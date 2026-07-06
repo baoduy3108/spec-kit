@@ -53,7 +53,8 @@ class PlanInfo(BaseModel):
     duration_days: int
     rpm: int
     burst: int
-    daily_message_cap: int
+    premium_daily_cap: int
+    total_daily_cap: int
     apex_allowed: bool
     features: list[str] = []
     expires_at: int = 0

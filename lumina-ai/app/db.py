@@ -63,18 +63,21 @@ def _init_schema(conn: sqlite3.Connection):
     );
     CREATE TABLE IF NOT EXISTS usage_daily (
         user_id TEXT NOT NULL,
-        day TEXT NOT NULL,           -- 'YYYY-MM-DD' (UTC)
-        count INTEGER NOT NULL DEFAULT 0,
+        day TEXT NOT NULL,                   -- 'YYYY-MM-DD' (UTC)
+        premium_count INTEGER NOT NULL DEFAULT 0,  -- số lượt dùng bộ não cao cấp (Claude)
+        total_count INTEGER NOT NULL DEFAULT 0,    -- tổng số tin nhắn (kể cả engine free)
         PRIMARY KEY (user_id, day)
     );
     CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id, updated_at DESC);
     CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conversation_id, id);
     CREATE INDEX IF NOT EXISTS idx_codes_used_by ON activation_codes(used_by);
     """)
-    # Cơ sở dữ liệu tạo trước khi có cột plan/plan_expires_at (nếu có) — thêm cột an toàn
+    # Thêm cột an toàn cho DB tạo từ phiên bản cũ (bỏ qua nếu cột đã tồn tại)
     for stmt in (
         "ALTER TABLE users ADD COLUMN plan TEXT NOT NULL DEFAULT 'free'",
         "ALTER TABLE users ADD COLUMN plan_expires_at INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE usage_daily ADD COLUMN premium_count INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE usage_daily ADD COLUMN total_count INTEGER NOT NULL DEFAULT 0",
     ):
         try:
             conn.execute(stmt)
@@ -247,21 +250,48 @@ def redeem_activation_code(code: str, user_id: str) -> tuple[bool, str, dict | N
         return True, f"Kích hoạt thành công gói {plan['label']}!", plan
 
 
-def check_and_increment_daily_usage(user_id: str, cap: int) -> tuple[bool, int]:
-    """Kiểm tra + tăng số tin nhắn trong ngày (UTC). cap<=0 nghĩa là không giới hạn."""
+def get_daily_usage(user_id: str) -> tuple[int, int]:
+    """Trả về (premium_used, total_used) trong ngày hôm nay (UTC)."""
+    day = time.strftime("%Y-%m-%d", time.gmtime())
+    with _lock:
+        row = get_conn().execute(
+            "SELECT premium_count, total_count FROM usage_daily WHERE user_id=? AND day=?",
+            (user_id, day),
+        ).fetchone()
+        if not row:
+            return 0, 0
+        return row["premium_count"], row["total_count"]
+
+
+def consume_daily_usage(user_id: str, premium_cap: int, total_cap: int) -> tuple[bool, bool, int]:
+    """Ghi nhận 1 lượt chat và quyết định dùng tầng nào.
+
+    Trả về (allowed, use_premium, total_used_sau_khi_tăng):
+      • allowed=False  → đã chạm total_cap, chặn cứng (gợi ý nâng cấp).
+      • use_premium=True  → còn lượt cao cấp → dùng Claude.
+      • use_premium=False → hết lượt cao cấp nhưng chưa chạm total_cap → dùng engine free.
+    cap <= 0 nghĩa là không giới hạn.
+    """
     day = time.strftime("%Y-%m-%d", time.gmtime())
     with _lock:
         conn = get_conn()
         row = conn.execute(
-            "SELECT count FROM usage_daily WHERE user_id=? AND day=?", (user_id, day)
-        ).fetchone()
-        used = row["count"] if row else 0
-        if cap > 0 and used >= cap:
-            return False, used
-        conn.execute(
-            """INSERT INTO usage_daily(user_id, day, count) VALUES(?,?,1)
-               ON CONFLICT(user_id, day) DO UPDATE SET count = count + 1""",
+            "SELECT premium_count, total_count FROM usage_daily WHERE user_id=? AND day=?",
             (user_id, day),
+        ).fetchone()
+        premium_used = row["premium_count"] if row else 0
+        total_used = row["total_count"] if row else 0
+
+        if total_cap > 0 and total_used >= total_cap:
+            return False, False, total_used
+
+        use_premium = premium_cap <= 0 or premium_used < premium_cap
+        conn.execute(
+            """INSERT INTO usage_daily(user_id, day, premium_count, total_count) VALUES(?,?,?,1)
+               ON CONFLICT(user_id, day) DO UPDATE SET
+                   premium_count = premium_count + ?,
+                   total_count = total_count + 1""",
+            (user_id, day, 1 if use_premium else 0, 1 if use_premium else 0),
         )
         conn.commit()
-        return True, used + 1
+        return True, use_premium, total_used + 1

@@ -203,14 +203,19 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
     if not allowed:
         raise HTTPException(status_code=429, detail=f"Bạn gửi quá nhanh — chờ {wait} giây rồi thử lại.")
 
-    # Giới hạn số tin nhắn / ngày theo gói
-    daily_ok, used_today = db.check_and_increment_daily_usage(user["id"], plan["daily_message_cap"])
+    # Quyết định tầng bộ não: còn lượt cao cấp → Claude; hết → engine free; chạm tổng → chặn.
+    daily_ok, use_premium, _ = db.consume_daily_usage(
+        user["id"], plan["premium_daily_cap"], plan["total_daily_cap"]
+    )
     if not daily_ok:
         raise HTTPException(
             status_code=429,
-            detail=f"Bạn đã dùng hết {plan['daily_message_cap']} tin nhắn hôm nay của gói {plan['label']}. "
+            detail=f"Bạn đã dùng hết {plan['total_daily_cap']} tin nhắn hôm nay của gói {plan['label']}. "
                    f"Nâng cấp gói Tháng/Năm để chat nhiều hơn (xem mục ✦ Nâng cấp).",
         )
+    # Nếu tầng cao cấp không khả dụng (chưa cấu hình Claude) mà có engine free → vẫn chạy free.
+    if use_premium and not orchestrator.engines["claude"].available() and orchestrator.has_free_engine():
+        use_premium = False
 
     # Hội thoại: tạo mới hoặc nối tiếp
     conv_id = body.conversation_id
@@ -229,12 +234,16 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
     messages = trim_history(history + [{"role": "user", "content": body.message}],
                             CONFIG["MAX_CONTEXT_TOKENS"])
 
-    route = decide_route(body.message, history_len=len(history), apex_allowed=plan["apex_allowed"])
-    logger.info("Router: mode=%s model=%s user=%s", route.mode, route.model, user["email"])
+    # Tầng free chỉ có 2 "chế độ": tìm kiếm hay không (engine free không có tư duy sâu như Claude).
+    apex_allowed = plan["apex_allowed"] and use_premium
+    route = decide_route(body.message, history_len=len(history), apex_allowed=apex_allowed)
+    # Ẩn nhãn chế độ "cao cấp" khi đang chạy tầng free — để không lộ là đã tụt bộ não.
+    display_label = route.label if use_premium else ("🔍 Tìm kiếm web" if route.use_web_search else "✨ LUMINA")
+    logger.info("Router: mode=%s premium=%s user=%s", route.mode, use_premium, user["email"])
 
     async def event_stream():
         yield _sse({
-            "type": "router", "mode": route.mode, "label": route.label,
+            "type": "router", "mode": route.mode, "label": display_label,
             "conversation_id": conv_id,
         })
         if route.apex_locked:
@@ -245,7 +254,7 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
         answer_parts: list[str] = []
         citations: list[dict] = []
         try:
-            async for event in orchestrator.run(messages, route):
+            async for event in orchestrator.run(messages, route, use_premium=use_premium):
                 if event["type"] == "text":
                     answer_parts.append(event["text"])
                 elif event["type"] == "citations":

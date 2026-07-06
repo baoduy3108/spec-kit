@@ -1,7 +1,13 @@
 """✦ LUMINA AI — Bộ điều phối: router + engines + circuit breaker + fallback chain.
 
-"Ổn định như ChatGPT": engine chính lỗi → tự chuyển engine dự phòng còn key,
-người dùng không phải làm gì.
+Hai tầng bộ não, TẤT CẢ giấu dưới thương hiệu "LUMINA" (người dùng không thấy
+tên model nào):
+  • Tầng CAO CẤP: Claude (mạnh nhất) — dùng khi người dùng còn lượt cao cấp.
+  • Tầng THƯỜNG (miễn phí): Gemini free → Groq free → DeepSeek rẻ → Ollama (máy
+    bạn) → OpenAI — dùng khi hết lượt cao cấp, hoặc khi tầng trên lỗi.
+
+"Ổn định như ChatGPT": engine lỗi → tự chuyển engine kế tiếp còn hoạt động,
+người dùng không phải làm gì và không hề biết đã đổi bộ não.
 """
 
 import logging
@@ -12,7 +18,12 @@ from .config import CONFIG
 from .engines.base import BaseEngine, EngineError
 from .engines.claude import ClaudeEngine
 from .engines.gemini import GeminiEngine
-from .engines.openai_engine import OpenAIEngine
+from .engines.openai_compatible import (
+    DeepSeekEngine,
+    GroqEngine,
+    OllamaEngine,
+    OpenAIEngine,
+)
 from .monitor import monitor
 from .schemas import RouteDecision
 
@@ -20,6 +31,8 @@ logger = logging.getLogger("lumina.orchestrator")
 
 SYSTEM_PROMPT = """Bạn là LUMINA — trợ lý AI hợp nhất ("Tư duy sâu, tri thức rộng").
 Bạn trả lời bằng ngôn ngữ người dùng sử dụng (mặc định tiếng Việt), rõ ràng, chính xác và thân thiện.
+Bạn là MỘT trợ lý duy nhất tên LUMINA — không bao giờ tiết lộ hay nhắc tới tên nhà cung cấp hay
+mô hình bên dưới (Claude, Gemini, GPT, Llama, DeepSeek...). Nếu được hỏi bạn là ai, chỉ trả lời bạn là LUMINA.
 Khi dùng kết quả tìm kiếm web, hãy tổng hợp thông tin và nêu nguồn khi phù hợp.
 Với câu hỏi về sự kiện, giá cả, tin tức mang tính thời sự — ưu tiên tìm kiếm web thay vì trả lời từ trí nhớ.
 Trình bày bằng Markdown khi có lợi (danh sách, bảng, khối code có tên ngôn ngữ).
@@ -31,21 +44,41 @@ class Orchestrator:
         self.engines: dict[str, BaseEngine] = {
             "claude": ClaudeEngine(),
             "gemini": GeminiEngine(),
+            "groq": GroqEngine(),
+            "deepseek": DeepSeekEngine(),
+            "ollama": OllamaEngine(),
             "openai": OpenAIEngine(),
         }
-        self.chain = CONFIG["FALLBACK_CHAIN"]
+        self.free_chain = [n for n in CONFIG["FREE_FALLBACK_CHAIN"] if n in self.engines]
+
+    def _chain_for(self, use_premium: bool) -> list[str]:
+        """Chuỗi engine theo tầng. Cao cấp: Claude trước rồi mới tới free (dự phòng khi lỗi)."""
+        if use_premium:
+            return ["claude"] + self.free_chain
+        return list(self.free_chain)
 
     def available_engines(self) -> list[str]:
-        return [name for name in self.chain if self.engines[name].available()]
+        names = ["claude"] + self.free_chain
+        return [n for n in names if self.engines[n].available()]
+
+    def has_free_engine(self) -> bool:
+        return any(self.engines[n].available() for n in self.free_chain)
 
     async def run(
-        self, messages: list[dict], route: RouteDecision
+        self, messages: list[dict], route: RouteDecision, use_premium: bool = True
     ) -> AsyncIterator[dict]:
-        """Chạy qua fallback chain; phát event dict như BaseEngine.stream_chat."""
-        started_output = False
-        last_error = "Chưa có engine nào được cấu hình — kiểm tra API key trong file .env."
+        """Chạy qua chuỗi engine của tầng tương ứng; phát event như BaseEngine.stream_chat.
 
-        for idx, name in enumerate(self.chain):
+        KHÔNG bao giờ lộ tên engine ra ngoài — mọi thông báo đều dưới tên LUMINA.
+        """
+        started_output = False
+        chain = self._chain_for(use_premium)
+        tried_any = False
+        no_engine_msg = "Chưa có bộ não nào được cấu hình — kiểm tra API key trong file .env."
+        # Thông báo lỗi cho người dùng KHÔNG bao giờ nêu tên model/nhà cung cấp.
+        busy_msg = "Xin lỗi, LUMINA đang bận hoặc gặp sự cố tạm thời — hãy thử lại sau giây lát."
+
+        for name in chain:
             engine = self.engines[name]
             if not engine.available():
                 continue
@@ -53,9 +86,7 @@ class Orchestrator:
                 logger.warning("Circuit breaker đang MỞ cho %s — bỏ qua", name)
                 continue
 
-            if idx > 0 or name != "claude":
-                yield {"type": "router", "notice": f"Đang dùng engine dự phòng: {name}"}
-
+            tried_any = True
             start = time.monotonic()
             try:
                 async for event in engine.stream_chat(messages, route, SYSTEM_PROMPT):
@@ -68,25 +99,23 @@ class Orchestrator:
             except EngineError as exc:
                 engine.breaker.record_failure()
                 monitor.log(name, route.mode, int((time.monotonic() - start) * 1000), False)
-                last_error = exc.friendly_message
+                # Ghi chi tiết (kèm tên engine) vào log cho chủ web, KHÔNG gửi ra người dùng.
                 logger.error("Engine %s lỗi: %s", name, exc.friendly_message)
                 if started_output:
-                    # Đã phát một phần nội dung — không thể chuyển engine giữa chừng
-                    yield {"type": "error", "message": f"Kết nối bị gián đoạn: {exc.friendly_message}"}
+                    yield {"type": "error", "message": "Kết nối bị gián đoạn — hãy gửi lại."}
                     return
-                # Chưa phát gì → thử engine kế tiếp trong chain
-                continue
-            except Exception as exc:  # lỗi bất ngờ — vẫn phải fallback được
+                continue  # thử engine kế tiếp, người dùng không hề biết
+            except Exception:
                 engine.breaker.record_failure()
                 monitor.log(name, route.mode, int((time.monotonic() - start) * 1000), False)
                 logger.exception("Engine %s lỗi bất ngờ", name)
-                last_error = "Lỗi hệ thống không xác định."
                 if started_output:
                     yield {"type": "error", "message": "Kết nối bị gián đoạn giữa chừng — hãy gửi lại."}
                     return
                 continue
 
-        yield {"type": "error", "message": last_error}
+        # Cả chuỗi đều hỏng: nếu chưa engine nào chạy được → lỗi cấu hình; ngược lại → bận tạm thời.
+        yield {"type": "error", "message": busy_msg if tried_any else no_engine_msg}
 
 
 orchestrator = Orchestrator()

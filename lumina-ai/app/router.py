@@ -74,7 +74,7 @@ def decide_route(message: str, history_len: int = 0, apex_allowed: bool = True) 
     wants_apex = CONFIG["ENABLE_FABLE"] and (_matches(_apex_re, text) or len(text) > 4000)
     if wants_apex and apex_allowed:
         return RouteDecision(
-            mode="apex", label="🌌 Đỉnh cao (Fable)",
+            mode="apex", label="🌌 Đỉnh cao",
             model=CONFIG["CLAUDE_MODEL_APEX"], use_web_search=True, effort="high",
         )
     if wants_apex and not apex_allowed:

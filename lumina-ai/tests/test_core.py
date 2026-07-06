@@ -193,18 +193,42 @@ def test_redeem_invalid_code_fails():
     assert "không tồn tại" in message
 
 
-def test_daily_usage_cap_enforced():
+def test_premium_then_free_then_blocked():
+    """2 lượt đầu = cao cấp, tới total_cap thì tụt free, vượt total_cap thì chặn."""
     uid = _new_user_id()
-    for _ in range(3):
-        allowed, used = db.check_and_increment_daily_usage(uid, cap=3)
-        assert allowed is True
-    allowed, used = db.check_and_increment_daily_usage(uid, cap=3)
-    assert allowed is False
-    assert used == 3
+    # premium_cap=2, total_cap=4
+    a1, p1, _ = db.consume_daily_usage(uid, premium_cap=2, total_cap=4)
+    a2, p2, _ = db.consume_daily_usage(uid, premium_cap=2, total_cap=4)
+    assert (a1, p1) == (True, True)   # lượt 1 — cao cấp
+    assert (a2, p2) == (True, True)   # lượt 2 — cao cấp
+    a3, p3, _ = db.consume_daily_usage(uid, premium_cap=2, total_cap=4)
+    a4, p4, _ = db.consume_daily_usage(uid, premium_cap=2, total_cap=4)
+    assert (a3, p3) == (True, False)  # lượt 3 — free (hết cao cấp)
+    assert (a4, p4) == (True, False)  # lượt 4 — free
+    a5, p5, used5 = db.consume_daily_usage(uid, premium_cap=2, total_cap=4)
+    assert a5 is False               # lượt 5 — chạm total_cap, chặn
+    assert used5 == 4
+
+    premium_used, total_used = db.get_daily_usage(uid)
+    assert premium_used == 2
+    assert total_used == 4
 
 
 def test_daily_usage_unlimited_when_cap_zero():
     uid = _new_user_id()
     for _ in range(5):
-        allowed, _ = db.check_and_increment_daily_usage(uid, cap=0)
+        allowed, use_premium, _ = db.consume_daily_usage(uid, premium_cap=0, total_cap=0)
         assert allowed is True
+        assert use_premium is True  # premium_cap<=0 → luôn cao cấp
+
+
+def test_orchestrator_chain_tiers():
+    """Chuỗi cao cấp có Claude đứng đầu; chuỗi free không có Claude."""
+    from app.orchestrator import orchestrator
+    premium_chain = orchestrator._chain_for(use_premium=True)
+    free_chain = orchestrator._chain_for(use_premium=False)
+    assert premium_chain[0] == "claude"
+    assert "claude" not in free_chain
+    # Các engine free phải nằm trong danh sách đã đăng ký
+    for name in free_chain:
+        assert name in orchestrator.engines

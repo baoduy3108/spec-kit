@@ -26,13 +26,24 @@ CONFIG = {
     "CLAUDE_MODEL_FAST": "claude-haiku-4-5",     # nhanh, tiết kiệm
     "ENABLE_FABLE": _bool("ENABLE_FABLE", False),
 
-    # ── Gemini / OpenAI (engine phụ — TÙY CHỌN, tự bật khi có key)
-    "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY", ""),
-    "GEMINI_MODEL": os.getenv("GEMINI_MODEL", "gemini-2.5-pro"),
+    # ── Engine MIỄN PHÍ / RẺ (tự bật khi có key) ────────────────
+    # Khi người dùng hết lượt cao cấp (Claude), LUMINA tự tụt xuống các engine
+    # này để vẫn trả lời được mà không tốn tiền — tất cả giấu dưới tên "LUMINA".
+    "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY", ""),   # gói FREE tại aistudio.google.com
+    "GEMINI_MODEL": os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+    "GROQ_API_KEY": os.getenv("GROQ_API_KEY", ""),       # FREE tại console.groq.com
+    "GROQ_MODEL": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+    "GROQ_BASE_URL": "https://api.groq.com/openai/v1",
+    "DEEPSEEK_API_KEY": os.getenv("DEEPSEEK_API_KEY", ""),  # cực rẻ tại platform.deepseek.com
+    "DEEPSEEK_MODEL": os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
+    "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",
+    "OLLAMA_BASE_URL": os.getenv("OLLAMA_BASE_URL", ""),  # ví dụ http://localhost:11434/v1 (model chạy trên máy bạn)
+    "OLLAMA_MODEL": os.getenv("OLLAMA_MODEL", "llama3.1"),
     "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY", ""),
     "OPENAI_MODEL": os.getenv("OPENAI_MODEL", "gpt-4o"),
+    "OPENAI_BASE_URL": "https://api.openai.com/v1",
 
-    # ── Tìm kiếm cho engine phụ (Claude có web search tích hợp sẵn)
+    # ── Tìm kiếm cho engine phụ (Claude/Gemini có web search tích hợp sẵn)
     "TAVILY_API_KEY": os.getenv("TAVILY_API_KEY", ""),
 
     # ── Đăng nhập Google (BẮT BUỘC khi chạy công khai) ──────────
@@ -44,7 +55,9 @@ CONFIG = {
     "DEV_MODE": _bool("DEV_MODE", False),
 
     # ── Độ bền / hiệu năng (kế thừa khung mẫu) ──────────────────
-    "FALLBACK_CHAIN": ["claude", "gemini", "openai"],
+    # Chuỗi engine MIỄN PHÍ/RẺ — dùng khi hết lượt cao cấp hoặc khi engine chính lỗi.
+    # Thứ tự ưu tiên: Gemini free → Groq free → DeepSeek rẻ → Ollama (máy bạn) → OpenAI.
+    "FREE_FALLBACK_CHAIN": ["gemini", "groq", "deepseek", "ollama", "openai"],
     "CIRCUIT_BREAKER_THRESHOLD": int(os.getenv("CIRCUIT_BREAKER_THRESHOLD", "5")),
     "CIRCUIT_BREAKER_TIMEOUT": int(os.getenv("CIRCUIT_BREAKER_TIMEOUT", "60")),
     "CACHE_TTL": int(os.getenv("CACHE_TTL", "3600")),
@@ -77,7 +90,13 @@ CONFIG = {
 }
 
 # ── Định nghĩa các gói ───────────────────────────────────────────
-# Sửa giá/giới hạn tại đây cho phù hợp — đây chỉ là gợi ý mặc định.
+# CÁCH HOẠT ĐỘNG (giấu model dưới thương hiệu LUMINA — người dùng không thấy tên model):
+#   • premium_daily_cap  = số lượt "cao cấp" mỗi ngày dùng bộ não mạnh nhất (Claude).
+#   • Hết lượt cao cấp → LUMINA TỰ tụt xuống chuỗi engine MIỄN PHÍ (Gemini/Groq/
+#     DeepSeek/Ollama) — người dùng vẫn chat tiếp được, không bị chặn cứng.
+#   • total_daily_cap    = tổng số tin nhắn/ngày (kể cả engine free) — chặn lạm dụng.
+#   • Gói trả phí = NHIỀU lượt cao cấp hơn + tổng lượt cao hơn (chỉ là "thêm token").
+# Sửa giá/giới hạn tại đây hoặc qua biến môi trường.
 PLANS: dict[str, dict] = {
     "free": {
         "key": "free",
@@ -86,14 +105,15 @@ PLANS: dict[str, dict] = {
         "duration_days": 0,          # 0 = không hết hạn (mặc định của mọi tài khoản)
         "rpm": CONFIG["RATE_LIMIT_REQUESTS_PER_MINUTE"],
         "burst": CONFIG["RATE_LIMIT_BURST"],
-        # Mặc định RẤT thấp có chủ đích — ngân sách API ban đầu nhỏ, chỉ đủ cho
-        # khách dùng thử 1-2 lượt rồi phải mua gói mới chat tiếp được. Tăng dần
-        # qua FREE_DAILY_CAP trong .env khi ngân sách API rộng hơn.
-        "daily_message_cap": int(os.getenv("FREE_DAILY_CAP", "2")),
+        # Lượt cao cấp (Claude) rất thấp có chủ đích — bảo vệ ngân sách API nhỏ.
+        # Hết lượt này thì chuyển sang engine free, vẫn chat được.
+        "premium_daily_cap": int(os.getenv("FREE_PREMIUM_CAP", "2")),
+        "total_daily_cap": int(os.getenv("FREE_TOTAL_CAP", "30")),
         "apex_allowed": False,
         "features": [
-            "⚡ Phản hồi nhanh / ✨ Cân bằng / 🧠 Tư duy sâu / 🔍 Tìm kiếm web",
-            f"Dùng thử {os.getenv('FREE_DAILY_CAP', '2')} tin nhắn / ngày",
+            f"{os.getenv('FREE_PREMIUM_CAP', '2')} lượt bộ não cao cấp / ngày",
+            "Sau đó tự dùng bộ não thường (vẫn miễn phí, không giới hạn model)",
+            f"Tối đa {os.getenv('FREE_TOTAL_CAP', '30')} tin nhắn / ngày",
         ],
     },
     "monthly": {
@@ -103,12 +123,13 @@ PLANS: dict[str, dict] = {
         "duration_days": 30,
         "rpm": int(os.getenv("PAID_RPM", "30")),
         "burst": int(os.getenv("PAID_BURST", "50")),
-        "daily_message_cap": int(os.getenv("PAID_DAILY_CAP", "500")),
+        "premium_daily_cap": int(os.getenv("PAID_PREMIUM_CAP", "200")),
+        "total_daily_cap": int(os.getenv("PAID_TOTAL_CAP", "1000")),
         "apex_allowed": True,
         "features": [
-            "Mọi tính năng gói Miễn phí",
-            f"Tối đa {os.getenv('PAID_DAILY_CAP', '500')} tin nhắn / ngày",
-            "Mở khóa 🌌 Đỉnh cao (Fable) cho tác vụ khó nhất",
+            f"{os.getenv('PAID_PREMIUM_CAP', '200')} lượt bộ não cao cấp / ngày (gấp nhiều lần gói Miễn phí)",
+            f"Tối đa {os.getenv('PAID_TOTAL_CAP', '1000')} tin nhắn / ngày",
+            "Mở khóa chế độ 🌌 Đỉnh cao cho tác vụ khó nhất",
             "Ưu tiên xử lý, phản hồi nhanh hơn",
         ],
     },
@@ -119,21 +140,35 @@ PLANS: dict[str, dict] = {
         "duration_days": 365,
         "rpm": int(os.getenv("PAID_RPM", "30")),
         "burst": int(os.getenv("PAID_BURST", "50")),
-        "daily_message_cap": int(os.getenv("PAID_DAILY_CAP", "500")),
+        "premium_daily_cap": int(os.getenv("PAID_PREMIUM_CAP", "200")),
+        "total_daily_cap": int(os.getenv("PAID_TOTAL_CAP", "2000")),
         "apex_allowed": True,
         "features": [
             "Mọi tính năng gói Tháng",
+            "Tổng lượt/ngày cao gấp đôi",
             "Tiết kiệm ~27% so với đóng theo tháng",
         ],
     },
 }
 
 
+def has_any_engine() -> bool:
+    """Có ít nhất một bộ não được cấu hình không (cao cấp hoặc free)."""
+    return bool(
+        CONFIG["ANTHROPIC_API_KEY"] or CONFIG["GEMINI_API_KEY"] or CONFIG["GROQ_API_KEY"]
+        or CONFIG["DEEPSEEK_API_KEY"] or CONFIG["OLLAMA_BASE_URL"] or CONFIG["OPENAI_API_KEY"]
+    )
+
+
 def validate_config() -> list[str]:
     """Trả về danh sách cảnh báo cấu hình (không chặn khởi động)."""
     warnings = []
-    if not CONFIG["ANTHROPIC_API_KEY"]:
-        warnings.append("Thiếu ANTHROPIC_API_KEY — LUMINA chưa thể trả lời. Lấy key tại https://console.anthropic.com")
+    if not has_any_engine():
+        warnings.append("Chưa có bộ não nào — điền ít nhất một key: ANTHROPIC_API_KEY (cao cấp) "
+                        "hoặc GEMINI_API_KEY / GROQ_API_KEY (miễn phí). Xem README.")
+    elif not CONFIG["ANTHROPIC_API_KEY"]:
+        warnings.append("Chưa có ANTHROPIC_API_KEY — LUMINA sẽ chạy hoàn toàn bằng bộ não miễn phí "
+                        "(Gemini/Groq/DeepSeek/Ollama). Thêm Claude nếu muốn chất lượng cao nhất.")
     if not CONFIG["GOOGLE_CLIENT_ID"] and not CONFIG["DEV_MODE"]:
         warnings.append("Thiếu GOOGLE_CLIENT_ID — không ai đăng nhập được. Tạo tại https://console.cloud.google.com (hoặc đặt DEV_MODE=true khi chạy thử).")
     if not CONFIG["SECRET_KEY"]:
