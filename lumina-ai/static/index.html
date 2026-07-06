@@ -32,6 +32,16 @@
       </div>
       <button id="new-chat" class="new-chat-btn">＋ Cuộc trò chuyện mới</button>
       <nav id="conv-list" class="conv-list"></nav>
+
+      <div class="plan-box">
+        <div class="plan-info">
+          <span id="plan-label" class="plan-label">Gói Miễn phí</span>
+          <span id="plan-usage" class="plan-usage"></span>
+        </div>
+        <button id="upgrade-btn" class="upgrade-btn">✦ Nâng cấp</button>
+      </div>
+      <button id="admin-btn" class="admin-btn hidden">🛠 Quản trị mã kích hoạt</button>
+
       <div class="sidebar-footer">
         <img id="user-avatar" class="avatar" src="" alt="">
         <span id="user-name" class="user-name"></span>
@@ -67,6 +77,50 @@
         <p class="composer-hint">LUMINA tự chọn: ⚡ nhanh · ✨ cân bằng · 🧠 tư duy sâu · 🔍 tìm kiếm web</p>
       </div>
     </main>
+  </div>
+
+  <!-- ── Modal Nâng cấp gói ─────────────────────────────── -->
+  <div id="upgrade-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="upgrade-modal">✕</button>
+      <h2 class="modal-title">✦ Nâng cấp gói LUMINA</h2>
+      <div id="plan-cards" class="plan-cards"></div>
+
+      <div class="payment-box">
+        <h3>Cách thanh toán</h3>
+        <p class="payment-desc">Chuyển khoản hoặc Momo theo thông tin bên dưới → gửi ảnh chụp màn hình + email đăng nhập cho chủ web → nhận mã kích hoạt.</p>
+        <div id="payment-info" class="payment-info"></div>
+      </div>
+
+      <div class="redeem-box">
+        <h3>Nhập mã kích hoạt</h3>
+        <div class="redeem-row">
+          <input id="redeem-input" type="text" placeholder="LUMINA-XXXX-XXXX">
+          <button id="redeem-btn">Kích hoạt</button>
+        </div>
+        <p id="redeem-result" class="redeem-result"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal Quản trị (chỉ ADMIN_EMAILS) ─────────────────── -->
+  <div id="admin-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="admin-modal">✕</button>
+      <h2 class="modal-title">🛠 Quản trị mã kích hoạt</h2>
+
+      <div class="admin-create">
+        <select id="admin-plan">
+          <option value="monthly">Gói Tháng</option>
+          <option value="yearly">Gói Năm</option>
+        </select>
+        <input id="admin-count" type="number" min="1" max="100" value="1">
+        <button id="admin-create-btn">Tạo mã</button>
+      </div>
+      <p class="admin-hint">Sau khi xác nhận đã nhận tiền chuyển khoản/Momo, tạo mã tại đây rồi gửi cho người dùng.</p>
+
+      <div id="admin-codes" class="admin-codes"></div>
+    </div>
   </div>
 
   <script src="/static/app.js"></script>

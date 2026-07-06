@@ -52,6 +52,7 @@ CONFIG = {
     "MAX_PAUSE_TURN_CONTINUATIONS": 5,
 
     # Giới hạn lượt theo người dùng (token bucket) — bảo vệ API key
+    # (đây là giới hạn của gói MIỄN PHÍ; gói trả phí dùng PLANS["monthly"/"yearly"] bên dưới)
     "RATE_LIMIT_REQUESTS_PER_MINUTE": int(os.getenv("RATE_LIMIT_RPM", "10")),
     "RATE_LIMIT_BURST": int(os.getenv("RATE_LIMIT_BURST", "15")),
 
@@ -59,6 +60,72 @@ CONFIG = {
     "DB_PATH": os.getenv("DB_PATH", os.path.join(os.path.dirname(__file__), "..", "data", "lumina.db")),
 
     "LOG_LEVEL": os.getenv("LOG_LEVEL", "INFO"),
+
+    # ── Quản trị (tạo mã kích hoạt gói trả phí) ──────────────────
+    # Danh sách email được quyền vào trang quản trị, cách nhau bởi dấu phẩy
+    "ADMIN_EMAILS": [e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()],
+
+    # ── Thông tin chuyển khoản thủ công (hiển thị khi người dùng nâng cấp) ──
+    # Vì chưa tích hợp cổng thanh toán tự động (VNPay/PayOS/Momo), người dùng
+    # chuyển khoản thủ công theo thông tin này, bạn xác nhận rồi tạo mã kích
+    # hoạt gửi cho họ qua trang /admin.
+    "PAYMENT_BANK_NAME": os.getenv("PAYMENT_BANK_NAME", ""),
+    "PAYMENT_BANK_ACCOUNT": os.getenv("PAYMENT_BANK_ACCOUNT", ""),
+    "PAYMENT_BANK_OWNER": os.getenv("PAYMENT_BANK_OWNER", ""),
+    "PAYMENT_MOMO": os.getenv("PAYMENT_MOMO", ""),
+    "PAYMENT_NOTE": os.getenv("PAYMENT_NOTE", "Ghi nội dung chuyển khoản: email đăng nhập của bạn"),
+}
+
+# ── Định nghĩa các gói ───────────────────────────────────────────
+# Sửa giá/giới hạn tại đây cho phù hợp — đây chỉ là gợi ý mặc định.
+PLANS: dict[str, dict] = {
+    "free": {
+        "key": "free",
+        "label": "Miễn phí",
+        "price_vnd": 0,
+        "duration_days": 0,          # 0 = không hết hạn (mặc định của mọi tài khoản)
+        "rpm": CONFIG["RATE_LIMIT_REQUESTS_PER_MINUTE"],
+        "burst": CONFIG["RATE_LIMIT_BURST"],
+        # Mặc định RẤT thấp có chủ đích — ngân sách API ban đầu nhỏ, chỉ đủ cho
+        # khách dùng thử 1-2 lượt rồi phải mua gói mới chat tiếp được. Tăng dần
+        # qua FREE_DAILY_CAP trong .env khi ngân sách API rộng hơn.
+        "daily_message_cap": int(os.getenv("FREE_DAILY_CAP", "2")),
+        "apex_allowed": False,
+        "features": [
+            "⚡ Phản hồi nhanh / ✨ Cân bằng / 🧠 Tư duy sâu / 🔍 Tìm kiếm web",
+            f"Dùng thử {os.getenv('FREE_DAILY_CAP', '2')} tin nhắn / ngày",
+        ],
+    },
+    "monthly": {
+        "key": "monthly",
+        "label": "Gói Tháng",
+        "price_vnd": int(os.getenv("PRICE_MONTHLY_VND", "79000")),
+        "duration_days": 30,
+        "rpm": int(os.getenv("PAID_RPM", "30")),
+        "burst": int(os.getenv("PAID_BURST", "50")),
+        "daily_message_cap": int(os.getenv("PAID_DAILY_CAP", "500")),
+        "apex_allowed": True,
+        "features": [
+            "Mọi tính năng gói Miễn phí",
+            f"Tối đa {os.getenv('PAID_DAILY_CAP', '500')} tin nhắn / ngày",
+            "Mở khóa 🌌 Đỉnh cao (Fable) cho tác vụ khó nhất",
+            "Ưu tiên xử lý, phản hồi nhanh hơn",
+        ],
+    },
+    "yearly": {
+        "key": "yearly",
+        "label": "Gói Năm",
+        "price_vnd": int(os.getenv("PRICE_YEARLY_VND", "690000")),
+        "duration_days": 365,
+        "rpm": int(os.getenv("PAID_RPM", "30")),
+        "burst": int(os.getenv("PAID_BURST", "50")),
+        "daily_message_cap": int(os.getenv("PAID_DAILY_CAP", "500")),
+        "apex_allowed": True,
+        "features": [
+            "Mọi tính năng gói Tháng",
+            "Tiết kiệm ~27% so với đóng theo tháng",
+        ],
+    },
 }
 
 

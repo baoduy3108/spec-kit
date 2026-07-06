@@ -53,8 +53,14 @@ def _matches(regexes: list[re.Pattern], text: str) -> bool:
     return any(r.search(text) for r in regexes)
 
 
-def decide_route(message: str, history_len: int = 0) -> RouteDecision:
-    """Phân loại câu lệnh và trả về quyết định định tuyến."""
+def decide_route(message: str, history_len: int = 0, apex_allowed: bool = True) -> RouteDecision:
+    """Phân loại câu lệnh và trả về quyết định định tuyến.
+
+    apex_allowed: gói của người dùng có được dùng chế độ 🌌 Đỉnh cao (Fable)
+    không — gói Miễn phí sẽ False, gói Tháng/Năm True. Khi câu hỏi đáng lẽ
+    dùng Đỉnh cao nhưng người dùng chưa được phép, hạ xuống 🧠 Tư duy sâu và
+    đánh dấu apex_locked để giao diện gợi ý nâng cấp.
+    """
     text = message.strip()
 
     # 1) Cần thông tin từ web → ưu tiên cao nhất (search + AI phân tích)
@@ -64,11 +70,17 @@ def decide_route(message: str, history_len: int = 0) -> RouteDecision:
             model=CONFIG["CLAUDE_MODEL_DEEP"], use_web_search=True, effort="high",
         )
 
-    # 2) Tác vụ khó nhất → Fable 5 (nếu được bật)
-    if CONFIG["ENABLE_FABLE"] and (_matches(_apex_re, text) or len(text) > 4000):
+    # 2) Tác vụ khó nhất → Fable 5 (nếu được bật và gói cho phép)
+    wants_apex = CONFIG["ENABLE_FABLE"] and (_matches(_apex_re, text) or len(text) > 4000)
+    if wants_apex and apex_allowed:
         return RouteDecision(
             mode="apex", label="🌌 Đỉnh cao (Fable)",
             model=CONFIG["CLAUDE_MODEL_APEX"], use_web_search=True, effort="high",
+        )
+    if wants_apex and not apex_allowed:
+        return RouteDecision(
+            mode="deep", label="🧠 Tư duy sâu",
+            model=CONFIG["CLAUDE_MODEL_DEEP"], effort="high", apex_locked=True,
         )
 
     # 3) Code / toán / phân tích → tư duy sâu

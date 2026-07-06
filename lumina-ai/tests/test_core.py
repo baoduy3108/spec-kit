@@ -2,18 +2,29 @@
 
 import os
 import sys
+import tempfile
 import time
+import uuid
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 os.environ.setdefault("DEV_MODE", "true")
+# DB riêng cho test — không đụng vào lumina.db thật (phải set TRƯỚC khi import app.config)
+os.environ.setdefault("DB_PATH", os.path.join(tempfile.mkdtemp(prefix="lumina_test_"), "test.db"))
 
+from app import db  # noqa: E402
 from app.cache import ResponseCache  # noqa: E402
 from app.circuit_breaker import BreakerState, CircuitBreaker  # noqa: E402
 from app.memory import trim_history  # noqa: E402
 from app.ratelimit import UserRateLimiter  # noqa: E402
 from app.router import decide_route  # noqa: E402
 from app.config import CONFIG  # noqa: E402
+
+
+def _new_user_id() -> str:
+    uid = f"test-{uuid.uuid4().hex[:8]}"
+    db.upsert_user(uid, f"{uid}@example.com", "Test User", "")
+    return uid
 
 
 # ── Router: "mô hình bù trừ" chọn đúng chế độ ───────────────────────────────
@@ -48,6 +59,22 @@ def test_router_balanced_default():
 def test_router_apex_disabled_by_default():
     route = decide_route("Đây là một bài toán cực khó cần suy luận sâu")
     assert route.mode != "apex"  # ENABLE_FABLE mặc định false → không dùng Fable
+
+
+def test_router_apex_locked_for_free_plan():
+    """Bật ENABLE_FABLE tạm thời để kiểm tra gói Miễn phí bị khóa Đỉnh cao."""
+    original = CONFIG["ENABLE_FABLE"]
+    CONFIG["ENABLE_FABLE"] = True
+    try:
+        route = decide_route("Đây là một bài toán cực khó cần suy luận sâu", apex_allowed=False)
+        assert route.mode == "deep"
+        assert route.apex_locked is True
+
+        route_paid = decide_route("Đây là một bài toán cực khó cần suy luận sâu", apex_allowed=True)
+        assert route_paid.mode == "apex"
+        assert route_paid.apex_locked is False
+    finally:
+        CONFIG["ENABLE_FABLE"] = original
 
 
 # ── Memory: cắt cửa sổ ngữ cảnh ─────────────────────────────────────────────
@@ -105,3 +132,79 @@ def test_rate_limiter_blocks_after_burst():
     # Người dùng khác không bị ảnh hưởng
     ok, _ = limiter.check("user-2")
     assert ok
+
+
+def test_rate_limiter_upgrades_capacity_on_plan_change():
+    """Khi gói của người dùng đổi (nâng cấp), bucket phải cập nhật dung lượng mới ngay."""
+    limiter = UserRateLimiter(rate_per_minute=60, burst=15)
+    ok, _ = limiter.check("user-3", rate_per_minute=10, burst=2)  # gói free: burst nhỏ
+    assert ok
+    ok, _ = limiter.check("user-3", rate_per_minute=10, burst=2)
+    assert ok
+    ok, _ = limiter.check("user-3", rate_per_minute=10, burst=2)
+    assert not ok  # hết burst của gói free
+
+    # Nâng cấp gói trả phí — burst cao hơn phải cho phép thêm ngay
+    ok, _ = limiter.check("user-3", rate_per_minute=30, burst=50)
+    assert ok
+
+
+# ── Gói & mã kích hoạt (DB) ──────────────────────────────────────────────────
+
+def test_new_user_defaults_to_free_plan():
+    uid = _new_user_id()
+    plan = db.get_effective_plan(uid)
+    assert plan["key"] == "free"
+    assert plan["apex_allowed"] is False
+    assert plan["expires_at"] == 0
+
+
+def test_redeem_activation_code_upgrades_plan():
+    uid = _new_user_id()
+    codes = db.create_activation_codes("monthly", 30, 1, "admin@example.com")
+    assert len(codes) == 1
+
+    ok, message, plan = db.redeem_activation_code(codes[0], uid)
+    assert ok is True
+    assert plan["key"] == "monthly"
+    assert plan["apex_allowed"] is True
+    assert plan["expires_at"] > time.time()
+
+    effective = db.get_effective_plan(uid)
+    assert effective["key"] == "monthly"
+
+
+def test_redeem_code_twice_fails():
+    uid1, uid2 = _new_user_id(), _new_user_id()
+    codes = db.create_activation_codes("yearly", 365, 1, "admin@example.com")
+    ok, _, _ = db.redeem_activation_code(codes[0], uid1)
+    assert ok is True
+    ok2, message2, plan2 = db.redeem_activation_code(codes[0], uid2)
+    assert ok2 is False
+    assert plan2 is None
+    assert "đã được sử dụng" in message2
+
+
+def test_redeem_invalid_code_fails():
+    uid = _new_user_id()
+    ok, message, plan = db.redeem_activation_code("LUMINA-0000-0000", uid)
+    assert ok is False
+    assert plan is None
+    assert "không tồn tại" in message
+
+
+def test_daily_usage_cap_enforced():
+    uid = _new_user_id()
+    for _ in range(3):
+        allowed, used = db.check_and_increment_daily_usage(uid, cap=3)
+        assert allowed is True
+    allowed, used = db.check_and_increment_daily_usage(uid, cap=3)
+    assert allowed is False
+    assert used == 3
+
+
+def test_daily_usage_unlimited_when_cap_zero():
+    uid = _new_user_id()
+    for _ in range(5):
+        allowed, _ = db.check_and_increment_daily_usage(uid, cap=0)
+        assert allowed is True

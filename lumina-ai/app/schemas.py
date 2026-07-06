@@ -43,3 +43,26 @@ class RouteDecision(BaseModel):
     model: str           # model ID thực tế
     use_web_search: bool = False
     effort: Optional[str] = None  # None | "high"
+    apex_locked: bool = False     # câu hỏi đáng lẽ dùng Đỉnh cao nhưng gói chưa cho phép
+
+
+class PlanInfo(BaseModel):
+    key: str
+    label: str
+    price_vnd: int
+    duration_days: int
+    rpm: int
+    burst: int
+    daily_message_cap: int
+    apex_allowed: bool
+    features: list[str] = []
+    expires_at: int = 0
+
+
+class RedeemRequest(BaseModel):
+    code: str
+
+
+class AdminCreateCodesRequest(BaseModel):
+    plan: str
+    count: int = 1

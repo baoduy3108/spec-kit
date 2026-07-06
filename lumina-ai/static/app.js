@@ -7,9 +7,16 @@
   const state = {
     config: null,
     user: null,
+    plan: null,
     conversationId: null,
     streaming: false,
   };
+
+  const PLAN_LABELS = { free: "Miễn phí", monthly: "Tháng", yearly: "Năm" };
+
+  function formatVnd(n) {
+    return n.toLocaleString("vi-VN") + "đ";
+  }
 
   // ── Markdown renderer gọn nhẹ (không cần CDN) ─────────────────────────────
   function escapeHtml(s) {
@@ -88,12 +95,19 @@
   }
 
   // ── Đăng nhập ─────────────────────────────────────────────────────────────
+  async function refreshMe() {
+    // Luôn lấy lại từ /api/me (không dùng trực tiếp response đăng nhập) vì nó
+    // có thêm is_admin + plan mà endpoint đăng nhập không trả về.
+    const me = await api("/api/me");
+    state.user = me.user;
+    state.plan = me.plan;
+  }
+
   async function boot() {
     state.config = await api("/api/config");
     document.title = `${state.config.app_name} — ${state.config.tagline}`;
     try {
-      const me = await api("/api/me");
-      state.user = me.user;
+      await refreshMe();
       showApp();
     } catch {
       showLogin();
@@ -125,12 +139,12 @@
 
   async function onGoogleCredential(response) {
     try {
-      const data = await api("/api/auth/google", {
+      await api("/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential: response.credential }),
       });
-      state.user = data.user;
+      await refreshMe();
       showApp();
     } catch (err) {
       const el = $("login-error");
@@ -140,8 +154,8 @@
   }
 
   $("dev-login").addEventListener("click", async () => {
-    const data = await api("/api/auth/dev", { method: "POST" });
-    state.user = data.user;
+    await api("/api/auth/dev", { method: "POST" });
+    await refreshMe();
     showApp();
   });
 
@@ -157,8 +171,137 @@
     $("user-name").textContent = state.user.name || state.user.email;
     if (state.user.picture) $("user-avatar").src = state.user.picture;
     else $("user-avatar").style.display = "none";
+    if (state.user.is_admin) $("admin-btn").classList.remove("hidden");
+    renderPlanBox();
     loadConversations();
   }
+
+  function renderPlanBox() {
+    const plan = state.plan;
+    if (!plan) return;
+    const label = $("plan-label");
+    label.textContent = "Gói " + (plan.label || PLAN_LABELS[plan.key] || plan.key);
+    label.classList.toggle("paid", plan.key !== "free");
+    let usageText = plan.daily_message_cap > 0
+      ? `Tối đa ${plan.daily_message_cap} tin nhắn/ngày`
+      : "Không giới hạn tin nhắn/ngày";
+    if (plan.key !== "free" && plan.expires_at) {
+      const daysLeft = Math.max(0, Math.ceil((plan.expires_at * 1000 - Date.now()) / 86400000));
+      usageText += ` · còn ${daysLeft} ngày`;
+    }
+    $("plan-usage").textContent = usageText;
+  }
+
+  async function refreshPlan() {
+    const me = await api("/api/me");
+    state.plan = me.plan;
+    renderPlanBox();
+  }
+
+  // ── Modal Nâng cấp ────────────────────────────────────────────────────────
+  async function openUpgradeModal() {
+    $("upgrade-modal").classList.remove("hidden");
+    $("redeem-result").textContent = "";
+    $("redeem-input").value = "";
+    const data = await api("/api/plans");
+
+    const cardsBox = $("plan-cards");
+    cardsBox.innerHTML = "";
+    for (const p of data.plans) {
+      const card = document.createElement("div");
+      card.className = "plan-card" + (p.key === "monthly" ? " highlight" : "");
+      const price = p.price_vnd === 0 ? "0đ" : formatVnd(p.price_vnd);
+      const per = p.key === "monthly" ? "<small>/tháng</small>" : p.key === "yearly" ? "<small>/năm</small>" : "";
+      const current = state.plan && state.plan.key === p.key ? ' <small style="color:var(--accent-2)">· đang dùng</small>' : "";
+      card.innerHTML = `
+        <h4>${p.label}${current}</h4>
+        <div class="price">${price}${per}</div>
+        <ul>${(p.features || []).map((f) => `<li>${f}</li>`).join("")}</ul>`;
+      cardsBox.appendChild(card);
+    }
+
+    const pay = data.payment || {};
+    const rows = [];
+    if (pay.bank_name) rows.push(`<div><b>Ngân hàng:</b> ${pay.bank_name}</div>`);
+    if (pay.bank_account) rows.push(`<div><b>Số tài khoản:</b> ${pay.bank_account}</div>`);
+    if (pay.bank_owner) rows.push(`<div><b>Chủ tài khoản:</b> ${pay.bank_owner}</div>`);
+    if (pay.momo) rows.push(`<div><b>Momo:</b> ${pay.momo}</div>`);
+    if (pay.note) rows.push(`<div>${pay.note}</div>`);
+    $("payment-info").innerHTML = rows.length
+      ? rows.join("")
+      : '<span class="empty">Chủ web chưa cấu hình thông tin thanh toán — liên hệ trực tiếp để nâng cấp.</span>';
+  }
+
+  $("upgrade-btn").addEventListener("click", openUpgradeModal);
+
+  $("redeem-btn").addEventListener("click", async () => {
+    const code = $("redeem-input").value.trim();
+    const result = $("redeem-result");
+    if (!code) return;
+    try {
+      const data = await api("/api/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      result.textContent = "✓ " + data.message;
+      result.className = "redeem-result ok";
+      await refreshPlan();
+      setTimeout(() => $("upgrade-modal").classList.add("hidden"), 1400);
+    } catch (err) {
+      result.textContent = "✕ " + err.message;
+      result.className = "redeem-result err";
+    }
+  });
+
+  // ── Modal Quản trị ────────────────────────────────────────────────────────
+  async function openAdminModal() {
+    $("admin-modal").classList.remove("hidden");
+    await refreshAdminCodes();
+  }
+
+  async function refreshAdminCodes() {
+    const data = await api("/api/admin/codes");
+    const box = $("admin-codes");
+    box.innerHTML = "";
+    if (!data.codes.length) {
+      box.innerHTML = '<p style="color:var(--text-dim);font-size:12.5px">Chưa có mã nào.</p>';
+      return;
+    }
+    for (const c of data.codes) {
+      const row = document.createElement("div");
+      row.className = "admin-code-row";
+      const status = c.used_by
+        ? `<span class="tag used">Đã dùng bởi ${c.used_by}</span>`
+        : '<span class="tag free">Chưa dùng</span>';
+      row.innerHTML = `<code>${c.code}</code><span class="tag">${PLAN_LABELS[c.plan] || c.plan}</span>${status}`;
+      box.appendChild(row);
+    }
+  }
+
+  $("admin-btn").addEventListener("click", openAdminModal);
+
+  $("admin-create-btn").addEventListener("click", async () => {
+    const plan = $("admin-plan").value;
+    const count = parseInt($("admin-count").value, 10) || 1;
+    try {
+      await api("/api/admin/codes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, count }),
+      });
+      await refreshAdminCodes();
+    } catch (err) {
+      alert("Lỗi tạo mã: " + err.message);
+    }
+  });
+
+  document.querySelectorAll(".modal-close").forEach((btn) =>
+    btn.addEventListener("click", () => $(btn.dataset.close).classList.add("hidden"))
+  );
+  document.querySelectorAll(".modal-overlay").forEach((overlay) =>
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.classList.add("hidden"); })
+  );
 
   async function loadConversations() {
     const data = await api("/api/conversations");
@@ -357,6 +500,14 @@
           case "citations":
             renderCitations(el.body, ev.items || []);
             break;
+          case "upsell": {
+            const chip = document.createElement("button");
+            chip.className = "upsell-chip";
+            chip.textContent = "✦ " + ev.message;
+            chip.addEventListener("click", openUpgradeModal);
+            el.body.insertBefore(chip, el.content);
+            break;
+          }
           case "error": {
             const err = document.createElement("div");
             err.className = "msg-error";
@@ -371,10 +522,18 @@
         $("messages").scrollTop = $("messages").scrollHeight;
       }
     } catch (err) {
-      const errBox = document.createElement("div");
-      errBox.className = "msg-error";
-      errBox.textContent = "Lỗi: " + err.message;
-      el.body.appendChild(errBox);
+      if (err.message.includes("Nâng cấp")) {
+        const chip = document.createElement("button");
+        chip.className = "upsell-chip";
+        chip.textContent = "✦ " + err.message;
+        chip.addEventListener("click", openUpgradeModal);
+        el.body.appendChild(chip);
+      } else {
+        const errBox = document.createElement("div");
+        errBox.className = "msg-error";
+        errBox.textContent = "Lỗi: " + err.message;
+        el.body.appendChild(errBox);
+      }
     } finally {
       el.content.classList.remove("cursor-blink");
       if (thinkingBox) {

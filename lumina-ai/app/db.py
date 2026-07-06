@@ -1,12 +1,13 @@
-"""✦ LUMINA AI — Lưu trữ SQLite: người dùng, hội thoại, tin nhắn."""
+"""✦ LUMINA AI — Lưu trữ SQLite: người dùng, hội thoại, tin nhắn, gói & mã kích hoạt."""
 
 import os
+import secrets
 import sqlite3
 import threading
 import time
 import uuid
 
-from .config import CONFIG
+from .config import CONFIG, PLANS
 
 _lock = threading.RLock()
 _conn: sqlite3.Connection | None = None
@@ -31,6 +32,8 @@ def _init_schema(conn: sqlite3.Connection):
         email TEXT,
         name TEXT,
         picture TEXT,
+        plan TEXT NOT NULL DEFAULT 'free',
+        plan_expires_at INTEGER NOT NULL DEFAULT 0,  -- 0 = không hết hạn
         created_at INTEGER
     );
     CREATE TABLE IF NOT EXISTS conversations (
@@ -49,9 +52,34 @@ def _init_schema(conn: sqlite3.Connection):
         citations TEXT,
         created_at INTEGER
     );
+    CREATE TABLE IF NOT EXISTS activation_codes (
+        code TEXT PRIMARY KEY,
+        plan TEXT NOT NULL,
+        duration_days INTEGER NOT NULL,
+        created_by TEXT,
+        created_at INTEGER,
+        used_by TEXT,
+        used_at INTEGER
+    );
+    CREATE TABLE IF NOT EXISTS usage_daily (
+        user_id TEXT NOT NULL,
+        day TEXT NOT NULL,           -- 'YYYY-MM-DD' (UTC)
+        count INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (user_id, day)
+    );
     CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id, updated_at DESC);
     CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conversation_id, id);
+    CREATE INDEX IF NOT EXISTS idx_codes_used_by ON activation_codes(used_by);
     """)
+    # Cơ sở dữ liệu tạo trước khi có cột plan/plan_expires_at (nếu có) — thêm cột an toàn
+    for stmt in (
+        "ALTER TABLE users ADD COLUMN plan TEXT NOT NULL DEFAULT 'free'",
+        "ALTER TABLE users ADD COLUMN plan_expires_at INTEGER NOT NULL DEFAULT 0",
+    ):
+        try:
+            conn.execute(stmt)
+        except sqlite3.OperationalError:
+            pass  # cột đã tồn tại
     conn.commit()
 
 
@@ -124,3 +152,116 @@ def get_messages(conv_id: str, limit: int = 200) -> list[dict]:
             (conv_id, limit),
         ).fetchall()
         return [dict(r) for r in rows]
+
+
+# ─── Gói & mã kích hoạt ──────────────────────────────────────────────────────
+
+def get_effective_plan(user_id: str) -> dict:
+    """Trả về thông tin gói đang hiệu lực của người dùng (tự hạ về 'free' nếu hết hạn)."""
+    with _lock:
+        conn = get_conn()
+        row = conn.execute("SELECT plan, plan_expires_at FROM users WHERE id=?", (user_id,)).fetchone()
+        plan_key = row["plan"] if row else "free"
+        expires_at = row["plan_expires_at"] if row else 0
+        now = int(time.time())
+        if plan_key != "free" and expires_at and expires_at < now:
+            # Hết hạn — hạ về free và ghi lại
+            conn.execute("UPDATE users SET plan='free', plan_expires_at=0 WHERE id=?", (user_id,))
+            conn.commit()
+            plan_key, expires_at = "free", 0
+        plan = dict(PLANS.get(plan_key, PLANS["free"]))
+        plan["expires_at"] = expires_at
+        return plan
+
+
+def set_user_plan(user_id: str, plan_key: str, expires_at: int):
+    with _lock:
+        conn = get_conn()
+        conn.execute("UPDATE users SET plan=?, plan_expires_at=? WHERE id=?", (plan_key, expires_at, user_id))
+        conn.commit()
+
+
+def _generate_code() -> str:
+    group = lambda: secrets.token_hex(2).upper()
+    return f"LUMINA-{group()}-{group()}"
+
+
+def create_activation_codes(plan_key: str, duration_days: int, count: int, created_by: str) -> list[str]:
+    with _lock:
+        conn = get_conn()
+        now = int(time.time())
+        codes = []
+        for _ in range(count):
+            code = _generate_code()
+            conn.execute(
+                "INSERT INTO activation_codes(code, plan, duration_days, created_by, created_at) VALUES(?,?,?,?,?)",
+                (code, plan_key, duration_days, created_by, now),
+            )
+            codes.append(code)
+        conn.commit()
+        return codes
+
+
+def list_activation_codes(limit: int = 100) -> list[dict]:
+    with _lock:
+        rows = get_conn().execute(
+            "SELECT code, plan, duration_days, created_by, created_at, used_by, used_at "
+            "FROM activation_codes ORDER BY created_at DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def redeem_activation_code(code: str, user_id: str) -> tuple[bool, str, dict | None]:
+    """Kích hoạt mã cho user. Trả về (thành công, thông báo, thông tin gói mới)."""
+    code = code.strip().upper()
+    with _lock:
+        conn = get_conn()
+        row = conn.execute(
+            "SELECT code, plan, duration_days, used_by FROM activation_codes WHERE code=?", (code,)
+        ).fetchone()
+        if not row:
+            return False, "Mã kích hoạt không tồn tại.", None
+        if row["used_by"]:
+            return False, "Mã kích hoạt này đã được sử dụng.", None
+
+        plan_key = row["plan"]
+        duration_days = row["duration_days"]
+        now = int(time.time())
+
+        # Nếu đang có cùng gói còn hạn → cộng dồn thời gian; khác gói → tính từ hiện tại
+        current = conn.execute("SELECT plan, plan_expires_at FROM users WHERE id=?", (user_id,)).fetchone()
+        base = now
+        if current and current["plan"] == plan_key and current["plan_expires_at"] > now:
+            base = current["plan_expires_at"]
+        new_expires = base + duration_days * 86400
+
+        conn.execute(
+            "UPDATE activation_codes SET used_by=?, used_at=? WHERE code=?", (user_id, now, code)
+        )
+        conn.execute("UPDATE users SET plan=?, plan_expires_at=? WHERE id=?", (plan_key, new_expires, user_id))
+        conn.commit()
+
+        plan = dict(PLANS.get(plan_key, PLANS["free"]))
+        plan["expires_at"] = new_expires
+        return True, f"Kích hoạt thành công gói {plan['label']}!", plan
+
+
+def check_and_increment_daily_usage(user_id: str, cap: int) -> tuple[bool, int]:
+    """Kiểm tra + tăng số tin nhắn trong ngày (UTC). cap<=0 nghĩa là không giới hạn."""
+    day = time.strftime("%Y-%m-%d", time.gmtime())
+    with _lock:
+        conn = get_conn()
+        row = conn.execute(
+            "SELECT count FROM usage_daily WHERE user_id=? AND day=?", (user_id, day)
+        ).fetchone()
+        used = row["count"] if row else 0
+        if cap > 0 and used >= cap:
+            return False, used
+        conn.execute(
+            """INSERT INTO usage_daily(user_id, day, count) VALUES(?,?,1)
+               ON CONFLICT(user_id, day) DO UPDATE SET count = count + 1""",
+            (user_id, day),
+        )
+        conn.commit()
+        return True, used + 1

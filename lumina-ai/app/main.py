@@ -6,11 +6,15 @@ Endpoints:
   POST /api/auth/google     → đăng nhập bằng Google ID token → cookie phiên
   POST /api/auth/dev        → đăng nhập khách (chỉ khi DEV_MODE=true)
   POST /api/auth/logout     → đăng xuất
-  GET  /api/me              → thông tin người dùng hiện tại
+  GET  /api/me              → thông tin người dùng hiện tại (kèm gói đang dùng)
   GET  /api/conversations   → danh sách hội thoại
   GET  /api/conversations/{id} → tin nhắn của một hội thoại
   DELETE /api/conversations/{id}
   POST /api/chat/stream     → chat streaming SSE (bắt buộc đăng nhập)
+  GET  /api/plans           → danh sách gói (Miễn phí/Tháng/Năm) + thông tin chuyển khoản
+  POST /api/redeem          → nhập mã kích hoạt để nâng cấp gói
+  GET  /api/admin/codes     → (quản trị) xem danh sách mã đã tạo
+  POST /api/admin/codes     → (quản trị) tạo mã kích hoạt mới
   GET  /health              → kiểm tra sức khỏe
   GET  /api/metrics         → thống kê hiệu năng
 """
@@ -27,13 +31,13 @@ from pydantic import BaseModel
 
 from . import auth, db
 from .cache import ResponseCache
-from .config import CONFIG, validate_config
+from .config import CONFIG, PLANS, validate_config
 from .memory import trim_history
 from .monitor import monitor
 from .orchestrator import orchestrator
 from .ratelimit import UserRateLimiter
 from .router import decide_route
-from .schemas import ChatRequest
+from .schemas import AdminCreateCodesRequest, ChatRequest, RedeemRequest
 
 logging.basicConfig(level=getattr(logging, CONFIG["LOG_LEVEL"], logging.INFO))
 logger = logging.getLogger("lumina")
@@ -105,7 +109,8 @@ async def logout(response: Response):
 
 @app.get("/api/me")
 async def me(user: dict = Depends(auth.require_user)):
-    return {"user": user}
+    plan = db.get_effective_plan(user["id"])
+    return {"user": user, "plan": plan}
 
 
 @app.get("/api/config")
@@ -141,6 +146,48 @@ async def remove_conversation(conv_id: str, user: dict = Depends(auth.require_us
     return {"ok": True}
 
 
+# ─── Gói & mã kích hoạt ──────────────────────────────────────────────────────
+
+@app.get("/api/plans")
+async def plans():
+    return {
+        "plans": list(PLANS.values()),
+        "payment": {
+            "bank_name": CONFIG["PAYMENT_BANK_NAME"],
+            "bank_account": CONFIG["PAYMENT_BANK_ACCOUNT"],
+            "bank_owner": CONFIG["PAYMENT_BANK_OWNER"],
+            "momo": CONFIG["PAYMENT_MOMO"],
+            "note": CONFIG["PAYMENT_NOTE"],
+        },
+    }
+
+
+@app.post("/api/redeem")
+async def redeem(body: RedeemRequest, user: dict = Depends(auth.require_user)):
+    ok, message, plan = db.redeem_activation_code(body.code, user["id"])
+    if not ok:
+        raise HTTPException(status_code=400, detail=message)
+    return {"message": message, "plan": plan}
+
+
+@app.get("/api/admin/codes")
+async def admin_list_codes(user: dict = Depends(auth.require_user)):
+    auth.require_admin(user)
+    return {"codes": db.list_activation_codes()}
+
+
+@app.post("/api/admin/codes")
+async def admin_create_codes(body: AdminCreateCodesRequest, user: dict = Depends(auth.require_user)):
+    auth.require_admin(user)
+    if body.plan not in ("monthly", "yearly"):
+        raise HTTPException(status_code=400, detail="Gói không hợp lệ — chỉ 'monthly' hoặc 'yearly'.")
+    if not (1 <= body.count <= 100):
+        raise HTTPException(status_code=400, detail="Số lượng mã phải từ 1 đến 100.")
+    duration = PLANS[body.plan]["duration_days"]
+    codes = db.create_activation_codes(body.plan, duration, body.count, user["email"])
+    return {"codes": codes}
+
+
 # ─── Chat streaming (SSE) ────────────────────────────────────────────────────
 
 def _sse(data: dict) -> str:
@@ -149,10 +196,21 @@ def _sse(data: dict) -> str:
 
 @app.post("/api/chat/stream")
 async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)):
-    # Giới hạn lượt theo người dùng — bảo vệ API key của chủ web
-    allowed, wait = rate_limiter.check(user["id"])
+    plan = db.get_effective_plan(user["id"])
+
+    # Giới hạn lượt/phút theo gói — bảo vệ API key của chủ web
+    allowed, wait = rate_limiter.check(user["id"], plan["rpm"], plan["burst"])
     if not allowed:
         raise HTTPException(status_code=429, detail=f"Bạn gửi quá nhanh — chờ {wait} giây rồi thử lại.")
+
+    # Giới hạn số tin nhắn / ngày theo gói
+    daily_ok, used_today = db.check_and_increment_daily_usage(user["id"], plan["daily_message_cap"])
+    if not daily_ok:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Bạn đã dùng hết {plan['daily_message_cap']} tin nhắn hôm nay của gói {plan['label']}. "
+                   f"Nâng cấp gói Tháng/Năm để chat nhiều hơn (xem mục ✦ Nâng cấp).",
+        )
 
     # Hội thoại: tạo mới hoặc nối tiếp
     conv_id = body.conversation_id
@@ -171,7 +229,7 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
     messages = trim_history(history + [{"role": "user", "content": body.message}],
                             CONFIG["MAX_CONTEXT_TOKENS"])
 
-    route = decide_route(body.message, history_len=len(history))
+    route = decide_route(body.message, history_len=len(history), apex_allowed=plan["apex_allowed"])
     logger.info("Router: mode=%s model=%s user=%s", route.mode, route.model, user["email"])
 
     async def event_stream():
@@ -179,6 +237,11 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
             "type": "router", "mode": route.mode, "label": route.label,
             "conversation_id": conv_id,
         })
+        if route.apex_locked:
+            yield _sse({
+                "type": "upsell",
+                "message": "Câu hỏi này hợp với 🌌 Đỉnh cao — nâng cấp gói Tháng/Năm để mở khóa.",
+            })
         answer_parts: list[str] = []
         citations: list[dict] = []
         try:
