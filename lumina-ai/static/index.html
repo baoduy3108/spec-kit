@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUMINA AI — Tư duy sâu, tri thức rộng</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <!-- ── Màn hình đăng nhập ─────────────────────────────── -->
+  <div id="login-screen" class="login-screen hidden">
+    <div class="login-card">
+      <div class="logo-big">✦</div>
+      <h1 class="brand">LUMINA <span>AI</span></h1>
+      <p class="tagline">Tư duy sâu, tri thức rộng</p>
+      <p class="login-desc">Một AI hợp nhất — tự chọn bộ não tốt nhất cho từng câu hỏi:<br>
+        🧠 tư duy sâu &nbsp;·&nbsp; 🔍 tìm kiếm web thời gian thực &nbsp;·&nbsp; ⚡ phản hồi nhanh</p>
+      <div id="google-signin"></div>
+      <button id="dev-login" class="dev-login hidden">Vào chế độ chạy thử (DEV)</button>
+      <p id="login-error" class="login-error hidden"></p>
+    </div>
+  </div>
+
+  <!-- ── Ứng dụng chat ──────────────────────────────────── -->
+  <div id="app" class="app hidden">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo-small">✦</span>
+        <span class="brand-small">LUMINA AI</span>
+      </div>
+      <button id="new-chat" class="new-chat-btn">＋ Cuộc trò chuyện mới</button>
+      <nav id="conv-list" class="conv-list"></nav>
+      <div class="sidebar-footer">
+        <img id="user-avatar" class="avatar" src="" alt="">
+        <span id="user-name" class="user-name"></span>
+        <button id="logout" class="logout-btn" title="Đăng xuất">⎋</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button id="toggle-sidebar" class="icon-btn">☰</button>
+        <span id="topbar-title" class="topbar-title">Cuộc trò chuyện mới</span>
+      </header>
+
+      <div id="messages" class="messages">
+        <div id="welcome" class="welcome">
+          <div class="logo-big">✦</div>
+          <h2>Xin chào! Mình là LUMINA</h2>
+          <p>Hỏi bất cứ điều gì — mình tự chọn chế độ phù hợp nhất, không cần bạn chỉnh gì cả.</p>
+          <div class="suggestions">
+            <button class="suggestion">Tin tức AI mới nhất hôm nay?</button>
+            <button class="suggestion">Viết hàm Python kiểm tra số nguyên tố</button>
+            <button class="suggestion">Giải thích hố đen cho trẻ 10 tuổi</button>
+            <button class="suggestion">Lên kế hoạch du lịch Đà Lạt 3 ngày</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="composer-wrap">
+        <div class="composer">
+          <textarea id="input" rows="1" placeholder="Nhắn tin cho LUMINA…"></textarea>
+          <button id="send" class="send-btn" title="Gửi">➤</button>
+        </div>
+        <p class="composer-hint">LUMINA tự chọn: ⚡ nhanh · ✨ cân bằng · 🧠 tư duy sâu · 🔍 tìm kiếm web</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
