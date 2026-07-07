@@ -29,6 +29,7 @@ class OpenAICompatibleEngine(BaseEngine):
     model = ""
     api_key = ""
     is_local = False  # Ollama chạy nội bộ — không cần key
+    extra_headers: dict = {}  # header phụ (ví dụ OpenRouter khuyến nghị Referer/Title)
 
     def available(self) -> bool:
         if self.is_local:
@@ -59,7 +60,7 @@ class OpenAICompatibleEngine(BaseEngine):
             "max_tokens": 8192,
             "stream": True,
         }
-        headers = {}
+        headers = dict(self.extra_headers)
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
 
@@ -132,6 +133,21 @@ class OllamaEngine(OpenAICompatibleEngine):
         self.base_url = CONFIG["OLLAMA_BASE_URL"].rstrip("/")
         self.model = CONFIG["OLLAMA_MODEL"]
         self.api_key = ""
+
+
+class OpenRouterEngine(OpenAICompatibleEngine):
+    name = "openrouter"
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = CONFIG["OPENROUTER_BASE_URL"]
+        self.model = CONFIG["OPENROUTER_MODEL"]
+        self.api_key = CONFIG["OPENROUTER_API_KEY"]
+        # OpenRouter khuyến nghị (không bắt buộc) gửi 2 header này
+        self.extra_headers = {
+            "HTTP-Referer": "https://lumina-ai.app",
+            "X-Title": CONFIG["APP_NAME"],
+        }
 
 
 class OpenAIEngine(OpenAICompatibleEngine):

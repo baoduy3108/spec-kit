@@ -23,6 +23,7 @@ from .engines.openai_compatible import (
     GroqEngine,
     OllamaEngine,
     OpenAIEngine,
+    OpenRouterEngine,
 )
 from .monitor import monitor
 from .schemas import RouteDecision
@@ -45,6 +46,7 @@ class Orchestrator:
             "claude": ClaudeEngine(),
             "gemini": GeminiEngine(),
             "groq": GroqEngine(),
+            "openrouter": OpenRouterEngine(),
             "deepseek": DeepSeekEngine(),
             "ollama": OllamaEngine(),
             "openai": OpenAIEngine(),

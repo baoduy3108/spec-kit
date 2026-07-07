@@ -34,6 +34,9 @@ CONFIG = {
     "GROQ_API_KEY": os.getenv("GROQ_API_KEY", ""),       # FREE tại console.groq.com
     "GROQ_MODEL": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
     "GROQ_BASE_URL": "https://api.groq.com/openai/v1",
+    "OPENROUTER_API_KEY": os.getenv("OPENROUTER_API_KEY", ""),  # FREE (nhiều model) tại openrouter.ai/keys
+    "OPENROUTER_MODEL": os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free"),
+    "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
     "DEEPSEEK_API_KEY": os.getenv("DEEPSEEK_API_KEY", ""),  # cực rẻ tại platform.deepseek.com
     "DEEPSEEK_MODEL": os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
     "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",
@@ -57,7 +60,7 @@ CONFIG = {
     # ── Độ bền / hiệu năng (kế thừa khung mẫu) ──────────────────
     # Chuỗi engine MIỄN PHÍ/RẺ — dùng khi hết lượt cao cấp hoặc khi engine chính lỗi.
     # Thứ tự ưu tiên: Gemini free → Groq free → DeepSeek rẻ → Ollama (máy bạn) → OpenAI.
-    "FREE_FALLBACK_CHAIN": ["gemini", "groq", "deepseek", "ollama", "openai"],
+    "FREE_FALLBACK_CHAIN": ["gemini", "groq", "openrouter", "deepseek", "ollama", "openai"],
     "CIRCUIT_BREAKER_THRESHOLD": int(os.getenv("CIRCUIT_BREAKER_THRESHOLD", "5")),
     "CIRCUIT_BREAKER_TIMEOUT": int(os.getenv("CIRCUIT_BREAKER_TIMEOUT", "60")),
     "CACHE_TTL": int(os.getenv("CACHE_TTL", "3600")),
@@ -156,7 +159,8 @@ def has_any_engine() -> bool:
     """Có ít nhất một bộ não được cấu hình không (cao cấp hoặc free)."""
     return bool(
         CONFIG["ANTHROPIC_API_KEY"] or CONFIG["GEMINI_API_KEY"] or CONFIG["GROQ_API_KEY"]
-        or CONFIG["DEEPSEEK_API_KEY"] or CONFIG["OLLAMA_BASE_URL"] or CONFIG["OPENAI_API_KEY"]
+        or CONFIG["OPENROUTER_API_KEY"] or CONFIG["DEEPSEEK_API_KEY"]
+        or CONFIG["OLLAMA_BASE_URL"] or CONFIG["OPENAI_API_KEY"]
     )
 
 

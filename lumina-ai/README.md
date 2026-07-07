@@ -37,6 +37,7 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 Cần tối thiểu một trong số này (khuyến nghị điền **Gemini free** trước, thêm Claude sau nếu muốn chất lượng cao):
 - 🆓 **Gemini (miễn phí)** — <https://aistudio.google.com/apikey> → tạo key. Đây là bộ não free chính.
 - 🆓 **Groq (miễn phí, rất nhanh)** — <https://console.groq.com/keys>.
+- 🆓 **OpenRouter (miễn phí, 1 key nhiều model)** — <https://openrouter.ai/keys>.
 - 🥇 **Claude (cao cấp, có phí)** — <https://console.anthropic.com/settings/keys>, nạp vài đô. Chỉ dùng cho các lượt "cao cấp"; không bắt buộc.
 - 💰 **DeepSeek (cực rẻ)** — <https://platform.deepseek.com>; **Ollama (free, tự host)** — <https://ollama.com>.
 
