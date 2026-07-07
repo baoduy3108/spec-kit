@@ -32,10 +32,12 @@ class GeminiEngine(BaseEngine):
             {"role": "user" if m["role"] == "user" else "model", "parts": [{"text": m["content"]}]}
             for m in messages
         ]
+        # Câu hỏi code/phân tích cần output dài hơn (tránh cắt cụt); câu thường thì vừa phải.
+        max_out = 32768 if route.mode in ("deep", "apex", "search") else 8192
         payload: dict = {
             "contents": contents,
             "systemInstruction": {"parts": [{"text": system}]},
-            "generationConfig": {"maxOutputTokens": 8192},
+            "generationConfig": {"maxOutputTokens": max_out},
         }
         if route.use_web_search:
             payload["tools"] = [{"google_search": {}}]  # Search grounding

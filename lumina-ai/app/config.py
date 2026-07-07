@@ -6,6 +6,14 @@ Kiến trúc kế thừa khung mẫu "Unified AI Core" (PHẦN 1), model ID cậ
 
 import os
 
+# Tự động nạp file .env (nếu có) ở thư mục lumina-ai — người dùng chỉ cần tạo .env
+# và chạy, KHỎI phải gõ lệnh export. Trên Render thì dùng biến môi trường của Render.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+except ImportError:
+    pass  # chưa cài python-dotenv cũng không sao — vẫn đọc biến môi trường bình thường
+
 
 def _bool(name: str, default: bool = False) -> bool:
     return os.getenv(name, str(default)).strip().lower() in ("1", "true", "yes", "on")

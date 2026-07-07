@@ -54,10 +54,12 @@ class OpenAICompatibleEngine(BaseEngine):
                 citations = [{"title": r.title, "url": r.url} for r in results if r.url]
                 yield {"type": "search_status", "tool": "web_search", "query": messages[-1]["content"][:80]}
 
+        # Code/phân tích cần output dài hơn để không bị cắt cụt giữa chừng.
+        max_out = 16384 if route.mode in ("deep", "apex", "search") else 8192
         payload = {
             "model": self.model,
             "messages": chat_messages,
-            "max_tokens": 8192,
+            "max_tokens": max_out,
             "stream": True,
         }
         headers = dict(self.extra_headers)
