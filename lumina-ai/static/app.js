@@ -10,6 +10,8 @@
     plan: null,
     conversationId: null,
     streaming: false,
+    attachedImages: [],   // data URL các ảnh đang đính kèm cho lượt tới
+    forceMode: null,      // null | "image" | "research" — nút ép chế độ
   };
 
   const PLAN_LABELS = { free: "Miễn phí", monthly: "Tháng", yearly: "Năm" };
@@ -27,6 +29,9 @@
   function inlineMd(s) {
     return s
       .replace(/`([^`]+)`/g, (_, c) => `<code>${c}</code>`)
+      // Ảnh ![alt](url) — phải xử lý TRƯỚC link để không bị nuốt nhầm
+      .replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g,
+        '<img src="$2" alt="$1" class="gen-img" loading="lazy">')
       .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
       .replace(/(^|\W)\*([^*\n]+)\*(?=\W|$)/g, "$1<em>$2</em>")
       .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
@@ -448,12 +453,22 @@
   // ── Render tin nhắn ───────────────────────────────────────────────────────
   function hideWelcome() { $("welcome")?.classList.add("hidden"); }
 
-  function addUserMessage(text) {
+  function addUserMessage(text, images) {
     hideWelcome();
     const div = document.createElement("div");
     div.className = "msg user";
     div.innerHTML = `<div class="msg-avatar">🧑</div><div class="msg-body"><div class="msg-content"></div></div>`;
     div.querySelector(".msg-content").textContent = text;
+    if (images && images.length) {
+      const strip = document.createElement("div");
+      strip.className = "msg-images";
+      for (const src of images) {
+        const im = document.createElement("img");
+        im.src = src; im.className = "msg-img";
+        strip.appendChild(im);
+      }
+      div.querySelector(".msg-body").appendChild(strip);
+    }
     $("messages").appendChild(div);
     $("messages").scrollTop = $("messages").scrollHeight;
   }
@@ -496,14 +511,19 @@
   // ── Gửi + nhận stream ─────────────────────────────────────────────────────
   async function sendMessage() {
     const input = $("input");
-    const text = input.value.trim();
-    if (!text || state.streaming) return;
+    let text = input.value.trim();
+    const images = state.attachedImages.slice();
+    const mode = state.forceMode;
+    // Cho phép gửi chỉ ảnh (không chữ) — tự thêm câu hỏi mặc định.
+    if (!text && images.length) text = "Xem ảnh này giúp mình nhé.";
+    if ((!text && !images.length) || state.streaming) return;
     input.value = "";
     autoResize();
+    clearAttachments();
     state.streaming = true;
     $("send").disabled = true;
 
-    addUserMessage(text);
+    addUserMessage(text, images);
     const el = addAssistantMessage("");
     const badge = el.body.querySelector(".mode-badge") || (() => {
       const b = document.createElement("span");
@@ -521,7 +541,12 @@
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, conversation_id: state.conversationId }),
+        body: JSON.stringify({
+          message: text,
+          conversation_id: state.conversationId,
+          images: images,
+          mode: mode,
+        }),
       });
       if (!resp.ok) {
         let detail = resp.statusText;
@@ -568,11 +593,16 @@
           case "search_status": {
             const chip = document.createElement("span");
             chip.className = "search-chip";
-            chip.textContent = (ev.tool === "web_fetch" ? "🌐 Đang đọc trang: " : "🔍 Đang tìm kiếm: ")
-              + (ev.query || "…");
+            const prefix = ev.tool === "image_gen" ? "🎨 Đang vẽ ảnh: "
+              : ev.tool === "web_fetch" ? "🌐 Đang đọc trang: "
+              : "🔍 Đang tìm kiếm: ";
+            chip.textContent = prefix + (ev.query || "…");
             el.body.insertBefore(chip, el.content);
             break;
           }
+          case "image":
+            // Ảnh sẽ được render qua markdown ở sự kiện "text" kế tiếp — ở đây chỉ báo đang tải.
+            break;
           case "text":
             answer += ev.text;
             el.content.innerHTML = renderMarkdown(answer);
@@ -626,6 +656,113 @@
       loadConversations();
     }
   }
+
+  // ── Đính kèm ảnh (đa phương thức: LUMINA "xem" ảnh) ───────────────────────
+  const MAX_IMAGES = 4;
+
+  function clearAttachments() {
+    state.attachedImages = [];
+    $("attach-preview").innerHTML = "";
+    $("attach-preview").classList.add("hidden");
+  }
+
+  function renderAttachPreview() {
+    const box = $("attach-preview");
+    box.innerHTML = "";
+    box.classList.toggle("hidden", state.attachedImages.length === 0);
+    state.attachedImages.forEach((src, i) => {
+      const wrap = document.createElement("div");
+      wrap.className = "attach-thumb";
+      wrap.innerHTML = `<img src="${src}"><button class="attach-del" title="Bỏ ảnh">✕</button>`;
+      wrap.querySelector(".attach-del").addEventListener("click", () => {
+        state.attachedImages.splice(i, 1);
+        renderAttachPreview();
+      });
+      box.appendChild(wrap);
+    });
+  }
+
+  // Thu nhỏ ảnh về tối đa 1024px + nén JPEG để request nhẹ, gửi nhanh, đỡ tốn token.
+  function downscaleImage(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("Không đọc được ảnh"));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("Ảnh lỗi"));
+        img.onload = () => {
+          const max = 1024;
+          let { width, height } = img;
+          if (width > max || height > max) {
+            const r = Math.min(max / width, max / height);
+            width = Math.round(width * r); height = Math.round(height * r);
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width; canvas.height = height;
+          canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.85));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function addFiles(fileList) {
+    const files = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
+    for (const f of files) {
+      if (state.attachedImages.length >= MAX_IMAGES) break;
+      try {
+        state.attachedImages.push(await downscaleImage(f));
+      } catch { /* bỏ qua ảnh lỗi */ }
+    }
+    renderAttachPreview();
+  }
+
+  $("attach-btn").addEventListener("click", () => $("file-input").click());
+  $("file-input").addEventListener("change", (e) => { addFiles(e.target.files); e.target.value = ""; });
+
+  // ── Nói bằng giọng (Web Speech API — chạy ngay trong trình duyệt, miễn phí) ─
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognizer = null, listening = false;
+
+  function setupVoice() {
+    const mic = $("mic-btn");
+    if (!SpeechRec) { mic.style.display = "none"; return; }  // trình duyệt không hỗ trợ
+    mic.addEventListener("click", () => {
+      if (listening) { recognizer && recognizer.stop(); return; }
+      recognizer = new SpeechRec();
+      recognizer.lang = "vi-VN";
+      recognizer.interimResults = true;
+      recognizer.continuous = false;
+      const base = $("input").value;
+      recognizer.onstart = () => { listening = true; mic.classList.add("listening"); };
+      recognizer.onerror = () => { listening = false; mic.classList.remove("listening"); };
+      recognizer.onend = () => { listening = false; mic.classList.remove("listening"); autoResize(); };
+      recognizer.onresult = (e) => {
+        let txt = "";
+        for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
+        $("input").value = (base ? base + " " : "") + txt;
+        autoResize();
+      };
+      recognizer.start();
+    });
+  }
+  setupVoice();
+
+  // ── Nút ép chế độ 🎨 Vẽ ảnh / 🔬 Nghiên cứu sâu ───────────────────────────
+  document.querySelectorAll(".mode-toggle").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const m = btn.dataset.mode;
+      state.forceMode = state.forceMode === m ? null : m;
+      document.querySelectorAll(".mode-toggle").forEach((b) =>
+        b.classList.toggle("active", b.dataset.mode === state.forceMode));
+      const ph = state.forceMode === "image" ? "Mô tả ảnh muốn vẽ…"
+        : state.forceMode === "research" ? "Chủ đề cần nghiên cứu sâu…"
+        : "Nhắn tin cho LUMINA…";
+      $("input").placeholder = ph;
+    })
+  );
 
   // ── UI events ─────────────────────────────────────────────────────────────
   function autoResize() {

@@ -70,11 +70,19 @@
       </div>
 
       <div class="composer-wrap">
+        <div id="attach-preview" class="attach-preview hidden"></div>
         <div class="composer">
+          <button id="attach-btn" class="composer-icon" title="Đính kèm ảnh để LUMINA xem">📎</button>
           <textarea id="input" rows="1" placeholder="Nhắn tin cho LUMINA…"></textarea>
+          <button id="mic-btn" class="composer-icon" title="Nói bằng giọng">🎤</button>
           <button id="send" class="send-btn" title="Gửi">➤</button>
         </div>
-        <p class="composer-hint">LUMINA tự chọn: ⚡ nhanh · ✨ cân bằng · 🧠 tư duy sâu · 🔍 tìm kiếm web</p>
+        <div class="composer-tools">
+          <button class="mode-toggle" data-mode="image" title="Bảo LUMINA vẽ ảnh">🎨 Vẽ ảnh</button>
+          <button class="mode-toggle" data-mode="research" title="Tìm nhiều nguồn, viết báo cáo">🔬 Nghiên cứu sâu</button>
+          <span class="composer-hint">LUMINA tự chọn: ⚡ nhanh · 🧠 sâu · 🔍 tìm kiếm · 🖼 xem ảnh</span>
+        </div>
+        <input type="file" id="file-input" accept="image/*" multiple hidden>
       </div>
     </main>
   </div>

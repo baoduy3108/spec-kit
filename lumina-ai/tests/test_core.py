@@ -61,6 +61,30 @@ def test_router_apex_disabled_by_default():
     assert route.mode != "apex"  # ENABLE_FABLE mặc định false → không dùng Fable
 
 
+# ── Router: chế độ đa phương thức (vẽ ảnh / nghiên cứu) ─────────────────────
+
+def test_router_image_intent():
+    for q in ["vẽ cho tôi một con mèo", "tạo ảnh hoàng hôn trên biển", "draw a robot"]:
+        assert decide_route(q).mode == "image_gen", q
+
+
+def test_router_research_intent():
+    route = decide_route("nghiên cứu sâu về tác động của AI tới việc làm")
+    assert route.mode == "research"
+    assert route.use_web_search is True
+
+
+def test_router_force_mode_overrides():
+    # Nút bấm giao diện ép chế độ dù nội dung không có từ khóa
+    assert decide_route("con mèo", force_mode="image").mode == "image_gen"
+    assert decide_route("biến đổi khí hậu", force_mode="research").mode == "research"
+
+
+def test_router_no_false_positive_image():
+    for q in ["Đà Lạt có gì chơi", "cách tạo file excel", "tạo thói quen tốt"]:
+        assert decide_route(q).mode != "image_gen", q
+
+
 def test_router_apex_locked_for_free_plan():
     """Bật ENABLE_FABLE tạm thời để kiểm tra gói Miễn phí bị khóa Đỉnh cao."""
     original = CONFIG["ENABLE_FABLE"]
@@ -258,3 +282,41 @@ def test_orchestrator_chain_tiers():
     # Các engine free phải nằm trong danh sách đã đăng ký
     for name in free_chain:
         assert name in orchestrator.engines
+
+
+# ── Đa phương thức: xử lý ảnh (media) ───────────────────────────────────────
+
+def test_parse_data_url_valid():
+    from app.media import parse_data_url
+    assert parse_data_url("data:image/png;base64,AAAA") == ("image/png", "AAAA")
+    assert parse_data_url("data:image/jpeg;base64,/9j/xyz") == ("image/jpeg", "/9j/xyz")
+
+
+def test_parse_data_url_rejects_non_image():
+    from app.media import parse_data_url
+    assert parse_data_url("data:text/plain;base64,AAAA") is None
+    assert parse_data_url("không phải data url") is None
+    assert parse_data_url("") is None
+
+
+def test_has_images_detection():
+    from app.media import has_images
+    assert has_images([{"role": "user", "content": "hi"}]) is False
+    assert has_images([{"role": "user", "content": "hi", "images": ["data:image/png;base64,AA"]}]) is True
+
+
+# ── Đa phương thức: tạo ảnh (imagegen) ──────────────────────────────────────
+
+def test_imagegen_pollinations_url():
+    import asyncio
+    from app.imagegen import generate_image
+    result = asyncio.get_event_loop().run_until_complete(generate_image("con rồng lửa"))
+    assert result["url"].startswith("https://image.pollinations.ai/prompt/")
+    assert result["prompt"] == "con rồng lửa"
+
+
+def test_imagegen_empty_prompt_has_fallback():
+    import asyncio
+    from app.imagegen import generate_image
+    result = asyncio.get_event_loop().run_until_complete(generate_image("   "))
+    assert result["url"].startswith("https://image.pollinations.ai/")

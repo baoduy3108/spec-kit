@@ -25,10 +25,23 @@ from .engines.openai_compatible import (
     OpenAIEngine,
     OpenRouterEngine,
 )
+from .imagegen import generate_image
+from .media import has_images
 from .monitor import monitor
 from .schemas import RouteDecision
 
 logger = logging.getLogger("lumina.orchestrator")
+
+# Bộ não "nhìn" được ảnh (đa phương thức). Groq/DeepSeek/Ollama chỉ đọc chữ.
+_VISION_ENGINES = {"claude", "gemini"}
+
+# Chỉ thị thêm khi người dùng yêu cầu 🔬 Nghiên cứu sâu — buộc bộ não tìm nhiều
+# nguồn, đối chiếu và viết báo cáo có cấu trúc kèm trích dẫn.
+_RESEARCH_DIRECTIVE = (
+    "\n\n[Chế độ NGHIÊN CỨU SÂU: Hãy tìm kiếm web nhiều lần từ nhiều góc độ khác nhau, "
+    "đối chiếu các nguồn, và viết một BÁO CÁO có cấu trúc rõ ràng (mở đầu, các phần chính "
+    "với tiêu đề, kết luận). Trích dẫn nguồn cho mọi thông tin quan trọng.]"
+)
 
 SYSTEM_PROMPT = """Bạn là LUMINA — trợ lý AI hợp nhất ("Tư duy sâu, tri thức rộng").
 Bạn trả lời bằng ngôn ngữ người dùng sử dụng (mặc định tiếng Việt), rõ ràng, chính xác và thân thiện.
@@ -66,6 +79,22 @@ class Orchestrator:
     def has_free_engine(self) -> bool:
         return any(self.engines[n].available() for n in self.free_chain)
 
+    async def _run_image_gen(self, messages: list[dict]) -> AsyncIterator[dict]:
+        """🎨 Vẽ ảnh — không dùng bộ não chat, gọi dịch vụ tạo ảnh (miễn phí/ DALL-E)."""
+        prompt = ""
+        for m in reversed(messages):
+            if m.get("role") == "user" and m.get("content"):
+                prompt = m["content"]
+                break
+        yield {"type": "search_status", "tool": "image_gen", "query": prompt[:80]}
+        result = await generate_image(prompt)
+        # Đẩy về cả sự kiện ảnh (hiển thị ngay) lẫn text markdown (lưu lại, tải lại vẫn thấy).
+        yield {"type": "image", "url": result["url"], "prompt": result["prompt"]}
+        yield {"type": "text",
+               "text": f'🎨 Đây là ảnh LUMINA vẽ theo yêu cầu **"{result["prompt"]}"**:\n\n'
+                       f'![{result["prompt"]}]({result["url"]})'}
+        yield {"type": "final", "usage": {}, "stop_reason": "end_turn"}
+
     async def run(
         self, messages: list[dict], route: RouteDecision, use_premium: bool = True
     ) -> AsyncIterator[dict]:
@@ -73,12 +102,34 @@ class Orchestrator:
 
         KHÔNG bao giờ lộ tên engine ra ngoài — mọi thông báo đều dưới tên LUMINA.
         """
+        # 🎨 Chế độ vẽ ảnh — xử lý riêng, không qua bộ não chat.
+        if route.mode == "image_gen":
+            async for event in self._run_image_gen(messages):
+                yield event
+            return
+
+        # 🔬 Chế độ nghiên cứu sâu — chèn chỉ thị vào câu hỏi cuối để bộ não tìm nhiều nguồn.
+        if route.mode == "research":
+            messages = list(messages)
+            for i in range(len(messages) - 1, -1, -1):
+                if messages[i].get("role") == "user":
+                    messages[i] = {**messages[i], "content": messages[i]["content"] + _RESEARCH_DIRECTIVE}
+                    break
+
         started_output = False
         chain = self._chain_for(use_premium)
+        # Có ảnh đính kèm → chỉ dùng bộ não "nhìn" được (Claude/Gemini).
+        if has_images(messages):
+            chain = [n for n in chain if n in _VISION_ENGINES]
         tried_any = False
         no_engine_msg = "Chưa có bộ não nào được cấu hình — kiểm tra API key trong file .env."
         # Thông báo lỗi cho người dùng KHÔNG bao giờ nêu tên model/nhà cung cấp.
         busy_msg = "Xin lỗi, LUMINA đang bận hoặc gặp sự cố tạm thời — hãy thử lại sau giây lát."
+        if not chain:
+            yield {"type": "error", "message":
+                   "Để LUMINA xem được ảnh, cần bật bộ não Gemini (miễn phí) hoặc Claude — "
+                   "kiểm tra API key trong file .env."}
+            return
 
         for name in chain:
             engine = self.engines[name]

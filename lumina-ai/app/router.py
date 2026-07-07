@@ -44,17 +44,54 @@ _APEX_PATTERNS = [
     r"\bviết cả (dự án|chương trình|hệ thống)\b",
 ]
 
+# 🎨 Vẽ ảnh — câu lệnh yêu cầu tạo hình ảnh
+_IMAGE_PATTERNS = [
+    r"\bvẽ\b",
+    r"\btạo\b[\w\s]{0,14}\b(ảnh|hình|tranh|hình ảnh)\b",
+    r"\bhình ảnh\b.*\b(về|của)\b",
+    r"\bthiết kế\b[\w\s]{0,10}\b(logo|poster|banner|hình|ảnh)\b", r"\bminh họa\b",
+    r"\bdraw\b", r"\bgenerate (an? )?image\b", r"\bcreate (an? )?(image|picture|art)\b",
+    r"\bimage of\b", r"\bpicture of\b", r"\bpaint\b",
+]
+
+# 🔬 Nghiên cứu sâu — yêu cầu tổng hợp nhiều nguồn thành báo cáo
+_RESEARCH_PATTERNS = [
+    r"\bnghiên cứu sâu\b", r"\bnghiên cứu kỹ\b", r"\bnghiên cứu chi tiết\b",
+    r"\bbáo cáo (chi tiết|đầy đủ|tổng hợp)\b", r"\btổng hợp (nhiều|các) nguồn\b",
+    r"\bphân tích chuyên sâu\b", r"\btìm hiểu kỹ\b", r"\bkhảo sát toàn diện\b",
+    r"\bdeep research\b", r"\bin-depth research\b", r"\bcomprehensive report\b",
+]
+
 _search_re = [re.compile(p, re.IGNORECASE) for p in _SEARCH_PATTERNS]
 _deep_re = [re.compile(p, re.IGNORECASE) for p in _DEEP_PATTERNS]
 _apex_re = [re.compile(p, re.IGNORECASE) for p in _APEX_PATTERNS]
+_image_re = [re.compile(p, re.IGNORECASE) for p in _IMAGE_PATTERNS]
+_research_re = [re.compile(p, re.IGNORECASE) for p in _RESEARCH_PATTERNS]
+
+
+def _image_route() -> RouteDecision:
+    return RouteDecision(mode="image_gen", label="🎨 Vẽ ảnh", model="")
+
+
+def _research_route() -> RouteDecision:
+    return RouteDecision(
+        mode="research", label="🔬 Nghiên cứu sâu",
+        model=CONFIG["CLAUDE_MODEL_DEEP"], use_web_search=True, effort="high",
+    )
 
 
 def _matches(regexes: list[re.Pattern], text: str) -> bool:
     return any(r.search(text) for r in regexes)
 
 
-def decide_route(message: str, history_len: int = 0, apex_allowed: bool = True) -> RouteDecision:
+def decide_route(
+    message: str, history_len: int = 0, apex_allowed: bool = True,
+    force_mode: str | None = None,
+) -> RouteDecision:
     """Phân loại câu lệnh và trả về quyết định định tuyến.
+
+    force_mode: nút bấm ở giao diện ép chế độ — "image" (vẽ ảnh) hoặc
+    "research" (nghiên cứu sâu). None → tự đoán theo nội dung.
 
     apex_allowed: gói của người dùng có được dùng chế độ 🌌 Đỉnh cao (Fable)
     không — gói Miễn phí sẽ False, gói Tháng/Năm True. Khi câu hỏi đáng lẽ
@@ -62,6 +99,20 @@ def decide_route(message: str, history_len: int = 0, apex_allowed: bool = True) 
     đánh dấu apex_locked để giao diện gợi ý nâng cấp.
     """
     text = message.strip()
+
+    # 0) Nút ép chế độ từ giao diện được ưu tiên tuyệt đối
+    if force_mode == "image":
+        return _image_route()
+    if force_mode == "research":
+        return _research_route()
+
+    # 1a) Yêu cầu vẽ ảnh → chế độ tạo ảnh (không dùng bộ não chat)
+    if _matches(_image_re, text):
+        return _image_route()
+
+    # 1b) Yêu cầu nghiên cứu sâu → tìm nhiều nguồn + viết báo cáo
+    if _matches(_research_re, text):
+        return _research_route()
 
     # 1) Cần thông tin từ web → ưu tiên cao nhất (search + AI phân tích)
     if _matches(_search_re, text):

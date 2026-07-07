@@ -13,6 +13,11 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=32000)
     conversation_id: Optional[str] = None
+    # Ảnh đính kèm (data URL base64) để LUMINA "xem" — tối đa 4 tấm cho 1 lượt.
+    images: list[str] = Field(default_factory=list, max_length=4)
+    # Ép chế độ từ nút bấm ở giao diện: "image" (vẽ ảnh) | "research" (nghiên cứu sâu).
+    # None → Router tự đoán theo nội dung câu hỏi.
+    mode: Optional[str] = None
 
 
 class SearchResult(BaseModel):

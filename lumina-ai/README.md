@@ -29,6 +29,17 @@ Router tự chọn chế độ theo câu hỏi (⚡ nhanh · ✨ cân bằng · 
 
 Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · Cache · Memory · Rate limiter · Metrics), viết lại theo Claude API hiện hành + tầng engine miễn phí.
 
+**Đa phương thức (không chỉ chat chữ) — tất cả chạy được trên web miễn phí:**
+
+| Tính năng | Cách dùng | Cần gì |
+|---|---|---|
+| 🖼 **Xem / hiểu ảnh** | Bấm 📎 đính kèm ảnh → hỏi "ảnh này là gì?" | Gemini (free) hoặc Claude — có sẵn |
+| 🔬 **Nghiên cứu sâu** | Bấm nút **🔬 Nghiên cứu sâu** hoặc gõ "nghiên cứu sâu về…" → LUMINA tìm nhiều nguồn, viết báo cáo có trích dẫn | Bộ não có tìm kiếm (Gemini/Claude) |
+| 🎨 **Vẽ ảnh** | Bấm nút **🎨 Vẽ ảnh** hoặc gõ "vẽ con mèo…" → ra ảnh | **Miễn phí, không cần key** (Pollinations); tự dùng DALL-E nếu có `OPENAI_API_KEY` |
+| 🎤 **Nói bằng giọng** | Bấm 🎤 → nói → ra chữ | Chạy ngay trong trình duyệt (Chrome/Edge/Android), không cần server |
+
+> Router tự nhận ra ý định ("vẽ…", "nghiên cứu sâu…") nên thường **không cần bấm nút**; hai nút chỉ để ép chế độ khi muốn.
+
 ---
 
 ## 1. Chuẩn bị (một lần, ~10 phút)
@@ -103,9 +114,11 @@ lumina-ai/
 │   ├── main.py             # FastAPI: auth, hội thoại, /api/chat/stream (SSE), gói, đơn hàng/webhook, health
 │   ├── payments.py         # SePay (VietQR + webhook) + PayPal (tạo đơn/capture)
 │   ├── router.py           # ✦ Auto-Router "bù trừ" — trái tim của LUMINA (gate 🌌 Đỉnh cao theo gói)
-│   ├── orchestrator.py     # Điều phối 2 tầng bộ não (cao cấp/free) + fallback + giấu tên model
-│   ├── engines/claude.py   # Tầng cao cấp: adaptive thinking, web search, streaming
-│   ├── engines/gemini.py   # Tầng free: Gemini + search grounding
+│   ├── orchestrator.py     # Điều phối 2 tầng bộ não + fallback + chế độ vẽ ảnh/nghiên cứu + giấu tên model
+│   ├── imagegen.py         # 🎨 Vẽ ảnh (Pollinations free, hoặc DALL-E nếu có OpenAI key)
+│   ├── media.py            # 🖼 Xử lý ảnh đính kèm (data URL) cho bộ não nhìn được
+│   ├── engines/claude.py   # Tầng cao cấp: adaptive thinking, web search, xem ảnh, streaming
+│   ├── engines/gemini.py   # Tầng free: Gemini + search grounding + xem ảnh
 │   ├── engines/openai_compatible.py # Tầng free: Groq / DeepSeek / Ollama / OpenAI (chung 1 lớp)
 │   ├── auth.py             # Đăng nhập Google → JWT cookie, kiểm tra quyền quản trị
 │   ├── db.py               # SQLite: users (+ gói), hội thoại, tin nhắn, đơn hàng, lượt cao cấp/tổng/ngày

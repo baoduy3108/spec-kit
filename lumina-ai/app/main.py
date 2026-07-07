@@ -313,15 +313,26 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
         for m in db.get_messages(conv_id)
         if m["role"] in ("user", "assistant") and m["content"]
     ]
-    db.add_message(conv_id, "user", body.message)
-    messages = trim_history(history + [{"role": "user", "content": body.message}],
-                            CONFIG["MAX_CONTEXT_TOKENS"])
+    # Lưu tin nhắn người dùng; nếu có gửi ảnh thì ghi chú lại (không lưu ảnh thô vào DB).
+    stored = body.message + (f"\n\n_(đã gửi {len(body.images)} ảnh)_" if body.images else "")
+    db.add_message(conv_id, "user", stored)
+    # Ảnh chỉ gắn vào lượt hiện tại để bộ não "nhìn"; lịch sử cũ chỉ có chữ.
+    current_turn = {"role": "user", "content": body.message}
+    if body.images:
+        current_turn["images"] = [img for img in body.images if img]
+    messages = trim_history(history + [current_turn], CONFIG["MAX_CONTEXT_TOKENS"])
 
     # Tầng free chỉ có 2 "chế độ": tìm kiếm hay không (engine free không có tư duy sâu như Claude).
     apex_allowed = plan["apex_allowed"] and use_premium
-    route = decide_route(body.message, history_len=len(history), apex_allowed=apex_allowed)
+    force_mode = body.mode if body.mode in ("image", "research") else None
+    route = decide_route(body.message, history_len=len(history),
+                         apex_allowed=apex_allowed, force_mode=force_mode)
     # Ẩn nhãn chế độ "cao cấp" khi đang chạy tầng free — để không lộ là đã tụt bộ não.
-    display_label = route.label if use_premium else ("🔍 Tìm kiếm web" if route.use_web_search else "✨ LUMINA")
+    # Nhãn TÍNH NĂNG (vẽ ảnh / nghiên cứu) là an toàn (không phải tên model) → luôn hiện.
+    if route.mode in ("image_gen", "research"):
+        display_label = route.label
+    else:
+        display_label = route.label if use_premium else ("🔍 Tìm kiếm web" if route.use_web_search else "✨ LUMINA")
     logger.info("Router: mode=%s premium=%s user=%s", route.mode, use_premium, user["email"])
 
     async def event_stream():

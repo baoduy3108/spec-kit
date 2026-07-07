@@ -18,10 +18,39 @@ from typing import AsyncIterator
 import anthropic
 
 from ..config import CONFIG
+from ..media import parse_data_url
 from ..schemas import RouteDecision
 from .base import BaseEngine, EngineError
 
 logger = logging.getLogger("lumina.claude")
+
+# Chế độ cần output dài: code, phân tích, tìm kiếm, nghiên cứu.
+_LONG_MODES = ("deep", "apex", "search", "research")
+
+
+def _prepare_messages(messages: list[dict]) -> list[dict]:
+    """Chuyển messages nội bộ ({role, content, images?}) sang định dạng Anthropic.
+
+    Tin nhắn có ảnh → content thành danh sách block (text + image base64).
+    Bỏ mọi khóa thừa (như 'images') để SDK không báo lỗi.
+    """
+    out: list[dict] = []
+    for m in messages:
+        images = m.get("images") or []
+        if not images:
+            out.append({"role": m["role"], "content": m["content"]})
+            continue
+        blocks: list[dict] = [{"type": "text", "text": m["content"]}]
+        for img in images:
+            parsed = parse_data_url(img)
+            if parsed:
+                media_type, b64 = parsed
+                blocks.append({
+                    "type": "image",
+                    "source": {"type": "base64", "media_type": media_type, "data": b64},
+                })
+        out.append({"role": m["role"], "content": blocks})
+    return out
 
 # Model không hỗ trợ adaptive thinking / effort
 _NO_THINKING_MODELS = {CONFIG["CLAUDE_MODEL_FAST"]}  # haiku-4-5
@@ -51,7 +80,7 @@ class ClaudeEngine(BaseEngine):
         is_fable = route.model == CONFIG["CLAUDE_MODEL_APEX"]
         params: dict = {
             "model": route.model,
-            "max_tokens": 64000 if route.mode in ("deep", "apex", "search") else 16000,
+            "max_tokens": 64000 if route.mode in _LONG_MODES else 16000,
             "system": system,
             "messages": messages,
         }
@@ -72,7 +101,7 @@ class ClaudeEngine(BaseEngine):
     ) -> AsyncIterator[dict]:
         client = self._get_client()
         is_fable = route.model == CONFIG["CLAUDE_MODEL_APEX"]
-        convo = list(messages)
+        convo = _prepare_messages(messages)
         continuations = 0
 
         try:
@@ -130,7 +159,7 @@ class ClaudeEngine(BaseEngine):
                 if final.stop_reason == "pause_turn" and continuations < CONFIG["MAX_PAUSE_TURN_CONTINUATIONS"]:
                     # Server tool cần thêm vòng xử lý — gửi lại để tiếp tục
                     continuations += 1
-                    convo = list(messages) + [{"role": "assistant", "content": final.content}]
+                    convo = _prepare_messages(messages) + [{"role": "assistant", "content": final.content}]
                     continue
 
                 usage = getattr(final, "usage", None)
