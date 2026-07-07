@@ -81,15 +81,23 @@ CONFIG = {
     # Danh sách email được quyền vào trang quản trị, cách nhau bởi dấu phẩy
     "ADMIN_EMAILS": [e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()],
 
-    # ── Thông tin chuyển khoản thủ công (hiển thị khi người dùng nâng cấp) ──
-    # Vì chưa tích hợp cổng thanh toán tự động (VNPay/PayOS/Momo), người dùng
-    # chuyển khoản thủ công theo thông tin này, bạn xác nhận rồi tạo mã kích
-    # hoạt gửi cho họ qua trang /admin.
-    "PAYMENT_BANK_NAME": os.getenv("PAYMENT_BANK_NAME", ""),
+    # ── Thanh toán TỰ ĐỘNG ──────────────────────────────────────
+    # (A) SePay — khách VN quét VietQR chuyển khoản, tiền về thẳng tài khoản bạn.
+    #     Đăng ký free tại sepay.vn → nối ngân hàng → lấy API key (dùng xác thực webhook).
+    "SEPAY_API_KEY": os.getenv("SEPAY_API_KEY", ""),
+    "PAYMENT_BANK_BIN": os.getenv("PAYMENT_BANK_BIN", ""),      # mã BIN ngân hàng cho VietQR (vd 970436 = Vietcombank)
     "PAYMENT_BANK_ACCOUNT": os.getenv("PAYMENT_BANK_ACCOUNT", ""),
-    "PAYMENT_BANK_OWNER": os.getenv("PAYMENT_BANK_OWNER", ""),
-    "PAYMENT_MOMO": os.getenv("PAYMENT_MOMO", ""),
-    "PAYMENT_NOTE": os.getenv("PAYMENT_NOTE", "Ghi nội dung chuyển khoản: email đăng nhập của bạn"),
+    "PAYMENT_BANK_OWNER": os.getenv("PAYMENT_BANK_OWNER", ""),  # tên chủ TK, IN HOA không dấu
+    "PAYMENT_BANK_NAME": os.getenv("PAYMENT_BANK_NAME", ""),    # tên ngân hàng hiển thị
+
+    # (B) PayPal — khách quốc tế trả thẻ/PayPal, tiền về thẳng PayPal của bạn.
+    #     Tạo REST App tại developer.paypal.com → lấy Client ID + Secret.
+    "PAYPAL_CLIENT_ID": os.getenv("PAYPAL_CLIENT_ID", ""),
+    "PAYPAL_SECRET": os.getenv("PAYPAL_SECRET", ""),
+    "PAYPAL_MODE": os.getenv("PAYPAL_MODE", "live"),           # "live" hoặc "sandbox" (test)
+
+    # Đơn hàng hết hạn sau (phút) nếu chưa thanh toán
+    "ORDER_TTL_MINUTES": int(os.getenv("ORDER_TTL_MINUTES", "30")),
 }
 
 # ── Định nghĩa các gói ───────────────────────────────────────────
@@ -105,6 +113,7 @@ PLANS: dict[str, dict] = {
         "key": "free",
         "label": "Miễn phí",
         "price_vnd": 0,
+        "price_usd": 0.0,
         "duration_days": 0,          # 0 = không hết hạn (mặc định của mọi tài khoản)
         "rpm": CONFIG["RATE_LIMIT_REQUESTS_PER_MINUTE"],
         "burst": CONFIG["RATE_LIMIT_BURST"],
@@ -122,7 +131,8 @@ PLANS: dict[str, dict] = {
     "monthly": {
         "key": "monthly",
         "label": "Gói Tháng",
-        "price_vnd": int(os.getenv("PRICE_MONTHLY_VND", "79000")),
+        "price_vnd": int(os.getenv("PRICE_MONTHLY_VND", "500000")),
+        "price_usd": float(os.getenv("PRICE_MONTHLY_USD", "20")),
         "duration_days": 30,
         "rpm": int(os.getenv("PAID_RPM", "30")),
         "burst": int(os.getenv("PAID_BURST", "50")),
@@ -139,7 +149,8 @@ PLANS: dict[str, dict] = {
     "yearly": {
         "key": "yearly",
         "label": "Gói Năm",
-        "price_vnd": int(os.getenv("PRICE_YEARLY_VND", "690000")),
+        "price_vnd": int(os.getenv("PRICE_YEARLY_VND", "5000000")),
+        "price_usd": float(os.getenv("PRICE_YEARLY_USD", "200")),
         "duration_days": 365,
         "rpm": int(os.getenv("PAID_RPM", "30")),
         "burst": int(os.getenv("PAID_BURST", "50")),
@@ -162,6 +173,20 @@ def has_any_engine() -> bool:
         or CONFIG["OPENROUTER_API_KEY"] or CONFIG["DEEPSEEK_API_KEY"]
         or CONFIG["OLLAMA_BASE_URL"] or CONFIG["OPENAI_API_KEY"]
     )
+
+
+def sepay_enabled() -> bool:
+    """SePay (chuyển khoản VN) đã cấu hình đủ để nhận thanh toán chưa."""
+    return bool(CONFIG["SEPAY_API_KEY"] and CONFIG["PAYMENT_BANK_BIN"] and CONFIG["PAYMENT_BANK_ACCOUNT"])
+
+
+def paypal_enabled() -> bool:
+    """PayPal (thẻ quốc tế) đã cấu hình chưa."""
+    return bool(CONFIG["PAYPAL_CLIENT_ID"] and CONFIG["PAYPAL_SECRET"])
+
+
+def paypal_api_base() -> str:
+    return "https://api-m.paypal.com" if CONFIG["PAYPAL_MODE"] == "live" else "https://api-m.sandbox.paypal.com"
 
 
 def validate_config() -> list[str]:

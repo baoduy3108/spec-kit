@@ -149,7 +149,7 @@ def test_rate_limiter_upgrades_capacity_on_plan_change():
     assert ok
 
 
-# ── Gói & mã kích hoạt (DB) ──────────────────────────────────────────────────
+# ── Gói & đơn hàng / thanh toán (DB) ─────────────────────────────────────────
 
 def test_new_user_defaults_to_free_plan():
     uid = _new_user_id()
@@ -159,38 +159,64 @@ def test_new_user_defaults_to_free_plan():
     assert plan["expires_at"] == 0
 
 
-def test_redeem_activation_code_upgrades_plan():
+def test_create_order_and_mark_paid_activates_plan():
     uid = _new_user_id()
-    codes = db.create_activation_codes("monthly", 30, 1, "admin@example.com")
-    assert len(codes) == 1
+    order = db.create_order(uid, "monthly", "sepay", 500000, 0.0)
+    assert order["status"] == "pending"
+    assert order["id"].startswith("LUM")
 
-    ok, message, plan = db.redeem_activation_code(codes[0], uid)
-    assert ok is True
+    activated, plan = db.mark_order_paid(order["id"], provider_ref="tx1")
+    assert activated is True
     assert plan["key"] == "monthly"
     assert plan["apex_allowed"] is True
     assert plan["expires_at"] > time.time()
 
-    effective = db.get_effective_plan(uid)
-    assert effective["key"] == "monthly"
+    assert db.get_order(order["id"])["status"] == "paid"
+    assert db.get_effective_plan(uid)["key"] == "monthly"
 
 
-def test_redeem_code_twice_fails():
-    uid1, uid2 = _new_user_id(), _new_user_id()
-    codes = db.create_activation_codes("yearly", 365, 1, "admin@example.com")
-    ok, _, _ = db.redeem_activation_code(codes[0], uid1)
-    assert ok is True
-    ok2, message2, plan2 = db.redeem_activation_code(codes[0], uid2)
-    assert ok2 is False
-    assert plan2 is None
-    assert "đã được sử dụng" in message2
-
-
-def test_redeem_invalid_code_fails():
+def test_mark_order_paid_idempotent():
     uid = _new_user_id()
-    ok, message, plan = db.redeem_activation_code("LUMINA-0000-0000", uid)
-    assert ok is False
+    order = db.create_order(uid, "monthly", "sepay", 500000, 0.0)
+    activated1, plan1 = db.mark_order_paid(order["id"])
+    expires1 = plan1["expires_at"]
+    # Webhook bắn trùng — không kích hoạt lại, không cộng dồn thời hạn
+    activated2, plan2 = db.mark_order_paid(order["id"])
+    assert activated1 is True
+    assert activated2 is False
+    assert plan2 is None
+    assert db.get_effective_plan(uid)["expires_at"] == expires1
+
+
+def test_mark_nonexistent_order():
+    activated, plan = db.mark_order_paid("LUMZZZZZZ")
+    assert activated is False
     assert plan is None
-    assert "không tồn tại" in message
+
+
+def test_sepay_auth_and_content_matching():
+    from app import payments
+    from app.config import CONFIG
+    CONFIG["SEPAY_API_KEY"] = "secret-key"
+    try:
+        assert payments.verify_sepay_authorization("Apikey secret-key") is True
+        assert payments.verify_sepay_authorization("Apikey wrong") is False
+        assert payments.verify_sepay_authorization("") is False
+    finally:
+        CONFIG["SEPAY_API_KEY"] = ""
+
+    # Tìm mã đơn trong nội dung chuyển khoản (kể cả lẫn chữ khác)
+    pending = ["LUMABC123", "LUMDEF456"]
+    assert payments.extract_order_id_from_content("chuyen tien LUMABC123 cam on", pending) == "LUMABC123"
+    assert payments.extract_order_id_from_content("khong co ma", pending) is None
+
+
+def test_vietqr_url_builder():
+    from app import payments
+    url = payments.build_vietqr_url("970436", "0123456789", "NGUYEN VAN A", 500000, "LUMABC123")
+    assert "970436-0123456789" in url
+    assert "amount=500000" in url
+    assert "LUMABC123" in url
 
 
 def test_premium_then_free_then_blocked():

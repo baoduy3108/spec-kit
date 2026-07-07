@@ -11,10 +11,13 @@ Endpoints:
   GET  /api/conversations/{id} → tin nhắn của một hội thoại
   DELETE /api/conversations/{id}
   POST /api/chat/stream     → chat streaming SSE (bắt buộc đăng nhập)
-  GET  /api/plans           → danh sách gói (Miễn phí/Tháng/Năm) + thông tin chuyển khoản
-  POST /api/redeem          → nhập mã kích hoạt để nâng cấp gói
-  GET  /api/admin/codes     → (quản trị) xem danh sách mã đã tạo
-  POST /api/admin/codes     → (quản trị) tạo mã kích hoạt mới
+  GET  /api/plans           → danh sách gói + cổng thanh toán đang bật
+  POST /api/orders          → tạo đơn mua gói (SePay → QR; PayPal → order id)
+  GET  /api/orders/{id}     → poll trạng thái đơn (pending/paid)
+  POST /api/orders/{id}/paypal-capture → thu tiền PayPal sau khi khách duyệt
+  POST /api/webhook/sepay   → SePay báo có tiền vào → tự kích hoạt gói
+  GET  /api/admin/orders    → (quản trị) xem danh sách đơn hàng
+  POST /api/admin/orders/{id}/confirm → (quản trị) xác nhận tay 1 đơn khi webhook lỗi
   GET  /health              → kiểm tra sức khỏe
   GET  /api/metrics         → thống kê hiệu năng
 """
@@ -23,13 +26,13 @@ import json
 import logging
 import os
 
-from fastapi import Depends, FastAPI, HTTPException, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, db
+from . import auth, config, db, payments
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
 from .memory import trim_history
@@ -37,7 +40,7 @@ from .monitor import monitor
 from .orchestrator import orchestrator
 from .ratelimit import UserRateLimiter
 from .router import decide_route
-from .schemas import AdminCreateCodesRequest, ChatRequest, RedeemRequest
+from .schemas import ChatRequest, CreateOrderRequest, PaypalCaptureRequest
 
 logging.basicConfig(level=getattr(logging, CONFIG["LOG_LEVEL"], logging.INFO))
 logger = logging.getLogger("lumina")
@@ -146,46 +149,126 @@ async def remove_conversation(conv_id: str, user: dict = Depends(auth.require_us
     return {"ok": True}
 
 
-# ─── Gói & mã kích hoạt ──────────────────────────────────────────────────────
+# ─── Gói & thanh toán tự động ────────────────────────────────────────────────
 
 @app.get("/api/plans")
 async def plans():
     return {
         "plans": list(PLANS.values()),
-        "payment": {
-            "bank_name": CONFIG["PAYMENT_BANK_NAME"],
-            "bank_account": CONFIG["PAYMENT_BANK_ACCOUNT"],
-            "bank_owner": CONFIG["PAYMENT_BANK_OWNER"],
-            "momo": CONFIG["PAYMENT_MOMO"],
-            "note": CONFIG["PAYMENT_NOTE"],
+        "providers": {
+            "sepay": config.sepay_enabled(),
+            "paypal": config.paypal_enabled(),
+            "paypal_client_id": CONFIG["PAYPAL_CLIENT_ID"] if config.paypal_enabled() else "",
         },
     }
 
 
-@app.post("/api/redeem")
-async def redeem(body: RedeemRequest, user: dict = Depends(auth.require_user)):
-    ok, message, plan = db.redeem_activation_code(body.code, user["id"])
-    if not ok:
-        raise HTTPException(status_code=400, detail=message)
-    return {"message": message, "plan": plan}
-
-
-@app.get("/api/admin/codes")
-async def admin_list_codes(user: dict = Depends(auth.require_user)):
-    auth.require_admin(user)
-    return {"codes": db.list_activation_codes()}
-
-
-@app.post("/api/admin/codes")
-async def admin_create_codes(body: AdminCreateCodesRequest, user: dict = Depends(auth.require_user)):
-    auth.require_admin(user)
+@app.post("/api/orders")
+async def create_order(body: CreateOrderRequest, user: dict = Depends(auth.require_user)):
+    """Tạo đơn mua gói. SePay → trả link QR + nội dung; PayPal → trả paypal_order_id."""
     if body.plan not in ("monthly", "yearly"):
-        raise HTTPException(status_code=400, detail="Gói không hợp lệ — chỉ 'monthly' hoặc 'yearly'.")
-    if not (1 <= body.count <= 100):
-        raise HTTPException(status_code=400, detail="Số lượng mã phải từ 1 đến 100.")
-    duration = PLANS[body.plan]["duration_days"]
-    codes = db.create_activation_codes(body.plan, duration, body.count, user["email"])
-    return {"codes": codes}
+        raise HTTPException(status_code=400, detail="Gói không hợp lệ.")
+    plan = PLANS[body.plan]
+
+    if body.provider == "sepay":
+        if not config.sepay_enabled():
+            raise HTTPException(status_code=503, detail="Chưa cấu hình chuyển khoản VN (SePay).")
+        order = db.create_order(user["id"], body.plan, "sepay", plan["price_vnd"], 0.0)
+        qr = payments.build_vietqr_url(
+            CONFIG["PAYMENT_BANK_BIN"], CONFIG["PAYMENT_BANK_ACCOUNT"],
+            CONFIG["PAYMENT_BANK_OWNER"], plan["price_vnd"], order["id"],
+        )
+        return {
+            "order_id": order["id"], "provider": "sepay",
+            "qr_url": qr, "amount_vnd": plan["price_vnd"], "content": order["id"],
+            "bank_name": CONFIG["PAYMENT_BANK_NAME"], "bank_account": CONFIG["PAYMENT_BANK_ACCOUNT"],
+            "bank_owner": CONFIG["PAYMENT_BANK_OWNER"],
+        }
+
+    if body.provider == "paypal":
+        if not config.paypal_enabled():
+            raise HTTPException(status_code=503, detail="Chưa cấu hình PayPal.")
+        order = db.create_order(user["id"], body.plan, "paypal", 0, plan["price_usd"])
+        try:
+            pp_id = await payments.create_paypal_order(
+                order["id"], plan["price_usd"], f"{CONFIG['APP_NAME']} {plan['label']}"
+            )
+        except Exception:
+            logger.exception("Tạo đơn PayPal lỗi")
+            raise HTTPException(status_code=502, detail="Không tạo được đơn PayPal — thử lại sau.")
+        return {"order_id": order["id"], "provider": "paypal", "paypal_order_id": pp_id,
+                "amount_usd": plan["price_usd"]}
+
+    raise HTTPException(status_code=400, detail="Cổng thanh toán không hợp lệ.")
+
+
+@app.get("/api/orders/{order_id}")
+async def order_status(order_id: str, user: dict = Depends(auth.require_user)):
+    """Frontend poll cái này tới khi status='paid'."""
+    order = db.get_order(order_id)
+    if not order or order["user_id"] != user["id"]:
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn.")
+    return {"order_id": order["id"], "status": order["status"]}
+
+
+@app.post("/api/orders/{order_id}/paypal-capture")
+async def paypal_capture(order_id: str, body: PaypalCaptureRequest, user: dict = Depends(auth.require_user)):
+    """Frontend gọi sau khi khách duyệt trên PayPal (onApprove). Server thu tiền + kích hoạt."""
+    order = db.get_order(order_id)
+    if not order or order["user_id"] != user["id"]:
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn.")
+    try:
+        ok, custom_id, amount = await payments.capture_paypal_order(body.paypal_order_id)
+    except Exception:
+        logger.exception("Capture PayPal lỗi")
+        raise HTTPException(status_code=502, detail="Không thu được tiền PayPal.")
+    # Chống gian lận: custom_id phải khớp đơn + số tiền đủ
+    if not ok or custom_id != order["id"] or amount + 1e-6 < order["amount_usd"]:
+        raise HTTPException(status_code=400, detail="Thanh toán PayPal không hợp lệ.")
+    activated, plan = db.mark_order_paid(order["id"], provider_ref=body.paypal_order_id)
+    return {"status": "paid", "plan": plan}
+
+
+@app.post("/api/webhook/sepay")
+async def sepay_webhook(request: Request):
+    """SePay gọi khi có tiền vào tài khoản. Xác thực Apikey → khớp đơn → kích hoạt."""
+    if not payments.verify_sepay_authorization(request.headers.get("authorization", "")):
+        raise HTTPException(status_code=401, detail="Sai xác thực SePay.")
+    data = await request.json()
+    if (data.get("transferType") or "").lower() not in ("in", "money_in", ""):
+        return {"ok": True}  # chỉ xử lý tiền VÀO
+    content = data.get("content") or data.get("description") or ""
+    amount = float(data.get("transferAmount") or data.get("amount") or 0)
+
+    pending = [o["id"] for o in db.list_orders(limit=300) if o["status"] == "pending" and o["provider"] == "sepay"]
+    oid = payments.extract_order_id_from_content(content, pending)
+    if not oid:
+        logger.warning("SePay: không khớp đơn nào. content=%r", content[:80])
+        return {"ok": True}  # trả 200 để SePay không gửi lại mãi
+    order = db.get_order(oid)
+    if order and amount + 1 >= order["amount_vnd"]:  # +1 phòng lệch lẻ
+        db.mark_order_paid(oid, provider_ref=str(data.get("id") or data.get("referenceCode") or ""))
+        logger.info("SePay: kích hoạt đơn %s (%.0f đ)", oid, amount)
+    else:
+        logger.warning("SePay: đơn %s tiền không đủ (%.0f < %s)", oid, amount, order and order["amount_vnd"])
+    return {"ok": True}
+
+
+@app.get("/api/admin/orders")
+async def admin_orders(user: dict = Depends(auth.require_user)):
+    auth.require_admin(user)
+    return {"orders": db.list_orders()}
+
+
+@app.post("/api/admin/orders/{order_id}/confirm")
+async def admin_confirm_order(order_id: str, user: dict = Depends(auth.require_user)):
+    """Lưới an toàn: khách đã trả nhưng webhook lỗi → chủ web xác nhận tay 1 đơn cụ thể."""
+    auth.require_admin(user)
+    order = db.get_order(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn.")
+    activated, plan = db.mark_order_paid(order_id, provider_ref="admin-confirm")
+    return {"activated": activated, "plan": plan}
 
 
 # ─── Chat streaming (SSE) ────────────────────────────────────────────────────

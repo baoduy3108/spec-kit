@@ -40,7 +40,7 @@
         </div>
         <button id="upgrade-btn" class="upgrade-btn">✦ Nâng cấp</button>
       </div>
-      <button id="admin-btn" class="admin-btn hidden">🛠 Quản trị mã kích hoạt</button>
+      <button id="admin-btn" class="admin-btn hidden">🛠 Đơn hàng</button>
 
       <div class="sidebar-footer">
         <img id="user-avatar" class="avatar" src="" alt="">
@@ -85,41 +85,39 @@
       <button class="modal-close" data-close="upgrade-modal">✕</button>
       <h2 class="modal-title">✦ Nâng cấp gói LUMINA</h2>
       <div id="plan-cards" class="plan-cards"></div>
-
-      <div class="payment-box">
-        <h3>Cách thanh toán</h3>
-        <p class="payment-desc">Chuyển khoản hoặc Momo theo thông tin bên dưới → gửi ảnh chụp màn hình + email đăng nhập cho chủ web → nhận mã kích hoạt.</p>
-        <div id="payment-info" class="payment-info"></div>
-      </div>
-
-      <div class="redeem-box">
-        <h3>Nhập mã kích hoạt</h3>
-        <div class="redeem-row">
-          <input id="redeem-input" type="text" placeholder="LUMINA-XXXX-XXXX">
-          <button id="redeem-btn">Kích hoạt</button>
-        </div>
-        <p id="redeem-result" class="redeem-result"></p>
-      </div>
+      <p id="no-provider-note" class="admin-hint hidden">Chủ web chưa bật cổng thanh toán nào — liên hệ trực tiếp để nâng cấp.</p>
     </div>
   </div>
 
-  <!-- ── Modal Quản trị (chỉ ADMIN_EMAILS) ─────────────────── -->
+  <!-- ── Modal QR chuyển khoản VN ──────────────────────────── -->
+  <div id="qr-modal" class="modal-overlay hidden">
+    <div class="modal qr-modal">
+      <button class="modal-close" data-close="qr-modal">✕</button>
+      <h2 class="modal-title">Quét mã để chuyển khoản</h2>
+      <img id="qr-img" class="qr-img" alt="Mã QR chuyển khoản">
+      <div id="qr-info" class="qr-info"></div>
+      <p class="qr-hint">Mở app ngân hàng → quét QR → chuyển đúng số tiền và nội dung. Gói tự kích hoạt trong vài giây sau khi tiền vào.</p>
+      <p id="qr-status" class="qr-status">⏳ Đang chờ thanh toán…</p>
+    </div>
+  </div>
+
+  <!-- ── Modal PayPal ──────────────────────────────────────── -->
+  <div id="paypal-modal" class="modal-overlay hidden">
+    <div class="modal paypal-modal">
+      <button class="modal-close" data-close="paypal-modal">✕</button>
+      <h2 class="modal-title">Thanh toán bằng thẻ / PayPal</h2>
+      <div id="paypal-buttons"></div>
+      <p id="paypal-status" class="qr-status"></p>
+    </div>
+  </div>
+
+  <!-- ── Modal Quản trị đơn hàng (chỉ ADMIN_EMAILS) ────────── -->
   <div id="admin-modal" class="modal-overlay hidden">
     <div class="modal">
       <button class="modal-close" data-close="admin-modal">✕</button>
-      <h2 class="modal-title">🛠 Quản trị mã kích hoạt</h2>
-
-      <div class="admin-create">
-        <select id="admin-plan">
-          <option value="monthly">Gói Tháng</option>
-          <option value="yearly">Gói Năm</option>
-        </select>
-        <input id="admin-count" type="number" min="1" max="100" value="1">
-        <button id="admin-create-btn">Tạo mã</button>
-      </div>
-      <p class="admin-hint">Sau khi xác nhận đã nhận tiền chuyển khoản/Momo, tạo mã tại đây rồi gửi cho người dùng.</p>
-
-      <div id="admin-codes" class="admin-codes"></div>
+      <h2 class="modal-title">🛠 Đơn hàng</h2>
+      <p class="admin-hint">Đơn tự kích hoạt khi tiền vào. Nếu khách đã trả mà webhook lỗi, bấm "Xác nhận" để kích hoạt tay đơn đó.</p>
+      <div id="admin-orders" class="admin-codes"></div>
     </div>
   </div>
 

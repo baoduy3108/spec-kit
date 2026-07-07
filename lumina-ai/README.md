@@ -25,7 +25,7 @@ Router tự chọn chế độ theo câu hỏi (⚡ nhanh · ✨ cân bằng · 
 
 **Bảo mật:** bắt buộc đăng nhập Google; API key nằm ở server (không lộ ra trình duyệt); giới hạn lượt/người để bảo vệ chi phí; hệ thống **không bao giờ lộ tên model** ra người dùng.
 
-**Gói Miễn phí / Tháng / Năm:** gói trả phí = **nhiều lượt cao cấp hơn + tổng lượt/ngày cao hơn** (chỉ là "thêm token", không phải model khác) + mở khóa 🌌 Đỉnh cao. Chưa cần cổng thanh toán — người dùng chuyển khoản/Momo, bạn xác nhận rồi tạo **mã kích hoạt** (mục 6).
+**Gói Miễn phí / Tháng / Năm:** gói trả phí = **nhiều lượt cao cấp hơn + tổng lượt/ngày cao hơn** (chỉ là "thêm token", không phải model khác) + mở khóa 🌌 Đỉnh cao. **Thanh toán tự động** — khách VN quét QR chuyển khoản (SePay), khách quốc tế trả thẻ/PayPal; tiền vào là gói tự lên (mục 6).
 
 Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · Cache · Memory · Rate limiter · Metrics), viết lại theo Claude API hiện hành + tầng engine miễn phí.
 
@@ -56,7 +56,7 @@ Cần tối thiểu một trong số này (khuyến nghị điền **Gemini free
 Điền càng nhiều key thì càng bền (bộ não này lỗi/hết hạn mức thì nhảy sang cái khác): `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, hoặc `OLLAMA_BASE_URL` (tự host model trên máy riêng).
 
 ### d) Cấu hình gói trả phí (tùy chọn)
-Trong `.env`, đặt `ADMIN_EMAILS=email-cua-ban@gmail.com` (email Google bạn dùng để đăng nhập) để mở khóa mục **🛠 Quản trị mã kích hoạt** trên web. Điền thêm `PAYMENT_BANK_NAME`, `PAYMENT_BANK_ACCOUNT`, `PAYMENT_BANK_OWNER`, `PAYMENT_MOMO` để hiển thị thông tin chuyển khoản khi người dùng bấm "✦ Nâng cấp". Xem mục 6 để biết cách vận hành.
+Bán gói thì cần cổng thanh toán — xem **mục 6** (SePay cho khách VN, PayPal cho khách quốc tế). Đặt `ADMIN_EMAILS=email-cua-ban@gmail.com` để mở mục **🛠 Đơn hàng** trên web. Không bán gói cũng được — web vẫn chạy free bình thường.
 
 ## 2. Chạy thử trên máy
 
@@ -100,14 +100,15 @@ Có Docker? `docker build -t lumina-ai . && docker run -p 8000:8000 --env-file .
 ```
 lumina-ai/
 ├── app/
-│   ├── main.py             # FastAPI: auth, hội thoại, /api/chat/stream (SSE), gói/mã kích hoạt, health, metrics
+│   ├── main.py             # FastAPI: auth, hội thoại, /api/chat/stream (SSE), gói, đơn hàng/webhook, health
+│   ├── payments.py         # SePay (VietQR + webhook) + PayPal (tạo đơn/capture)
 │   ├── router.py           # ✦ Auto-Router "bù trừ" — trái tim của LUMINA (gate 🌌 Đỉnh cao theo gói)
 │   ├── orchestrator.py     # Điều phối 2 tầng bộ não (cao cấp/free) + fallback + giấu tên model
 │   ├── engines/claude.py   # Tầng cao cấp: adaptive thinking, web search, streaming
 │   ├── engines/gemini.py   # Tầng free: Gemini + search grounding
 │   ├── engines/openai_compatible.py # Tầng free: Groq / DeepSeek / Ollama / OpenAI (chung 1 lớp)
 │   ├── auth.py             # Đăng nhập Google → JWT cookie, kiểm tra quyền quản trị
-│   ├── db.py               # SQLite: users (+ gói), hội thoại, tin nhắn, mã kích hoạt, lượt cao cấp/tổng/ngày
+│   ├── db.py               # SQLite: users (+ gói), hội thoại, tin nhắn, đơn hàng, lượt cao cấp/tổng/ngày
 │   ├── memory.py / cache.py / circuit_breaker.py / ratelimit.py / monitor.py
 │   └── search/             # Tavily/DuckDuckGo cho engine free khi cần tìm kiếm
 ├── static/                 # Giao diện chat + modal Nâng cấp/Quản trị (HTML/CSS/JS thuần, không cần build)
@@ -127,17 +128,25 @@ lumina-ai/
 
 **Đổi tên/giao diện?** Sửa `APP_NAME` trong `app/config.py` và màu sắc trong `static/style.css` (biến `--accent`, `--gradient`).
 
-## 6. Vận hành gói trả phí (Tháng/Năm)
+## 6. Bán gói — thanh toán TỰ ĐỘNG (tiền về thẳng tài khoản bạn)
 
-Vì bạn chưa có tài khoản merchant (VNPay/PayOS/Stripe) để tự động xác nhận thanh toán, LUMINA dùng cách thủ công — rất phổ biến với người làm sản phẩm một mình tại Việt Nam:
+Người dùng bấm **"✦ Nâng cấp"** → chọn gói → chọn cách trả. Tiền vào là gói **tự kích hoạt**, bạn không phải làm gì. Hai cổng (điền cổng nào thì hiện cổng đó):
 
-1. **Người dùng bấm "✦ Nâng cấp"** trong sidebar → thấy giá 2 gói (sửa tại `PRICE_MONTHLY_VND`/`PRICE_YEARLY_VND` trong `.env`) và thông tin chuyển khoản/Momo của bạn.
-2. Họ chuyển khoản, gửi ảnh chụp + **email đăng nhập** cho bạn (qua Zalo/Messenger/email — tự thỏa thuận).
-3. Bạn kiểm tra đã nhận tiền → đăng nhập LUMINA bằng tài khoản có trong `ADMIN_EMAILS` → bấm **🛠 Quản trị mã kích hoạt** ở sidebar → chọn gói (Tháng/Năm) + số lượng → **Tạo mã**.
-4. Gửi mã dạng `LUMINA-XXXX-XXXX` cho người dùng → họ dán vào ô "Nhập mã kích hoạt" trong màn Nâng cấp → được nâng cấp **ngay lập tức**, không cần chờ bạn thao tác gì thêm phía họ.
+### 🇻🇳 Khách VN — SePay (quét QR chuyển khoản)
+1. Đăng ký miễn phí tại <https://sepay.vn> → **nối tài khoản ngân hàng** của bạn (chỉ đọc biến động số dư).
+2. Trong SePay, đặt **Webhook URL** = `https://<web-cua-ban>/api/webhook/sepay`, lấy **API key**.
+3. Điền vào `.env`: `SEPAY_API_KEY`, `PAYMENT_BANK_BIN` (mã BIN ngân hàng, tra tại vietqr.io), `PAYMENT_BANK_ACCOUNT`, `PAYMENT_BANK_OWNER` (IN HOA không dấu), `PAYMENT_BANK_NAME`.
+4. Khách bấm "Chuyển khoản VN" → hệ thống **tự sinh mã QR** đúng số tiền + nội dung (mã đơn) → khách quét chuyển → tiền về **thẳng tài khoản bạn** → SePay báo webhook → gói tự lên. Xong.
 
-Gói trả phí tự động: tăng giới hạn lượt/phút và tin nhắn/ngày (`PAID_RPM`, `PAID_BURST`, `PAID_DAILY_CAP`), mở khóa chế độ 🌌 Đỉnh cao (nếu `ENABLE_FABLE=true`). Hết hạn tự động hạ về gói Miễn phí, không cần bạn can thiệp.
+### 🌍 Khách quốc tế — PayPal (thẻ Visa/MC hoặc PayPal)
+1. Có **tài khoản PayPal Business** → vào <https://developer.paypal.com/dashboard> tạo **REST App** → lấy **Client ID + Secret**.
+2. Điền vào `.env`: `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `PAYPAL_MODE=live` (dùng `sandbox` để test trước).
+3. Khách bấm "Thẻ quốc tế" → trả qua nút PayPal → tiền về **thẳng ví PayPal của bạn** → gói tự lên.
 
-**Đa quản trị viên:** liệt kê nhiều email cách nhau dấu phẩy trong `ADMIN_EMAILS`.
+### Vận hành
+- Giá gói: `PRICE_MONTHLY_VND`/`PRICE_MONTHLY_USD`/`PRICE_YEARLY_VND`/`PRICE_YEARLY_USD` trong `.env`.
+- Gói trả phí tự tăng lượt cao cấp + tổng lượt/ngày (`PAID_PREMIUM_CAP`, `PAID_TOTAL_CAP`) + mở 🌌 Đỉnh cao. **Hết hạn tự hạ về Miễn phí.**
+- **Vẫn chỉ 1 key Claude của bạn** — tiền khách trả để bạn nạp token cho key đó. Không có Claude thì gói trả phí vẫn chạy bằng bộ não free (chỉ là không có tầng "cao cấp").
+- **Trang quản trị đơn hàng:** đăng nhập bằng email trong `ADMIN_EMAILS` → nút **🛠 Đơn hàng** ở sidebar → xem mọi đơn; nếu khách đã trả mà webhook lỗi, bấm **"Xác nhận"** để kích hoạt tay đơn đó (lưới an toàn).
 
-**Muốn tự động hóa thanh toán sau này?** Có thể tích hợp thêm PayOS hoặc VNPay (phổ biến, hỗ trợ QR chuyển khoản, có API đơn giản) — khi đó bước 2-3 ở trên sẽ tự động, không cần bạn tạo mã tay. Đây là hướng mở rộng, chưa có trong bản hiện tại.
+> ⚠️ **Bảo mật:** mọi khóa (`SEPAY_API_KEY`, `PAYPAL_SECRET`…) chỉ nằm trong `.env`/dashboard Render, **không** đưa lên GitHub. Webhook SePay được xác thực bằng API key; thanh toán PayPal được xác nhận lại phía server (chống giả mạo).

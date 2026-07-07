@@ -197,108 +197,190 @@
   }
 
   // ── Modal Nâng cấp ────────────────────────────────────────────────────────
+  let providers = { sepay: false, paypal: false, paypal_client_id: "" };
+  let pollTimer = null;
+
   async function openUpgradeModal() {
     $("upgrade-modal").classList.remove("hidden");
-    $("redeem-result").textContent = "";
-    $("redeem-input").value = "";
     const data = await api("/api/plans");
+    providers = data.providers || {};
+    const anyProvider = providers.sepay || providers.paypal;
+    $("no-provider-note").classList.toggle("hidden", anyProvider);
 
     const cardsBox = $("plan-cards");
     cardsBox.innerHTML = "";
     for (const p of data.plans) {
       const card = document.createElement("div");
       card.className = "plan-card" + (p.key === "monthly" ? " highlight" : "");
-      const price = p.price_vnd === 0 ? "0đ" : formatVnd(p.price_vnd);
       const per = p.key === "monthly" ? "<small>/tháng</small>" : p.key === "yearly" ? "<small>/năm</small>" : "";
+      const priceHtml = p.key === "free"
+        ? '<div class="price">0đ</div>'
+        : `<div class="price">${formatVnd(p.price_vnd)}${per}</div><div class="price-usd">hoặc $${p.price_usd}</div>`;
       const current = state.plan && state.plan.key === p.key ? ' <small style="color:var(--accent-2)">· đang dùng</small>' : "";
+
+      let buttons = "";
+      if (p.key !== "free" && anyProvider) {
+        buttons = '<div class="pay-buttons">';
+        if (providers.sepay) buttons += `<button class="pay-vn" data-plan="${p.key}">🇻🇳 Chuyển khoản VN</button>`;
+        if (providers.paypal) buttons += `<button class="pay-pp" data-plan="${p.key}">💳 Thẻ quốc tế</button>`;
+        buttons += "</div>";
+      }
       card.innerHTML = `
         <h4>${p.label}${current}</h4>
-        <div class="price">${price}${per}</div>
-        <ul>${(p.features || []).map((f) => `<li>${f}</li>`).join("")}</ul>`;
+        ${priceHtml}
+        <ul>${(p.features || []).map((f) => `<li>${f}</li>`).join("")}</ul>
+        ${buttons}`;
       cardsBox.appendChild(card);
     }
-
-    const pay = data.payment || {};
-    const rows = [];
-    if (pay.bank_name) rows.push(`<div><b>Ngân hàng:</b> ${pay.bank_name}</div>`);
-    if (pay.bank_account) rows.push(`<div><b>Số tài khoản:</b> ${pay.bank_account}</div>`);
-    if (pay.bank_owner) rows.push(`<div><b>Chủ tài khoản:</b> ${pay.bank_owner}</div>`);
-    if (pay.momo) rows.push(`<div><b>Momo:</b> ${pay.momo}</div>`);
-    if (pay.note) rows.push(`<div>${pay.note}</div>`);
-    $("payment-info").innerHTML = rows.length
-      ? rows.join("")
-      : '<span class="empty">Chủ web chưa cấu hình thông tin thanh toán — liên hệ trực tiếp để nâng cấp.</span>';
+    cardsBox.querySelectorAll(".pay-vn").forEach((b) =>
+      b.addEventListener("click", () => startSepay(b.dataset.plan)));
+    cardsBox.querySelectorAll(".pay-pp").forEach((b) =>
+      b.addEventListener("click", () => startPaypal(b.dataset.plan)));
   }
 
   $("upgrade-btn").addEventListener("click", openUpgradeModal);
 
-  $("redeem-btn").addEventListener("click", async () => {
-    const code = $("redeem-input").value.trim();
-    const result = $("redeem-result");
-    if (!code) return;
+  // ── Chuyển khoản VN (SePay): tạo đơn → hiện QR → poll tới khi paid ──────────
+  async function startSepay(plan) {
     try {
-      const data = await api("/api/redeem", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+      const order = await api("/api/orders", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, provider: "sepay" }),
       });
-      result.textContent = "✓ " + data.message;
-      result.className = "redeem-result ok";
-      await refreshPlan();
-      setTimeout(() => $("upgrade-modal").classList.add("hidden"), 1400);
+      $("upgrade-modal").classList.add("hidden");
+      $("qr-img").src = order.qr_url;
+      $("qr-info").innerHTML =
+        `<div><b>Số tiền:</b> ${formatVnd(order.amount_vnd)}</div>` +
+        `<div><b>Nội dung:</b> <code>${order.content}</code></div>` +
+        `<div><b>Ngân hàng:</b> ${order.bank_name || ""} — ${order.bank_account} (${order.bank_owner})</div>`;
+      $("qr-status").textContent = "⏳ Đang chờ thanh toán…";
+      $("qr-status").className = "qr-status";
+      $("qr-modal").classList.remove("hidden");
+      pollOrder(order.order_id, "qr-status");
     } catch (err) {
-      result.textContent = "✕ " + err.message;
-      result.className = "redeem-result err";
+      alert("Lỗi tạo đơn: " + err.message);
     }
-  });
-
-  // ── Modal Quản trị ────────────────────────────────────────────────────────
-  async function openAdminModal() {
-    $("admin-modal").classList.remove("hidden");
-    await refreshAdminCodes();
   }
 
-  async function refreshAdminCodes() {
-    const data = await api("/api/admin/codes");
-    const box = $("admin-codes");
-    box.innerHTML = "";
-    if (!data.codes.length) {
-      box.innerHTML = '<p style="color:var(--text-dim);font-size:12.5px">Chưa có mã nào.</p>';
+  function pollOrder(orderId, statusElId) {
+    clearInterval(pollTimer);
+    pollTimer = setInterval(async () => {
+      try {
+        const s = await api(`/api/orders/${orderId}`);
+        if (s.status === "paid") {
+          clearInterval(pollTimer);
+          $(statusElId).textContent = "✅ Thanh toán thành công! Gói đã được nâng cấp.";
+          $(statusElId).className = "qr-status ok";
+          await refreshPlan();
+          setTimeout(() => {
+            $("qr-modal").classList.add("hidden");
+            $("paypal-modal").classList.add("hidden");
+          }, 2200);
+        }
+      } catch { /* đơn có thể chưa sẵn sàng — thử lại lượt sau */ }
+    }, 3000);
+  }
+
+  // ── PayPal: nạp SDK, tạo đơn qua server, capture qua server ────────────────
+  let paypalSdkLoaded = false;
+  function loadPaypalSdk() {
+    return new Promise((resolve, reject) => {
+      if (paypalSdkLoaded && window.paypal) return resolve();
+      const s = document.createElement("script");
+      s.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(providers.paypal_client_id)}&currency=USD`;
+      s.onload = () => { paypalSdkLoaded = true; resolve(); };
+      s.onerror = () => reject(new Error("Không tải được PayPal"));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function startPaypal(plan) {
+    $("upgrade-modal").classList.add("hidden");
+    $("paypal-status").textContent = "";
+    $("paypal-buttons").innerHTML = "Đang tải PayPal…";
+    $("paypal-modal").classList.remove("hidden");
+    try {
+      await loadPaypalSdk();
+    } catch (err) {
+      $("paypal-buttons").textContent = err.message;
       return;
     }
-    for (const c of data.codes) {
+    let ourOrderId = null;
+    $("paypal-buttons").innerHTML = "";
+    window.paypal.Buttons({
+      createOrder: async () => {
+        const order = await api("/api/orders", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan, provider: "paypal" }),
+        });
+        ourOrderId = order.order_id;
+        return order.paypal_order_id;
+      },
+      onApprove: async (data) => {
+        $("paypal-status").textContent = "⏳ Đang xác nhận thanh toán…";
+        try {
+          await api(`/api/orders/${ourOrderId}/paypal-capture`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paypal_order_id: data.orderID }),
+          });
+          $("paypal-status").textContent = "✅ Thanh toán thành công! Gói đã được nâng cấp.";
+          $("paypal-status").className = "qr-status ok";
+          await refreshPlan();
+          setTimeout(() => $("paypal-modal").classList.add("hidden"), 2200);
+        } catch (err) {
+          $("paypal-status").textContent = "✕ " + err.message;
+          $("paypal-status").className = "qr-status err";
+        }
+      },
+      onError: () => { $("paypal-status").textContent = "Có lỗi với PayPal — thử lại."; },
+    }).render("#paypal-buttons");
+  }
+
+  // ── Modal Quản trị đơn hàng ───────────────────────────────────────────────
+  async function openAdminModal() {
+    $("admin-modal").classList.remove("hidden");
+    await refreshAdminOrders();
+  }
+
+  async function refreshAdminOrders() {
+    const data = await api("/api/admin/orders");
+    const box = $("admin-orders");
+    box.innerHTML = "";
+    if (!data.orders.length) {
+      box.innerHTML = '<p style="color:var(--text-dim);font-size:12.5px">Chưa có đơn nào.</p>';
+      return;
+    }
+    for (const o of data.orders) {
       const row = document.createElement("div");
       row.className = "admin-code-row";
-      const status = c.used_by
-        ? `<span class="tag used">Đã dùng bởi ${c.used_by}</span>`
-        : '<span class="tag free">Chưa dùng</span>';
-      row.innerHTML = `<code>${c.code}</code><span class="tag">${PLAN_LABELS[c.plan] || c.plan}</span>${status}`;
+      const paid = o.status === "paid";
+      const amount = o.provider === "paypal" ? `$${o.amount_usd}` : formatVnd(o.amount_vnd);
+      const statusTag = paid
+        ? '<span class="tag used">Đã thanh toán</span>'
+        : '<span class="tag free">Chờ thanh toán</span>';
+      let action = "";
+      if (!paid) action = `<button class="confirm-order" data-id="${o.id}">Xác nhận</button>`;
+      row.innerHTML = `<code>${o.id}</code><span class="tag">${PLAN_LABELS[o.plan] || o.plan} · ${amount}</span>` +
+        `<span class="tag">${o.email || ""}</span>${statusTag}${action}`;
       box.appendChild(row);
     }
+    box.querySelectorAll(".confirm-order").forEach((b) =>
+      b.addEventListener("click", async () => {
+        if (!confirm("Xác nhận đơn này đã nhận được tiền?")) return;
+        try {
+          await api(`/api/admin/orders/${b.dataset.id}/confirm`, { method: "POST" });
+          await refreshAdminOrders();
+        } catch (err) { alert("Lỗi: " + err.message); }
+      }));
   }
 
   $("admin-btn").addEventListener("click", openAdminModal);
 
-  $("admin-create-btn").addEventListener("click", async () => {
-    const plan = $("admin-plan").value;
-    const count = parseInt($("admin-count").value, 10) || 1;
-    try {
-      await api("/api/admin/codes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan, count }),
-      });
-      await refreshAdminCodes();
-    } catch (err) {
-      alert("Lỗi tạo mã: " + err.message);
-    }
-  });
-
   document.querySelectorAll(".modal-close").forEach((btn) =>
-    btn.addEventListener("click", () => $(btn.dataset.close).classList.add("hidden"))
+    btn.addEventListener("click", () => { clearInterval(pollTimer); $(btn.dataset.close).classList.add("hidden"); })
   );
   document.querySelectorAll(".modal-overlay").forEach((overlay) =>
-    overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.classList.add("hidden"); })
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) { clearInterval(pollTimer); overlay.classList.add("hidden"); } })
   );
 
   async function loadConversations() {

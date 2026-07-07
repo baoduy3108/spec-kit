@@ -28,7 +28,22 @@ services:
         sync: false
       - key: SECRET_KEY
         generateValue: true  # Render tự sinh chuỗi bí mật
+      # Thanh toán tự động (điền nếu muốn bán gói) — tiền về thẳng tài khoản bạn
+      - key: SEPAY_API_KEY
+        sync: false
+      - key: PAYMENT_BANK_BIN
+        sync: false
+      - key: PAYMENT_BANK_ACCOUNT
+        sync: false
+      - key: PAYMENT_BANK_OWNER
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_SECRET
+        sync: false
       # Tùy chọn
+      - key: ADMIN_EMAILS
+        sync: false
       - key: ENABLE_FABLE
         value: "false"
       - key: FREE_PREMIUM_CAP

@@ -53,6 +53,7 @@ class PlanInfo(BaseModel):
     duration_days: int
     rpm: int
     burst: int
+    price_usd: float = 0.0
     premium_daily_cap: int
     total_daily_cap: int
     apex_allowed: bool
@@ -60,10 +61,10 @@ class PlanInfo(BaseModel):
     expires_at: int = 0
 
 
-class RedeemRequest(BaseModel):
-    code: str
+class CreateOrderRequest(BaseModel):
+    plan: str       # monthly | yearly
+    provider: str   # sepay | paypal
 
 
-class AdminCreateCodesRequest(BaseModel):
-    plan: str
-    count: int = 1
+class PaypalCaptureRequest(BaseModel):
+    paypal_order_id: str

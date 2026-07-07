@@ -52,14 +52,17 @@ def _init_schema(conn: sqlite3.Connection):
         citations TEXT,
         created_at INTEGER
     );
-    CREATE TABLE IF NOT EXISTS activation_codes (
-        code TEXT PRIMARY KEY,
-        plan TEXT NOT NULL,
-        duration_days INTEGER NOT NULL,
-        created_by TEXT,
+    CREATE TABLE IF NOT EXISTS orders (
+        id TEXT PRIMARY KEY,                  -- mã đơn ngắn, dùng làm nội dung chuyển khoản SePay
+        user_id TEXT NOT NULL,
+        plan TEXT NOT NULL,                   -- monthly | yearly
+        provider TEXT NOT NULL,               -- sepay | paypal
+        amount_vnd INTEGER NOT NULL DEFAULT 0,
+        amount_usd REAL NOT NULL DEFAULT 0,
+        status TEXT NOT NULL DEFAULT 'pending', -- pending | paid | expired
+        provider_ref TEXT,                    -- mã giao dịch cổng (PayPal order id / SePay tx)
         created_at INTEGER,
-        used_by TEXT,
-        used_at INTEGER
+        paid_at INTEGER
     );
     CREATE TABLE IF NOT EXISTS usage_daily (
         user_id TEXT NOT NULL,
@@ -70,7 +73,8 @@ def _init_schema(conn: sqlite3.Connection):
     );
     CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id, updated_at DESC);
     CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conversation_id, id);
-    CREATE INDEX IF NOT EXISTS idx_codes_used_by ON activation_codes(used_by);
+    CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status, created_at DESC);
     """)
     # Thêm cột an toàn cho DB tạo từ phiên bản cũ (bỏ qua nếu cột đã tồn tại)
     for stmt in (
@@ -184,70 +188,83 @@ def set_user_plan(user_id: str, plan_key: str, expires_at: int):
         conn.commit()
 
 
-def _generate_code() -> str:
-    group = lambda: secrets.token_hex(2).upper()
-    return f"LUMINA-{group()}-{group()}"
+def _activate_plan_locked(conn, user_id: str, plan_key: str, duration_days: int) -> int:
+    """Kích hoạt/cộng dồn gói cho user (gọi bên trong _lock). Trả về mốc hết hạn mới."""
+    now = int(time.time())
+    current = conn.execute("SELECT plan, plan_expires_at FROM users WHERE id=?", (user_id,)).fetchone()
+    base = now
+    if current and current["plan"] == plan_key and current["plan_expires_at"] > now:
+        base = current["plan_expires_at"]  # cùng gói còn hạn → cộng dồn
+    new_expires = base + duration_days * 86400
+    conn.execute("UPDATE users SET plan=?, plan_expires_at=? WHERE id=?", (plan_key, new_expires, user_id))
+    return new_expires
 
 
-def create_activation_codes(plan_key: str, duration_days: int, count: int, created_by: str) -> list[str]:
+# ─── Đơn hàng (thanh toán tự động) ──────────────────────────────────────────
+
+def _generate_order_id() -> str:
+    # Ngắn gọn, chỉ chữ HOA + số — dễ gõ làm nội dung chuyển khoản
+    return "LUM" + secrets.token_hex(3).upper()
+
+
+def create_order(user_id: str, plan_key: str, provider: str, amount_vnd: int, amount_usd: float) -> dict:
     with _lock:
         conn = get_conn()
+        # Tránh trùng id
+        for _ in range(5):
+            oid = _generate_order_id()
+            if not conn.execute("SELECT 1 FROM orders WHERE id=?", (oid,)).fetchone():
+                break
         now = int(time.time())
-        codes = []
-        for _ in range(count):
-            code = _generate_code()
-            conn.execute(
-                "INSERT INTO activation_codes(code, plan, duration_days, created_by, created_at) VALUES(?,?,?,?,?)",
-                (code, plan_key, duration_days, created_by, now),
-            )
-            codes.append(code)
+        conn.execute(
+            "INSERT INTO orders(id, user_id, plan, provider, amount_vnd, amount_usd, status, created_at) "
+            "VALUES(?,?,?,?,?,?, 'pending', ?)",
+            (oid, user_id, plan_key, provider, amount_vnd, amount_usd, now),
+        )
         conn.commit()
-        return codes
+        return {"id": oid, "user_id": user_id, "plan": plan_key, "provider": provider,
+                "amount_vnd": amount_vnd, "amount_usd": amount_usd, "status": "pending", "created_at": now}
 
 
-def list_activation_codes(limit: int = 100) -> list[dict]:
+def get_order(order_id: str) -> dict | None:
+    with _lock:
+        row = get_conn().execute("SELECT * FROM orders WHERE id=?", (order_id.strip().upper(),)).fetchone()
+        return dict(row) if row else None
+
+
+def list_orders(limit: int = 100) -> list[dict]:
     with _lock:
         rows = get_conn().execute(
-            "SELECT code, plan, duration_days, created_by, created_at, used_by, used_at "
-            "FROM activation_codes ORDER BY created_at DESC LIMIT ?",
-            (limit,),
+            "SELECT o.*, u.email FROM orders o LEFT JOIN users u ON u.id=o.user_id "
+            "ORDER BY o.created_at DESC LIMIT ?", (limit,),
         ).fetchall()
         return [dict(r) for r in rows]
 
 
-def redeem_activation_code(code: str, user_id: str) -> tuple[bool, str, dict | None]:
-    """Kích hoạt mã cho user. Trả về (thành công, thông báo, thông tin gói mới)."""
-    code = code.strip().upper()
+def mark_order_paid(order_id: str, provider_ref: str = "") -> tuple[bool, dict | None]:
+    """Đánh dấu đơn đã trả + kích hoạt gói. IDEMPOTENT: gọi lại đơn đã paid không cộng thêm.
+
+    Trả về (vừa_kích_hoạt, thông_tin_gói). vừa_kích_hoạt=False nếu đơn không tồn tại
+    hoặc đã paid từ trước (webhook bắn trùng).
+    """
+    order_id = order_id.strip().upper()
     with _lock:
         conn = get_conn()
-        row = conn.execute(
-            "SELECT code, plan, duration_days, used_by FROM activation_codes WHERE code=?", (code,)
-        ).fetchone()
-        if not row:
-            return False, "Mã kích hoạt không tồn tại.", None
-        if row["used_by"]:
-            return False, "Mã kích hoạt này đã được sử dụng.", None
-
+        row = conn.execute("SELECT * FROM orders WHERE id=?", (order_id,)).fetchone()
+        if not row or row["status"] == "paid":
+            return False, None
         plan_key = row["plan"]
-        duration_days = row["duration_days"]
+        duration = PLANS.get(plan_key, {}).get("duration_days", 30)
         now = int(time.time())
-
-        # Nếu đang có cùng gói còn hạn → cộng dồn thời gian; khác gói → tính từ hiện tại
-        current = conn.execute("SELECT plan, plan_expires_at FROM users WHERE id=?", (user_id,)).fetchone()
-        base = now
-        if current and current["plan"] == plan_key and current["plan_expires_at"] > now:
-            base = current["plan_expires_at"]
-        new_expires = base + duration_days * 86400
-
+        new_expires = _activate_plan_locked(conn, row["user_id"], plan_key, duration)
         conn.execute(
-            "UPDATE activation_codes SET used_by=?, used_at=? WHERE code=?", (user_id, now, code)
+            "UPDATE orders SET status='paid', paid_at=?, provider_ref=? WHERE id=?",
+            (now, provider_ref, order_id),
         )
-        conn.execute("UPDATE users SET plan=?, plan_expires_at=? WHERE id=?", (plan_key, new_expires, user_id))
         conn.commit()
-
         plan = dict(PLANS.get(plan_key, PLANS["free"]))
         plan["expires_at"] = new_expires
-        return True, f"Kích hoạt thành công gói {plan['label']}!", plan
+        return True, plan
 
 
 def get_daily_usage(user_id: str) -> tuple[int, int]:
