@@ -25,6 +25,7 @@ from .engines.openai_compatible import (
     OpenAIEngine,
     OpenRouterEngine,
 )
+from . import knowledge
 from .imagegen import generate_image
 from .media import has_images
 from .monitor import monitor
@@ -116,6 +117,21 @@ class Orchestrator:
                     messages[i] = {**messages[i], "content": messages[i]["content"] + _RESEARCH_DIRECTIVE}
                     break
 
+        # 📚 Kho tri thức nội bộ (RAG-lite, giảm token): câu cần tra cứu → đọc kho
+        # trong thư mục data/ trước (0 token), thiếu thì "học" từ Wikipedia (miễn phí)
+        # rồi lưu lại. Tư liệu kèm link nguồn + chỉ thị đối chiếu chéo (chống bịp).
+        system_prompt = SYSTEM_PROMPT
+        if route.use_web_search and messages:
+            last_user = next((m["content"] for m in reversed(messages) if m.get("role") == "user"), "")
+            try:
+                facts = await knowledge.gather(last_user[:200])
+            except Exception:  # noqa: BLE001 — kho tri thức là phụ trợ, không được làm hỏng chat
+                facts = []
+            if facts:
+                yield {"type": "search_status", "tool": "knowledge",
+                       "query": ", ".join(f["topic"] for f in facts)[:80]}
+                system_prompt = SYSTEM_PROMPT + knowledge.build_context(facts)
+
         started_output = False
         chain = self._chain_for(use_premium)
         # Có ảnh đính kèm → chỉ dùng bộ não "nhìn" được (Claude/Gemini).
@@ -142,7 +158,7 @@ class Orchestrator:
             tried_any = True
             start = time.monotonic()
             try:
-                async for event in engine.stream_chat(messages, route, SYSTEM_PROMPT):
+                async for event in engine.stream_chat(messages, route, system_prompt):
                     if event["type"] in ("text", "thinking"):
                         started_output = True
                     yield event

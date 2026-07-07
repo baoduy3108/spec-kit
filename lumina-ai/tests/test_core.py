@@ -320,3 +320,54 @@ def test_imagegen_empty_prompt_has_fallback():
     from app.imagegen import generate_image
     result = asyncio.get_event_loop().run_until_complete(generate_image("   "))
     assert result["url"].startswith("https://image.pollinations.ai/")
+
+
+# ── Kho tri thức nội bộ (RAG-lite — "học dần", giảm token) ──────────────────
+
+def test_knowledge_remember_and_lookup():
+    from app import knowledge
+    knowledge.remember("trà xanh", "Trà xanh là loại trà làm từ lá Camellia sinensis...",
+                       url="https://vi.wikipedia.org/wiki/Tr%C3%A0_xanh", source="wikipedia")
+    hits = knowledge.lookup_local("lợi ích của trà xanh là gì")
+    assert hits and hits[0]["topic"] == "trà xanh"
+    assert "Camellia" in hits[0]["summary"]
+
+
+def test_knowledge_remember_updates_not_duplicates():
+    from app import knowledge
+    knowledge.remember("hà nội", "Bản cũ.", source="wikipedia")
+    knowledge.remember("hà nội", "Bản mới hơn.", source="wikipedia")
+    hits = knowledge.lookup_local("hà nội")
+    same_topic = [h for h in hits if h["topic"] == "hà nội"]
+    assert len(same_topic) == 1
+    assert same_topic[0]["summary"] == "Bản mới hơn."
+
+
+def test_knowledge_keywords_skip_stopwords():
+    from app.knowledge import extract_keywords
+    kws = extract_keywords("trà xanh là gì và có lợi ích gì cho sức khỏe")
+    assert "trà" in kws and "xanh" in kws
+    assert "là" not in kws and "gì" not in kws
+
+
+def test_knowledge_build_context_warns_cross_check():
+    from app.knowledge import build_context
+    ctx = build_context([{"topic": "trà xanh", "summary": "abc", "url": "https://x", "source": "wikipedia"}])
+    assert "ĐỐI CHIẾU" in ctx          # bắt bộ não đối chiếu chéo (chống nguồn bị sửa bịp)
+    assert "https://x" in ctx           # kèm link nguồn để trích dẫn
+
+
+def test_knowledge_gather_prefers_local_no_network():
+    import asyncio
+    from app import knowledge
+    knowledge.remember("số nguyên tố", "Số nguyên tố là số tự nhiên lớn hơn 1...", source="wikipedia")
+    items = asyncio.get_event_loop().run_until_complete(knowledge.gather("số nguyên tố là gì"))
+    assert items and items[0]["topic"] == "số nguyên tố"
+
+
+def test_knowledge_gather_never_raises_offline():
+    import asyncio
+    from app import knowledge
+    # Chủ đề không có trong kho + mạng bị chặn → phải trả [] êm, không nổ lỗi
+    items = asyncio.get_event_loop().run_until_complete(knowledge.gather("zzzz-khong-ton-tai-9999"))
+    assert items == []

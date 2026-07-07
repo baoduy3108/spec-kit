@@ -40,6 +40,8 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 
 > Router tự nhận ra ý định ("vẽ…", "nghiên cứu sâu…") nên thường **không cần bấm nút**; hai nút chỉ để ép chế độ khi muốn.
 
+**📚 Kho tri thức tự học (giảm token):** câu hỏi cần tra cứu → LUMINA đọc **kho nội bộ** trong thư mục `data/knowledge.db` trước (0 token, 0 mạng); chưa có thì "học" từ **Wikipedia API miễn phí** (tiếng Việt → tiếng Anh) rồi **lưu vào kho** — càng nhiều người hỏi, kho càng lớn, càng ít tốn lượt tìm kiếm. Vì nguồn mở ai cũng sửa được, tư liệu luôn kèm **link nguồn** và bộ não bị bắt **đối chiếu chéo** với hiểu biết + kết quả tìm kiếm, mâu thuẫn thì phải nói rõ. (Không thể tải cả Wikipedia/CommonCrawl về — hàng TB đến PB — nên "học dần theo câu hỏi thật" là bản khả thi và hiệu quả nhất của ý tưởng này.)
+
 ---
 
 ## 1. Chuẩn bị (một lần, ~10 phút)
@@ -116,6 +118,7 @@ lumina-ai/
 │   ├── router.py           # ✦ Auto-Router "bù trừ" — trái tim của LUMINA (gate 🌌 Đỉnh cao theo gói)
 │   ├── orchestrator.py     # Điều phối 2 tầng bộ não + fallback + chế độ vẽ ảnh/nghiên cứu + giấu tên model
 │   ├── imagegen.py         # 🎨 Vẽ ảnh (Pollinations free, hoặc DALL-E nếu có OpenAI key)
+│   ├── knowledge.py        # 📚 Kho tri thức tự học (data/knowledge.db + Wikipedia free) — giảm token
 │   ├── media.py            # 🖼 Xử lý ảnh đính kèm (data URL) cho bộ não nhìn được
 │   ├── engines/claude.py   # Tầng cao cấp: adaptive thinking, web search, xem ảnh, streaming
 │   ├── engines/gemini.py   # Tầng free: Gemini + search grounding + xem ảnh
