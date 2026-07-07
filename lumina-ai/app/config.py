@@ -127,13 +127,14 @@ PLANS: dict[str, dict] = {
         "burst": CONFIG["RATE_LIMIT_BURST"],
         # Lượt cao cấp (Claude) rất thấp có chủ đích — bảo vệ ngân sách API nhỏ.
         # Hết lượt này thì chuyển sang engine free, vẫn chat được.
-        "premium_daily_cap": int(os.getenv("FREE_PREMIUM_CAP", "2")),
-        "total_daily_cap": int(os.getenv("FREE_TOTAL_CAP", "30")),
+        "premium_daily_cap": int(os.getenv("FREE_PREMIUM_CAP", "3")),
+        "total_daily_cap": int(os.getenv("FREE_TOTAL_CAP", "120")),
         "apex_allowed": False,
+        # KHÔNG hiển thị con số giới hạn cho gói Miễn phí (tránh làm người dùng ngại).
         "features": [
-            f"{os.getenv('FREE_PREMIUM_CAP', '2')} lượt bộ não cao cấp / ngày",
-            "Sau đó tự dùng bộ não thường (vẫn miễn phí, không giới hạn model)",
-            f"Tối đa {os.getenv('FREE_TOTAL_CAP', '30')} tin nhắn / ngày",
+            "Trò chuyện thoải mái mỗi ngày với LUMINA",
+            "Tự động chọn bộ não tốt nhất cho từng câu hỏi",
+            "Xem ảnh · vẽ ảnh · tìm kiếm web · nghiên cứu sâu",
         ],
     },
     "monthly": {

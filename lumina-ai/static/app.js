@@ -187,10 +187,16 @@
     const label = $("plan-label");
     label.textContent = "Gói " + (plan.label || PLAN_LABELS[plan.key] || plan.key);
     label.classList.toggle("paid", plan.key !== "free");
-    let usageText = `${plan.premium_daily_cap} lượt cao cấp/ngày · tối đa ${plan.total_daily_cap} tin nhắn/ngày`;
-    if (plan.key !== "free" && plan.expires_at) {
-      const daysLeft = Math.max(0, Math.ceil((plan.expires_at * 1000 - Date.now()) / 86400000));
-      usageText += ` · còn ${daysLeft} ngày`;
+    // KHÔNG lộ con số giới hạn của gói Miễn phí — chỉ nói lời thân thiện.
+    let usageText;
+    if (plan.key === "free") {
+      usageText = "Trò chuyện thoải mái · LUMINA tự chọn bộ não";
+    } else {
+      usageText = "Đang kích hoạt";
+      if (plan.expires_at) {
+        const daysLeft = Math.max(0, Math.ceil((plan.expires_at * 1000 - Date.now()) / 86400000));
+        usageText = `Còn ${daysLeft} ngày · lượt dùng cao`;
+      }
     }
     $("plan-usage").textContent = usageText;
   }

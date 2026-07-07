@@ -291,10 +291,11 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
         user["id"], plan["premium_daily_cap"], plan["total_daily_cap"]
     )
     if not daily_ok:
+        # KHÔNG nêu con số / tên gói — chỉ mời nâng cấp một cách thân thiện.
         raise HTTPException(
             status_code=429,
-            detail=f"Bạn đã dùng hết {plan['total_daily_cap']} tin nhắn hôm nay của gói {plan['label']}. "
-                   f"Nâng cấp gói Tháng/Năm để chat nhiều hơn (xem mục ✦ Nâng cấp).",
+            detail="Hôm nay bạn đã trò chuyện khá nhiều rồi 😊 — Nâng cấp gói Tháng/Năm "
+                   "để tiếp tục thoải mái hơn (xem mục ✦ Nâng cấp).",
         )
     # Nếu tầng cao cấp không khả dụng (chưa cấu hình Claude) mà có engine free → vẫn chạy free.
     if use_premium and not orchestrator.engines["claude"].available() and orchestrator.has_free_engine():
