@@ -27,7 +27,7 @@ from .engines.openai_compatible import (
 )
 from . import knowledge
 from .imagegen import generate_image
-from .media import has_images
+from .media import has_images, has_videos
 from .monitor import monitor
 from .schemas import RouteDecision
 
@@ -35,6 +35,8 @@ logger = logging.getLogger("lumina.orchestrator")
 
 # Bộ não "nhìn" được ảnh (đa phương thức). Groq/DeepSeek/Ollama chỉ đọc chữ.
 _VISION_ENGINES = {"claude", "gemini"}
+# Bộ não xem được VIDEO — hiện chỉ Gemini (Anthropic API chưa hỗ trợ video).
+_VIDEO_ENGINES = {"gemini"}
 
 # Chỉ thị thêm khi người dùng yêu cầu 🔬 Nghiên cứu sâu — buộc bộ não tìm nhiều
 # nguồn, đối chiếu và viết báo cáo có cấu trúc kèm trích dẫn.
@@ -42,6 +44,16 @@ _RESEARCH_DIRECTIVE = (
     "\n\n[Chế độ NGHIÊN CỨU SÂU: Hãy tìm kiếm web nhiều lần từ nhiều góc độ khác nhau, "
     "đối chiếu các nguồn, và viết một BÁO CÁO có cấu trúc rõ ràng (mở đầu, các phần chính "
     "với tiêu đề, kết luận). Trích dẫn nguồn cho mọi thông tin quan trọng.]"
+)
+
+# Chỉ thị khi người dùng cần 📝 Phụ đề — buộc bộ não xuất transcript đúng
+# định dạng SRT kèm mốc thời gian, để người dùng tải về dùng ngay.
+_SUBTITLE_DIRECTIVE = (
+    "\n\n[Chế độ TẠO PHỤ ĐỀ: Hãy nghe kỹ lời thoại/âm thanh trong video và xuất ra "
+    "TOÀN BỘ transcript theo đúng định dạng phụ đề SRT chuẩn (số thứ tự, mốc thời gian "
+    "dạng 00:00:01,000 --> 00:00:04,000, rồi tới câu thoại), đặt trong một khối code "
+    "```srt ... ```. Nếu video có nhiều người nói, ghi rõ tên/nhân vật trước lời thoại "
+    "nếu phân biệt được. Không thêm bình luận ngoài khối code.]"
 )
 
 SYSTEM_PROMPT = """Bạn là LUMINA — trợ lý AI hợp nhất ("Tư duy sâu, tri thức rộng").
@@ -110,11 +122,14 @@ class Orchestrator:
             return
 
         # 🔬 Chế độ nghiên cứu sâu — chèn chỉ thị vào câu hỏi cuối để bộ não tìm nhiều nguồn.
-        if route.mode == "research":
+        # 📝 Chế độ tạo phụ đề — chèn chỉ thị buộc xuất đúng định dạng SRT.
+        directive = _RESEARCH_DIRECTIVE if route.mode == "research" \
+            else _SUBTITLE_DIRECTIVE if route.mode == "subtitle" else None
+        if directive:
             messages = list(messages)
             for i in range(len(messages) - 1, -1, -1):
                 if messages[i].get("role") == "user":
-                    messages[i] = {**messages[i], "content": messages[i]["content"] + _RESEARCH_DIRECTIVE}
+                    messages[i] = {**messages[i], "content": messages[i]["content"] + directive}
                     break
 
         # 📚 Kho tri thức nội bộ (RAG-lite, giảm token): câu cần tra cứu → đọc kho
@@ -134,17 +149,23 @@ class Orchestrator:
 
         started_output = False
         chain = self._chain_for(use_premium)
+        # Có video đính kèm → chỉ Gemini xem được (giới hạn chặt hơn ảnh).
         # Có ảnh đính kèm → chỉ dùng bộ não "nhìn" được (Claude/Gemini).
-        if has_images(messages):
+        no_capability_msg = ""
+        if has_videos(messages):
+            chain = [n for n in chain if n in _VIDEO_ENGINES]
+            no_capability_msg = ("Để LUMINA xem được video, cần bật bộ não Gemini (miễn phí) — "
+                                 "kiểm tra GEMINI_API_KEY trong file .env.")
+        elif has_images(messages):
             chain = [n for n in chain if n in _VISION_ENGINES]
+            no_capability_msg = ("Để LUMINA xem được ảnh, cần bật bộ não Gemini (miễn phí) hoặc Claude — "
+                                 "kiểm tra API key trong file .env.")
         tried_any = False
         no_engine_msg = "Chưa có bộ não nào được cấu hình — kiểm tra API key trong file .env."
         # Thông báo lỗi cho người dùng KHÔNG bao giờ nêu tên model/nhà cung cấp.
         busy_msg = "Xin lỗi, LUMINA đang bận hoặc gặp sự cố tạm thời — hãy thử lại sau giây lát."
         if not chain:
-            yield {"type": "error", "message":
-                   "Để LUMINA xem được ảnh, cần bật bộ não Gemini (miễn phí) hoặc Claude — "
-                   "kiểm tra API key trong file .env."}
+            yield {"type": "error", "message": no_capability_msg or no_engine_msg}
             return
 
         for name in chain:

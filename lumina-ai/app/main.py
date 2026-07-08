@@ -10,7 +10,10 @@ Endpoints:
   GET  /api/conversations   → danh sách hội thoại
   GET  /api/conversations/{id} → tin nhắn của một hội thoại
   DELETE /api/conversations/{id}
-  POST /api/chat/stream     → chat streaming SSE (bắt buộc đăng nhập)
+  POST /api/chat/stream     → chat streaming SSE (bắt buộc đăng nhập) — nhận cả ảnh/video/tệp
+  POST /api/dub             → 🗣 lồng tiếng + gắn phụ đề video (job nền)
+  GET  /api/dub/{job_id}    → poll trạng thái job lồng tiếng
+  GET  /api/dub/{job_id}/download → tải video đã lồng tiếng
   GET  /api/plans           → danh sách gói + cổng thanh toán đang bật
   POST /api/orders          → tạo đơn mua gói (SePay → QR; PayPal → order id)
   GET  /api/orders/{id}     → poll trạng thái đơn (pending/paid)
@@ -32,7 +35,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, payments
+from . import auth, config, db, files, media, payments, video_dub
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
 from .memory import trim_history
@@ -40,7 +43,7 @@ from .monitor import monitor
 from .orchestrator import orchestrator
 from .ratelimit import UserRateLimiter
 from .router import decide_route
-from .schemas import ChatRequest, CreateOrderRequest, PaypalCaptureRequest
+from .schemas import ChatRequest, CreateOrderRequest, DubRequest, PaypalCaptureRequest
 
 logging.basicConfig(level=getattr(logging, CONFIG["LOG_LEVEL"], logging.INFO))
 logger = logging.getLogger("lumina")
@@ -279,6 +282,14 @@ def _sse(data: dict) -> str:
 
 @app.post("/api/chat/stream")
 async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)):
+    # Chế độ 📝 Phụ đề BẮT BUỘC có video — nếu không, chặn sớm (đừng để bộ não
+    # "bịa" phụ đề từ hư không khi người dùng lỡ bấm nút mà quên đính kèm).
+    if body.mode == "subtitle" and not body.videos:
+        raise HTTPException(
+            status_code=400,
+            detail="Hãy đính kèm 📎 video trước khi bấm chế độ 📝 Phụ đề nhé.",
+        )
+
     plan = db.get_effective_plan(user["id"])
 
     # Giới hạn lượt/phút theo gói — bảo vệ API key của chủ web
@@ -314,23 +325,46 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
         for m in db.get_messages(conv_id)
         if m["role"] in ("user", "assistant") and m["content"]
     ]
-    # Lưu tin nhắn người dùng; nếu có gửi ảnh thì ghi chú lại (không lưu ảnh thô vào DB).
-    stored = body.message + (f"\n\n_(đã gửi {len(body.images)} ảnh)_" if body.images else "")
+
+    # Tệp đính kèm (PDF/Word/Excel/txt) → tách chữ ra, chèn vào nội dung câu hỏi.
+    # Xử lý ngay ở đây (không cần bộ não "nhìn" đặc biệt) vì mọi engine đều đọc chữ được.
+    file_notes: list[str] = []
+    effective_message = body.message
+    if body.files:
+        extracted = [files.extract_text(f.name or "tệp", f.data_url) for f in body.files]
+        for result in extracted:
+            file_notes.append(f"⚠️ {result['name']}: {result['error']}" if result.get("error")
+                              else f"✅ đã đọc {result['name']}")
+        effective_message = body.message + files.build_context(extracted)
+
+    # Lưu tin nhắn người dùng; ghi chú đính kèm (không lưu ảnh/video/tệp thô vào DB).
+    attach_notes = []
+    if body.images:
+        attach_notes.append(f"đã gửi {len(body.images)} ảnh")
+    if body.videos:
+        attach_notes.append("đã gửi 1 video")
+    attach_notes.extend(file_notes)
+    stored = body.message + (f"\n\n_({'; '.join(attach_notes)})_" if attach_notes else "")
     db.add_message(conv_id, "user", stored)
-    # Ảnh chỉ gắn vào lượt hiện tại để bộ não "nhìn"; lịch sử cũ chỉ có chữ.
-    current_turn = {"role": "user", "content": body.message}
+
+    # Ảnh/video chỉ gắn vào lượt hiện tại để bộ não "nhìn"; lịch sử cũ chỉ có chữ.
+    current_turn = {"role": "user", "content": effective_message}
     if body.images:
         current_turn["images"] = [img for img in body.images if img]
+    if body.videos:
+        current_turn["videos"] = [v for v in body.videos if v]
     messages = trim_history(history + [current_turn], CONFIG["MAX_CONTEXT_TOKENS"])
 
     # Tầng free chỉ có 2 "chế độ": tìm kiếm hay không (engine free không có tư duy sâu như Claude).
     apex_allowed = plan["apex_allowed"] and use_premium
-    force_mode = body.mode if body.mode in ("image", "research") else None
+    force_mode = body.mode if body.mode in ("image", "research", "subtitle") else None
+    # Có video mà chưa ép chế độ + câu hỏi rỗng-ý (kiểu chỉ gửi video) → ưu tiên phân tích thường,
+    # người dùng bấm nút 📝 riêng khi muốn phụ đề (tránh đoán nhầm ý định).
     route = decide_route(body.message, history_len=len(history),
                          apex_allowed=apex_allowed, force_mode=force_mode)
     # Ẩn nhãn chế độ "cao cấp" khi đang chạy tầng free — để không lộ là đã tụt bộ não.
-    # Nhãn TÍNH NĂNG (vẽ ảnh / nghiên cứu) là an toàn (không phải tên model) → luôn hiện.
-    if route.mode in ("image_gen", "research"):
+    # Nhãn TÍNH NĂNG (vẽ ảnh / nghiên cứu / phụ đề) là an toàn (không phải tên model) → luôn hiện.
+    if route.mode in ("image_gen", "research", "subtitle"):
         display_label = route.label
     else:
         display_label = route.label if use_premium else ("🔍 Tìm kiếm web" if route.use_web_search else "✨ LUMINA")
@@ -370,6 +404,51 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+# ─── 🗣 Lồng tiếng + gắn phụ đề video (job chạy nền — có thể mất 1-3 phút) ────
+
+@app.post("/api/dub")
+async def create_dub_job(body: DubRequest, user: dict = Depends(auth.require_user)):
+    """Chỉ gói TRẢ PHÍ được dùng — tính năng nặng nhất, tốn tài nguyên máy chủ nhất."""
+    plan = db.get_effective_plan(user["id"])
+    if not plan["apex_allowed"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Lồng tiếng & phụ đề tự động cần gói Tháng/Năm (tính năng tốn nhiều tài nguyên xử lý).",
+        )
+    if not config.CONFIG["GEMINI_API_KEY"]:
+        raise HTTPException(status_code=503, detail="Chưa bật bộ não Gemini — cần để LUMINA nghe video.")
+    video_bytes = media.decode_video(body.video)
+    if not video_bytes:
+        raise HTTPException(
+            status_code=400,
+            detail="Video không hợp lệ hoặc quá lớn (tối đa ~18MB — hãy nén hoặc cắt ngắn video).",
+        )
+    if body.target_lang not in ("vi", "en"):
+        raise HTTPException(status_code=400, detail="Ngôn ngữ lồng tiếng chỉ hỗ trợ 'vi' hoặc 'en'.")
+    video_dub.cleanup_expired_jobs()
+    job_id = await video_dub.start_job(user["id"], video_bytes, body.target_lang, body.burn_subtitles)
+    return {"job_id": job_id, "status": "pending"}
+
+
+@app.get("/api/dub/{job_id}")
+async def dub_job_status(job_id: str, user: dict = Depends(auth.require_user)):
+    job = video_dub.get_job(job_id)
+    if not job or job.user_id != user["id"]:
+        raise HTTPException(status_code=404, detail="Không tìm thấy job.")
+    return {"job_id": job.id, "status": job.status, "progress": job.progress, "error": job.error}
+
+
+@app.get("/api/dub/{job_id}/download")
+async def dub_job_download(job_id: str, user: dict = Depends(auth.require_user)):
+    job = video_dub.get_job(job_id)
+    if not job or job.user_id != user["id"]:
+        raise HTTPException(status_code=404, detail="Không tìm thấy job.")
+    if job.status != "done" or not job.output_path or not os.path.isfile(job.output_path):
+        raise HTTPException(status_code=409, detail="Video chưa xử lý xong.")
+    return FileResponse(job.output_path, media_type="video/mp4",
+                        filename=f"lumina_dubbed_{job_id}.mp4")
 
 
 # ─── Giám sát ────────────────────────────────────────────────────────────────

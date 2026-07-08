@@ -34,11 +34,23 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 | Tính năng | Cách dùng | Cần gì |
 |---|---|---|
 | 🖼 **Xem / hiểu ảnh** | Bấm 📎 đính kèm ảnh → hỏi "ảnh này là gì?" | Gemini (free) hoặc Claude — có sẵn |
+| 🎬 **Xem / hiểu video** | Bấm 📎 đính kèm video (≤~18MB) → hỏi về nội dung | Chỉ **Gemini** xem được video (Claude/OpenAI chưa hỗ trợ) |
+| 📄 **Đọc tệp** | Bấm 📎 đính kèm PDF/Word/Excel/txt → hỏi về nội dung | Đọc chữ trực tiếp — mọi bộ não đều dùng được |
 | 🔬 **Nghiên cứu sâu** | Bấm nút **🔬 Nghiên cứu sâu** hoặc gõ "nghiên cứu sâu về…" → LUMINA tìm nhiều nguồn, viết báo cáo có trích dẫn | Bộ não có tìm kiếm (Gemini/Claude) |
 | 🎨 **Vẽ ảnh** | Bấm nút **🎨 Vẽ ảnh** hoặc gõ "vẽ con mèo…" → ra ảnh | **Miễn phí, không cần key** (Pollinations); tự dùng DALL-E nếu có `OPENAI_API_KEY` |
+| 📝 **Tạo phụ đề video** | Đính kèm video + bấm nút **📝 Phụ đề** → LUMINA xuất transcript chuẩn SRT (kèm mốc thời gian) | Gemini (nghe video) |
+| 🗣 **Lồng tiếng tự động** | Nút **🗣 Lồng tiếng phim** ở sidebar → chọn video, chọn ngôn ngữ → chờ 1-3 phút → tải video đã lồng tiếng + gắn phụ đề | Chỉ gói **Tháng/Năm** (tốn nhiều tài nguyên xử lý) — xem chi tiết bên dưới |
 | 🎤 **Nói bằng giọng** | Bấm 🎤 → nói → ra chữ | Chạy ngay trong trình duyệt (Chrome/Edge/Android), không cần server |
 
-> Router tự nhận ra ý định ("vẽ…", "nghiên cứu sâu…") nên thường **không cần bấm nút**; hai nút chỉ để ép chế độ khi muốn.
+> Router tự nhận ra ý định ("vẽ…", "nghiên cứu sâu…") nên thường **không cần bấm nút**; các nút chỉ để ép chế độ khi muốn.
+
+### 🗣 Về tính năng Lồng tiếng & Phụ đề tự động (nặng nhất hệ thống)
+
+Đây là pipeline xử lý video THẬT (không phải giả lập): LUMINA **nghe** video (Gemini) → **dịch** lời thoại → **sinh giọng đọc mới** bằng [edge-tts](https://github.com/rany2/edge-tts) (giọng Microsoft, MIỄN PHÍ, không cần key) → **ghép** giọng mới vào đúng mốc thời gian và **gắn cứng phụ đề** bằng ffmpeg (qua gói `imageio-ffmpeg` — mang sẵn binary tĩnh, **không cần cài đặt gì thêm** trên máy chủ, chạy được cả trên Render free).
+
+Giới hạn có chủ đích: video tối đa **~3 phút, ~18MB**; xử lý mất **1-3 phút** (chạy nền, không giữ kết nối HTTP); chỉ mở cho gói **Tháng/Năm** vì đây là tính năng tốn tài nguyên máy chủ nhất trong toàn bộ LUMINA.
+
+> ⚠️ **Lưu ý khi tự deploy:** dịch vụ giọng đọc edge-tts gọi ra máy chủ Microsoft — hoạt động bình thường trên Render/máy cá nhân, nhưng có thể bị chặn bởi một số mạng doanh nghiệp/proxy hạn chế. Hãy thử tính năng này ngay sau khi deploy để chắc chắn mạng máy chủ của bạn kết nối được.
 
 **📚 Kho tri thức tự học (giảm token):** câu hỏi cần tra cứu → LUMINA đọc **kho nội bộ** trong thư mục `data/knowledge.db` trước (0 token, 0 mạng); chưa có thì "học" từ **Wikipedia API miễn phí** (tiếng Việt → tiếng Anh) rồi **lưu vào kho** — càng nhiều người hỏi, kho càng lớn, càng ít tốn lượt tìm kiếm. Vì nguồn mở ai cũng sửa được, tư liệu luôn kèm **link nguồn** và bộ não bị bắt **đối chiếu chéo** với hiểu biết + kết quả tìm kiếm, mâu thuẫn thì phải nói rõ. (Không thể tải cả Wikipedia/CommonCrawl về — hàng TB đến PB — nên "học dần theo câu hỏi thật" là bản khả thi và hiệu quả nhất của ý tưởng này.)
 
@@ -119,9 +131,11 @@ lumina-ai/
 │   ├── orchestrator.py     # Điều phối 2 tầng bộ não + fallback + chế độ vẽ ảnh/nghiên cứu + giấu tên model
 │   ├── imagegen.py         # 🎨 Vẽ ảnh (Pollinations free, hoặc DALL-E nếu có OpenAI key)
 │   ├── knowledge.py        # 📚 Kho tri thức tự học (data/knowledge.db + Wikipedia free) — giảm token
-│   ├── media.py            # 🖼 Xử lý ảnh đính kèm (data URL) cho bộ não nhìn được
+│   ├── media.py            # 🖼🎬 Xử lý ảnh/video đính kèm (data URL) cho bộ não nhìn được
+│   ├── files.py            # 📄 Đọc PDF/Word/Excel/txt đính kèm → tách chữ đưa vào ngữ cảnh
+│   ├── video_dub.py        # 🗣 Pipeline lồng tiếng + gắn phụ đề video (Gemini + edge-tts + ffmpeg)
 │   ├── engines/claude.py   # Tầng cao cấp: adaptive thinking, web search, xem ảnh, streaming
-│   ├── engines/gemini.py   # Tầng free: Gemini + search grounding + xem ảnh
+│   ├── engines/gemini.py   # Tầng free: Gemini + search grounding + xem ảnh/video
 │   ├── engines/openai_compatible.py # Tầng free: Groq / DeepSeek / Ollama / OpenAI (chung 1 lớp)
 │   ├── auth.py             # Đăng nhập Google → JWT cookie, kiểm tra quyền quản trị
 │   ├── db.py               # SQLite: users (+ gói), hội thoại, tin nhắn, đơn hàng, lượt cao cấp/tổng/ngày

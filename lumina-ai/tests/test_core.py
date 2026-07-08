@@ -371,3 +371,151 @@ def test_knowledge_gather_never_raises_offline():
     # Chủ đề không có trong kho + mạng bị chặn → phải trả [] êm, không nổ lỗi
     items = asyncio.get_event_loop().run_until_complete(knowledge.gather("zzzz-khong-ton-tai-9999"))
     assert items == []
+
+
+# ── Router: chế độ 📝 Phụ đề (video → transcript SRT) ────────────────────────
+
+def test_router_subtitle_force_mode():
+    route = decide_route("bất kỳ nội dung gì", force_mode="subtitle")
+    assert route.mode == "subtitle"
+    assert route.label == "📝 Phụ đề"
+
+
+# ── Media: video đính kèm ────────────────────────────────────────────────────
+
+def test_media_parse_video_data_url():
+    from app.media import parse_video_data_url
+    import base64
+    small = base64.b64encode(b"x" * 100).decode()
+    assert parse_video_data_url(f"data:video/mp4;base64,{small}") == ("video/mp4", small)
+    assert parse_video_data_url("data:image/png;base64,AAAA") is None  # không phải video
+
+
+def test_media_parse_video_rejects_oversized():
+    from app.media import parse_video_data_url, MAX_VIDEO_BYTES
+    import base64
+    huge = base64.b64encode(b"x" * (MAX_VIDEO_BYTES + 1000)).decode()
+    assert parse_video_data_url(f"data:video/mp4;base64,{huge}") is None
+
+
+def test_media_has_videos():
+    from app.media import has_videos
+    assert has_videos([{"role": "user", "content": "hi"}]) is False
+    assert has_videos([{"role": "user", "content": "hi", "videos": ["data:video/mp4;base64,AA"]}]) is True
+
+
+def test_media_decode_video_roundtrip():
+    from app.media import decode_video
+    import base64
+    raw = b"video bytes here"
+    b64 = base64.b64encode(raw).decode()
+    assert decode_video(f"data:video/mp4;base64,{b64}") == raw
+    assert decode_video("không phải data url") is None
+
+
+# ── Tệp đính kèm: đọc PDF/Word/Excel/txt ─────────────────────────────────────
+
+def test_files_extract_docx_and_xlsx_and_txt():
+    import base64
+    import io
+    from app.files import build_context, extract_text
+
+    import docx
+    d = docx.Document()
+    d.add_paragraph("Xin chào LUMINA, đây là tài liệu thử nghiệm.")
+    buf = io.BytesIO(); d.save(buf)
+    r_docx = extract_text(
+        "bao_cao.docx",
+        "data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,"
+        + base64.b64encode(buf.getvalue()).decode(),
+    )
+    assert r_docx["error"] == ""
+    assert "LUMINA" in r_docx["text"]
+
+    import openpyxl
+    wb = openpyxl.Workbook(); ws = wb.active
+    ws.append(["Tên", "Điểm"]); ws.append(["An", 9])
+    buf2 = io.BytesIO(); wb.save(buf2)
+    r_xlsx = extract_text(
+        "diem.xlsx",
+        "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,"
+        + base64.b64encode(buf2.getvalue()).decode(),
+    )
+    assert r_xlsx["error"] == ""
+    assert "An" in r_xlsx["text"]
+
+    r_txt = extract_text("note.txt", "data:text/plain;base64," + base64.b64encode(b"ghi chu test").decode())
+    assert r_txt["text"] == "ghi chu test"
+
+    ctx = build_context([r_docx, r_xlsx, r_txt])
+    assert "bao_cao.docx" in ctx and "diem.xlsx" in ctx and "note.txt" in ctx
+
+
+def test_files_extract_rejects_bad_input():
+    from app.files import extract_text
+    assert extract_text("x.pdf", "không phải data url")["error"] != ""
+    assert extract_text("x.bin", "data:application/octet-stream;base64,AAAA")["error"] != ""
+
+
+def test_files_build_context_skips_errors():
+    from app.files import build_context
+    ok = {"name": "a.txt", "text": "nội dung", "error": ""}
+    bad = {"name": "b.pdf", "text": "", "error": "hỏng"}
+    ctx = build_context([ok, bad])
+    assert "a.txt" in ctx
+    assert "b.pdf" not in ctx  # tệp lỗi không được đưa vào ngữ cảnh
+
+
+# ── Lồng tiếng & phụ đề video: các hàm thuần túy + ffmpeg thật ──────────────
+
+def test_video_dub_srt_formatting():
+    from app.video_dub import _fmt_srt_time, build_srt
+    assert _fmt_srt_time(0) == "00:00:00,000"
+    assert _fmt_srt_time(65.5) == "00:01:05,500"
+    segs = [{"start": 0, "end": 2.5, "original": "hi", "translated": "chào"}]
+    srt = build_srt(segs)
+    assert "00:00:00,000 --> 00:00:02,500" in srt
+    assert "chào" in srt
+
+
+def test_video_dub_extract_json_array_variants():
+    from app.video_dub import _extract_json_array
+    fenced = '```json\n[{"start": 0.0, "end": 1.0, "original": "a", "translated": "b"}]\n```'
+    assert _extract_json_array(fenced)[0]["translated"] == "b"
+    bare = 'noise [{"start":0,"end":1,"original":"a","translated":"b"}] noise'
+    assert _extract_json_array(bare)[0]["translated"] == "b"
+    assert _extract_json_array("không có json") == []
+
+
+def test_video_dub_ffmpeg_pipeline_real():
+    """Kiểm thử thật bằng ffmpeg: tạo video test → ghép audio mới → không bị cắt ngắn."""
+    import asyncio
+    import os
+    import tempfile
+    from app.video_dub import _build_dubbed_audio, _mux_final, _probe_duration, _run_ffmpeg
+
+    async def go():
+        work = tempfile.mkdtemp()
+        test_video = os.path.join(work, "test.mp4")
+        await _run_ffmpeg(["-f", "lavfi", "-i", "testsrc=duration=3:size=160x120:rate=10",
+                           "-f", "lavfi", "-i", "sine=frequency=1000:duration=3",
+                           "-c:v", "libx264", "-c:a", "aac", "-y", test_video])
+        duration = await _probe_duration(test_video)
+        assert abs(duration - 3.0) < 0.2
+
+        seg_audio = os.path.join(work, "seg_0.mp3")
+        await _run_ffmpeg(["-f", "lavfi", "-i", "sine=frequency=440:duration=1.0", "-y", seg_audio])
+        segments = [{"start": 0.0, "end": 1.0, "original": "hi", "translated": "chào"}]
+        # Đoạn 0 rỗng (giả lập lỗi TTS) rồi mới tới đoạn có audio thật — kiểm tra
+        # KHÔNG bị lệch chỉ số input khi ghép (bug đã phát hiện + sửa khi phát triển).
+        dubbed = await _build_dubbed_audio(segments, [seg_audio], work, duration)
+        audio_dur = await _probe_duration(dubbed)
+        assert abs(audio_dur - duration) < 0.3  # audio phải khớp ĐỦ độ dài video, không bị cắt
+
+        out_path = os.path.join(work, "output.mp4")
+        await _mux_final(test_video, dubbed, None, out_path)
+        assert os.path.getsize(out_path) > 1000
+        out_dur = await _probe_duration(out_path)
+        assert abs(out_dur - duration) < 0.3  # video cuối KHÔNG bị cắt ngắn so với gốc
+
+    asyncio.get_event_loop().run_until_complete(go())

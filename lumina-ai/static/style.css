@@ -577,6 +577,83 @@ body {
   min-height: 120px;
 }
 
+/* Đính kèm video (chip trong composer preview) */
+.attach-video { display: flex; align-items: center; justify-content: center; }
+.attach-icon {
+  width: 62px; height: 62px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+}
+
+/* Đính kèm tệp (chip trong composer preview) */
+.attach-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px 6px 12px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  max-width: 220px;
+}
+.attach-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.attach-chip .attach-del {
+  position: static;
+  width: 16px; height: 16px;
+  font-size: 9px;
+  flex: 0 0 auto;
+}
+
+/* Video/tệp trong tin nhắn người dùng */
+.msg-video {
+  max-width: 320px; max-height: 240px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-top: 8px;
+  display: block;
+}
+.msg-files {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+
+/* ── Modal 🗣 Lồng tiếng & phụ đề ───────────────────────── */
+.dub-field {
+  display: flex; flex-direction: column; gap: 5px;
+  margin: 12px 0;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.dub-field select, .dub-field input[type="file"] {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+}
+.dub-checkbox { flex-direction: row; align-items: center; gap: 8px; }
+.dub-checkbox input { width: auto; }
+.dub-progress-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin: 16px 0 10px;
+}
+.dub-progress-fill {
+  height: 100%;
+  width: 5%;
+  background: var(--gradient);
+  transition: width .4s ease;
+}
+
 /* Mobile */
 @media (max-width: 720px) {
   .sidebar { position: fixed; z-index: 20; height: 100vh; }

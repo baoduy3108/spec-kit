@@ -11,7 +11,9 @@
     conversationId: null,
     streaming: false,
     attachedImages: [],   // data URL các ảnh đang đính kèm cho lượt tới
-    forceMode: null,      // null | "image" | "research" — nút ép chế độ
+    attachedVideo: null,  // { name, dataUrl } — chỉ 1 video/lượt
+    attachedFiles: [],    // [{ name, dataUrl }] — PDF/Word/Excel/txt, tối đa 3
+    forceMode: null,      // null | "image" | "research" | "subtitle" — nút ép chế độ
   };
 
   const PLAN_LABELS = { free: "Miễn phí", monthly: "Tháng", yearly: "Năm" };
@@ -185,7 +187,9 @@
     const plan = state.plan;
     if (!plan) return;
     const label = $("plan-label");
-    label.textContent = "Gói " + (plan.label || PLAN_LABELS[plan.key] || plan.key);
+    // plan.label đã có sẵn "Gói " ở gói trả phí (vd "Gói Tháng") — không thêm lần nữa.
+    const rawLabel = plan.label || PLAN_LABELS[plan.key] || plan.key;
+    label.textContent = rawLabel.startsWith("Gói") ? rawLabel : "Gói " + rawLabel;
     label.classList.toggle("paid", plan.key !== "free");
     // KHÔNG lộ con số giới hạn của gói Miễn phí — chỉ nói lời thân thiện.
     let usageText;
@@ -388,10 +392,18 @@
   $("admin-btn").addEventListener("click", openAdminModal);
 
   document.querySelectorAll(".modal-close").forEach((btn) =>
-    btn.addEventListener("click", () => { clearInterval(pollTimer); $(btn.dataset.close).classList.add("hidden"); })
+    btn.addEventListener("click", () => {
+      clearInterval(pollTimer); clearInterval(dubPollTimer);
+      $(btn.dataset.close).classList.add("hidden");
+    })
   );
   document.querySelectorAll(".modal-overlay").forEach((overlay) =>
-    overlay.addEventListener("click", (e) => { if (e.target === overlay) { clearInterval(pollTimer); overlay.classList.add("hidden"); } })
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        clearInterval(pollTimer); clearInterval(dubPollTimer);
+        overlay.classList.add("hidden");
+      }
+    })
   );
 
   async function loadConversations() {
@@ -453,13 +465,14 @@
 
   function modeLabel(mode) {
     return { fast: "⚡ Phản hồi nhanh", balanced: "✨ Cân bằng", deep: "🧠 Tư duy sâu",
-             search: "🔍 Tìm kiếm web", apex: "🌌 Đỉnh cao" }[mode] || "";
+             search: "🔍 Tìm kiếm web", apex: "🌌 Đỉnh cao", image_gen: "🎨 Vẽ ảnh",
+             research: "🔬 Nghiên cứu sâu", subtitle: "📝 Phụ đề" }[mode] || "";
   }
 
   // ── Render tin nhắn ───────────────────────────────────────────────────────
   function hideWelcome() { $("welcome")?.classList.add("hidden"); }
 
-  function addUserMessage(text, images) {
+  function addUserMessage(text, images, video, fileNames) {
     hideWelcome();
     const div = document.createElement("div");
     div.className = "msg user";
@@ -474,6 +487,17 @@
         strip.appendChild(im);
       }
       div.querySelector(".msg-body").appendChild(strip);
+    }
+    if (video) {
+      const v = document.createElement("video");
+      v.src = video; v.controls = true; v.className = "msg-video";
+      div.querySelector(".msg-body").appendChild(v);
+    }
+    if (fileNames && fileNames.length) {
+      const chips = document.createElement("div");
+      chips.className = "msg-files";
+      chips.textContent = "📄 " + fileNames.join(", ");
+      div.querySelector(".msg-body").appendChild(chips);
     }
     $("messages").appendChild(div);
     $("messages").scrollTop = $("messages").scrollHeight;
@@ -519,17 +543,24 @@
     const input = $("input");
     let text = input.value.trim();
     const images = state.attachedImages.slice();
+    const video = state.attachedVideo;
+    const attachedFiles = state.attachedFiles.slice();
     const mode = state.forceMode;
-    // Cho phép gửi chỉ ảnh (không chữ) — tự thêm câu hỏi mặc định.
-    if (!text && images.length) text = "Xem ảnh này giúp mình nhé.";
-    if ((!text && !images.length) || state.streaming) return;
+    const hasAttachment = images.length || video || attachedFiles.length;
+    // Cho phép gửi chỉ đính kèm (không chữ) — tự thêm câu hỏi mặc định.
+    if (!text && hasAttachment) {
+      text = mode === "subtitle" ? "Tạo phụ đề cho video này giúp mình."
+        : video ? "Xem video này giúp mình nhé."
+        : "Xem giúp mình nhé.";
+    }
+    if ((!text && !hasAttachment) || state.streaming) return;
     input.value = "";
     autoResize();
     clearAttachments();
     state.streaming = true;
     $("send").disabled = true;
 
-    addUserMessage(text, images);
+    addUserMessage(text, images, video?.dataUrl, attachedFiles.map((f) => f.name));
     const el = addAssistantMessage("");
     const badge = el.body.querySelector(".mode-badge") || (() => {
       const b = document.createElement("span");
@@ -551,6 +582,8 @@
           message: text,
           conversation_id: state.conversationId,
           images: images,
+          videos: video ? [video.dataUrl] : [],
+          files: attachedFiles.map((f) => ({ name: f.name, data_url: f.dataUrl })),
           mode: mode,
         }),
       });
@@ -664,11 +697,16 @@
     }
   }
 
-  // ── Đính kèm ảnh (đa phương thức: LUMINA "xem" ảnh) ───────────────────────
+  // ── Đính kèm ảnh/video/tệp (đa phương thức: LUMINA "xem" & "đọc") ──────────
   const MAX_IMAGES = 4;
+  const MAX_VIDEO_BYTES = 18 * 1024 * 1024;   // khớp giới hạn backend (media.py)
+  const MAX_FILES = 3;
+  const DOC_EXT = /\.(pdf|docx|xlsx|txt|md|csv)$/i;
 
   function clearAttachments() {
     state.attachedImages = [];
+    state.attachedVideo = null;
+    state.attachedFiles = [];
     $("attach-preview").innerHTML = "";
     $("attach-preview").classList.add("hidden");
   }
@@ -676,7 +714,9 @@
   function renderAttachPreview() {
     const box = $("attach-preview");
     box.innerHTML = "";
-    box.classList.toggle("hidden", state.attachedImages.length === 0);
+    const hasAny = state.attachedImages.length || state.attachedVideo || state.attachedFiles.length;
+    box.classList.toggle("hidden", !hasAny);
+
     state.attachedImages.forEach((src, i) => {
       const wrap = document.createElement("div");
       wrap.className = "attach-thumb";
@@ -686,6 +726,38 @@
         renderAttachPreview();
       });
       box.appendChild(wrap);
+    });
+
+    if (state.attachedVideo) {
+      const wrap = document.createElement("div");
+      wrap.className = "attach-thumb attach-video";
+      wrap.innerHTML = `<span class="attach-icon">🎬</span>` +
+        `<button class="attach-del" title="Bỏ video">✕</button>`;
+      wrap.querySelector(".attach-del").addEventListener("click", () => {
+        state.attachedVideo = null;
+        renderAttachPreview();
+      });
+      box.appendChild(wrap);
+    }
+
+    state.attachedFiles.forEach((f, i) => {
+      const chip = document.createElement("div");
+      chip.className = "attach-chip";
+      chip.innerHTML = `<span>📄 ${f.name}</span><button class="attach-del" title="Bỏ tệp">✕</button>`;
+      chip.querySelector(".attach-del").addEventListener("click", () => {
+        state.attachedFiles.splice(i, 1);
+        renderAttachPreview();
+      });
+      box.appendChild(chip);
+    });
+  }
+
+  function readAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("Không đọc được tệp"));
+      reader.onload = () => resolve(reader.result);
+      reader.readAsDataURL(file);
     });
   }
 
@@ -716,12 +788,22 @@
   }
 
   async function addFiles(fileList) {
-    const files = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
-    for (const f of files) {
-      if (state.attachedImages.length >= MAX_IMAGES) break;
+    for (const f of Array.from(fileList)) {
       try {
-        state.attachedImages.push(await downscaleImage(f));
-      } catch { /* bỏ qua ảnh lỗi */ }
+        if (f.type.startsWith("image/")) {
+          if (state.attachedImages.length >= MAX_IMAGES) continue;
+          state.attachedImages.push(await downscaleImage(f));
+        } else if (f.type.startsWith("video/")) {
+          if (f.size > MAX_VIDEO_BYTES) {
+            alert(`Video "${f.name}" quá lớn (tối đa ~18MB) — hãy nén hoặc cắt ngắn video.`);
+            continue;
+          }
+          state.attachedVideo = { name: f.name, dataUrl: await readAsDataUrl(f) };
+        } else if (DOC_EXT.test(f.name) || f.type === "application/pdf") {
+          if (state.attachedFiles.length >= MAX_FILES) continue;
+          state.attachedFiles.push({ name: f.name, dataUrl: await readAsDataUrl(f) });
+        }
+      } catch { /* bỏ qua tệp lỗi, không chặn các tệp còn lại */ }
     }
     renderAttachPreview();
   }
@@ -757,7 +839,7 @@
   }
   setupVoice();
 
-  // ── Nút ép chế độ 🎨 Vẽ ảnh / 🔬 Nghiên cứu sâu ───────────────────────────
+  // ── Nút ép chế độ 🎨 Vẽ ảnh / 🔬 Nghiên cứu sâu / 📝 Phụ đề ────────────────
   document.querySelectorAll(".mode-toggle").forEach((btn) =>
     btn.addEventListener("click", () => {
       const m = btn.dataset.mode;
@@ -766,6 +848,7 @@
         b.classList.toggle("active", b.dataset.mode === state.forceMode));
       const ph = state.forceMode === "image" ? "Mô tả ảnh muốn vẽ…"
         : state.forceMode === "research" ? "Chủ đề cần nghiên cứu sâu…"
+        : state.forceMode === "subtitle" ? "Đính kèm 📎 video rồi bấm Gửi…"
         : "Nhắn tin cho LUMINA…";
       $("input").placeholder = ph;
     })
@@ -788,6 +871,85 @@
   document.querySelectorAll(".suggestion").forEach((btn) =>
     btn.addEventListener("click", () => { $("input").value = btn.textContent; sendMessage(); })
   );
+
+  // ── 🗣 Modal Lồng tiếng & gắn phụ đề video (job nền, có thể mất 1-3 phút) ──
+  let dubPollTimer = null;
+
+  function openDubModal() {
+    $("dub-modal").classList.remove("hidden");
+    $("dub-form").classList.remove("hidden");
+    $("dub-progress").classList.add("hidden");
+    $("dub-download").classList.add("hidden");
+    $("dub-file-input").value = "";
+  }
+  $("dub-btn").addEventListener("click", openDubModal);
+
+  const DUB_STATUS_TEXT = {
+    pending: "⏳ Đang chuẩn bị…",
+    transcribing: "🎧 Đang nghe & dịch lời thoại…",
+    voicing: "🗣 Đang tạo giọng đọc mới…",
+    muxing: "🎬 Đang ghép video…",
+    done: "✅ Xong! Video đã sẵn sàng.",
+    error: "✕ Có lỗi xảy ra.",
+  };
+
+  $("dub-submit").addEventListener("click", async () => {
+    const fileInput = $("dub-file-input");
+    const file = fileInput.files[0];
+    if (!file) { alert("Hãy chọn một video trước."); return; }
+    if (file.size > MAX_VIDEO_BYTES) {
+      alert("Video quá lớn (tối đa ~18MB) — hãy nén hoặc cắt ngắn video."); return;
+    }
+    let dataUrl;
+    try { dataUrl = await readAsDataUrl(file); }
+    catch { alert("Không đọc được video."); return; }
+
+    $("dub-form").classList.add("hidden");
+    $("dub-progress").classList.remove("hidden");
+    $("dub-download").classList.add("hidden");
+    $("dub-progress-fill").style.width = "5%";
+    $("dub-progress-text").textContent = DUB_STATUS_TEXT.pending;
+
+    try {
+      const res = await api("/api/dub", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          video: dataUrl,
+          target_lang: $("dub-lang").value,
+          burn_subtitles: $("dub-subs").checked,
+        }),
+      });
+      pollDubJob(res.job_id);
+    } catch (err) {
+      $("dub-progress-text").textContent = "✕ " + err.message;
+      $("dub-progress-text").className = "qr-status err";
+      if (err.message.includes("Nâng cấp") || err.message.includes("gói")) {
+        setTimeout(() => { $("dub-modal").classList.add("hidden"); openUpgradeModal(); }, 1800);
+      }
+    }
+  });
+
+  function pollDubJob(jobId) {
+    clearInterval(dubPollTimer);
+    dubPollTimer = setInterval(async () => {
+      try {
+        const s = await api(`/api/dub/${jobId}`);
+        $("dub-progress-fill").style.width = Math.max(5, s.progress) + "%";
+        $("dub-progress-text").textContent = DUB_STATUS_TEXT[s.status] || s.status;
+        $("dub-progress-text").className = "qr-status";
+        if (s.status === "done") {
+          clearInterval(dubPollTimer);
+          const dl = $("dub-download");
+          dl.href = `/api/dub/${jobId}/download`;
+          dl.classList.remove("hidden");
+        } else if (s.status === "error") {
+          clearInterval(dubPollTimer);
+          $("dub-progress-text").textContent = "✕ " + (s.error || "Có lỗi xảy ra.");
+          $("dub-progress-text").className = "qr-status err";
+        }
+      } catch { /* job có thể chưa sẵn sàng — thử lại lượt sau */ }
+    }, 3000);
+  }
 
   boot().catch((err) => {
     document.body.innerHTML = `<p style="padding:40px;color:#ff8a80">Không kết nối được máy chủ: ${escapeHtml(err.message)}</p>`;

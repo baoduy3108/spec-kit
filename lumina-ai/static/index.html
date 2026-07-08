@@ -40,6 +40,7 @@
         </div>
         <button id="upgrade-btn" class="upgrade-btn">✦ Nâng cấp</button>
       </div>
+      <button id="dub-btn" class="admin-btn">🗣 Lồng tiếng phim</button>
       <button id="admin-btn" class="admin-btn hidden">🛠 Đơn hàng</button>
 
       <div class="sidebar-footer">
@@ -72,7 +73,7 @@
       <div class="composer-wrap">
         <div id="attach-preview" class="attach-preview hidden"></div>
         <div class="composer">
-          <button id="attach-btn" class="composer-icon" title="Đính kèm ảnh để LUMINA xem">📎</button>
+          <button id="attach-btn" class="composer-icon" title="Đính kèm ảnh / video / tệp để LUMINA xem">📎</button>
           <textarea id="input" rows="1" placeholder="Nhắn tin cho LUMINA…"></textarea>
           <button id="mic-btn" class="composer-icon" title="Nói bằng giọng">🎤</button>
           <button id="send" class="send-btn" title="Gửi">➤</button>
@@ -80,9 +81,12 @@
         <div class="composer-tools">
           <button class="mode-toggle" data-mode="image" title="Bảo LUMINA vẽ ảnh">🎨 Vẽ ảnh</button>
           <button class="mode-toggle" data-mode="research" title="Tìm nhiều nguồn, viết báo cáo">🔬 Nghiên cứu sâu</button>
-          <span class="composer-hint">LUMINA tự chọn: ⚡ nhanh · 🧠 sâu · 🔍 tìm kiếm · 🖼 xem ảnh</span>
+          <button class="mode-toggle" data-mode="subtitle" title="Đính kèm video trước, LUMINA xuất transcript SRT">📝 Phụ đề</button>
+          <span class="composer-hint">LUMINA tự chọn: ⚡ nhanh · 🧠 sâu · 🔍 tìm kiếm · 🖼 xem ảnh · 🎬 video</span>
         </div>
-        <input type="file" id="file-input" accept="image/*" multiple hidden>
+        <input type="file" id="file-input"
+               accept="image/*,video/mp4,video/webm,video/quicktime,.pdf,.docx,.xlsx,.txt,.md,.csv"
+               multiple hidden>
       </div>
     </main>
   </div>
@@ -116,6 +120,41 @@
       <h2 class="modal-title">Thanh toán bằng thẻ / PayPal</h2>
       <div id="paypal-buttons"></div>
       <p id="paypal-status" class="qr-status"></p>
+    </div>
+  </div>
+
+  <!-- ── Modal 🗣 Lồng tiếng + gắn phụ đề video ─────────────── -->
+  <div id="dub-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="dub-modal">✕</button>
+      <h2 class="modal-title">🗣 Lồng tiếng &amp; gắn phụ đề video</h2>
+      <p class="admin-hint">LUMINA nghe video, dịch lời thoại, tạo giọng đọc mới và gắn phụ đề — tự động
+        hoàn toàn. Video tối đa ~3 phút, ~18MB. Có thể mất 1-3 phút xử lý.</p>
+
+      <div id="dub-form">
+        <label class="dub-field">
+          <span>Chọn video</span>
+          <input type="file" id="dub-file-input" accept="video/mp4,video/webm,video/quicktime">
+        </label>
+        <label class="dub-field">
+          <span>Lồng tiếng sang</span>
+          <select id="dub-lang">
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="en">🇬🇧 Tiếng Anh</option>
+          </select>
+        </label>
+        <label class="dub-field dub-checkbox">
+          <input type="checkbox" id="dub-subs" checked>
+          <span>Gắn cứng phụ đề vào video</span>
+        </label>
+        <button id="dub-submit" class="upgrade-btn" style="width:100%">Bắt đầu xử lý</button>
+      </div>
+
+      <div id="dub-progress" class="hidden">
+        <div class="dub-progress-bar"><div id="dub-progress-fill" class="dub-progress-fill"></div></div>
+        <p id="dub-progress-text" class="qr-status">Đang chuẩn bị…</p>
+        <a id="dub-download" class="upgrade-btn hidden" style="width:100%;text-align:center;display:block">⬇ Tải video đã lồng tiếng</a>
+      </div>
     </div>
   </div>
 

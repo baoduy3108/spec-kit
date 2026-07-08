@@ -10,13 +10,22 @@ class ChatMessage(BaseModel):
     content: str
 
 
+class FileAttachment(BaseModel):
+    name: str = ""
+    data_url: str = ""  # data:<mime>;base64,...
+
+
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=32000)
     conversation_id: Optional[str] = None
     # Ảnh đính kèm (data URL base64) để LUMINA "xem" — tối đa 4 tấm cho 1 lượt.
     images: list[str] = Field(default_factory=list, max_length=4)
-    # Ép chế độ từ nút bấm ở giao diện: "image" (vẽ ảnh) | "research" (nghiên cứu sâu).
-    # None → Router tự đoán theo nội dung câu hỏi.
+    # Video đính kèm (data URL base64, chỉ Gemini xem được) — tối đa 1 video/lượt.
+    videos: list[str] = Field(default_factory=list, max_length=1)
+    # Tệp đính kèm (PDF/Word/Excel/txt) — tối đa 3 tệp/lượt.
+    files: list[FileAttachment] = Field(default_factory=list, max_length=3)
+    # Ép chế độ từ nút bấm ở giao diện: "image" (vẽ ảnh) | "research" (nghiên cứu sâu)
+    # | "subtitle" (tạo phụ đề/transcript từ video). None → Router tự đoán.
     mode: Optional[str] = None
 
 
@@ -73,3 +82,9 @@ class CreateOrderRequest(BaseModel):
 
 class PaypalCaptureRequest(BaseModel):
     paypal_order_id: str
+
+
+class DubRequest(BaseModel):
+    video: str = Field(min_length=1)          # data URL base64
+    target_lang: str = "vi"                    # ngôn ngữ lồng tiếng: vi | en
+    burn_subtitles: bool = True                 # có gắn phụ đề cứng vào video không

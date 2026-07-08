@@ -80,6 +80,11 @@ def _research_route() -> RouteDecision:
     )
 
 
+def _subtitle_route() -> RouteDecision:
+    # Chỉ Gemini xem được video → luôn dùng model Gemini (không có model Claude tương ứng).
+    return RouteDecision(mode="subtitle", label="📝 Phụ đề", model=CONFIG["CLAUDE_MODEL_DEEP"])
+
+
 def _matches(regexes: list[re.Pattern], text: str) -> bool:
     return any(r.search(text) for r in regexes)
 
@@ -90,8 +95,9 @@ def decide_route(
 ) -> RouteDecision:
     """Phân loại câu lệnh và trả về quyết định định tuyến.
 
-    force_mode: nút bấm ở giao diện ép chế độ — "image" (vẽ ảnh) hoặc
-    "research" (nghiên cứu sâu). None → tự đoán theo nội dung.
+    force_mode: nút bấm ở giao diện ép chế độ — "image" (vẽ ảnh), "research"
+    (nghiên cứu sâu), hoặc "subtitle" (tạo phụ đề/transcript từ video).
+    None → tự đoán theo nội dung.
 
     apex_allowed: gói của người dùng có được dùng chế độ 🌌 Đỉnh cao (Fable)
     không — gói Miễn phí sẽ False, gói Tháng/Năm True. Khi câu hỏi đáng lẽ
@@ -105,6 +111,8 @@ def decide_route(
         return _image_route()
     if force_mode == "research":
         return _research_route()
+    if force_mode == "subtitle":
+        return _subtitle_route()
 
     # 1a) Yêu cầu vẽ ảnh → chế độ tạo ảnh (không dùng bộ não chat)
     if _matches(_image_re, text):

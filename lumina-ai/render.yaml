@@ -47,6 +47,6 @@ services:
       - key: ENABLE_FABLE
         value: "false"
       - key: FREE_PREMIUM_CAP
-        value: "2"
+        value: "3"
       - key: RATE_LIMIT_RPM
         value: "10"
