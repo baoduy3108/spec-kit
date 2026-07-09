@@ -161,6 +161,27 @@ def get_messages(conv_id: str, limit: int = 200) -> list[dict]:
         return [dict(r) for r in rows]
 
 
+def search_messages(user_id: str, keywords: list[str], exclude_conv_id: str = "", limit: int = 40) -> list[dict]:
+    """Tìm tin nhắn cũ của CHÍNH người dùng này (ở các hội thoại KHÁC) khớp từ khóa —
+    phục vụ tính năng 'nhớ lại cuộc trò chuyện cũ' khi mở hội thoại mới.
+
+    Luôn lọc theo user_id — không bao giờ trộn dữ liệu giữa hai người dùng khác nhau.
+    """
+    if not keywords:
+        return []
+    with _lock:
+        conditions = " OR ".join(["m.content LIKE ?"] * len(keywords))
+        params: list = [kw for kw in ([f"%{k}%" for k in keywords])]
+        rows = get_conn().execute(
+            f"""SELECT m.id, m.conversation_id, c.title, m.role, m.content, m.created_at
+                FROM messages m JOIN conversations c ON m.conversation_id = c.id
+                WHERE c.user_id = ? AND c.id != ? AND ({conditions})
+                ORDER BY m.created_at DESC LIMIT ?""",
+            [user_id, exclude_conv_id] + params + [limit],
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
 # ─── Gói & mã kích hoạt ──────────────────────────────────────────────────────
 
 def get_effective_plan(user_id: str) -> dict:

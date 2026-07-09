@@ -634,6 +634,7 @@
             chip.className = "search-chip";
             const prefix = ev.tool === "image_gen" ? "🎨 Đang vẽ ảnh: "
               : ev.tool === "knowledge" ? "📚 Tra kho tri thức: "
+              : ev.tool === "recall" ? "🧠 Nhớ lại cuộc trò chuyện: "
               : ev.tool === "web_fetch" ? "🌐 Đang đọc trang: "
               : "🔍 Đang tìm kiếm: ";
             chip.textContent = prefix + (ev.query || "…");

@@ -44,6 +44,8 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 
 > Router tự nhận ra ý định ("vẽ…", "nghiên cứu sâu…") nên thường **không cần bấm nút**; các nút chỉ để ép chế độ khi muốn.
 
+**🧠 Trí nhớ dài hạn (nhớ chat cũ):** mỗi hội thoại trong sidebar vốn tách biệt — nhưng khi bạn **mở hội thoại MỚI**, LUMINA tự tìm trong các hội thoại CŨ của **chính bạn** xem có liên quan không, rồi âm thầm đưa vào ngữ cảnh (không hiện ra dạng thô, chỉ là chip nhỏ "🧠 Nhớ lại cuộc trò chuyện"). Không cần bạn nhắc lại từ đầu mỗi lần mở chat mới. Tìm kiếm bằng SQL nội bộ (không gọi API ngoài, gần như không tốn gì) và **luôn lọc theo tài khoản** — tuyệt đối không trộn dữ liệu giữa hai người dùng khác nhau.
+
 ### 🗣 Về tính năng Lồng tiếng & Phụ đề tự động (nặng nhất hệ thống)
 
 Đây là pipeline xử lý video THẬT (không phải giả lập): LUMINA **nghe** video (Gemini) → **dịch** lời thoại → **sinh giọng đọc mới** bằng [edge-tts](https://github.com/rany2/edge-tts) (giọng Microsoft, MIỄN PHÍ, không cần key) → **ghép** giọng mới vào đúng mốc thời gian và **gắn cứng phụ đề** bằng ffmpeg (qua gói `imageio-ffmpeg` — mang sẵn binary tĩnh, **không cần cài đặt gì thêm** trên máy chủ, chạy được cả trên Render free).
@@ -131,6 +133,7 @@ lumina-ai/
 │   ├── orchestrator.py     # Điều phối 2 tầng bộ não + fallback + chế độ vẽ ảnh/nghiên cứu + giấu tên model
 │   ├── imagegen.py         # 🎨 Vẽ ảnh (Pollinations free, hoặc DALL-E nếu có OpenAI key)
 │   ├── knowledge.py        # 📚 Kho tri thức tự học (data/knowledge.db + Wikipedia free) — giảm token
+│   ├── recall.py           # 🧠 Trí nhớ dài hạn — nhớ hội thoại CŨ khi mở hội thoại MỚI (cách ly theo user)
 │   ├── media.py            # 🖼🎬 Xử lý ảnh/video đính kèm (data URL) cho bộ não nhìn được
 │   ├── files.py            # 📄 Đọc PDF/Word/Excel/txt đính kèm → tách chữ đưa vào ngữ cảnh
 │   ├── video_dub.py        # 🗣 Pipeline lồng tiếng + gắn phụ đề video (Gemini + edge-tts + ffmpeg)

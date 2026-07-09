@@ -35,7 +35,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, files, media, payments, video_dub
+from . import auth, config, db, files, media, payments, recall, video_dub
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
 from .memory import trim_history
@@ -313,6 +313,7 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
         use_premium = False
 
     # Hội thoại: tạo mới hoặc nối tiếp
+    is_new_conversation = not body.conversation_id
     conv_id = body.conversation_id
     if conv_id:
         if not db.get_conversation(conv_id, user["id"]):
@@ -336,6 +337,15 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
             file_notes.append(f"⚠️ {result['name']}: {result['error']}" if result.get("error")
                               else f"✅ đã đọc {result['name']}")
         effective_message = body.message + files.build_context(extracted)
+
+    # 🧠 Trí nhớ dài hạn: chỉ khi mở hội thoại MỚI (đã có lịch sử trong hội thoại
+    # hiện tại thì không cần — nó tự thấy trong `history` rồi), tìm trong các hội
+    # thoại CŨ của CHÍNH người dùng này xem có liên quan không, âm thầm đưa vào.
+    recall_items: list[dict] = []
+    if is_new_conversation:
+        recall_items = recall.gather(user["id"], body.message, exclude_conv_id=conv_id)
+        if recall_items:
+            effective_message += recall.build_context(recall_items)
 
     # Lưu tin nhắn người dùng; ghi chú đính kèm (không lưu ảnh/video/tệp thô vào DB).
     attach_notes = []
@@ -375,6 +385,11 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
             "type": "router", "mode": route.mode, "label": display_label,
             "conversation_id": conv_id,
         })
+        if recall_items:
+            yield _sse({
+                "type": "search_status", "tool": "recall",
+                "query": ", ".join(it["title"] for it in recall_items)[:80],
+            })
         if route.apex_locked:
             yield _sse({
                 "type": "upsell",

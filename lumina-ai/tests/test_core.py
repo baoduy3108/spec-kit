@@ -519,3 +519,64 @@ def test_video_dub_ffmpeg_pipeline_real():
         assert abs(out_dur - duration) < 0.3  # video cuối KHÔNG bị cắt ngắn so với gốc
 
     asyncio.get_event_loop().run_until_complete(go())
+
+
+# ── Trí nhớ dài hạn: nhớ lại hội thoại CŨ khi mở hội thoại MỚI ──────────────
+
+def test_recall_finds_relevant_past_conversation():
+    from app import recall
+    uid = _new_user_id()
+    conv1 = db.create_conversation(uid, "Dự án LUMINA")
+    db.add_message(conv1, "user", "Dự án LUMINA AI của tôi deadline là ngày 20 tháng 8 nhé")
+    db.add_message(conv1, "assistant", "Đã ghi nhận, deadline là 20/8.")
+    conv2 = db.create_conversation(uid, "Nấu ăn")
+    db.add_message(conv2, "user", "Cách nấu phở bò ngon")
+
+    conv3 = db.create_conversation(uid, "Hội thoại mới")
+    items = recall.gather(uid, "deadline dự án LUMINA AI là khi nào", exclude_conv_id=conv3)
+    assert items
+    assert any("20" in it["snippet"] for it in items)
+    assert not any("phở" in it["snippet"].lower() for it in items)
+
+
+def test_recall_isolated_between_users():
+    """Bảo mật quan trọng nhất: KHÔNG BAO GIỜ được lộ dữ liệu giữa 2 người dùng khác nhau."""
+    from app import recall
+    uid_a = _new_user_id()
+    uid_b = _new_user_id()
+    conv_a = db.create_conversation(uid_a, "Bí mật A")
+    db.add_message(conv_a, "user", "Dự án LUMINA bí mật của tôi có mật khẩu SECRET-AAA")
+    conv_b = db.create_conversation(uid_b, "Bí mật B")
+    db.add_message(conv_b, "user", "Dự án LUMINA bí mật của tôi có mật khẩu SECRET-BBB")
+
+    items_b = recall.gather(uid_b, "mật khẩu dự án LUMINA của tôi là gì", exclude_conv_id="")
+    joined = " ".join(it["snippet"] for it in items_b)
+    assert "SECRET-BBB" in joined       # thấy đúng dữ liệu của chính mình
+    assert "SECRET-AAA" not in joined   # TUYỆT ĐỐI không thấy dữ liệu của người khác
+
+
+def test_recall_excludes_current_conversation():
+    from app import recall
+    uid = _new_user_id()
+    conv1 = db.create_conversation(uid, "Hội thoại hiện tại")
+    db.add_message(conv1, "user", "Từ khóa đặc biệt XYZKEYWORD nằm trong chính hội thoại này")
+    items = recall.gather(uid, "XYZKEYWORD", exclude_conv_id=conv1)
+    assert items == []  # bị loại vì exclude_conv_id — history của hội thoại hiện tại đã có sẵn rồi
+
+
+def test_recall_build_context_has_anti_hallucination_directive():
+    from app import recall
+    ctx = recall.build_context([{"conversation_id": "c1", "title": "T", "role": "user",
+                                 "snippet": "nội dung", "created_at": 0}])
+    assert "không bịa" in ctx
+    assert "T" in ctx
+
+
+def test_recall_no_keywords_returns_empty():
+    from app import recall
+    uid = _new_user_id()
+    assert recall.gather(uid, "là gì và có", exclude_conv_id="") == []  # toàn từ dừng
+
+
+def test_db_search_messages_empty_keywords():
+    assert db.search_messages("any-user", [], exclude_conv_id="") == []
