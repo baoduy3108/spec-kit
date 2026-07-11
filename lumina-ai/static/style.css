@@ -34,9 +34,10 @@ body {
   align-items: center;
   justify-content: center;
   background:
-    radial-gradient(600px 400px at 20% 20%, rgba(139,124,248,.18), transparent),
-    radial-gradient(600px 400px at 80% 80%, rgba(79,195,247,.14), transparent),
-    var(--bg);
+    radial-gradient(ellipse at center, transparent 0%, transparent 40%, var(--bg) 92%),
+    url("/static/images/login-cover.jpg");
+  background-size: cover;
+  background-position: center;
 }
 .login-card {
   text-align: center;
