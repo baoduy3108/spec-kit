@@ -438,7 +438,7 @@
   function buildWelcomePlaceholder() {
     const div = document.createElement("div");
     div.id = "welcome"; div.className = "welcome";
-    div.innerHTML = "<div class='logo-big'>✦</div><h2>Xin chào! Mình là LUMINA</h2>";
+    div.innerHTML = "<img class='logo-big' src='/static/images/logo-128.png' alt='LUMINA'><h2>Xin chào! Mình là LUMINA</h2>";
     return div;
   }
 
