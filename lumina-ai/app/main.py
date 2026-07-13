@@ -25,6 +25,7 @@ Endpoints:
   GET  /api/metrics         → thống kê hiệu năng
 """
 
+import asyncio
 import json
 import logging
 import os
@@ -35,7 +36,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, files, media, payments, recall, video_dub
+from . import auth, config, db, files, media, payments, recall, video_dub, webpage
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
 from .memory import trim_history
@@ -338,6 +339,18 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
                               else f"✅ đã đọc {result['name']}")
         effective_message = body.message + files.build_context(extracted)
 
+    # 🌐 Link trong câu hỏi → TỰ TẢI và đọc nội dung trang — hoạt động với MỌI
+    # bộ não (trước đây chỉ Claude ở chế độ 🔍 tìm kiếm mới đọc được link).
+    webpage_notes: list[str] = []
+    fetched_pages: list[dict] = []
+    urls = webpage.extract_urls(body.message)
+    if urls:
+        fetched_pages = await asyncio.gather(*(webpage.fetch_page(u) for u in urls))
+        for p in fetched_pages:
+            webpage_notes.append(f"⚠️ {p['url']}: {p['error']}" if p.get("error")
+                                 else f"✅ đã đọc {p['url']}")
+        effective_message += webpage.build_context(fetched_pages)
+
     # 🧠 Trí nhớ dài hạn: chỉ khi mở hội thoại MỚI (đã có lịch sử trong hội thoại
     # hiện tại thì không cần — nó tự thấy trong `history` rồi), tìm trong các hội
     # thoại CŨ của CHÍNH người dùng này xem có liên quan không, âm thầm đưa vào.
@@ -354,6 +367,7 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
     if body.videos:
         attach_notes.append("đã gửi 1 video")
     attach_notes.extend(file_notes)
+    attach_notes.extend(webpage_notes)
     stored = body.message + (f"\n\n_({'; '.join(attach_notes)})_" if attach_notes else "")
     db.add_message(conv_id, "user", stored)
 
@@ -385,6 +399,12 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
             "type": "router", "mode": route.mode, "label": display_label,
             "conversation_id": conv_id,
         })
+        ok_pages = [p for p in fetched_pages if not p.get("error")]
+        if ok_pages:
+            yield _sse({
+                "type": "search_status", "tool": "web_fetch",
+                "query": ", ".join(p["title"] for p in ok_pages)[:80],
+            })
         if recall_items:
             yield _sse({
                 "type": "search_status", "tool": "recall",

@@ -17,3 +17,6 @@ openpyxl>=3.1
 # thống, chạy được cả trên Render free) + giọng đọc miễn phí (Microsoft Edge TTS)
 imageio-ffmpeg>=0.5
 edge-tts>=6.1
+
+# 🌐 Đọc nội dung trang web khi người dùng dán link — hoạt động với MỌI bộ não
+beautifulsoup4>=4.12

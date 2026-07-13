@@ -36,6 +36,7 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 | 🖼 **Xem / hiểu ảnh** | Bấm 📎 đính kèm ảnh → hỏi "ảnh này là gì?" | Gemini (free) hoặc Claude — có sẵn |
 | 🎬 **Xem / hiểu video** | Bấm 📎 đính kèm video (≤~18MB) → hỏi về nội dung | Chỉ **Gemini** xem được video (Claude/OpenAI chưa hỗ trợ) |
 | 📄 **Đọc tệp** | Bấm 📎 đính kèm PDF/Word/Excel/txt → hỏi về nội dung | Đọc chữ trực tiếp — mọi bộ não đều dùng được |
+| 🌐 **Đọc link dán trong chat** | Dán bất kỳ link http(s) nào vào câu hỏi → LUMINA tự tải và đọc nội dung trang | **Mọi bộ não** (server tự tải trang, không phụ thuộc Claude/chế độ tìm kiếm) |
 | 🔬 **Nghiên cứu sâu** | Bấm nút **🔬 Nghiên cứu sâu** hoặc gõ "nghiên cứu sâu về…" → LUMINA tìm nhiều nguồn, viết báo cáo có trích dẫn | Bộ não có tìm kiếm (Gemini/Claude) |
 | 🎨 **Vẽ ảnh** | Bấm nút **🎨 Vẽ ảnh** hoặc gõ "vẽ con mèo…" → ra ảnh | **Miễn phí, không cần key** (Pollinations); tự dùng DALL-E nếu có `OPENAI_API_KEY` |
 | 📝 **Tạo phụ đề video** | Đính kèm video + bấm nút **📝 Phụ đề** → LUMINA xuất transcript chuẩn SRT (kèm mốc thời gian) | Gemini (nghe video) |
@@ -43,6 +44,8 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 | 🎤 **Nói bằng giọng** | Bấm 🎤 → nói → ra chữ | Chạy ngay trong trình duyệt (Chrome/Edge/Android), không cần server |
 
 > Router tự nhận ra ý định ("vẽ…", "nghiên cứu sâu…") nên thường **không cần bấm nút**; các nút chỉ để ép chế độ khi muốn.
+
+**🌐 Đọc link dán trong chat:** trước đây chỉ Claude ở chế độ 🔍 tìm kiếm mới đọc được link người dùng dán vào — Gemini/Groq/DeepSeek/OpenAI thì không. Giờ máy chủ **tự tải link** (httpx, không cần key) và tách nội dung đọc được (bỏ menu/quảng cáo/script bằng BeautifulSoup) trước khi đưa cho bộ não — hoạt động với **mọi bộ não, mọi chế độ**. Giới hạn 2 link/tin nhắn, trang nặng hơn 3MB hoặc không phải HTML thì báo lỗi thân thiện thay vì treo.
 
 **🧠 Trí nhớ dài hạn (nhớ chat cũ):** mỗi hội thoại trong sidebar vốn tách biệt — nhưng khi bạn **mở hội thoại MỚI**, LUMINA tự tìm trong các hội thoại CŨ của **chính bạn** xem có liên quan không, rồi âm thầm đưa vào ngữ cảnh (không hiện ra dạng thô, chỉ là chip nhỏ "🧠 Nhớ lại cuộc trò chuyện"). Không cần bạn nhắc lại từ đầu mỗi lần mở chat mới. Tìm kiếm bằng SQL nội bộ (không gọi API ngoài, gần như không tốn gì) và **luôn lọc theo tài khoản** — tuyệt đối không trộn dữ liệu giữa hai người dùng khác nhau.
 
@@ -134,6 +137,7 @@ lumina-ai/
 │   ├── imagegen.py         # 🎨 Vẽ ảnh (Pollinations free, hoặc DALL-E nếu có OpenAI key)
 │   ├── knowledge.py        # 📚 Kho tri thức tự học (data/knowledge.db + Wikipedia free) — giảm token
 │   ├── recall.py           # 🧠 Trí nhớ dài hạn — nhớ hội thoại CŨ khi mở hội thoại MỚI (cách ly theo user)
+│   ├── webpage.py          # 🌐 Đọc link dán trong chat (httpx + BeautifulSoup) — mọi bộ não dùng được
 │   ├── media.py            # 🖼🎬 Xử lý ảnh/video đính kèm (data URL) cho bộ não nhìn được
 │   ├── files.py            # 📄 Đọc PDF/Word/Excel/txt đính kèm → tách chữ đưa vào ngữ cảnh
 │   ├── video_dub.py        # 🗣 Pipeline lồng tiếng + gắn phụ đề video (Gemini + edge-tts + ffmpeg)

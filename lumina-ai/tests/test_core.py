@@ -580,3 +580,70 @@ def test_recall_no_keywords_returns_empty():
 
 def test_db_search_messages_empty_keywords():
     assert db.search_messages("any-user", [], exclude_conv_id="") == []
+
+
+# ── 🌐 Đọc trang web khi người dùng dán link (mọi bộ não, không chỉ Claude) ──
+
+def test_webpage_extract_urls():
+    from app.webpage import extract_urls
+    msg = "đọc giúp tôi https://example.com/page?a=1 nói về gì, còn cả http://test.org/x nữa."
+    urls = extract_urls(msg)
+    assert urls == ["https://example.com/page?a=1", "http://test.org/x"]
+
+
+def test_webpage_extract_urls_dedupe_and_limit():
+    from app.webpage import extract_urls
+    msg = "https://a.com https://a.com https://b.com https://c.com https://d.com"
+    urls = extract_urls(msg, limit=2)
+    assert urls == ["https://a.com", "https://b.com"]  # loại trùng + giới hạn số lượng
+
+
+def test_webpage_extract_urls_none():
+    from app.webpage import extract_urls
+    assert extract_urls("không có link nào ở đây cả") == []
+
+
+def test_webpage_parses_html_strips_boilerplate():
+    """Kiểm tra tách nội dung: loại script/nav/header/footer, giữ đúng nội dung chính."""
+    from bs4 import BeautifulSoup
+    html = """
+    <html><head><title>Bai viet hay</title></head>
+    <body>
+    <nav>Menu dieu huong</nav>
+    <script>alert("xau")</script>
+    <header>Header quang cao</header>
+    <article><h1>Tieu de</h1><p>Noi dung chinh ve LUMINA AI.</p></article>
+    <footer>Footer ban quyen</footer>
+    </body></html>
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup(["script", "style", "nav", "footer", "header", "noscript", "svg"]):
+        tag.decompose()
+    text = soup.get_text(separator="\n", strip=True)
+    assert "dieu huong" not in text
+    assert "xau" not in text
+    assert "quang cao" not in text
+    assert "ban quyen" not in text
+    assert "LUMINA AI" in text
+
+
+def test_webpage_fetch_page_never_raises_on_bad_url():
+    import asyncio
+    from app.webpage import fetch_page
+    result = asyncio.get_event_loop().run_until_complete(fetch_page("https://khong-ton-tai-9999.invalid"))
+    assert result["error"] != ""  # báo lỗi thân thiện, không raise
+
+
+def test_webpage_build_context_skips_errors():
+    from app.webpage import build_context
+    ok = {"url": "https://a.com", "title": "Trang A", "text": "nội dung A", "error": ""}
+    bad = {"url": "https://b.com", "title": "", "text": "", "error": "hỏng"}
+    ctx = build_context([ok, bad])
+    assert "Trang A" in ctx
+    assert "b.com" not in ctx  # trang lỗi không được đưa vào ngữ cảnh
+
+
+def test_webpage_build_context_empty_when_no_pages():
+    from app.webpage import build_context
+    assert build_context([]) == ""
+    assert build_context([{"url": "x", "title": "", "text": "", "error": "lỗi"}]) == ""
