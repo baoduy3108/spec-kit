@@ -40,7 +40,7 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 | 🔬 **Nghiên cứu sâu** | Bấm nút **🔬 Nghiên cứu sâu** hoặc gõ "nghiên cứu sâu về…" → LUMINA tìm nhiều nguồn, viết báo cáo có trích dẫn | Bộ não có tìm kiếm (Gemini/Claude) |
 | 🎨 **Vẽ ảnh** | Bấm nút **🎨 Vẽ ảnh** hoặc gõ "vẽ con mèo…" → ra ảnh | **Miễn phí, không cần key** (Pollinations); tự dùng DALL-E nếu có `OPENAI_API_KEY` |
 | 📝 **Tạo phụ đề video** | Đính kèm video + bấm nút **📝 Phụ đề** → LUMINA xuất transcript chuẩn SRT (kèm mốc thời gian) | Gemini (nghe video) |
-| 🤖 **Agent Hóa** | Bấm nút **🤖 Agent Hóa** → LUMINA phân tích/thiết kế/triển khai theo quy trình 6 giai đoạn nghiêm ngặt (SPEC → Design Review → Implementation → Validation → Review → Handover); nếu chưa có code/tài liệu trong hội thoại, LUMINA sẽ hỏi bạn dán vào hoặc dùng 📎/dán link trước khi phân tích | Bộ não có tìm kiếm (Gemini/Claude) |
+| 🛠 **Công Trình Sư** | Bấm nút **🛠 Công Trình Sư** → LUMINA phân tích/thiết kế/triển khai theo quy trình 6 giai đoạn nghiêm ngặt (SPEC → Design Review → Implementation → Validation → Review → Handover); nếu chưa có code/tài liệu trong hội thoại, LUMINA sẽ hỏi bạn dán vào hoặc dùng 📎/dán link trước khi phân tích | Bộ não có tìm kiếm (Gemini/Claude) |
 | 🗣 **Lồng tiếng tự động** | Nút **🗣 Lồng tiếng phim** ở sidebar → chọn video, chọn ngôn ngữ → chờ 1-3 phút → tải video đã lồng tiếng + gắn phụ đề | Chỉ gói **Tháng/Năm** (tốn nhiều tài nguyên xử lý) — xem chi tiết bên dưới |
 | 🎤 **Nói bằng giọng** | Bấm 🎤 → nói → ra chữ | Chạy ngay trong trình duyệt (Chrome/Edge/Android), không cần server |
 

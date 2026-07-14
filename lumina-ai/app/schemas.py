@@ -25,7 +25,7 @@ class ChatRequest(BaseModel):
     # Tệp đính kèm (PDF/Word/Excel/txt) — tối đa 3 tệp/lượt.
     files: list[FileAttachment] = Field(default_factory=list, max_length=3)
     # Ép chế độ từ nút bấm ở giao diện: "image" (vẽ ảnh) | "research" (nghiên cứu sâu)
-    # | "subtitle" (tạo phụ đề/transcript từ video) | "agent" (Agent Hóa — quy trình 6
+    # | "subtitle" (tạo phụ đề/transcript từ video) | "agent" (Công Trình Sư — quy trình 6
     # giai đoạn). None → Router tự đoán.
     mode: Optional[str] = None
 
