@@ -381,6 +381,23 @@ def test_router_subtitle_force_mode():
     assert route.label == "📝 Phụ đề"
 
 
+# ── Router: chế độ 🤖 Agent Hóa (quy trình 6 giai đoạn) ─────────────────────
+
+def test_router_agent_force_mode():
+    route = decide_route("bất kỳ nội dung gì", force_mode="agent")
+    assert route.mode == "agent"
+    assert route.label == "🤖 Agent Hóa"
+    assert route.use_web_search is True
+    assert route.effort == "high"
+
+
+def test_router_agent_not_auto_detected():
+    # Agent Hóa CHỈ kích hoạt qua nút bấm (force_mode) — không có regex tự đoán,
+    # để tránh vô tình chạy quy trình 6 giai đoạn nặng nề trên câu hỏi thường.
+    for q in ["phân tích giúp mình đoạn code này", "thiết kế hệ thống mới", "review code giúp mình"]:
+        assert decide_route(q).mode != "agent", q
+
+
 # ── Media: video đính kèm ────────────────────────────────────────────────────
 
 def test_media_parse_video_data_url():

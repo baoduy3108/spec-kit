@@ -381,14 +381,14 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
 
     # Tầng free chỉ có 2 "chế độ": tìm kiếm hay không (engine free không có tư duy sâu như Claude).
     apex_allowed = plan["apex_allowed"] and use_premium
-    force_mode = body.mode if body.mode in ("image", "research", "subtitle") else None
+    force_mode = body.mode if body.mode in ("image", "research", "subtitle", "agent") else None
     # Có video mà chưa ép chế độ + câu hỏi rỗng-ý (kiểu chỉ gửi video) → ưu tiên phân tích thường,
     # người dùng bấm nút 📝 riêng khi muốn phụ đề (tránh đoán nhầm ý định).
     route = decide_route(body.message, history_len=len(history),
                          apex_allowed=apex_allowed, force_mode=force_mode)
     # Ẩn nhãn chế độ "cao cấp" khi đang chạy tầng free — để không lộ là đã tụt bộ não.
     # Nhãn TÍNH NĂNG (vẽ ảnh / nghiên cứu / phụ đề) là an toàn (không phải tên model) → luôn hiện.
-    if route.mode in ("image_gen", "research", "subtitle"):
+    if route.mode in ("image_gen", "research", "subtitle", "agent"):
         display_label = route.label
     else:
         display_label = route.label if use_premium else ("🔍 Tìm kiếm web" if route.use_web_search else "✨ LUMINA")

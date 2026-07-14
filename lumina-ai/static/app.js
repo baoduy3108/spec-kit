@@ -13,7 +13,7 @@
     attachedImages: [],   // data URL các ảnh đang đính kèm cho lượt tới
     attachedVideo: null,  // { name, dataUrl } — chỉ 1 video/lượt
     attachedFiles: [],    // [{ name, dataUrl }] — PDF/Word/Excel/txt, tối đa 3
-    forceMode: null,      // null | "image" | "research" | "subtitle" — nút ép chế độ
+    forceMode: null,      // null | "image" | "research" | "subtitle" | "agent" — nút ép chế độ
   };
 
   const PLAN_LABELS = { free: "Miễn phí", monthly: "Tháng", yearly: "Năm" };
@@ -466,7 +466,7 @@
   function modeLabel(mode) {
     return { fast: "⚡ Phản hồi nhanh", balanced: "✨ Cân bằng", deep: "🧠 Tư duy sâu",
              search: "🔍 Tìm kiếm web", apex: "🌌 Đỉnh cao", image_gen: "🎨 Vẽ ảnh",
-             research: "🔬 Nghiên cứu sâu", subtitle: "📝 Phụ đề" }[mode] || "";
+             research: "🔬 Nghiên cứu sâu", subtitle: "📝 Phụ đề", agent: "🤖 Agent Hóa" }[mode] || "";
   }
 
   // ── Render tin nhắn ───────────────────────────────────────────────────────
@@ -840,7 +840,7 @@
   }
   setupVoice();
 
-  // ── Nút ép chế độ 🎨 Vẽ ảnh / 🔬 Nghiên cứu sâu / 📝 Phụ đề ────────────────
+  // ── Nút ép chế độ 🎨 Vẽ ảnh / 🔬 Nghiên cứu sâu / 📝 Phụ đề / 🤖 Agent Hóa ──
   document.querySelectorAll(".mode-toggle").forEach((btn) =>
     btn.addEventListener("click", () => {
       const m = btn.dataset.mode;
@@ -850,6 +850,7 @@
       const ph = state.forceMode === "image" ? "Mô tả ảnh muốn vẽ…"
         : state.forceMode === "research" ? "Chủ đề cần nghiên cứu sâu…"
         : state.forceMode === "subtitle" ? "Đính kèm 📎 video rồi bấm Gửi…"
+        : state.forceMode === "agent" ? "Mô tả yêu cầu (dán kèm code/tài liệu nếu có)…"
         : "Nhắn tin cho LUMINA…";
       $("input").placeholder = ph;
     })

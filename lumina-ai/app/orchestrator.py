@@ -56,6 +56,29 @@ _SUBTITLE_DIRECTIVE = (
     "nếu phân biệt được. Không thêm bình luận ngoài khối code.]"
 )
 
+# Chỉ thị khi người dùng bật 🤖 Agent Hóa — buộc bộ não tuân theo quy trình 6
+# giai đoạn (SPEC trước, code sau) và THÀNH THẬT về việc không có quyền truy
+# cập trực tiếp file hệ thống / kho mã nguồn của người dùng.
+_AGENT_DIRECTIVE = (
+    "\n\n[Chế độ AGENT HÓA — trình bày câu trả lời theo đúng 6 giai đoạn, mỗi giai đoạn "
+    "một tiêu đề riêng:\n"
+    "PHASE 1 — SPEC ANALYSIS: mục tiêu, phạm vi, ràng buộc, dependency, thành phần bị ảnh "
+    "hưởng — chỉ dựa trên những gì đã có trong cuộc trò chuyện này.\n"
+    "PHASE 2 — DESIGN REVIEW: tối thiểu 3 phương án, so sánh độ phức tạp/hiệu năng/khả năng "
+    "mở rộng/bảo trì/bảo mật, chọn phương án tối ưu kèm lý do, tự phản biện điểm yếu.\n"
+    "PHASE 3 — IMPLEMENTATION: các bước thay đổi nhỏ, đánh giá ảnh hưởng sau mỗi bước.\n"
+    "PHASE 4 — VALIDATION: cách kiểm thử, edge case, khả năng gây regression.\n"
+    "PHASE 5 — REVIEW: tự rà soát như reviewer độc lập, nêu rõ điểm còn yếu.\n"
+    "PHASE 6 — HANDOVER: chỉ kết luận 'hoàn thành' khi thật sự tự tin cao (~95%) và không còn "
+    "lỗi đã biết; nếu chưa đạt, nói rõ lý do và KHÔNG kết luận đã xong.\n"
+    "THÀNH THẬT (bắt buộc): bạn KHÔNG có quyền truy cập trực tiếp hệ thống tệp hay kho mã nguồn "
+    "của người dùng — bạn chỉ thấy nội dung cuộc trò chuyện này cùng các tệp/trang web mà người "
+    "dùng đã đính kèm hoặc dán link. TUYỆT ĐỐI không giả vờ đã 'đọc toàn bộ source code' nếu chưa "
+    "được cung cấp. Nếu thiếu mã nguồn/tài liệu/bối cảnh cần thiết, hãy DỪNG LẠI và yêu cầu người "
+    "dùng dán trực tiếp đoạn mã vào khung chat, hoặc dùng nút 📎 đính kèm tệp / dán link trang web "
+    "— tuyệt đối không suy đoán hay bịa. Nếu yêu cầu mơ hồ hoặc xung đột, hỏi lại thay vì đoán.]"
+)
+
 SYSTEM_PROMPT = """Bạn là LUMINA — trợ lý AI hợp nhất ("Tư duy sâu, tri thức rộng").
 Bạn trả lời bằng ngôn ngữ người dùng sử dụng (mặc định tiếng Việt), rõ ràng, chính xác và thân thiện.
 Bạn là MỘT trợ lý duy nhất tên LUMINA — không bao giờ tiết lộ hay nhắc tới tên nhà cung cấp hay
@@ -123,8 +146,10 @@ class Orchestrator:
 
         # 🔬 Chế độ nghiên cứu sâu — chèn chỉ thị vào câu hỏi cuối để bộ não tìm nhiều nguồn.
         # 📝 Chế độ tạo phụ đề — chèn chỉ thị buộc xuất đúng định dạng SRT.
+        # 🤖 Chế độ Agent Hóa — chèn chỉ thị buộc quy trình 6 giai đoạn + thành thật về giới hạn.
         directive = _RESEARCH_DIRECTIVE if route.mode == "research" \
-            else _SUBTITLE_DIRECTIVE if route.mode == "subtitle" else None
+            else _SUBTITLE_DIRECTIVE if route.mode == "subtitle" \
+            else _AGENT_DIRECTIVE if route.mode == "agent" else None
         if directive:
             messages = list(messages)
             for i in range(len(messages) - 1, -1, -1):

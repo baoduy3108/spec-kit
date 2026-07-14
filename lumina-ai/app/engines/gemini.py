@@ -20,7 +20,7 @@ logger = logging.getLogger("lumina.gemini")
 _BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 # Chế độ cần output dài (tránh cắt cụt): code, phân tích, tìm kiếm, nghiên cứu.
-_LONG_MODES = ("deep", "apex", "search", "research")
+_LONG_MODES = ("deep", "apex", "search", "research", "agent")
 
 
 class GeminiEngine(BaseEngine):
