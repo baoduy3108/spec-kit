@@ -26,7 +26,7 @@ class ChatRequest(BaseModel):
     files: list[FileAttachment] = Field(default_factory=list, max_length=3)
     # Ép chế độ từ nút bấm ở giao diện: "image" (vẽ ảnh) | "research" (nghiên cứu sâu)
     # | "subtitle" (tạo phụ đề/transcript từ video) | "agent" (Lumina Forge — quy trình 6
-    # giai đoạn). None → Router tự đoán.
+    # giai đoạn) | "code" (Code Chuyên Sâu). None → Router tự đoán.
     mode: Optional[str] = None
 
 
@@ -53,7 +53,7 @@ class EngineReply(BaseModel):
 
 class RouteDecision(BaseModel):
     """Quyết định của Auto-Router 'bù trừ'."""
-    mode: str            # fast | balanced | deep | search | apex | image_gen | research | subtitle | agent
+    mode: str            # fast | balanced | deep | search | apex | image_gen | research | subtitle | agent | code
     label: str           # nhãn hiển thị trên UI, ví dụ "🧠 Tư duy sâu"
     model: str           # model ID thực tế
     use_web_search: bool = False

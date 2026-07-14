@@ -398,6 +398,23 @@ def test_router_agent_not_auto_detected():
         assert decide_route(q).mode != "agent", q
 
 
+# ── Router: chế độ 💻 Code Chuyên Sâu ────────────────────────────────────────
+
+def test_router_code_force_mode():
+    route = decide_route("bất kỳ nội dung gì", force_mode="code")
+    assert route.mode == "code"
+    assert route.label == "💻 Code Chuyên Sâu"
+    assert route.use_web_search is True
+    assert route.effort == "high"
+
+
+def test_router_code_not_auto_detected():
+    # Code Chuyên Sâu CHỈ kích hoạt qua nút bấm — câu hỏi code thường vẫn rơi vào
+    # "deep" (🧠 Tư duy sâu) mặc định, không tự động nâng cấp lên chế độ nặng hơn.
+    for q in ["viết hàm python kiểm tra số nguyên tố", "sửa lỗi đoạn code javascript này", "debug sql giúp mình"]:
+        assert decide_route(q).mode != "code", q
+
+
 # ── Media: video đính kèm ────────────────────────────────────────────────────
 
 def test_media_parse_video_data_url():

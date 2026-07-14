@@ -79,6 +79,32 @@ _AGENT_DIRECTIVE = (
     "— tuyệt đối không suy đoán hay bịa. Nếu yêu cầu mơ hồ hoặc xung đột, hỏi lại thay vì đoán.]"
 )
 
+# Chỉ thị khi người dùng bật 💻 Code Chuyên Sâu — buộc bộ não trả lời code ở mức
+# chuyên gia: đúng convention từng ngôn ngữ, có kiến trúc/bảo mật/test, không chỉ
+# viết cho chạy được. Tái dùng đoạn THÀNH THẬT của Lumina Forge vì lý do giống hệt
+# (không có quyền truy cập file hệ thống/kho mã nguồn thật của người dùng).
+_CODE_DIRECTIVE = (
+    "\n\n[Chế độ CODE CHUYÊN SÂU — trả lời như một kỹ sư phần mềm cấp cao, không chỉ đưa "
+    "code chạy được:\n"
+    "1. Nếu người dùng chưa nói rõ ngôn ngữ/framework, chọn lựa chọn phù hợp nhất với ngữ "
+    "cảnh và nêu rõ vì sao (hỗ trợ tốt: Python, TypeScript, JavaScript, Rust, Go, Java, C#, "
+    "C++, SQL, Bash).\n"
+    "2. Với việc lớn hơn một hàm đơn lẻ (kiến trúc hệ thống, API, database, AI Agent/MCP/RAG/"
+    "Vector DB): trình bày ngắn gọn kiến trúc/thiết kế trước khi viết code — các thành phần, "
+    "luồng dữ liệu, vì sao chọn cách này thay vì cách khác.\n"
+    "3. Code phải đúng convention/idiom chuẩn của ngôn ngữ đó, đặt tên rõ ràng, xử lý lỗi hợp "
+    "lý — không thêm phần thừa ngoài phạm vi yêu cầu.\n"
+    "4. Chủ động nêu rủi ro bảo mật liên quan (injection, auth, input không tin cậy, secret lộ "
+    "ra client...) nếu có, và cách kiểm thử/edge case cần lưu ý.\n"
+    "5. Nếu liên quan Docker/CI-CD, đưa kèm Dockerfile hoặc pipeline mẫu súc tích. Nếu liên quan "
+    "Prompt Engineering, áp dụng best practice hiện hành (system/user tách biệt, ví dụ cụ thể, "
+    "ràng buộc rõ output).\n"
+    "THÀNH THẬT (bắt buộc): bạn KHÔNG có quyền truy cập trực tiếp hệ thống tệp hay kho mã nguồn "
+    "thật của người dùng — chỉ thấy nội dung cuộc trò chuyện này cùng tệp/trang web đã đính kèm "
+    "hoặc dán link. Nếu thiếu ngữ cảnh cần thiết (code hiện có, schema, cấu trúc dự án...), hỏi "
+    "lại và yêu cầu dán/đính kèm thay vì suy đoán hay bịa.]"
+)
+
 SYSTEM_PROMPT = """Bạn là LUMINA — trợ lý AI hợp nhất ("Tư duy sâu, tri thức rộng").
 Bạn trả lời bằng ngôn ngữ người dùng sử dụng (mặc định tiếng Việt), rõ ràng, chính xác và thân thiện.
 Bạn là MỘT trợ lý duy nhất tên LUMINA — không bao giờ tiết lộ hay nhắc tới tên nhà cung cấp hay
@@ -147,9 +173,11 @@ class Orchestrator:
         # 🔬 Chế độ nghiên cứu sâu — chèn chỉ thị vào câu hỏi cuối để bộ não tìm nhiều nguồn.
         # 📝 Chế độ tạo phụ đề — chèn chỉ thị buộc xuất đúng định dạng SRT.
         # ⚙️ Chế độ Lumina Forge — chèn chỉ thị buộc quy trình 6 giai đoạn + thành thật về giới hạn.
+        # 💻 Chế độ Code Chuyên Sâu — chèn chỉ thị buộc trả lời code ở mức chuyên gia.
         directive = _RESEARCH_DIRECTIVE if route.mode == "research" \
             else _SUBTITLE_DIRECTIVE if route.mode == "subtitle" \
-            else _AGENT_DIRECTIVE if route.mode == "agent" else None
+            else _AGENT_DIRECTIVE if route.mode == "agent" \
+            else _CODE_DIRECTIVE if route.mode == "code" else None
         if directive:
             messages = list(messages)
             for i in range(len(messages) - 1, -1, -1):
