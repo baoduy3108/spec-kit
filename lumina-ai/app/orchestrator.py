@@ -56,11 +56,11 @@ _SUBTITLE_DIRECTIVE = (
     "nếu phân biệt được. Không thêm bình luận ngoài khối code.]"
 )
 
-# Chỉ thị khi người dùng bật 🛠 Công Trình Sư — buộc bộ não tuân theo quy trình 6
+# Chỉ thị khi người dùng bật ⚙️ Lumina Forge — buộc bộ não tuân theo quy trình 6
 # giai đoạn (SPEC trước, code sau) và THÀNH THẬT về việc không có quyền truy
 # cập trực tiếp file hệ thống / kho mã nguồn của người dùng.
 _AGENT_DIRECTIVE = (
-    "\n\n[Chế độ CÔNG TRÌNH SƯ — trình bày câu trả lời theo đúng 6 giai đoạn, mỗi giai đoạn "
+    "\n\n[Chế độ LUMINA FORGE — trình bày câu trả lời theo đúng 6 giai đoạn, mỗi giai đoạn "
     "một tiêu đề riêng:\n"
     "PHASE 1 — SPEC ANALYSIS: mục tiêu, phạm vi, ràng buộc, dependency, thành phần bị ảnh "
     "hưởng — chỉ dựa trên những gì đã có trong cuộc trò chuyện này.\n"
@@ -146,7 +146,7 @@ class Orchestrator:
 
         # 🔬 Chế độ nghiên cứu sâu — chèn chỉ thị vào câu hỏi cuối để bộ não tìm nhiều nguồn.
         # 📝 Chế độ tạo phụ đề — chèn chỉ thị buộc xuất đúng định dạng SRT.
-        # 🛠 Chế độ Công Trình Sư — chèn chỉ thị buộc quy trình 6 giai đoạn + thành thật về giới hạn.
+        # ⚙️ Chế độ Lumina Forge — chèn chỉ thị buộc quy trình 6 giai đoạn + thành thật về giới hạn.
         directive = _RESEARCH_DIRECTIVE if route.mode == "research" \
             else _SUBTITLE_DIRECTIVE if route.mode == "subtitle" \
             else _AGENT_DIRECTIVE if route.mode == "agent" else None

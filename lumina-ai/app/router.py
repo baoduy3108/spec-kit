@@ -87,7 +87,7 @@ def _subtitle_route() -> RouteDecision:
 
 def _agent_route() -> RouteDecision:
     return RouteDecision(
-        mode="agent", label="🛠 Công Trình Sư",
+        mode="agent", label="⚙️ Lumina Forge",
         model=CONFIG["CLAUDE_MODEL_DEEP"], use_web_search=True, effort="high",
     )
 
@@ -104,7 +104,7 @@ def decide_route(
 
     force_mode: nút bấm ở giao diện ép chế độ — "image" (vẽ ảnh), "research"
     (nghiên cứu sâu), "subtitle" (tạo phụ đề/transcript từ video), hoặc "agent"
-    (Công Trình Sư — quy trình 6 giai đoạn có cấu trúc). None → tự đoán theo nội dung.
+    (Lumina Forge — quy trình 6 giai đoạn có cấu trúc). None → tự đoán theo nội dung.
 
     apex_allowed: gói của người dùng có được dùng chế độ 🌌 Đỉnh cao (Fable)
     không — gói Miễn phí sẽ False, gói Tháng/Năm True. Khi câu hỏi đáng lẽ

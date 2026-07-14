@@ -466,7 +466,7 @@
   function modeLabel(mode) {
     return { fast: "⚡ Phản hồi nhanh", balanced: "✨ Cân bằng", deep: "🧠 Tư duy sâu",
              search: "🔍 Tìm kiếm web", apex: "🌌 Đỉnh cao", image_gen: "🎨 Vẽ ảnh",
-             research: "🔬 Nghiên cứu sâu", subtitle: "📝 Phụ đề", agent: "🛠 Công Trình Sư" }[mode] || "";
+             research: "🔬 Nghiên cứu sâu", subtitle: "📝 Phụ đề", agent: "⚙️ Lumina Forge" }[mode] || "";
   }
 
   // ── Render tin nhắn ───────────────────────────────────────────────────────
@@ -840,7 +840,7 @@
   }
   setupVoice();
 
-  // ── Nút ép chế độ 🎨 Vẽ ảnh / 🔬 Nghiên cứu sâu / 📝 Phụ đề / 🛠 Công Trình Sư ──
+  // ── Nút ép chế độ 🎨 Vẽ ảnh / 🔬 Nghiên cứu sâu / 📝 Phụ đề / ⚙️ Lumina Forge ──
   document.querySelectorAll(".mode-toggle").forEach((btn) =>
     btn.addEventListener("click", () => {
       const m = btn.dataset.mode;
