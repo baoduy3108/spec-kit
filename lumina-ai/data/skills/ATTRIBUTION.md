@@ -13,6 +13,15 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `ui-ux-pro-max-skill` | Next Level Builder | MIT | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill |
 | `acquire-codebase-knowledge` | không rõ (chỉ nhận được thư mục skill lẻ, không có repo gốc) | MIT (tự khai trong frontmatter `SKILL.md`) | không rõ |
 | `dashmotion` | Mars (csthink) | MIT | https://github.com/csthink/dashmotion |
+| `mattpocock/skills` (5 skill: domain-modeling, codebase-design, resolving-merge-conflicts, diagnosing-bugs, prototype) | Matt Pocock | MIT | https://github.com/mattpocock/skills |
+| `uucz/moyu` (1 skill: anti-over-engineering) | uucz | MIT | https://github.com/uucz/moyu |
+| `Agent-Skills-for-Context-Engineering` (3 skill: context-degradation, multi-agent-patterns, memory-systems) | muratcankoylan + contributors | MIT | https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering |
+
+**Lưu ý về 9 skill mới nhất (domain-modeling → tool-design, trừ dashmotion đã ghi riêng ở trên)**:
+nội dung được lấy qua công cụ tải trang web (không tải trực tiếp file gốc như các skill khác) —
+tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản lưu trong LUMINA có thể là bản tóm lược/diễn đạt
+lại rất sát nội dung gốc chứ không đảm bảo khớp byte-by-byte 100% với `SKILL.md` gốc trên GitHub.
+Không tác động tới độ chính xác của phương pháp luận — chỉ khác về hình thức khớp nguyên văn.
 
 Skill `acquire-codebase-knowledge` giả định chạy `scripts/scan.py` + ghi 7 file thật vào
 `docs/codebase/` — LUMINA không làm được 2 việc này (không sandbox chạy code, không ghi file thật

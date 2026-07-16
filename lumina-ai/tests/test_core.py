@@ -403,6 +403,25 @@ def test_skills_dashmotion_matches_diagram_request():
     assert skill.slug == "dashmotion"
 
 
+def test_skills_library_has_at_least_65():
+    from app import skills
+    assert len(skills._SKILLS) >= 65
+
+
+def test_skills_agent_architecture_topics_match():
+    from app import skills
+    cases = {
+        "có nên dùng nhiều AI agent phối hợp không": "multi-agent-patterns",
+        "làm sao cho AI agent nhớ được across session": "memory-systems",
+        "viết mô tả tool cho MCP server sao cho AI hiểu đúng": "tool-design",
+        "đừng làm quá tay, chỉ sửa đúng cái tôi yêu cầu thôi": "anti-over-engineering",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_find_matching_skill_irrelevant_returns_none():
     from app import skills
     assert skills.find_matching_skill("hôm nay trời đẹp không, đi chơi đâu nhỉ") is None
