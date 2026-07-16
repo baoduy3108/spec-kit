@@ -13,14 +13,14 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `ui-ux-pro-max-skill` | Next Level Builder | MIT | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill |
 | `acquire-codebase-knowledge` | không rõ (chỉ nhận được thư mục skill lẻ, không có repo gốc) | MIT (tự khai trong frontmatter `SKILL.md`) | không rõ |
 | `dashmotion` | Mars (csthink) | MIT | https://github.com/csthink/dashmotion |
-| `mattpocock/skills` (6 skill: domain-modeling, codebase-design, resolving-merge-conflicts, diagnosing-bugs, prototype, grilling) | Matt Pocock | MIT | https://github.com/mattpocock/skills |
+| `mattpocock/skills` (7 skill: domain-modeling, codebase-design, resolving-merge-conflicts, diagnosing-bugs, prototype, grilling, teaching-framework) | Matt Pocock | MIT | https://github.com/mattpocock/skills |
 | `uucz/moyu` (1 skill: anti-over-engineering) | uucz | MIT | https://github.com/uucz/moyu |
 | `Agent-Skills-for-Context-Engineering` (3 skill: context-degradation, multi-agent-patterns, memory-systems) | muratcankoylan + contributors | MIT | https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering |
 | `ehmo/platform-design-skills` (2 skill: platform-design-web, platform-design-android) | ehmo | MIT | https://github.com/ehmo/platform-design-skills |
 | `zscole/model-hierarchy-skill` (1 skill: model-hierarchy) | zscole | MIT | https://github.com/zscole/model-hierarchy-skill |
 | `massimodeluisa/recursive-decomposition-skill` (1 skill: recursive-decomposition) | massimodeluisa | MIT | https://github.com/massimodeluisa/recursive-decomposition-skill |
 | `mcollina/skills` (4 skill: documentation-diataxis, typescript-magician, oauth-security, eslint-neostandard-linting) | Matteo Collina | MIT | https://github.com/mcollina/skills |
-| `dembrandt/dembrandt-skills` (4 skill: nielsen-usability-heuristics, information-architecture, modular-scale-typography, gestalt-ui-organisation) | dembrandt | MIT | https://github.com/dembrandt/dembrandt-skills |
+| `dembrandt/dembrandt-skills` (11 skill: nielsen-usability-heuristics, information-architecture, modular-scale-typography, gestalt-ui-organisation, loading-states-perceived-performance, status-colors-and-errors, form-design, micro-interactions, responsive-paradigms, notifications-and-recovery, data-display-and-selection — repo có 40 skill, mới tuyển 11) | dembrandt | MIT | https://github.com/dembrandt/dembrandt-skills |
 | `BehiSecc/VibeSec-Skill` (1 skill: vibesec) | BehiSecc | Apache-2.0 | https://github.com/BehiSecc/VibeSec-Skill |
 | `meodai/skill.color-expert` (1 skill: color-expert) | meodai | **CC BY 4.0** (khác MIT/Apache — yêu cầu ghi công, cho phép dùng thương mại) | https://github.com/meodai/skill.color-expert |
 | `MohamedAbdallah-14/unslop` (1 skill: unslop) | MohamedAbdallah-14 | MIT | https://github.com/MohamedAbdallah-14/unslop |
@@ -66,6 +66,12 @@ không được phép sao chép nội dung. Repo `K-Dense-AI/claude-scientific-s
 `mukul975/Anthropic-Cybersecurity-Skills` đã xem xét nhưng KHÔNG đưa vào — phần lớn skill cần cài
 đặt công cụ/thư viện chuyên ngành thật (RDKit, Volatility3, Splunk, BloodHound...) và thuộc lĩnh
 vực quá chuyên sâu/hẹp (khoa học sinh học, pháp y số) so với đối tượng người dùng LUMINA.
+
+Repo `Digidai/product-manager-skills` đã xem xét nhưng KHÔNG đưa vào — dùng giấy phép
+**CC BY-NC-SA 4.0** (cấm dùng thương mại), không phù hợp vì LUMINA có gói trả phí. Repo
+`hanfang/claude-memory-skill` đã xem xét nhưng KHÔNG đưa vào — cần agent nền chạy song song +
+ghi file vào `~/.claude/memory/` thật, LUMINA không có hạ tầng này (đã có `memory-systems` ở trên
+làm kiến thức khái niệm tương đương, không cần bản tool-dependent này).
 
 Các repo `gstack`, `understand-anything`, `codebase-memory-mcp` (DeusData), `ruflo` (ruvnet),
 `serena` (oraios), `cocoindex-code` đã được xem xét nhưng KHÔNG đưa vào — đều là MCP server/CLI/

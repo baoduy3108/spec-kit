@@ -478,6 +478,29 @@ def test_skills_writing_and_platform_topics_match():
         assert skill.slug == expected_slug, (text, skill.slug)
 
 
+def test_skills_library_has_at_least_90():
+    from app import skills
+    assert len(skills._SKILLS) >= 90
+
+
+def test_skills_ux_patterns_match():
+    from app import skills
+    cases = {
+        "dạy tôi học python từ đầu, đi từng bước một": "teaching-framework",
+        "thiết kế trạng thái loading cho trang này": "loading-states-perceived-performance",
+        "màu báo lỗi nên dùng sao cho đúng": "status-colors-and-errors",
+        "validate form này khi nào thì hợp lý": "form-design",
+        "thêm animation nút bấm cho mượt hơn": "micro-interactions",
+        "responsive design cho mobile với desktop khác nhau sao": "responsive-paradigms",
+        "thiết kế toast notification cho app": "notifications-and-recovery",
+        "làm bảng dữ liệu có chọn nhiều item được không": "data-display-and-selection",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_find_matching_skill_irrelevant_returns_none():
     from app import skills
     assert skills.find_matching_skill("hôm nay trời đẹp không, đi chơi đâu nhỉ") is None
