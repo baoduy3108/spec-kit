@@ -19,6 +19,10 @@ file có thêm trường `keywords_vi` (từ khóa kích hoạt tiếng Việt, 
 thuộc nội dung gốc) để so khớp với tin nhắn người dùng. Xem `app/skills.py` để biết cách các
 file này được nạp và so khớp.
 
-Các repo `gstack`, `understand-anything`, `codebase-memory-mcp` (DeusData), `ruflo` (ruvnet) đã
-được xem xét nhưng KHÔNG đưa vào — đều là MCP server/agent-orchestration framework thật, đòi hỏi
-tiến trình chạy nền/vector DB/browser control mà LUMINA không có.
+Các repo `gstack`, `understand-anything`, `codebase-memory-mcp` (DeusData), `ruflo` (ruvnet),
+`serena` (oraios), `cocoindex-code` đã được xem xét nhưng KHÔNG đưa vào — đều là MCP server/CLI/
+agent-orchestration framework thật, đòi hỏi tiến trình chạy nền/vector DB/browser control/Language
+Server Protocol mà LUMINA không có. `serena` chạy LSP server thật cho từng ngôn ngữ (0 file
+SKILL.md). `cocoindex-code` chỉ có 1 SKILL.md nhưng toàn bộ nội dung là hướng dẫn gọi CLI `ccc`
+(search/index/init) dựa trên semantic search + vector embeddings thật — không tách được thành nội
+dung tư vấn thuần văn bản.
