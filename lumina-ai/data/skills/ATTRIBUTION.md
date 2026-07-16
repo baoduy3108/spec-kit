@@ -20,6 +20,9 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `zscole/model-hierarchy-skill` (1 skill: model-hierarchy) | zscole | MIT | https://github.com/zscole/model-hierarchy-skill |
 | `massimodeluisa/recursive-decomposition-skill` (1 skill: recursive-decomposition) | massimodeluisa | MIT | https://github.com/massimodeluisa/recursive-decomposition-skill |
 | `mcollina/skills` (3 skill: documentation-diataxis, typescript-magician, oauth-security) | Matteo Collina | MIT | https://github.com/mcollina/skills |
+| `dembrandt/dembrandt-skills` (4 skill: nielsen-usability-heuristics, information-architecture, modular-scale-typography, gestalt-ui-organisation) | dembrandt | MIT | https://github.com/dembrandt/dembrandt-skills |
+| `BehiSecc/VibeSec-Skill` (1 skill: vibesec) | BehiSecc | Apache-2.0 | https://github.com/BehiSecc/VibeSec-Skill |
+| `meodai/skill.color-expert` (1 skill: color-expert) | meodai | **CC BY 4.0** (khác MIT/Apache — yêu cầu ghi công, cho phép dùng thương mại) | https://github.com/meodai/skill.color-expert |
 
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
@@ -50,6 +53,10 @@ tiếng Việt** (không giữ nguyên văn tiếng Anh như các skill khác) v
 `scripts/layout.py` (Python) để tính bố cục — LUMINA không chạy được script, nên bản trong LUMINA
 chỉ giữ lại "cách tính tay" (hand-computed fallback) mà chính tài liệu gốc đã mô tả, diễn đạt lại
 rõ ràng hơn để LUMINA áp dụng đúng.
+
+Repo `NeoLabHQ/context-engineering-kit` (chứa các plugin `ddd`, `kaizen`, `write-concisely`...) đã
+được xem xét nhưng KHÔNG đưa vào — dùng giấy phép **GPLv3** (copyleft mạnh, khác hẳn MIT/Apache-2.0
+đã dùng cho toàn bộ skill khác), không phù hợp trộn vào dự án có mục đích thương mại.
 
 Các repo `gstack`, `understand-anything`, `codebase-memory-mcp` (DeusData), `ruflo` (ruvnet),
 `serena` (oraios), `cocoindex-code` đã được xem xét nhưng KHÔNG đưa vào — đều là MCP server/CLI/
