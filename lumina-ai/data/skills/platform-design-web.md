@@ -2,7 +2,7 @@
 name: platform-design-web
 description: 450+ actionable design rules for web platforms based on WCAG 2.2, MDN standards, and modern web APIs — accessibility, responsive design, forms, typography, performance, animation, dark mode, navigation, touch, i18n, PWA. Use when reviewing or building a web UI for accessibility/responsive/performance compliance.
 category: design
-keywords_vi: wcag, accessibility web, chuẩn accessibility, thiết kế web chuẩn, responsive design, quy tắc thiết kế web, dark mode web, form web chuẩn
+keywords_vi: accessibility web, chuẩn accessibility, thiết kế web chuẩn, responsive design, quy tắc thiết kế web, dark mode web, form web chuẩn
 ---
 
 # Web Platform Design Guidelines

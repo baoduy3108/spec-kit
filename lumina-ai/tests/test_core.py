@@ -808,3 +808,48 @@ def test_webpage_build_context_empty_when_no_pages():
     from app.webpage import build_context
     assert build_context([]) == ""
     assert build_context([{"url": "x", "title": "", "text": "", "error": "lỗi"}]) == ""
+
+
+def test_skills_library_has_at_least_110():
+    from app import skills
+    assert len(skills._SKILLS) >= 110
+
+
+def test_skills_accessibility_and_layout_topics_match():
+    from app import skills
+    cases = {
+        "kiểm tra website này có đạt chuẩn wcag không": "wcag-accessibility",
+        "nút bấm này thiếu trạng thái hover disabled": "button-states",
+        "làm chế độ tối dark mode cho web": "color-mode-and-theme",
+        "dùng shadow đổ bóng thế nào cho hợp lý": "elevation-and-depth",
+        "nên dùng modal hay drawer cho tính năng này": "modal-and-overlay-patterns",
+        "thiết kế thanh tab điều hướng": "tab-navigation",
+        "vùng cuộn nội dung dài xử lý sao": "scroll-areas",
+        "thanh header dính cố định khi cuộn trang": "sticky-and-fixed-elements",
+        "giao diện quá chật hay quá thưa": "ui-density",
+        "viết html ngữ nghĩa chuẩn seo": "semantic-html-and-seo",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_visual_and_data_topics_match():
+    from app import skills
+    cases = {
+        "phân cấp thị giác nhấn mạnh nội dung quan trọng": "visual-emphasis-and-hierarchy",
+        "thiết kế luồng người dùng dẫn dắt từng bước": "user-flows-and-guided-paths",
+        "bố cục trang nhất quán xuyên suốt": "layout-paradigms-and-consistency",
+        "các thành phần giao diện đồng bộ với nhau": "component-family-consistency",
+        "ẩn dụ thực tế trong thiết kế giao diện": "real-world-metaphors",
+        "tạo bảng màu tự động bằng thuật toán": "algorithmic-color-palette",
+        "ngôn ngữ hình ảnh thương hiệu nhất quán": "brand-visual-language",
+        "tối ưu core web vitals cho trang web": "performance-web-vitals",
+        "chuyển động kể chuyện trong giao diện": "motion-and-storytelling",
+        "nhiều view dữ liệu đồng bộ liên kết với nhau": "coordinated-data-views",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
