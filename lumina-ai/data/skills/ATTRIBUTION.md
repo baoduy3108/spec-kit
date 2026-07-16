@@ -11,6 +11,14 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `superpowers` | Jesse Vincent | MIT | https://github.com/obra/superpowers |
 | `taste-skill` | Leonxlnx | MIT | https://github.com/Leonxlnx/taste-skill |
 | `ui-ux-pro-max-skill` | Next Level Builder | MIT | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill |
+| `acquire-codebase-knowledge` | không rõ (chỉ nhận được thư mục skill lẻ, không có repo gốc) | MIT (tự khai trong frontmatter `SKILL.md`) | không rõ |
+
+Skill `acquire-codebase-knowledge` giả định chạy `scripts/scan.py` + ghi 7 file thật vào
+`docs/codebase/` — LUMINA không làm được 2 việc này (không sandbox chạy code, không ghi file thật
+lên hệ thống người dùng). Đã tận dụng khung 7 mục (STACK/STRUCTURE/ARCHITECTURE/CONVENTIONS/
+INTEGRATIONS/TESTING/CONCERNS) làm cấu trúc trình bày NGAY TRONG CHAT dựa trên code người dùng
+dán/đính kèm — không chạy script, không ghi file thật (xem chỉ thị caveat mạnh hơn trong
+`build_skill_context()`).
 
 Chỉ các skill THUẦN VĂN BẢN/PHƯƠNG PHÁP LUẬN (không cần chạy tool/MCP/browser/code-execution
 thật) được tuyển vào — LUMINA là REST API chat, không có hạ tầng thực thi công cụ như một coding

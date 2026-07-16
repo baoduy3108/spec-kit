@@ -387,6 +387,15 @@ def test_skills_find_matching_skill_hits_expected():
     assert skill.slug == "test-driven-development"
 
 
+def test_skills_acquire_codebase_knowledge_matches_and_warns_no_real_files():
+    from app import skills
+    skill = skills.find_matching_skill("giúp mình tài liệu hóa codebase này")
+    assert skill is not None
+    assert skill.slug == "acquire-codebase-knowledge"
+    ctx = skills.build_skill_context(skill)
+    assert "không khẳng định đã tạo/ghi file thật" in ctx
+
+
 def test_skills_find_matching_skill_irrelevant_returns_none():
     from app import skills
     assert skills.find_matching_skill("hôm nay trời đẹp không, đi chơi đâu nhỉ") is None

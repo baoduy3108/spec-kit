@@ -98,6 +98,10 @@ def build_skill_context(skill: Skill) -> str:
     return (
         f"\n\n[TÀI LIỆU KỸ NĂNG THAM KHẢO — \"{skill.name}\": LUMINA KHÔNG có công cụ chạy "
         "bash/git/browser/MCP thật như một coding agent thật (vd Claude Code) — nếu tài liệu "
-        "dưới đây giả định có công cụ đó, hãy BỎ QUA phần đó, chỉ áp dụng phần kiến thức/"
-        f"phương pháp luận diễn đạt được bằng lời:\n{body}\n]"
+        "dưới đây giả định có công cụ đó (vd chạy script, đọc git history, GHI FILE thật ra đĩa), "
+        "hãy BỎ QUA phần đó. Nếu tài liệu mô tả việc TẠO/GHI file (vd tài liệu hóa codebase thành "
+        "nhiều file), hãy trình bày kết quả dưới dạng NỘI DUNG NGAY TRONG KHUNG CHAT — tuyệt đối "
+        "không khẳng định đã tạo/ghi file thật lên hệ thống. Chỉ áp dụng phần kiến thức/phương "
+        f"pháp luận diễn đạt được bằng lời, dựa trên những gì người dùng đã dán/đính kèm trong "
+        f"cuộc trò chuyện này:\n{body}\n]"
     )
