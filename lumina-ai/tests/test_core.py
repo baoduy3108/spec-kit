@@ -422,6 +422,26 @@ def test_skills_agent_architecture_topics_match():
         assert skill.slug == expected_slug, (text, skill.slug)
 
 
+def test_skills_library_has_at_least_72():
+    from app import skills
+    assert len(skills._SKILLS) >= 72
+
+
+def test_skills_platform_and_language_topics_match():
+    from app import skills
+    cases = {
+        "review giao diện web này có đạt chuẩn accessibility không": "platform-design-web",
+        "thiết kế app android theo material design 3": "platform-design-android",
+        "nên dùng model nào cho tác vụ rẻ, model nào cho tác vụ khó": "model-hierarchy",
+        "lỗi typescript any type sửa sao đây": "typescript-magician",
+        "implement oauth pkce cho app này": "oauth-security",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_find_matching_skill_irrelevant_returns_none():
     from app import skills
     assert skills.find_matching_skill("hôm nay trời đẹp không, đi chơi đâu nhỉ") is None

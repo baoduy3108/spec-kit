@@ -16,12 +16,20 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `mattpocock/skills` (5 skill: domain-modeling, codebase-design, resolving-merge-conflicts, diagnosing-bugs, prototype) | Matt Pocock | MIT | https://github.com/mattpocock/skills |
 | `uucz/moyu` (1 skill: anti-over-engineering) | uucz | MIT | https://github.com/uucz/moyu |
 | `Agent-Skills-for-Context-Engineering` (3 skill: context-degradation, multi-agent-patterns, memory-systems) | muratcankoylan + contributors | MIT | https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering |
+| `ehmo/platform-design-skills` (2 skill: platform-design-web, platform-design-android) | ehmo | MIT | https://github.com/ehmo/platform-design-skills |
+| `zscole/model-hierarchy-skill` (1 skill: model-hierarchy) | zscole | MIT | https://github.com/zscole/model-hierarchy-skill |
+| `massimodeluisa/recursive-decomposition-skill` (1 skill: recursive-decomposition) | massimodeluisa | MIT | https://github.com/massimodeluisa/recursive-decomposition-skill |
+| `mcollina/skills` (3 skill: documentation-diataxis, typescript-magician, oauth-security) | Matteo Collina | MIT | https://github.com/mcollina/skills |
 
-**Lưu ý về 9 skill mới nhất (domain-modeling → tool-design, trừ dashmotion đã ghi riêng ở trên)**:
-nội dung được lấy qua công cụ tải trang web (không tải trực tiếp file gốc như các skill khác) —
-tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản lưu trong LUMINA có thể là bản tóm lược/diễn đạt
-lại rất sát nội dung gốc chứ không đảm bảo khớp byte-by-byte 100% với `SKILL.md` gốc trên GitHub.
-Không tác động tới độ chính xác của phương pháp luận — chỉ khác về hình thức khớp nguyên văn.
+**Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
+dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
+file gốc như các skill trong 5 repo đầu tiên) — tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản
+lưu trong LUMINA có thể là bản tóm lược/diễn đạt lại rất sát nội dung gốc chứ không đảm bảo khớp
+byte-by-byte 100% với `SKILL.md` gốc trên GitHub. Không tác động tới độ chính xác của phương pháp
+luận — chỉ khác về hình thức khớp nguyên văn.
+
+Skill `recursive-decomposition` có thêm 1 đoạn được viết riêng (không thuộc bản gốc) làm rõ cách
+áp dụng khi LUMINA không có công cụ grep/glob/wc thật.
 
 Skill `acquire-codebase-knowledge` giả định chạy `scripts/scan.py` + ghi 7 file thật vào
 `docs/codebase/` — LUMINA không làm được 2 việc này (không sandbox chạy code, không ghi file thật
