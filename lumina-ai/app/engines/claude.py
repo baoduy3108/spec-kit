@@ -25,7 +25,7 @@ from .base import BaseEngine, EngineError
 logger = logging.getLogger("lumina.claude")
 
 # Chế độ cần output dài: code, phân tích, tìm kiếm, nghiên cứu.
-_LONG_MODES = ("deep", "apex", "search", "research", "agent", "code")
+_LONG_MODES = ("deep", "apex", "search", "research", "agent")
 
 
 def _prepare_messages(messages: list[dict]) -> list[dict]:

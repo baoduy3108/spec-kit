@@ -92,13 +92,6 @@ def _agent_route() -> RouteDecision:
     )
 
 
-def _code_route() -> RouteDecision:
-    return RouteDecision(
-        mode="code", label="💻 Code Chuyên Sâu",
-        model=CONFIG["CLAUDE_MODEL_DEEP"], use_web_search=True, effort="high",
-    )
-
-
 def _matches(regexes: list[re.Pattern], text: str) -> bool:
     return any(r.search(text) for r in regexes)
 
@@ -110,9 +103,9 @@ def decide_route(
     """Phân loại câu lệnh và trả về quyết định định tuyến.
 
     force_mode: nút bấm ở giao diện ép chế độ — "image" (vẽ ảnh), "research"
-    (nghiên cứu sâu), "subtitle" (tạo phụ đề/transcript từ video), "agent"
-    (Lumina Forge — quy trình 6 giai đoạn có cấu trúc), hoặc "code" (Code
-    Chuyên Sâu — kiến trúc/bảo mật/test có cấu trúc). None → tự đoán theo nội dung.
+    (nghiên cứu sâu), "subtitle" (tạo phụ đề/transcript từ video), hoặc "agent"
+    (⚙️ Lumina Forge — tự co giãn: yêu cầu nhỏ trả lời gọn ở mức chuyên gia,
+    yêu cầu lớn dùng đủ quy trình 6 giai đoạn). None → tự đoán theo nội dung.
 
     apex_allowed: gói của người dùng có được dùng chế độ 🌌 Đỉnh cao (Fable)
     không — gói Miễn phí sẽ False, gói Tháng/Năm True. Khi câu hỏi đáng lẽ
@@ -130,8 +123,6 @@ def decide_route(
         return _subtitle_route()
     if force_mode == "agent":
         return _agent_route()
-    if force_mode == "code":
-        return _code_route()
 
     # 1a) Yêu cầu vẽ ảnh → chế độ tạo ảnh (không dùng bộ não chat)
     if _matches(_image_re, text):

@@ -466,8 +466,7 @@
   function modeLabel(mode) {
     return { fast: "⚡ Phản hồi nhanh", balanced: "✨ Cân bằng", deep: "🧠 Tư duy sâu",
              search: "🔍 Tìm kiếm web", apex: "🌌 Đỉnh cao", image_gen: "🎨 Vẽ ảnh",
-             research: "🔬 Nghiên cứu sâu", subtitle: "📝 Phụ đề", agent: "⚙️ Lumina Forge",
-             code: "💻 Code Chuyên Sâu" }[mode] || "";
+             research: "🔬 Nghiên cứu sâu", subtitle: "📝 Phụ đề", agent: "⚙️ Lumina Forge" }[mode] || "";
   }
 
   // ── Render tin nhắn ───────────────────────────────────────────────────────
@@ -637,6 +636,7 @@
               : ev.tool === "knowledge" ? "📚 Tra kho tri thức: "
               : ev.tool === "recall" ? "🧠 Nhớ lại cuộc trò chuyện: "
               : ev.tool === "web_fetch" ? "🌐 Đang đọc trang: "
+              : ev.tool === "skill" ? "🧩 Áp dụng kỹ năng: "
               : "🔍 Đang tìm kiếm: ";
             chip.textContent = prefix + (ev.query || "…");
             el.body.insertBefore(chip, el.content);
@@ -841,7 +841,7 @@
   }
   setupVoice();
 
-  // ── Nút ép chế độ 🎨 Vẽ ảnh / 🔬 Nghiên cứu sâu / 📝 Phụ đề / ⚙️ Lumina Forge / 💻 Code ──
+  // ── Nút ép chế độ 🎨 Vẽ ảnh / 🔬 Nghiên cứu sâu / 📝 Phụ đề / ⚙️ Lumina Forge ──
   document.querySelectorAll(".mode-toggle").forEach((btn) =>
     btn.addEventListener("click", () => {
       const m = btn.dataset.mode;
@@ -852,7 +852,6 @@
         : state.forceMode === "research" ? "Chủ đề cần nghiên cứu sâu…"
         : state.forceMode === "subtitle" ? "Đính kèm 📎 video rồi bấm Gửi…"
         : state.forceMode === "agent" ? "Mô tả yêu cầu (dán kèm code/tài liệu nếu có)…"
-        : state.forceMode === "code" ? "Mô tả bài toán code (ngôn ngữ, mục tiêu, dán code liên quan nếu có)…"
         : "Nhắn tin cho LUMINA…";
       $("input").placeholder = ph;
     })

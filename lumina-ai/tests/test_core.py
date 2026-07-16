@@ -373,6 +373,36 @@ def test_knowledge_gather_never_raises_offline():
     assert items == []
 
 
+# ── Thư viện Kỹ năng nội bộ (tuyển chọn từ Claude Skills công khai) ──────────
+
+def test_skills_library_loads_non_empty():
+    from app import skills
+    assert len(skills._SKILLS) >= 40  # đã tuyển chọn 53 skill, cho biên độ an toàn
+
+
+def test_skills_find_matching_skill_hits_expected():
+    from app import skills
+    skill = skills.find_matching_skill("làm sao viết test trước khi code cho tính năng mới")
+    assert skill is not None
+    assert skill.slug == "test-driven-development"
+
+
+def test_skills_find_matching_skill_irrelevant_returns_none():
+    from app import skills
+    assert skills.find_matching_skill("hôm nay trời đẹp không, đi chơi đâu nhỉ") is None
+
+
+def test_skills_build_skill_context_has_caveat_and_cap():
+    from app import skills
+    skill = skills.Skill(
+        slug="test-slug", name="Test Skill", description="", category="engineering",
+        keywords=("test",), body="x" * 20000,
+    )
+    ctx = skills.build_skill_context(skill)
+    assert "KHÔNG có công cụ chạy bash/git/browser/MCP thật" in ctx
+    assert len(ctx) < 20000  # đã cắt bớt, không tiêm nguyên bản dài
+
+
 # ── Router: chế độ 📝 Phụ đề (video → transcript SRT) ────────────────────────
 
 def test_router_subtitle_force_mode():
@@ -396,23 +426,6 @@ def test_router_agent_not_auto_detected():
     # để tránh vô tình chạy quy trình 6 giai đoạn nặng nề trên câu hỏi thường.
     for q in ["phân tích giúp mình đoạn code này", "thiết kế hệ thống mới", "review code giúp mình"]:
         assert decide_route(q).mode != "agent", q
-
-
-# ── Router: chế độ 💻 Code Chuyên Sâu ────────────────────────────────────────
-
-def test_router_code_force_mode():
-    route = decide_route("bất kỳ nội dung gì", force_mode="code")
-    assert route.mode == "code"
-    assert route.label == "💻 Code Chuyên Sâu"
-    assert route.use_web_search is True
-    assert route.effort == "high"
-
-
-def test_router_code_not_auto_detected():
-    # Code Chuyên Sâu CHỈ kích hoạt qua nút bấm — câu hỏi code thường vẫn rơi vào
-    # "deep" (🧠 Tư duy sâu) mặc định, không tự động nâng cấp lên chế độ nặng hơn.
-    for q in ["viết hàm python kiểm tra số nguyên tố", "sửa lỗi đoạn code javascript này", "debug sql giúp mình"]:
-        assert decide_route(q).mode != "code", q
 
 
 # ── Media: video đính kèm ────────────────────────────────────────────────────

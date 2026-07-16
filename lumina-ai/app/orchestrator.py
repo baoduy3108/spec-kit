@@ -26,6 +26,7 @@ from .engines.openai_compatible import (
     OpenRouterEngine,
 )
 from . import knowledge
+from . import skills
 from .imagegen import generate_image
 from .media import has_images, has_videos
 from .monitor import monitor
@@ -56,53 +57,40 @@ _SUBTITLE_DIRECTIVE = (
     "nếu phân biệt được. Không thêm bình luận ngoài khối code.]"
 )
 
-# Chỉ thị khi người dùng bật ⚙️ Lumina Forge — buộc bộ não tuân theo quy trình 6
-# giai đoạn (SPEC trước, code sau) và THÀNH THẬT về việc không có quyền truy
-# cập trực tiếp file hệ thống / kho mã nguồn của người dùng.
+# Chỉ thị khi người dùng bật ⚙️ Lumina Forge — TỰ CO GIÃN theo quy mô yêu cầu:
+# việc nhỏ trả lời gọn ở mức chuyên gia (kiến trúc/bảo mật/test), việc lớn dùng
+# đủ quy trình 6 giai đoạn (SPEC trước, code sau). Kèm THÀNH THẬT về việc không
+# có quyền truy cập trực tiếp file hệ thống / kho mã nguồn của người dùng.
 _AGENT_DIRECTIVE = (
-    "\n\n[Chế độ LUMINA FORGE — trình bày câu trả lời theo đúng 6 giai đoạn, mỗi giai đoạn "
-    "một tiêu đề riêng:\n"
-    "PHASE 1 — SPEC ANALYSIS: mục tiêu, phạm vi, ràng buộc, dependency, thành phần bị ảnh "
-    "hưởng — chỉ dựa trên những gì đã có trong cuộc trò chuyện này.\n"
-    "PHASE 2 — DESIGN REVIEW: tối thiểu 3 phương án, so sánh độ phức tạp/hiệu năng/khả năng "
-    "mở rộng/bảo trì/bảo mật, chọn phương án tối ưu kèm lý do, tự phản biện điểm yếu.\n"
-    "PHASE 3 — IMPLEMENTATION: các bước thay đổi nhỏ, đánh giá ảnh hưởng sau mỗi bước.\n"
-    "PHASE 4 — VALIDATION: cách kiểm thử, edge case, khả năng gây regression.\n"
-    "PHASE 5 — REVIEW: tự rà soát như reviewer độc lập, nêu rõ điểm còn yếu.\n"
-    "PHASE 6 — HANDOVER: chỉ kết luận 'hoàn thành' khi thật sự tự tin cao (~95%) và không còn "
-    "lỗi đã biết; nếu chưa đạt, nói rõ lý do và KHÔNG kết luận đã xong.\n"
-    "THÀNH THẬT (bắt buộc): bạn KHÔNG có quyền truy cập trực tiếp hệ thống tệp hay kho mã nguồn "
-    "của người dùng — bạn chỉ thấy nội dung cuộc trò chuyện này cùng các tệp/trang web mà người "
-    "dùng đã đính kèm hoặc dán link. TUYỆT ĐỐI không giả vờ đã 'đọc toàn bộ source code' nếu chưa "
-    "được cung cấp. Nếu thiếu mã nguồn/tài liệu/bối cảnh cần thiết, hãy DỪNG LẠI và yêu cầu người "
-    "dùng dán trực tiếp đoạn mã vào khung chat, hoặc dùng nút 📎 đính kèm tệp / dán link trang web "
-    "— tuyệt đối không suy đoán hay bịa. Nếu yêu cầu mơ hồ hoặc xung đột, hỏi lại thay vì đoán.]"
-)
-
-# Chỉ thị khi người dùng bật 💻 Code Chuyên Sâu — buộc bộ não trả lời code ở mức
-# chuyên gia: đúng convention từng ngôn ngữ, có kiến trúc/bảo mật/test, không chỉ
-# viết cho chạy được. Tái dùng đoạn THÀNH THẬT của Lumina Forge vì lý do giống hệt
-# (không có quyền truy cập file hệ thống/kho mã nguồn thật của người dùng).
-_CODE_DIRECTIVE = (
-    "\n\n[Chế độ CODE CHUYÊN SÂU — trả lời như một kỹ sư phần mềm cấp cao, không chỉ đưa "
-    "code chạy được:\n"
-    "1. Nếu người dùng chưa nói rõ ngôn ngữ/framework, chọn lựa chọn phù hợp nhất với ngữ "
-    "cảnh và nêu rõ vì sao (hỗ trợ tốt: Python, TypeScript, JavaScript, Rust, Go, Java, C#, "
-    "C++, SQL, Bash).\n"
-    "2. Với việc lớn hơn một hàm đơn lẻ (kiến trúc hệ thống, API, database, AI Agent/MCP/RAG/"
-    "Vector DB): trình bày ngắn gọn kiến trúc/thiết kế trước khi viết code — các thành phần, "
-    "luồng dữ liệu, vì sao chọn cách này thay vì cách khác.\n"
-    "3. Code phải đúng convention/idiom chuẩn của ngôn ngữ đó, đặt tên rõ ràng, xử lý lỗi hợp "
-    "lý — không thêm phần thừa ngoài phạm vi yêu cầu.\n"
-    "4. Chủ động nêu rủi ro bảo mật liên quan (injection, auth, input không tin cậy, secret lộ "
+    "\n\n[Chế độ LUMINA FORGE — trước tiên tự đánh giá quy mô yêu cầu:\n"
+    "• NHỎ (1 hàm/đoạn code cụ thể, sửa lỗi nhỏ, giải thích, câu hỏi kỹ thuật đơn lẻ): trả lời "
+    "TRỰC TIẾP, KHÔNG dùng tiêu đề PHASE, nhưng vẫn giữ chất lượng kỹ sư cấp cao:\n"
+    "  1. Nếu chưa rõ ngôn ngữ/framework, chọn lựa phù hợp nhất với ngữ cảnh và nêu rõ vì sao "
+    "(hỗ trợ tốt: Python, TypeScript, JavaScript, Rust, Go, Java, C#, C++, SQL, Bash).\n"
+    "  2. Code đúng convention/idiom chuẩn của ngôn ngữ đó, đặt tên rõ ràng, xử lý lỗi hợp lý — "
+    "không thêm phần thừa ngoài phạm vi yêu cầu.\n"
+    "  3. Chủ động nêu rủi ro bảo mật liên quan (injection, auth, input không tin cậy, secret lộ "
     "ra client...) nếu có, và cách kiểm thử/edge case cần lưu ý.\n"
-    "5. Nếu liên quan Docker/CI-CD, đưa kèm Dockerfile hoặc pipeline mẫu súc tích. Nếu liên quan "
-    "Prompt Engineering, áp dụng best practice hiện hành (system/user tách biệt, ví dụ cụ thể, "
-    "ràng buộc rõ output).\n"
-    "THÀNH THẬT (bắt buộc): bạn KHÔNG có quyền truy cập trực tiếp hệ thống tệp hay kho mã nguồn "
-    "thật của người dùng — chỉ thấy nội dung cuộc trò chuyện này cùng tệp/trang web đã đính kèm "
-    "hoặc dán link. Nếu thiếu ngữ cảnh cần thiết (code hiện có, schema, cấu trúc dự án...), hỏi "
-    "lại và yêu cầu dán/đính kèm thay vì suy đoán hay bịa.]"
+    "  4. Nếu liên quan Docker/CI-CD, đưa kèm Dockerfile/pipeline mẫu súc tích. Nếu liên quan "
+    "Prompt Engineering, áp dụng best practice hiện hành (system/user tách biệt, ví dụ cụ thể).\n"
+    "• LỚN (≥2 file/thành phần, kiến trúc hệ thống, API, database, AI Agent/MCP/RAG/Vector DB, "
+    "tính năng nhiều bước): trình bày theo đúng 6 giai đoạn, mỗi giai đoạn một tiêu đề riêng:\n"
+    "  PHASE 1 — SPEC ANALYSIS: mục tiêu, phạm vi, ràng buộc, dependency, thành phần bị ảnh "
+    "hưởng — chỉ dựa trên những gì đã có trong cuộc trò chuyện này.\n"
+    "  PHASE 2 — DESIGN REVIEW: tối thiểu 3 phương án, so sánh độ phức tạp/hiệu năng/khả năng "
+    "mở rộng/bảo trì/bảo mật, chọn phương án tối ưu kèm lý do, tự phản biện điểm yếu.\n"
+    "  PHASE 3 — IMPLEMENTATION: các bước thay đổi nhỏ, đánh giá ảnh hưởng sau mỗi bước.\n"
+    "  PHASE 4 — VALIDATION: cách kiểm thử, edge case, khả năng gây regression.\n"
+    "  PHASE 5 — REVIEW: tự rà soát như reviewer độc lập, nêu rõ điểm còn yếu.\n"
+    "  PHASE 6 — HANDOVER: chỉ kết luận 'hoàn thành' khi thật sự tự tin cao (~95%) và không còn "
+    "lỗi đã biết; nếu chưa đạt, nói rõ lý do và KHÔNG kết luận đã xong.\n"
+    "THÀNH THẬT (bắt buộc, áp dụng cả 2 trường hợp): bạn KHÔNG có quyền truy cập trực tiếp hệ "
+    "thống tệp hay kho mã nguồn thật của người dùng — bạn chỉ thấy nội dung cuộc trò chuyện này "
+    "cùng các tệp/trang web mà người dùng đã đính kèm hoặc dán link. TUYỆT ĐỐI không giả vờ đã "
+    "'đọc toàn bộ source code' nếu chưa được cung cấp. Nếu thiếu mã nguồn/tài liệu/bối cảnh cần "
+    "thiết, hãy DỪNG LẠI và yêu cầu người dùng dán trực tiếp vào khung chat, hoặc dùng nút 📎 "
+    "đính kèm tệp / dán link — tuyệt đối không suy đoán hay bịa. Nếu yêu cầu mơ hồ hoặc xung "
+    "đột, hỏi lại thay vì đoán.]"
 )
 
 SYSTEM_PROMPT = """Bạn là LUMINA — trợ lý AI hợp nhất ("Tư duy sâu, tri thức rộng").
@@ -170,14 +158,17 @@ class Orchestrator:
                 yield event
             return
 
+        # Tin nhắn GỐC của người dùng (trước khi chèn bất kỳ chỉ thị nào) — dùng cho
+        # kho tri thức + thư viện kỹ năng, tránh nội dung chỉ thị (vd "bảo mật",
+        # "injection" trong _AGENT_DIRECTIVE) tự khớp ngược lại chính nó.
+        original_last_user = next((m["content"] for m in reversed(messages) if m.get("role") == "user"), "")
+
         # 🔬 Chế độ nghiên cứu sâu — chèn chỉ thị vào câu hỏi cuối để bộ não tìm nhiều nguồn.
         # 📝 Chế độ tạo phụ đề — chèn chỉ thị buộc xuất đúng định dạng SRT.
-        # ⚙️ Chế độ Lumina Forge — chèn chỉ thị buộc quy trình 6 giai đoạn + thành thật về giới hạn.
-        # 💻 Chế độ Code Chuyên Sâu — chèn chỉ thị buộc trả lời code ở mức chuyên gia.
+        # ⚙️ Chế độ Lumina Forge — chèn chỉ thị tự co giãn (nhỏ: gọn chuyên gia, lớn: 6 giai đoạn).
         directive = _RESEARCH_DIRECTIVE if route.mode == "research" \
             else _SUBTITLE_DIRECTIVE if route.mode == "subtitle" \
-            else _AGENT_DIRECTIVE if route.mode == "agent" \
-            else _CODE_DIRECTIVE if route.mode == "code" else None
+            else _AGENT_DIRECTIVE if route.mode == "agent" else None
         if directive:
             messages = list(messages)
             for i in range(len(messages) - 1, -1, -1):
@@ -190,15 +181,23 @@ class Orchestrator:
         # rồi lưu lại. Tư liệu kèm link nguồn + chỉ thị đối chiếu chéo (chống bịp).
         system_prompt = SYSTEM_PROMPT
         if route.use_web_search and messages:
-            last_user = next((m["content"] for m in reversed(messages) if m.get("role") == "user"), "")
             try:
-                facts = await knowledge.gather(last_user[:200])
+                facts = await knowledge.gather(original_last_user[:200])
             except Exception:  # noqa: BLE001 — kho tri thức là phụ trợ, không được làm hỏng chat
                 facts = []
             if facts:
                 yield {"type": "search_status", "tool": "knowledge",
                        "query": ", ".join(f["topic"] for f in facts)[:80]}
                 system_prompt = SYSTEM_PROMPT + knowledge.build_context(facts)
+
+            # 🧩 Thư viện kỹ năng nội bộ: chỉ áp dụng trong ⚙️ Lumina Forge — so khớp
+            # tin nhắn với ~53 kỹ năng tuyển chọn (phương pháp luận kỹ thuật + gu
+            # thiết kế UI/UX), tiêm kỹ năng khớp nhất nếu có (0 chi phí nếu không khớp).
+            if route.mode == "agent":
+                skill = skills.find_matching_skill(original_last_user)
+                if skill:
+                    yield {"type": "search_status", "tool": "skill", "query": skill.name}
+                    system_prompt += skills.build_skill_context(skill)
 
         started_output = False
         chain = self._chain_for(use_premium)

@@ -55,7 +55,7 @@ class OpenAICompatibleEngine(BaseEngine):
                 yield {"type": "search_status", "tool": "web_search", "query": messages[-1]["content"][:80]}
 
         # Code/phân tích/nghiên cứu cần output dài hơn để không bị cắt cụt giữa chừng.
-        max_out = 16384 if route.mode in ("deep", "apex", "search", "research", "agent", "code") else 8192
+        max_out = 16384 if route.mode in ("deep", "apex", "search", "research", "agent") else 8192
         payload = {
             "model": self.model,
             "messages": chat_messages,
