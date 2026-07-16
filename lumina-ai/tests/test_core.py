@@ -396,6 +396,13 @@ def test_skills_acquire_codebase_knowledge_matches_and_warns_no_real_files():
     assert "không khẳng định đã tạo/ghi file thật" in ctx
 
 
+def test_skills_dashmotion_matches_diagram_request():
+    from app import skills
+    skill = skills.find_matching_skill("vẽ sơ đồ kiến trúc động cho hệ thống này")
+    assert skill is not None
+    assert skill.slug == "dashmotion"
+
+
 def test_skills_find_matching_skill_irrelevant_returns_none():
     from app import skills
     assert skills.find_matching_skill("hôm nay trời đẹp không, đi chơi đâu nhỉ") is None
