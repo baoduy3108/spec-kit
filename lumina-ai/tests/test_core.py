@@ -460,6 +460,24 @@ def test_skills_design_and_security_topics_match():
         assert skill.slug == expected_slug, (text, skill.slug)
 
 
+def test_skills_library_has_at_least_82():
+    from app import skills
+    assert len(skills._SKILLS) >= 82
+
+
+def test_skills_writing_and_platform_topics_match():
+    from app import skills
+    cases = {
+        "sửa lại đoạn văn này cho bớt giống văn phong AI viết": "unslop",
+        "review code swiftui này giúp tôi": "swiftui-expert",
+        "thiết lập eslint 9 cho dự án javascript": "eslint-neostandard-linting",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_find_matching_skill_irrelevant_returns_none():
     from app import skills
     assert skills.find_matching_skill("hôm nay trời đẹp không, đi chơi đâu nhỉ") is None

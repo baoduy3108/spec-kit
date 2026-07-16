@@ -13,16 +13,18 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `ui-ux-pro-max-skill` | Next Level Builder | MIT | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill |
 | `acquire-codebase-knowledge` | không rõ (chỉ nhận được thư mục skill lẻ, không có repo gốc) | MIT (tự khai trong frontmatter `SKILL.md`) | không rõ |
 | `dashmotion` | Mars (csthink) | MIT | https://github.com/csthink/dashmotion |
-| `mattpocock/skills` (5 skill: domain-modeling, codebase-design, resolving-merge-conflicts, diagnosing-bugs, prototype) | Matt Pocock | MIT | https://github.com/mattpocock/skills |
+| `mattpocock/skills` (6 skill: domain-modeling, codebase-design, resolving-merge-conflicts, diagnosing-bugs, prototype, grilling) | Matt Pocock | MIT | https://github.com/mattpocock/skills |
 | `uucz/moyu` (1 skill: anti-over-engineering) | uucz | MIT | https://github.com/uucz/moyu |
 | `Agent-Skills-for-Context-Engineering` (3 skill: context-degradation, multi-agent-patterns, memory-systems) | muratcankoylan + contributors | MIT | https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering |
 | `ehmo/platform-design-skills` (2 skill: platform-design-web, platform-design-android) | ehmo | MIT | https://github.com/ehmo/platform-design-skills |
 | `zscole/model-hierarchy-skill` (1 skill: model-hierarchy) | zscole | MIT | https://github.com/zscole/model-hierarchy-skill |
 | `massimodeluisa/recursive-decomposition-skill` (1 skill: recursive-decomposition) | massimodeluisa | MIT | https://github.com/massimodeluisa/recursive-decomposition-skill |
-| `mcollina/skills` (3 skill: documentation-diataxis, typescript-magician, oauth-security) | Matteo Collina | MIT | https://github.com/mcollina/skills |
+| `mcollina/skills` (4 skill: documentation-diataxis, typescript-magician, oauth-security, eslint-neostandard-linting) | Matteo Collina | MIT | https://github.com/mcollina/skills |
 | `dembrandt/dembrandt-skills` (4 skill: nielsen-usability-heuristics, information-architecture, modular-scale-typography, gestalt-ui-organisation) | dembrandt | MIT | https://github.com/dembrandt/dembrandt-skills |
 | `BehiSecc/VibeSec-Skill` (1 skill: vibesec) | BehiSecc | Apache-2.0 | https://github.com/BehiSecc/VibeSec-Skill |
 | `meodai/skill.color-expert` (1 skill: color-expert) | meodai | **CC BY 4.0** (khác MIT/Apache — yêu cầu ghi công, cho phép dùng thương mại) | https://github.com/meodai/skill.color-expert |
+| `MohamedAbdallah-14/unslop` (1 skill: unslop) | MohamedAbdallah-14 | MIT | https://github.com/MohamedAbdallah-14/unslop |
+| `AvdLee/SwiftUI-Agent-Skill` (1 skill: swiftui-expert) | Antoine van der Lee | MIT | https://github.com/AvdLee/SwiftUI-Agent-Skill |
 
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
@@ -57,6 +59,13 @@ rõ ràng hơn để LUMINA áp dụng đúng.
 Repo `NeoLabHQ/context-engineering-kit` (chứa các plugin `ddd`, `kaizen`, `write-concisely`...) đã
 được xem xét nhưng KHÔNG đưa vào — dùng giấy phép **GPLv3** (copyleft mạnh, khác hẳn MIT/Apache-2.0
 đã dùng cho toàn bộ skill khác), không phù hợp trộn vào dự án có mục đích thương mại.
+
+Repo `raintree-technology/apple-hig-skills` đã xem xét nhưng KHÔNG đưa vào — nội dung Apple Human
+Interface Guidelines thật thuộc **bản quyền © Apple Inc.** (chỉ phần tooling/cấu trúc repo là MIT),
+không được phép sao chép nội dung. Repo `K-Dense-AI/claude-scientific-skills` và
+`mukul975/Anthropic-Cybersecurity-Skills` đã xem xét nhưng KHÔNG đưa vào — phần lớn skill cần cài
+đặt công cụ/thư viện chuyên ngành thật (RDKit, Volatility3, Splunk, BloodHound...) và thuộc lĩnh
+vực quá chuyên sâu/hẹp (khoa học sinh học, pháp y số) so với đối tượng người dùng LUMINA.
 
 Các repo `gstack`, `understand-anything`, `codebase-memory-mcp` (DeusData), `ruflo` (ruvnet),
 `serena` (oraios), `cocoindex-code` đã được xem xét nhưng KHÔNG đưa vào — đều là MCP server/CLI/
