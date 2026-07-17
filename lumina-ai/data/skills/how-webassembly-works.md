@@ -2,7 +2,7 @@
 name: how-webassembly-works
 description: How WebAssembly (Wasm) works — a compact binary instruction format run by a fast stack-based VM in the browser (and beyond), near-native speed in a sandbox, compiling C/C++/Rust/Go to Wasm, and how it complements (not replaces) JavaScript. Use to understand Wasm, when to use it, and running non-JS languages on the web.
 category: engineering
-keywords_vi: webassembly wasm hoạt động thế nào, chạy code tốc độ cao trên web, compile c++ rust sang wasm, vm stack sandbox, wasm vs javascript, hiểu webassembly
+keywords_vi: webassembly, wasm, chạy code tốc độ cao trên web, compile rust sang wasm, sandbox wasm, vm stack, wasm vs javascript
 ---
 
 # How WebAssembly Works
