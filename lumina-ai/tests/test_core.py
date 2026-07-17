@@ -899,7 +899,7 @@ def test_skills_architecture_and_product_topics_match():
         "hỗ trợ đa ngôn ngữ i18n, số nhiều plural theo locale": "i18n-and-localization",
         "hệ thống production sập, ứng phó sự cố và mitigate rollback": "incident-response",
         "kiểm chứng ý tưởng bằng mvp trước khi xây": "mvp-and-validation",
-        "phỏng vấn người dùng và usability test không dẫn dắt": "user-research",
+        "phỏng vấn khách hàng hỏi đúng câu hỏi không dẫn dắt để research": "user-research",
         "chạy a/b testing đúng cách, sample size và tránh p-hacking": "ab-testing",
         "nên test cái gì và bao nhiêu, test pyramid": "testing-strategy",
     }
