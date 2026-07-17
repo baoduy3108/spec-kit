@@ -32,6 +32,8 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `smixs/creative-director-skill` (1 skill: creative-director — chỉ lấy phương pháp 5 pha + kỹ thuật ideation, không lấy thư viện 569 case) | smixs | MIT | https://github.com/smixs/creative-director-skill |
 | `robzolkos/skill-rails-upgrade` (1 skill: rails-upgrade — lõi phương pháp; phần gọi `gh`/API chỉ là tùy chọn) | robzolkos | MIT | https://github.com/robzolkos/skill-rails-upgrade |
 | `BrianRWagner/ai-marketing-skills` (4 skill: marketing-principles, positioning-basics, homepage-audit, cold-outreach-sequence — chỉ lấy skill methodology thuần; các skill phụ thuộc API LinkedIn/Reddit/YouTube như last30days/reddit-insights KHÔNG lấy) | Brian Wagner | MIT | https://github.com/BrianRWagner/ai-marketing-skills |
+| `testdino-hq/playwright-skill` (1 skill: playwright-testing — tuyển tập 70 pattern, chưng cất phần cốt lõi) | testdino-hq | MIT | https://github.com/testdino-hq/playwright-skill |
+| `CosmoBlk/email-marketing-bible` (1 skill: email-marketing — lấy lõi tư vấn 19 chương, bỏ phần connector MCP Klaviyo/Resend/Mailchimp) | CosmoBlk | MIT | https://github.com/CosmoBlk/email-marketing-bible |
 
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp

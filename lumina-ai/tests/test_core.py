@@ -850,6 +850,23 @@ def test_skills_library_has_at_least_136():
     assert len(skills._SKILLS) >= 136
 
 
+def test_skills_library_has_at_least_138():
+    from app import skills
+    assert len(skills._SKILLS) >= 138
+
+
+def test_skills_playwright_and_email_topics_match():
+    from app import skills
+    cases = {
+        "test playwright bị flaky, nên dùng getByRole và web-first assertion": "playwright-testing",
+        "cải thiện tỉ lệ mở email và deliverability cho chiến dịch email": "email-marketing",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_marketing_and_upgrade_topics_match():
     from app import skills
     cases = {
