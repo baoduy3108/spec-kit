@@ -840,6 +840,23 @@ def test_skills_library_has_at_least_129():
     assert len(skills._SKILLS) >= 129
 
 
+def test_skills_library_has_at_least_131():
+    from app import skills
+    assert len(skills._SKILLS) >= 131
+
+
+def test_skills_rails_and_creative_topics_match():
+    from app import skills
+    cases = {
+        "review code rails 8 theo đúng quy ước native hotwire": "rails-conventions",
+        "nghĩ ý tưởng sáng tạo cho chiến dịch quảng cáo dùng scamper": "creative-director",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_codebase_understanding_topics_match():
     from app import skills
     cases = {

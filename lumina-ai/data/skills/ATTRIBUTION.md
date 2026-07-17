@@ -28,6 +28,8 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `meodai/skill.color-expert` (1 skill: color-expert) | meodai | **CC BY 4.0** (khác MIT/Apache — yêu cầu ghi công, cho phép dùng thương mại) | https://github.com/meodai/skill.color-expert |
 | `MohamedAbdallah-14/unslop` (1 skill: unslop) | MohamedAbdallah-14 | MIT | https://github.com/MohamedAbdallah-14/unslop |
 | `AvdLee/SwiftUI-Agent-Skill` (1 skill: swiftui-expert) | Antoine van der Lee | MIT | https://github.com/AvdLee/SwiftUI-Agent-Skill |
+| `ethos-link/rails-conventions` (1 skill: rails-conventions) | Ethos Link | MIT | https://github.com/ethos-link/rails-conventions |
+| `smixs/creative-director-skill` (1 skill: creative-director — chỉ lấy phương pháp 5 pha + kỹ thuật ideation, không lấy thư viện 569 case) | smixs | MIT | https://github.com/smixs/creative-director-skill |
 
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
