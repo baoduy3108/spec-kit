@@ -2,7 +2,7 @@
 name: how-compression-works
 description: How data compression works — lossless (Huffman coding, dictionary/LZ methods behind gzip/zip) vs lossy (JPEG/MP3/video, discarding imperceptible detail), why some data compresses and some doesn't (entropy), and picking a format/level. Use to understand gzip/zip, image/audio/video formats, and compression trade-offs.
 category: engineering
-keywords_vi: nén dữ liệu hoạt động thế nào, compression, lossless lossy, huffman lz gzip, nén ảnh jpeg mp3, entropy, chọn định dạng nén, hiểu nén dữ liệu
+keywords_vi: nén dữ liệu, compression, lossless lossy, huffman, gzip, lz77, nén ảnh jpeg mp3, entropy, chọn định dạng nén
 ---
 
 # How Compression Works
