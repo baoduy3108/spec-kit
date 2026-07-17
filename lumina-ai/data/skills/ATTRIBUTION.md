@@ -54,6 +54,15 @@ giấy phép bên thứ ba): `prompt-engineering`, `sql-query-optimization`, `re
 Nội dung là kiến thức/thông lệ phổ biến (không thuộc phạm vi bản quyền của riêng ai), diễn đạt bằng
 lời của LUMINA.
 
+**Nhóm skill "cơ chế X hoạt động bên trong" (how-X-works):** lấy cảm hứng từ danh sách chủ đề
+`codecrafters-io/build-your-own-x` (giấy phép **CC0 1.0 — public domain**, tức miễn trừ mọi bản
+quyền, dùng tự do không cần ghi công) — LUMINA **tự viết bản giải thích gốc** cho từng chủ đề (không
+sao chép các bài hướng dẫn bên thứ ba được liên kết trong danh sách đó): `how-git-works-internally`,
+`how-databases-work`, `how-docker-containers-work`, `how-web-servers-work`, `how-browsers-work`,
+`how-compilers-work`, `how-shells-work`, `how-regex-engines-work`, `how-blockchain-works`,
+`how-neural-networks-work`, `how-operating-systems-work`, `how-llms-work` (và các how-X-works khác).
+Nội dung là kiến thức phổ thông về nguyên lý hệ thống, diễn đạt bằng lời của LUMINA.
+
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
 file gốc như các skill trong 5 repo đầu tiên) — tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản

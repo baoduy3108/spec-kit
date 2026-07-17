@@ -885,6 +885,33 @@ def test_skills_library_has_at_least_182():
     assert len(skills._SKILLS) >= 182
 
 
+def test_skills_library_has_at_least_194():
+    from app import skills
+    assert len(skills._SKILLS) >= 194
+
+
+def test_skills_how_x_works_topics_match():
+    from app import skills
+    cases = {
+        "git lưu trữ dữ liệu thế nào, cơ chế object blob tree commit bên trong": "how-git-works-internally",
+        "database hoạt động bên trong ra sao, b-tree wal mvcc buffer pool": "how-databases-work",
+        "container hoạt động thế nào, namespace cgroup overlay filesystem": "how-docker-containers-work",
+        "web server xử lý request thế nào, event loop vs thread pool socket": "how-web-servers-work",
+        "trình duyệt render trang thế nào, dom cssom layout reflow paint": "how-browsers-work",
+        "compiler và interpreter hoạt động thế nào, lexer parser ast bytecode": "how-compilers-work",
+        "shell chạy lệnh thế nào bên trong, fork exec pipe file descriptor": "how-shells-work",
+        "regex engine khớp thế nào, nfa dfa backtracking redos": "how-regex-engines-work",
+        "blockchain hoạt động thế nào, proof of work merkle hàm băm chuỗi khối": "how-blockchain-works",
+        "mạng nơ-ron học thế nào, backpropagation gradient descent activation": "how-neural-networks-work",
+        "hệ điều hành hoạt động thế nào, process scheduler virtual memory syscall": "how-operating-systems-work",
+        "llm mô hình ngôn ngữ hoạt động thế nào, transformer attention dự đoán token": "how-llms-work",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_architecture_and_product_topics_match():
     from app import skills
     cases = {
