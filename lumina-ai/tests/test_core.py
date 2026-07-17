@@ -815,6 +815,26 @@ def test_skills_library_has_at_least_110():
     assert len(skills._SKILLS) >= 110
 
 
+def test_skills_library_has_at_least_115():
+    from app import skills
+    assert len(skills._SKILLS) >= 115
+
+
+def test_skills_dembrandt_advanced_topics_match():
+    from app import skills
+    cases = {
+        "ảnh sản phẩm nên dùng dữ liệu thật hay lorem ipsum": "authentic-product-representation",
+        "đặt bộ chọn ngôn ngữ và tiền tệ ở đâu trên header": "global-toolbar-controls",
+        "mấy card này khác chiều cao so le nhau nhìn lệch": "repeated-component-alignment",
+        "thêm breadcrumb cho điều hướng nhiều tầng": "ui-context-and-scope",
+        "thiết kế tool điều phối kho vận cho nhân viên chuyên nghiệp": "operational-expert-tool-ui",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_accessibility_and_layout_topics_match():
     from app import skills
     cases = {
