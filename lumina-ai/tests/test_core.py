@@ -835,6 +835,23 @@ def test_skills_library_has_at_least_127():
     assert len(skills._SKILLS) >= 127
 
 
+def test_skills_library_has_at_least_129():
+    from app import skills
+    assert len(skills._SKILLS) >= 129
+
+
+def test_skills_codebase_understanding_topics_match():
+    from app import skills
+    cases = {
+        "giải thích hàm này làm gì và nó thuộc tầng nào liên kết với gì": "explaining-code-in-context",
+        "viết tài liệu onboarding cho người mới vào team, lộ trình học codebase": "codebase-onboarding-guide",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_verification_topic_matches():
     from app import skills
     skill = skills.find_matching_skill("đừng tuyên bố hoàn thành khi chưa kiểm chứng, phải xác minh trước khi báo")

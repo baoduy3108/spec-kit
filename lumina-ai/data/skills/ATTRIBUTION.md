@@ -76,13 +76,25 @@ Repo `Digidai/product-manager-skills` đã xem xét nhưng KHÔNG đưa vào —
 ghi file vào `~/.claude/memory/` thật, LUMINA không có hạ tầng này (đã có `memory-systems` ở trên
 làm kiến thức khái niệm tương đương, không cần bản tool-dependent này).
 
-Các repo `gstack`, `understand-anything`, `codebase-memory-mcp` (DeusData), `ruflo` (ruvnet),
+Các repo `gstack`, `codebase-memory-mcp` (DeusData), `ruflo` (ruvnet),
 `serena` (oraios), `cocoindex-code` đã được xem xét nhưng KHÔNG đưa vào — đều là MCP server/CLI/
 agent-orchestration framework thật, đòi hỏi tiến trình chạy nền/vector DB/browser control/Language
 Server Protocol mà LUMINA không có. `serena` chạy LSP server thật cho từng ngôn ngữ (0 file
-SKILL.md). `cocoindex-code` chỉ có 1 SKILL.md nhưng toàn bộ nội dung là hướng dẫn gọi CLI `ccc`
-(search/index/init) dựa trên semantic search + vector embeddings thật — không tách được thành nội
-dung tư vấn thuần văn bản.
+SKILL.md — không có văn bản nào để chưng cất). `cocoindex-code` chỉ có 1 SKILL.md nhưng toàn bộ nội
+dung là hướng dẫn gọi CLI `ccc` (search/index/init) dựa trên semantic search + vector embeddings
+thật — không tách được thành nội dung tư vấn thuần văn bản. `gstack` có nhiều SKILL.md nhưng đều
+ràng buộc chặt với CLI `gstack` + thiết bị thật (StateServer/screenshot) và tham chiếu Apple HIG
+(bản quyền), lại không kèm LICENSE — phần lõi tư vấn quá mỏng để tách.
+
+**`Lum1104/Understand-Anything`** ban đầu bị xếp vào nhóm MCP (các skill gốc cần file
+`.ua/knowledge-graph.json` do lệnh `/understand` sinh ra + ghi file thật) — nhưng **MÔ HÌNH TƯ DUY**
+của nó (giải thích code theo tầng/liên kết/luồng; lộ trình onboarding có guided tour) thì tách được.
+Repo **không kèm LICENSE rõ ràng**, nên **KHÔNG chép nguyên văn** — chỉ **chưng cất phương pháp/ý
+tưởng thành văn bản gốc tiếng Anh của LUMINA** (ý tưởng/phương pháp không thuộc phạm vi bản quyền,
+chỉ cách diễn đạt cụ thể mới thuộc), bỏ hoàn toàn phần đọc/ghi file JSON. Đã rút ra 2 skill:
+`explaining-code-in-context`, `codebase-onboarding-guide` (khác góc với `acquire-codebase-knowledge`
+đã có: một cái giải thích SÂU 1 thành phần, một cái làm LỘ TRÌNH cho người mới). Link:
+https://github.com/Lum1104/Understand-Anything
 
 **Nhóm video/tạo ảnh AI đã rà nhưng KHÔNG đưa vào** (từ danh sách `awesome-agent-skills`): hầu hết
 skill "tạo ảnh"/"edit video" trong danh sách công khai (fal.ai, MiniMax, OpenAI Sora/imagegen,
