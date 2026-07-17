@@ -99,6 +99,14 @@ theo thông lệ ngành (kiến thức phổ thông, không sao chép repo cụ 
 `learning-how-to-learn`, `critical-thinking`, `sql-joins-explained`, `data-visualization-principles`
 — LUMINA tự biên soạn (kiến thức/thông lệ phổ thông).
 
+**Nhóm how-X hệ thống/bảo mật + AI + kỹ năng đời sống**: `how-http-works`,
+`how-cookies-and-sessions-work`, `how-vpns-work`, `how-2fa-works`, `how-payment-processing-works`,
+`how-video-streaming-works`, `how-webassembly-works`, `how-bloom-filters-work`,
+`how-consistent-hashing-works`, `nlp-basics`, `computer-vision-basics`, `mlops-basics`,
+`copywriting-basics`, `habit-formation`, `goal-setting-okrs`, `personal-finance-basics` — LUMINA tự
+biên soạn (kiến thức phổ thông; `personal-finance-basics` chỉ mang tính giáo dục, không phải tư vấn
+tài chính cá nhân hóa).
+
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
 file gốc như các skill trong 5 repo đầu tiên) — tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản

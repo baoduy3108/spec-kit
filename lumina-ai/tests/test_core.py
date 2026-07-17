@@ -915,6 +915,37 @@ def test_skills_library_has_at_least_264():
     assert len(skills._SKILLS) >= 264
 
 
+def test_skills_library_has_at_least_280():
+    from app import skills
+    assert len(skills._SKILLS) >= 280
+
+
+def test_skills_systems_and_life_topics_match():
+    from app import skills
+    cases = {
+        "http method get post status code 404 500 header": "how-http-works",
+        "cookie session duy trì đăng nhập httponly secure samesite": "how-cookies-and-sessions-work",
+        "vpn mạng riêng ảo tunnel mã hóa ẩn ip có an toàn không": "how-vpns-work",
+        "2fa xác thực hai yếu tố totp authenticator security key fido": "how-2fa-works",
+        "thanh toán thẻ gateway authorization capture pci tokenization": "how-payment-processing-works",
+        "video streaming adaptive bitrate hls dash buffering codec": "how-video-streaming-works",
+        "webassembly wasm compile rust sang wasm sandbox tốc độ": "how-webassembly-works",
+        "bloom filter kiểm tra tồn tại tiết kiệm bộ nhớ false positive": "how-bloom-filters-work",
+        "consistent hashing băm nhất quán hash ring virtual node": "how-consistent-hashing-works",
+        "nlp xử lý ngôn ngữ tự nhiên tokenization tf-idf word embedding": "nlp-basics",
+        "computer vision thị giác máy tính cnn convolution object detection": "computer-vision-basics",
+        "mlops đưa model lên production drift dữ liệu retrain monitor": "mlops-basics",
+        "copywriting viết quảng cáo lợi ích vs tính năng aida pas headline": "copywriting-basics",
+        "xây dựng thói quen tốt cue routine reward habit stacking": "habit-formation",
+        "đặt mục tiêu okr objective key result smart goal": "goal-setting-okrs",
+        "tài chính cá nhân lập ngân sách quỹ khẩn cấp trả nợ lãi cao lãi kép": "personal-finance-basics",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_professional_and_ml_topics_match():
     from app import skills
     cases = {
