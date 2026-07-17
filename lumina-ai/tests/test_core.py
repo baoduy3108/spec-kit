@@ -855,6 +855,25 @@ def test_skills_library_has_at_least_138():
     assert len(skills._SKILLS) >= 138
 
 
+def test_skills_library_has_at_least_142():
+    from app import skills
+    assert len(skills._SKILLS) >= 142
+
+
+def test_skills_career_topics_match():
+    from app import skills
+    cases = {
+        "cv của tôi bị loại tự động qua ats, tối ưu từ khóa sao": "resume-ats-optimizer",
+        "viết lại gạch đầu dòng cv cho mạnh, định lượng thành tích": "resume-bullet-writer",
+        "chuẩn bị phỏng vấn xin việc, luyện star story trả lời câu hỏi hành vi": "interview-prep",
+        "nên deal lương bao nhiêu, đàm phán lương khi nhận offer": "salary-negotiation",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_playwright_and_email_topics_match():
     from app import skills
     cases = {

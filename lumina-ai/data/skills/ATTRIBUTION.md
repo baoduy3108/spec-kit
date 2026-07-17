@@ -34,6 +34,7 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `BrianRWagner/ai-marketing-skills` (4 skill: marketing-principles, positioning-basics, homepage-audit, cold-outreach-sequence — chỉ lấy skill methodology thuần; các skill phụ thuộc API LinkedIn/Reddit/YouTube như last30days/reddit-insights KHÔNG lấy) | Brian Wagner | MIT | https://github.com/BrianRWagner/ai-marketing-skills |
 | `testdino-hq/playwright-skill` (1 skill: playwright-testing — tuyển tập 70 pattern, chưng cất phần cốt lõi) | testdino-hq | MIT | https://github.com/testdino-hq/playwright-skill |
 | `CosmoBlk/email-marketing-bible` (1 skill: email-marketing — lấy lõi tư vấn 19 chương, bỏ phần connector MCP Klaviyo/Resend/Mailchimp) | CosmoBlk | MIT | https://github.com/CosmoBlk/email-marketing-bible |
+| `Paramchoudhary/ResumeSkills` (4 skill: resume-ats-optimizer, resume-bullet-writer, interview-prep, salary-negotiation — chỉ lấy skill methodology thuần; các skill cần dữ liệu LinkedIn/thị trường lương thời gian thực KHÔNG lấy) | Param Choudhary | MIT | https://github.com/Paramchoudhary/ResumeSkills |
 
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
