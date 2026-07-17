@@ -870,6 +870,31 @@ def test_skills_library_has_at_least_146():
     assert len(skills._SKILLS) >= 146
 
 
+def test_skills_library_has_at_least_156():
+    from app import skills
+    assert len(skills._SKILLS) >= 156
+
+
+def test_skills_core_engineering_topics_match():
+    from app import skills
+    cases = {
+        "viết prompt cho ai sao cho ra kết quả đúng, tối ưu system prompt": "prompt-engineering",
+        "query sql chạy chậm quá, đánh index và explain plan sao": "sql-query-optimization",
+        "viết regex biểu thức chính quy để bắt chuỗi email": "regular-expressions",
+        "viết dockerfile multi-stage cho image nhẹ hơn": "docker-containers",
+        "dùng grep sed awk xử lý text trên terminal linux": "linux-command-line",
+        "thiết kế schema database chuẩn hóa với khóa ngoại quan hệ": "database-schema-design",
+        "thiết kế hệ thống chịu tải cao với load balancing và caching": "system-design-fundamentals",
+        "code đa luồng bị race condition và deadlock, xử lý sao": "concurrency-and-parallelism",
+        "phân tích dữ liệu bằng pandas, groupby và merge dataframe": "data-analysis-pandas",
+        "tối ưu độ phức tạp big-o, chọn cấu trúc dữ liệu phù hợp": "algorithms-and-complexity",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_writing_process_topics_match():
     from app import skills
     cases = {

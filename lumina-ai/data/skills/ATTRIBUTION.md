@@ -38,6 +38,14 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `EveryInc/charlie-cfo-skill` (1 skill: bootstrapped-cfo) | Every Inc | MIT | https://github.com/EveryInc/charlie-cfo-skill |
 | `ognjengt/founder-skills` (2 skill: prd-writing từ `prd-generator`, sop-writing từ `sop-creator` — chỉ lấy lõi phương pháp, bỏ bước `md-to-pdf`/đọc file context/tool) | ognjengt | MIT | https://github.com/ognjengt/founder-skills |
 
+**Skill do LUMINA tự biên soạn (không sao chép từ repo cụ thể):** một số năng lực lõi mà mọi
+coding agent mạnh đều cần nhưng các repo công khai còn thiếu/hoặc chỉ có bản phụ thuộc tool — được
+LUMINA **tự viết theo thông lệ ngành chuẩn** (không phải bản sao của bất kỳ repo nào, nên không kèm
+giấy phép bên thứ ba): `prompt-engineering`, `sql-query-optimization`, `regular-expressions`,
+`docker-containers`, `linux-command-line`, `database-schema-design`, `system-design-fundamentals`,
+`concurrency-and-parallelism`, `data-analysis-pandas`, `algorithms-and-complexity`. Nội dung là kiến
+thức/thông lệ phổ biến (không thuộc phạm vi bản quyền của riêng ai), diễn đạt bằng lời của LUMINA.
+
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
 file gốc như các skill trong 5 repo đầu tiên) — tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản
