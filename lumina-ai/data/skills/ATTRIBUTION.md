@@ -35,6 +35,8 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `testdino-hq/playwright-skill` (1 skill: playwright-testing — tuyển tập 70 pattern, chưng cất phần cốt lõi) | testdino-hq | MIT | https://github.com/testdino-hq/playwright-skill |
 | `CosmoBlk/email-marketing-bible` (1 skill: email-marketing — lấy lõi tư vấn 19 chương, bỏ phần connector MCP Klaviyo/Resend/Mailchimp) | CosmoBlk | MIT | https://github.com/CosmoBlk/email-marketing-bible |
 | `Paramchoudhary/ResumeSkills` (4 skill: resume-ats-optimizer, resume-bullet-writer, interview-prep, salary-negotiation — chỉ lấy skill methodology thuần; các skill cần dữ liệu LinkedIn/thị trường lương thời gian thực KHÔNG lấy) | Param Choudhary | MIT | https://github.com/Paramchoudhary/ResumeSkills |
+| `EveryInc/charlie-cfo-skill` (1 skill: bootstrapped-cfo) | Every Inc | MIT | https://github.com/EveryInc/charlie-cfo-skill |
+| `ognjengt/founder-skills` (1 skill: prd-writing từ folder `prd-generator` — chỉ lấy lõi phương pháp viết PRD, bỏ bước `md-to-pdf`) | ognjengt | MIT | https://github.com/ognjengt/founder-skills |
 
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
@@ -78,7 +80,10 @@ không được phép sao chép nội dung. Repo `K-Dense-AI/claude-scientific-s
 vực quá chuyên sâu/hẹp (khoa học sinh học, pháp y số) so với đối tượng người dùng LUMINA.
 
 Repo `Digidai/product-manager-skills` đã xem xét nhưng KHÔNG đưa vào — dùng giấy phép
-**CC BY-NC-SA 4.0** (cấm dùng thương mại), không phù hợp vì LUMINA có gói trả phí. Repo
+**CC BY-NC-SA 4.0** (cấm dùng thương mại), không phù hợp vì LUMINA có gói trả phí. Tương tự,
+`lawvable/awesome-legal-skills` dùng **CC BY-NC-ND 4.0** (cấm thương mại + cấm tạo bản phái sinh)
+— vi phạm cả 2 điều kiện của LUMINA (có gói trả phí + phải diễn đạt lại/thích nghi nội dung), nên
+KHÔNG đưa vào. Repo
 `hanfang/claude-memory-skill` đã xem xét nhưng KHÔNG đưa vào — cần agent nền chạy song song +
 ghi file vào `~/.claude/memory/` thật, LUMINA không có hạ tầng này (đã có `memory-systems` ở trên
 làm kiến thức khái niệm tương đương, không cần bản tool-dependent này).
