@@ -820,6 +820,25 @@ def test_skills_library_has_at_least_115():
     assert len(skills._SKILLS) >= 115
 
 
+def test_skills_library_has_at_least_119():
+    from app import skills
+    assert len(skills._SKILLS) >= 119
+
+
+def test_skills_context_engineering_topics_match():
+    from app import skills
+    cases = {
+        "giải thích attention budget và cửa sổ ngữ cảnh hoạt động thế nào": "context-fundamentals",
+        "phiên chat dài quá agent quên mất đã sửa file nào, nén ngữ cảnh sao": "context-compression",
+        "giảm chi phí token bằng observation masking và kv-cache": "context-optimization",
+        "xây dựng rubric nhiều chiều để đánh giá agent": "evaluation",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_dembrandt_advanced_topics_match():
     from app import skills
     cases = {

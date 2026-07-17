@@ -15,7 +15,7 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `dashmotion` | Mars (csthink) | MIT | https://github.com/csthink/dashmotion |
 | `mattpocock/skills` (7 skill: domain-modeling, codebase-design, resolving-merge-conflicts, diagnosing-bugs, prototype, grilling, teaching-framework) | Matt Pocock | MIT | https://github.com/mattpocock/skills |
 | `uucz/moyu` (1 skill: anti-over-engineering) | uucz | MIT | https://github.com/uucz/moyu |
-| `Agent-Skills-for-Context-Engineering` (3 skill: context-degradation, multi-agent-patterns, memory-systems) | muratcankoylan + contributors | MIT | https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering |
+| `Agent-Skills-for-Context-Engineering` (8 skill: context-degradation, multi-agent-patterns, memory-systems, tool-design, context-fundamentals, context-compression, context-optimization, evaluation) | muratcankoylan + contributors | MIT | https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering |
 | `ehmo/platform-design-skills` (2 skill: platform-design-web, platform-design-android) | ehmo | MIT | https://github.com/ehmo/platform-design-skills |
 | `zscole/model-hierarchy-skill` (1 skill: model-hierarchy) | zscole | MIT | https://github.com/zscole/model-hierarchy-skill |
 | `massimodeluisa/recursive-decomposition-skill` (1 skill: recursive-decomposition) | massimodeluisa | MIT | https://github.com/massimodeluisa/recursive-decomposition-skill |
