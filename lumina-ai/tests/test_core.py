@@ -890,6 +890,34 @@ def test_skills_library_has_at_least_194():
     assert len(skills._SKILLS) >= 194
 
 
+def test_skills_library_has_at_least_207():
+    from app import skills
+    assert len(skills._SKILLS) >= 207
+
+
+def test_skills_how_x_works_and_llm_topics_match():
+    from app import skills
+    cases = {
+        "công cụ tìm kiếm hoạt động thế nào, inverted index và tf-idf bm25": "how-search-engines-work",
+        "cpu bộ xử lý hoạt động thế nào, fetch decode execute pipeline cache": "how-cpus-work",
+        "render đồ họa 3d thế nào, rasterization ray tracing shader z-buffer": "how-3d-rendering-works",
+        "game engine hoạt động thế nào, game loop delta time entity component system": "how-game-engines-work",
+        "react vue hoạt động thế nào, virtual dom diffing reactivity": "how-frontend-frameworks-work",
+        "malloc cấp phát bộ nhớ thế nào, free list phân mảnh": "how-memory-allocators-work",
+        "emulator giả lập máy thế nào, thông dịch opcode fetch decode": "how-emulators-work",
+        "consensus phân tán thế nào, raft bầu leader replication quorum": "how-distributed-consensus-works",
+        "trình soạn thảo lưu văn bản thế nào, gap buffer rope piece table": "how-text-editors-work",
+        "bittorrent chia sẻ p2p thế nào, torrent seeder dht swarm": "how-bittorrent-works",
+        "physics engine mô phỏng thế nào, tích phân euler va chạm collision": "how-physics-engines-work",
+        "chạy llm trên máy local, ollama gguf quantization theo vram": "running-llms-locally",
+        "serve llm nhiều người dùng, vllm continuous batching kv cache": "llm-inference-optimization",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_how_x_works_topics_match():
     from app import skills
     cases = {

@@ -60,8 +60,17 @@ quyền, dùng tự do không cần ghi công) — LUMINA **tự viết bản gi
 sao chép các bài hướng dẫn bên thứ ba được liên kết trong danh sách đó): `how-git-works-internally`,
 `how-databases-work`, `how-docker-containers-work`, `how-web-servers-work`, `how-browsers-work`,
 `how-compilers-work`, `how-shells-work`, `how-regex-engines-work`, `how-blockchain-works`,
-`how-neural-networks-work`, `how-operating-systems-work`, `how-llms-work` (và các how-X-works khác).
+`how-neural-networks-work`, `how-operating-systems-work`, `how-llms-work`, `how-search-engines-work`,
+`how-cpus-work`, `how-3d-rendering-works`, `how-game-engines-work`, `how-frontend-frameworks-work`,
+`how-memory-allocators-work`, `how-emulators-work`, `how-distributed-consensus-works`,
+`how-text-editors-work`, `how-bittorrent-works`, `how-physics-engines-work` (và các how-X-works khác).
 Nội dung là kiến thức phổ thông về nguyên lý hệ thống, diễn đạt bằng lời của LUMINA.
+
+**Nhóm skill chạy/serve LLM local** (`running-llms-locally`, `llm-inference-optimization`): LUMINA tự
+biên soạn theo thông lệ ngành, lấy bối cảnh từ các dự án mã nguồn mở `ollama/ollama`,
+`ggml-org/llama.cpp`, `vllm-project/vllm`, `mudler/LocalAI`, `open-webui/open-webui`, `janhq/jan`
+(đây là PHẦN MỀM chạy LLM, không phải repo skill — không có SKILL.md để trích; chỉ dùng làm bối
+cảnh kiến thức, nội dung do LUMINA tự viết).
 
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
