@@ -830,6 +830,18 @@ def test_skills_library_has_at_least_126():
     assert len(skills._SKILLS) >= 126
 
 
+def test_skills_library_has_at_least_127():
+    from app import skills
+    assert len(skills._SKILLS) >= 127
+
+
+def test_skills_verification_topic_matches():
+    from app import skills
+    skill = skills.find_matching_skill("đừng tuyên bố hoàn thành khi chưa kiểm chứng, phải xác minh trước khi báo")
+    assert skill is not None
+    assert skill.slug == "verification-before-completion"
+
+
 def test_skills_backend_and_method_topics_match():
     from app import skills
     cases = {

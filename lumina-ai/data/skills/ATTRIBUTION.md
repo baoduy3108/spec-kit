@@ -8,7 +8,7 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 |---|---|---|---|
 | `agent-skills` | Addy Osmani | MIT | https://github.com/addyosmani/agent-skills |
 | `skills` (chính thức) | Anthropic | Apache-2.0 | https://github.com/anthropics/skills |
-| `superpowers` | Jesse Vincent | MIT | https://github.com/obra/superpowers |
+| `superpowers` (6 skill: brainstorming, systematic-debugging, writing-plans, receiving-code-review, requesting-code-review, verification-before-completion) | Jesse Vincent | MIT | https://github.com/obra/superpowers |
 | `taste-skill` | Leonxlnx | MIT | https://github.com/Leonxlnx/taste-skill |
 | `ui-ux-pro-max-skill` | Next Level Builder | MIT | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill |
 | `acquire-codebase-knowledge` | không rõ (chỉ nhận được thư mục skill lẻ, không có repo gốc) | MIT (tự khai trong frontmatter `SKILL.md`) | không rõ |
