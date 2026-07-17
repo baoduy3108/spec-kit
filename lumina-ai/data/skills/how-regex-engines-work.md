@@ -2,7 +2,7 @@
 name: how-regex-engines-work
 description: How a regex engine matches — compiling a pattern to an NFA/DFA, the difference between DFA engines (linear time, no backtracking) and backtracking engines (support backreferences/lookaround but can blow up), and why catastrophic backtracking (ReDoS) happens. Use to understand regex performance, ReDoS, and why engines differ in features and speed.
 category: engineering
-keywords_vi: regex engine hoạt động thế nào, nfa dfa, backtracking regex, catastrophic backtracking redos, cơ chế khớp regex, vì sao regex chậm, hiểu regex sâu
+keywords_vi: regex engine, nfa dfa, backtracking regex, redos, catastrophic backtracking, cơ chế khớp regex, vì sao regex chậm, khớp regex thế nào
 ---
 
 # How Regex Engines Work
