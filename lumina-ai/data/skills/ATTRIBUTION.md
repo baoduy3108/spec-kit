@@ -92,6 +92,13 @@ theo thông lệ ngành (kiến thức phổ thông, không sao chép repo cụ 
 `vector-embeddings`, `fine-tuning-vs-rag-vs-prompting`, `statistics-fundamentals`,
 `probability-and-bayes`, `data-cleaning` — LUMINA tự biên soạn (kiến thức phổ thông).
 
+**Nhóm ML/how-X + kỹ năng chuyên nghiệp/tư duy + data**: `how-async-await-works`,
+`machine-learning-basics`, `how-recommendation-systems-work`, `time-management-and-prioritization`,
+`decision-making-frameworks`, `giving-and-receiving-feedback`, `effective-meetings`,
+`writing-effective-emails`, `presentations-and-storytelling`, `negotiation-basics`,
+`learning-how-to-learn`, `critical-thinking`, `sql-joins-explained`, `data-visualization-principles`
+— LUMINA tự biên soạn (kiến thức/thông lệ phổ thông).
+
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
 file gốc như các skill trong 5 repo đầu tiên) — tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản

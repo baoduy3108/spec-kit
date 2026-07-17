@@ -910,6 +910,35 @@ def test_skills_library_has_at_least_250():
     assert len(skills._SKILLS) >= 250
 
 
+def test_skills_library_has_at_least_264():
+    from app import skills
+    assert len(skills._SKILLS) >= 264
+
+
+def test_skills_professional_and_ml_topics_match():
+    from app import skills
+    cases = {
+        "async await event loop microtask không chặn luồng": "how-async-await-works",
+        "machine learning cơ bản supervised overfitting train test split": "machine-learning-basics",
+        "hệ thống gợi ý collaborative filtering cold start": "how-recommendation-systems-work",
+        "quản lý thời gian sắp xếp ưu tiên ma trận eisenhower": "time-management-and-prioritization",
+        "ra quyết định khó reversible irreversible tránh phân tích tê liệt": "decision-making-frameworks",
+        "cách góp ý feedback cho người khác và nhận phê bình sbi": "giving-and-receiving-feedback",
+        "họp hiệu quả agenda action item có nên họp không": "effective-meetings",
+        "viết email công việc hiệu quả subject bluf": "writing-effective-emails",
+        "thuyết trình kể chuyện làm slide một ý một slide pitch": "presentations-and-storytelling",
+        "đàm phán batna lợi ích vs lập trường win-win": "negotiation-basics",
+        "học cách học active recall spaced repetition feynman": "learning-how-to-learn",
+        "tư duy phản biện đánh giá lập luận ngụy biện thiên kiến bias": "critical-thinking",
+        "sql join inner left outer bị nhân đôi dòng fan-out": "sql-joins-explained",
+        "trực quan hóa dữ liệu chọn loại biểu đồ tránh chart gây hiểu lầm": "data-visualization-principles",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_network_crypto_ai_topics_match():
     from app import skills
     cases = {
