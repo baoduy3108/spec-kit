@@ -80,6 +80,12 @@ cảnh kiến thức, nội dung do LUMINA tự viết).
 chế/phi thương mại nên KHÔNG sao chép; các mẫu thuật toán là kiến thức phổ quát, không thuộc bản
 quyền của riêng ai, được diễn đạt bằng lời của LUMINA).
 
+**Nhóm backend/DevOps/kiến trúc** (`error-handling-patterns`, `api-pagination-and-filtering`,
+`rate-limiting-algorithms`, `webhooks-design`, `idempotency`, `retries-and-resilience`,
+`distributed-tracing`, `secrets-management`, `load-testing`, `chaos-engineering`,
+`event-sourcing-cqrs`, `clean-architecture`, `code-smells`, `technical-debt`): LUMINA tự biên soạn
+theo thông lệ ngành (kiến thức phổ thông, không sao chép repo cụ thể).
+
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
 file gốc như các skill trong 5 repo đầu tiên) — tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản

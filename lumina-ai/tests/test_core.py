@@ -900,6 +900,35 @@ def test_skills_library_has_at_least_221():
     assert len(skills._SKILLS) >= 221
 
 
+def test_skills_library_has_at_least_235():
+    from app import skills
+    assert len(skills._SKILLS) >= 235
+
+
+def test_skills_backend_devops_topics_match():
+    from app import skills
+    cases = {
+        "thiết kế xử lý lỗi exception vs result, fail fast không nuốt lỗi": "error-handling-patterns",
+        "phân trang api dùng cursor keyset thay offset và lọc filter": "api-pagination-and-filtering",
+        "giới hạn tần suất api bằng token bucket sliding window chống spam": "rate-limiting-algorithms",
+        "thiết kế webhook gửi sự kiện có retry và ký hmac xác thực": "webhooks-design",
+        "làm thao tác idempotent với idempotency key tránh xử lý trùng": "idempotency",
+        "thử lại retry với exponential backoff và circuit breaker": "retries-and-resilience",
+        "truy vết phân tán trace span correlation id tìm nút thắt latency": "distributed-tracing",
+        "quản lý secret api key không commit dùng env và vault": "secrets-management",
+        "kiểm thử tải load test đo latency p99 percentile tìm bottleneck": "load-testing",
+        "chaos engineering tiêm lỗi có chủ đích kiểm thử độ bền": "chaos-engineering",
+        "event sourcing cqrs lưu trạng thái bằng sự kiện tách read write": "event-sourcing-cqrs",
+        "clean architecture phân tầng dependency rule hexagonal": "clean-architecture",
+        "nhận biết code smell god class trùng lặp khi nào refactor": "code-smells",
+        "quản lý nợ kỹ thuật khi nào refactor hay làm tính năng": "technical-debt",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_algorithm_patterns_match():
     from app import skills
     cases = {
