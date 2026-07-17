@@ -880,6 +880,35 @@ def test_skills_library_has_at_least_168():
     assert len(skills._SKILLS) >= 168
 
 
+def test_skills_library_has_at_least_182():
+    from app import skills
+    assert len(skills._SKILLS) >= 182
+
+
+def test_skills_architecture_and_product_topics_match():
+    from app import skills
+    cases = {
+        "lỡ tay git reset hard mất commit, dùng reflog khôi phục": "git-advanced",
+        "thiết kế schema graphql, xử lý n+1 bằng dataloader": "graphql-design",
+        "nên tách microservice không, ranh giới service và database per service": "microservices-and-boundaries",
+        "quản lý dependency, semver lockfile và cập nhật thư viện an toàn": "dependency-management",
+        "dùng feature flag triển khai dần canary và kill switch": "feature-flags-and-rollouts",
+        "mô hình dữ liệu nosql mongodb, chọn partition key": "nosql-data-modeling",
+        "app bị rò rỉ bộ nhớ memory leak, tốn ram tăng dần": "memory-management",
+        "làm chat realtime, chọn websocket hay sse": "websockets-and-realtime",
+        "hỗ trợ đa ngôn ngữ i18n, số nhiều plural theo locale": "i18n-and-localization",
+        "hệ thống production sập, ứng phó sự cố và mitigate rollback": "incident-response",
+        "kiểm chứng ý tưởng bằng mvp trước khi xây": "mvp-and-validation",
+        "phỏng vấn người dùng và usability test không dẫn dắt": "user-research",
+        "chạy a/b testing đúng cách, sample size và tránh p-hacking": "ab-testing",
+        "nên test cái gì và bao nhiêu, test pyramid": "testing-strategy",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_infra_and_language_topics_match():
     from app import skills
     cases = {

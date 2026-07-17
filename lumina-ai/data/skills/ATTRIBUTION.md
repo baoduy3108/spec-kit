@@ -46,7 +46,11 @@ giấy phép bên thứ ba): `prompt-engineering`, `sql-query-optimization`, `re
 `concurrency-and-parallelism`, `data-analysis-pandas`, `algorithms-and-complexity`, `kubernetes-basics`,
 `networking-fundamentals`, `authentication-and-authorization`, `caching-strategies`,
 `message-queues-and-events`, `python-best-practices`, `react-patterns`, `css-layout`,
-`functional-programming`, `object-oriented-design`, `datetime-and-timezones`, `encoding-and-unicode`.
+`functional-programming`, `object-oriented-design`, `datetime-and-timezones`, `encoding-and-unicode`,
+`git-advanced`, `graphql-design`, `microservices-and-boundaries`, `dependency-management`,
+`feature-flags-and-rollouts`, `nosql-data-modeling`, `memory-management`, `websockets-and-realtime`,
+`i18n-and-localization`, `incident-response`, `mvp-and-validation`, `user-research`, `ab-testing`,
+`testing-strategy`.
 Nội dung là kiến thức/thông lệ phổ biến (không thuộc phạm vi bản quyền của riêng ai), diễn đạt bằng
 lời của LUMINA.
 
