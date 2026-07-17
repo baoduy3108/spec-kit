@@ -2,7 +2,7 @@
 name: how-web-servers-work
 description: How a web server works from the socket up — listening/accepting TCP connections, parsing the HTTP request, the concurrency models (process/thread-per-connection, thread pool, event loop, async), keep-alive, and how a reverse proxy fronts application servers. Use to understand server performance, concurrency limits, and the request lifecycle.
 category: engineering
-keywords_vi: web server hoạt động thế nào, cơ chế server bên trong, socket lắng nghe, xử lý request http, event loop vs thread pool, reverse proxy, hiểu server sâu
+keywords_vi: web server, cơ chế server bên trong, socket lắng nghe, xử lý request, request http, thread pool server, reverse proxy, server xử lý request
 ---
 
 # How Web Servers Work
