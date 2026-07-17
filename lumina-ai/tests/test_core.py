@@ -865,6 +865,23 @@ def test_skills_library_has_at_least_144():
     assert len(skills._SKILLS) >= 144
 
 
+def test_skills_library_has_at_least_146():
+    from app import skills
+    assert len(skills._SKILLS) >= 146
+
+
+def test_skills_writing_process_topics_match():
+    from app import skills
+    cases = {
+        "trả lời ngắn gọn thôi, bớt dài dòng lan man đi": "communicating-concisely",
+        "viết sop quy trình chuẩn hướng dẫn từng bước cho nhân viên": "sop-writing",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_finance_and_product_topics_match():
     from app import skills
     cases = {
