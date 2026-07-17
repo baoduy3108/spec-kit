@@ -905,6 +905,36 @@ def test_skills_library_has_at_least_235():
     assert len(skills._SKILLS) >= 235
 
 
+def test_skills_library_has_at_least_250():
+    from app import skills
+    assert len(skills._SKILLS) >= 250
+
+
+def test_skills_network_crypto_ai_topics_match():
+    from app import skills
+    cases = {
+        "tcp hoạt động thế nào three-way handshake retransmit flow control": "how-tcp-works",
+        "dns phân giải tên miền recursive resolver bản ghi a cname ttl": "how-dns-works",
+        "https tls handshake chứng chỉ ca đối xứng bất đối xứng": "how-https-tls-works",
+        "hash table bảng băm hàm băm va chạm collision load factor": "how-hash-tables-work",
+        "cdn edge server cache cache-control purge": "how-cdns-work",
+        "load balancer cân bằng tải round-robin health check sticky session": "how-load-balancers-work",
+        "nén dữ liệu lossless lossy huffman gzip jpeg": "how-compression-works",
+        "mã hóa bất đối xứng khóa công khai riêng tư chữ ký số": "how-public-key-crypto-works",
+        "jwt json web token header payload signature ký hmac": "how-jwt-works",
+        "làm chatbot rag trên tài liệu riêng chunking embedding retrieval": "rag-fundamentals",
+        "embedding vector tìm kiếm ngữ nghĩa cosine similarity vector database": "vector-embeddings",
+        "khi nào fine-tune hay rag hay prompt để chỉnh llm": "fine-tuning-vs-rag-vs-prompting",
+        "thống kê cơ bản mean median độ lệch chuẩn tương quan nhân quả": "statistics-fundamentals",
+        "xác suất bayes cập nhật niềm tin base rate dương tính giả": "probability-and-bayes",
+        "làm sạch dữ liệu xử lý missing outlier trùng lặp chuẩn hóa": "data-cleaning",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_backend_devops_topics_match():
     from app import skills
     cases = {

@@ -86,6 +86,12 @@ quyền của riêng ai, được diễn đạt bằng lời của LUMINA).
 `event-sourcing-cqrs`, `clean-architecture`, `code-smells`, `technical-debt`): LUMINA tự biên soạn
 theo thông lệ ngành (kiến thức phổ thông, không sao chép repo cụ thể).
 
+**Nhóm mạng/crypto (how-X-works) + AI + thống kê**: `how-tcp-works`, `how-dns-works`,
+`how-https-tls-works`, `how-hash-tables-work`, `how-cdns-work`, `how-load-balancers-work`,
+`how-compression-works`, `how-public-key-crypto-works`, `how-jwt-works`, `rag-fundamentals`,
+`vector-embeddings`, `fine-tuning-vs-rag-vs-prompting`, `statistics-fundamentals`,
+`probability-and-bayes`, `data-cleaning` — LUMINA tự biên soạn (kiến thức phổ thông).
+
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
 file gốc như các skill trong 5 repo đầu tiên) — tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản
