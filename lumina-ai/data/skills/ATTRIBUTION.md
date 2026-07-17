@@ -30,6 +30,8 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `AvdLee/SwiftUI-Agent-Skill` (1 skill: swiftui-expert) | Antoine van der Lee | MIT | https://github.com/AvdLee/SwiftUI-Agent-Skill |
 | `ethos-link/rails-conventions` (1 skill: rails-conventions) | Ethos Link | MIT | https://github.com/ethos-link/rails-conventions |
 | `smixs/creative-director-skill` (1 skill: creative-director — chỉ lấy phương pháp 5 pha + kỹ thuật ideation, không lấy thư viện 569 case) | smixs | MIT | https://github.com/smixs/creative-director-skill |
+| `robzolkos/skill-rails-upgrade` (1 skill: rails-upgrade — lõi phương pháp; phần gọi `gh`/API chỉ là tùy chọn) | robzolkos | MIT | https://github.com/robzolkos/skill-rails-upgrade |
+| `BrianRWagner/ai-marketing-skills` (4 skill: marketing-principles, positioning-basics, homepage-audit, cold-outreach-sequence — chỉ lấy skill methodology thuần; các skill phụ thuộc API LinkedIn/Reddit/YouTube như last30days/reddit-insights KHÔNG lấy) | Brian Wagner | MIT | https://github.com/BrianRWagner/ai-marketing-skills |
 
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp

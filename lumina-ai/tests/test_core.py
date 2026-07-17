@@ -845,6 +845,26 @@ def test_skills_library_has_at_least_131():
     assert len(skills._SKILLS) >= 131
 
 
+def test_skills_library_has_at_least_136():
+    from app import skills
+    assert len(skills._SKILLS) >= 136
+
+
+def test_skills_marketing_and_upgrade_topics_match():
+    from app import skills
+    cases = {
+        "nâng cấp rails lên phiên bản mới mà giữ tùy biến, đừng chạy app:update": "rails-upgrade",
+        "chiến lược marketing cho sản phẩm mới, tư duy marketing hệ thống": "marketing-principles",
+        "làm rõ định vị thương hiệu và value proposition sản phẩm": "positioning-basics",
+        "đánh giá landing page tối ưu chuyển đổi, headline chưa tốt": "homepage-audit",
+        "viết chuỗi email cold outreach tiếp cận khách hàng linkedin": "cold-outreach-sequence",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_rails_and_creative_topics_match():
     from app import skills
     cases = {
