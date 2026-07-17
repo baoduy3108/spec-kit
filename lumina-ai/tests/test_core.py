@@ -875,6 +875,33 @@ def test_skills_library_has_at_least_156():
     assert len(skills._SKILLS) >= 156
 
 
+def test_skills_library_has_at_least_168():
+    from app import skills
+    assert len(skills._SKILLS) >= 168
+
+
+def test_skills_infra_and_language_topics_match():
+    from app import skills
+    cases = {
+        "pod bị crashloopbackoff trên kubernetes, sửa manifest sao": "kubernetes-basics",
+        "lỗi kết nối mạng timeout, dns không resolve được host": "networking-fundamentals",
+        "làm đăng nhập bảo mật, hash mật khẩu và session vs jwt": "authentication-and-authorization",
+        "thêm cache nhưng dữ liệu cũ stale, invalidate cache sao cho đúng": "caching-strategies",
+        "dùng message queue kafka, xử lý tin nhắn trùng lặp at-least-once": "message-queues-and-events",
+        "viết python chuẩn pythonic, tránh mutable default argument": "python-best-practices",
+        "component react bị render lại nhiều lần, useeffect chạy vô hạn": "react-patterns",
+        "dàn trang css responsive dùng flexbox grid, căn giữa phần tử": "css-layout",
+        "lập trình hàm pure function và immutable map filter reduce": "functional-programming",
+        "thiết kế hướng đối tượng theo solid, composition over inheritance": "object-oriented-design",
+        "lưu thời gian sai múi giờ, xử lý timezone utc và dst": "datetime-and-timezones",
+        "chữ bị lỗi font mojibake ký tự lạ, encoding utf-8 sai": "encoding-and-unicode",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_core_engineering_topics_match():
     from app import skills
     cases = {

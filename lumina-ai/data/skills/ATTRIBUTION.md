@@ -43,8 +43,12 @@ coding agent mạnh đều cần nhưng các repo công khai còn thiếu/hoặc
 LUMINA **tự viết theo thông lệ ngành chuẩn** (không phải bản sao của bất kỳ repo nào, nên không kèm
 giấy phép bên thứ ba): `prompt-engineering`, `sql-query-optimization`, `regular-expressions`,
 `docker-containers`, `linux-command-line`, `database-schema-design`, `system-design-fundamentals`,
-`concurrency-and-parallelism`, `data-analysis-pandas`, `algorithms-and-complexity`. Nội dung là kiến
-thức/thông lệ phổ biến (không thuộc phạm vi bản quyền của riêng ai), diễn đạt bằng lời của LUMINA.
+`concurrency-and-parallelism`, `data-analysis-pandas`, `algorithms-and-complexity`, `kubernetes-basics`,
+`networking-fundamentals`, `authentication-and-authorization`, `caching-strategies`,
+`message-queues-and-events`, `python-best-practices`, `react-patterns`, `css-layout`,
+`functional-programming`, `object-oriented-design`, `datetime-and-timezones`, `encoding-and-unicode`.
+Nội dung là kiến thức/thông lệ phổ biến (không thuộc phạm vi bản quyền của riêng ai), diễn đạt bằng
+lời của LUMINA.
 
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
