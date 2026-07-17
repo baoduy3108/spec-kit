@@ -825,6 +825,28 @@ def test_skills_library_has_at_least_119():
     assert len(skills._SKILLS) >= 119
 
 
+def test_skills_library_has_at_least_126():
+    from app import skills
+    assert len(skills._SKILLS) >= 126
+
+
+def test_skills_backend_and_method_topics_match():
+    from app import skills
+    cases = {
+        "viết node.js bằng typescript dùng type stripping không cần build": "nodejs-typescript",
+        "debug native crash segfault trong node.js core với v8": "nodejs-core",
+        "xây rest api bằng fastify với schema validation và plugin": "fastify-best-practices",
+        "chia nhỏ tính năng thành các lát dọc vertical slice có ticket": "vertical-slice-tickets",
+        "review module terraform và tổ chức state backend": "terraform-and-opentofu",
+        "có nhiều hướng giải chưa rõ chọn cái nào, review theo nguyên lý gốc": "first-principles-review",
+        "xác định mục tiêu và điều kiện dừng trước khi bắt đầu làm": "goal-framing",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_context_engineering_topics_match():
     from app import skills
     cases = {
