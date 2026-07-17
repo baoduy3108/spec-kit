@@ -72,6 +72,14 @@ biên soạn theo thông lệ ngành, lấy bối cảnh từ các dự án mã 
 (đây là PHẦN MỀM chạy LLM, không phải repo skill — không có SKILL.md để trích; chỉ dùng làm bối
 cảnh kiến thức, nội dung do LUMINA tự viết).
 
+**Nhóm mẫu thuật toán** (`sliding-window-pattern`, `two-pointers-pattern`, `binary-search-patterns`,
+`backtracking-pattern`, `dynamic-programming-patterns`, `greedy-algorithms`, `union-find`,
+`monotonic-stack`, `graph-traversal`, `shortest-paths`, `topological-sort`, `trie-prefix-tree`,
+`heap-priority-queue`, `bit-manipulation`): LUMINA tự biên soạn từ kiến thức khoa học máy tính chuẩn
+(người dùng nhắc tới repo `labuladong/fucking-algorithm` như gợi ý chủ đề — repo đó có giấy phép hạn
+chế/phi thương mại nên KHÔNG sao chép; các mẫu thuật toán là kiến thức phổ quát, không thuộc bản
+quyền của riêng ai, được diễn đạt bằng lời của LUMINA).
+
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
 file gốc như các skill trong 5 repo đầu tiên) — tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản

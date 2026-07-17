@@ -895,6 +895,35 @@ def test_skills_library_has_at_least_207():
     assert len(skills._SKILLS) >= 207
 
 
+def test_skills_library_has_at_least_221():
+    from app import skills
+    assert len(skills._SKILLS) >= 221
+
+
+def test_skills_algorithm_patterns_match():
+    from app import skills
+    cases = {
+        "tìm chuỗi con liên tiếp dài nhất dùng sliding window cửa sổ trượt": "sliding-window-pattern",
+        "dùng hai con trỏ two pointers tìm cặp tổng trên mảng sorted": "two-pointers-pattern",
+        "tìm kiếm nhị phân binary search vị trí đầu cuối": "binary-search-patterns",
+        "liệt kê hoán vị tổ hợp bằng backtracking quay lui": "backtracking-pattern",
+        "quy hoạch động dp knapsack với memoization": "dynamic-programming-patterns",
+        "thuật toán tham lam greedy interval scheduling": "greedy-algorithms",
+        "union find disjoint set đếm thành phần liên thông": "union-find",
+        "dùng monotonic stack ngăn xếp đơn điệu next greater element": "monotonic-stack",
+        "duyệt đồ thị bfs dfs tìm đường ngắn nhất không trọng số đếm đảo": "graph-traversal",
+        "tìm đường đi ngắn nhất có trọng số dijkstra bellman-ford": "shortest-paths",
+        "sắp xếp topo thứ tự phụ thuộc dependency kahn": "topological-sort",
+        "dùng trie cây tiền tố làm autocomplete": "trie-prefix-tree",
+        "dùng heap priority queue tìm top k phần tử lớn nhất": "heap-priority-queue",
+        "thao tác bit bitwise xor tìm số xuất hiện lẻ lần và bitmask": "bit-manipulation",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_how_x_works_and_llm_topics_match():
     from app import skills
     cases = {
