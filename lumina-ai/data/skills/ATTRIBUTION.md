@@ -104,6 +104,15 @@ biên soạn theo thông lệ ngành, lấy bối cảnh từ các dự án mã 
 (đây là PHẦN MỀM chạy LLM, không phải repo skill — không có SKILL.md để trích; chỉ dùng làm bối
 cảnh kiến thức, nội dung do LUMINA tự viết).
 
+**Nhóm thuật toán & CS nền tảng (bổ sung)** (`how-cryptographic-hashing-works`,
+`string-matching-algorithms`, `divide-and-conquer`, `sorting-algorithms`,
+`how-random-number-generation-works`, `floating-point-arithmetic`, `segment-and-fenwick-trees`,
+`minimum-spanning-tree`, `maximum-flow-and-min-cut`, `skip-lists`, `reservoir-sampling`,
+`sweep-line-algorithms`, `lru-cache-design`, `number-theory-for-programmers`,
+`game-theory-basics`): LUMINA tự biên soạn từ kiến thức khoa học máy tính chuẩn (giáo trình thuật
+toán, IEEE 754, lý thuyết trò chơi cổ điển) — nguyên lý phổ quát, không thuộc bản quyền của ai,
+diễn đạt bằng lời của LUMINA.
+
 **Nhóm mẫu thuật toán** (`sliding-window-pattern`, `two-pointers-pattern`, `binary-search-patterns`,
 `backtracking-pattern`, `dynamic-programming-patterns`, `greedy-algorithms`, `union-find`,
 `monotonic-stack`, `graph-traversal`, `shortest-paths`, `topological-sort`, `trie-prefix-tree`,

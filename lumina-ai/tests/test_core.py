@@ -965,6 +965,11 @@ def test_skills_library_has_at_least_410():
     assert len(skills._SKILLS) >= 410
 
 
+def test_skills_library_has_at_least_425():
+    from app import skills
+    assert len(skills._SKILLS) >= 425
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1594,6 +1599,31 @@ def test_skills_data_and_web_how_x_topics_match():
         "oauth2 authorization code pkce access token refresh scope": "how-oauth2-flows-work",
         "websocket protocol upgrade handshake framing full-duplex ping pong": "how-websocket-protocol-works",
         "service worker offline pwa cache proxy chặn request push": "how-service-workers-work",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_algorithms_and_cs_topics_match():
+    from app import skills
+    cases = {
+        "cryptographic hash sha-256 md5 collision băm mật khẩu salt": "how-cryptographic-hashing-works",
+        "string matching tìm chuỗi con kmp rabin-karp boyer-moore": "string-matching-algorithms",
+        "divide and conquer chia để trị merge sort master theorem": "divide-and-conquer",
+        "sorting algorithm sắp xếp quicksort merge heapsort stability": "sorting-algorithms",
+        "random number generation sinh số ngẫu nhiên prng csprng seed": "how-random-number-generation-works",
+        "floating point số thực dấu phẩy động 0.1 + 0.2 ieee 754 nan": "floating-point-arithmetic",
+        "segment tree fenwick binary indexed range query o(log n)": "segment-and-fenwick-trees",
+        "minimum spanning tree cây khung nhỏ nhất kruskal prim": "minimum-spanning-tree",
+        "maximum flow min cut luồng cực đại ford-fulkerson bipartite matching": "maximum-flow-and-min-cut",
+        "skip list danh sách bỏ qua nhiều tầng redis sorted set": "skip-lists",
+        "reservoir sampling lấy mẫu ngẫu nhiên từ luồng k phần tử một lần duyệt": "reservoir-sampling",
+        "sweep line đường quét interval overlap meeting rooms": "sweep-line-algorithms",
+        "lru cache hash map doubly linked list eviction o(1)": "lru-cache-design",
+        "number theory gcd euclid modular exponentiation sieve nguyên tố": "number-theory-for-programmers",
+        "game theory lý thuyết trò chơi nash equilibrium prisoner dilemma minimax": "game-theory-basics",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
