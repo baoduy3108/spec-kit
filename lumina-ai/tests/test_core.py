@@ -925,6 +925,31 @@ def test_skills_library_has_at_least_300():
     assert len(skills._SKILLS) >= 300
 
 
+def test_skills_library_has_at_least_310():
+    from app import skills
+    assert len(skills._SKILLS) >= 310
+
+
+def test_skills_repos_and_game_topics_match():
+    from app import skills
+    cases = {
+        "email smtp imap mx record spf dkim dmarc": "how-email-works",
+        "webrtc gọi video trình duyệt peer to peer stun turn ice": "how-webrtc-works",
+        "captcha chống bot recaptcha thử thách hình ảnh behavioral": "how-captcha-works",
+        "single sign-on sso identity provider saml oidc": "how-single-sign-on-works",
+        "quy trình sparc specification pseudocode architecture refinement": "sparc-methodology",
+        "goap goal oriented action planning ai game npc precondition effect": "goap-planning",
+        "thiết kế game mda framework core loop động lực người chơi flow": "game-design-fundamentals",
+        "game feel juice phản hồi tức thì screen shake hit-stop": "game-feel-and-juice",
+        "cân bằng game đường cong độ khó economy sink source": "game-balancing",
+        "tạo video ngắn ai tiktok script visual voiceover phụ đề": "ai-short-video-generation",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_milestone300_topics_match():
     from app import skills
     cases = {

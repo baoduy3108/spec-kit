@@ -165,6 +165,17 @@ KHÔNG đưa vào. Repo
 ghi file vào `~/.claude/memory/` thật, LUMINA không có hạ tầng này (đã có `memory-systems` ở trên
 làm kiến thức khái niệm tương đương, không cần bản tool-dependent này).
 
+**`ruvnet/ruflo`** (MIT) — chủ yếu là MCP/CLI orchestration tool — nhưng phần **phương pháp luận**
+tách được: đã chưng cất `sparc-methodology` (quy trình 5 pha) + `goap-planning` (mẫu AI game/agent
+kinh điển) thành văn bản gốc LUMINA, bỏ phần tool. **`donchitos/Claude-Code-Game-Studios`** (MIT) —
+hybrid tool + lý thuyết game design; tách phần LÝ THUYẾT (MDA framework, Flow, Self-Determination
+Theory — khung học thuật công khai) thành `game-design-fundamentals`, `game-feel-and-juice`,
+`game-balancing`. **`harry0703/MoneyPrinterTurbo`** (MIT) là ỨNG DỤNG tạo video (phụ thuộc API trả
+phí), không phải repo skill — chỉ lấy bối cảnh cho `ai-short-video-generation`. **`graphify-labs/
+graphify`** là tool chạy (code→knowledge graph); khái niệm đã có ở `explaining-code-in-context`/
+`codebase-onboarding-guide` nên KHÔNG thêm. `how-email-works`, `how-webrtc-works`, `how-captcha-works`,
+`how-single-sign-on-works` do LUMINA tự biên soạn (kiến thức phổ thông).
+
 Các repo `gstack`, `codebase-memory-mcp` (DeusData), `ruflo` (ruvnet),
 `serena` (oraios), `cocoindex-code` đã được xem xét nhưng KHÔNG đưa vào — đều là MCP server/CLI/
 agent-orchestration framework thật, đòi hỏi tiến trình chạy nền/vector DB/browser control/Language
