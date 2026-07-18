@@ -2,7 +2,7 @@
 name: how-single-sign-on-works
 description: How Single Sign-On works — one login granting access to many apps via a trusted identity provider, using SAML or OpenID Connect (OAuth-based), tokens/assertions, and the redirect dance. Covers SSO vs OAuth vs OIDC and the trade-offs. Use to understand "Sign in with Google/Okta", enterprise SSO, and federated identity.
 category: engineering
-keywords_vi: single sign-on sso hoạt động thế nào, đăng nhập một lần, identity provider idp, saml openid connect oidc, đăng nhập bằng google, federated identity, hiểu sso
+keywords_vi: single sign-on, sso, đăng nhập một lần, identity provider, saml, oidc, openid connect, đăng nhập bằng google, federated identity
 ---
 
 # How Single Sign-On Works

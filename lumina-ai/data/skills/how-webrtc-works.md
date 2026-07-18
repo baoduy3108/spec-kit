@@ -2,7 +2,7 @@
 name: how-webrtc-works
 description: How WebRTC enables real-time browser-to-browser audio/video/data — peer-to-peer connections, signaling, NAT traversal with STUN/TURN/ICE, and why a relay is sometimes needed. Use to understand video calls, live streaming, and peer-to-peer web communication.
 category: engineering
-keywords_vi: webrtc hoạt động thế nào, gọi video trình duyệt, peer to peer real-time, signaling stun turn ice, nat traversal, video call p2p, hiểu webrtc
+keywords_vi: webrtc, gọi video trình duyệt, real-time p2p, signaling, stun turn ice, nat traversal, video call peer to peer, hiểu webrtc
 ---
 
 # How WebRTC Works
