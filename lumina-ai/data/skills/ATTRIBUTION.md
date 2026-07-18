@@ -88,6 +88,16 @@ Nội dung là kiến thức phổ thông về nguyên lý hệ thống, diễn 
 LUMINA tự biên soạn từ kiến thức học máy/deep learning chuẩn (giáo trình, bài báo nền tảng như
 Transformer/BPE/PCA) — nguyên lý phổ quát, không sao chép nguồn cụ thể; category `ai-agent`.
 
+**Nhóm how-X về data engineering & web protocol** (`how-columnar-storage-works`,
+`how-data-warehouses-work`, `how-database-replication-works`, `how-database-sharding-works`,
+`how-lsm-trees-work`, `how-change-data-capture-works`, `how-time-series-databases-work`,
+`how-json-serialization-works`, `how-http-caching-works`, `how-cors-works`,
+`how-server-sent-events-work`, `how-graphql-works`, `how-oauth2-flows-work`,
+`how-websocket-protocol-works`, `how-service-workers-work`): LUMINA tự biên soạn từ nguyên lý hệ
+thống dữ liệu & chuẩn web (RFC HTTP/CORS/WebSocket/OAuth2, tài liệu Parquet/LSM) — kiến thức phổ
+thông, diễn đạt bằng lời của LUMINA (bổ sung góc "cơ chế" cho các skill usage đã có như
+graphql-design, caching-strategies, oauth-security, websockets-and-realtime).
+
 **Nhóm skill chạy/serve LLM local** (`running-llms-locally`, `llm-inference-optimization`): LUMINA tự
 biên soạn theo thông lệ ngành, lấy bối cảnh từ các dự án mã nguồn mở `ollama/ollama`,
 `ggml-org/llama.cpp`, `vllm-project/vllm`, `mudler/LocalAI`, `open-webui/open-webui`, `janhq/jan`

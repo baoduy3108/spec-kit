@@ -960,6 +960,11 @@ def test_skills_library_has_at_least_395():
     assert len(skills._SKILLS) >= 395
 
 
+def test_skills_library_has_at_least_410():
+    from app import skills
+    assert len(skills._SKILLS) >= 410
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1564,6 +1569,31 @@ def test_skills_ai_ml_how_x_topics_match():
         "quantization lượng tử hóa int8 int4 nén mô hình chạy llm nhẹ": "how-model-quantization-works",
         "dimensionality reduction giảm chiều pca t-sne umap": "how-dimensionality-reduction-works",
         "anomaly detection phát hiện bất thường isolation forest outlier": "how-anomaly-detection-works",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_data_and_web_how_x_topics_match():
+    from app import skills
+    cases = {
+        "columnar storage lưu trữ theo cột parquet olap nén": "how-columnar-storage-works",
+        "data warehouse kho dữ liệu olap oltp star schema etl": "how-data-warehouses-work",
+        "database replication sao chép leader follower replication lag": "how-database-replication-works",
+        "database sharding phân mảnh shard key horizontal partition": "how-database-sharding-works",
+        "lsm tree memtable sstable compaction tối ưu ghi rocksdb": "how-lsm-trees-work",
+        "change data capture cdc tail transaction log debezium": "how-change-data-capture-works",
+        "time series database chuỗi thời gian metrics downsampling retention": "how-time-series-databases-work",
+        "serialization tuần tự hóa json vs binary protobuf schema evolution": "how-json-serialization-works",
+        "http caching cache-control etag 304 cache busting": "how-http-caching-works",
+        "cors same-origin policy preflight options access-control-allow-origin": "how-cors-works",
+        "server-sent events sse eventsource text/event-stream reconnect": "how-server-sent-events-work",
+        "graphql single endpoint resolver n+1 dataloader query mutation": "how-graphql-works",
+        "oauth2 authorization code pkce access token refresh scope": "how-oauth2-flows-work",
+        "websocket protocol upgrade handshake framing full-duplex ping pong": "how-websocket-protocol-works",
+        "service worker offline pwa cache proxy chặn request push": "how-service-workers-work",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
