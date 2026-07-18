@@ -970,6 +970,11 @@ def test_skills_library_has_at_least_425():
     assert len(skills._SKILLS) >= 425
 
 
+def test_skills_library_has_at_least_440():
+    from app import skills
+    assert len(skills._SKILLS) >= 440
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1624,6 +1629,31 @@ def test_skills_algorithms_and_cs_topics_match():
         "lru cache hash map doubly linked list eviction o(1)": "lru-cache-design",
         "number theory gcd euclid modular exponentiation sieve nguyên tố": "number-theory-for-programmers",
         "game theory lý thuyết trò chơi nash equilibrium prisoner dilemma minimax": "game-theory-basics",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_product_business_topics_match():
+    from app import skills
+    cases = {
+        "product discovery khám phá sản phẩm phỏng vấn khách hàng jobs to be done": "product-discovery",
+        "user story mapping bản đồ câu chuyện backbone slice mvp": "user-story-mapping",
+        "roadmap prioritization ưu tiên lộ trình rice moscow": "roadmap-prioritization",
+        "pricing strategy chiến lược định giá value-based willingness to pay": "pricing-strategy",
+        "go-to-market gtm đưa sản phẩm ra thị trường icp product-led": "go-to-market-strategy",
+        "competitive analysis phân tích đối thủ cạnh tranh ma trận": "competitive-analysis",
+        "b2b sales bán hàng doanh nghiệp pipeline qualify champion": "b2b-sales-fundamentals",
+        "content strategy chiến lược nội dung pillar phễu phân phối": "content-strategy",
+        "seo content nghiên cứu từ khóa search intent backlink": "seo-content-strategy",
+        "growth loop vòng lặp tăng trưởng viral k-factor": "growth-loops-and-virality",
+        "community building xây dựng cộng đồng belonging seed moderation": "community-building",
+        "stakeholder management quản lý các bên liên quan power interest buy-in": "stakeholder-management",
+        "agile scrum kanban sprint standup retrospective wip": "agile-and-scrum",
+        "project risk management quản lý rủi ro dự án likelihood impact register": "project-risk-management",
+        "career growth engineer phát triển sự nghiệp ic vs management promotion": "career-growth-for-engineers",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)

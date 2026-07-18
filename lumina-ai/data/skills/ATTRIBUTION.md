@@ -113,6 +113,14 @@ cảnh kiến thức, nội dung do LUMINA tự viết).
 toán, IEEE 754, lý thuyết trò chơi cổ điển) — nguyên lý phổ quát, không thuộc bản quyền của ai,
 diễn đạt bằng lời của LUMINA.
 
+**Nhóm sản phẩm/kinh doanh/nghề nghiệp** (`product-discovery`, `user-story-mapping`,
+`roadmap-prioritization`, `pricing-strategy`, `go-to-market-strategy`, `competitive-analysis`,
+`b2b-sales-fundamentals`, `content-strategy`, `seo-content-strategy`, `growth-loops-and-virality`,
+`community-building`, `stakeholder-management`, `agile-and-scrum`, `project-risk-management`,
+`career-growth-for-engineers`): LUMINA tự biên soạn theo thông lệ ngành sản phẩm/tăng
+trưởng/quản lý (JTBD, RICE, Scrum, lý thuyết tăng trưởng loop, thang cấp bậc kỹ sư) — kiến thức
+phổ thông, không sao chép nguồn cụ thể.
+
 **Nhóm mẫu thuật toán** (`sliding-window-pattern`, `two-pointers-pattern`, `binary-search-patterns`,
 `backtracking-pattern`, `dynamic-programming-patterns`, `greedy-algorithms`, `union-find`,
 `monotonic-stack`, `graph-traversal`, `shortest-paths`, `topological-sort`, `trie-prefix-tree`,
