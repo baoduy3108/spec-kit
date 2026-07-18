@@ -113,6 +113,14 @@ cảnh kiến thức, nội dung do LUMINA tự viết).
 toán, IEEE 754, lý thuyết trò chơi cổ điển) — nguyên lý phổ quát, không thuộc bản quyền của ai,
 diễn đạt bằng lời của LUMINA.
 
+**Nhóm DevOps/cloud/hạ tầng** (`gitops`, `service-mesh`, `api-gateway-patterns`,
+`event-driven-architecture`, `cloud-cost-optimization`, `disaster-recovery-and-backups`,
+`immutable-infrastructure`, `configuration-management`, `container-image-optimization`,
+`kubernetes-networking`, `monitoring-and-alerting`, `runbooks-and-oncall`,
+`serverless-architecture-patterns`, `edge-computing`, `policy-as-code`): LUMINA tự biên soạn theo
+thông lệ ngành DevOps/SRE/cloud-native (12-factor, GitOps, FinOps, mẫu Kubernetes) — nguyên lý phổ
+thông, không sao chép nguồn cụ thể.
+
 **Nhóm thực hành kỹ thuật (backend/độ tin cậy/kiểm thử)** (`database-migrations`,
 `deployment-strategies`, `slos-and-error-budgets`, `capacity-planning`, `connection-pooling`,
 `n-plus-one-query-problem`, `saga-pattern`, `two-phase-commit`, `distributed-locking`,

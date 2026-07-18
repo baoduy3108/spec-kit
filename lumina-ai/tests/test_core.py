@@ -980,6 +980,11 @@ def test_skills_library_has_at_least_455():
     assert len(skills._SKILLS) >= 455
 
 
+def test_skills_library_has_at_least_470():
+    from app import skills
+    assert len(skills._SKILLS) >= 470
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1684,6 +1689,31 @@ def test_skills_engineering_practices_topics_match():
         "contract testing kiểm thử hợp đồng api pact consumer provider": "contract-testing",
         "property-based testing sinh input ngẫu nhiên hypothesis shrinking": "property-based-testing",
         "test double mocking stub mock fake over-mocking cô lập": "test-doubles-and-mocking",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_devops_cloud_topics_match():
+    from app import skills
+    cases = {
+        "gitops git nguồn sự thật argocd flux reconcile declarative": "gitops",
+        "service mesh sidecar proxy mtls istio linkerd data plane": "service-mesh",
+        "api gateway cổng api điểm vào duy nhất bff routing auth": "api-gateway-patterns",
+        "event-driven architecture kiến trúc hướng sự kiện kafka pub sub decoupling": "event-driven-architecture",
+        "cloud cost optimization tối ưu chi phí đám mây finops reserved spot": "cloud-cost-optimization",
+        "disaster recovery backup rpo rto 3-2-1 restore": "disaster-recovery-and-backups",
+        "immutable infrastructure hạ tầng bất biến cattle pets config drift golden image": "immutable-infrastructure",
+        "configuration management quản lý cấu hình env var tách config ansible": "configuration-management",
+        "container image optimization tối ưu image docker multi-stage layer caching distroless": "container-image-optimization",
+        "kubernetes networking service clusterip ingress dns pod ip": "kubernetes-networking",
+        "monitoring alerting golden signals alert fatigue actionable symptom": "monitoring-and-alerting",
+        "runbook oncall ca trực rotation escalation toil blameless": "runbooks-and-oncall",
+        "serverless architecture faas cold start stateless lambda": "serverless-architecture-patterns",
+        "edge computing tính toán tại biên edge function giảm độ trễ cdn": "edge-computing",
+        "policy as code opa rego admission controller guardrail tuân thủ": "policy-as-code",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
