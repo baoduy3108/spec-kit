@@ -2,7 +2,7 @@
 name: creative-director
 description: A structured creative-direction method built on insight-before-ideas — a five-phase process (intake → insight → ideation → evaluate/refine → articulate) using named ideation methods (SIT, TRIZ, SCAMPER, Bisociation, Synectics, reverse brainstorming) and a weighted scoring rubric. Use when generating advertising/brand/campaign concepts or judging creative ideas against a brief.
 category: design
-keywords_vi: ý tưởng sáng tạo, phương pháp sáng tạo, scamper triz sit, brainstorm ý tưởng quảng cáo, insight chiến dịch, giám đốc sáng tạo, concept quảng cáo, nghĩ ý tưởng chiến dịch
+keywords_vi: ý tưởng sáng tạo, quảng cáo, chiến dịch, phương pháp sáng tạo, ý tưởng chiến dịch quảng cáo, insight chiến dịch, giám đốc sáng tạo, concept quảng cáo
 ---
 
 # Creative Director

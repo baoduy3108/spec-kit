@@ -2,7 +2,7 @@
 name: data-pipelines-etl
 description: Design data pipelines — ETL vs ELT, batch vs streaming, idempotent and incremental processing, orchestration and dependencies (DAGs), data quality checks, schema evolution, and handling failures/backfills. Use when building a data pipeline moving data between systems, or reasoning about ETL/data-engineering design.
 category: engineering
-keywords_vi: data pipeline etl elt, đường ống dữ liệu, batch vs streaming, orchestration dag airflow, incremental xử lý gia tăng, backfill, chất lượng dữ liệu, kỹ thuật dữ liệu
+keywords_vi: data pipeline, etl elt, đường ống dữ liệu, batch streaming, orchestration, incremental, backfill, kỹ thuật dữ liệu data engineering
 ---
 
 # Data Pipelines & ETL
