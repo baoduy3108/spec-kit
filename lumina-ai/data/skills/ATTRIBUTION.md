@@ -69,7 +69,11 @@ sao chép các bài hướng dẫn bên thứ ba được liên kết trong danh
 `how-database-transactions-work`, `how-b-trees-work`, `how-write-ahead-logging-works`,
 `how-interpreters-work`, `how-digital-signatures-work`, `how-certificate-authorities-work`,
 `how-ntp-time-sync-works`, `how-raid-works`, `how-mapreduce-works`, `how-antivirus-works`,
-`how-text-rendering-works`, `how-audio-codecs-work` (và các how-X-works khác).
+`how-text-rendering-works`, `how-audio-codecs-work`, `how-ssds-work`, `how-hard-drives-work`,
+`how-dram-works`, `how-cpu-caches-work`, `how-computers-boot`, `how-virtualization-works`,
+`how-cpu-scheduling-works`, `how-transistors-and-logic-gates-work`, `how-usb-works`,
+`how-wifi-works`, `how-bluetooth-works`, `how-touchscreens-work`, `how-displays-work`,
+`how-digital-cameras-work`, `how-gpus-work` (và các how-X-works khác).
 Nội dung là kiến thức phổ thông về nguyên lý hệ thống, diễn đạt bằng lời của LUMINA.
 
 **Nhóm skill chạy/serve LLM local** (`running-llms-locally`, `llm-inference-optimization`): LUMINA tự

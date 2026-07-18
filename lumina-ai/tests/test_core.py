@@ -945,6 +945,11 @@ def test_skills_library_has_at_least_350():
     assert len(skills._SKILLS) >= 350
 
 
+def test_skills_library_has_at_least_365():
+    from app import skills
+    assert len(skills._SKILLS) >= 365
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1474,6 +1479,31 @@ def test_skills_systems_how_x_topics_match():
         "antivirus phát hiện malware signature behavioral": "how-antivirus-works",
         "text rendering hiển thị chữ font glyph shaping": "how-text-rendering-works",
         "audio codec nén âm thanh mp3 opus psychoacoustic": "how-audio-codecs-work",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_hardware_how_x_topics_match():
+    from app import skills
+    cases = {
+        "ssd nand flash wear leveling trim hoạt động": "how-ssds-work",
+        "ổ cứng từ hdd platter seek time sequential random": "how-hard-drives-work",
+        "dram ram tụ điện refresh row buffer": "how-dram-works",
+        "cpu cache l1 l2 l3 locality cache miss false sharing": "how-cpu-caches-work",
+        "máy tính khởi động bios uefi bootloader nạp kernel": "how-computers-boot",
+        "virtualization ảo hóa hypervisor máy ảo vm vs container": "how-virtualization-works",
+        "cpu scheduling lập lịch tiến trình context switch round robin": "how-cpu-scheduling-works",
+        "transistor logic gate cổng logic công tắc nhị phân": "how-transistors-and-logic-gates-work",
+        "usb enumeration endpoint device class power delivery": "how-usb-works",
+        "wifi mạng không dây băng tần kênh csma nhiễu": "how-wifi-works",
+        "bluetooth ble frequency hopping pairing gatt": "how-bluetooth-works",
+        "màn hình cảm ứng capacitive điện dung multi-touch": "how-touchscreens-work",
+        "màn hình lcd oled pixel subpixel refresh rate": "how-displays-work",
+        "máy ảnh số cảm biến cmos bayer raw jpeg phơi sáng": "how-digital-cameras-work",
+        "gpu xử lý song song simt warp tăng tốc ml": "how-gpus-work",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
