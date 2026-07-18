@@ -950,6 +950,11 @@ def test_skills_library_has_at_least_365():
     assert len(skills._SKILLS) >= 365
 
 
+def test_skills_library_has_at_least_380():
+    from app import skills
+    assert len(skills._SKILLS) >= 380
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1504,6 +1509,31 @@ def test_skills_hardware_how_x_topics_match():
         "màn hình lcd oled pixel subpixel refresh rate": "how-displays-work",
         "máy ảnh số cảm biến cmos bayer raw jpeg phơi sáng": "how-digital-cameras-work",
         "gpu xử lý song song simt warp tăng tốc ml": "how-gpus-work",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_networking_how_x_topics_match():
+    from app import skills
+    cases = {
+        "nat network address translation chia sẻ ip riêng port forwarding": "how-nat-works",
+        "firewall tường lửa lọc gói tin stateful default deny": "how-firewalls-work",
+        "proxy forward reverse proxy nginx tls termination": "how-proxies-work",
+        "định tuyến internet bgp autonomous system router bảng": "how-internet-routing-works",
+        "arp ánh xạ ip sang mac broadcast arp spoofing": "how-arp-works",
+        "dhcp cấp phát ip tự động dora lease gateway dns": "how-dhcp-works",
+        "địa chỉ ip subnet mask cidr ipv4 ipv6 private": "how-ip-addressing-works",
+        "switch mạng forward theo mac address table vlan": "how-network-switches-work",
+        "ssh shell từ xa an toàn key host key public key tunnel": "how-ssh-works",
+        "grpc protocol buffers protobuf rpc http2 streaming": "how-grpc-works",
+        "quic http3 udp head of line blocking 0-rtt": "how-quic-and-http3-work",
+        "mqtt iot publish subscribe broker topic qos": "how-mqtt-works",
+        "mạng di động cellular cell base station handoff sim 5g": "how-cellular-networks-work",
+        "multicast gửi một tới nhiều igmp group": "how-multicast-works",
+        "internet vệ tinh geo leo starlink độ trễ ground station": "how-satellite-internet-works",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)

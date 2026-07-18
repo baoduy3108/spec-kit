@@ -73,7 +73,11 @@ sao chép các bài hướng dẫn bên thứ ba được liên kết trong danh
 `how-dram-works`, `how-cpu-caches-work`, `how-computers-boot`, `how-virtualization-works`,
 `how-cpu-scheduling-works`, `how-transistors-and-logic-gates-work`, `how-usb-works`,
 `how-wifi-works`, `how-bluetooth-works`, `how-touchscreens-work`, `how-displays-work`,
-`how-digital-cameras-work`, `how-gpus-work` (và các how-X-works khác).
+`how-digital-cameras-work`, `how-gpus-work`, `how-nat-works`, `how-firewalls-work`,
+`how-proxies-work`, `how-internet-routing-works`, `how-arp-works`, `how-dhcp-works`,
+`how-ip-addressing-works`, `how-network-switches-work`, `how-ssh-works`, `how-grpc-works`,
+`how-quic-and-http3-work`, `how-mqtt-works`, `how-cellular-networks-work`, `how-multicast-works`,
+`how-satellite-internet-works` (và các how-X-works khác).
 Nội dung là kiến thức phổ thông về nguyên lý hệ thống, diễn đạt bằng lời của LUMINA.
 
 **Nhóm skill chạy/serve LLM local** (`running-llms-locally`, `llm-inference-optimization`): LUMINA tự
