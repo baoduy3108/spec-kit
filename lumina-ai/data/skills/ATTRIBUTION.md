@@ -80,6 +80,14 @@ sao chép các bài hướng dẫn bên thứ ba được liên kết trong danh
 `how-satellite-internet-works` (và các how-X-works khác).
 Nội dung là kiến thức phổ thông về nguyên lý hệ thống, diễn đạt bằng lời của LUMINA.
 
+**Nhóm how-X về AI/ML** (`how-transformers-work`, `how-backpropagation-works`,
+`how-gradient-descent-works`, `how-tokenizers-work`, `how-diffusion-models-work`, `how-gans-work`,
+`how-convolutional-networks-work`, `how-recurrent-networks-work`, `how-vector-databases-work`,
+`how-decision-trees-work`, `how-clustering-works`, `how-overfitting-and-regularization-work`,
+`how-model-quantization-works`, `how-dimensionality-reduction-works`, `how-anomaly-detection-works`):
+LUMINA tự biên soạn từ kiến thức học máy/deep learning chuẩn (giáo trình, bài báo nền tảng như
+Transformer/BPE/PCA) — nguyên lý phổ quát, không sao chép nguồn cụ thể; category `ai-agent`.
+
 **Nhóm skill chạy/serve LLM local** (`running-llms-locally`, `llm-inference-optimization`): LUMINA tự
 biên soạn theo thông lệ ngành, lấy bối cảnh từ các dự án mã nguồn mở `ollama/ollama`,
 `ggml-org/llama.cpp`, `vllm-project/vllm`, `mudler/LocalAI`, `open-webui/open-webui`, `janhq/jan`

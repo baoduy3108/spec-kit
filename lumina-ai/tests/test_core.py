@@ -955,6 +955,11 @@ def test_skills_library_has_at_least_380():
     assert len(skills._SKILLS) >= 380
 
 
+def test_skills_library_has_at_least_395():
+    from app import skills
+    assert len(skills._SKILLS) >= 395
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1534,6 +1539,31 @@ def test_skills_networking_how_x_topics_match():
         "mạng di động cellular cell base station handoff sim 5g": "how-cellular-networks-work",
         "multicast gửi một tới nhiều igmp group": "how-multicast-works",
         "internet vệ tinh geo leo starlink độ trễ ground station": "how-satellite-internet-works",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_ai_ml_how_x_topics_match():
+    from app import skills
+    cases = {
+        "transformer self-attention query key value multi-head": "how-transformers-work",
+        "backpropagation lan truyền ngược chain rule gradient": "how-backpropagation-works",
+        "gradient descent learning rate sgd adam optimizer": "how-gradient-descent-works",
+        "tokenizer token hóa subword bpe vocabulary": "how-tokenizers-work",
+        "diffusion model sinh ảnh khử nhiễu text to image": "how-diffusion-models-work",
+        "gan generator discriminator huấn luyện đối kháng mode collapse": "how-gans-work",
+        "cnn convolutional mạng tích chập bộ lọc pooling": "how-convolutional-networks-work",
+        "rnn lstm mạng hồi quy hidden state vanishing gradient": "how-recurrent-networks-work",
+        "vector database tìm kiếm tương đồng ann hnsw semantic": "how-vector-databases-work",
+        "decision tree cây quyết định random forest gradient boosting": "how-decision-trees-work",
+        "clustering phân cụm k-means dbscan không giám sát": "how-clustering-works",
+        "overfitting quá khớp regularization dropout bias variance": "how-overfitting-and-regularization-work",
+        "quantization lượng tử hóa int8 int4 nén mô hình chạy llm nhẹ": "how-model-quantization-works",
+        "dimensionality reduction giảm chiều pca t-sne umap": "how-dimensionality-reduction-works",
+        "anomaly detection phát hiện bất thường isolation forest outlier": "how-anomaly-detection-works",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
