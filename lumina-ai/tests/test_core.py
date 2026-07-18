@@ -930,6 +930,32 @@ def test_skills_library_has_at_least_310():
     assert len(skills._SKILLS) >= 310
 
 
+def test_skills_library_has_at_least_321():
+    from app import skills
+    assert len(skills._SKILLS) >= 321
+
+
+def test_skills_gsap_and_frameworks_match():
+    from app import skills
+    cases = {
+        "gsap greensock tween timeline easing animate web stagger": "gsap-animation",
+        "scrolltrigger gsap hoạt hình theo cuộn pin scrub reveal on scroll": "gsap-scrolltrigger",
+        "django orm queryset select_related n+1 migration": "django-patterns",
+        "angular rxjs observable async pipe dependency injection onpush": "angular-patterns",
+        "dotnet c# asp.net core async await dependency injection linq ef core": "dotnet-csharp-patterns",
+        "spring boot java controller service repository jpa transactional dto": "spring-boot-patterns",
+        "vue 3 composition api ref reactive computed composable": "vue-patterns",
+        "flutter dart widget stateless stateful provider riverpod const": "flutter-patterns",
+        "react native core component view text stylesheet flexbox flatList": "react-native-patterns",
+        "kotlin android jetpack compose viewmodel coroutines flow lifecycle": "kotlin-android",
+        "laravel php eloquent orm eager loading blade mass assignment queue": "laravel-php",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_repos_and_game_topics_match():
     from app import skills
     cases = {

@@ -28,6 +28,7 @@ mã nguồn mở giấy phép cho phép tái sử dụng (yêu cầu ghi công t
 | `meodai/skill.color-expert` (1 skill: color-expert) | meodai | **CC BY 4.0** (khác MIT/Apache — yêu cầu ghi công, cho phép dùng thương mại) | https://github.com/meodai/skill.color-expert |
 | `MohamedAbdallah-14/unslop` (1 skill: unslop) | MohamedAbdallah-14 | MIT | https://github.com/MohamedAbdallah-14/unslop |
 | `AvdLee/SwiftUI-Agent-Skill` (1 skill: swiftui-expert) | Antoine van der Lee | MIT | https://github.com/AvdLee/SwiftUI-Agent-Skill |
+| `greensock/gsap-skills` (2 skill: gsap-animation, gsap-scrolltrigger — chưng cất từ 8 skill gốc thành 2 bản súc tích) | GreenSock | MIT | https://github.com/greensock/gsap-skills |
 | `ethos-link/rails-conventions` (1 skill: rails-conventions) | Ethos Link | MIT | https://github.com/ethos-link/rails-conventions |
 | `smixs/creative-director-skill` (1 skill: creative-director — chỉ lấy phương pháp 5 pha + kỹ thuật ideation, không lấy thư viện 569 case) | smixs | MIT | https://github.com/smixs/creative-director-skill |
 | `robzolkos/skill-rails-upgrade` (1 skill: rails-upgrade — lõi phương pháp; phần gọi `gh`/API chỉ là tùy chọn) | robzolkos | MIT | https://github.com/robzolkos/skill-rails-upgrade |
@@ -175,6 +176,13 @@ phí), không phải repo skill — chỉ lấy bối cảnh cho `ai-short-video
 graphify`** là tool chạy (code→knowledge graph); khái niệm đã có ở `explaining-code-in-context`/
 `codebase-onboarding-guide` nên KHÔNG thêm. `how-email-works`, `how-webrtc-works`, `how-captcha-works`,
 `how-single-sign-on-works` do LUMINA tự biên soạn (kiến thức phổ thông).
+
+**Nhóm skill framework** (`django-patterns`, `angular-patterns`, `dotnet-csharp-patterns`,
+`spring-boot-patterns`, `vue-patterns`, `flutter-patterns`, `react-native-patterns`,
+`kotlin-android`, `laravel-php`): LUMINA tự biên soạn theo thông lệ/tài liệu chính thức của từng
+framework (lấy `affaan-m/ECC` — MIT, kho 278 skill — làm gợi ý chủ đề; nội dung là best-practice phổ
+biến của framework, không sao chép). Các skill trùng với thư viện đã có (api-design, error-handling,
+docker, e2e-testing, ADR, design-system, codebase-onboarding…) trong ECC KHÔNG thêm lại.
 
 Các repo `gstack`, `codebase-memory-mcp` (DeusData), `ruflo` (ruvnet),
 `serena` (oraios), `cocoindex-code` đã được xem xét nhưng KHÔNG đưa vào — đều là MCP server/CLI/
