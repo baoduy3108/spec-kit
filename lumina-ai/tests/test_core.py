@@ -935,6 +935,11 @@ def test_skills_library_has_at_least_321():
     assert len(skills._SKILLS) >= 321
 
 
+def test_skills_library_has_at_least_335():
+    from app import skills
+    assert len(skills._SKILLS) >= 335
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1415,6 +1420,30 @@ def test_skills_visual_and_data_topics_match():
         "tối ưu core web vitals cho trang web": "performance-web-vitals",
         "chuyển động kể chuyện trong giao diện": "motion-and-storytelling",
         "nhiều view dữ liệu đồng bộ liên kết với nhau": "coordinated-data-views",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_languages_security_business_topics_match():
+    from app import skills
+    cases = {
+        "giải thích ownership và borrow checker trong rust": "rust-ownership",
+        "goroutine channel trong go bị leak thì sao": "go-concurrency",
+        "discriminated union và utility type trong typescript": "typescript-advanced-types",
+        "next.js app router server client component render thế nào": "nextjs-patterns",
+        "làm sao mô hình hóa mối đe dọa stride khi thiết kế": "threat-modeling",
+        "sveltekit runes state derived load function": "svelte-patterns",
+        "xây dựng api node.js với express middleware": "express-and-node-apis",
+        "owasp top 10 lỗ hổng web phổ biến broken access control": "owasp-top-10",
+        "thêm content security policy csp và header bảo mật http": "security-headers",
+        "tor hoạt động thế nào onion routing": "how-tor-works",
+        "mã hóa dữ liệu lưu trữ encryption at rest envelope": "how-encryption-at-rest-works",
+        "chỉ số saas mrr churn ltv cac": "saas-metrics",
+        "phân tích phễu funnel và cohort retention": "cohort-and-funnel-analysis",
+        "viết tài liệu kỹ thuật readme diataxis": "technical-writing",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
