@@ -940,6 +940,11 @@ def test_skills_library_has_at_least_335():
     assert len(skills._SKILLS) >= 335
 
 
+def test_skills_library_has_at_least_350():
+    from app import skills
+    assert len(skills._SKILLS) >= 350
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1444,6 +1449,31 @@ def test_skills_languages_security_business_topics_match():
         "chỉ số saas mrr churn ltv cac": "saas-metrics",
         "phân tích phễu funnel và cohort retention": "cohort-and-funnel-analysis",
         "viết tài liệu kỹ thuật readme diataxis": "technical-writing",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_systems_how_x_topics_match():
+    from app import skills
+    cases = {
+        "garbage collection hoạt động thế nào mark and sweep": "how-garbage-collection-works",
+        "bộ nhớ ảo virtual memory page table mmu": "how-virtual-memory-works",
+        "filesystem inode thư mục lưu file trên đĩa": "how-filesystems-work",
+        "database transaction acid isolation level mvcc": "how-database-transactions-work",
+        "b-tree chỉ mục database index cây cân bằng": "how-b-trees-work",
+        "write ahead log wal durability crash recovery": "how-write-ahead-logging-works",
+        "interpreter thông dịch bytecode máy ảo": "how-interpreters-work",
+        "chữ ký số digital signature ký bằng khóa riêng": "how-digital-signatures-work",
+        "certificate authority pki chain of trust tls": "how-certificate-authorities-work",
+        "ntp đồng bộ thời gian clock skew": "how-ntp-time-sync-works",
+        "raid gộp nhiều ổ đĩa striping mirroring parity": "how-raid-works",
+        "mapreduce xử lý dữ liệu lớn map shuffle reduce": "how-mapreduce-works",
+        "antivirus phát hiện malware signature behavioral": "how-antivirus-works",
+        "text rendering hiển thị chữ font glyph shaping": "how-text-rendering-works",
+        "audio codec nén âm thanh mp3 opus psychoacoustic": "how-audio-codecs-work",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)

@@ -64,7 +64,12 @@ sao chép các bài hướng dẫn bên thứ ba được liên kết trong danh
 `how-neural-networks-work`, `how-operating-systems-work`, `how-llms-work`, `how-search-engines-work`,
 `how-cpus-work`, `how-3d-rendering-works`, `how-game-engines-work`, `how-frontend-frameworks-work`,
 `how-memory-allocators-work`, `how-emulators-work`, `how-distributed-consensus-works`,
-`how-text-editors-work`, `how-bittorrent-works`, `how-physics-engines-work` (và các how-X-works khác).
+`how-text-editors-work`, `how-bittorrent-works`, `how-physics-engines-work`,
+`how-garbage-collection-works`, `how-virtual-memory-works`, `how-filesystems-work`,
+`how-database-transactions-work`, `how-b-trees-work`, `how-write-ahead-logging-works`,
+`how-interpreters-work`, `how-digital-signatures-work`, `how-certificate-authorities-work`,
+`how-ntp-time-sync-works`, `how-raid-works`, `how-mapreduce-works`, `how-antivirus-works`,
+`how-text-rendering-works`, `how-audio-codecs-work` (và các how-X-works khác).
 Nội dung là kiến thức phổ thông về nguyên lý hệ thống, diễn đạt bằng lời của LUMINA.
 
 **Nhóm skill chạy/serve LLM local** (`running-llms-locally`, `llm-inference-optimization`): LUMINA tự
