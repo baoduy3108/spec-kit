@@ -113,6 +113,13 @@ cảnh kiến thức, nội dung do LUMINA tự viết).
 toán, IEEE 754, lý thuyết trò chơi cổ điển) — nguyên lý phổ quát, không thuộc bản quyền của ai,
 diễn đạt bằng lời của LUMINA.
 
+**Nhóm thực hành kỹ thuật (backend/độ tin cậy/kiểm thử)** (`database-migrations`,
+`deployment-strategies`, `slos-and-error-budgets`, `capacity-planning`, `connection-pooling`,
+`n-plus-one-query-problem`, `saga-pattern`, `two-phase-commit`, `distributed-locking`,
+`leader-election`, `object-storage`, `materialized-views`, `contract-testing`,
+`property-based-testing`, `test-doubles-and-mocking`): LUMINA tự biên soạn theo thông lệ ngành
+(SRE, thiết kế hệ thống phân tán, mẫu kiểm thử) — nguyên lý phổ thông, không sao chép nguồn cụ thể.
+
 **Nhóm sản phẩm/kinh doanh/nghề nghiệp** (`product-discovery`, `user-story-mapping`,
 `roadmap-prioritization`, `pricing-strategy`, `go-to-market-strategy`, `competitive-analysis`,
 `b2b-sales-fundamentals`, `content-strategy`, `seo-content-strategy`, `growth-loops-and-virality`,

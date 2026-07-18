@@ -975,6 +975,11 @@ def test_skills_library_has_at_least_440():
     assert len(skills._SKILLS) >= 440
 
 
+def test_skills_library_has_at_least_455():
+    from app import skills
+    assert len(skills._SKILLS) >= 455
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1654,6 +1659,31 @@ def test_skills_product_business_topics_match():
         "agile scrum kanban sprint standup retrospective wip": "agile-and-scrum",
         "project risk management quản lý rủi ro dự án likelihood impact register": "project-risk-management",
         "career growth engineer phát triển sự nghiệp ic vs management promotion": "career-growth-for-engineers",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_engineering_practices_topics_match():
+    from app import skills
+    cases = {
+        "database migration di trú schema zero-downtime expand contract backfill": "database-migrations",
+        "deployment strategy triển khai blue-green canary rolling rollback": "deployment-strategies",
+        "slo sli error budget mục tiêu độ tin cậy sre": "slos-and-error-budgets",
+        "capacity planning lập kế hoạch dung lượng peak headroom autoscaling": "capacity-planning",
+        "connection pooling gộp kết nối database too many connections": "connection-pooling",
+        "n+1 query problem orm lazy loading eager join dataloader": "n-plus-one-query-problem",
+        "saga pattern giao dịch phân tán microservices compensating orchestration": "saga-pattern",
+        "two-phase commit 2pc prepare commit coordinator blocking": "two-phase-commit",
+        "distributed locking khóa phân tán redis ttl fencing token": "distributed-locking",
+        "leader election bầu chọn leader raft split-brain quorum failover": "leader-election",
+        "object storage lưu trữ đối tượng s3 bucket presigned url": "object-storage",
+        "materialized view khung nhìn cụ thể hóa precompute refresh": "materialized-views",
+        "contract testing kiểm thử hợp đồng api pact consumer provider": "contract-testing",
+        "property-based testing sinh input ngẫu nhiên hypothesis shrinking": "property-based-testing",
+        "test double mocking stub mock fake over-mocking cô lập": "test-doubles-and-mocking",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
