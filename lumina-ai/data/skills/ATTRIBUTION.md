@@ -107,6 +107,14 @@ theo thông lệ ngành (kiến thức phổ thông, không sao chép repo cụ 
 biên soạn (kiến thức phổ thông; `personal-finance-basics` chỉ mang tính giáo dục, không phải tư vấn
 tài chính cá nhân hóa).
 
+**Nhóm how-X + AI/data + kỹ năng (đợt cán mốc 300)**: `how-qr-codes-work`, `how-gps-works`,
+`how-machine-translation-works`, `how-speech-recognition-works`, `how-image-formats-work`,
+`how-package-managers-work`, `how-serverless-works`, `how-face-recognition-works`,
+`how-spam-filters-work`, `reinforcement-learning-basics`, `data-pipelines-etl`, `graph-databases`,
+`stream-processing`, `feature-engineering`, `conflict-resolution`, `delegation`,
+`brainstorming-techniques`, `mentoring-and-coaching`, `emotional-intelligence`, `note-taking-systems`
+— LUMINA tự biên soạn (kiến thức/thông lệ phổ thông).
+
 **Lưu ý về các skill lấy qua công cụ tải trang web** (domain-modeling → oauth-security, trừ
 dashmotion đã ghi riêng ở trên): nội dung được lấy qua công cụ tải trang web (không tải trực tiếp
 file gốc như các skill trong 5 repo đầu tiên) — tuy đã yêu cầu giữ nguyên văn và đối chiếu, bản

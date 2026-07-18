@@ -920,6 +920,41 @@ def test_skills_library_has_at_least_280():
     assert len(skills._SKILLS) >= 280
 
 
+def test_skills_library_has_at_least_300():
+    from app import skills
+    assert len(skills._SKILLS) >= 300
+
+
+def test_skills_milestone300_topics_match():
+    from app import skills
+    cases = {
+        "qr code module đen trắng finder pattern sửa lỗi reed-solomon": "how-qr-codes-work",
+        "gps định vị vệ tinh trilateration cần 4 vệ tinh": "how-gps-works",
+        "dịch máy neural machine translation transformer attention": "how-machine-translation-works",
+        "nhận dạng giọng nói speech to text spectrogram whisper": "how-speech-recognition-works",
+        "định dạng ảnh jpeg png webp svg raster vector": "how-image-formats-work",
+        "package manager npm pip giải quyết phụ thuộc transitive": "how-package-managers-work",
+        "serverless faas lambda cold start tự scale trả theo lần chạy": "how-serverless-works",
+        "reinforcement learning agent reward policy exploration exploitation": "reinforcement-learning-basics",
+        "data pipeline etl elt batch streaming orchestration incremental": "data-pipelines-etl",
+        "giải quyết xung đột mâu thuẫn nhóm tách người khỏi vấn đề": "conflict-resolution",
+        "giao việc ủy quyền không ôm hết việc tránh micromanage": "delegation",
+        "brainstorming động não tạo ý tưởng scamper phân kỳ hội tụ": "brainstorming-techniques",
+        "mentoring coaching cố vấn huấn luyện hỏi thay vì bảo grow": "mentoring-and-coaching",
+        "nhận diện khuôn mặt faceprint embedding bias quyền riêng tư": "how-face-recognition-works",
+        "bộ lọc spam bayesian sender reputation spf dkim dmarc": "how-spam-filters-work",
+        "graph database node edge neo4j cypher dữ liệu nhiều liên kết": "graph-databases",
+        "stream processing xử lý luồng event time watermark windowing": "stream-processing",
+        "trí tuệ cảm xúc eq tự nhận thức kiểm soát cảm xúc đồng cảm": "emotional-intelligence",
+        "hệ thống ghi chú zettelkasten para tóm tắt bằng lời mình": "note-taking-systems",
+        "feature engineering tạo đặc trưng encode categorical tránh data leakage": "feature-engineering",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_systems_and_life_topics_match():
     from app import skills
     cases = {
