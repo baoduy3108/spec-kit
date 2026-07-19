@@ -995,6 +995,11 @@ def test_skills_library_has_at_least_500():
     assert len(skills._SKILLS) >= 500
 
 
+def test_skills_library_has_at_least_514():
+    from app import skills
+    assert len(skills._SKILLS) >= 514
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1774,6 +1779,30 @@ def test_skills_osint_monitoring_topics_match():
         "crisis monitoring giám sát khủng hoảng cảnh báo sớm situational awareness": "crisis-monitoring",
         "monitoring pipeline ingest normalize enrich detect alert backpressure": "monitoring-pipeline-design",
         "data journalism storytelling kể chuyện bằng dữ liệu tránh biểu đồ gây hiểu lầm": "data-journalism-and-storytelling",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_llm_app_topics_match():
+    from app import skills
+    cases = {
+        "agentic rag agent lập luận truy xuất nhiều bước multi-hop self-correct": "agentic-rag",
+        "rag chunking chia nhỏ tài liệu kích thước chunk overlap semantic": "rag-chunking-strategies",
+        "rag retrieval reranking hybrid search bm25 cross-encoder top-k": "rag-retrieval-and-reranking",
+        "rag evaluation đánh giá faithfulness groundedness llm as judge": "rag-evaluation",
+        "structured output llm json schema constrained decoding validate": "structured-output-from-llms",
+        "llm function calling tool definition arguments agent loop": "llm-function-calling",
+        "prompt injection defense tiêm lệnh indirect injection jailbreak least privilege": "prompt-injection-defense",
+        "hallucination mitigation giảm ảo giác grounding citation không biết": "hallucination-mitigation",
+        "llm guardrails safety lọc input output moderation pii": "llm-guardrails-and-safety",
+        "llm cost latency optimization giảm chi phí model routing prompt caching streaming": "llm-cost-and-latency-optimization",
+        "semantic caching cache theo ngữ nghĩa embedding similarity threshold": "semantic-caching",
+        "agent planning react plan and execute reflection lập kế hoạch": "agent-planning-patterns",
+        "document parsing rag trích xuất pdf bảng ocr layout ingest": "document-parsing-for-rag",
+        "llm observability tracing chuỗi agent log token cost quality": "llm-observability",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
