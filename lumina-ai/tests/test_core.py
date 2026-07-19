@@ -1025,6 +1025,11 @@ def test_skills_library_has_at_least_589():
     assert len(skills._SKILLS) >= 589
 
 
+def test_skills_library_has_at_least_604():
+    from app import skills
+    assert len(skills._SKILLS) >= 604
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1953,6 +1958,31 @@ def test_skills_build_your_own_x_extra_topics_match():
         "network stack phân tầng link ip tcp application encapsulation": "how-network-stacks-work",
         "syntax highlighting tô màu cú pháp lexing token textmate tree-sitter": "how-syntax-highlighting-works",
         "url shortener mã ngắn base62 redirect 301 302 cache đọc nhiều": "how-url-shorteners-work",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_advanced_llm_ml_topics_match():
+    from app import skills
+    cases = {
+        "rlhf là gì reward model ppo và dpo căn chỉnh": "how-rlhf-works",
+        "giải thích mixture of experts moe router sparse": "how-mixture-of-experts-works",
+        "lora fine-tuning adapter low-rank qlora peft": "how-lora-fine-tuning-works",
+        "knowledge distillation student teacher dark knowledge": "how-knowledge-distillation-works",
+        "beam search giữ top-k chuỗi khi giải mã dịch máy": "how-beam-search-works",
+        "temperature top-p top-k tham số sinh llm ngẫu nhiên": "how-llm-sampling-works",
+        "speculative decoding draft model tăng tốc suy luận": "how-speculative-decoding-works",
+        "word embedding word2vec glove vector nghĩa": "how-word-embeddings-work",
+        "positional encoding rope sinusoidal mã hóa vị trí": "how-positional-encoding-works",
+        "batch norm layer norm chuẩn hóa activation mạng sâu": "how-normalization-in-networks-works",
+        "relu gelu sigmoid hàm kích hoạt phi tuyến": "how-activation-functions-work",
+        "kv cache bộ nhớ suy luận llm prefill decode": "how-kv-cache-works",
+        "multimodal đa phương thức vision language ảnh văn bản": "how-multimodal-models-work",
+        "model context protocol mcp tools resources prompts": "how-model-context-protocol-works",
+        "vision transformer vit chia ảnh thành patch token": "how-vision-transformers-work",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
