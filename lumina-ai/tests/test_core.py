@@ -985,6 +985,11 @@ def test_skills_library_has_at_least_470():
     assert len(skills._SKILLS) >= 470
 
 
+def test_skills_library_has_at_least_485():
+    from app import skills
+    assert len(skills._SKILLS) >= 485
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1714,6 +1719,31 @@ def test_skills_devops_cloud_topics_match():
         "serverless architecture faas cold start stateless lambda": "serverless-architecture-patterns",
         "edge computing tính toán tại biên edge function giảm độ trễ cdn": "edge-computing",
         "policy as code opa rego admission controller guardrail tuân thủ": "policy-as-code",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_frontend_web_topics_match():
+    from app import skills
+    cases = {
+        "css cascade specificity độ ưu tiên quy tắc nào thắng important": "css-cascade-and-specificity",
+        "state management frontend local global server state redux signals": "state-management-patterns",
+        "virtual dom reconciliation diff key trong list react": "virtual-dom-and-reconciliation",
+        "browser storage localstorage cookie indexeddb lưu token": "browser-storage",
+        "css architecture bem tailwind utility-first css modules scoped": "css-architecture",
+        "web bundler webpack vite tree shaking code splitting": "web-build-tools-and-bundlers",
+        "tối ưu ảnh web webp avif responsive srcset lazy loading": "web-image-optimization",
+        "progressive enhancement html trước baseline graceful degradation": "progressive-enhancement",
+        "webauthn passkey đăng nhập không mật khẩu fido2 chống phishing": "webauthn-and-passkeys",
+        "data fetching react query swr caching optimistic loading state": "data-fetching-patterns",
+        "debounce throttle giới hạn tần suất search scroll": "debouncing-and-throttling",
+        "web worker luồng nền offload việc nặng giữ ui mượt postmessage": "web-workers",
+        "rendering patterns csr ssr ssg isr hydration islands": "rendering-patterns",
+        "micro-frontends chia nhỏ frontend module federation đội độc lập": "micro-frontends",
+        "design tokens biến thiết kế semantic primitive theming dark mode": "design-tokens",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
