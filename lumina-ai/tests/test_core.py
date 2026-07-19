@@ -1020,6 +1020,11 @@ def test_skills_library_has_at_least_574():
     assert len(skills._SKILLS) >= 574
 
 
+def test_skills_library_has_at_least_589():
+    from app import skills
+    assert len(skills._SKILLS) >= 589
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1923,6 +1928,31 @@ def test_skills_spec_driven_and_agent_topics_match():
         "human in the loop development con người quyết định checkpoint hành động hệ trọng": "human-in-the-loop-development",
         "intent-driven development tách intent what why khỏi how nguồn sự thật": "intent-driven-development",
         "living documentation tài liệu sống đồng bộ code docs-as-code sinh từ nguồn": "living-documentation",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_build_your_own_x_extra_topics_match():
+    from app import skills
+    cases = {
+        "template engine placeholder parse compile render autoescape": "how-template-engines-work",
+        "uuid guid định danh 128 bit v4 v7 không cần phối hợp": "how-uuids-work",
+        "diff algorithm longest common subsequence myers so sánh khác biệt": "how-diff-algorithms-work",
+        "augmented reality ar slam visual inertial theo dõi vị trí": "how-augmented-reality-works",
+        "voxel engine thế giới khối chunking meshing procedural minecraft": "how-voxel-engines-work",
+        "chess engine cờ vua minimax alpha-beta evaluation transposition": "how-chess-engines-work",
+        "spreadsheet excel công thức đồ thị phụ thuộc tính lại topological": "how-spreadsheet-engines-work",
+        "parser biến token thành cây recursive descent grammar precedence": "how-parsers-work",
+        "terminal emulator pty escape ansi sequence shell vs terminal": "how-terminal-emulators-work",
+        "key-value store get put log index lsm redis": "how-key-value-stores-work",
+        "ray tracing mô phỏng ánh sáng tia phản xạ khúc xạ bóng": "how-ray-tracing-works",
+        "container runtime namespaces cgroups overlay filesystem tiến trình cô lập": "how-container-runtimes-work",
+        "network stack phân tầng link ip tcp application encapsulation": "how-network-stacks-work",
+        "syntax highlighting tô màu cú pháp lexing token textmate tree-sitter": "how-syntax-highlighting-works",
+        "url shortener mã ngắn base62 redirect 301 302 cache đọc nhiều": "how-url-shorteners-work",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
