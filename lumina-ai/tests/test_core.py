@@ -1010,6 +1010,11 @@ def test_skills_library_has_at_least_544():
     assert len(skills._SKILLS) >= 544
 
 
+def test_skills_library_has_at_least_559():
+    from app import skills
+    assert len(skills._SKILLS) >= 559
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1863,6 +1868,31 @@ def test_skills_edtech_tutoring_topics_match():
         "learner motivation engagement động lực growth mindset gamification": "learner-motivation-and-engagement",
         "curriculum sequencing sắp xếp chương trình tiên quyết spiral interleaving": "curriculum-sequencing",
         "retrieval practice testing effect luyện truy hồi active recall đọc lại yếu": "retrieval-practice-and-testing-effect",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_generative_media_topics_match():
+    from app import skills
+    cases = {
+        "how video generation works sinh video ai temporal consistency diffusion": "how-video-generation-works",
+        "image to video animation làm ảnh tĩnh chuyển động motion conditioning": "image-to-video-and-animation",
+        "motion capture pose estimation bắt chuyển động keypoint retargeting": "motion-capture-and-pose-estimation",
+        "keyframe animation interpolation khung chính tween easing timing": "keyframe-animation-and-interpolation",
+        "camera cinematography cỡ cảnh góc máy chuyển động bố cục": "camera-and-cinematography-basics",
+        "storyboarding shot planning dựng storyboard lập kế hoạch cảnh continuity": "storyboarding-and-shot-planning",
+        "video editing dựng phim cut pacing transition j-cut audio": "video-editing-fundamentals",
+        "color grading chỉnh màu white balance lut mood consistency": "color-grading-basics",
+        "prompt engineering visual media viết prompt sinh ảnh style lighting camera": "prompt-engineering-for-visual-media",
+        "controllable image generation controlnet pose depth inpainting lora reference": "controllable-image-generation",
+        "audio music generation sinh âm thanh nhạc tts voice cloning": "audio-and-music-generation",
+        "lip-sync talking heads đồng bộ môi khuôn mặt nói viseme uncanny": "lip-sync-and-talking-heads",
+        "3d scene representation nerf gaussian splatting dựng 3d từ ảnh": "3d-scene-representation",
+        "generative media pipeline quy trình sản xuất video ai consistency cross-shot": "generative-media-pipeline",
+        "ai avatar character animation rig skeleton vtuber điều khiển bằng motion": "ai-avatar-and-character-animation",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
