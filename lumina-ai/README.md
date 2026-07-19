@@ -15,7 +15,7 @@ LUMINA là web chatbot AI "bù trừ": bạn chỉ cần gõ câu hỏi, hệ th
 **Bộ não NHIỀU TẦNG (điểm mấu chốt để chạy gần như miễn phí):**
 
 1. 🥇 **Tầng cao cấp — Claude** (chất lượng cao nhất): dùng cho N lượt đầu mỗi ngày của mỗi người (gói Miễn phí = 2 lượt). Router tự chọn Haiku / Sonnet / Opus / Fable theo độ khó câu hỏi.
-2. 🆓 **Tầng thường — miễn phí**: hết lượt cao cấp, LUMINA **tự tụt xuống** Gemini (free) → Groq (free) → DeepSeek (rẻ) → Ollama (máy bạn) → OpenAI. Người dùng vẫn chat tiếp bình thường, **không hề biết đã đổi bộ não**.
+2. 🆓 **Tầng thường — miễn phí**: hết lượt cao cấp, LUMINA **tự tụt xuống** Gemini (free) → Groq (free) → GitHub Models (free, chỉ cần GitHub token) → OpenRouter (free) → DeepSeek (rẻ) → Ollama (máy bạn) → OpenAI. Người dùng vẫn chat tiếp bình thường, **không hề biết đã đổi bộ não**.
 
 → Bạn chỉ tốn tiền Claude cho vài lượt cao cấp; phần còn lại chạy bằng API miễn phí. **Không có Claude cũng được** — LUMINA chạy 100% bằng bộ não free.
 

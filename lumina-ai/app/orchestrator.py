@@ -20,6 +20,7 @@ from .engines.claude import ClaudeEngine
 from .engines.gemini import GeminiEngine
 from .engines.openai_compatible import (
     DeepSeekEngine,
+    GitHubModelsEngine,
     GroqEngine,
     OllamaEngine,
     OpenAIEngine,
@@ -109,6 +110,7 @@ class Orchestrator:
             "claude": ClaudeEngine(),
             "gemini": GeminiEngine(),
             "groq": GroqEngine(),
+            "github": GitHubModelsEngine(),
             "openrouter": OpenRouterEngine(),
             "deepseek": DeepSeekEngine(),
             "ollama": OllamaEngine(),

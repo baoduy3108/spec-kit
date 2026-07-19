@@ -126,6 +126,18 @@ class GroqEngine(OpenAICompatibleEngine):
         self.api_key = CONFIG["GROQ_API_KEY"]
 
 
+class GitHubModelsEngine(OpenAICompatibleEngine):
+    """GitHub Models — free (có hạn mức) qua endpoint OpenAI-compatible.
+    Xác thực bằng GitHub token miễn phí (dùng như api_key). Model dạng 'publisher/name'."""
+    name = "github"
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = CONFIG["GITHUB_MODELS_BASE_URL"].rstrip("/")
+        self.model = CONFIG["GITHUB_MODELS_MODEL"]
+        self.api_key = CONFIG["GITHUB_MODELS_API_KEY"]
+
+
 class OllamaEngine(OpenAICompatibleEngine):
     name = "ollama"
     is_local = True

@@ -50,6 +50,12 @@ CONFIG = {
     "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",
     "OLLAMA_BASE_URL": os.getenv("OLLAMA_BASE_URL", ""),  # ví dụ http://localhost:11434/v1 (model chạy trên máy bạn)
     "OLLAMA_MODEL": os.getenv("OLLAMA_MODEL", "llama3.1"),
+    # GitHub Models — FREE (có hạn mức) tại github.com/marketplace/models.
+    # Chỉ cần 1 GitHub token miễn phí (Personal Access Token, không cần scope đặc biệt cho public models).
+    # Lấy token: github.com/settings/tokens → Generate new token (classic) → không cần tick scope nào.
+    "GITHUB_MODELS_API_KEY": os.getenv("GITHUB_MODELS_API_KEY", ""),
+    "GITHUB_MODELS_MODEL": os.getenv("GITHUB_MODELS_MODEL", "openai/gpt-4o-mini"),
+    "GITHUB_MODELS_BASE_URL": os.getenv("GITHUB_MODELS_BASE_URL", "https://models.github.ai/inference"),
     "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY", ""),
     "OPENAI_MODEL": os.getenv("OPENAI_MODEL", "gpt-4o"),
     "OPENAI_BASE_URL": "https://api.openai.com/v1",
@@ -67,8 +73,8 @@ CONFIG = {
 
     # ── Độ bền / hiệu năng (kế thừa khung mẫu) ──────────────────
     # Chuỗi engine MIỄN PHÍ/RẺ — dùng khi hết lượt cao cấp hoặc khi engine chính lỗi.
-    # Thứ tự ưu tiên: Gemini free → Groq free → DeepSeek rẻ → Ollama (máy bạn) → OpenAI.
-    "FREE_FALLBACK_CHAIN": ["gemini", "groq", "openrouter", "deepseek", "ollama", "openai"],
+    # Thứ tự ưu tiên: Gemini free → Groq free → GitHub Models free → OpenRouter → DeepSeek rẻ → Ollama (máy bạn) → OpenAI.
+    "FREE_FALLBACK_CHAIN": ["gemini", "groq", "github", "openrouter", "deepseek", "ollama", "openai"],
     "CIRCUIT_BREAKER_THRESHOLD": int(os.getenv("CIRCUIT_BREAKER_THRESHOLD", "5")),
     "CIRCUIT_BREAKER_TIMEOUT": int(os.getenv("CIRCUIT_BREAKER_TIMEOUT", "60")),
     "CACHE_TTL": int(os.getenv("CACHE_TTL", "3600")),
@@ -180,7 +186,8 @@ def has_any_engine() -> bool:
     return bool(
         CONFIG["ANTHROPIC_API_KEY"] or CONFIG["GEMINI_API_KEY"] or CONFIG["GROQ_API_KEY"]
         or CONFIG["OPENROUTER_API_KEY"] or CONFIG["DEEPSEEK_API_KEY"]
-        or CONFIG["OLLAMA_BASE_URL"] or CONFIG["OPENAI_API_KEY"]
+        or CONFIG["OLLAMA_BASE_URL"] or CONFIG["GITHUB_MODELS_API_KEY"]
+        or CONFIG["OPENAI_API_KEY"]
     )
 
 
