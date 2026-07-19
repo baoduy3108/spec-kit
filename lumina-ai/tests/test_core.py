@@ -990,6 +990,11 @@ def test_skills_library_has_at_least_485():
     assert len(skills._SKILLS) >= 485
 
 
+def test_skills_library_has_at_least_500():
+    from app import skills
+    assert len(skills._SKILLS) >= 500
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1744,6 +1749,31 @@ def test_skills_frontend_web_topics_match():
         "rendering patterns csr ssr ssg isr hydration islands": "rendering-patterns",
         "micro-frontends chia nhỏ frontend module federation đội độc lập": "micro-frontends",
         "design tokens biến thiết kế semantic primitive theming dark mode": "design-tokens",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_osint_monitoring_topics_match():
+    from app import skills
+    cases = {
+        "osint tình báo nguồn mở thu thập thông tin công khai chu trình": "osint-fundamentals",
+        "news aggregation rss feed tổng hợp tin tức polling dedup": "news-aggregation-and-rss",
+        "web scraping cào dữ liệu parse html trang động robots.txt": "web-scraping-fundamentals",
+        "event detection alerting phát hiện sự kiện spike burst breaking news": "event-detection-and-alerting",
+        "data source reliability độ tin cậy nguồn tin corroboration primary": "data-source-reliability",
+        "information verification fact-check xác minh reverse image geolocation": "information-verification",
+        "media monitoring social listening giám sát mention share of voice bot": "media-monitoring-and-social-listening",
+        "sentiment analysis trend phân tích cảm xúc xu hướng aspect sarcasm": "sentiment-and-trend-analysis",
+        "geospatial mapping geocoding tọa độ projection geojson spatial index": "geospatial-mapping-and-geocoding",
+        "real-time dashboard bảng giám sát thời gian thực glanceable live update": "real-time-monitoring-dashboards",
+        "entity resolution deduplication khử trùng lặp fuzzy matching blocking": "entity-resolution-and-deduplication",
+        "geopolitical risk analysis rủi ro địa chính trị scenario indicators warnings": "geopolitical-risk-analysis",
+        "crisis monitoring giám sát khủng hoảng cảnh báo sớm situational awareness": "crisis-monitoring",
+        "monitoring pipeline ingest normalize enrich detect alert backpressure": "monitoring-pipeline-design",
+        "data journalism storytelling kể chuyện bằng dữ liệu tránh biểu đồ gây hiểu lầm": "data-journalism-and-storytelling",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
