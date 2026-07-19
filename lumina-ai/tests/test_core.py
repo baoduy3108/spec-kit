@@ -1005,6 +1005,11 @@ def test_skills_library_has_at_least_529():
     assert len(skills._SKILLS) >= 529
 
 
+def test_skills_library_has_at_least_544():
+    from app import skills
+    assert len(skills._SKILLS) >= 544
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1833,6 +1838,31 @@ def test_skills_trading_topics_match():
         "trading bot architecture kiến trúc bot data signal risk execution kill-switch": "trading-bot-architecture",
         "market data ohlcv tick candle level 2 order book split adjusted": "market-data-fundamentals",
         "sentiment-driven trading news social signal already priced in manipulation": "sentiment-driven-trading",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_edtech_tutoring_topics_match():
+    from app import skills
+    cases = {
+        "intelligent tutoring systems its mô hình miền học viên sư phạm adaptive": "intelligent-tutoring-systems",
+        "socratic method dạy bằng câu hỏi thay vì trả lời dẫn dắt": "socratic-method-teaching",
+        "spaced repetition srs đường cong quên anki khoảng cách tăng dần": "spaced-repetition-systems",
+        "adaptive personalized learning điều chỉnh độ khó tốc độ lộ trình": "adaptive-and-personalized-learning",
+        "formative assessment feedback đánh giá quá trình phản hồi kịp thời": "formative-assessment-and-feedback",
+        "scaffolding zpd giàn giáo vùng phát triển gần fading": "scaffolding-and-zpd",
+        "cognitive load theory tải nhận thức bộ nhớ làm việc worked example": "cognitive-load-theory",
+        "mastery learning học theo thành thạo trước khi tiến remediation": "mastery-learning",
+        "blooms taxonomy learning objectives thang bloom mục tiêu động từ đo được": "blooms-taxonomy-and-objectives",
+        "knowledge tracing mô hình hóa kiến thức bayesian deep student model": "knowledge-tracing",
+        "building an ai tutor gia sư llm dẫn dắt không cho đáp án grounding": "building-an-ai-tutor",
+        "misconception diagnosis chẩn đoán quan niệm sai lỗi có hệ thống đối chất": "misconception-diagnosis",
+        "learner motivation engagement động lực growth mindset gamification": "learner-motivation-and-engagement",
+        "curriculum sequencing sắp xếp chương trình tiên quyết spiral interleaving": "curriculum-sequencing",
+        "retrieval practice testing effect luyện truy hồi active recall đọc lại yếu": "retrieval-practice-and-testing-effect",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
