@@ -1000,6 +1000,11 @@ def test_skills_library_has_at_least_514():
     assert len(skills._SKILLS) >= 514
 
 
+def test_skills_library_has_at_least_529():
+    from app import skills
+    assert len(skills._SKILLS) >= 529
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1803,6 +1808,31 @@ def test_skills_llm_app_topics_match():
         "agent planning react plan and execute reflection lập kế hoạch": "agent-planning-patterns",
         "document parsing rag trích xuất pdf bảng ocr layout ingest": "document-parsing-for-rag",
         "llm observability tracing chuỗi agent log token cost quality": "llm-observability",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_trading_topics_match():
+    from app import skills
+    cases = {
+        "technical analysis indicators chỉ báo moving average rsi macd bollinger": "technical-analysis-indicators",
+        "algorithmic trading strategies trend following mean reversion arbitrage": "algorithmic-trading-strategies",
+        "backtesting trading lookahead survivorship overfitting slippage out-of-sample": "backtesting-trading-strategies",
+        "risk management trading position sizing stop-loss kelly drawdown": "risk-management-in-trading",
+        "order types execution market limit stop slippage twap vwap": "order-types-and-execution",
+        "market microstructure order book bid ask spread liquidity depth": "market-microstructure",
+        "portfolio theory diversification correlation sharpe efficient frontier": "portfolio-theory-and-diversification",
+        "quantitative trading signals alpha beta factor model signal decay": "quantitative-trading-signals",
+        "crypto defi trading dex amm liquidity pool impermanent loss gas mev": "crypto-and-defi-trading",
+        "options derivatives call put greeks delta theta vega leverage": "options-and-derivatives-basics",
+        "high frequency trading hft latency colocation speed arms race": "high-frequency-trading-concepts",
+        "trading psychology tâm lý fear greed loss aversion revenge fomo": "trading-psychology",
+        "trading bot architecture kiến trúc bot data signal risk execution kill-switch": "trading-bot-architecture",
+        "market data ohlcv tick candle level 2 order book split adjusted": "market-data-fundamentals",
+        "sentiment-driven trading news social signal already priced in manipulation": "sentiment-driven-trading",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
