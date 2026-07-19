@@ -1015,6 +1015,11 @@ def test_skills_library_has_at_least_559():
     assert len(skills._SKILLS) >= 559
 
 
+def test_skills_library_has_at_least_574():
+    from app import skills
+    assert len(skills._SKILLS) >= 574
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1893,6 +1898,31 @@ def test_skills_generative_media_topics_match():
         "3d scene representation nerf gaussian splatting dựng 3d từ ảnh": "3d-scene-representation",
         "generative media pipeline quy trình sản xuất video ai consistency cross-shot": "generative-media-pipeline",
         "ai avatar character animation rig skeleton vtuber điều khiển bằng motion": "ai-avatar-and-character-animation",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_spec_driven_and_agent_topics_match():
+    from app import skills
+    cases = {
+        "writing a project constitution hiến pháp nguyên tắc nền tảng ràng buộc agent": "writing-a-project-constitution",
+        "writing executable specifications viết đặc tả what why acceptance criteria": "writing-executable-specifications",
+        "spec clarification ambiguity làm rõ đặc tả mơ hồ câu hỏi trước khi build": "spec-clarification-and-ambiguity-resolution",
+        "technical planning from specs lập kế hoạch kỹ thuật kiến trúc từ đặc tả": "technical-planning-from-specs",
+        "task decomposition implementation chia kế hoạch thành task vertical slice": "task-decomposition-for-implementation",
+        "spec plan consistency analysis đối chiếu spec plan tasks phủ sóng traceability": "spec-plan-consistency-analysis",
+        "working with ai coding agents làm việc agent lập trình review giữ kiểm soát": "working-with-ai-coding-agents",
+        "prompting coding agents viết chỉ thị cho agent intent constraint done criteria": "prompting-coding-agents",
+        "reviewing ai generated code review code ai hallucinate api plausible sai": "reviewing-ai-generated-code",
+        "context for coding agents claude.md agents.md ngữ cảnh quy ước": "context-for-coding-agents",
+        "iterative development with agents lặp instruct review refine phản hồi cụ thể": "iterative-development-with-agents",
+        "preventing agent over-engineering ngăn agent làm quá phức tạp yagni gold-plating": "preventing-agent-over-engineering",
+        "human in the loop development con người quyết định checkpoint hành động hệ trọng": "human-in-the-loop-development",
+        "intent-driven development tách intent what why khỏi how nguồn sự thật": "intent-driven-development",
+        "living documentation tài liệu sống đồng bộ code docs-as-code sinh từ nguồn": "living-documentation",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
