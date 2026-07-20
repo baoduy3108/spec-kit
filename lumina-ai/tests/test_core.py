@@ -1040,6 +1040,11 @@ def test_skills_library_has_at_least_618():
     assert len(skills._SKILLS) >= 618
 
 
+def test_skills_library_has_at_least_628():
+    from app import skills
+    assert len(skills._SKILLS) >= 628
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -2027,6 +2032,26 @@ def test_skills_fintech_payments_topics_match():
         "pci dss không lưu số thẻ tokenization hosted field saq a": "pci-dss-basics",
         "3d secure sca xác thực mạnh chuyển trách nhiệm gian lận": "how-3d-secure-works",
         "fraud detection phát hiện gian lận velocity false positive review queue": "fraud-detection-basics",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_web_platform_topics_match():
+    from app import skills
+    cases = {
+        "spf dkim dmarc xác thực email chống giả mạo spoofing": "how-spf-dkim-dmarc-work",
+        "email deliverability khả năng vào inbox warm-up reputation list hygiene": "email-deliverability",
+        "browser rendering critical rendering path dom cssom layout paint composite": "how-browser-rendering-works",
+        "web workers luồng nền javascript tính toán nặng không đơ ui": "how-web-workers-work",
+        "progressive web app pwa cài được chạy offline manifest service worker": "how-progressive-web-apps-work",
+        "source map ánh xạ code minified về source gốc debug stack trace": "how-source-maps-work",
+        "lazy loading tải lười code splitting hoãn tải ảnh ngoài màn hình": "how-lazy-loading-works",
+        "content security policy csp chặn script nội tuyến chống xss nonce": "how-content-security-policy-works",
+        "slowly changing dimensions scd type 2 lưu lịch sử phiên bản chiều": "slowly-changing-dimensions",
+        "window function sql running total xếp hạng row_number over partition by": "window-functions-in-sql",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
