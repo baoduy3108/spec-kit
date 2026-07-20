@@ -1167,6 +1167,11 @@ def test_skills_library_has_at_least_685():
     assert len(skills._SKILLS) >= 685
 
 
+def test_skills_library_has_at_least_694():
+    from app import skills
+    assert len(skills._SKILLS) >= 694
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -2301,6 +2306,25 @@ def test_skills_image_generation_topics_match():
         "textual inversion embedding dạy model khái niệm mới vài ảnh so với lora dreambooth": "textual-inversion-and-embeddings",
         "độ phân giải tỉ lệ khung ảnh vẽ quá lớn nhân đôi chủ thể vẽ nhỏ rồi upscale": "image-generation-resolution-and-aspect",
         "seed tái lập vẽ ảnh cùng seed cùng cài đặt cùng ảnh cố định seed tinh chỉnh": "seed-and-reproducibility-image-gen",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_advanced_data_engineering_topics_match():
+    from app import skills
+    cases = {
+        "lakehouse iceberg delta hudi acid transaction time travel table format trên parquet": "data-lakehouse-and-table-formats",
+        "query optimizer cost based kế hoạch thực thi thống kê bảng thứ tự join explain": "how-query-optimizers-work",
+        "mpp database xử lý song song nhiều node shuffle di chuyển dữ liệu distribution key skew": "how-mpp-databases-work",
+        "chiến lược phân vùng dữ liệu partition theo thời gian range hash pruning tránh quá nhiều": "data-partitioning-strategies",
+        "data contract schema evolution tương thích ngược producer consumer chống vỡ pipeline": "data-contracts-and-schema-evolution",
+        "data lineage observability theo dõi dữ liệu đến từ đâu freshness volume schema distribution": "data-lineage-and-observability",
+        "reverse etl đồng bộ từ warehouse ra crm ads email operational analytics idempotent": "reverse-etl",
+        "vectorized query execution xử lý theo lô vector cột simd nhanh thay vì từng dòng": "how-vectorized-query-execution-works",
+        "data mesh phi tập trung domain sở hữu dữ liệu như sản phẩm self-serve governance": "data-mesh-architecture",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
