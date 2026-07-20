@@ -36,6 +36,42 @@ _lock = threading.RLock()
 
 # Tư liệu để lâu sẽ cũ (nhất là số liệu) — quá hạn thì bỏ qua và tra lại.
 MAX_AGE_DAYS = 90
+# Tin tức cũ rất nhanh — hạn ngắn hơn nhiều.
+NEWS_MAX_AGE_DAYS = 3
+
+# ── TẦNG 1 (chống bịp): độ tin theo NGUỒN ───────────────────────────────────
+# Mọi tri thức "học" được đều PHẢI kèm nhãn độ tin để bộ não biết tin tới đâu.
+# Không nguồn nào được coi là chân lý tuyệt đối — nhất là Wikipedia (ai cũng sửa
+# được) và tin tức (giật tít/thiên lệch/chưa kiểm chứng).
+_SOURCE_TRUST = {
+    "user":      ("⚠️ THẤP", "bạn cung cấp — CHƯA kiểm chứng, chỉ là bối cảnh, không phải sự thật đã xác minh"),
+    "news":      ("⚠️ THẤP-VỪA", "tin tức thời gian thực — có thể sai/giật tít/thiên lệch/chưa xác nhận; PHẢI đối chiếu nhiều nguồn"),
+    "wikipedia": ("◐ VỪA", "bách khoa cộng đồng — AI CŨNG SỬA ĐƯỢC nên có thể bị phá hoại/lỗi thời; đối chiếu trước khi tin"),
+    "manual":    ("● KHÁ", "biên tập tuyển chọn sẵn"),
+    "primary":   ("● CAO", "nguồn sơ cấp/chính thống"),
+}
+
+
+def source_trust(source: str) -> tuple[str, str]:
+    """Trả (nhãn mức tin, mô tả) cho một nguồn — dùng ở Tầng 1 chống bịp."""
+    return _SOURCE_TRUST.get((source or "").lower(), ("? KHÔNG RÕ", "nguồn không xác định — hết sức thận trọng"))
+
+
+# Câu hỏi mang tính TIN TỨC/THỜI SỰ → kích hoạt học tin tức thời gian thực.
+_NEWS_CUES = (
+    "tin tức", "thời sự", "mới nhất", "gần đây", "hôm nay", "hôm qua", "hiện nay",
+    "hiện tại", "cập nhật", "diễn biến", "sự kiện", "vừa xảy ra", "đang xảy ra",
+    "news", "latest", "today", "breaking", "recent", "update",
+)
+
+
+def is_news_query(query: str) -> bool:
+    """Câu hỏi có tính thời sự không (để bổ sung nguồn tin tức thời gian thực)."""
+    low = (query or "").lower()
+    if any(cue in low for cue in _NEWS_CUES):
+        return True
+    # Có năm gần đây (2024/2025/2026...) cũng coi là thời sự
+    return bool(re.search(r"\b20(2[4-9]|3\d)\b", low))
 
 # Từ dừng tiếng Việt/Anh tối giản — bỏ khi rút từ khóa chủ đề.
 _STOPWORDS = {
@@ -198,8 +234,56 @@ async def _fetch_wikipedia(query: str, lang: str) -> dict | None:
         return None
 
 
+async def _fetch_news(query: str, lang: str = "vi", limit: int = 4) -> dict | None:
+    """Học TIN TỨC THỜI GIAN THỰC từ Google News RSS (MIỄN PHÍ, không cần key) —
+    tinh thần worldmonitor: theo dõi thời sự theo thời gian thực. Trả về một 'fact'
+    gộp các tiêu đề mới nhất + link nguồn, source='news' (Tầng 1 = độ tin thấp-vừa).
+    Best-effort, không bao giờ raise."""
+    hl = "vi" if lang == "vi" else "en-US"
+    gl = "VN" if lang == "vi" else "US"
+    url = (
+        "https://news.google.com/rss/search?q="
+        + urllib.parse.quote(query)
+        + f"&hl={hl}&gl={gl}&ceid={gl}:{hl.split('-')[0]}"
+    )
+    try:
+        async with httpx.AsyncClient(timeout=10, headers={"User-Agent": "LUMINA-AI/1.0"}) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            xml = resp.text
+        # Parse RSS <item> tối giản bằng regex (tránh phụ thuộc thư viện XML).
+        items = re.findall(r"<item>(.*?)</item>", xml, re.DOTALL)[:limit]
+        headlines: list[str] = []
+        first_link = ""
+        for it in items:
+            m_title = re.search(r"<title>(.*?)</title>", it, re.DOTALL)
+            m_link = re.search(r"<link>(.*?)</link>", it, re.DOTALL)
+            if not m_title:
+                continue
+            title = re.sub(r"<[^>]+>", "", m_title.group(1)).strip()
+            title = title.replace("&amp;", "&").replace("&#39;", "'").replace("&quot;", '"')
+            if title:
+                headlines.append(f"– {title}")
+                if not first_link and m_link:
+                    first_link = m_link.group(1).strip()
+        if not headlines:
+            return None
+        return {
+            "topic": f"tin tức: {query[:60].lower()}",
+            "summary": "Tiêu đề tin mới nhất (CHƯA kiểm chứng — đối chiếu nhiều nguồn):\n"
+                       + "\n".join(headlines),
+            "url": first_link or "https://news.google.com",
+            "source": "news",
+            "lang": lang,
+        }
+    except Exception as exc:  # noqa: BLE001 — nguồn phụ, hỏng thì bỏ qua êm
+        logger.debug("News RSS lỗi: %s", exc)
+        return None
+
+
 async def gather(query: str, max_items: int = 3) -> list[dict]:
-    """Thu thập tư liệu: kho nội bộ trước (0 token) → Wikipedia (miễn phí) → lưu kho.
+    """Thu thập tư liệu: kho nội bộ trước (0 token) → [tin tức nếu câu thời sự] →
+    Wikipedia (miễn phí) → lưu kho. Mọi mẩu đều kèm nhãn NGUỒN để chống bịp.
 
     Không bao giờ raise — nguồn tri thức là phụ trợ, hỏng thì trả về rỗng
     và bộ não vẫn tự trả lời/tìm kiếm như thường.
@@ -207,6 +291,19 @@ async def gather(query: str, max_items: int = 3) -> list[dict]:
     query = (query or "").strip()
     if len(query) < 4:
         return []
+
+    # Câu THỜI SỰ → luôn học tin mới (không cache lâu; tin tức cũ rất nhanh).
+    if is_news_query(query):
+        results: list[dict] = []
+        news = await _fetch_news(query, "vi")
+        if news:
+            results.append(news)
+        # Kèm nền tảng bách khoa để đối chiếu (Tầng 2) nếu kho đã có.
+        local = lookup_local(query, limit=max_items - 1)
+        results.extend(local)
+        if results:
+            return results[:max_items]
+
     items = lookup_local(query, limit=max_items)
     if items:
         return items
@@ -220,18 +317,40 @@ async def gather(query: str, max_items: int = 3) -> list[dict]:
 
 
 def build_context(items: list[dict]) -> str:
-    """Ghép tư liệu thành khối ngữ cảnh cho bộ não — kèm chỉ thị ĐỐI CHIẾU CHÉO
-    (Wikipedia ai cũng sửa được nên không được tin mù quáng)."""
+    """Ghép tư liệu thành khối ngữ cảnh, gắn HỆ THỐNG 3 TẦNG CHỐNG BỊP.
+
+    Vì LUMINA học từ nguồn mở (Wikipedia ai cũng sửa được) + tin tức thời gian
+    thực (giật tít/thiên lệch), tri thức "học" được KHÔNG được coi là chân lý.
+    Ba tầng bảo vệ:
+      • TẦNG 1 — Nhãn NGUỒN & độ tin: mỗi mẩu ghi rõ nguồn + mức tin.
+      • TẦNG 2 — Đối chiếu chéo: bắt buộc xác chứng qua ≥2 nguồn độc lập; nêu rõ
+        mâu thuẫn/đơn nguồn; tin tức chưa xác nhận phải nói là "chưa kiểm chứng".
+      • TẦNG 3 — Phán đoán độc lập: đối chiếu với kiến thức đã huấn luyện + tìm
+        kiếm trực tiếp; TUYỆT ĐỐI không trình bày điều chưa kiểm chứng như sự thật;
+        thấy nghi ngờ/mâu thuẫn phải nói thẳng cho người dùng.
+    """
     if not items:
         return ""
     lines = []
     for it in items:
-        src = f" (nguồn: {it['url']})" if it.get("url") else ""
-        lines.append(f"• {it['topic']}: {it['summary'][:800]}{src}")
+        tier, desc = source_trust(it.get("source", ""))
+        src = f" [link: {it['url']}]" if it.get("url") else ""
+        lines.append(
+            f"• ({tier} — {desc}) {it['topic']}: {it['summary'][:800]}{src}"
+        )
     return (
-        "\n\n[TƯ LIỆU THAM KHẢO từ kho tri thức mở — LƯU Ý: nguồn cộng đồng có thể bị "
-        "sửa sai, hãy ĐỐI CHIẾU với hiểu biết của bạn và kết quả tìm kiếm; nếu mâu thuẫn "
-        "hãy nói rõ. Trích link nguồn khi dùng:\n" + "\n".join(lines) + "\n]"
+        "\n\n[TƯ LIỆU LUMINA HỌC ĐƯỢC — áp dụng HỆ THỐNG 3 TẦNG CHỐNG BỊP, "
+        "KHÔNG tin mù quáng bất kỳ mẩu nào:\n"
+        "  ① NGUỒN & ĐỘ TIN — mỗi dòng đã ghi rõ mức tin (THẤP→CAO). Nguồn cộng "
+        "đồng (Wikipedia) có thể bị phá hoại/lỗi thời; tin tức có thể sai/giật tít; "
+        "điều người dùng dạy là bối cảnh CHƯA kiểm chứng.\n"
+        "  ② ĐỐI CHIẾU CHÉO — chỉ khẳng định khi có ≥2 nguồn độc lập ủng hộ; nếu "
+        "chỉ 1 nguồn hoặc các nguồn mâu thuẫn → nói rõ 'chưa chắc chắn/đang tranh cãi'; "
+        "tin tức chưa được xác nhận phải gắn nhãn 'chưa kiểm chứng'.\n"
+        "  ③ PHÁN ĐOÁN ĐỘC LẬP — đối chiếu với hiểu biết của bạn + kết quả tìm kiếm; "
+        "KHÔNG trình bày điều chưa kiểm chứng như sự thật; thấy nghi ngờ/mâu thuẫn/"
+        "lỗi thời hãy nói thẳng. Trích link nguồn khi dùng.\n\n"
+        + "\n".join(lines) + "\n]"
     )
 
 

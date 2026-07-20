@@ -409,6 +409,41 @@ def test_knowledge_build_context_warns_cross_check():
     assert "https://x" in ctx           # kèm link nguồn để trích dẫn
 
 
+def test_knowledge_source_trust_tiers():
+    """Tầng 1 chống bịp: mỗi nguồn có mức tin riêng; nguồn lạ bị đánh dấu thận trọng."""
+    from app.knowledge import source_trust
+    # Wikipedia & tin tức & user = độ tin thấp/vừa (cảnh báo)
+    assert "THẤP" in source_trust("news")[0] or "VỪA" in source_trust("news")[0]
+    assert "VỪA" in source_trust("wikipedia")[0]
+    assert "THẤP" in source_trust("user")[0]
+    # Nguồn không xác định → cảnh báo rõ
+    tier, desc = source_trust("nguồn-lạ-hoắc")
+    assert "KHÔNG RÕ" in tier or "thận trọng" in desc
+
+
+def test_knowledge_is_news_query():
+    """Nhận diện câu thời sự để bật nguồn tin tức thời gian thực."""
+    from app.knowledge import is_news_query
+    assert is_news_query("tin tức mới nhất về bầu cử")
+    assert is_news_query("diễn biến hôm nay ra sao")
+    assert is_news_query("chuyện gì xảy ra năm 2025")   # có năm gần đây
+    assert not is_news_query("giải thích định lý pytago")
+    assert not is_news_query("cách viết hàm kiểm tra email")
+
+
+def test_knowledge_build_context_three_layer_anti_deception():
+    """Tầng 2+3: khối ngữ cảnh nêu rõ 3 tầng chống bịp + nhãn nguồn từng mẩu."""
+    from app.knowledge import build_context
+    ctx = build_context([
+        {"topic": "sự kiện X", "summary": "tiêu đề tin...", "url": "https://n", "source": "news"},
+        {"topic": "khái niệm Y", "summary": "định nghĩa...", "url": "https://w", "source": "wikipedia"},
+    ])
+    assert "3 TẦNG" in ctx or "3 tầng" in ctx.lower()
+    assert "ĐỐI CHIẾU CHÉO" in ctx        # tầng 2
+    assert "PHÁN ĐOÁN ĐỘC LẬP" in ctx      # tầng 3
+    assert "chưa kiểm chứng" in ctx.lower()  # tin tức phải gắn nhãn
+
+
 def test_knowledge_gather_prefers_local_no_network():
     import asyncio
     from app import knowledge
