@@ -1172,6 +1172,23 @@ def test_skills_library_has_at_least_694():
     assert len(skills._SKILLS) >= 694
 
 
+def test_skills_library_has_at_least_696():
+    from app import skills
+    assert len(skills._SKILLS) >= 696
+
+
+def test_skills_agent_reach_topics_match():
+    from app import skills
+    cases = {
+        "lớp năng lực trừu tượng tách cái gì khỏi cách làm danh sách backend fallback đổi thứ tự không viết lại code": "capability-abstraction-and-backend-routing",
+        "cho agent khả năng đọc web nền tảng ngoài nguồn không cần cấu hình rss phụ đề fallback health check": "giving-agents-external-reach",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
