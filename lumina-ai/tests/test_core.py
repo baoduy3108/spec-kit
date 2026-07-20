@@ -1096,6 +1096,11 @@ def test_skills_library_has_at_least_660():
     assert len(skills._SKILLS) >= 660
 
 
+def test_skills_library_has_at_least_669():
+    from app import skills
+    assert len(skills._SKILLS) >= 669
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -2175,6 +2180,25 @@ def test_skills_compiler_pl_topics_match():
         "jit compiler biên dịch nóng lúc chạy profiling deoptimization tiered warmup": "how-jit-compilers-work",
         "calling convention abi truyền tham số thanh ghi stack frame ffi tương thích nhị phân": "calling-conventions-and-abi",
         "memory model happens-before data race reordering atomics memory barrier đồng bộ": "memory-models-and-happens-before",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_blockchain_web3_topics_match():
+    from app import skills
+    cases = {
+        "smart contract hợp đồng thông minh code tự thực thi trên blockchain bất biến gas": "how-smart-contracts-work",
+        "ethereum evm world computer tài khoản trạng thái toàn cục bytecode gas": "how-ethereum-and-evm-work",
+        "ví crypto khóa riêng seed phrase custodial non-custodial mất khóa mất tiền": "how-crypto-wallets-and-keys-work",
+        "token nft erc-20 erc-721 fungible non-fungible metadata off-chain": "how-nfts-and-tokens-work",
+        "lỗ hổng smart contract reentrancy tràn số nguyên thao túng oracle front-running mev": "blockchain-security-pitfalls",
+        "oracle blockchain đưa dữ liệu off-chain lên chain thao túng giá flash loan chainlink": "how-oracles-work",
+        "stablecoin neo giá usd dự trữ fiat thế chấp crypto thuật toán depeg": "how-stablecoins-work",
+        "defi cho vay vay mượn thế chấp vượt mức thanh lý yield composability money legos": "how-defi-primitives-work",
+        "rollup layer 2 mở rộng blockchain optimistic fraud proof zk validity proof": "how-rollups-and-layer2-work",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
