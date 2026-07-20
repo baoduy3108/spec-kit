@@ -12,13 +12,41 @@ services:
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
-      - key: ANTHROPIC_API_KEY
+      # Bộ não — điền ÍT NHẤT một cái (khuyến nghị GEMINI_API_KEY free để chạy $0)
+      - key: GEMINI_API_KEY
         sync: false          # điền tay trong dashboard — không lưu vào git
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false          # cao cấp, có phí — để trống nếu chỉ chạy free
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      # Bắt buộc
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: SECRET_KEY
         generateValue: true  # Render tự sinh chuỗi bí mật
+      # Thanh toán tự động (điền nếu muốn bán gói) — tiền về thẳng tài khoản bạn
+      - key: SEPAY_API_KEY
+        sync: false
+      - key: PAYMENT_BANK_BIN
+        sync: false
+      - key: PAYMENT_BANK_ACCOUNT
+        sync: false
+      - key: PAYMENT_BANK_OWNER
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_SECRET
+        sync: false
+      # Tùy chọn
+      - key: ADMIN_EMAILS
+        sync: false
       - key: ENABLE_FABLE
         value: "false"
+      - key: FREE_PREMIUM_CAP
+        value: "3"
       - key: RATE_LIMIT_RPM
         value: "10"

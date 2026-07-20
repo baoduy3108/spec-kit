@@ -67,9 +67,18 @@ def require_user(request: Request) -> dict:
         raise HTTPException(status_code=401, detail="Phiên đăng nhập đã hết hạn")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Phiên đăng nhập không hợp lệ")
+    email = payload.get("email", "")
     return {
         "id": payload["sub"],
-        "email": payload.get("email", ""),
+        "email": email,
         "name": payload.get("name", ""),
         "picture": payload.get("picture", ""),
+        "is_admin": bool(email) and email.lower() in CONFIG["ADMIN_EMAILS"],
     }
+
+
+def require_admin(user: dict) -> dict:
+    """Chặn truy cập nếu không phải email quản trị (danh sách ADMIN_EMAILS)."""
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Chỉ quản trị viên mới truy cập được.")
+    return user

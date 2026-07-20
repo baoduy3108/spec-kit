@@ -11,12 +11,16 @@ from typing import AsyncIterator
 import httpx
 
 from ..config import CONFIG
+from ..media import parse_data_url, parse_video_data_url
 from ..schemas import RouteDecision
 from .base import BaseEngine, EngineError
 
 logger = logging.getLogger("lumina.gemini")
 
 _BASE = "https://generativelanguage.googleapis.com/v1beta/models"
+
+# Chế độ cần output dài (tránh cắt cụt): code, phân tích, tìm kiếm, nghiên cứu.
+_LONG_MODES = ("deep", "apex", "search", "research", "agent")
 
 
 class GeminiEngine(BaseEngine):
@@ -25,24 +29,48 @@ class GeminiEngine(BaseEngine):
     def available(self) -> bool:
         return bool(CONFIG["GEMINI_API_KEY"])
 
+    def supports_vision(self) -> bool:
+        return True
+
+    def supports_video(self) -> bool:
+        return True
+
     async def stream_chat(
         self, messages: list[dict], route: RouteDecision, system: str
     ) -> AsyncIterator[dict]:
-        contents = [
-            {"role": "user" if m["role"] == "user" else "model", "parts": [{"text": m["content"]}]}
-            for m in messages
-        ]
+        contents = []
+        has_video = False
+        for m in messages:
+            parts: list[dict] = [{"text": m["content"]}]
+            # Ảnh đính kèm (LUMINA "xem" ảnh) — Gemini nhận inlineData base64.
+            for img in m.get("images") or []:
+                parsed = parse_data_url(img)
+                if parsed:
+                    media_type, b64 = parsed
+                    parts.append({"inlineData": {"mimeType": media_type, "data": b64}})
+            # Video đính kèm (LUMINA "xem" video) — chỉ Gemini hỗ trợ.
+            for vid in m.get("videos") or []:
+                parsed = parse_video_data_url(vid)
+                if parsed:
+                    media_type, b64 = parsed
+                    parts.append({"inlineData": {"mimeType": media_type, "data": b64}})
+                    has_video = True
+            contents.append({"role": "user" if m["role"] == "user" else "model", "parts": parts})
+        # Câu hỏi code/phân tích cần output dài hơn (tránh cắt cụt); câu thường thì vừa phải.
+        max_out = 32768 if route.mode in _LONG_MODES else 8192
         payload: dict = {
             "contents": contents,
             "systemInstruction": {"parts": [{"text": system}]},
-            "generationConfig": {"maxOutputTokens": 8192},
+            "generationConfig": {"maxOutputTokens": max_out},
         }
         if route.use_web_search:
             payload["tools"] = [{"google_search": {}}]  # Search grounding
 
         url = f"{_BASE}/{CONFIG['GEMINI_MODEL']}:generateContent?key={CONFIG['GEMINI_API_KEY']}"
+        # Video cần nhiều thời gian xử lý khung hình hơn hẳn ảnh/chữ.
+        timeout = 240 if has_video else 120
         try:
-            async with httpx.AsyncClient(timeout=120) as client:
+            async with httpx.AsyncClient(timeout=timeout) as client:
                 resp = await client.post(url, json=payload)
                 resp.raise_for_status()
                 data = resp.json()
