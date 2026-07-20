@@ -1030,6 +1030,11 @@ def test_skills_library_has_at_least_604():
     assert len(skills._SKILLS) >= 604
 
 
+def test_skills_library_has_at_least_608():
+    from app import skills
+    assert len(skills._SKILLS) >= 608
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -1983,6 +1988,20 @@ def test_skills_advanced_llm_ml_topics_match():
         "multimodal đa phương thức vision language ảnh văn bản": "how-multimodal-models-work",
         "model context protocol mcp tools resources prompts": "how-model-context-protocol-works",
         "vision transformer vit chia ảnh thành patch token": "how-vision-transformers-work",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_messaging_reliability_topics_match():
+    from app import skills
+    cases = {
+        "backpressure áp lực ngược producer nhanh consumer chậm bounded queue": "backpressure-and-flow-control",
+        "dead letter queue dlq poison message hàng đợi thư chết": "dead-letter-queues",
+        "transactional outbox tránh dual write phát sự kiện tin cậy": "transactional-outbox",
+        "delivery semantics at-least-once exactly-once ngữ nghĩa phân phối": "delivery-semantics",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
