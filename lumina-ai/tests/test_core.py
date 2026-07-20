@@ -1157,6 +1157,11 @@ def test_skills_library_has_at_least_669():
     assert len(skills._SKILLS) >= 669
 
 
+def test_skills_library_has_at_least_677():
+    from app import skills
+    assert len(skills._SKILLS) >= 677
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -2255,6 +2260,24 @@ def test_skills_blockchain_web3_topics_match():
         "stablecoin neo giá usd dự trữ fiat thế chấp crypto thuật toán depeg": "how-stablecoins-work",
         "defi cho vay vay mượn thế chấp vượt mức thanh lý yield composability money legos": "how-defi-primitives-work",
         "rollup layer 2 mở rộng blockchain optimistic fraud proof zk validity proof": "how-rollups-and-layer2-work",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_audio_dsp_topics_match():
+    from app import skills
+    cases = {
+        "âm thanh số sample rate bit depth pcm dải động 44.1khz": "how-digital-audio-works",
+        "biến đổi fourier phân tích tín hiệu thành sóng sin miền tần số fft phổ": "how-fourier-transform-works",
+        "lấy mẫu nyquist aliasing tần số cao giả dạng thấp bộ lọc chống aliasing": "how-sampling-and-aliasing-works",
+        "bộ lọc âm thanh eq low-pass high-pass cutoff resonance định hình tần số": "how-audio-filters-work",
+        "tổng hợp âm thanh oscillator dạng sóng envelope adsr subtractive fm synthesizer": "how-audio-synthesis-works",
+        "reverb delay echo chorus flanger phaser compressor hiệu ứng không gian": "how-reverb-and-effects-work",
+        "đổi cao độ pitch shift kéo giãn thời gian time stretch phase vocoder formant": "how-pitch-and-time-work",
+        "khử nhiễu âm thanh spectral subtraction hồ sơ nhiễu musical noise ml denoiser": "how-noise-reduction-works",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
