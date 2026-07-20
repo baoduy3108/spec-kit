@@ -1045,6 +1045,11 @@ def test_skills_library_has_at_least_628():
     assert len(skills._SKILLS) >= 628
 
 
+def test_skills_library_has_at_least_638():
+    from app import skills
+    assert len(skills._SKILLS) >= 638
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -2052,6 +2057,26 @@ def test_skills_web_platform_topics_match():
         "content security policy csp chặn script nội tuyến chống xss nonce": "how-content-security-policy-works",
         "slowly changing dimensions scd type 2 lưu lịch sử phiên bản chiều": "slowly-changing-dimensions",
         "window function sql running total xếp hạng row_number over partition by": "window-functions-in-sql",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_mobile_topics_match():
+    from app import skills
+    cases = {
+        "kiến trúc app di động tách ui khỏi logic mvvm mvi repository": "mobile-app-architecture",
+        "push notification thông báo đẩy device token apns fcm": "how-push-notifications-work",
+        "offline-first local db nguồn sự thật đồng bộ hai chiều conflict": "offline-first-mobile-sync",
+        "hiệu năng app di động khởi động nhanh cold start cuộn mượt 60fps jank": "mobile-app-performance",
+        "app store optimization aso từ khóa icon screenshot đánh giá ranking": "app-store-optimization",
+        "deep linking universal link app link mở màn hình app deferred": "how-deep-linking-works",
+        "điều hướng di động tab bar drawer stack back stack nút back": "mobile-navigation-patterns",
+        "responsive vs adaptive nhiều kích thước màn hình tablet foldable notch": "responsive-vs-adaptive-mobile",
+        "tiết kiệm pin và mạng gom việc nền doze giảm đánh thức radio": "battery-and-network-efficiency",
+        "khôi phục trạng thái process death os giết app xoay màn hình instance state": "mobile-state-restoration",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
