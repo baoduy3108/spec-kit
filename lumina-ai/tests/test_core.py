@@ -1050,6 +1050,11 @@ def test_skills_library_has_at_least_638():
     assert len(skills._SKILLS) >= 638
 
 
+def test_skills_library_has_at_least_646():
+    from app import skills
+    assert len(skills._SKILLS) >= 646
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -2077,6 +2082,24 @@ def test_skills_mobile_topics_match():
         "responsive vs adaptive nhiều kích thước màn hình tablet foldable notch": "responsive-vs-adaptive-mobile",
         "tiết kiệm pin và mạng gom việc nền doze giảm đánh thức radio": "battery-and-network-efficiency",
         "khôi phục trạng thái process death os giết app xoay màn hình instance state": "mobile-state-restoration",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_game_dev_topics_match():
+    from app import skills
+    cases = {
+        "quản lý trạng thái game scene menu chơi tạm dừng game over state stack": "game-state-management",
+        "sprite animation game sprite sheet atlas máy trạng thái idle run jump": "sprite-and-animation-systems",
+        "pathfinding trong game tìm đường npc navmesh a-star steering tránh va chạm": "how-pathfinding-in-games-works",
+        "netcode multiplayer server authoritative client prediction interpolation rollback": "game-networking-and-netcode",
+        "procedural generation sinh nội dung địa hình noise perlin seed wave function collapse": "procedural-generation-in-games",
+        "game camera theo người chơi damping dead zone look-ahead va chạm 3d": "how-game-cameras-work",
+        "game ai npc behavior finite state machine behavior tree utility ai đáng tin": "game-ai-behavior",
+        "object pooling tái sử dụng đạn particle tránh giật garbage collection": "object-pooling-in-games",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
