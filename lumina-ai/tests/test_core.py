@@ -303,6 +303,18 @@ def test_local_models_registered_as_fallback():
         assert all(not o.engines[n].available() for n in local_names)
 
 
+def test_mistral_engine_registered():
+    """Mistral API (cloud) được đăng ký, nằm trong chuỗi free, tắt khi thiếu key."""
+    from app.orchestrator import Orchestrator
+    from app.config import CONFIG
+    o = Orchestrator()
+    assert "mistral" in o.engines
+    assert "mistral" in o.free_chain
+    assert o.engines["mistral"].model
+    if not CONFIG["MISTRAL_API_KEY"]:
+        assert not o.engines["mistral"].available()
+
+
 # ── Đa phương thức: xử lý ảnh (media) ───────────────────────────────────────
 
 def test_parse_data_url_valid():

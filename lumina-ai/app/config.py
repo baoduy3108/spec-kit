@@ -48,6 +48,11 @@ CONFIG = {
     "DEEPSEEK_API_KEY": os.getenv("DEEPSEEK_API_KEY", ""),  # cực rẻ tại platform.deepseek.com
     "DEEPSEEK_MODEL": os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
     "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",
+    # Mistral API (cloud) — có free/experimental tier tại console.mistral.ai. Đây là NƠI dùng các
+    # model Mistral lớn (Mistral Large 3, Mistral Small 3.1) mà máy local không chạy nổi.
+    "MISTRAL_API_KEY": os.getenv("MISTRAL_API_KEY", ""),
+    "MISTRAL_MODEL": os.getenv("MISTRAL_MODEL", "mistral-small-latest"),
+    "MISTRAL_BASE_URL": os.getenv("MISTRAL_BASE_URL", "https://api.mistral.ai/v1"),
     "OLLAMA_BASE_URL": os.getenv("OLLAMA_BASE_URL", ""),  # ví dụ http://localhost:11434/v1 (model chạy trên máy bạn)
     "OLLAMA_MODEL": os.getenv("OLLAMA_MODEL", "llama3.1"),
     # LỚP DỰ PHÒNG LOCAL: khi hết token API (cho nhiều người dùng toàn cầu),
@@ -55,12 +60,17 @@ CONFIG = {
     # Ollama phục vụ được nhiều model — liệt kê ở đây, LUMINA sẽ lần lượt thử.
     # KHÔNG làm nặng app (Ollama là tiến trình riêng, app chỉ gọi HTTP); "nặng" là
     # ở RAM MÁY TỰ HOST. Chỉ hoạt động khi bạn tự host + đã `ollama pull` các model.
-    # 5 model local nhẹ, đa dạng nhà cung cấp (chọn theo RAM máy — số nhỏ = nhẹ hơn):
-    #   qwen2.5:3b (~2GB) · llama3.2:3b (~2GB) · phi3.5 (~2.2GB) · gemma2:2b (~1.6GB) · mistral:7b (~4GB)
+    # 5 model local ĐỜI MỚI nhưng vẫn chạy nổi trên máy thường (chọn theo RAM — số nhỏ = nhẹ hơn):
+    #   qwen3:4b (~2.6GB) · deepseek-r1:7b (distill, CÓ suy luận, ~4.7GB) · llama3.2:3b (~2GB)
+    #   · gemma3:4b (~3.3GB) · mistral:7b (~4GB)
+    # LƯU Ý THẬT: các bản KHỔNG LỒ (Llama 4 ~109B, DeepSeek-R1/V3.2 full ~671B, Mistral Large ~123B)
+    # KHÔNG chạy local nổi trên máy thường (cần ~60–400GB VRAM) — chúng thuộc TẦNG API (Groq/OpenRouter/
+    # DeepSeek/Mistral đã có ở trên), không phải local. Máy mạnh (24GB+) có thể đổi lên qwen3:8b/14b,
+    # deepseek-r1:14b/32b, mistral-small (24B) qua biến LOCAL_MODELS.
     "LOCAL_MODELS": [
         m.strip() for m in os.getenv(
             "LOCAL_MODELS",
-            "qwen2.5:3b,llama3.2:3b,phi3.5,gemma2:2b,mistral:7b",
+            "qwen3:4b,deepseek-r1:7b,llama3.2:3b,gemma3:4b,mistral:7b",
         ).split(",") if m.strip()
     ],
     # GitHub Models — FREE (có hạn mức) tại github.com/marketplace/models.
@@ -86,8 +96,8 @@ CONFIG = {
 
     # ── Độ bền / hiệu năng (kế thừa khung mẫu) ──────────────────
     # Chuỗi engine MIỄN PHÍ/RẺ — dùng khi hết lượt cao cấp hoặc khi engine chính lỗi.
-    # Thứ tự ưu tiên: Gemini free → Groq free → GitHub Models free → OpenRouter → DeepSeek rẻ → Ollama (máy bạn) → OpenAI.
-    "FREE_FALLBACK_CHAIN": ["gemini", "groq", "github", "openrouter", "deepseek", "ollama", "openai"],
+    # Thứ tự ưu tiên: Gemini free → Groq free → GitHub Models free → OpenRouter → DeepSeek rẻ → Mistral → Ollama (máy bạn) → OpenAI.
+    "FREE_FALLBACK_CHAIN": ["gemini", "groq", "github", "openrouter", "deepseek", "mistral", "ollama", "openai"],
     "CIRCUIT_BREAKER_THRESHOLD": int(os.getenv("CIRCUIT_BREAKER_THRESHOLD", "5")),
     "CIRCUIT_BREAKER_TIMEOUT": int(os.getenv("CIRCUIT_BREAKER_TIMEOUT", "60")),
     "CACHE_TTL": int(os.getenv("CACHE_TTL", "3600")),
@@ -199,6 +209,7 @@ def has_any_engine() -> bool:
     return bool(
         CONFIG["ANTHROPIC_API_KEY"] or CONFIG["GEMINI_API_KEY"] or CONFIG["GROQ_API_KEY"]
         or CONFIG["OPENROUTER_API_KEY"] or CONFIG["DEEPSEEK_API_KEY"]
+        or CONFIG["MISTRAL_API_KEY"]
         or CONFIG["OLLAMA_BASE_URL"] or CONFIG["GITHUB_MODELS_API_KEY"]
         or CONFIG["OPENAI_API_KEY"]
     )

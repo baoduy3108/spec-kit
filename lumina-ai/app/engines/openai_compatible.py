@@ -126,6 +126,19 @@ class GroqEngine(OpenAICompatibleEngine):
         self.api_key = CONFIG["GROQ_API_KEY"]
 
 
+class MistralEngine(OpenAICompatibleEngine):
+    """Mistral API (cloud, OpenAI-compatible) — nơi dùng các model Mistral lớn
+    (Mistral Large 3 / Small 3.1) mà máy local không chạy nổi. Có free tier."""
+
+    name = "mistral"
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = CONFIG["MISTRAL_BASE_URL"].rstrip("/")
+        self.model = CONFIG["MISTRAL_MODEL"]
+        self.api_key = CONFIG["MISTRAL_API_KEY"]
+
+
 class GitHubModelsEngine(OpenAICompatibleEngine):
     """GitHub Models — free (có hạn mức) qua endpoint OpenAI-compatible.
     Xác thực bằng GitHub token miễn phí (dùng như api_key). Model dạng 'publisher/name'."""
