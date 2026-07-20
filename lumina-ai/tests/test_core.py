@@ -1035,6 +1035,11 @@ def test_skills_library_has_at_least_608():
     assert len(skills._SKILLS) >= 608
 
 
+def test_skills_library_has_at_least_618():
+    from app import skills
+    assert len(skills._SKILLS) >= 618
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -2002,6 +2007,26 @@ def test_skills_messaging_reliability_topics_match():
         "dead letter queue dlq poison message hàng đợi thư chết": "dead-letter-queues",
         "transactional outbox tránh dual write phát sự kiện tin cậy": "transactional-outbox",
         "delivery semantics at-least-once exactly-once ngữ nghĩa phân phối": "delivery-semantics",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_fintech_payments_topics_match():
+    from app import skills
+    cases = {
+        "double entry accounting kế toán kép ghi nợ ghi có bằng nhau": "how-double-entry-accounting-works",
+        "thiết kế ledger sổ cái ví tiền entry bất biến append-only": "designing-a-ledger",
+        "xử lý tiền tệ không dùng float lưu số nguyên cents đa tiền tệ": "money-and-currency-handling",
+        "payment reconciliation đối soát khớp sổ với sao kê ngân hàng settlement": "payment-reconciliation",
+        "subscription billing thanh toán định kỳ proration dunning đổi gói": "subscription-billing-design",
+        "ach wire transfer chuyển khoản ngân hàng gom lô không đảo": "how-ach-and-wire-transfers-work",
+        "thuế và hóa đơn sales tax vat gst hóa đơn tuần tự credit note": "tax-and-invoicing-basics",
+        "pci dss không lưu số thẻ tokenization hosted field saq a": "pci-dss-basics",
+        "3d secure sca xác thực mạnh chuyển trách nhiệm gian lận": "how-3d-secure-works",
+        "fraud detection phát hiện gian lận velocity false positive review queue": "fraud-detection-basics",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
