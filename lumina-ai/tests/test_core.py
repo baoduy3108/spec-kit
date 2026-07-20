@@ -1055,6 +1055,11 @@ def test_skills_library_has_at_least_646():
     assert len(skills._SKILLS) >= 646
 
 
+def test_skills_library_has_at_least_654():
+    from app import skills
+    assert len(skills._SKILLS) >= 654
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -2100,6 +2105,24 @@ def test_skills_game_dev_topics_match():
         "game camera theo người chơi damping dead zone look-ahead va chạm 3d": "how-game-cameras-work",
         "game ai npc behavior finite state machine behavior tree utility ai đáng tin": "game-ai-behavior",
         "object pooling tái sử dụng đạn particle tránh giật garbage collection": "object-pooling-in-games",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_privacy_crypto_topics_match():
+    from app import skills
+    cases = {
+        "gdpr quyền riêng tư dữ liệu cơ sở pháp lý tối thiểu hóa quyền xóa": "gdpr-and-data-privacy",
+        "xử lý pii tối thiểu hóa thu thập cô lập mã hóa loại khỏi log": "pii-handling-and-minimization",
+        "lưu giữ và xóa dữ liệu retention hard soft delete xóa lan tỏa backup": "data-retention-and-deletion",
+        "quản lý đồng ý consent opt-in granular ghi bằng chứng cookie rút lại": "consent-management",
+        "ẩn danh và bí danh hóa anonymization pseudonymization tái định danh k-anonymity": "data-anonymization-and-pseudonymization",
+        "mã hóa đối xứng vs bất đối xứng khóa công khai riêng tư hybrid": "symmetric-vs-asymmetric-encryption",
+        "băm và lưu mật khẩu bcrypt argon2 salt hash chậm không plaintext": "password-hashing-and-storage",
+        "nhật ký kiểm toán bảo mật audit log append-only chống giả mạo ai làm gì": "security-audit-logging",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
