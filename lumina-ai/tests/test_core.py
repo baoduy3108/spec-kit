@@ -284,6 +284,25 @@ def test_orchestrator_chain_tiers():
         assert name in orchestrator.engines
 
 
+def test_local_models_registered_as_fallback():
+    """LOCAL_MODELS được đăng ký thành ≥5 bộ não local (dự phòng khi hết token API),
+    nằm trong chuỗi free, và KHÔNG kích hoạt khi chưa tự host (thiếu OLLAMA_BASE_URL)."""
+    from app.orchestrator import Orchestrator
+    from app.config import CONFIG
+    o = Orchestrator()
+    local_names = [n for n in o.engines if getattr(o.engines[n], "is_local", False)]
+    # ollama chính + ≥5 model local từ LOCAL_MODELS
+    assert len(local_names) >= 5
+    assert len(CONFIG["LOCAL_MODELS"]) >= 5
+    # mỗi model local có model riêng và nằm trong chuỗi free
+    for n in local_names:
+        assert o.engines[n].model
+    assert any(n.startswith("ollama-") for n in o.free_chain)
+    # Không có OLLAMA_BASE_URL trong test → tất cả local đều không available (không tốn tài nguyên)
+    if not CONFIG["OLLAMA_BASE_URL"]:
+        assert all(not o.engines[n].available() for n in local_names)
+
+
 # ── Đa phương thức: xử lý ảnh (media) ───────────────────────────────────────
 
 def test_parse_data_url_valid():

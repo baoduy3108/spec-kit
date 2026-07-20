@@ -118,6 +118,23 @@ class Orchestrator:
         }
         self.free_chain = [n for n in CONFIG["FREE_FALLBACK_CHAIN"] if n in self.engines]
 
+        # ── Lớp dự phòng LOCAL đa model ─────────────────────────────
+        # Đăng ký thêm mỗi model trong LOCAL_MODELS thành một bộ não local riêng
+        # (cùng endpoint Ollama, khác model) và chèn ngay sau "ollama" trong chuỗi
+        # free — để khi hết token API, LUMINA lần lượt thử nhiều model local.
+        # Không tốn tài nguyên khi chưa tự host: available()=False nếu thiếu OLLAMA_BASE_URL.
+        local_names: list[str] = []
+        for i, model in enumerate(CONFIG.get("LOCAL_MODELS", []), start=1):
+            ename = f"ollama-{i}"
+            self.engines[ename] = OllamaEngine(model=model, name=ename)
+            local_names.append(ename)
+        if local_names:
+            if "ollama" in self.free_chain:
+                pos = self.free_chain.index("ollama") + 1
+                self.free_chain[pos:pos] = local_names
+            else:
+                self.free_chain += local_names
+
     def _chain_for(self, use_premium: bool) -> list[str]:
         """Chuỗi engine theo tầng. Cao cấp: Claude trước rồi mới tới free (dự phòng khi lỗi)."""
         if use_premium:

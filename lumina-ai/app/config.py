@@ -50,6 +50,19 @@ CONFIG = {
     "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",
     "OLLAMA_BASE_URL": os.getenv("OLLAMA_BASE_URL", ""),  # ví dụ http://localhost:11434/v1 (model chạy trên máy bạn)
     "OLLAMA_MODEL": os.getenv("OLLAMA_MODEL", "llama3.1"),
+    # LỚP DỰ PHÒNG LOCAL: khi hết token API (cho nhiều người dùng toàn cầu),
+    # LUMINA vẫn trả lời được bằng các model chạy NỘI BỘ qua Ollama. Một endpoint
+    # Ollama phục vụ được nhiều model — liệt kê ở đây, LUMINA sẽ lần lượt thử.
+    # KHÔNG làm nặng app (Ollama là tiến trình riêng, app chỉ gọi HTTP); "nặng" là
+    # ở RAM MÁY TỰ HOST. Chỉ hoạt động khi bạn tự host + đã `ollama pull` các model.
+    # 5 model local nhẹ, đa dạng nhà cung cấp (chọn theo RAM máy — số nhỏ = nhẹ hơn):
+    #   qwen2.5:3b (~2GB) · llama3.2:3b (~2GB) · phi3.5 (~2.2GB) · gemma2:2b (~1.6GB) · mistral:7b (~4GB)
+    "LOCAL_MODELS": [
+        m.strip() for m in os.getenv(
+            "LOCAL_MODELS",
+            "qwen2.5:3b,llama3.2:3b,phi3.5,gemma2:2b,mistral:7b",
+        ).split(",") if m.strip()
+    ],
     # GitHub Models — FREE (có hạn mức) tại github.com/marketplace/models.
     # Chỉ cần 1 GitHub token miễn phí (Personal Access Token, không cần scope đặc biệt cho public models).
     # Lấy token: github.com/settings/tokens → Generate new token (classic) → không cần tick scope nào.

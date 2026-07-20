@@ -139,14 +139,21 @@ class GitHubModelsEngine(OpenAICompatibleEngine):
 
 
 class OllamaEngine(OpenAICompatibleEngine):
+    """Bộ não chạy NỘI BỘ qua Ollama (máy tự host). Một endpoint Ollama phục vụ
+    được nhiều model local — nên có thể tạo nhiều instance, mỗi cái một model,
+    làm lớp dự phòng khi hết token API. `name`/`model` cho phép ghi đè để đăng ký
+    nhiều model local (ollama, ollama-2, ...)."""
+
     name = "ollama"
     is_local = True
 
-    def __init__(self):
+    def __init__(self, model: str | None = None, name: str | None = None):
         super().__init__()
         self.base_url = CONFIG["OLLAMA_BASE_URL"].rstrip("/")
-        self.model = CONFIG["OLLAMA_MODEL"]
+        self.model = model or CONFIG["OLLAMA_MODEL"]
         self.api_key = ""
+        if name:
+            self.name = name
 
 
 class OpenRouterEngine(OpenAICompatibleEngine):
