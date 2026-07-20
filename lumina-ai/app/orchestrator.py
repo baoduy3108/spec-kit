@@ -201,6 +201,16 @@ class Orchestrator:
         # trong thư mục data/ trước (0 token), thiếu thì "học" từ Wikipedia (miễn phí)
         # rồi lưu lại. Tư liệu kèm link nguồn + chỉ thị đối chiếu chéo (chống bịp).
         system_prompt = SYSTEM_PROMPT
+        # 🧠 "Dạy LUMINA": nếu người dùng RA LỆNH ghi nhớ điều gì đó → tiếp thu vào kho
+        # tri thức (source="user") để tái dùng về sau — workflow tiến hoá theo người dùng.
+        # Chạy ở MỌI chế độ (không phụ thuộc web_search) và không bao giờ làm hỏng chat.
+        if messages:
+            try:
+                learned = knowledge.learn_from_user(original_last_user)
+            except Exception:  # noqa: BLE001
+                learned = None
+            if learned:
+                yield {"type": "search_status", "tool": "learned", "query": learned[:80]}
         if route.use_web_search and messages:
             try:
                 facts = await knowledge.gather(original_last_user[:200])

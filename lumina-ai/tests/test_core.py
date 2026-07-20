@@ -381,6 +381,27 @@ def test_knowledge_keywords_skip_stopwords():
     assert "là" not in kws and "gì" not in kws
 
 
+def test_learn_from_user_teaches_and_recalls():
+    """'Dạy LUMINA': lệnh ghi nhớ của người dùng được tiếp thu vào kho và tra lại được
+    ở lượt sau (workflow tiến hoá theo kiến thức người dùng)."""
+    from app import knowledge
+    learned = knowledge.learn_from_user(
+        "ghi nhớ rằng dự án Zenith của tôi dùng cổng 8842 cho máy chủ nội bộ")
+    assert learned is not None
+    assert "8842" in learned
+    # Lượt sau: hỏi lại → kho nội bộ trả về đúng điều đã dạy
+    hits = knowledge.lookup_local("dự án zenith dùng cổng nào")
+    assert any("8842" in h["summary"] for h in hits)
+
+
+def test_learn_from_user_ignores_non_teaching():
+    """Câu thường (không phải mệnh lệnh dạy) KHÔNG bị bắt nhầm để ghi nhớ."""
+    from app import knowledge
+    assert knowledge.learn_from_user("tôi không nhớ nổi mật khẩu wifi") is None
+    assert knowledge.learn_from_user("hôm nay trời đẹp quá") is None
+    assert knowledge.learn_from_user("bạn có nhớ tên tôi không") is None
+
+
 def test_knowledge_build_context_warns_cross_check():
     from app.knowledge import build_context
     ctx = build_context([{"topic": "trà xanh", "summary": "abc", "url": "https://x", "source": "wikipedia"}])

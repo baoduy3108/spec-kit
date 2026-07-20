@@ -637,6 +637,7 @@
               : ev.tool === "recall" ? "🧠 Nhớ lại cuộc trò chuyện: "
               : ev.tool === "web_fetch" ? "🌐 Đang đọc trang: "
               : ev.tool === "skill" ? "🧩 Áp dụng kỹ năng: "
+              : ev.tool === "learned" ? "🧠 Đã tiếp thu & ghi nhớ: "
               : "🔍 Đang tìm kiếm: ";
             chip.textContent = prefix + (ev.query || "…");
             el.body.insertBefore(chip, el.content);

@@ -106,6 +106,41 @@ def remember(topic: str, summary: str, url: str = "", source: str = "manual", la
         conn.commit()
 
 
+# Cụm từ mệnh lệnh "dạy LUMINA" — người dùng chủ động cung cấp tri thức để AI tiếp thu.
+# Phải nằm ở ĐẦU câu (mệnh lệnh) để tránh bắt nhầm "tôi không nhớ nổi"...
+_TEACH_TRIGGERS = (
+    "ghi nhớ rằng", "ghi nhớ là", "ghi nhớ:", "ghi nhớ ", "hãy nhớ rằng", "hãy nhớ là",
+    "nhớ giúp tôi", "nhớ giùm", "nhớ dùm", "học điều này", "học kiến thức này",
+    "lưu ý rằng", "remember that", "please remember", "note that",
+)
+
+
+def learn_from_user(text: str, source: str = "user") -> str | None:
+    """"Dạy LUMINA": nếu người dùng RA LỆNH ghi nhớ một điều gì đó ở đầu câu, tách nội
+    dung đó và lưu vào kho tri thức (source="user") để tái sử dụng ở các lượt sau —
+    workflow tự tiến hoá theo kiến thức người dùng cung cấp. Trả về mẩu đã học, hoặc None.
+
+    An toàn/khiêm tốn: chỉ kích hoạt khi có cụm mệnh lệnh rõ ràng ở ~20 ký tự đầu,
+    nội dung đủ dài (≥8 ký tự). Không bao giờ raise (phụ trợ, hỏng thì bỏ qua)."""
+    t = (text or "").strip()
+    if len(t) < 10:
+        return None
+    low = t.lower()
+    try:
+        for trig in _TEACH_TRIGGERS:
+            idx = low.find(trig)
+            if idx != -1 and idx <= 20:  # mệnh lệnh phải ở đầu câu
+                fact = t[idx + len(trig):].lstrip(" :,-–—\t").strip()
+                if len(fact) >= 8:
+                    kws = extract_keywords(fact, 6)
+                    topic = " ".join(kws) if kws else fact[:60]
+                    remember(topic=topic, summary=fact, source=source)
+                    return fact[:160]
+    except Exception:  # noqa: BLE001 — học từ người dùng là phụ trợ, không được làm hỏng chat
+        return None
+    return None
+
+
 def lookup_local(query: str, limit: int = 3) -> list[dict]:
     """Tra kho nội bộ theo từ khóa — đọc từ đĩa, 0 token, 0 mạng."""
     keywords = extract_keywords(query)
