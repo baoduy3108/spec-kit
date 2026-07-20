@@ -1162,6 +1162,11 @@ def test_skills_library_has_at_least_677():
     assert len(skills._SKILLS) >= 677
 
 
+def test_skills_library_has_at_least_685():
+    from app import skills
+    assert len(skills._SKILLS) >= 685
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -2278,6 +2283,24 @@ def test_skills_audio_dsp_topics_match():
         "reverb delay echo chorus flanger phaser compressor hiệu ứng không gian": "how-reverb-and-effects-work",
         "đổi cao độ pitch shift kéo giãn thời gian time stretch phase vocoder formant": "how-pitch-and-time-work",
         "khử nhiễu âm thanh spectral subtraction hồ sơ nhiễu musical noise ml denoiser": "how-noise-reduction-works",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_image_generation_topics_match():
+    from app import skills
+    cases = {
+        "workflow vẽ ảnh dạng node comfyui đồ thị load model encode prompt sample decode": "node-based-image-workflows",
+        "viết prompt cho model vẽ ảnh cấu trúc chủ thể phong cách trọng số nhấn mạnh": "prompting-for-image-models",
+        "sampler scheduler diffusion euler dpm++ ddim số bước steps karras": "image-model-samplers-and-schedulers",
+        "negative prompt và cfg guidance scale bám prompt ảnh bị cháy fried": "negative-prompts-and-cfg",
+        "nâng cấp phóng to ảnh super resolution esrgan hires fix tiled upscale": "image-upscaling-methods",
+        "textual inversion embedding dạy model khái niệm mới vài ảnh so với lora dreambooth": "textual-inversion-and-embeddings",
+        "độ phân giải tỉ lệ khung ảnh vẽ quá lớn nhân đôi chủ thể vẽ nhỏ rồi upscale": "image-generation-resolution-and-aspect",
+        "seed tái lập vẽ ảnh cùng seed cùng cài đặt cùng ảnh cố định seed tinh chỉnh": "seed-and-reproducibility-image-gen",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
