@@ -1079,6 +1079,11 @@ def test_skills_library_has_at_least_654():
     assert len(skills._SKILLS) >= 654
 
 
+def test_skills_library_has_at_least_660():
+    from app import skills
+    assert len(skills._SKILLS) >= 660
+
+
 def test_skills_gsap_and_frameworks_match():
     from app import skills
     cases = {
@@ -2142,6 +2147,22 @@ def test_skills_privacy_crypto_topics_match():
         "mã hóa đối xứng vs bất đối xứng khóa công khai riêng tư hybrid": "symmetric-vs-asymmetric-encryption",
         "băm và lưu mật khẩu bcrypt argon2 salt hash chậm không plaintext": "password-hashing-and-storage",
         "nhật ký kiểm toán bảo mật audit log append-only chống giả mạo ai làm gì": "security-audit-logging",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
+def test_skills_compiler_pl_topics_match():
+    from app import skills
+    cases = {
+        "type checker kiểm tra kiểu tĩnh duyệt ast luật kiểu nominal structural soundness": "how-type-checkers-work",
+        "type inference hindley milner suy luận kiểu unification let-polymorphism": "type-inference-hindley-milner",
+        "compiler tối ưu code constant folding dead code inlining ssa register allocation": "how-compilers-optimize-code",
+        "jit compiler biên dịch nóng lúc chạy profiling deoptimization tiered warmup": "how-jit-compilers-work",
+        "calling convention abi truyền tham số thanh ghi stack frame ffi tương thích nhị phân": "calling-conventions-and-abi",
+        "memory model happens-before data race reordering atomics memory barrier đồng bộ": "memory-models-and-happens-before",
     }
     for text, expected_slug in cases.items():
         skill = skills.find_matching_skill(text)
