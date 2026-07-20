@@ -60,17 +60,21 @@ CONFIG = {
     # Ollama phục vụ được nhiều model — liệt kê ở đây, LUMINA sẽ lần lượt thử.
     # KHÔNG làm nặng app (Ollama là tiến trình riêng, app chỉ gọi HTTP); "nặng" là
     # ở RAM MÁY TỰ HOST. Chỉ hoạt động khi bạn tự host + đã `ollama pull` các model.
-    # 5 model local ĐỜI MỚI nhưng vẫn chạy nổi trên máy thường (chọn theo RAM — số nhỏ = nhẹ hơn):
-    #   qwen3:4b (~2.6GB) · deepseek-r1:7b (distill, CÓ suy luận, ~4.7GB) · llama3.2:3b (~2GB)
-    #   · gemma3:4b (~3.3GB) · mistral:7b (~4GB)
+    # NHIỀU model local ĐỜI MỚI, đủ dòng & đủ cỡ (app KHÔNG nặng thêm — chỉ là tên; weights
+    # nằm trên máy Ollama tự host, và chỉ tốn đĩa khi bác thực sự `ollama pull` từng cái).
+    # LUMINA lần lượt thử cái nào đã pull; chưa pull/chưa host thì tự bỏ qua.
+    # Cỡ nhẹ (máy 8–16GB): qwen3:4b (~2.6GB) · llama3.2:3b (~2GB) · gemma3:4b (~3.3GB)
+    #                       · deepseek-r1:7b (distill CÓ suy luận, ~4.7GB) · mistral:7b (~4GB)
+    #                       · phi4 (~9GB) · mistral-nemo (~7GB) · qwen2.5-coder:7b (chuyên code)
+    # Cỡ nặng (máy 24GB+):  qwen3:8b · deepseek-r1:14b · gemma3:12b (đổi/thêm qua biến LOCAL_MODELS)
     # LƯU Ý THẬT: các bản KHỔNG LỒ (Llama 4 ~109B, DeepSeek-R1/V3.2 full ~671B, Mistral Large ~123B)
-    # KHÔNG chạy local nổi trên máy thường (cần ~60–400GB VRAM) — chúng thuộc TẦNG API (Groq/OpenRouter/
-    # DeepSeek/Mistral đã có ở trên), không phải local. Máy mạnh (24GB+) có thể đổi lên qwen3:8b/14b,
-    # deepseek-r1:14b/32b, mistral-small (24B) qua biến LOCAL_MODELS.
+    # KHÔNG chạy local nổi (cần ~60–400GB VRAM) — chúng thuộc TẦNG API (Groq/OpenRouter/DeepSeek/
+    # Mistral đã có ở trên), không phải local.
     "LOCAL_MODELS": [
         m.strip() for m in os.getenv(
             "LOCAL_MODELS",
-            "qwen3:4b,deepseek-r1:7b,llama3.2:3b,gemma3:4b,mistral:7b",
+            "qwen3:4b,qwen3:8b,deepseek-r1:7b,deepseek-r1:14b,llama3.2:3b,"
+            "gemma3:4b,gemma3:12b,phi4,mistral:7b,mistral-nemo,qwen2.5-coder:7b",
         ).split(",") if m.strip()
     ],
     # GitHub Models — FREE (có hạn mức) tại github.com/marketplace/models.
