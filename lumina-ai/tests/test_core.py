@@ -1187,6 +1187,28 @@ def test_skills_library_has_at_least_711():
     assert len(skills._SKILLS) >= 711
 
 
+def test_skills_library_has_at_least_718():
+    from app import skills
+    assert len(skills._SKILLS) >= 718
+
+
+def test_skills_api_design_topics_match():
+    from app import skills
+    cases = {
+        "nguyên tắc thiết kế rest api resource danh từ http method status code stateless": "rest-api-design-principles",
+        "chiến lược versioning api url header media-type breaking change tương thích ngược deprecate": "api-versioning-strategies",
+        "thiết kế xử lý lỗi api status code thân lỗi máy đọc problem details rfc 7807 không lộ nội bộ": "api-error-handling-design",
+        "openapi swagger hợp đồng api đặc tả sinh code client server mock contract-first": "openapi-and-api-contracts",
+        "thiết kế rate limit api 429 retry-after header limit remaining reset quota tier": "rate-limiting-api-design",
+        "hateoas richardson maturity model các cấp rest hypermedia link trong response": "hateoas-and-rest-maturity",
+        "backend for frontend bff một backend riêng cho web mobile gộp dữ liệu theo client": "backend-for-frontend-pattern",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_advanced_testing_topics_match():
     from app import skills
     cases = {
