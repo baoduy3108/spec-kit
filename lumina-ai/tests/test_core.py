@@ -1177,6 +1177,28 @@ def test_skills_library_has_at_least_696():
     assert len(skills._SKILLS) >= 696
 
 
+def test_skills_library_has_at_least_703():
+    from app import skills
+    assert len(skills._SKILLS) >= 703
+
+
+def test_skills_devops_iac_topics_match():
+    from app import skills
+    cases = {
+        "terraform state file ánh xạ config với hạ tầng thật remote state locking drift không sửa tay": "how-terraform-state-works",
+        "autoscaling mở rộng ngang dọc hpa cpu cluster autoscaler node tránh thrashing": "autoscaling-strategies",
+        "helm đóng gói kubernetes chart template values release nâng cấp rollback vs kustomize": "helm-and-kubernetes-packaging",
+        "kubernetes operator crd custom resource controller reconcile loop tự động vận hành": "kubernetes-operators-and-crds",
+        "môi trường preview tạm thời cho mỗi pull request cô lập tự hủy seed dữ liệu chi phí": "ephemeral-preview-environments",
+        "bảo mật chuỗi cung ứng phần mềm sbom ký artifact provenance slsa dependency bị chiếm": "software-supply-chain-security",
+        "build tái lập tất định cùng input cùng output ghim dependency cache theo nội dung hermetic": "reproducible-builds-and-caching",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_agent_reach_topics_match():
     from app import skills
     cases = {
