@@ -1182,6 +1182,29 @@ def test_skills_library_has_at_least_703():
     assert len(skills._SKILLS) >= 703
 
 
+def test_skills_library_has_at_least_711():
+    from app import skills
+    assert len(skills._SKILLS) >= 711
+
+
+def test_skills_advanced_testing_topics_match():
+    from app import skills
+    cases = {
+        "mutation testing cố tình chèn lỗi mutant xem test có bắt được đo chất lượng bộ test": "mutation-testing",
+        "snapshot testing lưu output làm ảnh chụp báo lỗi khi khác rubber-stamp giòn": "snapshot-testing",
+        "test flaky đậu rớt ngẫu nhiên timing async phụ thuộc thứ tự trạng thái chung": "flaky-test-diagnosis",
+        "fuzzing ném input ngẫu nhiên méo mó tìm crash coverage-guided parser input không tin cậy": "fuzzing-basics",
+        "quản lý dữ liệu test factory builder fixture cô lập dọn dẹp tránh dữ liệu chung": "test-data-management",
+        "characterization test golden master ghi lại hành vi hiện tại code cũ lưới an toàn refactor": "characterization-testing",
+        "kiểm thử code bất đồng bộ đồng thời await thay vì sleep fake clock race detector": "testing-async-and-concurrent-code",
+        "độ phủ code line branch condition path coverage vì sao 100 phần trăm không có nghĩa test tốt": "coverage-metrics-and-limits",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_devops_iac_topics_match():
     from app import skills
     cases = {
