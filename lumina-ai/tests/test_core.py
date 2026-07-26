@@ -1197,6 +1197,23 @@ def test_skills_library_has_at_least_726():
     assert len(skills._SKILLS) >= 726
 
 
+def test_skills_library_has_at_least_728():
+    from app import skills
+    assert len(skills._SKILLS) >= 728
+
+
+def test_skills_graphrag_and_trend_topics_match():
+    from app import skills
+    cases = {
+        "graphrag rag dựa knowledge graph trích entity quan hệ community summarization global local search": "how-graphrag-works",
+        "xếp hạng theo engagement upvote view odds cửa sổ recency gộp câu chuyện qua nhiều nền tảng trending": "engagement-and-recency-ranking",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_mlops_topics_match():
     from app import skills
     cases = {
