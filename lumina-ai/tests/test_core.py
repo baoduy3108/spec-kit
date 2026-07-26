@@ -1192,6 +1192,29 @@ def test_skills_library_has_at_least_718():
     assert len(skills._SKILLS) >= 718
 
 
+def test_skills_library_has_at_least_726():
+    from app import skills
+    assert len(skills._SKILLS) >= 726
+
+
+def test_skills_mlops_topics_match():
+    from app import skills
+    cases = {
+        "feature store online offline chống training-serving skew tái dùng feature phục vụ nhất quán": "feature-stores",
+        "training-serving skew model thấy feature khác lúc production rò rỉ dữ liệu leakage": "training-serving-skew",
+        "theo dõi thí nghiệm ml mlflow ghi param metric artifact phiên bản dữ liệu tái lập": "experiment-tracking-and-reproducibility",
+        "giám sát model ml data drift concept drift nhãn thật đến chậm khi nào retrain": "ml-model-monitoring-and-drift",
+        "phục vụ triển khai model batch vs online real-time shadow canary champion challenger": "model-serving-and-deployment",
+        "model registry versioning lineage staging production archived promote rollback": "model-registry-and-versioning",
+        "gán nhãn dữ liệu chất lượng đồng thuận giữa người gán active learning giảm chi phí": "data-labeling-and-annotation",
+        "đánh giá model precision recall f1 auc bẫy accuracy mất cân bằng calibration": "ml-model-evaluation-metrics",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_api_design_topics_match():
     from app import skills
     cases = {
