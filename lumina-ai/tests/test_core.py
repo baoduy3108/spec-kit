@@ -1202,6 +1202,25 @@ def test_skills_library_has_at_least_728():
     assert len(skills._SKILLS) >= 728
 
 
+def test_skills_library_has_at_least_732():
+    from app import skills
+    assert len(skills._SKILLS) >= 732
+
+
+def test_skills_crawl_and_pm_topics_match():
+    from app import skills
+    cases = {
+        "crawl web cho llm rag render javascript tách nội dung chính markdown sạch giữ trích dẫn nguồn": "web-crawling-for-llms",
+        "jobs to be done jtbd khách hàng thuê sản phẩm để tiến bộ trong công việc milkshake không phải tính năng": "jobs-to-be-done",
+        "opportunity solution tree teresa torres nối outcome cơ hội giải pháp experiment tránh feature-first": "opportunity-solution-tree",
+        "north star metric một chỉ số giá trị cốt lõi input metric vì sao doanh thu vanity là north star tệ": "north-star-metric",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
+
+
 def test_skills_graphrag_and_trend_topics_match():
     from app import skills
     cases = {
