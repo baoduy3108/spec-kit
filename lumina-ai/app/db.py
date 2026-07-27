@@ -52,6 +52,14 @@ def _init_schema(conn: sqlite3.Connection):
         citations TEXT,
         created_at INTEGER
     );
+    CREATE TABLE IF NOT EXISTS projects (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        widgets TEXT NOT NULL DEFAULT '[]',   -- JSON: danh sách spec widget của "mặt bàn"
+        created_at INTEGER,
+        updated_at INTEGER
+    );
     CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY,                  -- mã đơn ngắn, dùng làm nội dung chuyển khoản SePay
         user_id TEXT NOT NULL,
@@ -82,6 +90,7 @@ def _init_schema(conn: sqlite3.Connection):
         "ALTER TABLE users ADD COLUMN plan_expires_at INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE usage_daily ADD COLUMN premium_count INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE usage_daily ADD COLUMN total_count INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE conversations ADD COLUMN project_id TEXT",   # gán hội thoại vào project (NULL = ngoài project)
     ):
         try:
             conn.execute(stmt)
@@ -101,17 +110,97 @@ def upsert_user(user_id: str, email: str, name: str, picture: str):
         conn.commit()
 
 
-def create_conversation(user_id: str, title: str) -> str:
+def create_conversation(user_id: str, title: str, project_id: str | None = None) -> str:
     with _lock:
         conn = get_conn()
         conv_id = uuid.uuid4().hex
         now = int(time.time())
+        # Chỉ gán project_id nếu project đó thuộc chính người dùng (tránh gán bừa).
+        pid = project_id if (project_id and _project_owned(conn, project_id, user_id)) else None
         conn.execute(
-            "INSERT INTO conversations(id, user_id, title, created_at, updated_at) VALUES(?,?,?,?,?)",
-            (conv_id, user_id, title[:80], now, now),
+            "INSERT INTO conversations(id, user_id, title, project_id, created_at, updated_at) VALUES(?,?,?,?,?,?)",
+            (conv_id, user_id, title[:80], pid, now, now),
         )
         conn.commit()
         return conv_id
+
+
+# ─── Projects (mặt bàn riêng: nhóm hội thoại + bảng widget) ──────────────────
+
+def _project_owned(conn: sqlite3.Connection, project_id: str, user_id: str) -> bool:
+    row = conn.execute("SELECT 1 FROM projects WHERE id=? AND user_id=?", (project_id, user_id)).fetchone()
+    return row is not None
+
+
+def create_project(user_id: str, name: str) -> str:
+    with _lock:
+        conn = get_conn()
+        pid = uuid.uuid4().hex
+        now = int(time.time())
+        conn.execute(
+            "INSERT INTO projects(id, user_id, name, widgets, created_at, updated_at) VALUES(?,?,?,'[]',?,?)",
+            (pid, user_id, (name or "Project").strip()[:60], now, now),
+        )
+        conn.commit()
+        return pid
+
+
+def list_projects(user_id: str) -> list[dict]:
+    with _lock:
+        rows = get_conn().execute(
+            "SELECT id, name, updated_at FROM projects WHERE user_id=? ORDER BY updated_at DESC",
+            (user_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_project(project_id: str, user_id: str) -> dict | None:
+    with _lock:
+        row = get_conn().execute(
+            "SELECT * FROM projects WHERE id=? AND user_id=?", (project_id, user_id)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def rename_project(project_id: str, user_id: str, name: str) -> bool:
+    with _lock:
+        conn = get_conn()
+        cur = conn.execute("UPDATE projects SET name=?, updated_at=? WHERE id=? AND user_id=?",
+                           ((name or "Project").strip()[:60], int(time.time()), project_id, user_id))
+        conn.commit()
+        return cur.rowcount > 0
+
+
+def set_project_widgets(project_id: str, user_id: str, widgets_json: str) -> bool:
+    with _lock:
+        conn = get_conn()
+        cur = conn.execute("UPDATE projects SET widgets=?, updated_at=? WHERE id=? AND user_id=?",
+                           (widgets_json, int(time.time()), project_id, user_id))
+        conn.commit()
+        return cur.rowcount > 0
+
+
+def delete_project(project_id: str, user_id: str) -> bool:
+    """Xóa project; hội thoại của nó KHÔNG bị xóa, chỉ gỡ khỏi project (project_id = NULL)."""
+    with _lock:
+        conn = get_conn()
+        if not _project_owned(conn, project_id, user_id):
+            return False
+        conn.execute("UPDATE conversations SET project_id=NULL WHERE project_id=? AND user_id=?",
+                     (project_id, user_id))
+        conn.execute("DELETE FROM projects WHERE id=? AND user_id=?", (project_id, user_id))
+        conn.commit()
+        return True
+
+
+def assign_conversation_project(conv_id: str, user_id: str, project_id: str | None) -> bool:
+    with _lock:
+        conn = get_conn()
+        pid = project_id if (project_id and _project_owned(conn, project_id, user_id)) else None
+        cur = conn.execute("UPDATE conversations SET project_id=? WHERE id=? AND user_id=?",
+                           (pid, conv_id, user_id))
+        conn.commit()
+        return cur.rowcount > 0
 
 
 def get_conversation(conv_id: str, user_id: str) -> dict | None:
@@ -125,8 +214,19 @@ def get_conversation(conv_id: str, user_id: str) -> dict | None:
 def list_conversations(user_id: str, limit: int = 50) -> list[dict]:
     with _lock:
         rows = get_conn().execute(
-            "SELECT id, title, updated_at FROM conversations WHERE user_id=? ORDER BY updated_at DESC LIMIT ?",
+            "SELECT id, title, project_id, updated_at FROM conversations "
+            "WHERE user_id=? ORDER BY updated_at DESC LIMIT ?",
             (user_id, limit),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def list_project_conversations(project_id: str, user_id: str, limit: int = 100) -> list[dict]:
+    with _lock:
+        rows = get_conn().execute(
+            "SELECT id, title, updated_at FROM conversations WHERE user_id=? AND project_id=? "
+            "ORDER BY updated_at DESC LIMIT ?",
+            (user_id, project_id, limit),
         ).fetchall()
         return [dict(r) for r in rows]
 

@@ -18,6 +18,8 @@ class FileAttachment(BaseModel):
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=32000)
     conversation_id: Optional[str] = None
+    # Gán hội thoại mới vào một project (mặt bàn riêng). None → không thuộc project nào.
+    project_id: Optional[str] = None
     # Ảnh đính kèm (data URL base64) để LUMINA "xem" — tối đa 4 tấm cho 1 lượt.
     images: list[str] = Field(default_factory=list, max_length=4)
     # Video đính kèm (data URL base64, chỉ Gemini xem được) — tối đa 1 video/lượt.

@@ -14,6 +14,7 @@
     attachedVideo: null,  // { name, dataUrl } — chỉ 1 video/lượt
     attachedFiles: [],    // [{ name, dataUrl }] — PDF/Word/Excel/txt, tối đa 3
     forceMode: null,      // null | "image" | "research" | "subtitle" | "agent" — nút ép chế độ
+    projectId: null,      // project mà hội thoại mới sẽ gắn vào (mặt bàn đang mở); null = ngoài project
   };
 
   const PLAN_LABELS = { free: "Miễn phí", monthly: "Tháng", yearly: "Năm" };
@@ -384,6 +385,7 @@
     if (state.user.is_admin) $("admin-btn").classList.remove("hidden");
     renderPlanBox();
     loadConversations();
+    loadProjects();
   }
 
   function renderPlanBox() {
@@ -631,11 +633,155 @@
 
   function newChat() {
     state.conversationId = null;
+    state.projectId = null;              // "＋ Cuộc trò chuyện mới" = chat ngoài project
+    closeDashboard();
     $("topbar-title").textContent = "Cuộc trò chuyện mới";
     $("messages").innerHTML = "";
     $("messages").appendChild($("welcome") || buildWelcomePlaceholder());
     $("welcome")?.classList.remove("hidden");
     loadConversations();
+    loadProjects();
+  }
+
+  // ── Projects (mặt bàn riêng: nhóm hội thoại + bảng widget sống) ────────────
+  async function loadProjects() {
+    let data;
+    try { data = await api("/api/projects"); } catch { return; }
+    const list = $("project-list");
+    list.innerHTML = "";
+    for (const p of data.projects) {
+      const item = document.createElement("div");
+      item.className = "proj-item" + (p.id === state.projectId ? " active" : "");
+      item.innerHTML = `<span class="title"></span><button class="del" title="Xóa project">✕</button>`;
+      item.querySelector(".title").textContent = "◧ " + (p.name || "Project");
+      item.addEventListener("click", () => openDashboard(p.id));
+      item.querySelector(".del").addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm(`Xóa project "${p.name}"? (Các cuộc trò chuyện KHÔNG bị xóa, chỉ gỡ khỏi project.)`)) return;
+        await api(`/api/projects/${p.id}`, { method: "DELETE" });
+        if (state.projectId === p.id) newChat();
+        loadProjects();
+      });
+      list.appendChild(item);
+    }
+  }
+
+  async function createProject() {
+    const name = prompt("Tên project (mặt bàn) mới:", "Project của tôi");
+    if (name === null) return;
+    const proj = await api("/api/projects", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name.trim() || "Project mới" }),
+    });
+    await loadProjects();
+    openDashboard(proj.id);
+  }
+
+  function closeDashboard() {
+    $("dashboard").classList.add("hidden");
+    $("messages").classList.remove("hidden");
+    document.querySelector(".composer-wrap")?.classList.remove("hidden");
+  }
+
+  async function openDashboard(projectId) {
+    let data;
+    try { data = await api(`/api/projects/${projectId}`); }
+    catch { return; }
+    state.projectId = projectId;
+    const proj = data.project;
+    $("topbar-title").textContent = "◧ " + (proj.name || "Project");
+    // Chuyển sang chế độ xem Dashboard (ẩn khung chat).
+    $("messages").classList.add("hidden");
+    document.querySelector(".composer-wrap")?.classList.add("hidden");
+    const dash = $("dashboard");
+    dash.classList.remove("hidden");
+    dash.innerHTML = "";
+
+    // Header dashboard
+    const head = el("div", "dash-head");
+    const h = el("div", "dash-title", "◧ " + (proj.name || "Project"));
+    const actions = el("div", "dash-actions");
+    const bNew = el("button", "dash-btn primary", "＋ Trò chuyện trong project");
+    bNew.addEventListener("click", () => { state.projectId = projectId; closeDashboard(); newChatInProject(); });
+    const bAdd = el("button", "dash-btn", "＋ Thêm widget");
+    const bRename = el("button", "dash-btn", "✎ Đổi tên");
+    bRename.addEventListener("click", async () => {
+      const nn = prompt("Tên mới:", proj.name); if (nn === null) return;
+      await api(`/api/projects/${projectId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: nn }) });
+      loadProjects(); openDashboard(projectId);
+    });
+    actions.append(bNew, bAdd, bRename);
+    head.append(h, actions);
+    dash.appendChild(head);
+
+    // Lưới widget sống (mặt bàn)
+    const widgets = Array.isArray(proj.widgets) ? proj.widgets : [];
+    const grid = el("div", "dash-grid");
+    if (!widgets.length) grid.appendChild(el("div", "dash-empty", "Chưa có widget nào. Bấm “＋ Thêm widget” để ghim tin tức, đồng hồ, trạng thái… vào mặt bàn này."));
+    widgets.forEach((spec, idx) => {
+      const cell = el("div", "dash-cell");
+      const card = el("div", "lumina-widget");
+      card.setAttribute("data-spec", encodeURIComponent(JSON.stringify(spec)));
+      const rm = el("button", "dash-remove", "✕"); rm.title = "Gỡ widget";
+      rm.addEventListener("click", async () => {
+        const next = widgets.slice(); next.splice(idx, 1);
+        await saveWidgets(projectId, next); openDashboard(projectId);
+      });
+      cell.append(card, rm);
+      grid.appendChild(cell);
+    });
+    dash.appendChild(grid);
+    renderWidgetsIn(grid);
+
+    // Danh sách hội thoại trong project
+    const convWrap = el("div", "dash-convs");
+    convWrap.appendChild(el("div", "dash-subhead", "Trò chuyện trong project"));
+    if (!data.conversations.length) convWrap.appendChild(el("div", "dash-empty", "Chưa có cuộc trò chuyện nào."));
+    for (const c of data.conversations) {
+      const row = el("div", "dash-conv", c.title || "(không tiêu đề)");
+      row.addEventListener("click", () => { closeDashboard(); openConversation(c.id, c.title); });
+      convWrap.appendChild(row);
+    }
+    dash.appendChild(convWrap);
+
+    bAdd.addEventListener("click", () => openAddWidget(projectId, widgets));
+  }
+
+  function newChatInProject() {
+    state.conversationId = null;
+    $("topbar-title").textContent = "Trò chuyện mới trong project";
+    $("messages").innerHTML = "";
+    $("messages").appendChild($("welcome") || buildWelcomePlaceholder());
+    $("welcome")?.classList.remove("hidden");
+  }
+
+  async function saveWidgets(projectId, widgets) {
+    await api(`/api/projects/${projectId}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ widgets }),
+    });
+  }
+
+  function openAddWidget(projectId, widgets) {
+    const type = prompt("Loại widget: news | knowledge | status | clock", "news");
+    if (!type) return;
+    const t = type.trim().toLowerCase();
+    if (!["news", "knowledge", "status", "clock"].includes(t)) { alert("Loại không hợp lệ."); return; }
+    const spec = { type: t };
+    if (t === "news" || t === "knowledge") {
+      const q = prompt(t === "news" ? "Từ khoá tin tức cần theo dõi:" : "Chủ đề tri thức:", "");
+      if (q === null) return;
+      spec.query = q.trim(); spec.title = (t === "news" ? "Tin: " : "Tri thức: ") + spec.query;
+    } else if (t === "clock") {
+      const mode = prompt("clock (đồng hồ) hay countdown (đếm ngược)?", "clock");
+      if (mode && mode.trim() === "countdown") {
+        const target = prompt("Mốc đếm ngược (VD 2027-01-01T00:00:00):", "2027-01-01T00:00:00");
+        if (!target) return;
+        spec.mode = "countdown"; spec.target = target.trim(); spec.title = "Đếm ngược";
+      } else { spec.mode = "clock"; spec.title = "Đồng hồ"; }
+    } else { spec.title = "Trạng thái LUMINA"; }
+    const next = (widgets || []).concat([spec]);
+    saveWidgets(projectId, next).then(() => openDashboard(projectId));
   }
 
   function buildWelcomePlaceholder() {
@@ -646,6 +792,7 @@
   }
 
   async function openConversation(convId, title) {
+    closeDashboard();
     state.conversationId = convId;
     $("topbar-title").textContent = title || "";
     const data = await api(`/api/conversations/${convId}`);
@@ -786,6 +933,7 @@
         body: JSON.stringify({
           message: text,
           conversation_id: state.conversationId,
+          project_id: state.conversationId ? null : state.projectId,
           images: images,
           videos: video ? [video.dataUrl] : [],
           files: attachedFiles.map((f) => ({ name: f.name, data_url: f.dataUrl })),
@@ -1080,6 +1228,7 @@
   });
   $("send").addEventListener("click", sendMessage);
   $("new-chat").addEventListener("click", newChat);
+  $("new-project").addEventListener("click", createProject);
   $("toggle-sidebar").addEventListener("click", () => $("sidebar").classList.toggle("collapsed"));
   document.querySelectorAll(".suggestion").forEach((btn) =>
     btn.addEventListener("click", () => { $("input").value = btn.textContent; sendMessage(); })

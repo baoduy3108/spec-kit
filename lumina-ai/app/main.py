@@ -30,6 +30,7 @@ import json
 import logging
 import os
 import time
+from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -179,6 +180,79 @@ async def conversation_messages(conv_id: str, user: dict = Depends(auth.require_
 async def remove_conversation(conv_id: str, user: dict = Depends(auth.require_user)):
     if not db.delete_conversation(conv_id, user["id"]):
         raise HTTPException(status_code=404, detail="Không tìm thấy hội thoại")
+    return {"ok": True}
+
+
+class _ConvProjectBody(BaseModel):
+    project_id: Optional[str] = None
+
+
+@app.post("/api/conversations/{conv_id}/project")
+async def set_conversation_project(conv_id: str, body: _ConvProjectBody,
+                                   user: dict = Depends(auth.require_user)):
+    if not db.assign_conversation_project(conv_id, user["id"], body.project_id):
+        raise HTTPException(status_code=404, detail="Không tìm thấy hội thoại")
+    return {"ok": True}
+
+
+# ─── Projects (mặt bàn riêng: nhóm hội thoại + bảng widget sống) ──────────────
+
+class _ProjectCreate(BaseModel):
+    name: str = ""
+
+
+class _ProjectUpdate(BaseModel):
+    name: Optional[str] = None
+    widgets: Optional[list] = None       # danh sách spec widget của mặt bàn
+
+
+def _load_project(project_id: str, user_id: str) -> dict:
+    proj = db.get_project(project_id, user_id)
+    if not proj:
+        raise HTTPException(status_code=404, detail="Không tìm thấy project")
+    try:
+        proj["widgets"] = json.loads(proj.get("widgets") or "[]")
+    except (ValueError, TypeError):
+        proj["widgets"] = []
+    return proj
+
+
+@app.get("/api/projects")
+async def projects_list(user: dict = Depends(auth.require_user)):
+    return {"projects": db.list_projects(user["id"])}
+
+
+@app.post("/api/projects")
+async def project_create(body: _ProjectCreate, user: dict = Depends(auth.require_user)):
+    pid = db.create_project(user["id"], body.name or "Project mới")
+    return _load_project(pid, user["id"])
+
+
+@app.get("/api/projects/{project_id}")
+async def project_detail(project_id: str, user: dict = Depends(auth.require_user)):
+    proj = _load_project(project_id, user["id"])
+    return {"project": proj, "conversations": db.list_project_conversations(project_id, user["id"])}
+
+
+@app.put("/api/projects/{project_id}")
+async def project_update(project_id: str, body: _ProjectUpdate,
+                         user: dict = Depends(auth.require_user)):
+    if not db.get_project(project_id, user["id"]):
+        raise HTTPException(status_code=404, detail="Không tìm thấy project")
+    if body.name is not None:
+        db.rename_project(project_id, user["id"], body.name)
+    if body.widgets is not None:
+        # Chỉ giữ các widget hợp lệ (loại widget LUMINA hỗ trợ) để không lưu rác.
+        valid = {"news", "knowledge", "status", "clock"}
+        clean = [w for w in body.widgets if isinstance(w, dict) and w.get("type") in valid][:12]
+        db.set_project_widgets(project_id, user["id"], json.dumps(clean, ensure_ascii=False))
+    return _load_project(project_id, user["id"])
+
+
+@app.delete("/api/projects/{project_id}")
+async def project_delete(project_id: str, user: dict = Depends(auth.require_user)):
+    if not db.delete_project(project_id, user["id"]):
+        raise HTTPException(status_code=404, detail="Không tìm thấy project")
     return {"ok": True}
 
 
@@ -349,7 +423,7 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
         if not db.get_conversation(conv_id, user["id"]):
             raise HTTPException(status_code=404, detail="Không tìm thấy hội thoại")
     else:
-        conv_id = db.create_conversation(user["id"], body.message)
+        conv_id = db.create_conversation(user["id"], body.message, project_id=body.project_id)
 
     history = [
         {"role": m["role"], "content": m["content"]}

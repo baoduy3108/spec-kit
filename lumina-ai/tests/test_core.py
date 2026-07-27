@@ -863,6 +863,58 @@ def test_widget_endpoints_status_and_knowledge():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+def test_projects_crud_and_widgets_and_conv_assign():
+    """◧ Project: tạo/sửa/xóa + lưu widget mặt bàn + gán hội thoại; cô lập theo người dùng."""
+    from fastapi.testclient import TestClient
+    from app import auth, db
+    from app.main import app
+
+    uid = _new_user_id()
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "T", "picture": "", "is_admin": False}
+    try:
+        client = TestClient(app)
+        # tạo
+        r = client.post("/api/projects", json={"name": "Dự án A"})
+        assert r.status_code == 200
+        pid = r.json()["id"]
+        assert r.json()["name"] == "Dự án A" and r.json()["widgets"] == []
+        assert any(p["id"] == pid for p in client.get("/api/projects").json()["projects"])
+
+        # lưu widget (loại hợp lệ giữ lại, loại rác bị loại)
+        r = client.put(f"/api/projects/{pid}", json={"widgets": [
+            {"type": "news", "query": "giá vàng"}, {"type": "clock", "mode": "clock"},
+            {"type": "HACK", "query": "x"},
+        ]})
+        assert r.status_code == 200
+        widgets = r.json()["widgets"]
+        assert len(widgets) == 2 and {w["type"] for w in widgets} == {"news", "clock"}
+
+        # đổi tên
+        assert client.put(f"/api/projects/{pid}", json={"name": "Dự án B"}).json()["name"] == "Dự án B"
+
+        # gán hội thoại vào project rồi liệt kê
+        conv_id = db.create_conversation(uid, "Chat trong dự án", project_id=pid)
+        detail = client.get(f"/api/projects/{pid}").json()
+        assert any(c["id"] == conv_id for c in detail["conversations"])
+
+        # người dùng KHÁC không thấy / không sửa được project này
+        other = _new_user_id()
+        app.dependency_overrides[auth.require_user] = lambda: {"id": other, "email": f"{other}@x.com",
+                                                               "name": "O", "picture": "", "is_admin": False}
+        assert client.get(f"/api/projects/{pid}").status_code == 404
+        assert client.delete(f"/api/projects/{pid}").status_code == 404
+
+        # chủ sở hữu xóa được; hội thoại KHÔNG bị xóa, chỉ gỡ khỏi project
+        app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                               "name": "T", "picture": "", "is_admin": False}
+        assert client.delete(f"/api/projects/{pid}").status_code == 200
+        assert db.get_conversation(conv_id, uid) is not None
+        assert db.get_conversation(conv_id, uid).get("project_id") in (None, "")
+    finally:
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 def test_video_link_build_context_and_whisper_gate():
     from app import video_link, transcribe
 
