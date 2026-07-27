@@ -29,6 +29,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 import time
 from typing import Optional
 
@@ -287,6 +288,105 @@ async def agent_update(agent_id: str, body: _AgentUpdate, user: dict = Depends(a
 async def agent_delete(agent_id: str, user: dict = Depends(auth.require_user)):
     if not db.delete_agent(agent_id, user["id"]):
         raise HTTPException(status_code=404, detail="Không tìm thấy agent")
+    return {"ok": True}
+
+
+# ─── Goal Engine (giao mục tiêu: AI chia nhỏ + theo dõi tiến độ) ──────────────
+
+class _GoalCreate(BaseModel):
+    title: str = ""
+    target_date: str = ""
+
+
+class _GoalUpdate(BaseModel):
+    title: Optional[str] = None
+    target_date: Optional[str] = None
+    steps: Optional[list] = None       # [{"text":..., "done":bool}]
+
+
+def _load_goal(row: dict) -> dict:
+    try:
+        steps = json.loads(row.get("steps") or "[]")
+    except (ValueError, TypeError):
+        steps = []
+    steps = [{"text": str(s.get("text", "")).strip(), "done": bool(s.get("done"))}
+             for s in steps if isinstance(s, dict) and str(s.get("text", "")).strip()]
+    done = sum(1 for s in steps if s["done"])
+    progress = round(done / len(steps) * 100) if steps else 0
+    return {"id": row["id"], "title": row["title"], "target_date": row.get("target_date", ""),
+            "steps": steps, "progress": progress}
+
+
+async def _ai_goal_steps(title: str, target_date: str) -> list[str]:
+    """Dùng bộ não chia mục tiêu thành các bước cụ thể. Best-effort → [] nếu lỗi."""
+    prompt = (
+        "Chia mục tiêu sau thành 4-7 bước hành động CỤ THỂ, khả thi, ngắn gọn, theo thứ tự thực hiện. "
+        "CHỈ trả về một mảng JSON các chuỗi tiếng Việt (không giải thích, không đánh số).\n"
+        f"Mục tiêu: {title}" + (f" (hạn hoàn thành: {target_date})" if target_date else "")
+    )
+    route = decide_route(prompt, history_len=0, apex_allowed=False, force_mode=None)
+    use_premium = not orchestrator.has_free_engine()   # ưu tiên engine free cho việc nhẹ
+    text = ""
+    try:
+        async for ev in orchestrator.run([{"role": "user", "content": prompt}], route,
+                                         use_premium=use_premium):
+            if ev.get("type") == "text":
+                text += ev["text"]
+    except Exception as e:  # noqa: BLE001
+        logger.warning("AI chia mục tiêu lỗi: %s", e)
+        return []
+    m = re.search(r"\[.*\]", text, re.DOTALL)
+    if not m:
+        return []
+    try:
+        arr = json.loads(m.group(0))
+    except (ValueError, TypeError):
+        return []
+    return [str(s).strip() for s in arr if isinstance(s, str) and str(s).strip()][:10]
+
+
+@app.get("/api/goals")
+async def goals_list(user: dict = Depends(auth.require_user)):
+    return {"goals": [_load_goal(g) for g in db.list_goals(user["id"])]}
+
+
+@app.post("/api/goals")
+async def goal_create(body: _GoalCreate, user: dict = Depends(auth.require_user)):
+    if not body.title.strip():
+        raise HTTPException(status_code=400, detail="Mục tiêu cần có tiêu đề.")
+    gid = db.create_goal(user["id"], body.title, body.target_date)
+    return _load_goal(db.get_goal(gid, user["id"]))
+
+
+@app.put("/api/goals/{goal_id}")
+async def goal_update(goal_id: str, body: _GoalUpdate, user: dict = Depends(auth.require_user)):
+    steps_json = None
+    if body.steps is not None:
+        clean = [{"text": str(s.get("text", "")).strip()[:300], "done": bool(s.get("done"))}
+                 for s in body.steps if isinstance(s, dict) and str(s.get("text", "")).strip()][:30]
+        steps_json = json.dumps(clean, ensure_ascii=False)
+    if not db.update_goal(goal_id, user["id"], title=body.title,
+                          target_date=body.target_date, steps_json=steps_json):
+        raise HTTPException(status_code=404, detail="Không tìm thấy mục tiêu")
+    return _load_goal(db.get_goal(goal_id, user["id"]))
+
+
+@app.post("/api/goals/{goal_id}/breakdown")
+async def goal_breakdown(goal_id: str, user: dict = Depends(auth.require_user)):
+    goal = db.get_goal(goal_id, user["id"])
+    if not goal:
+        raise HTTPException(status_code=404, detail="Không tìm thấy mục tiêu")
+    steps = await _ai_goal_steps(goal["title"], goal.get("target_date", ""))
+    if steps:
+        db.update_goal(goal_id, user["id"],
+                       steps_json=json.dumps([{"text": s, "done": False} for s in steps], ensure_ascii=False))
+    return _load_goal(db.get_goal(goal_id, user["id"]))
+
+
+@app.delete("/api/goals/{goal_id}")
+async def goal_delete(goal_id: str, user: dict = Depends(auth.require_user)):
+    if not db.delete_goal(goal_id, user["id"]):
+        raise HTTPException(status_code=404, detail="Không tìm thấy mục tiêu")
     return {"ok": True}
 
 

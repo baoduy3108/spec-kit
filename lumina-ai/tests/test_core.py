@@ -943,6 +943,43 @@ def test_agents_crud_and_isolation():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+def test_goals_crud_and_progress():
+    """🎯 Goal Engine: tạo mục tiêu, đặt bước, tiến độ % tự tính, breakdown lùi an toàn khi không có engine."""
+    from fastapi.testclient import TestClient
+    from app import auth
+    from app.main import app
+
+    uid = _new_user_id()
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "T", "picture": "", "is_admin": False}
+    try:
+        client = TestClient(app)
+        assert client.post("/api/goals", json={"title": ""}).status_code == 400
+        r = client.post("/api/goals", json={"title": "Học IELTS 7.5", "target_date": "2027-06-01"})
+        assert r.status_code == 200
+        gid = r.json()["id"]
+        assert r.json()["progress"] == 0 and r.json()["steps"] == []
+
+        # đặt 4 bước, 1 done → progress 25%
+        steps = [{"text": f"Bước {i}", "done": i == 0} for i in range(4)]
+        pr = client.put(f"/api/goals/{gid}", json={"steps": steps}).json()
+        assert len(pr["steps"]) == 4 and pr["progress"] == 25
+
+        # tick hết → 100%
+        steps2 = [{"text": s["text"], "done": True} for s in pr["steps"]]
+        assert client.put(f"/api/goals/{gid}", json={"steps": steps2}).json()["progress"] == 100
+
+        # breakdown không có engine → không raise, giữ nguyên (best-effort)
+        assert client.post(f"/api/goals/{gid}/breakdown").status_code == 200
+
+        assert any(g["id"] == gid for g in client.get("/api/goals").json()["goals"])
+        assert client.delete(f"/api/goals/{gid}").status_code == 200
+        # người khác không xóa được (đã xóa) / mục tiêu lạ → 404
+        assert client.delete("/api/goals/khongco").status_code == 404
+    finally:
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 def test_agent_sessions_tagging_and_listing():
     """🤖 Agent như workspace: hội thoại gắn agent_id (kể cả 'forge') + liệt kê session của agent."""
     from fastapi.testclient import TestClient

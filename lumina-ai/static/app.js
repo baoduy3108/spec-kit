@@ -850,6 +850,88 @@
     }
   }
 
+  // ── Goal Engine (giao mục tiêu: AI chia nhỏ + theo dõi tiến độ) ────────────
+  async function openGoals() {
+    state.conversationId = null;
+    $("messages").classList.add("hidden");
+    document.querySelector(".composer-wrap")?.classList.add("hidden");
+    $("topbar-title").textContent = "🎯 Mục tiêu";
+    await renderGoals();
+  }
+
+  async function renderGoals() {
+    let goals = [];
+    try { goals = (await api("/api/goals")).goals || []; } catch {}
+    const dash = $("dashboard");
+    dash.classList.remove("hidden");
+    dash.innerHTML = "";
+
+    const head = el("div", "dash-head");
+    head.appendChild(el("div", "dash-title", "🎯 Mục tiêu"));
+    dash.appendChild(head);
+
+    // Form tạo mục tiêu
+    const form = el("div", "goal-create");
+    const inp = el("input", "goal-input"); inp.placeholder = "Mục tiêu mới (VD: Học IELTS 7.5)"; inp.maxLength = 200;
+    const date = el("input", "goal-date"); date.type = "date"; date.title = "Hạn (tuỳ chọn)";
+    const add = el("button", "dash-btn primary", "＋ Tạo");
+    const submit = async () => {
+      if (!inp.value.trim()) return;
+      await api("/api/goals", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: inp.value.trim(), target_date: date.value || "" }) });
+      inp.value = ""; date.value = ""; renderGoals();
+    };
+    add.addEventListener("click", submit);
+    inp.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+    form.append(inp, date, add);
+    dash.appendChild(form);
+
+    if (!goals.length) dash.appendChild(el("div", "dash-empty", "Chưa có mục tiêu nào. Tạo một mục tiêu rồi bấm “✨ AI chia nhỏ” để LUMINA lập kế hoạch."));
+    for (const g of goals) dash.appendChild(goalCard(g));
+  }
+
+  function goalCard(g) {
+    const card = el("div", "goal-card");
+    const top = el("div", "goal-top");
+    const title = el("div", "goal-title", g.title);
+    const meta = el("div", "goal-meta", (g.target_date ? "hạn " + g.target_date + " · " : "") + g.progress + "%");
+    top.append(title, meta);
+    card.appendChild(top);
+
+    const bar = el("div", "goal-bar"); const fill = el("div", "goal-fill"); fill.style.width = g.progress + "%";
+    bar.appendChild(fill); card.appendChild(bar);
+
+    const steps = el("div", "goal-steps");
+    g.steps.forEach((s, i) => {
+      const row = el("label", "goal-step" + (s.done ? " done" : ""));
+      const cb = el("input"); cb.type = "checkbox"; cb.checked = s.done;
+      cb.addEventListener("change", async () => {
+        const next = g.steps.map((x, j) => j === i ? { text: x.text, done: cb.checked } : x);
+        await api(`/api/goals/${g.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ steps: next }) });
+        renderGoals();
+      });
+      row.append(cb, el("span", "goal-step-text", s.text));
+      steps.appendChild(row);
+    });
+    card.appendChild(steps);
+
+    const actions = el("div", "goal-actions");
+    const ai = el("button", "dash-btn", g.steps.length ? "✨ Lập lại kế hoạch" : "✨ AI chia nhỏ");
+    ai.addEventListener("click", async () => {
+      ai.textContent = "⏳ Đang lập kế hoạch…"; ai.disabled = true;
+      try { await api(`/api/goals/${g.id}/breakdown`, { method: "POST" }); } catch {}
+      renderGoals();
+    });
+    const del = el("button", "dash-btn", "🗑 Xóa");
+    del.addEventListener("click", async () => {
+      if (!confirm(`Xóa mục tiêu "${g.title}"?`)) return;
+      await api(`/api/goals/${g.id}`, { method: "DELETE" }); renderGoals();
+    });
+    actions.append(ai, del);
+    card.appendChild(actions);
+    return card;
+  }
+
   async function createProject() {
     const name = prompt("Tên project (mặt bàn) mới:", "Project của tôi");
     if (name === null) return;
@@ -1425,6 +1507,7 @@
   $("new-chat").addEventListener("click", newChat);
   $("new-project").addEventListener("click", createProject);
   $("agent-off").addEventListener("click", () => { state.agentId = null; updateAgentBadge(); loadAgents(); });
+  $("goals-btn").addEventListener("click", openGoals);
   $("toggle-sidebar").addEventListener("click", () => $("sidebar").classList.toggle("collapsed"));
   document.querySelectorAll(".suggestion").forEach((btn) =>
     btn.addEventListener("click", () => { $("input").value = btn.textContent; sendMessage(); })

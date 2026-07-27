@@ -69,6 +69,15 @@ def _init_schema(conn: sqlite3.Connection):
         created_at INTEGER,
         updated_at INTEGER
     );
+    CREATE TABLE IF NOT EXISTS goals (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        target_date TEXT DEFAULT '',            -- 'YYYY-MM-DD' hoặc rỗng
+        steps TEXT NOT NULL DEFAULT '[]',        -- JSON: [{"text":..., "done":bool}]
+        created_at INTEGER,
+        updated_at INTEGER
+    );
     CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY,                  -- mã đơn ngắn, dùng làm nội dung chuyển khoản SePay
         user_id TEXT NOT NULL,
@@ -273,6 +282,64 @@ def delete_agent(agent_id: str, user_id: str) -> bool:
     with _lock:
         conn = get_conn()
         cur = conn.execute("DELETE FROM agents WHERE id=? AND user_id=?", (agent_id, user_id))
+        conn.commit()
+        return cur.rowcount > 0
+
+
+# ─── Goal Engine (giao mục tiêu: AI chia nhỏ + theo dõi tiến độ) ──────────────
+
+def create_goal(user_id: str, title: str, target_date: str = "") -> str:
+    with _lock:
+        conn = get_conn()
+        gid = uuid.uuid4().hex
+        now = int(time.time())
+        conn.execute(
+            "INSERT INTO goals(id, user_id, title, target_date, steps, created_at, updated_at) "
+            "VALUES(?,?,?,?,'[]',?,?)",
+            (gid, user_id, (title or "Mục tiêu").strip()[:200], (target_date or "").strip()[:20], now, now),
+        )
+        conn.commit()
+        return gid
+
+
+def list_goals(user_id: str) -> list[dict]:
+    with _lock:
+        rows = get_conn().execute(
+            "SELECT id, title, target_date, steps, updated_at FROM goals WHERE user_id=? ORDER BY updated_at DESC",
+            (user_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_goal(goal_id: str, user_id: str) -> dict | None:
+    with _lock:
+        row = get_conn().execute(
+            "SELECT * FROM goals WHERE id=? AND user_id=?", (goal_id, user_id)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def update_goal(goal_id: str, user_id: str, title: str | None = None,
+                target_date: str | None = None, steps_json: str | None = None) -> bool:
+    with _lock:
+        conn = get_conn()
+        if not conn.execute("SELECT 1 FROM goals WHERE id=? AND user_id=?", (goal_id, user_id)).fetchone():
+            return False
+        if title is not None:
+            conn.execute("UPDATE goals SET title=? WHERE id=?", ((title or "Mục tiêu").strip()[:200], goal_id))
+        if target_date is not None:
+            conn.execute("UPDATE goals SET target_date=? WHERE id=?", ((target_date or "").strip()[:20], goal_id))
+        if steps_json is not None:
+            conn.execute("UPDATE goals SET steps=? WHERE id=?", (steps_json, goal_id))
+        conn.execute("UPDATE goals SET updated_at=? WHERE id=?", (int(time.time()), goal_id))
+        conn.commit()
+        return True
+
+
+def delete_goal(goal_id: str, user_id: str) -> bool:
+    with _lock:
+        conn = get_conn()
+        cur = conn.execute("DELETE FROM goals WHERE id=? AND user_id=?", (goal_id, user_id))
         conn.commit()
         return cur.rowcount > 0
 

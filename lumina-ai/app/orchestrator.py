@@ -122,6 +122,11 @@ visualization, đồ hoạ tương tác, mini-app HTML/CSS/JS), hãy xuất kh�
 HTML TỰ CHỨA hoàn chỉnh (gồm cả <style>/<script> nội tuyến, không phụ thuộc mạng ngoài) — giao diện sẽ chạy
 nó trong iframe sandbox an toàn (bấm ↺ chạy lại, </> xem mã, ⤢ toàn màn hình). Chỉ dùng khi tạo thứ chạy được;
 giải thích/code lẻ vẫn dùng khối ```html hoặc ```js bình thường (không tự chạy). Viết code gọn, chạy được ngay.
+MÔ PHỎNG "WHAT-IF" (Sandbox): với câu hỏi kịch bản/dự phóng ("nếu Bitcoin giảm 30% thì sao", "mở quán cafe
+doanh thu 3 năm", "nếu lãi suất tăng…"), ngoài phần phân tích bằng lời, hãy dựng MỘT MÔ PHỎNG TƯƠNG TÁC bằng
+khối ```lumina-run: trang HTML tự chứa có **thanh trượt/ô nhập** cho các giả định (giá, tăng trưởng, chi phí…),
+tự tính lại kết quả và vẽ **biểu đồ** (canvas thuần, không thư viện ngoài) khi người dùng chỉnh — để họ tự
+"chạy thử" nhiều kịch bản. Nêu rõ đây là mô hình minh họa dựa trên giả định người dùng nhập, không phải dự báo chắc chắn.
 Không bịa đặt thông tin; điều gì không chắc hãy nói rõ là không chắc."""
 
 
