@@ -1202,9 +1202,26 @@ def test_skills_library_has_at_least_728():
     assert len(skills._SKILLS) >= 728
 
 
-def test_skills_library_has_at_least_732():
+def test_skills_library_has_at_least_739():
     from app import skills
-    assert len(skills._SKILLS) >= 732
+    assert len(skills._SKILLS) >= 739
+
+
+def test_skills_repos_and_systems_topics_match():
+    from app import skills
+    cases = {
+        "quản lý vòng đời kỹ năng agent và đánh giá chất lượng skill theo kết quả thực tế": "agent-skill-lifecycle-management",
+        "tối ưu skill như huấn luyện với validation gate cho prompt": "skill-optimization-as-training",
+        "dựng mô hình 3d thủ tục từ ảnh tham chiếu ra three.js": "image-to-procedural-3d",
+        "tái tạo cảnh 3d thời gian thực từ video point cloud": "streaming-3d-reconstruction",
+        "dịch pdf giữ nguyên bố cục và bảo toàn công thức code": "layout-preserving-document-translation",
+        "kiến trúc multiplayer server giữ trạng thái thẩm quyền chống gian lận": "server-authoritative-multiplayer",
+        "sinh id duy nhất phân tán snowflake sắp xếp được theo thời gian": "distributed-id-generation",
+    }
+    for text, expected_slug in cases.items():
+        skill = skills.find_matching_skill(text)
+        assert skill is not None, text
+        assert skill.slug == expected_slug, (text, skill.slug)
 
 
 def test_skills_crawl_and_pm_topics_match():
