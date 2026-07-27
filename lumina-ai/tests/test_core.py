@@ -1673,6 +1673,28 @@ def test_skills_distributed_reliability_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_771():
+    from app import skills
+    assert len(skills._SKILLS) >= 771
+
+
+def test_skills_lowlevel_batch_topics_match():
+    from app import skills
+    cases = {
+        "thuật toán không khoá lock-free và wait-free atomic compare-and-swap cas vấn đề aba con trỏ tái sử dụng tránh deadlock": "lock-free-and-wait-free-algorithms",
+        "false sharing hai biến khác nhau chung một cache line giao thức nhất quán cache mesi ping-pong giữa nhân padding căn chỉnh tách cache line": "false-sharing-and-cache-line-contention",
+        "đọc sao chép cập nhật rcu cho dữ liệu đọc nhiều ghi ít người đọc không khoá giai đoạn ân hạn grace period": "rcu-read-copy-update",
+        "dạng gán đơn tĩnh ssa mỗi biến gán đúng một lần phi-node hợp giá trị tại điểm nhập luồng điều khiển truyền hằng số": "ssa-form-and-compiler-optimization",
+        "cấp phát thanh ghi register allocation bằng tô màu đồ thị graph coloring biến sống cùng lúc giao nhau tràn thanh ghi spill khoảng sống live range": "register-allocation-and-graph-coloring",
+        "nội tuyến inlining thay lời gọi bằng thân hàm phân tích thoát escape analysis đối tượng không rời phạm vi không thoát cấp phát trên stack thay vì heap": "escape-analysis-and-inlining",
+        "lời gọi đuôi tail call và tối ưu tco chạy đệ quy trong không gian stack hằng số tiếp diễn continuation async await generator": "tail-calls-and-continuations",
+        "profile-guided optimization pgo tối ưu theo hồ sơ chạy thật thu thập profile nhánh nóng tách mã nóng lạnh hot cold splitting tối ưu trường hợp phổ biến common case": "profile-guided-optimization",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
