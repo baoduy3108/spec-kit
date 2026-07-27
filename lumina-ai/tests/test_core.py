@@ -1717,6 +1717,28 @@ def test_skills_net_stream_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_787():
+    from app import skills
+    assert len(skills._SKILLS) >= 787
+
+
+def test_skills_applied_crypto_batch_topics_match():
+    from app import skills
+    cases = {
+        "mã hoá có xác thực aead vừa bảo mật vừa toàn vẹn aes-gcm và chacha20-poly1305 encrypt-then-mac chế độ không xác thực aes-cbc nguy hiểm dữ liệu liên kết associated data": "authenticated-encryption-aead",
+        "hàm dẫn xuất khoá kdf biến một bí mật thành nhiều khoá hkdf trích rồi mở rộng extract-then-expand không dùng thẳng shared secret hay mật khẩu làm khoá tách miền domain separation": "key-derivation-functions",
+        "mã hoá phong bì envelope encryption khoá dữ liệu và khoá bọc data key dek mã hoá dữ liệu kek bọc lại dek khoá gốc không bao giờ rời kms hsm xoay khoá rẻ chỉ bọc lại dek": "envelope-encryption-and-kms",
+        "trao đổi khoá diffie-hellman ecdh trên kênh công khai bí mật chuyển tiếp forward secrecy khoá tạm ephemeral lộ khoá riêng dài hạn không giải mã được lưu lượng cũ pfs tls 1.3": "forward-secrecy-and-key-exchange",
+        "kênh phụ side-channel rò rỉ bí mật dù crypto đúng tấn công thời gian timing attack so sánh mac thoát sớm lập trình thời gian hằng số constant-time không rẽ nhánh theo bí mật": "constant-time-code-and-side-channels",
+        "quản lý nonce và iv số dùng một lần trong crypto đối xứng tái dùng nonce cùng khoá phá vỡ aes-gcm nghiêm trọng nonce ngẫu nhiên hay bộ đếm counter giới hạn 96-bit gcm": "nonce-and-iv-management",
+        "hạ tầng khoá công khai pki chuỗi tin cậy chứng chỉ tls ca gốc và ca trung gian ký chứng chỉ thu hồi chứng chỉ crl và ocsp minh bạch chứng chỉ certificate transparency log chỉ thêm": "certificate-transparency-and-pki",
+        "linh hoạt mật mã cryptographic agility đổi thuật toán không phải xây lại mọi thuật toán rồi cũng yếu md5 sha-1 ciphertext tự mô tả có mã định danh thuật toán và phiên bản chuyển đổi hậu lượng tử post-quantum": "cryptographic-agility-and-algorithm-migration",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
