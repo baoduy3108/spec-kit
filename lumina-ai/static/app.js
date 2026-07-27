@@ -126,7 +126,7 @@
   // Bộ não xuất khối ```lumina-widget chứa JSON {type,title,query,interval,...}.
   // Frontend render thành thẻ sống, poll endpoint LUMINA định kỳ. Thẻ tự dừng
   // khi bị gỡ khỏi DOM (chuyển hội thoại) → không rò rỉ timer.
-  const WIDGET_MIN_INTERVAL = { news: 30, knowledge: 30, status: 15, clock: 1 };
+  const WIDGET_MIN_INTERVAL = { news: 30, knowledge: 30, clock: 1 };
 
   function fmtClock(d) { return d.toLocaleTimeString("vi-VN"); }
 
@@ -167,12 +167,6 @@
         list.appendChild(row);
       }
       box.appendChild(list);
-    } else if (type === "status") {
-      const grid = el("div", "widget-stats");
-      grid.appendChild(statTile(data.plan, "Gói hiện tại"));
-      grid.appendChild(statTile(String(data.engines_ready), "Bộ não sẵn sàng"));
-      grid.appendChild(statTile(`${data.daily_used}/${data.daily_cap || "∞"}`, "Tin nhắn hôm nay"));
-      box.appendChild(grid);
     } else if (type === "clock") {
       const big = el("div", "widget-clock");
       big.textContent = spec.mode === "countdown" ? widgetCountdownText(spec) : fmtClock(new Date());
@@ -182,7 +176,6 @@
     }
   }
   function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-  function statTile(n, t) { const w = el("div", "widget-stat"); w.appendChild(el("div", "widget-stat-n", n)); w.appendChild(el("div", "widget-stat-t", t)); return w; }
 
   async function renderWidgetsIn(root) {
     const blocks = root.querySelectorAll(".lumina-widget:not([data-ready])");
@@ -197,7 +190,7 @@
 
       card.innerHTML = "";
       const head = el("div", "widget-head");
-      head.appendChild(el("span", "widget-title", spec.title || ({ news: "Tin tức trực tiếp", knowledge: "Tri thức đã học", status: "Trạng thái LUMINA", clock: spec.mode === "countdown" ? "Đếm ngược" : "Đồng hồ" }[type])));
+      head.appendChild(el("span", "widget-title", spec.title || ({ news: "Tin tức trực tiếp", knowledge: "Tri thức đã học", clock: spec.mode === "countdown" ? "Đếm ngược" : "Đồng hồ" }[type])));
       const meta = el("span", "widget-meta", "");
       const btnRefresh = el("button", "widget-btn", "⟳"); btnRefresh.title = "Làm mới";
       const btnPause = el("button", "widget-btn", "⏸"); btnPause.title = "Tạm dừng / chạy";
@@ -763,10 +756,10 @@
   }
 
   function openAddWidget(projectId, widgets) {
-    const type = prompt("Loại widget: news | knowledge | status | clock", "news");
+    const type = prompt("Loại widget: news | knowledge | clock", "news");
     if (!type) return;
     const t = type.trim().toLowerCase();
-    if (!["news", "knowledge", "status", "clock"].includes(t)) { alert("Loại không hợp lệ."); return; }
+    if (!["news", "knowledge", "clock"].includes(t)) { alert("Loại không hợp lệ."); return; }
     const spec = { type: t };
     if (t === "news" || t === "knowledge") {
       const q = prompt(t === "news" ? "Từ khoá tin tức cần theo dõi:" : "Chủ đề tri thức:", "");
@@ -779,7 +772,7 @@
         if (!target) return;
         spec.mode = "countdown"; spec.target = target.trim(); spec.title = "Đếm ngược";
       } else { spec.mode = "clock"; spec.title = "Đồng hồ"; }
-    } else { spec.title = "Trạng thái LUMINA"; }
+    }
     const next = (widgets || []).concat([spec]);
     saveWidgets(projectId, next).then(() => openDashboard(projectId));
   }

@@ -139,14 +139,6 @@ async def widget_data(wtype: str, q: str = "", user: dict = Depends(auth.require
         return {"type": "knowledge", "query": q, "updated_at": now,
                 "items": [{"topic": it.get("topic", ""), "summary": (it.get("summary") or "")[:240],
                            "url": it.get("url", "")} for it in items]}
-    if wtype == "status":
-        plan = db.get_effective_plan(user["id"])
-        premium_used, total_used = db.get_daily_usage(user["id"])
-        # An toàn: chỉ trả SỐ LƯỢNG bộ não sẵn sàng, không nêu tên nhà cung cấp.
-        return {"type": "status", "updated_at": now,
-                "plan": plan.get("label", "Miễn phí"),
-                "engines_ready": len(orchestrator.available_engines()),
-                "daily_used": total_used, "daily_cap": plan.get("total_daily_cap", 0)}
     raise HTTPException(status_code=404, detail="Loại widget không hỗ trợ")
 
 
@@ -243,7 +235,7 @@ async def project_update(project_id: str, body: _ProjectUpdate,
         db.rename_project(project_id, user["id"], body.name)
     if body.widgets is not None:
         # Chỉ giữ các widget hợp lệ (loại widget LUMINA hỗ trợ) để không lưu rác.
-        valid = {"news", "knowledge", "status", "clock"}
+        valid = {"news", "knowledge", "clock"}
         clean = [w for w in body.widgets if isinstance(w, dict) and w.get("type") in valid][:12]
         db.set_project_widgets(project_id, user["id"], json.dumps(clean, ensure_ascii=False))
     return _load_project(project_id, user["id"])
