@@ -220,6 +220,59 @@
     }
   }
 
+  // ── Live preview: chạy HTML/JS bộ não tạo ra, trong iframe sandbox an toàn ──
+  // sandbox KHÔNG có allow-same-origin → mã chạy ở origin riêng, không đọc được
+  // cookie/DOM của LUMINA. allow-scripts để JS/game chạy được.
+  function buildRunFrame(code) {
+    const frame = document.createElement("iframe");
+    frame.className = "run-frame";
+    frame.setAttribute("sandbox", "allow-scripts allow-pointer-lock allow-modals");
+    frame.setAttribute("loading", "lazy");
+    frame.srcdoc = code;
+    return frame;
+  }
+
+  function renderRunnablesIn(root) {
+    const blocks = root.querySelectorAll(".lumina-run:not([data-ready])");
+    for (const box of blocks) {
+      box.setAttribute("data-ready", "1");
+      const code = decodeURIComponent(box.getAttribute("data-code") || "");
+      box.innerHTML = "";
+      const head = el("div", "run-head");
+      head.appendChild(el("span", "run-title", "▶ Bản chạy thử (sandbox)"));
+      const ctrls = el("div", "run-ctrls");
+      const bReload = el("button", "run-btn", "↺"); bReload.title = "Chạy lại";
+      const bCode = el("button", "run-btn", "</>"); bCode.title = "Xem mã nguồn";
+      const bFull = el("button", "run-btn", "⤢"); bFull.title = "Toàn màn hình";
+      ctrls.append(bReload, bCode, bFull);
+      head.appendChild(ctrls);
+
+      const stage = el("div", "run-stage");
+      let frame = buildRunFrame(code);
+      stage.appendChild(frame);
+      const src = el("pre", "run-source hidden");
+      src.appendChild(el("code", null, code));
+
+      box.append(head, stage, src);
+
+      bReload.addEventListener("click", () => {
+        const nf = buildRunFrame(code);
+        frame.replaceWith(nf); frame = nf;
+      });
+      let showSource = false;
+      bCode.addEventListener("click", () => {
+        showSource = !showSource;
+        src.classList.toggle("hidden", !showSource);
+        stage.classList.toggle("hidden", showSource);
+        bCode.classList.toggle("active", showSource);
+      });
+      bFull.addEventListener("click", () => {
+        if (box.requestFullscreen) box.requestFullscreen();
+        else stage.classList.toggle("run-tall");
+      });
+    }
+  }
+
   function renderMarkdown(text) {
     const lines = escapeHtml(text).split("\n");
     const out = [];
@@ -237,6 +290,10 @@
         // Widget sống: giữ JSON gốc làm dự phòng, renderWidgetsIn() sẽ dựng thẻ.
         out.push(`<div class="lumina-widget" data-spec="${encodeURIComponent(unescapeHtml(body))}">` +
                  `<pre class="widget-fallback"><code>${body}</code></pre></div>`);
+      } else if (codeLang === "lumina-run") {
+        // Live preview: chạy HTML/JS trong iframe sandbox; giữ mã gốc làm dự phòng.
+        out.push(`<div class="lumina-run" data-code="${encodeURIComponent(unescapeHtml(body))}">` +
+                 `<pre class="run-fallback"><code>${body}</code></pre></div>`);
       } else {
         out.push(`<pre><code>${body}</code></pre>`);
       }
@@ -798,6 +855,7 @@
         el.content.innerHTML = renderMarkdown(m.content);
         renderMermaidIn(el.content);
         renderWidgetsIn(el.content);
+        renderRunnablesIn(el.content);
         try {
           const cits = JSON.parse(m.citations || "[]");
           if (cits.length) renderCitations(el.body, cits);
@@ -1039,6 +1097,7 @@
       el.content.classList.remove("cursor-blink");
       renderMermaidIn(el.content);   // render sơ đồ Mermaid khi đã có đủ nội dung
       renderWidgetsIn(el.content);   // dựng widget sống khi tin nhắn hoàn tất
+      renderRunnablesIn(el.content); // chạy bản preview HTML/JS (iframe sandbox)
       if (thinkingBox) {
         thinkingBox.classList.remove("active");
         thinkingBox.querySelector("summary").textContent =

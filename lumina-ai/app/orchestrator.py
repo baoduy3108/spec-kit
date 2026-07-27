@@ -117,6 +117,11 @@ thành thẻ sống tự làm mới. Chỉ dùng các "type" LUMINA thật sự 
   • "knowledge" → {"type":"knowledge","title":"…","query":"chủ đề","interval":60}  (tri thức LUMINA đã học)
   • "clock"     → {"type":"clock","mode":"clock"}  hoặc  {"type":"clock","mode":"countdown","target":"2026-12-31T23:59:59","title":"Đếm ngược"}
 Chỉ tạo widget khi người dùng thực sự muốn thứ cập nhật liên tục; câu hỏi thường thì trả lời bình thường.
+BẢN CHẠY THỬ (live preview): khi người dùng muốn một thứ CHẠY ĐƯỢC NGAY (game 2D, demo web, canvas,
+visualization, đồ hoạ tương tác, mini-app HTML/CSS/JS), hãy xuất khối code ```lumina-run chứa MỘT trang
+HTML TỰ CHỨA hoàn chỉnh (gồm cả <style>/<script> nội tuyến, không phụ thuộc mạng ngoài) — giao diện sẽ chạy
+nó trong iframe sandbox an toàn (bấm ↺ chạy lại, </> xem mã, ⤢ toàn màn hình). Chỉ dùng khi tạo thứ chạy được;
+giải thích/code lẻ vẫn dùng khối ```html hoặc ```js bình thường (không tự chạy). Viết code gọn, chạy được ngay.
 Không bịa đặt thông tin; điều gì không chắc hãy nói rõ là không chắc."""
 
 
