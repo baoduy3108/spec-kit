@@ -943,6 +943,31 @@ def test_agents_crud_and_isolation():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+def test_project_memory_and_feedback():
+    """📌 Trí nhớ dự án lưu/đọc được; 👍/👎 feedback ghi nhận + tổng hợp."""
+    from fastapi.testclient import TestClient
+    from app import auth
+    from app.main import app
+
+    uid = _new_user_id()
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "T", "picture": "", "is_admin": False}
+    try:
+        client = TestClient(app)
+        pid = client.post("/api/projects", json={"name": "Dự án X"}).json()["id"]
+        mem = "Kiến trúc: FastAPI + SQLite. Đã bỏ Stripe vì chưa có merchant."
+        r = client.put(f"/api/projects/{pid}", json={"memory": mem})
+        assert r.status_code == 200 and r.json()["memory"] == mem
+        assert client.get(f"/api/projects/{pid}").json()["project"]["memory"] == mem
+
+        # feedback
+        assert client.post("/api/feedback", json={"rating": 1}).json()["ok"] is True
+        s = client.post("/api/feedback", json={"rating": -1, "note": "hơi dài"}).json()["summary"]
+        assert s["up"] == 1 and s["down"] == 1 and s["total"] == 2
+    finally:
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 def test_goals_crud_and_progress():
     """🎯 Goal Engine: tạo mục tiêu, đặt bước, tiến độ % tự tính, breakdown lùi an toàn khi không có engine."""
     from fastapi.testclient import TestClient

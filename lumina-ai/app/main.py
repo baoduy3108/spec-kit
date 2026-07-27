@@ -197,6 +197,7 @@ class _ProjectCreate(BaseModel):
 class _ProjectUpdate(BaseModel):
     name: Optional[str] = None
     widgets: Optional[list] = None       # danh sách spec widget của mặt bàn
+    memory: Optional[str] = None         # trí nhớ dự án (kiến trúc/quyết định/file/lý do bỏ)
 
 
 def _load_project(project_id: str, user_id: str) -> dict:
@@ -239,6 +240,8 @@ async def project_update(project_id: str, body: _ProjectUpdate,
         valid = {"news", "knowledge", "clock"}
         clean = [w for w in body.widgets if isinstance(w, dict) and w.get("type") in valid][:12]
         db.set_project_widgets(project_id, user["id"], json.dumps(clean, ensure_ascii=False))
+    if body.memory is not None:
+        db.set_project_memory(project_id, user["id"], body.memory)
     return _load_project(project_id, user["id"])
 
 
@@ -388,6 +391,19 @@ async def goal_delete(goal_id: str, user: dict = Depends(auth.require_user)):
     if not db.delete_goal(goal_id, user["id"]):
         raise HTTPException(status_code=404, detail="Không tìm thấy mục tiêu")
     return {"ok": True}
+
+
+class _FeedbackBody(BaseModel):
+    conversation_id: Optional[str] = None
+    rating: int = 1                      # 1 hữu ích | -1 chưa tốt
+    note: str = ""
+
+
+@app.post("/api/feedback")
+async def submit_feedback(body: _FeedbackBody, user: dict = Depends(auth.require_user)):
+    """👍/👎 cho câu trả lời — LUMINA đo độ hữu dụng theo hành vi thật để tiến hoá."""
+    db.add_feedback(user["id"], body.conversation_id, body.rating, body.note)
+    return {"ok": True, "summary": db.feedback_summary(user["id"])}
 
 
 @app.get("/api/agents/{agent_id}/conversations")
@@ -568,12 +584,25 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
     # Hội thoại: tạo mới hoặc nối tiếp
     is_new_conversation = not body.conversation_id
     conv_id = body.conversation_id
+    existing_conv = None
     if conv_id:
-        if not db.get_conversation(conv_id, user["id"]):
+        existing_conv = db.get_conversation(conv_id, user["id"])
+        if not existing_conv:
             raise HTTPException(status_code=404, detail="Không tìm thấy hội thoại")
     else:
         conv_id = db.create_conversation(user["id"], body.message,
                                          project_id=body.project_id, agent_id=body.agent_id)
+
+    # 📌 Trí nhớ dự án: nếu hội thoại thuộc một project, chèn "bộ nhớ dự án" (kiến trúc/
+    # quyết định/file/lý do bỏ) vào ngữ cảnh — TÁCH biệt với chuyện cá nhân của người dùng.
+    proj_id = (existing_conv or {}).get("project_id") or body.project_id
+    if proj_id:
+        proj = db.get_project(proj_id, user["id"])
+        if proj and (proj.get("memory") or "").strip():
+            agent_extra = (agent_extra + "\n\n[TRÍ NHỚ DỰ ÁN — bối cảnh cố định của dự án này "
+                           "(kiến trúc, quyết định đã chốt, file quan trọng, lý do đã bỏ phương án cũ); "
+                           "ưu tiên nhất quán với nó, KHÔNG lẫn với dự án/chuyện khác:\n"
+                           + proj["memory"].strip()[:6000] + "\n]").strip()
 
     history = [
         {"role": m["role"], "content": m["content"]}

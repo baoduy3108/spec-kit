@@ -880,3 +880,36 @@ a.widget-link:hover { color: var(--accent-2); text-decoration: underline; }
 .goal-step input { margin-top: 3px; accent-color: var(--accent); }
 .goal-step.done .goal-step-text { text-decoration: line-through; color: var(--text-dim); }
 .goal-actions { display: flex; gap: 8px; }
+
+/* ── Bản đồ quyết định ─────────────────────────────────── */
+.lumina-decision { margin: 14px 0; border-radius: 14px; border: 1px solid var(--border); background: var(--bg-2); overflow: hidden; }
+.decision-fallback { margin: 0; padding: 12px; }
+.lumina-decision[data-ready] .decision-fallback { display: none; }
+.dec-title { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border); background: rgba(139,124,248,.07); font-weight: 700; font-size: 14.5px; }
+.dec-tree { padding: 8px 10px 12px; }
+.dec-opt { border-left: 2px solid var(--border); margin: 4px 0 4px 4px; padding-left: 8px; }
+.dec-head { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: var(--bg-3); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; color: var(--text); cursor: pointer; font-size: 14px; font-weight: 600; }
+.dec-head:hover { border-color: var(--accent); }
+.dec-caret { color: var(--accent-2); width: 12px; display: inline-block; }
+.dec-body { padding: 8px 4px 4px 22px; }
+.dec-conseq { font-size: 13.5px; color: var(--text); margin-bottom: 8px; }
+.dec-sub { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-dim); margin-top: 8px; }
+.dec-pros, .dec-cons { list-style: none; margin: 3px 0; font-size: 13px; }
+.dec-pros li::before { content: "＋ "; color: var(--good, #57d9a3); }
+.dec-cons li::before { content: "－ "; color: #ff8a80; }
+.dec-best { font-size: 13px; color: var(--accent-2); }
+.dec-children { margin-top: 8px; }
+
+/* ── Feedback độ hữu dụng ──────────────────────────────── */
+.fb-bar { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.fb-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 3px 9px; cursor: pointer; font-size: 13px; opacity: .6; }
+.fb-btn:hover { opacity: 1; border-color: var(--accent); }
+.fb-btn.chosen { opacity: 1; border-color: var(--accent-2); background: rgba(79,195,247,.12); }
+.fb-btn:disabled { cursor: default; }
+.fb-thanks { font-size: 12px; color: var(--text-dim); }
+
+/* ── Trí nhớ dự án (editor trong dashboard) ────────────── */
+.dash-mem { margin-top: 24px; }
+.dash-mem-hint { font-size: 12.5px; color: var(--text-dim); margin: -4px 0 8px; max-width: 70ch; }
+.dash-mem-input { width: 100%; background: var(--bg-3); border: 1px solid var(--border); border-radius: 10px; color: var(--text); padding: 10px 12px; font-family: inherit; font-size: 13.5px; line-height: 1.6; resize: vertical; margin-bottom: 8px; }
+.dash-mem-input:focus { outline: none; border-color: var(--accent); }

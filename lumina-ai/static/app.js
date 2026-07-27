@@ -331,6 +331,78 @@
     }
   }
 
+  // ── Bản đồ quyết định (cây lựa chọn → hậu quả, bấm mở từng nhánh) ──────────
+  function decisionOption(opt, depth) {
+    const wrap = el("div", "dec-opt");
+    const head = el("button", "dec-head");
+    const hasDetail = opt.consequence || (opt.pros && opt.pros.length) || (opt.cons && opt.cons.length) || opt.best_for || (opt.children && opt.children.length);
+    head.innerHTML = `<span class="dec-caret">${hasDetail ? "▸" : "•"}</span>`;
+    head.appendChild(el("span", "dec-label", opt.label || "Lựa chọn"));
+    wrap.appendChild(head);
+    const body = el("div", "dec-body hidden");
+    if (opt.consequence) body.appendChild(el("div", "dec-conseq", opt.consequence));
+    if (opt.pros && opt.pros.length) {
+      const ul = el("ul", "dec-pros");
+      opt.pros.forEach((p) => ul.appendChild(el("li", null, p)));
+      body.appendChild(el("div", "dec-sub", "Được")); body.appendChild(ul);
+    }
+    if (opt.cons && opt.cons.length) {
+      const ul = el("ul", "dec-cons");
+      opt.cons.forEach((c) => ul.appendChild(el("li", null, c)));
+      body.appendChild(el("div", "dec-sub", "Mất / rủi ro")); body.appendChild(ul);
+    }
+    if (opt.best_for) { body.appendChild(el("div", "dec-sub", "Tối ưu cho")); body.appendChild(el("div", "dec-best", opt.best_for)); }
+    if (opt.children && opt.children.length && depth < 5) {
+      const kids = el("div", "dec-children");
+      opt.children.forEach((c) => kids.appendChild(decisionOption(c, depth + 1)));
+      body.appendChild(kids);
+    }
+    wrap.appendChild(body);
+    if (hasDetail) head.addEventListener("click", () => {
+      const open = body.classList.toggle("hidden") === false;
+      head.querySelector(".dec-caret").textContent = open ? "▾" : "▸";
+    });
+    return wrap;
+  }
+
+  // ── Feedback độ hữu dụng: 👍/👎 dưới mỗi câu trả lời ──────────────────────
+  function addFeedbackBar(bodyEl, convId) {
+    if (!bodyEl || bodyEl.querySelector(".fb-bar")) return;
+    const bar = el("div", "fb-bar");
+    const up = el("button", "fb-btn", "👍");  up.title = "Hữu ích";
+    const down = el("button", "fb-btn", "👎"); down.title = "Chưa tốt";
+    const thanks = el("span", "fb-thanks", "");
+    async function send(rating, note) {
+      up.disabled = down.disabled = true;
+      (rating > 0 ? up : down).classList.add("chosen");
+      try { await api("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversation_id: convId || state.conversationId || null, rating, note: note || "" }) }); } catch {}
+      thanks.textContent = "Cảm ơn phản hồi!";
+    }
+    up.addEventListener("click", () => send(1, ""));
+    down.addEventListener("click", () => { const n = prompt("Phần nào chưa tốt / gây rối? (tuỳ chọn)", ""); send(-1, n === null ? "" : n); });
+    bar.append(up, down, thanks);
+    bodyEl.appendChild(bar);
+  }
+
+  function renderDecisionsIn(root) {
+    for (const box of root.querySelectorAll(".lumina-decision:not([data-ready])")) {
+      box.setAttribute("data-ready", "1");
+      let spec;
+      try { spec = JSON.parse(decodeURIComponent(box.getAttribute("data-spec") || "")); }
+      catch { box.setAttribute("data-error", "1"); continue; }
+      const opts = Array.isArray(spec.options) ? spec.options : [];
+      if (!opts.length) { box.setAttribute("data-error", "1"); continue; }
+      box.innerHTML = "";
+      const head = el("div", "dec-title");
+      head.append(el("span", "dec-icon", "🗺"), el("span", null, spec.question || "Bản đồ quyết định"));
+      box.appendChild(head);
+      const tree = el("div", "dec-tree");
+      opts.forEach((o) => tree.appendChild(decisionOption(o, 0)));
+      box.appendChild(tree);
+    }
+  }
+
   function renderMarkdown(text) {
     const lines = escapeHtml(text).split("\n");
     const out = [];
@@ -352,6 +424,10 @@
         // Live preview: chạy HTML/JS trong iframe sandbox; giữ mã gốc làm dự phòng.
         out.push(`<div class="lumina-run" data-code="${encodeURIComponent(unescapeHtml(body))}">` +
                  `<pre class="run-fallback"><code>${body}</code></pre></div>`);
+      } else if (codeLang === "lumina-decision") {
+        // Bản đồ quyết định: cây lựa chọn → hậu quả, bấm mở từng nhánh.
+        out.push(`<div class="lumina-decision" data-spec="${encodeURIComponent(unescapeHtml(body))}">` +
+                 `<pre class="decision-fallback"><code>${body}</code></pre></div>`);
       } else {
         out.push(`<pre><code>${body}</code></pre>`);
       }
@@ -999,6 +1075,21 @@
     dash.appendChild(grid);
     renderWidgetsIn(grid);
 
+    // 📌 Trí nhớ dự án (tách khỏi chuyện cá nhân) — mọi chat trong project dùng bối cảnh này
+    const memWrap = el("div", "dash-mem");
+    memWrap.appendChild(el("div", "dash-subhead", "📌 Trí nhớ dự án"));
+    memWrap.appendChild(el("div", "dash-mem-hint", "Kiến trúc, quyết định đã chốt, file quan trọng, lý do đã bỏ phương án cũ. LUMINA sẽ nhớ đúng dự án này khi bạn chat trong nó."));
+    const ta = el("textarea", "dash-mem-input"); ta.rows = 5; ta.value = proj.memory || "";
+    ta.placeholder = "VD:\n- Kiến trúc: FastAPI + SQLite, frontend thuần JS\n- Đã chốt: dùng SePay cho thanh toán VN\n- Đã bỏ: Stripe (chưa có merchant) — vì vậy đừng đề xuất lại";
+    const saveMem = el("button", "dash-btn", "💾 Lưu trí nhớ");
+    saveMem.addEventListener("click", async () => {
+      saveMem.textContent = "✓ Đã lưu";
+      await api(`/api/projects/${projectId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ memory: ta.value }) });
+      setTimeout(() => { saveMem.textContent = "💾 Lưu trí nhớ"; }, 1200);
+    });
+    memWrap.append(ta, saveMem);
+    dash.appendChild(memWrap);
+
     // Danh sách hội thoại trong project
     const convWrap = el("div", "dash-convs");
     convWrap.appendChild(el("div", "dash-subhead", "Trò chuyện trong project"));
@@ -1076,6 +1167,8 @@
         renderMermaidIn(el.content);
         renderWidgetsIn(el.content);
         renderRunnablesIn(el.content);
+        renderDecisionsIn(el.content);
+        addFeedbackBar(el.body, convId);
         try {
           const cits = JSON.parse(m.citations || "[]");
           if (cits.length) renderCitations(el.body, cits);
@@ -1323,6 +1416,8 @@
       renderMermaidIn(el.content);   // render sơ đồ Mermaid khi đã có đủ nội dung
       renderWidgetsIn(el.content);   // dựng widget sống khi tin nhắn hoàn tất
       renderRunnablesIn(el.content); // chạy bản preview HTML/JS (iframe sandbox)
+      renderDecisionsIn(el.content); // bản đồ quyết định (cây lựa chọn)
+      if (answer.trim()) addFeedbackBar(el.body, state.conversationId);  // 👍/👎 độ hữu dụng
       if (thinkingBox) {
         thinkingBox.classList.remove("active");
         thinkingBox.querySelector("summary").textContent =

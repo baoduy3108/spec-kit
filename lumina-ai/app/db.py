@@ -78,6 +78,14 @@ def _init_schema(conn: sqlite3.Connection):
         created_at INTEGER,
         updated_at INTEGER
     );
+    CREATE TABLE IF NOT EXISTS feedback (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        conversation_id TEXT,
+        rating INTEGER NOT NULL,                 -- 1 (hữu ích) | -1 (chưa tốt)
+        note TEXT DEFAULT '',
+        created_at INTEGER
+    );
     CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY,                  -- mã đơn ngắn, dùng làm nội dung chuyển khoản SePay
         user_id TEXT NOT NULL,
@@ -110,6 +118,7 @@ def _init_schema(conn: sqlite3.Connection):
         "ALTER TABLE usage_daily ADD COLUMN total_count INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE conversations ADD COLUMN project_id TEXT",   # gán hội thoại vào project (NULL = ngoài project)
         "ALTER TABLE conversations ADD COLUMN agent_id TEXT",     # gán hội thoại vào 1 agent (workspace/session của agent)
+        "ALTER TABLE projects ADD COLUMN memory TEXT NOT NULL DEFAULT ''",  # trí nhớ dự án (kiến trúc/quyết định/file/lý do bỏ)
     ):
         try:
             conn.execute(stmt)
@@ -209,6 +218,15 @@ def set_project_widgets(project_id: str, user_id: str, widgets_json: str) -> boo
         conn = get_conn()
         cur = conn.execute("UPDATE projects SET widgets=?, updated_at=? WHERE id=? AND user_id=?",
                            (widgets_json, int(time.time()), project_id, user_id))
+        conn.commit()
+        return cur.rowcount > 0
+
+
+def set_project_memory(project_id: str, user_id: str, memory: str) -> bool:
+    with _lock:
+        conn = get_conn()
+        cur = conn.execute("UPDATE projects SET memory=?, updated_at=? WHERE id=? AND user_id=?",
+                           ((memory or "").strip()[:6000], int(time.time()), project_id, user_id))
         conn.commit()
         return cur.rowcount > 0
 
@@ -342,6 +360,29 @@ def delete_goal(goal_id: str, user_id: str) -> bool:
         cur = conn.execute("DELETE FROM goals WHERE id=? AND user_id=?", (goal_id, user_id))
         conn.commit()
         return cur.rowcount > 0
+
+
+# ─── Feedback (AI tự đo độ hữu dụng theo hành vi thật) ────────────────────────
+
+def add_feedback(user_id: str, conversation_id: str | None, rating: int, note: str = "") -> None:
+    with _lock:
+        conn = get_conn()
+        conn.execute(
+            "INSERT INTO feedback(user_id, conversation_id, rating, note, created_at) VALUES(?,?,?,?,?)",
+            (user_id, conversation_id, 1 if rating >= 0 else -1, (note or "").strip()[:500], int(time.time())),
+        )
+        conn.commit()
+
+
+def feedback_summary(user_id: str) -> dict:
+    """Tổng hợp phản hồi của người dùng — dữ liệu để app tiến hoá theo hành vi thật."""
+    with _lock:
+        rows = get_conn().execute(
+            "SELECT rating, COUNT(*) FROM feedback WHERE user_id=? GROUP BY rating", (user_id,)
+        ).fetchall()
+    up = next((c for r, c in rows if r == 1), 0)
+    down = next((c for r, c in rows if r == -1), 0)
+    return {"up": up, "down": down, "total": up + down}
 
 
 def assign_conversation_project(conv_id: str, user_id: str, project_id: str | None) -> bool:
