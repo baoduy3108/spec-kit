@@ -1739,6 +1739,28 @@ def test_skills_applied_crypto_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_795():
+    from app import skills
+    assert len(skills._SKILLS) >= 795
+
+
+def test_skills_ml_systems_batch_topics_match():
+    from app import skills
+    cases = {
+        "gộp lô liên tục continuous batching phục vụ llm thông lượng cao batch tĩnh phải chờ chuỗi dài nhất lãng phí gpu lập lịch theo từng bước iteration-level thêm và loại chuỗi mỗi bước decode": "continuous-batching-for-llm-serving",
+        "paged attention quản lý kv cache như bộ nhớ ảo hệ điều hành kv cache là nút cổ chai bộ nhớ khối trang cố định thay vì bộ đệm liền mạch chia sẻ tiền tố prefix sharing": "paged-attention-and-kv-cache-memory",
+        "flash attention chú ý nhận biết io nhanh và tiết kiệm bộ nhớ không tạo ma trận chú ý n bình phương đầy đủ chia ô tiling và softmax trực tuyến online tính lại recomputation": "flash-attention",
+        "song song hoá mô hình quá lớn cho một gpu song song dữ liệu data parallel chia batch song song tensor chia ma trận trong một tầng song song đường ống pipeline phân mảnh trạng thái fsdp zero": "tensor-and-pipeline-parallelism",
+        "bộ nhớ huấn luyện bị chi phối bởi activation không phải trọng số checkpointing gradient đánh đổi tính toán lấy bộ nhớ chỉ lưu vài activation rồi tính lại phần còn lại khi backprop": "gradient-checkpointing-and-activation-memory",
+        "huấn luyện độ chính xác hỗn hợp mixed precision nhanh gấp đôi nửa bộ nhớ fp16 tràn dưới gradient cần nhân tỉ lệ loss scaling bf16 dễ hơn cùng dải mũ với fp32": "mixed-precision-training",
+        "mở rộng độ dài ngữ cảnh llm bằng điều chỉnh rope rotary position mô hình hỏng ngoài độ dài đã huấn luyện nội suy vị trí position interpolation ntk-aware và yarn": "context-length-extension-and-rope-scaling",
+        "hai pha suy luận llm prefill nghẽn tính toán và decode nghẽn bộ nhớ tách riêng disaggregation prefill và decode lên tài nguyên khác nhau thời gian tới token đầu ttft chunked prefill": "prefill-and-decode-disaggregation",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
