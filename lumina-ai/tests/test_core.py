@@ -1805,6 +1805,28 @@ def test_skills_db_engine_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_819():
+    from app import skills
+    assert len(skills._SKILLS) >= 819
+
+
+def test_skills_compression_search_batch_topics_match():
+    from app import skills
+    cases = {
+        "mã hoá entropy gán mã ngắn cho ký hiệu hay gặp mã dài cho hiếm mã huffman xây cây theo tần suất entropy shannon là giới hạn nén lý thuyết mã tiền tố prefix-free": "huffman-and-entropy-coding",
+        "nén từ điển lz77 lz78 thay chuỗi lặp bằng tham chiếu ngược cửa sổ trượt sliding window tham chiếu khoảng cách và độ dài distance length từ điển nạp sẵn preset dictionary": "lz77-and-dictionary-compression",
+        "mã hoá số học arithmetic coding mã hoá bằng số bit phân số vượt giới hạn số bit nguyên của huffman biểu diễn cả thông điệp thành một số ans asymmetric numeral systems zstd": "arithmetic-and-range-coding",
+        "mã hoá độ dài chạy run-length thay chuỗi giá trị lặp bằng giá trị và số đếm mã hoá delta lưu hiệu giữa các giá trị liên tiếp delta cộng zigzag cho số nguyên và dấu thời gian": "run-length-and-delta-encoding",
+        "chỉ mục ngược inverted index ánh xạ mỗi từ tới danh sách tài liệu chứa nó danh sách postings truy vấn boolean và cụm từ bằng giao danh sách postings like phần trăm không mở rộng": "inverted-index-and-full-text-search",
+        "xếp hạng liên quan tf-idf và bm25 cho tìm kiếm tần suất từ term frequency tần suất tài liệu nghịch idf từ hiếm quan trọng hơn bm25 bão hoà tf và chuẩn hoá độ dài tài liệu": "tf-idf-and-bm25-ranking",
+        "nén danh sách postings chỉ mục tìm kiếm postings sắp xếp theo doc id lưu khoảng cách gap delta bit-packing variable-byte frame-of-reference pfordelta con trỏ nhảy skip pointer nén chỉ mục tăng tốc truy vấn nhờ ít i/o": "posting-list-compression",
+        "phân tích văn bản tokenization tách token và stemming cho tìm kiếm chuẩn hoá lowercase bỏ dấu accent phân tích lúc lập chỉ mục và lúc truy vấn phải khớp tách từ ngôn ngữ cjk": "text-analysis-tokenization-and-stemming",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
