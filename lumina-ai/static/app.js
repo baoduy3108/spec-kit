@@ -791,7 +791,6 @@
     const forge = document.createElement("div");
     forge.className = "proj-item builtin" + (state.agentId === "forge" ? " active" : "");
     forge.innerHTML = `<span class="title">⚙️ Lumina Forge</span>`;
-    forge.title = "Kỹ sư cấp cao + tự áp dụng toàn bộ kỹ năng nội bộ";
     forge.addEventListener("click", () => toggleAgent({ id: "forge", name: "Lumina Forge", emoji: "⚙️" }));
     list.appendChild(forge);
     for (const a of data.agents) {
@@ -835,9 +834,7 @@
     const bNew = el("button", "dash-btn primary", "＋ Session mới");
     bNew.addEventListener("click", () => newSessionInAgent(a));
     actions.appendChild(bNew);
-    if (a.id === "forge")
-      head.appendChild(actions), dash.appendChild(el("div", "dash-sub", "Kỹ sư cấp cao + tự áp dụng toàn bộ 741 kỹ năng. Mỗi session là một cuộc trò chuyện riêng của agent này."));
-    else { head.appendChild(actions); }
+    head.appendChild(actions);
     dash.insertBefore(head, dash.firstChild);
 
     const convWrap = el("div", "dash-convs");
@@ -868,7 +865,7 @@
     if (!state.agentId) { bar.classList.add("hidden"); return; }
     if (state.agentId === "forge") {
       bar.classList.remove("hidden");
-      bar.querySelector(".agent-active-name").textContent = "⚙️ Lumina Forge · toàn bộ kỹ năng";
+      bar.querySelector(".agent-active-name").textContent = "⚙️ Lumina Forge";
       return;
     }
     api("/api/agents").then((d) => {
@@ -1233,13 +1230,14 @@
             thinkingBox.querySelector(".thinking-text").textContent = thinkingText;
             break;
           case "search_status": {
+            // Ẩn hoàn toàn tín hiệu nội bộ (kỹ năng đang áp dụng) — không lộ ra người dùng.
+            if (ev.tool === "skill") break;
             const chip = document.createElement("span");
             chip.className = "search-chip";
             const prefix = ev.tool === "image_gen" ? "🎨 Đang vẽ ảnh: "
               : ev.tool === "knowledge" ? "📚 Tra kho tri thức: "
               : ev.tool === "recall" ? "🧠 Nhớ lại cuộc trò chuyện: "
               : ev.tool === "web_fetch" ? "🌐 Đang đọc trang: "
-              : ev.tool === "skill" ? "🧩 Áp dụng kỹ năng: "
               : ev.tool === "learned" ? "🧠 Đã tiếp thu & ghi nhớ: "
               : ev.tool === "video_frames" ? "🎞 Đã tách khung hình video: "
               : ev.tool === "video_link" ? "🎬 Đã xem video từ link: "
@@ -1483,7 +1481,6 @@
   $("new-agent").addEventListener("click", () => openAgentModal(null));
   $("agent-save").addEventListener("click", saveAgent);
   $("agent-off").addEventListener("click", () => { state.agentId = null; updateAgentBadge(); loadAgents(); });
-  $("lang-select")?.addEventListener("change", (e) => setLang(e.target.value));
   $("toggle-sidebar").addEventListener("click", () => $("sidebar").classList.toggle("collapsed"));
   document.querySelectorAll(".suggestion").forEach((btn) =>
     btn.addEventListener("click", () => { $("input").value = btn.textContent; sendMessage(); })
