@@ -1128,6 +1128,14 @@ def test_orchestrator_injects_agent_instructions():
     assert "HƯỚNG DẪN AGENT TÙY CHỈNH" in captured.get("sys", "")
 
 
+def test_orchestrator_system_prompt_has_workflow_directive():
+    """SYSTEM_PROMPT hướng dẫn xuất khối lumina-workflow và nói rõ đây chỉ là bản thiết kế,
+    LUMINA không tự chạy/lập lịch (giữ đúng ranh giới thành thật)."""
+    from app.orchestrator import SYSTEM_PROMPT
+    assert "lumina-workflow" in SYSTEM_PROMPT
+    assert "KHÔNG tự chạy" in SYSTEM_PROMPT
+
+
 def test_video_link_build_context_and_whisper_gate():
     from app import video_link, transcribe
 

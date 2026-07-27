@@ -431,6 +431,41 @@
     $("versions-modal").classList.remove("hidden");
   }
 
+  // ── Quy trình sống (workflow thiết kế: các node nối tiếp bấm mở) ───────────
+  const WF_ICONS = { source: "📥", filter: "🔍", transform: "⚙️", schedule: "⏰", output: "📤", condition: "❓", action: "▶️" };
+  function renderWorkflowsIn(root) {
+    for (const box of root.querySelectorAll(".lumina-workflow:not([data-ready])")) {
+      box.setAttribute("data-ready", "1");
+      let spec;
+      try { spec = JSON.parse(decodeURIComponent(box.getAttribute("data-spec") || "")); }
+      catch { box.setAttribute("data-error", "1"); continue; }
+      const steps = Array.isArray(spec.steps) ? spec.steps : [];
+      if (!steps.length) { box.setAttribute("data-error", "1"); continue; }
+      box.innerHTML = "";
+      const head = el("div", "wf-title");
+      head.append(el("span", "wf-icon", "🧩"), el("span", null, spec.title || "Quy trình"));
+      box.appendChild(head);
+      const flow = el("div", "wf-flow");
+      steps.forEach((s, i) => {
+        if (i) flow.appendChild(el("div", "wf-arrow", "↓"));
+        const node = el("div", "wf-node");
+        const nh = el("button", "wf-node-head");
+        nh.append(el("span", "wf-node-icon", WF_ICONS[s.type] || "▪️"),
+                  el("span", "wf-node-num", String(i + 1)),
+                  el("span", "wf-node-label", s.label || "Bước"));
+        node.appendChild(nh);
+        if (s.detail) {
+          const d = el("div", "wf-node-detail hidden", s.detail);
+          node.appendChild(d);
+          nh.addEventListener("click", () => { d.classList.toggle("hidden"); });
+        }
+        flow.appendChild(node);
+      });
+      box.appendChild(flow);
+      box.appendChild(el("div", "wf-note", "📐 Đây là bản THIẾT KẾ — chỉnh bằng cách nhắn (vd “đổi bước 3…”, “thêm bước gửi email”). LUMINA chưa tự chạy/lập lịch quy trình."));
+    }
+  }
+
   function renderDecisionsIn(root) {
     for (const box of root.querySelectorAll(".lumina-decision:not([data-ready])")) {
       box.setAttribute("data-ready", "1");
@@ -474,6 +509,10 @@
         // Bản đồ quyết định: cây lựa chọn → hậu quả, bấm mở từng nhánh.
         out.push(`<div class="lumina-decision" data-spec="${encodeURIComponent(unescapeHtml(body))}">` +
                  `<pre class="decision-fallback"><code>${body}</code></pre></div>`);
+      } else if (codeLang === "lumina-workflow") {
+        // Quy trình sống: các node nối tiếp, bấm mở xem chi tiết (bản thiết kế).
+        out.push(`<div class="lumina-workflow" data-spec="${encodeURIComponent(unescapeHtml(body))}">` +
+                 `<pre class="wf-fallback"><code>${body}</code></pre></div>`);
       } else {
         out.push(`<pre><code>${body}</code></pre>`);
       }
@@ -1290,6 +1329,7 @@
         renderWidgetsIn(el.content);
         renderRunnablesIn(el.content);
         renderDecisionsIn(el.content);
+        renderWorkflowsIn(el.content);
         addFeedbackBar(el.body, convId, m.content);
         try {
           const cits = JSON.parse(m.citations || "[]");
@@ -1540,6 +1580,7 @@
       renderWidgetsIn(el.content);   // dựng widget sống khi tin nhắn hoàn tất
       renderRunnablesIn(el.content); // chạy bản preview HTML/JS (iframe sandbox)
       renderDecisionsIn(el.content); // bản đồ quyết định (cây lựa chọn)
+      renderWorkflowsIn(el.content); // quy trình sống (thiết kế)
       if (answer.trim()) addFeedbackBar(el.body, state.conversationId, answer);  // 👍/👎 + phiên bản
       if (thinkingBox) {
         thinkingBox.classList.remove("active");
