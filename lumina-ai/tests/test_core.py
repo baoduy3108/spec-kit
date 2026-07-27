@@ -1650,6 +1650,29 @@ def test_skills_repo_game_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_763():
+    from app import skills
+    assert len(skills._SKILLS) >= 763
+
+
+def test_skills_distributed_reliability_batch_topics_match():
+    from app import skills
+    cases = {
+        "ghi log trước khi ghi dữ liệu wal đảm bảo bền vững sau khi sập máy redo và undo khi khởi động lại": "write-ahead-logging",
+        "nhiều phiên bản dữ liệu mvcc cô lập ảnh chụp snapshot isolation đọc không chặn ghi write skew": "mvcc-and-snapshot-isolation",
+        "giao thức lan truyền gossip kiểu dịch tễ phát hiện lỗi node bằng heartbeat swim phi-accrual": "gossip-and-failure-detection",
+        "cây băm merkle tree hash phân cấp chống phân kỳ replica anti-entropy so sánh gốc rồi đi xuống nhánh khác nhau": "merkle-trees-and-anti-entropy",
+        "độ trễ đuôi tail latency p99 request dự phòng hedged gửi bản sao thứ hai fan-out khuếch đại một thành phần chậm": "tail-latency-and-hedged-requests",
+        "đồng hồ logic lamport và vector clock phát hiện cập nhật đồng thời concurrent theo quan hệ nhân quả happens-before": "vector-clocks-and-causality",
+        "giảm tải chủ động load shedding từ chối bớt việc suy giảm nhẹ nhàng graceful degradation admission control": "load-shedding-and-graceful-degradation",
+        "token phân định fencing tăng đơn điệu khoá phân tán không đủ an toàn não phân đôi split-brain hai leader cùng ghi": "fencing-tokens-and-split-brain",
+        "đồng bộ đồng hồ vật lý ntp có sai số truetime commit-wait và hybrid logical clock hlc chống lệch đồng hồ clock skew": "clock-synchronization-and-hybrid-logical-clocks",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
