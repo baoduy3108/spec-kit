@@ -1504,9 +1504,24 @@ def test_skills_match_english_queries_too():
     assert vi is not None and vi.slug == "test-driven-development"
 
 
-def test_skills_library_has_at_least_746():
+def test_skills_library_has_at_least_752():
     from app import skills
-    assert len(skills._SKILLS) >= 746
+    assert len(skills._SKILLS) >= 752
+
+
+def test_skills_agent_llm_batch_topics_match():
+    from app import skills
+    cases = {
+        "thuật toán index vector hnsw ivf tìm lân cận gần đúng ann đánh đổi recall": "vector-index-algorithms",
+        "mẫu workflow agent prompt chaining routing parallelization orchestrator workers": "agentic-workflow-patterns",
+        "prompt caching tái dùng tiền tố ổn định giảm chi phí và độ trễ token lặp": "prompt-caching-and-context-reuse",
+        "semantic cache cho llm theo ngữ nghĩa câu hỏi tương tự trên ngưỡng trả đáp án cũ": "semantic-caching-for-llms",
+        "quan sát và trace agent nhiều bước span mỗi lần gọi llm và tool token chi phí": "agent-observability-and-tracing",
+        "quản lý phiên bản prompt như artifact tách khỏi code a/b test rollback": "prompt-versioning-and-management",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
 def test_skills_mit_frontend_batch_topics_match():
