@@ -1695,6 +1695,28 @@ def test_skills_lowlevel_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_779():
+    from app import skills
+    assert len(skills._SKILLS) >= 779
+
+
+def test_skills_net_stream_batch_topics_match():
+    from app import skills
+    cases = {
+        "điều khiển tắc nghẽn tcp chia sẻ băng thông cửa sổ tắc nghẽn congestion window khởi động chậm slow start rồi tăng cộng giảm nhân aimd thuật toán cubic và bbr": "tcp-congestion-control",
+        "chặn đầu hàng head-of-line blocking một mục kẹt làm nghẽn cả hàng segment tcp mất làm đơ mọi luồng http2 http3 chuyển sang quic udp nhiều hàng đợi riêng thay vì một hàng chung": "head-of-line-blocking",
+        "phình đệm bufferbloat buffer router quá lớn giữ hàng đợi khổng lồ quản lý hàng đợi chủ động aqm codel fq-codel pie độ trễ tăng vọt khi tải nặng": "bufferbloat-and-active-queue-management",
+        "thời gian sự kiện event-time và thời gian xử lý processing-time watermark ước lượng đã thấy hết sự kiện tới mốc t xử lý dữ liệu trễ allowed lateness": "event-time-and-watermarks",
+        "cửa sổ hoá stream windowing gom luồng vô hạn thành khối hữu hạn cửa sổ cố định không chồng lấn tumbling cửa sổ trượt chồng lấn sliding cửa sổ phiên session window": "windowing-in-stream-processing",
+        "xử lý luồng đúng một lần exactly-once khác biệt với at-least-once và at-most-once khử trùng lặp deduplication idempotent sink chốt checkpoint và offset nguyên tử": "exactly-once-stream-processing",
+        "xử lý luồng có trạng thái stateful nhớ qua nhiều sự kiện trạng thái theo khoá keyed state chốt điểm checkpoint và ảnh chụp snapshot để chịu lỗi savepoint nâng cấp": "stateful-stream-processing-and-checkpointing",
+        "mô hình dataflow batch và streaming là cùng một phép tính kiến trúc lambda gồm lớp batch và lớp tốc độ kiến trúc kappa một pipeline streaming tái xử lý bằng replay": "dataflow-and-stream-batch-unification",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
