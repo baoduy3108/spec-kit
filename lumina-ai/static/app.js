@@ -19,6 +19,59 @@
 
   const PLAN_LABELS = { free: "Miễn phí", monthly: "Tháng", yearly: "Năm" };
 
+  // ── Đa ngôn ngữ (i18n giao diện) ──────────────────────────────────────────
+  const I18N = {
+    vi: {
+      newChat: "＋ Cuộc trò chuyện mới", projects: "◧ Mặt bàn (Project)", chats: "Trò chuyện",
+      newProject: "Tạo project mới", upgrade: "✦ Nâng cấp", dub: "🗣 Lồng tiếng phim",
+      learn: "✦ Bộ não LUMINA: Attention & MoE", orders: "🛠 Đơn hàng", logout: "Đăng xuất",
+      topNew: "Cuộc trò chuyện mới", attach: "Đính kèm ảnh / video / tệp để LUMINA xem",
+      inputPh: "Nhắn tin cho LUMINA…", mic: "Nói bằng giọng", send: "Gửi",
+      mImage: "🎨 Vẽ ảnh", mResearch: "🔬 Nghiên cứu sâu", mSubtitle: "📝 Phụ đề", mAgent: "⚙️ Lumina Forge",
+      hint: "LUMINA tự chọn: ⚡ nhanh · 🧠 sâu · 🔍 tìm kiếm · 🖼 xem ảnh · 🎬 video",
+      hi: "Xin chào! Mình là LUMINA", desc: "Hỏi bất cứ điều gì — mình tự chọn chế độ phù hợp nhất, không cần bạn chỉnh gì cả.",
+      lang: "Ngôn ngữ",
+    },
+    en: {
+      newChat: "＋ New chat", projects: "◧ Projects", chats: "Chats",
+      newProject: "New project", upgrade: "✦ Upgrade", dub: "🗣 Dub a video",
+      learn: "✦ Inside LUMINA: Attention & MoE", orders: "🛠 Orders", logout: "Sign out",
+      topNew: "New chat", attach: "Attach image / video / file for LUMINA to see",
+      inputPh: "Message LUMINA…", mic: "Speak", send: "Send",
+      mImage: "🎨 Image", mResearch: "🔬 Deep research", mSubtitle: "📝 Subtitles", mAgent: "⚙️ Lumina Forge",
+      hint: "LUMINA auto-picks: ⚡ fast · 🧠 deep · 🔍 search · 🖼 vision · 🎬 video",
+      hi: "Hi! I'm LUMINA", desc: "Ask anything — I pick the best mode for you, no settings needed.",
+      lang: "Language",
+    },
+    zh: {
+      newChat: "＋ 新对话", projects: "◧ 项目", chats: "对话",
+      newProject: "新建项目", upgrade: "✦ 升级", dub: "🗣 视频配音",
+      learn: "✦ LUMINA 内部：Attention 与 MoE", orders: "🛠 订单", logout: "退出登录",
+      topNew: "新对话", attach: "附加图片 / 视频 / 文件让 LUMINA 查看",
+      inputPh: "给 LUMINA 发消息…", mic: "语音输入", send: "发送",
+      mImage: "🎨 画图", mResearch: "🔬 深度研究", mSubtitle: "📝 字幕", mAgent: "⚙️ Lumina Forge",
+      hint: "LUMINA 自动选择：⚡ 快速 · 🧠 深度 · 🔍 搜索 · 🖼 看图 · 🎬 视频",
+      hi: "你好！我是 LUMINA", desc: "尽管问 — 我会自动选择最合适的模式，无需任何设置。",
+      lang: "语言",
+    },
+  };
+  function currentLang() {
+    const saved = localStorage.getItem("lumina_lang");
+    if (saved && I18N[saved]) return saved;
+    const nav = (navigator.language || "vi").slice(0, 2);
+    return I18N[nav] ? nav : "vi";
+  }
+  function t(key) { const l = currentLang(); return (I18N[l] && I18N[l][key]) || I18N.vi[key] || key; }
+  function applyI18n() {
+    const dict = I18N[currentLang()] || I18N.vi;
+    document.querySelectorAll("[data-i18n]").forEach((e) => { const k = e.getAttribute("data-i18n"); if (dict[k]) e.textContent = dict[k]; });
+    document.querySelectorAll("[data-i18n-title]").forEach((e) => { const k = e.getAttribute("data-i18n-title"); if (dict[k]) e.title = dict[k]; });
+    document.querySelectorAll("[data-i18n-ph]").forEach((e) => { const k = e.getAttribute("data-i18n-ph"); if (dict[k]) e.placeholder = dict[k]; });
+    document.documentElement.lang = currentLang();
+    const sel = $("lang-select"); if (sel) sel.value = currentLang();
+  }
+  function setLang(l) { if (!I18N[l]) return; localStorage.setItem("lumina_lang", l); applyI18n(); }
+
   function formatVnd(n) {
     return n.toLocaleString("vi-VN") + "đ";
   }
@@ -365,6 +418,7 @@
   }
 
   async function boot() {
+    applyI18n();   // dịch giao diện theo ngôn ngữ đã lưu / trình duyệt
     state.config = await api("/api/config");
     document.title = `${state.config.app_name} — ${state.config.tagline}`;
     try {
@@ -685,9 +739,10 @@
     state.conversationId = null;
     state.projectId = null;              // "＋ Cuộc trò chuyện mới" = chat ngoài project
     closeDashboard();
-    $("topbar-title").textContent = "Cuộc trò chuyện mới";
+    $("topbar-title").textContent = t("topNew");
     $("messages").innerHTML = "";
     $("messages").appendChild($("welcome") || buildWelcomePlaceholder());
+    applyI18n();
     $("welcome")?.classList.remove("hidden");
     loadConversations();
     loadProjects();
@@ -837,7 +892,8 @@
   function buildWelcomePlaceholder() {
     const div = document.createElement("div");
     div.id = "welcome"; div.className = "welcome";
-    div.innerHTML = "<img class='logo-big' src='/static/images/logo-128.png' alt='LUMINA'><h2>Xin chào! Mình là LUMINA</h2>";
+    div.innerHTML = "<img class='logo-big' src='/static/images/logo-128.png' alt='LUMINA'><h2 data-i18n='hi'></h2>";
+    div.querySelector("h2").textContent = t("hi");
     return div;
   }
 
@@ -1281,6 +1337,7 @@
   $("send").addEventListener("click", sendMessage);
   $("new-chat").addEventListener("click", newChat);
   $("new-project").addEventListener("click", createProject);
+  $("lang-select")?.addEventListener("change", (e) => setLang(e.target.value));
   $("toggle-sidebar").addEventListener("click", () => $("sidebar").classList.toggle("collapsed"));
   document.querySelectorAll(".suggestion").forEach((btn) =>
     btn.addEventListener("click", () => { $("input").value = btn.textContent; sendMessage(); })

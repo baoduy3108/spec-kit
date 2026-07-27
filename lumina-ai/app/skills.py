@@ -71,19 +71,36 @@ def load_skills() -> list[Skill]:
 _SKILLS: list[Skill] = load_skills()
 
 
+def _name_tokens(slug: str) -> tuple[str, ...]:
+    """Token tiếng Anh từ slug (vd 'test-driven-development' → test, driven, development)
+    để truy vấn TIẾNG ANH cũng khớp được kỹ năng (keywords_vi chỉ khớp câu tiếng Việt)."""
+    return tuple(w for w in re.split(r"[-_\s]+", slug.lower()) if len(w) >= 4)
+
+
 def find_matching_skill(text: str) -> Skill | None:
-    """So khớp tin nhắn với từ khóa kích hoạt (`keywords_vi`) của từng kỹ năng bằng
-    SUBSTRING (không so token chính xác — mô tả gốc là tiếng Anh, so token với câu
-    tiếng Việt gần như không bao giờ trúng). Trả kỹ năng điểm cao nhất nếu đạt
-    ngưỡng tối thiểu, ngược lại None. Chỉ lấy 1 kỹ năng/lượt để giữ chi phí token
-    thấp và tránh trộn nhiều hướng dẫn không liền mạch."""
+    """So khớp tin nhắn với kỹ năng bằng SUBSTRING. Ưu tiên `keywords_vi` (tự viết
+    tiếng Việt), CỘNG token tiếng Anh từ slug để truy vấn tiếng Anh cũng trúng
+    (vd 'test driven development' → skill test-driven-development). Trả kỹ năng điểm
+    cao nhất nếu đạt ngưỡng, ngược lại None. Chỉ lấy 1 kỹ năng/lượt (giữ chi phí token
+    thấp, tránh trộn nhiều hướng dẫn)."""
     t = (text or "").strip().lower()
     if len(t) < 4:
         return None
+    # Giai đoạn 1 — từ khóa tiếng Việt tuyển chọn (giữ NGUYÊN hành vi cũ, ưu tiên tuyệt đối).
     best: Skill | None = None
     best_score = 0
     for skill in _SKILLS:
         score = sum(1 for kw in skill.keywords if kw in t)
+        if score > best_score:
+            best_score = score
+            best = skill
+    if best_score >= _MIN_MATCH_SCORE:
+        return best
+    # Giai đoạn 2 — CHỈ khi từ khóa tiếng Việt không trúng gì: thử token tiếng Anh từ slug,
+    # để truy vấn tiếng Anh (vd 'test driven development') vẫn khớp được kỹ năng.
+    best, best_score = None, 0
+    for skill in _SKILLS:
+        score = sum(1 for w in _name_tokens(skill.slug) if w in t)
         if score > best_score:
             best_score = score
             best = skill

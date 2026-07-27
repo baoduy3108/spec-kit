@@ -30,15 +30,15 @@
         <img class="logo-small" src="/static/images/logo-128.png" alt="LUMINA">
         <span class="brand-small">LUMINA AI</span>
       </div>
-      <button id="new-chat" class="new-chat-btn">＋ Cuộc trò chuyện mới</button>
+      <button id="new-chat" class="new-chat-btn" data-i18n="newChat">＋ Cuộc trò chuyện mới</button>
 
       <div class="proj-head">
-        <span>◧ Mặt bàn (Project)</span>
-        <button id="new-project" class="proj-add" title="Tạo project mới">＋</button>
+        <span data-i18n="projects">◧ Mặt bàn (Project)</span>
+        <button id="new-project" class="proj-add" data-i18n-title="newProject" title="Tạo project mới">＋</button>
       </div>
       <nav id="project-list" class="project-list"></nav>
 
-      <div class="conv-head">Trò chuyện</div>
+      <div class="conv-head" data-i18n="chats">Trò chuyện</div>
       <nav id="conv-list" class="conv-list"></nav>
 
       <div class="plan-box">
@@ -46,23 +46,31 @@
           <span id="plan-label" class="plan-label">Gói Miễn phí</span>
           <span id="plan-usage" class="plan-usage"></span>
         </div>
-        <button id="upgrade-btn" class="upgrade-btn">✦ Nâng cấp</button>
+        <button id="upgrade-btn" class="upgrade-btn" data-i18n="upgrade">✦ Nâng cấp</button>
       </div>
-      <button id="dub-btn" class="admin-btn">🗣 Lồng tiếng phim</button>
-      <a id="learn-btn" class="admin-btn" href="/static/learn.html" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:left">✦ Bộ não LUMINA: Attention & MoE</a>
-      <button id="admin-btn" class="admin-btn hidden">🛠 Đơn hàng</button>
+      <button id="dub-btn" class="admin-btn" data-i18n="dub">🗣 Lồng tiếng phim</button>
+      <a id="learn-btn" class="admin-btn" href="/static/learn.html" target="_blank" rel="noopener" data-i18n="learn" style="display:block;text-decoration:none;text-align:left">✦ Bộ não LUMINA: Attention & MoE</a>
+      <button id="admin-btn" class="admin-btn hidden" data-i18n="orders">🛠 Đơn hàng</button>
+
+      <div class="lang-row">
+        <select id="lang-select" class="lang-select" title="Language / Ngôn ngữ / 语言">
+          <option value="vi">🇻🇳 Tiếng Việt</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="zh">🇨🇳 中文</option>
+        </select>
+      </div>
 
       <div class="sidebar-footer">
         <img id="user-avatar" class="avatar" src="" alt="">
         <span id="user-name" class="user-name"></span>
-        <button id="logout" class="logout-btn" title="Đăng xuất">⎋</button>
+        <button id="logout" class="logout-btn" data-i18n-title="logout" title="Đăng xuất">⎋</button>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
         <button id="toggle-sidebar" class="icon-btn">☰</button>
-        <span id="topbar-title" class="topbar-title">Cuộc trò chuyện mới</span>
+        <span id="topbar-title" class="topbar-title" data-i18n="topNew">Cuộc trò chuyện mới</span>
       </header>
 
       <div id="dashboard" class="dashboard hidden"></div>
@@ -70,8 +78,8 @@
       <div id="messages" class="messages">
         <div id="welcome" class="welcome">
           <img class="logo-big" src="/static/images/logo-128.png" alt="LUMINA">
-          <h2>Xin chào! Mình là LUMINA</h2>
-          <p>Hỏi bất cứ điều gì — mình tự chọn chế độ phù hợp nhất, không cần bạn chỉnh gì cả.</p>
+          <h2 data-i18n="hi">Xin chào! Mình là LUMINA</h2>
+          <p data-i18n="desc">Hỏi bất cứ điều gì — mình tự chọn chế độ phù hợp nhất, không cần bạn chỉnh gì cả.</p>
           <div class="suggestions">
             <button class="suggestion">Tin tức AI mới nhất hôm nay?</button>
             <button class="suggestion">Viết hàm Python kiểm tra số nguyên tố</button>
@@ -84,17 +92,17 @@
       <div class="composer-wrap">
         <div id="attach-preview" class="attach-preview hidden"></div>
         <div class="composer">
-          <button id="attach-btn" class="composer-icon" title="Đính kèm ảnh / video / tệp để LUMINA xem">📎</button>
-          <textarea id="input" rows="1" placeholder="Nhắn tin cho LUMINA…"></textarea>
-          <button id="mic-btn" class="composer-icon" title="Nói bằng giọng">🎤</button>
-          <button id="send" class="send-btn" title="Gửi">➤</button>
+          <button id="attach-btn" class="composer-icon" data-i18n-title="attach" title="Đính kèm ảnh / video / tệp để LUMINA xem">📎</button>
+          <textarea id="input" rows="1" data-i18n-ph="inputPh" placeholder="Nhắn tin cho LUMINA…"></textarea>
+          <button id="mic-btn" class="composer-icon" data-i18n-title="mic" title="Nói bằng giọng">🎤</button>
+          <button id="send" class="send-btn" data-i18n-title="send" title="Gửi">➤</button>
         </div>
         <div class="composer-tools">
-          <button class="mode-toggle" data-mode="image" title="Bảo LUMINA vẽ ảnh">🎨 Vẽ ảnh</button>
-          <button class="mode-toggle" data-mode="research" title="Tìm nhiều nguồn, viết báo cáo">🔬 Nghiên cứu sâu</button>
-          <button class="mode-toggle" data-mode="subtitle" title="Đính kèm video trước, LUMINA xuất transcript SRT">📝 Phụ đề</button>
-          <button class="mode-toggle" data-mode="agent" title="Bắt LUMINA trả lời ở mức kỹ sư cấp cao — gọn cho việc nhỏ, đủ quy trình 6 giai đoạn cho việc lớn">⚙️ Lumina Forge</button>
-          <span class="composer-hint">LUMINA tự chọn: ⚡ nhanh · 🧠 sâu · 🔍 tìm kiếm · 🖼 xem ảnh · 🎬 video</span>
+          <button class="mode-toggle" data-mode="image" data-i18n="mImage" title="Bảo LUMINA vẽ ảnh">🎨 Vẽ ảnh</button>
+          <button class="mode-toggle" data-mode="research" data-i18n="mResearch" title="Tìm nhiều nguồn, viết báo cáo">🔬 Nghiên cứu sâu</button>
+          <button class="mode-toggle" data-mode="subtitle" data-i18n="mSubtitle" title="Đính kèm video trước, LUMINA xuất transcript SRT">📝 Phụ đề</button>
+          <button class="mode-toggle" data-mode="agent" data-i18n="mAgent" title="Bắt LUMINA trả lời ở mức kỹ sư cấp cao — gọn cho việc nhỏ, đủ quy trình 6 giai đoạn cho việc lớn">⚙️ Lumina Forge</button>
+          <span class="composer-hint" data-i18n="hint">LUMINA tự chọn: ⚡ nhanh · 🧠 sâu · 🔍 tìm kiếm · 🖼 xem ảnh · 🎬 video</span>
         </div>
         <input type="file" id="file-input"
                accept="image/*,video/mp4,video/webm,video/quicktime,.pdf,.docx,.xlsx,.txt,.md,.csv"

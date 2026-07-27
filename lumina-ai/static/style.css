@@ -831,3 +831,12 @@ a.widget-link:hover { color: var(--accent-2); text-decoration: underline; }
 .run-source { margin: 0; max-height: 420px; overflow: auto; }
 .lumina-run:fullscreen { background: var(--bg-2); }
 .lumina-run:fullscreen .run-frame { height: calc(100vh - 46px); }
+
+/* ── Bộ chọn ngôn ngữ ──────────────────────────────────── */
+.lang-row { padding: 0 14px 8px; }
+.lang-select {
+  width: 100%; background: var(--bg-3); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px;
+  font-size: 12.5px; cursor: pointer;
+}
+.lang-select:hover { border-color: var(--accent); }

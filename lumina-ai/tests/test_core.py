@@ -1363,6 +1363,21 @@ def test_skills_library_has_at_least_728():
     assert len(skills._SKILLS) >= 728
 
 
+def test_skills_match_english_queries_too():
+    """Truy vấn TIẾNG ANH cũng khớp kỹ năng (fallback token tên slug), không phá khớp tiếng Việt."""
+    from app import skills
+    cases = {
+        "how to do test driven development in python": "test-driven-development",
+        "what is graphrag": "how-graphrag-works",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+    # Câu tiếng Việt vẫn khớp đúng (giai đoạn 1 ưu tiên tuyệt đối).
+    vi = skills.find_matching_skill("làm sao viết test trước khi code")
+    assert vi is not None and vi.slug == "test-driven-development"
+
+
 def test_skills_library_has_at_least_739():
     from app import skills
     assert len(skills._SKILLS) >= 739
