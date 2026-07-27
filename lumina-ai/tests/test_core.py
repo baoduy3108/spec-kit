@@ -1761,6 +1761,28 @@ def test_skills_ml_systems_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_803():
+    from app import skills
+    assert len(skills._SKILLS) >= 803
+
+
+def test_skills_os_kernel_batch_topics_match():
+    from app import skills
+    cases = {
+        "bộ đệm trang page cache kernel giữ trang tệp trong ram đọc lại tệp gần như tức thì không chạm đĩa ánh xạ tệp vào bộ nhớ mmap trang bẩn dirty page và ghi lại writeback": "page-cache-and-memory-mapped-files",
+        "mô hình vào ra io blocking và non-blocking sẵn sàng readiness select poll epoll so với hoàn tất completion io_uring vấn đề c10k một luồng mỗi kết nối không mở rộng": "io-models-and-io-uring",
+        "sao chép khi ghi copy-on-write cow tiến trình con dùng chung trang chỉ đọc fork tạo tiến trình mới gần như miễn phí chỉ sao chép trang khi có bên ghi vào redis fork để chụp nhanh": "copy-on-write-and-fork",
+        "vào ra không sao chép zero-copy sendfile splice gửi tệp qua socket kiểu thường sao chép bốn lần loại bỏ bản sao thừa và vượt biên user kernel kafka nginx nhanh nhờ zero-copy": "zero-copy-io",
+        "ngắt interrupt thiết bị báo xong thay vì cpu chờ thăm dò polling lãng phí cpu dma thiết bị tự chuyển dữ liệu vào ra bộ nhớ không cần cpu sao chép bão ngắt interrupt storm và napi": "interrupts-dma-and-device-io",
+        "truy cập bộ nhớ không đồng nhất numa trên máy nhiều socket bộ nhớ node xa chậm hơn node cục bộ cấp phát theo lần chạm đầu first-touch ghim luồng và bộ nhớ cùng một node": "numa-and-memory-locality",
+        "chi phí chuyển ngữ cảnh context switch giữa luồng nhiều luồng hơn số nhân làm chậm chương trình chi phí gián tiếp cache và tlb nguội sau khi chuyển quá tải luồng oversubscription": "context-switching-cost",
+        "trang lớn huge page và bộ đệm dịch địa chỉ tlb trang 4kb khiến tập làm việc lớn tràn tlb gây miss đi bộ bảng trang page walk tốn kém transparent huge page thp": "huge-pages-and-tlb",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
