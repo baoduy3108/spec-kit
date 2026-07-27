@@ -406,6 +406,41 @@ async def submit_feedback(body: _FeedbackBody, user: dict = Depends(auth.require
     return {"ok": True, "summary": db.feedback_summary(user["id"])}
 
 
+# ─── Version hóa suy nghĩ (lưu v1..vN của một artifact/câu trả lời, quay lại) ──
+
+class _VersionCreate(BaseModel):
+    conversation_id: str
+    content: str
+    label: str = ""
+
+
+@app.post("/api/versions")
+async def version_create(body: _VersionCreate, user: dict = Depends(auth.require_user)):
+    if not body.content.strip():
+        raise HTTPException(status_code=400, detail="Không có nội dung để lưu phiên bản.")
+    return db.add_version(user["id"], body.conversation_id, body.content, body.label)
+
+
+@app.get("/api/versions")
+async def versions_list(conversation_id: str, user: dict = Depends(auth.require_user)):
+    return {"versions": db.list_versions(user["id"], conversation_id)}
+
+
+@app.get("/api/versions/{version_id}")
+async def version_get(version_id: str, user: dict = Depends(auth.require_user)):
+    v = db.get_version(version_id, user["id"])
+    if not v:
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiên bản")
+    return {"id": v["id"], "label": v["label"], "content": v["content"], "created_at": v["created_at"]}
+
+
+@app.delete("/api/versions/{version_id}")
+async def version_delete(version_id: str, user: dict = Depends(auth.require_user)):
+    if not db.delete_version(version_id, user["id"]):
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiên bản")
+    return {"ok": True}
+
+
 @app.get("/api/agents/{agent_id}/conversations")
 async def agent_conversations(agent_id: str, user: dict = Depends(auth.require_user)):
     """Các session (hội thoại) thuộc 1 agent — 'forge' là agent dựng sẵn.
@@ -699,14 +734,14 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
 
     # Tầng free chỉ có 2 "chế độ": tìm kiếm hay không (engine free không có tư duy sâu như Claude).
     apex_allowed = plan["apex_allowed"] and use_premium
-    force_mode = body.mode if body.mode in ("image", "research", "subtitle", "agent") else None
+    force_mode = body.mode if body.mode in ("image", "research", "subtitle", "agent", "critique") else None
     # Có video mà chưa ép chế độ + câu hỏi rỗng-ý (kiểu chỉ gửi video) → ưu tiên phân tích thường,
     # người dùng bấm nút 📝 riêng khi muốn phụ đề (tránh đoán nhầm ý định).
     route = decide_route(body.message, history_len=len(history),
                          apex_allowed=apex_allowed, force_mode=force_mode)
     # Ẩn nhãn chế độ "cao cấp" khi đang chạy tầng free — để không lộ là đã tụt bộ não.
     # Nhãn TÍNH NĂNG (vẽ ảnh / nghiên cứu / phụ đề) là an toàn (không phải tên model) → luôn hiện.
-    if route.mode in ("image_gen", "research", "subtitle", "agent"):
+    if route.mode in ("image_gen", "research", "subtitle", "agent", "critique"):
         display_label = route.label
     else:
         display_label = route.label if use_premium else ("🔍 Tìm kiếm web" if route.use_web_search else "✨ LUMINA")

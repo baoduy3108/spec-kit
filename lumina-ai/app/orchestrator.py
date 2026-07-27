@@ -59,6 +59,16 @@ _SUBTITLE_DIRECTIVE = (
     "nếu phân biệt được. Không thêm bình luận ngoài khối code.]"
 )
 
+_CRITIQUE_DIRECTIVE = (
+    "\n\n[Chế độ PHẢN BIỆN NỘI BỘ: trước khi chốt câu trả lời, hãy TỰ ĐÓNG HAI VAI trong đầu:\n"
+    "1) NGƯỜI ĐỀ XUẤT: soạn câu trả lời tốt nhất cho yêu cầu.\n"
+    "2) NGƯỜI PHẢN BIỆN: cố tình tìm lỗ hổng — chỗ sai, giả định thiếu căn cứ, thiếu trường hợp biên, "
+    "rủi ro bảo mật/hiệu năng, điểm mơ hồ, phản ví dụ.\n"
+    "Nếu người phản biện bắt được vấn đề THỰC SỰ, hãy SỬA ngay và lặp lại tới khi vững.\n"
+    "CHỈ xuất BẢN ĐÃ CẢI THIỆN (không in ra phần tranh luận nội bộ dài dòng). Kết thúc bằng một mục ngắn "
+    "\"🔎 Đã tự phản biện & sửa:\" liệt kê 1-3 điểm đã vá (nếu không có vấn đề gì, ghi \"đã rà, không thấy lỗ hổng đáng kể\").]"
+)
+
 # Chỉ thị khi người dùng bật ⚙️ Lumina Forge — TỰ CO GIÃN theo quy mô yêu cầu:
 # việc nhỏ trả lời gọn ở mức chuyên gia (kiến trúc/bảo mật/test), việc lớn dùng
 # đủ quy trình 6 giai đoạn (SPEC trước, code sau). Kèm THÀNH THẬT về việc không
@@ -223,7 +233,8 @@ class Orchestrator:
         # ⚙️ Chế độ Lumina Forge — chèn chỉ thị tự co giãn (nhỏ: gọn chuyên gia, lớn: 6 giai đoạn).
         directive = _RESEARCH_DIRECTIVE if route.mode == "research" \
             else _SUBTITLE_DIRECTIVE if route.mode == "subtitle" \
-            else _AGENT_DIRECTIVE if route.mode == "agent" else None
+            else _AGENT_DIRECTIVE if route.mode == "agent" \
+            else _CRITIQUE_DIRECTIVE if route.mode == "critique" else None
         if directive:
             messages = list(messages)
             for i in range(len(messages) - 1, -1, -1):

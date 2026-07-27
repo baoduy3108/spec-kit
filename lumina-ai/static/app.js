@@ -365,8 +365,8 @@
     return wrap;
   }
 
-  // ── Feedback độ hữu dụng: 👍/👎 dưới mỗi câu trả lời ──────────────────────
-  function addFeedbackBar(bodyEl, convId) {
+  // ── Thanh hành động dưới mỗi câu trả lời: 👍/👎 + lưu/xem phiên bản ────────
+  function addFeedbackBar(bodyEl, convId, rawText) {
     if (!bodyEl || bodyEl.querySelector(".fb-bar")) return;
     const bar = el("div", "fb-bar");
     const up = el("button", "fb-btn", "👍");  up.title = "Hữu ích";
@@ -381,8 +381,54 @@
     }
     up.addEventListener("click", () => send(1, ""));
     down.addEventListener("click", () => { const n = prompt("Phần nào chưa tốt / gây rối? (tuỳ chọn)", ""); send(-1, n === null ? "" : n); });
-    bar.append(up, down, thanks);
+    bar.append(up, down);
+
+    // Version hóa: lưu bản này + xem lịch sử phiên bản của hội thoại
+    if (rawText && rawText.trim()) {
+      const save = el("button", "fb-btn", "📌 Lưu bản"); save.title = "Lưu thành một phiên bản";
+      save.addEventListener("click", async () => {
+        const cid = convId || state.conversationId;
+        if (!cid) { save.textContent = "cần lưu hội thoại trước"; return; }
+        const label = prompt("Nhãn phiên bản (để trống = v tự tăng):", "") || "";
+        try {
+          const v = await api("/api/versions", { method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ conversation_id: cid, content: rawText, label }) });
+          save.textContent = "✓ đã lưu " + v.label; save.disabled = true;
+        } catch { save.textContent = "lỗi lưu"; }
+      });
+      const hist = el("button", "fb-btn", "🕑 Phiên bản");
+      hist.addEventListener("click", () => openVersions(convId || state.conversationId));
+      bar.append(save, hist);
+    }
+    bar.append(thanks);
     bodyEl.appendChild(bar);
+  }
+
+  async function openVersions(convId) {
+    if (!convId) return;
+    let list = [];
+    try { list = (await api(`/api/versions?conversation_id=${encodeURIComponent(convId)}`)).versions || []; } catch {}
+    const body = $("versions-list");
+    body.innerHTML = "";
+    if (!list.length) body.appendChild(el("div", "dash-empty", "Chưa có phiên bản nào. Bấm “📌 Lưu bản” dưới một câu trả lời để lưu."));
+    for (const v of list) {
+      const row = el("div", "ver-row");
+      const info = el("div", "ver-info");
+      info.append(el("span", "ver-label", v.label), el("span", "ver-time", new Date(v.created_at * 1000).toLocaleString("vi-VN") + " · " + v.size + " ký tự"));
+      const view = el("button", "fb-btn", "Xem");
+      view.addEventListener("click", async () => {
+        const full = await api(`/api/versions/${v.id}`);
+        $("version-view").value = full.content;
+        $("version-view-wrap").classList.remove("hidden");
+        $("version-restore").onclick = () => { $("input").value = full.content; autoResize(); $("versions-modal").classList.add("hidden"); $("input").focus(); };
+      });
+      const del = el("button", "fb-btn", "🗑");
+      del.addEventListener("click", async () => { await api(`/api/versions/${v.id}`, { method: "DELETE" }); openVersions(convId); });
+      row.append(info, view, del);
+      body.appendChild(row);
+    }
+    $("version-view-wrap").classList.add("hidden");
+    $("versions-modal").classList.remove("hidden");
   }
 
   function renderDecisionsIn(root) {
@@ -1168,7 +1214,7 @@
         renderWidgetsIn(el.content);
         renderRunnablesIn(el.content);
         renderDecisionsIn(el.content);
-        addFeedbackBar(el.body, convId);
+        addFeedbackBar(el.body, convId, m.content);
         try {
           const cits = JSON.parse(m.citations || "[]");
           if (cits.length) renderCitations(el.body, cits);
@@ -1182,7 +1228,8 @@
   function modeLabel(mode) {
     return { fast: "⚡ Phản hồi nhanh", balanced: "✨ Cân bằng", deep: "🧠 Tư duy sâu",
              search: "🔍 Tìm kiếm web", apex: "🌌 Đỉnh cao", image_gen: "🎨 Vẽ ảnh",
-             research: "🔬 Nghiên cứu sâu", subtitle: "📝 Phụ đề", agent: "⚙️ Lumina Forge" }[mode] || "";
+             research: "🔬 Nghiên cứu sâu", subtitle: "📝 Phụ đề", agent: "⚙️ Lumina Forge",
+             critique: "🔎 Phản biện" }[mode] || "";
   }
 
   // ── Render tin nhắn ───────────────────────────────────────────────────────
@@ -1417,7 +1464,7 @@
       renderWidgetsIn(el.content);   // dựng widget sống khi tin nhắn hoàn tất
       renderRunnablesIn(el.content); // chạy bản preview HTML/JS (iframe sandbox)
       renderDecisionsIn(el.content); // bản đồ quyết định (cây lựa chọn)
-      if (answer.trim()) addFeedbackBar(el.body, state.conversationId);  // 👍/👎 độ hữu dụng
+      if (answer.trim()) addFeedbackBar(el.body, state.conversationId, answer);  // 👍/👎 + phiên bản
       if (thinkingBox) {
         thinkingBox.classList.remove("active");
         thinkingBox.querySelector("summary").textContent =
@@ -1581,6 +1628,7 @@
       const ph = state.forceMode === "image" ? "Mô tả ảnh muốn vẽ…"
         : state.forceMode === "research" ? "Chủ đề cần nghiên cứu sâu…"
         : state.forceMode === "subtitle" ? "Đính kèm 📎 video rồi bấm Gửi…"
+        : state.forceMode === "critique" ? "Câu hỏi/bài toán để LUMINA tự phản biện rồi trả lời…"
         : state.forceMode === "agent" ? "Mô tả yêu cầu (dán kèm code/tài liệu nếu có)…"
         : "Nhắn tin cho LUMINA…";
       $("input").placeholder = ph;

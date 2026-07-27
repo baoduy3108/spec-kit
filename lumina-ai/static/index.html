@@ -101,6 +101,7 @@
           <button class="mode-toggle" data-mode="research" data-i18n="mResearch" title="Tìm nhiều nguồn, viết báo cáo">🔬 Nghiên cứu sâu</button>
           <button class="mode-toggle" data-mode="subtitle" data-i18n="mSubtitle" title="Đính kèm video trước, LUMINA xuất transcript SRT">📝 Phụ đề</button>
           <button class="mode-toggle" data-mode="agent" data-i18n="mAgent" title="Bắt LUMINA trả lời ở mức kỹ sư cấp cao — gọn cho việc nhỏ, đủ quy trình 6 giai đoạn cho việc lớn">⚙️ Lumina Forge</button>
+          <button class="mode-toggle" data-mode="critique" title="LUMINA tự đóng vai đề xuất + phản biện, bắt lỗ hổng rồi sửa trước khi trả lời">🔎 Phản biện</button>
           <span class="composer-hint" data-i18n="hint">LUMINA tự chọn: ⚡ nhanh · 🧠 sâu · 🔍 tìm kiếm · 🖼 xem ảnh · 🎬 video</span>
         </div>
         <input type="file" id="file-input"
@@ -108,6 +109,23 @@
                multiple hidden>
       </div>
     </main>
+  </div>
+
+  <!-- ── Modal Phiên bản (version hóa suy nghĩ) ─────────── -->
+  <div id="versions-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:640px">
+      <button class="modal-close" data-close="versions-modal">✕</button>
+      <h2 class="modal-title">🕑 Phiên bản</h2>
+      <p class="payment-desc">Các bản đã lưu của hội thoại này — bấm “Xem” để đọc lại, “Khôi phục” để đưa nội dung vào ô nhập.</p>
+      <div id="versions-list"></div>
+      <div id="version-view-wrap" class="hidden" style="margin-top:14px">
+        <textarea id="version-view" class="agent-instructions" rows="10" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="version-restore" class="upgrade-btn" style="flex:1">↩ Khôi phục vào ô nhập</button>
+          <button class="dash-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('version-view').value)">📋 Sao chép</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ── Modal Nâng cấp gói ─────────────────────────────── -->

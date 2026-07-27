@@ -86,6 +86,14 @@ def _init_schema(conn: sqlite3.Connection):
         note TEXT DEFAULT '',
         created_at INTEGER
     );
+    CREATE TABLE IF NOT EXISTS versions (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        conversation_id TEXT NOT NULL,
+        label TEXT NOT NULL,                     -- v1, v2, ... hoặc nhãn tùy chỉnh
+        content TEXT NOT NULL,                    -- nội dung câu trả lời/bản artifact
+        created_at INTEGER
+    );
     CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY,                  -- mã đơn ngắn, dùng làm nội dung chuyển khoản SePay
         user_id TEXT NOT NULL,
@@ -372,6 +380,49 @@ def add_feedback(user_id: str, conversation_id: str | None, rating: int, note: s
             (user_id, conversation_id, 1 if rating >= 0 else -1, (note or "").strip()[:500], int(time.time())),
         )
         conn.commit()
+
+
+def add_version(user_id: str, conversation_id: str, content: str, label: str = "") -> dict:
+    """Lưu một 'phiên bản suy nghĩ' cho hội thoại. Tự đánh v{n} nếu không có nhãn."""
+    with _lock:
+        conn = get_conn()
+        vid = uuid.uuid4().hex
+        n = conn.execute("SELECT COUNT(*) FROM versions WHERE user_id=? AND conversation_id=?",
+                         (user_id, conversation_id)).fetchone()[0]
+        lbl = (label or "").strip()[:60] or f"v{n + 1}"
+        now = int(time.time())
+        conn.execute(
+            "INSERT INTO versions(id, user_id, conversation_id, label, content, created_at) VALUES(?,?,?,?,?,?)",
+            (vid, user_id, conversation_id, lbl, (content or "")[:100000], now),
+        )
+        conn.commit()
+        return {"id": vid, "label": lbl, "created_at": now}
+
+
+def list_versions(user_id: str, conversation_id: str) -> list[dict]:
+    with _lock:
+        rows = get_conn().execute(
+            "SELECT id, label, created_at, length(content) AS size FROM versions "
+            "WHERE user_id=? AND conversation_id=? ORDER BY created_at ASC",
+            (user_id, conversation_id),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_version(version_id: str, user_id: str) -> dict | None:
+    with _lock:
+        row = get_conn().execute(
+            "SELECT * FROM versions WHERE id=? AND user_id=?", (version_id, user_id)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def delete_version(version_id: str, user_id: str) -> bool:
+    with _lock:
+        conn = get_conn()
+        cur = conn.execute("DELETE FROM versions WHERE id=? AND user_id=?", (version_id, user_id))
+        conn.commit()
+        return cur.rowcount > 0
 
 
 def feedback_summary(user_id: str) -> dict:

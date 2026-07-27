@@ -629,6 +629,40 @@ def test_router_agent_not_auto_detected():
         assert decide_route(q).mode != "agent", q
 
 
+def test_router_critique_force_mode():
+    route = decide_route("nên chọn kiến trúc nào", force_mode="critique")
+    assert route.mode == "critique" and route.label == "🔎 Phản biện"
+    assert route.use_web_search is True and route.effort == "high"
+    # không tự kích hoạt khi không bấm nút
+    assert decide_route("nên chọn kiến trúc nào").mode != "critique"
+
+
+def test_versions_crud():
+    """🕑 Version hóa: lưu v1/v2, liệt kê, đọc, xóa; nhãn tự tăng."""
+    from fastapi.testclient import TestClient
+    from app import auth
+    from app.main import app
+
+    uid = _new_user_id()
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "T", "picture": "", "is_admin": False}
+    try:
+        client = TestClient(app)
+        cid = "conv-" + uid
+        assert client.post("/api/versions", json={"conversation_id": cid, "content": ""}).status_code == 400
+        v1 = client.post("/api/versions", json={"conversation_id": cid, "content": "ý tưởng thô"}).json()
+        v2 = client.post("/api/versions", json={"conversation_id": cid, "content": "bản tối ưu", "label": "production"}).json()
+        assert v1["label"] == "v1" and v2["label"] == "production"
+        lst = client.get(f"/api/versions?conversation_id={cid}").json()["versions"]
+        assert len(lst) == 2
+        assert client.get(f"/api/versions/{v1['id']}").json()["content"] == "ý tưởng thô"
+        assert client.delete(f"/api/versions/{v1['id']}").status_code == 200
+        assert len(client.get(f"/api/versions?conversation_id={cid}").json()["versions"]) == 1
+        assert client.get("/api/versions/khongco").status_code == 404
+    finally:
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 # ── Media: video đính kèm ────────────────────────────────────────────────────
 
 def test_media_parse_video_data_url():

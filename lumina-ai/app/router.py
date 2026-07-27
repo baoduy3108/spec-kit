@@ -92,6 +92,14 @@ def _agent_route() -> RouteDecision:
     )
 
 
+def _critique_route() -> RouteDecision:
+    # 🔎 Phản biện nội bộ: bộ não tự đóng vai đề xuất + phản biện trước khi chốt.
+    return RouteDecision(
+        mode="critique", label="🔎 Phản biện",
+        model=CONFIG["CLAUDE_MODEL_DEEP"], use_web_search=True, effort="high",
+    )
+
+
 def _matches(regexes: list[re.Pattern], text: str) -> bool:
     return any(r.search(text) for r in regexes)
 
@@ -123,6 +131,8 @@ def decide_route(
         return _subtitle_route()
     if force_mode == "agent":
         return _agent_route()
+    if force_mode == "critique":
+        return _critique_route()
 
     # 1a) Yêu cầu vẽ ảnh → chế độ tạo ảnh (không dùng bộ não chat)
     if _matches(_image_re, text):
