@@ -1504,9 +1504,23 @@ def test_skills_match_english_queries_too():
     assert vi is not None and vi.slug == "test-driven-development"
 
 
-def test_skills_library_has_at_least_741():
+def test_skills_library_has_at_least_746():
     from app import skills
-    assert len(skills._SKILLS) >= 741
+    assert len(skills._SKILLS) >= 746
+
+
+def test_skills_mit_frontend_batch_topics_match():
+    from app import skills
+    cases = {
+        "crdt hợp nhất không xung đột local-first đồng bộ nhiều thiết bị yjs automerge": "crdts-and-local-first-sync",
+        "máy trạng thái cho giao diện statechart xstate tránh mớ boolean cờ isloading": "state-machines-for-uis",
+        "signals phản ứng mịn fine-grained solidjs preact signal không re-render cả cây": "signals-and-fine-grained-reactivity",
+        "an toàn kiểu đầu cuối end-to-end trpc chia sẻ kiểu client server zod": "end-to-end-type-safety",
+        "ứng dụng hướng hypermedia htmx trả html fragment thay vì json": "hypermedia-driven-apps",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
 def test_skills_agent_protocols_and_rl_topics_match():
