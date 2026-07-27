@@ -865,3 +865,6 @@ a.widget-link:hover { color: var(--accent-2); text-decoration: underline; }
 .agent-active-bar .agent-active-name { font-weight: 600; }
 .agent-off { border: 0; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 12px; }
 .agent-off:hover { color: #ff8a80; }
+
+/* Agent dựng sẵn (Lumina Forge) trong danh sách agent */
+.proj-item.builtin .title { color: var(--accent-2); font-weight: 600; }

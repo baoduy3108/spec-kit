@@ -1478,9 +1478,20 @@ def test_skills_match_english_queries_too():
     assert vi is not None and vi.slug == "test-driven-development"
 
 
-def test_skills_library_has_at_least_739():
+def test_skills_library_has_at_least_741():
     from app import skills
-    assert len(skills._SKILLS) >= 739
+    assert len(skills._SKILLS) >= 741
+
+
+def test_skills_agent_protocols_and_rl_topics_match():
+    from app import skills
+    cases = {
+        "giao thức giao tiếp giữa các agent a2a anp mcp phối hợp nhiều agent": "agent-communication-protocols",
+        "agentic rl huấn luyện agent bằng grpo phần thưởng theo kết quả tác vụ verifiable": "agentic-rl-and-grpo",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
 def test_skills_repos_and_systems_topics_match():

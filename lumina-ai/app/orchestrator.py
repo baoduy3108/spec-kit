@@ -247,16 +247,18 @@ class Orchestrator:
             if facts:
                 yield {"type": "search_status", "tool": "knowledge",
                        "query": ", ".join(f["topic"] for f in facts)[:80]}
-                system_prompt = SYSTEM_PROMPT + knowledge.build_context(facts)
+                # NỐI (không ghi đè) để không mất hướng dẫn Agent tùy chỉnh đã chèn ở trên.
+                system_prompt += knowledge.build_context(facts)
 
-            # 🧩 Thư viện kỹ năng nội bộ: chỉ áp dụng trong ⚙️ Lumina Forge — so khớp
-            # tin nhắn với ~53 kỹ năng tuyển chọn (phương pháp luận kỹ thuật + gu
-            # thiết kế UI/UX), tiêm kỹ năng khớp nhất nếu có (0 chi phí nếu không khớp).
-            if route.mode == "agent":
-                skill = skills.find_matching_skill(original_last_user)
-                if skill:
-                    yield {"type": "search_status", "tool": "skill", "query": skill.name}
-                    system_prompt += skills.build_skill_context(skill)
+        # 🧩 Thư viện kỹ năng nội bộ (toàn bộ ~741 kỹ năng): tự áp dụng khi ở chế độ
+        # ⚙️ Lumina Forge HOẶC khi đang chat với một Agent tùy chỉnh (system_extra) —
+        # cùng một thư viện, "nhúng" vào cả agent lẫn Forge (không cắt cái nào). So khớp
+        # tin nhắn, tiêm kỹ năng khớp nhất nếu có (0 chi phí nếu không khớp).
+        if messages and (route.mode == "agent" or system_extra):
+            skill = skills.find_matching_skill(original_last_user)
+            if skill:
+                yield {"type": "search_status", "tool": "skill", "query": skill.name}
+                system_prompt += skills.build_skill_context(skill)
 
         started_output = False
         chain = self._chain_for(use_premium)

@@ -784,6 +784,13 @@
     try { data = await api("/api/agents"); } catch { return; }
     const list = $("agent-list");
     list.innerHTML = "";
+    // Agent DỰNG SẴN: ⚙️ Lumina Forge — chọn = chạy quy trình Forge + TOÀN BỘ thư viện kỹ năng.
+    const forge = document.createElement("div");
+    forge.className = "proj-item builtin" + (state.agentId === "forge" ? " active" : "");
+    forge.innerHTML = `<span class="title">⚙️ Lumina Forge</span>`;
+    forge.title = "Kỹ sư cấp cao + tự áp dụng toàn bộ kỹ năng nội bộ";
+    forge.addEventListener("click", () => toggleAgent({ id: "forge", name: "Lumina Forge", emoji: "⚙️" }));
+    list.appendChild(forge);
     for (const a of data.agents) {
       const item = document.createElement("div");
       item.className = "proj-item" + (a.id === state.agentId ? " active" : "");
@@ -813,6 +820,11 @@
     const bar = $("agent-active-bar");
     if (!bar) return;
     if (!state.agentId) { bar.classList.add("hidden"); return; }
+    if (state.agentId === "forge") {
+      bar.classList.remove("hidden");
+      bar.querySelector(".agent-active-name").textContent = "⚙️ Lumina Forge · toàn bộ kỹ năng";
+      return;
+    }
     api("/api/agents").then((d) => {
       const a = (d.agents || []).find((x) => x.id === state.agentId);
       if (!a) { bar.classList.add("hidden"); return; }
@@ -1119,7 +1131,9 @@
           message: text,
           conversation_id: state.conversationId,
           project_id: state.conversationId ? null : state.projectId,
-          agent_id: state.agentId,
+          // Agent dựng sẵn "forge" → chạy chế độ ⚙️ Lumina Forge (mode="agent"), không phải agent DB.
+          agent_id: state.agentId === "forge" ? null : state.agentId,
+          mode: state.agentId === "forge" ? "agent" : mode,
           images: images,
           videos: video ? [video.dataUrl] : [],
           files: attachedFiles.map((f) => ({ name: f.name, data_url: f.dataUrl })),
