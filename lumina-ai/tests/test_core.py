@@ -1827,6 +1827,28 @@ def test_skills_compression_search_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_827():
+    from app import skills
+    assert len(skills._SKILLS) >= 827
+
+
+def test_skills_numerical_probabilistic_batch_topics_match():
+    from app import skills
+    cases = {
+        "ổn định số học và triệt tiêu thảm hoạ catastrophic cancellation trừ hai số gần bằng nhau mất hết chữ số có nghĩa tái công thức ổn định log-sum-exp welford kahan summation": "numerical-stability-and-cancellation",
+        "phương pháp monte carlo giải bằng lấy mẫu ngẫu nhiên ước lượng tích phân xác suất kỳ vọng bằng trung bình nhiều mẫu sai số giảm theo một trên căn n bất kể số chiều": "monte-carlo-methods",
+        "count-min sketch đếm tần suất tỉ item trong bộ nhớ cố định nhỏ cấu trúc xác suất nhiều hàm băm và mảng đếm hai chiều tìm phần tử nổi trội heavy hitters top-k": "count-min-sketch",
+        "hyperloglog đếm số phần tử phân biệt distinct trong luồng lớn bằng vài kilobyte ước lượng lực lượng cardinality từ số bit 0 dẫn đầu tối đa trong hash gộp merge nhiều shard": "hyperloglog-cardinality-estimation",
+        "chỉ mục không gian spatial index cho truy vấn gần đây và trong vùng quadtree chia ô đệ quy và k-d tree chia theo trục r-tree bao đối tượng trong hình chữ nhật lồng nhau bounding box": "spatial-indexing-quadtrees-and-r-trees",
+        "geohash biến toạ độ 2d thành chuỗi số một chiều sắp xếp được đan xen bit vĩ độ kinh độ theo đường z-order morton curve điểm gần nhau thường chung tiền tố prefix geohash": "geohashing-and-spatial-hashing",
+        "minhash ước lượng độ tương đồng jaccard của tập từ chữ ký nhỏ locality-sensitive hashing lsh băm item giống nhau vào cùng thùng tìm gần trùng near-duplicate không so sánh mọi cặp": "minhash-and-locality-sensitive-hashing",
+        "sketch phân vị và percentile xấp xỉ p99 p999 trong bộ nhớ nhỏ t-digest ddsketch gk sai số có chặn không được lấy trung bình của percentile gộp merge nhiều shard": "quantile-sketches-and-approximate-percentiles",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
