@@ -1783,6 +1783,28 @@ def test_skills_os_kernel_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_811():
+    from app import skills
+    assert len(skills._SKILLS) >= 811
+
+
+def test_skills_db_engine_batch_topics_match():
+    from app import skills
+    cases = {
+        "bể đệm buffer pool cơ sở dữ liệu cache trang đĩa trong ram chính sách thay thế trang page replacement ghim trang pinning và trang bẩn dirty page lru hỏng khi quét lớn sequential flooding": "buffer-pool-and-page-replacement",
+        "ước lượng lực lượng cardinality estimation đoán số dòng mỗi bước thống kê bảng histogram và số giá trị phân biệt distinct ước lượng sai gây kế hoạch thảm hoạ giả định độc lập sai": "cardinality-estimation-and-statistics",
+        "thuật toán join vật lý nested-loop hash join sort-merge hash join tốt nhất cho equi-join lớn không sắp xếp nested loop trên bảng lớn là thảm hoạ": "join-algorithms-hash-merge-nested-loop",
+        "đẩy điều kiện lọc predicate pushdown xuống gần nguồn dữ liệu nhất cắt tỉa cột projection pruning chỉ đọc cột cần cắt phân vùng partition pruning đọc ít byte từ kho cột parquet": "predicate-pushdown-and-projection-pruning",
+        "khoá hai pha two-phase locking 2pl đảm bảo giao dịch tuần tự hoá pha tăng lấy khoá và pha giảm nhả khoá bế tắc deadlock và phát hiện bằng đồ thị chờ wait-for": "two-phase-locking-and-deadlocks",
+        "mức cô lập isolation level và các bất thường đồng thời đọc bẩn dirty read đọc không lặp lại non-repeatable phantom mất cập nhật lost update và write skew read committed serializable": "isolation-levels-and-anomalies",
+        "index bao phủ covering index và quét chỉ mục index-only scan index chứa đủ mọi cột truy vấn cần bỏ qua tra bảng cột include đính kèm payload ngoài khoá": "covering-indexes-and-index-only-scans",
+        "biên dịch truy vấn và sinh mã code generation cho engine cơ sở dữ liệu mô hình volcano diễn giải từng dòng tốn chi phí thực thi vector hoá xử lý lô cột qua toán tử biên dịch jit sinh mã máy": "query-compilation-and-code-generation",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
