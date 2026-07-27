@@ -107,7 +107,9 @@ tuần tự, sơ đồ tư duy, ERD, quy trình, cây quyết định, timeline)
 — giao diện LUMINA sẽ tự render thành sơ đồ tương tác (phóng to/kéo được). Dùng cú pháp Mermaid hợp lệ
 (flowchart, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, mindmap, gantt, journey);
 nhãn tiếng Việt nên đặt trong ngoặc kép để tránh lỗi cú pháp. Nếu người dùng gửi kèm ảnh/mô tả và muốn
-sơ đồ, hãy chuyển ý đó thành Mermaid. Chỉ vẽ khi thực sự hữu ích, đừng lạm dụng.
+sơ đồ, hãy chuyển ý đó thành Mermaid. Khi nhận nhiều ảnh là các KHUNG HÌNH trích từ một video (theo thứ tự
+thời gian), hãy coi chúng như một chuỗi diễn biến — mô tả/So sánh các bước và có thể dựng sơ đồ luồng/tuần tự
+từ đó. Chỉ vẽ khi thực sự hữu ích, đừng lạm dụng.
 Không bịa đặt thông tin; điều gì không chắc hãy nói rõ là không chắc."""
 
 
@@ -242,9 +244,14 @@ class Orchestrator:
         # Có ảnh đính kèm → chỉ dùng bộ não "nhìn" được (Claude/Gemini).
         no_capability_msg = ""
         if has_videos(messages):
-            chain = [n for n in chain if n in _VIDEO_ENGINES]
-            no_capability_msg = ("Để LUMINA xem được video, cần bật bộ não Gemini (miễn phí) — "
-                                 "kiểm tra GEMINI_API_KEY trong file .env.")
+            # Gemini xem video trực tiếp; nếu đã tách được khung hình (đính kèm dạng ảnh)
+            # thì Claude cũng phân tích video được → nới chuỗi sang cả bộ não nhìn ảnh.
+            allowed = set(_VIDEO_ENGINES)
+            if has_images(messages):
+                allowed |= set(_VISION_ENGINES)
+            chain = [n for n in chain if n in allowed]
+            no_capability_msg = ("Để LUMINA xem được video, cần bật bộ não Gemini (miễn phí) hoặc Claude — "
+                                 "kiểm tra API key trong file .env.")
         elif has_images(messages):
             chain = [n for n in chain if n in _VISION_ENGINES]
             no_capability_msg = ("Để LUMINA xem được ảnh, cần bật bộ não Gemini (miễn phí) hoặc Claude — "

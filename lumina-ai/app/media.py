@@ -5,8 +5,14 @@ Frontend gửi ảnh/video dưới dạng data URL: `data:image/png;base64,AAAA.
 KHÔNG nhận video — Anthropic API chưa hỗ trợ video trực tiếp).
 """
 
+import asyncio
 import base64
+import logging
+import os
 import re
+import tempfile
+
+logger = logging.getLogger("lumina.media")
 
 _DATA_URL_RE = re.compile(r"^data:(?P<mt>[\w./+-]+);base64,(?P<data>.+)$", re.DOTALL)
 
@@ -67,3 +73,98 @@ def has_images(messages: list[dict]) -> bool:
 def has_videos(messages: list[dict]) -> bool:
     """Có tin nhắn nào kèm video không — hiện chỉ Gemini xem được video."""
     return any(m.get("videos") for m in messages)
+
+
+# ─── 🎞 Tách khung hình video → ảnh (để MỌI bộ não "nhìn" video + dựng sơ đồ) ──
+#
+# Anthropic API chưa nhận video trực tiếp, chỉ nhận ảnh. Để LUMINA hiểu được video
+# bằng bất kỳ bộ não nhìn được (Claude/Gemini) và có thể dựng sơ đồ từ video, ta
+# tách vài khung hình đại diện rải đều theo thời lượng rồi gửi kèm như ẢNH.
+# Dùng ffmpeg tĩnh mang sẵn qua imageio-ffmpeg (KHÔNG cần cài đặt hệ thống) —
+# cùng cơ chế đã dùng cho lồng tiếng/phụ đề.
+
+FRAME_COUNT = 6          # số khung hình lấy ra (đủ để nắm nội dung, không tốn quá nhiều token)
+FRAME_MAX_DIM = 768      # cạnh dài tối đa mỗi khung (thu nhỏ để giảm payload)
+_DURATION_RE = re.compile(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)")
+
+
+def _ffmpeg_exe() -> str | None:
+    try:
+        import imageio_ffmpeg
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Không tìm thấy ffmpeg (imageio-ffmpeg): %s", e)
+        return None
+
+
+async def _probe_duration(exe: str, path: str) -> float:
+    """Đọc thời lượng video (giây) từ stderr của ffmpeg. 0 nếu không xác định."""
+    proc = await asyncio.create_subprocess_exec(
+        exe, "-i", path,
+        stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE,
+    )
+    _, stderr = await proc.communicate()
+    m = _DURATION_RE.search(stderr.decode(errors="ignore"))
+    if not m:
+        return 0.0
+    h, mnt, sec = m.groups()
+    return int(h) * 3600 + int(mnt) * 60 + float(sec)
+
+
+async def _grab_frame(exe: str, path: str, ts: float) -> str | None:
+    """Lấy 1 khung hình tại mốc `ts` giây → data URL JPEG (thu nhỏ). None nếu lỗi."""
+    args = [
+        exe, "-ss", f"{ts:.2f}", "-i", path, "-frames:v", "1",
+        "-vf", f"scale='min({FRAME_MAX_DIM},iw)':-2",
+        "-q:v", "5", "-f", "mjpeg", "pipe:1",
+    ]
+    proc = await asyncio.create_subprocess_exec(
+        exe, *args[1:], stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL,
+    )
+    out, _ = await proc.communicate()
+    if proc.returncode != 0 or not out:
+        return None
+    return "data:image/jpeg;base64," + base64.b64encode(out).decode("ascii")
+
+
+async def extract_video_frames(video_data_url: str, count: int = FRAME_COUNT) -> list[str]:
+    """Tách `count` khung hình rải đều theo thời lượng → danh sách data URL ảnh JPEG.
+
+    Trả [] nếu thiếu ffmpeg, video hỏng, hoặc bất kỳ lỗi nào — để phần gọi tự lùi
+    về hành vi cũ (chỉ Gemini xem video trực tiếp) mà không vỡ luồng.
+    """
+    exe = _ffmpeg_exe()
+    if not exe:
+        return []
+    data = decode_video(video_data_url)
+    if not data:
+        return []
+    tmp_path = None
+    try:
+        fd, tmp_path = tempfile.mkstemp(suffix=".mp4")
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+        duration = await _probe_duration(exe, tmp_path)
+        if duration and duration > 0.3:
+            # Rải đều, tránh sát đầu/cuối (dễ dính khung đen).
+            timestamps = [duration * (i + 0.5) / count for i in range(count)]
+        else:
+            # Không đọc được thời lượng → dùng mốc cố định tăng dần.
+            timestamps = [0.5 + i * 2.0 for i in range(count)]
+        frames: list[str] = []
+        for ts in timestamps:
+            frame = await _grab_frame(exe, tmp_path, ts)
+            if frame:
+                frames.append(frame)
+        if frames:
+            logger.info("Đã tách %d khung hình từ video (thời lượng ~%.1fs).", len(frames), duration)
+        return frames
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Tách khung hình video thất bại: %s", e)
+        return []
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass

@@ -373,10 +373,19 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
 
     # Ảnh/video chỉ gắn vào lượt hiện tại để bộ não "nhìn"; lịch sử cũ chỉ có chữ.
     current_turn = {"role": "user", "content": effective_message}
-    if body.images:
-        current_turn["images"] = [img for img in body.images if img]
+    turn_images = [img for img in body.images if img] if body.images else []
+    n_video_frames = 0
     if body.videos:
         current_turn["videos"] = [v for v in body.videos if v]
+        # 🎞 Tách khung hình để MỌI bộ não nhìn được video (không chỉ Gemini) và để
+        # dựng được sơ đồ từ video. Bỏ qua ở chế độ 📝 Phụ đề (cần video/âm thanh gốc).
+        if body.mode != "subtitle" and current_turn["videos"]:
+            frames = await media.extract_video_frames(current_turn["videos"][0])
+            if frames:
+                n_video_frames = len(frames)
+                turn_images = (turn_images + frames)[:8]   # giới hạn tổng số ảnh/lượt
+    if turn_images:
+        current_turn["images"] = turn_images
     messages = trim_history(history + [current_turn], CONFIG["MAX_CONTEXT_TOKENS"])
 
     # Tầng free chỉ có 2 "chế độ": tìm kiếm hay không (engine free không có tư duy sâu như Claude).
@@ -399,6 +408,11 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
             "type": "router", "mode": route.mode, "label": display_label,
             "conversation_id": conv_id,
         })
+        if n_video_frames:
+            yield _sse({
+                "type": "search_status", "tool": "video_frames",
+                "query": f"{n_video_frames} khung hình",
+            })
         ok_pages = [p for p in fetched_pages if not p.get("error")]
         if ok_pages:
             yield _sse({

@@ -769,6 +769,37 @@ def test_video_dub_ffmpeg_pipeline_real():
     asyncio.get_event_loop().run_until_complete(go())
 
 
+def test_extract_video_frames_real():
+    """🎞 Tách khung hình video thật bằng ffmpeg → ảnh JPEG data URL cho bộ não nhìn."""
+    import asyncio
+    import base64
+    import os
+    import tempfile
+    from app import media
+    from app.video_dub import _run_ffmpeg
+
+    async def go():
+        work = tempfile.mkdtemp()
+        vid = os.path.join(work, "clip.mp4")
+        await _run_ffmpeg(["-f", "lavfi", "-i", "testsrc=duration=4:size=320x240:rate=10",
+                           "-pix_fmt", "yuv420p", "-y", vid])
+        data_url = "data:video/mp4;base64," + base64.b64encode(open(vid, "rb").read()).decode()
+
+        frames = await media.extract_video_frames(data_url, count=4)
+        assert len(frames) == 4
+        for f in frames:
+            assert f.startswith("data:image/jpeg;base64,")
+            raw = base64.b64decode(f.split(",", 1)[1])
+            assert raw[:2] == b"\xff\xd8"          # JPEG magic
+            assert len(raw) > 300                    # là ảnh thật, không rỗng
+
+        # Video hỏng / không hợp lệ → trả [] (lùi an toàn về hành vi cũ, không vỡ luồng).
+        assert await media.extract_video_frames("data:video/mp4;base64,QUJD") == []
+        assert await media.extract_video_frames("không phải data url") == []
+
+    asyncio.get_event_loop().run_until_complete(go())
+
+
 # ── Trí nhớ dài hạn: nhớ lại hội thoại CŨ khi mở hội thoại MỚI ──────────────
 
 def test_recall_finds_relevant_past_conversation():

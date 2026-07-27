@@ -37,7 +37,7 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 | Tính năng | Cách dùng | Cần gì |
 |---|---|---|
 | 🖼 **Xem / hiểu ảnh** | Bấm 📎 đính kèm ảnh → hỏi "ảnh này là gì?" | Gemini (free) hoặc Claude — có sẵn |
-| 🎬 **Xem / hiểu video** | Bấm 📎 đính kèm video (≤~18MB) → hỏi về nội dung | Chỉ **Gemini** xem được video (Claude/OpenAI chưa hỗ trợ) |
+| 🎬 **Xem / hiểu video** | Bấm 📎 đính kèm video (≤~18MB) → hỏi về nội dung, hoặc "vẽ sơ đồ các bước trong video" | **Gemini** xem trực tiếp (cả âm thanh/chuyển động); ngoài ra LUMINA tự **tách 6 khung hình** rải đều → **Claude** (và mọi bộ não nhìn ảnh) cũng phân tích video & dựng sơ đồ được. Dùng ffmpeg tĩnh nhúng sẵn (imageio-ffmpeg), không cần cài đặt |
 | 📄 **Đọc tệp** | Bấm 📎 đính kèm PDF/Word/Excel/txt → hỏi về nội dung | Đọc chữ trực tiếp — mọi bộ não đều dùng được |
 | 🌐 **Đọc link dán trong chat** | Dán bất kỳ link http(s) nào vào câu hỏi → LUMINA tự tải và đọc nội dung trang | **Mọi bộ não** (server tự tải trang, không phụ thuộc Claude/chế độ tìm kiếm) |
 | 🔬 **Nghiên cứu sâu** | Bấm nút **🔬 Nghiên cứu sâu** hoặc gõ "nghiên cứu sâu về…" → LUMINA tìm nhiều nguồn, viết báo cáo có trích dẫn | Bộ não có tìm kiếm (Gemini/Claude) |

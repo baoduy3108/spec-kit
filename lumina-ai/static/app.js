@@ -733,6 +733,7 @@
               : ev.tool === "web_fetch" ? "🌐 Đang đọc trang: "
               : ev.tool === "skill" ? "🧩 Áp dụng kỹ năng: "
               : ev.tool === "learned" ? "🧠 Đã tiếp thu & ghi nhớ: "
+              : ev.tool === "video_frames" ? "🎞 Đã tách khung hình video: "
               : "🔍 Đang tìm kiếm: ";
             chip.textContent = prefix + (ev.query || "…");
             el.body.insertBefore(chip, el.content);
