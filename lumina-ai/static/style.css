@@ -840,3 +840,28 @@ a.widget-link:hover { color: var(--accent-2); text-decoration: underline; }
   font-size: 12.5px; cursor: pointer;
 }
 .lang-select:hover { border-color: var(--accent); }
+
+/* ── Agent tùy chỉnh ───────────────────────────────────── */
+.proj-item .edit { opacity: 0; border: 0; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 12px; }
+.proj-item:hover .edit { opacity: .7; }
+.proj-item .edit:hover { opacity: 1; color: var(--accent-2); }
+.agent-form { display: flex; flex-direction: column; gap: 12px; }
+.agent-row { display: flex; gap: 10px; }
+.agent-emoji {
+  width: 54px; text-align: center; font-size: 20px; background: var(--bg-3);
+  border: 1px solid var(--border); border-radius: 10px; color: var(--text); padding: 8px;
+}
+.agent-name-input, .agent-instructions {
+  flex: 1; background: var(--bg-3); border: 1px solid var(--border); border-radius: 10px;
+  color: var(--text); padding: 10px 12px; font-family: inherit; font-size: 14px;
+}
+.agent-instructions { width: 100%; resize: vertical; line-height: 1.6; }
+.agent-name-input:focus, .agent-instructions:focus, .agent-emoji:focus { outline: none; border-color: var(--accent); }
+.agent-active-bar {
+  display: flex; align-items: center; gap: 8px; margin: 0 0 8px;
+  align-self: flex-start; padding: 5px 10px; border-radius: 999px;
+  background: rgba(139,124,248,.14); border: 1px solid var(--border); font-size: 12.5px; color: var(--text);
+}
+.agent-active-bar .agent-active-name { font-weight: 600; }
+.agent-off { border: 0; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 12px; }
+.agent-off:hover { color: #ff8a80; }

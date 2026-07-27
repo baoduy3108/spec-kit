@@ -906,6 +906,80 @@ def test_projects_crud_and_widgets_and_conv_assign():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+def test_agents_crud_and_isolation():
+    """🤖 Agent tùy chỉnh: tạo/sửa/xóa, cần instructions, cô lập theo người dùng."""
+    from fastapi.testclient import TestClient
+    from app import auth
+    from app.main import app
+
+    uid = _new_user_id()
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "T", "picture": "", "is_admin": False}
+    try:
+        client = TestClient(app)
+        # thiếu instructions → 400
+        assert client.post("/api/agents", json={"name": "X", "instructions": ""}).status_code == 400
+        # tạo
+        r = client.post("/api/agents", json={"name": "Trợ lý MKT", "emoji": "📣",
+                                             "instructions": "Bạn là chuyên gia marketing, trả lời ngắn gọn."})
+        assert r.status_code == 200
+        aid = r.json()["id"]
+        assert r.json()["emoji"] == "📣"
+        assert any(a["id"] == aid for a in client.get("/api/agents").json()["agents"])
+        # sửa
+        assert client.put(f"/api/agents/{aid}", json={"name": "MKT Pro"}).json()["name"] == "MKT Pro"
+
+        # người dùng khác không thấy / không xóa được
+        other = _new_user_id()
+        app.dependency_overrides[auth.require_user] = lambda: {"id": other, "email": f"{other}@x.com",
+                                                               "name": "O", "picture": "", "is_admin": False}
+        assert client.delete(f"/api/agents/{aid}").status_code == 404
+        assert all(a["id"] != aid for a in client.get("/api/agents").json()["agents"])
+        # chủ xóa được
+        app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                               "name": "T", "picture": "", "is_admin": False}
+        assert client.delete(f"/api/agents/{aid}").status_code == 200
+    finally:
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
+def test_orchestrator_injects_agent_instructions():
+    """system_extra (hướng dẫn agent) được chèn vào system prompt của orchestrator."""
+    import asyncio
+    from app.orchestrator import orchestrator
+    from app.router import decide_route
+
+    captured = {}
+
+    class _FakeEngine:
+        def available(self): return True
+        class breaker:
+            @staticmethod
+            def allow_request(): return True
+            @staticmethod
+            def record_success(): pass
+        async def stream_chat(self, messages, route, system_prompt):
+            captured["sys"] = system_prompt
+            yield {"type": "text", "text": "ok"}
+
+    route = decide_route("chào bạn", history_len=0, apex_allowed=False, force_mode=None)
+    orig = dict(orchestrator.engines)
+    orig_chain = list(orchestrator.free_chain)
+    try:
+        orchestrator.engines["claude"] = _FakeEngine()
+        orchestrator.free_chain = []  # chỉ dùng claude giả
+        async def go():
+            async for _ in orchestrator.run([{"role": "user", "content": "chào bạn"}], route,
+                                            use_premium=True, system_extra="Bạn LUÔN nói như hải tặc."):
+                pass
+        asyncio.get_event_loop().run_until_complete(go())
+    finally:
+        orchestrator.engines = orig
+        orchestrator.free_chain = orig_chain
+    assert "hải tặc" in captured.get("sys", "")
+    assert "HƯỚNG DẪN AGENT TÙY CHỈNH" in captured.get("sys", "")
+
+
 def test_video_link_build_context_and_whisper_gate():
     from app import video_link, transcribe
 

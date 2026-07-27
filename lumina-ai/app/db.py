@@ -60,6 +60,15 @@ def _init_schema(conn: sqlite3.Connection):
         created_at INTEGER,
         updated_at INTEGER
     );
+    CREATE TABLE IF NOT EXISTS agents (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        emoji TEXT DEFAULT '🤖',
+        instructions TEXT NOT NULL DEFAULT '',  -- persona/system-prompt do người dùng tạo
+        created_at INTEGER,
+        updated_at INTEGER
+    );
     CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY,                  -- mã đơn ngắn, dùng làm nội dung chuyển khoản SePay
         user_id TEXT NOT NULL,
@@ -191,6 +200,66 @@ def delete_project(project_id: str, user_id: str) -> bool:
         conn.execute("DELETE FROM projects WHERE id=? AND user_id=?", (project_id, user_id))
         conn.commit()
         return True
+
+
+def create_agent(user_id: str, name: str, instructions: str, emoji: str = "🤖") -> str:
+    with _lock:
+        conn = get_conn()
+        aid = uuid.uuid4().hex
+        now = int(time.time())
+        conn.execute(
+            "INSERT INTO agents(id, user_id, name, emoji, instructions, created_at, updated_at) "
+            "VALUES(?,?,?,?,?,?,?)",
+            (aid, user_id, (name or "Agent").strip()[:60], (emoji or "🤖").strip()[:8],
+             (instructions or "").strip()[:4000], now, now),
+        )
+        conn.commit()
+        return aid
+
+
+def list_agents(user_id: str) -> list[dict]:
+    with _lock:
+        rows = get_conn().execute(
+            "SELECT id, name, emoji, instructions, updated_at FROM agents "
+            "WHERE user_id=? ORDER BY updated_at DESC",
+            (user_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_agent(agent_id: str, user_id: str) -> dict | None:
+    with _lock:
+        row = get_conn().execute(
+            "SELECT * FROM agents WHERE id=? AND user_id=?", (agent_id, user_id)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def update_agent(agent_id: str, user_id: str, name: str | None = None,
+                 instructions: str | None = None, emoji: str | None = None) -> bool:
+    with _lock:
+        conn = get_conn()
+        cur = conn.execute(
+            "SELECT id FROM agents WHERE id=? AND user_id=?", (agent_id, user_id)).fetchone()
+        if not cur:
+            return False
+        if name is not None:
+            conn.execute("UPDATE agents SET name=? WHERE id=?", ((name or "Agent").strip()[:60], agent_id))
+        if emoji is not None:
+            conn.execute("UPDATE agents SET emoji=? WHERE id=?", ((emoji or "🤖").strip()[:8], agent_id))
+        if instructions is not None:
+            conn.execute("UPDATE agents SET instructions=? WHERE id=?", ((instructions or "").strip()[:4000], agent_id))
+        conn.execute("UPDATE agents SET updated_at=? WHERE id=?", (int(time.time()), agent_id))
+        conn.commit()
+        return True
+
+
+def delete_agent(agent_id: str, user_id: str) -> bool:
+    with _lock:
+        conn = get_conn()
+        cur = conn.execute("DELETE FROM agents WHERE id=? AND user_id=?", (agent_id, user_id))
+        conn.commit()
+        return cur.rowcount > 0
 
 
 def assign_conversation_project(conv_id: str, user_id: str, project_id: str | None) -> bool:

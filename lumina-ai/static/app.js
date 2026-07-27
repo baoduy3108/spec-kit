@@ -15,6 +15,8 @@
     attachedFiles: [],    // [{ name, dataUrl }] — PDF/Word/Excel/txt, tối đa 3
     forceMode: null,      // null | "image" | "research" | "subtitle" | "agent" — nút ép chế độ
     projectId: null,      // project mà hội thoại mới sẽ gắn vào (mặt bàn đang mở); null = ngoài project
+    agentId: null,        // Agent tùy chỉnh đang bật; null = LUMINA mặc định
+    agentEditId: null,    // agent đang sửa trong modal (null = tạo mới)
   };
 
   const PLAN_LABELS = { free: "Miễn phí", monthly: "Tháng", yearly: "Năm" };
@@ -23,7 +25,8 @@
   const I18N = {
     vi: {
       newChat: "＋ Cuộc trò chuyện mới", projects: "◧ Mặt bàn (Project)", chats: "Trò chuyện",
-      newProject: "Tạo project mới", upgrade: "✦ Nâng cấp", dub: "🗣 Lồng tiếng phim",
+      newProject: "Tạo project mới", agents: "🤖 Agent của tôi", newAgent: "Tạo agent mới",
+      upgrade: "✦ Nâng cấp", dub: "🗣 Lồng tiếng phim",
       learn: "✦ Bộ não LUMINA: Attention & MoE", orders: "🛠 Đơn hàng", logout: "Đăng xuất",
       topNew: "Cuộc trò chuyện mới", attach: "Đính kèm ảnh / video / tệp để LUMINA xem",
       inputPh: "Nhắn tin cho LUMINA…", mic: "Nói bằng giọng", send: "Gửi",
@@ -34,7 +37,8 @@
     },
     en: {
       newChat: "＋ New chat", projects: "◧ Projects", chats: "Chats",
-      newProject: "New project", upgrade: "✦ Upgrade", dub: "🗣 Dub a video",
+      newProject: "New project", agents: "🤖 My Agents", newAgent: "New agent",
+      upgrade: "✦ Upgrade", dub: "🗣 Dub a video",
       learn: "✦ Inside LUMINA: Attention & MoE", orders: "🛠 Orders", logout: "Sign out",
       topNew: "New chat", attach: "Attach image / video / file for LUMINA to see",
       inputPh: "Message LUMINA…", mic: "Speak", send: "Send",
@@ -45,7 +49,8 @@
     },
     zh: {
       newChat: "＋ 新对话", projects: "◧ 项目", chats: "对话",
-      newProject: "新建项目", upgrade: "✦ 升级", dub: "🗣 视频配音",
+      newProject: "新建项目", agents: "🤖 我的智能体", newAgent: "新建智能体",
+      upgrade: "✦ 升级", dub: "🗣 视频配音",
       learn: "✦ LUMINA 内部：Attention 与 MoE", orders: "🛠 订单", logout: "退出登录",
       topNew: "新对话", attach: "附加图片 / 视频 / 文件让 LUMINA 查看",
       inputPh: "给 LUMINA 发消息…", mic: "语音输入", send: "发送",
@@ -490,6 +495,8 @@
     renderPlanBox();
     loadConversations();
     loadProjects();
+    loadAgents();
+    updateAgentBadge();
   }
 
   function renderPlanBox() {
@@ -771,6 +778,77 @@
     }
   }
 
+  // ── Agent tùy chỉnh (persona người dùng tự tạo) ───────────────────────────
+  async function loadAgents() {
+    let data;
+    try { data = await api("/api/agents"); } catch { return; }
+    const list = $("agent-list");
+    list.innerHTML = "";
+    for (const a of data.agents) {
+      const item = document.createElement("div");
+      item.className = "proj-item" + (a.id === state.agentId ? " active" : "");
+      item.innerHTML = `<span class="title"></span><button class="edit" title="Sửa">✎</button><button class="del" title="Xóa">✕</button>`;
+      item.querySelector(".title").textContent = (a.emoji || "🤖") + " " + a.name;
+      item.querySelector(".title").addEventListener("click", () => toggleAgent(a));
+      item.addEventListener("click", (e) => { if (e.target === item) toggleAgent(a); });
+      item.querySelector(".edit").addEventListener("click", (e) => { e.stopPropagation(); openAgentModal(a); });
+      item.querySelector(".del").addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm(`Xóa agent "${a.name}"?`)) return;
+        await api(`/api/agents/${a.id}`, { method: "DELETE" });
+        if (state.agentId === a.id) { state.agentId = null; updateAgentBadge(); }
+        loadAgents();
+      });
+      list.appendChild(item);
+    }
+  }
+
+  function toggleAgent(a) {
+    state.agentId = state.agentId === a.id ? null : a.id;
+    updateAgentBadge();
+    loadAgents();
+  }
+
+  function updateAgentBadge() {
+    const bar = $("agent-active-bar");
+    if (!bar) return;
+    if (!state.agentId) { bar.classList.add("hidden"); return; }
+    api("/api/agents").then((d) => {
+      const a = (d.agents || []).find((x) => x.id === state.agentId);
+      if (!a) { bar.classList.add("hidden"); return; }
+      bar.classList.remove("hidden");
+      bar.querySelector(".agent-active-name").textContent = (a.emoji || "🤖") + " " + a.name;
+    }).catch(() => {});
+  }
+
+  function openAgentModal(agent) {
+    state.agentEditId = agent ? agent.id : null;
+    $("agent-modal-title").textContent = agent ? "🤖 Sửa Agent" : "🤖 Tạo Agent";
+    $("agent-emoji").value = agent ? (agent.emoji || "🤖") : "🤖";
+    $("agent-name").value = agent ? agent.name : "";
+    $("agent-instructions").value = agent ? (agent.instructions || "") : "";
+    $("agent-modal").classList.remove("hidden");
+  }
+
+  async function saveAgent() {
+    const name = $("agent-name").value.trim();
+    const emoji = $("agent-emoji").value.trim() || "🤖";
+    const instructions = $("agent-instructions").value.trim();
+    if (!instructions) { alert("Agent cần có phần hướng dẫn."); return; }
+    const payload = { name: name || "Agent mới", emoji, instructions };
+    try {
+      if (state.agentEditId) {
+        await api(`/api/agents/${state.agentEditId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      } else {
+        const a = await api("/api/agents", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        state.agentId = a.id;  // bật agent vừa tạo
+      }
+    } catch (e) { alert("Lỗi lưu agent: " + e.message); return; }
+    $("agent-modal").classList.add("hidden");
+    updateAgentBadge();
+    loadAgents();
+  }
+
   async function createProject() {
     const name = prompt("Tên project (mặt bàn) mới:", "Project của tôi");
     if (name === null) return;
@@ -1041,6 +1119,7 @@
           message: text,
           conversation_id: state.conversationId,
           project_id: state.conversationId ? null : state.projectId,
+          agent_id: state.agentId,
           images: images,
           videos: video ? [video.dataUrl] : [],
           files: attachedFiles.map((f) => ({ name: f.name, data_url: f.dataUrl })),
@@ -1337,6 +1416,9 @@
   $("send").addEventListener("click", sendMessage);
   $("new-chat").addEventListener("click", newChat);
   $("new-project").addEventListener("click", createProject);
+  $("new-agent").addEventListener("click", () => openAgentModal(null));
+  $("agent-save").addEventListener("click", saveAgent);
+  $("agent-off").addEventListener("click", () => { state.agentId = null; updateAgentBadge(); loadAgents(); });
   $("lang-select")?.addEventListener("change", (e) => setLang(e.target.value));
   $("toggle-sidebar").addEventListener("click", () => $("sidebar").classList.toggle("collapsed"));
   document.querySelectorAll(".suggestion").forEach((btn) =>

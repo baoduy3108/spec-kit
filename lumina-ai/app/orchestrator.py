@@ -187,7 +187,8 @@ class Orchestrator:
         yield {"type": "final", "usage": {}, "stop_reason": "end_turn"}
 
     async def run(
-        self, messages: list[dict], route: RouteDecision, use_premium: bool = True
+        self, messages: list[dict], route: RouteDecision, use_premium: bool = True,
+        system_extra: str = "",
     ) -> AsyncIterator[dict]:
         """Chạy qua chuỗi engine của tầng tương ứng; phát event như BaseEngine.stream_chat.
 
@@ -221,6 +222,13 @@ class Orchestrator:
         # trong thư mục data/ trước (0 token), thiếu thì "học" từ Wikipedia (miễn phí)
         # rồi lưu lại. Tư liệu kèm link nguồn + chỉ thị đối chiếu chéo (chống bịp).
         system_prompt = SYSTEM_PROMPT
+        # 🤖 Agent tùy chỉnh của người dùng: chèn hướng dẫn/persona đã lưu (nếu có).
+        if system_extra:
+            system_prompt += (
+                "\n\n[HƯỚNG DẪN AGENT TÙY CHỈNH của người dùng — tuân theo trong khi vẫn giữ "
+                "các nguyên tắc an toàn/thành thật của LUMINA và KHÔNG lộ tên model:\n"
+                f"{system_extra.strip()[:4000]}\n]"
+            )
         # 🧠 "Dạy LUMINA": nếu người dùng RA LỆNH ghi nhớ điều gì đó → tiếp thu vào kho
         # tri thức (source="user") để tái dùng về sau — workflow tiến hoá theo người dùng.
         # Chạy ở MỌI chế độ (không phụ thuộc web_search) và không bao giờ làm hỏng chat.

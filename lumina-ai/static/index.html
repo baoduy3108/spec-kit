@@ -38,6 +38,12 @@
       </div>
       <nav id="project-list" class="project-list"></nav>
 
+      <div class="proj-head">
+        <span data-i18n="agents">🤖 Agent của tôi</span>
+        <button id="new-agent" class="proj-add" data-i18n-title="newAgent" title="Tạo agent mới">＋</button>
+      </div>
+      <nav id="agent-list" class="project-list"></nav>
+
       <div class="conv-head" data-i18n="chats">Trò chuyện</div>
       <nav id="conv-list" class="conv-list"></nav>
 
@@ -90,6 +96,10 @@
       </div>
 
       <div class="composer-wrap">
+        <div id="agent-active-bar" class="agent-active-bar hidden">
+          <span class="agent-active-name"></span>
+          <button id="agent-off" class="agent-off" title="Tắt agent">✕</button>
+        </div>
         <div id="attach-preview" class="attach-preview hidden"></div>
         <div class="composer">
           <button id="attach-btn" class="composer-icon" data-i18n-title="attach" title="Đính kèm ảnh / video / tệp để LUMINA xem">📎</button>
@@ -109,6 +119,24 @@
                multiple hidden>
       </div>
     </main>
+  </div>
+
+  <!-- ── Modal tạo / sửa Agent tùy chỉnh ────────────────── -->
+  <div id="agent-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:560px">
+      <button class="modal-close" data-close="agent-modal">✕</button>
+      <h2 class="modal-title" id="agent-modal-title">🤖 Tạo Agent</h2>
+      <p class="payment-desc">Agent = một "trợ lý riêng" bạn tự định nghĩa: đặt tên, tính cách và hướng dẫn. Khi chọn agent, LUMINA sẽ làm theo hướng dẫn đó (vẫn giữ an toàn/không lộ model).</p>
+      <div class="agent-form">
+        <div class="agent-row">
+          <input id="agent-emoji" class="agent-emoji" maxlength="4" value="🤖" title="Emoji">
+          <input id="agent-name" class="agent-name-input" placeholder="Tên agent (VD: Trợ lý Marketing)" maxlength="60">
+        </div>
+        <textarea id="agent-instructions" class="agent-instructions" rows="8"
+          placeholder="Hướng dẫn / tính cách của agent…&#10;VD: Bạn là chuyên gia marketing. Luôn trả lời ngắn gọn, có gạch đầu dòng, kèm ví dụ thực tế và số liệu khi có thể."></textarea>
+        <button id="agent-save" class="upgrade-btn" style="width:100%">Lưu Agent</button>
+      </div>
+    </div>
   </div>
 
   <!-- ── Modal Nâng cấp gói ─────────────────────────────── -->

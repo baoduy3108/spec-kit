@@ -248,6 +248,48 @@ async def project_delete(project_id: str, user: dict = Depends(auth.require_user
     return {"ok": True}
 
 
+# ─── Agent tùy chỉnh (persona người dùng tạo — "môi trường tạo agent") ────────
+
+class _AgentCreate(BaseModel):
+    name: str = ""
+    emoji: str = "🤖"
+    instructions: str = ""
+
+
+class _AgentUpdate(BaseModel):
+    name: Optional[str] = None
+    emoji: Optional[str] = None
+    instructions: Optional[str] = None
+
+
+@app.get("/api/agents")
+async def agents_list(user: dict = Depends(auth.require_user)):
+    return {"agents": db.list_agents(user["id"])}
+
+
+@app.post("/api/agents")
+async def agent_create(body: _AgentCreate, user: dict = Depends(auth.require_user)):
+    if not body.instructions.strip():
+        raise HTTPException(status_code=400, detail="Agent cần có phần hướng dẫn (instructions).")
+    aid = db.create_agent(user["id"], body.name or "Agent mới", body.instructions, body.emoji or "🤖")
+    return db.get_agent(aid, user["id"])
+
+
+@app.put("/api/agents/{agent_id}")
+async def agent_update(agent_id: str, body: _AgentUpdate, user: dict = Depends(auth.require_user)):
+    if not db.update_agent(agent_id, user["id"], name=body.name,
+                           instructions=body.instructions, emoji=body.emoji):
+        raise HTTPException(status_code=404, detail="Không tìm thấy agent")
+    return db.get_agent(agent_id, user["id"])
+
+
+@app.delete("/api/agents/{agent_id}")
+async def agent_delete(agent_id: str, user: dict = Depends(auth.require_user)):
+    if not db.delete_agent(agent_id, user["id"]):
+        raise HTTPException(status_code=404, detail="Không tìm thấy agent")
+    return {"ok": True}
+
+
 # ─── Gói & thanh toán tự động ────────────────────────────────────────────────
 
 @app.get("/api/plans")
@@ -408,6 +450,12 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
     if use_premium and not orchestrator.engines["claude"].available() and orchestrator.has_free_engine():
         use_premium = False
 
+    # 🤖 Agent tùy chỉnh: nạp hướng dẫn/persona của agent (nếu người dùng chọn) để chèn vào system prompt.
+    agent_extra = ""
+    agent_obj = db.get_agent(body.agent_id, user["id"]) if body.agent_id else None
+    if agent_obj:
+        agent_extra = agent_obj.get("instructions") or ""
+
     # Hội thoại: tạo mới hoặc nối tiếp
     is_new_conversation = not body.conversation_id
     conv_id = body.conversation_id
@@ -561,7 +609,8 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
         answer_parts: list[str] = []
         citations: list[dict] = []
         try:
-            async for event in orchestrator.run(messages, route, use_premium=use_premium):
+            async for event in orchestrator.run(messages, route, use_premium=use_premium,
+                                                system_extra=agent_extra):
                 if event["type"] == "text":
                     answer_parts.append(event["text"])
                 elif event["type"] == "citations":
