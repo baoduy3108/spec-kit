@@ -94,6 +94,15 @@ def _init_schema(conn: sqlite3.Connection):
         content TEXT NOT NULL,                    -- nội dung câu trả lời/bản artifact
         created_at INTEGER
     );
+    CREATE TABLE IF NOT EXISTS journal (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        project_id TEXT,                          -- gắn với 1 project (tuỳ chọn)
+        kind TEXT NOT NULL DEFAULT 'note',        -- idea | decision | rejected | milestone | note
+        title TEXT NOT NULL,
+        note TEXT DEFAULT '',
+        created_at INTEGER
+    );
     CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY,                  -- mã đơn ngắn, dùng làm nội dung chuyển khoản SePay
         user_id TEXT NOT NULL,
@@ -434,6 +443,55 @@ def feedback_summary(user_id: str) -> dict:
     up = next((c for r, c in rows if r == 1), 0)
     down = next((c for r, c in rows if r == -1), 0)
     return {"up": up, "down": down, "total": up + down}
+
+
+def recent_feedback_notes(user_id: str, limit: int = 20) -> list[str]:
+    with _lock:
+        rows = get_conn().execute(
+            "SELECT note FROM feedback WHERE user_id=? AND rating=-1 AND note != '' "
+            "ORDER BY created_at DESC LIMIT ?", (user_id, limit),
+        ).fetchall()
+    return [r[0] for r in rows]
+
+
+# ─── AI Time Capsule (nhật ký tiến hoá: ý tưởng/quyết định/đã bỏ/cột mốc) ──────
+
+def add_journal(user_id: str, kind: str, title: str, note: str = "",
+                project_id: str | None = None) -> dict:
+    with _lock:
+        conn = get_conn()
+        jid = uuid.uuid4().hex
+        now = int(time.time())
+        k = kind if kind in ("idea", "decision", "rejected", "milestone", "note") else "note"
+        conn.execute(
+            "INSERT INTO journal(id, user_id, project_id, kind, title, note, created_at) "
+            "VALUES(?,?,?,?,?,?,?)",
+            (jid, user_id, project_id, k, (title or "").strip()[:200], (note or "").strip()[:2000], now),
+        )
+        conn.commit()
+        return {"id": jid, "kind": k, "title": (title or "").strip()[:200],
+                "note": (note or "").strip()[:2000], "created_at": now}
+
+
+def list_journal(user_id: str, project_id: str | None = None) -> list[dict]:
+    with _lock:
+        if project_id:
+            rows = get_conn().execute(
+                "SELECT id, project_id, kind, title, note, created_at FROM journal "
+                "WHERE user_id=? AND project_id=? ORDER BY created_at ASC", (user_id, project_id)).fetchall()
+        else:
+            rows = get_conn().execute(
+                "SELECT id, project_id, kind, title, note, created_at FROM journal "
+                "WHERE user_id=? ORDER BY created_at ASC", (user_id,)).fetchall()
+        return [dict(r) for r in rows]
+
+
+def delete_journal(entry_id: str, user_id: str) -> bool:
+    with _lock:
+        conn = get_conn()
+        cur = conn.execute("DELETE FROM journal WHERE id=? AND user_id=?", (entry_id, user_id))
+        conn.commit()
+        return cur.rowcount > 0
 
 
 def assign_conversation_project(conv_id: str, user_id: str, project_id: str | None) -> bool:

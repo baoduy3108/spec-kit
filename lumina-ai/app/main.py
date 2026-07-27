@@ -441,6 +441,62 @@ async def version_delete(version_id: str, user: dict = Depends(auth.require_user
     return {"ok": True}
 
 
+# ─── AI Time Capsule (nhật ký tiến hoá) + Evolution report ───────────────────
+
+class _JournalCreate(BaseModel):
+    kind: str = "note"        # idea | decision | rejected | milestone | note
+    title: str = ""
+    note: str = ""
+    project_id: Optional[str] = None
+
+
+@app.get("/api/journal")
+async def journal_list(project_id: str = "", user: dict = Depends(auth.require_user)):
+    return {"entries": db.list_journal(user["id"], project_id or None)}
+
+
+@app.post("/api/journal")
+async def journal_create(body: _JournalCreate, user: dict = Depends(auth.require_user)):
+    if not body.title.strip():
+        raise HTTPException(status_code=400, detail="Mục nhật ký cần tiêu đề.")
+    return db.add_journal(user["id"], body.kind, body.title, body.note, body.project_id or None)
+
+
+@app.delete("/api/journal/{entry_id}")
+async def journal_delete(entry_id: str, user: dict = Depends(auth.require_user)):
+    if not db.delete_journal(entry_id, user["id"]):
+        raise HTTPException(status_code=404, detail="Không tìm thấy mục nhật ký")
+    return {"ok": True}
+
+
+@app.post("/api/evolution/report")
+async def evolution_report(user: dict = Depends(auth.require_user)):
+    """✨ LUMINA tự đánh giá từ dữ liệu feedback THẬT → đề xuất cải tiến (chỉ gợi ý,
+    KHÔNG tự sửa code). Không có feedback → trả thông báo."""
+    summary = db.feedback_summary(user["id"])
+    notes = db.recent_feedback_notes(user["id"], 20)
+    if summary["total"] == 0:
+        return {"summary": summary, "report": "Chưa có đủ dữ liệu phản hồi (👍/👎) để đánh giá. "
+                "Hãy dùng LUMINA và bấm 👍/👎 dưới các câu trả lời — mình sẽ tổng hợp và đề xuất cải tiến."}
+    prompt = (
+        "Bạn đang tự đánh giá để tiến hoá. Dựa trên DỮ LIỆU PHẢN HỒI THẬT dưới đây, hãy: "
+        "(1) nhận xét ngắn về mức độ hữu ích, (2) đề xuất 3-5 CẢI TIẾN cụ thể, ưu tiên theo tác động. "
+        "Ngắn gọn, thực tế, tiếng Việt.\n"
+        f"- 👍 hữu ích: {summary['up']} · 👎 chưa tốt: {summary['down']}\n"
+        + ("- Ghi chú 'chưa tốt' gần đây:\n" + "\n".join(f"  • {n}" for n in notes) if notes else "- (không có ghi chú chi tiết)")
+    )
+    route = decide_route(prompt, history_len=0, apex_allowed=False, force_mode=None)
+    use_premium = not orchestrator.has_free_engine()
+    text = ""
+    try:
+        async for ev in orchestrator.run([{"role": "user", "content": prompt}], route, use_premium=use_premium):
+            if ev.get("type") == "text":
+                text += ev["text"]
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Evolution report lỗi: %s", e)
+    return {"summary": summary, "report": text.strip() or "Chưa tạo được báo cáo (cần bật ít nhất một bộ não)."}
+
+
 @app.get("/api/agents/{agent_id}/conversations")
 async def agent_conversations(agent_id: str, user: dict = Depends(auth.require_user)):
     """Các session (hội thoại) thuộc 1 agent — 'forge' là agent dựng sẵn.

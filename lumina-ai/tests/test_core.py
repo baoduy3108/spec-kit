@@ -977,6 +977,32 @@ def test_agents_crud_and_isolation():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+def test_journal_and_evolution_report():
+    """🕰 Time Capsule: ghi mục nhật ký + liệt kê theo thời gian; evolution report lùi an toàn khi chưa có feedback."""
+    from fastapi.testclient import TestClient
+    from app import auth
+    from app.main import app
+
+    uid = _new_user_id()
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "T", "picture": "", "is_admin": False}
+    try:
+        client = TestClient(app)
+        assert client.post("/api/journal", json={"title": ""}).status_code == 400
+        a = client.post("/api/journal", json={"kind": "idea", "title": "Ý tưởng A"}).json()
+        client.post("/api/journal", json={"kind": "rejected", "title": "Bỏ A", "note": "vì phức tạp"})
+        entries = client.get("/api/journal").json()["entries"]
+        assert len(entries) == 2 and entries[0]["title"] == "Ý tưởng A" and entries[0]["kind"] == "idea"
+        assert client.delete(f"/api/journal/{a['id']}").status_code == 200
+        assert len(client.get("/api/journal").json()["entries"]) == 1
+
+        # evolution report: chưa có feedback → thông báo, không raise
+        rep = client.post("/api/evolution/report").json()
+        assert rep["summary"]["total"] == 0 and "phản hồi" in rep["report"].lower()
+    finally:
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 def test_project_memory_and_feedback():
     """📌 Trí nhớ dự án lưu/đọc được; 👍/👎 feedback ghi nhận + tổng hợp."""
     from fastapi.testclient import TestClient

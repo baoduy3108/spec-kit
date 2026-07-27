@@ -972,6 +972,82 @@
     }
   }
 
+  // ── AI Time Capsule (nhật ký tiến hoá) + Evolution report ─────────────────
+  const JOURNAL_KINDS = { idea: "💡 Ý tưởng", decision: "✅ Quyết định", rejected: "🚫 Đã bỏ", milestone: "🏁 Cột mốc", note: "📝 Ghi chú" };
+
+  async function openJournal() {
+    state.conversationId = null;
+    $("messages").classList.add("hidden");
+    document.querySelector(".composer-wrap")?.classList.add("hidden");
+    $("topbar-title").textContent = "🕰 Nhật ký tiến hoá";
+    await renderJournal();
+  }
+
+  async function renderJournal() {
+    let entries = [];
+    try { entries = (await api("/api/journal")).entries || []; } catch {}
+    const dash = $("dashboard");
+    dash.classList.remove("hidden");
+    dash.innerHTML = "";
+
+    const head = el("div", "dash-head");
+    head.appendChild(el("div", "dash-title", "🕰 Nhật ký tiến hoá"));
+    const rep = el("button", "dash-btn primary", "✨ LUMINA tự đánh giá");
+    rep.addEventListener("click", async () => {
+      rep.textContent = "⏳ Đang phân tích feedback…"; rep.disabled = true;
+      let out = { report: "Lỗi." };
+      try { out = await api("/api/evolution/report", { method: "POST" }); } catch (e) { out.report = "Lỗi: " + e.message; }
+      const box = $("evo-report"); box.classList.remove("hidden");
+      box.innerHTML = ""; box.appendChild(el("div", "dash-subhead", "✨ Đề xuất cải tiến (từ dữ liệu feedback thật)"));
+      const body = el("div"); body.innerHTML = renderMarkdown(out.report || ""); box.appendChild(body);
+      rep.textContent = "✨ LUMINA tự đánh giá"; rep.disabled = false;
+    });
+    const actions = el("div", "dash-actions"); actions.appendChild(rep);
+    head.appendChild(actions);
+    dash.appendChild(head);
+    dash.appendChild(el("div", "dash-sub", "Ghi lại ý tưởng, quyết định, cái đã bỏ (và lý do), cột mốc — để sau này xem lại “tại sao quyết vậy, đã thử gì, sai gì”."));
+
+    const evo = el("div", "hidden"); evo.id = "evo-report"; dash.appendChild(evo);
+
+    // Form thêm mục
+    const form = el("div", "jr-form");
+    const sel = el("select", "jr-kind");
+    Object.entries(JOURNAL_KINDS).forEach(([k, lbl]) => { const o = el("option", null, lbl); o.value = k; sel.appendChild(o); });
+    const t = el("input", "goal-input"); t.placeholder = "Tiêu đề (VD: Bỏ Stripe vì chưa có merchant)"; t.maxLength = 200;
+    const n = el("input", "goal-input"); n.placeholder = "Lý do / ghi chú (tuỳ chọn)"; n.maxLength = 2000;
+    const addb = el("button", "dash-btn primary", "＋ Ghi");
+    const submit = async () => {
+      if (!t.value.trim()) return;
+      await api("/api/journal", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: sel.value, title: t.value.trim(), note: n.value.trim() }) });
+      t.value = ""; n.value = ""; renderJournal();
+    };
+    addb.addEventListener("click", submit);
+    t.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+    form.append(sel, t, n, addb);
+    dash.appendChild(form);
+
+    // Dòng thời gian
+    if (!entries.length) { dash.appendChild(el("div", "dash-empty", "Chưa có mục nào. Ghi lại cột mốc/quyết định đầu tiên của bạn.")); return; }
+    const tl = el("div", "timeline");
+    for (const e of entries) {
+      const item = el("div", "tl-item tl-" + e.kind);
+      item.appendChild(el("div", "tl-dot"));
+      const c = el("div", "tl-content");
+      const top = el("div", "tl-top");
+      top.append(el("span", "tl-kind", JOURNAL_KINDS[e.kind] || e.kind), el("span", "tl-date", new Date(e.created_at * 1000).toLocaleDateString("vi-VN")));
+      const del = el("button", "fb-btn", "🗑");
+      del.addEventListener("click", async () => { await api(`/api/journal/${e.id}`, { method: "DELETE" }); renderJournal(); });
+      top.appendChild(del);
+      c.appendChild(top);
+      c.appendChild(el("div", "tl-title", e.title));
+      if (e.note) c.appendChild(el("div", "tl-note", e.note));
+      item.appendChild(c);
+      tl.appendChild(item);
+    }
+    dash.appendChild(tl);
+  }
+
   // ── Goal Engine (giao mục tiêu: AI chia nhỏ + theo dõi tiến độ) ────────────
   async function openGoals() {
     state.conversationId = null;
@@ -1651,6 +1727,7 @@
   $("new-project").addEventListener("click", createProject);
   $("agent-off").addEventListener("click", () => { state.agentId = null; updateAgentBadge(); loadAgents(); });
   $("goals-btn").addEventListener("click", openGoals);
+  $("journal-btn").addEventListener("click", openJournal);
   $("toggle-sidebar").addEventListener("click", () => $("sidebar").classList.toggle("collapsed"));
   document.querySelectorAll(".suggestion").forEach((btn) =>
     btn.addEventListener("click", () => { $("input").value = btn.textContent; sendMessage(); })
