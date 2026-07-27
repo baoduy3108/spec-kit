@@ -1504,9 +1504,20 @@ def test_skills_match_english_queries_too():
     assert vi is not None and vi.slug == "test-driven-development"
 
 
-def test_skills_library_has_at_least_752():
+def test_skills_library_has_at_least_754():
     from app import skills
-    assert len(skills._SKILLS) >= 752
+    assert len(skills._SKILLS) >= 754
+
+
+def test_skills_repo_game_batch_topics_match():
+    from app import skills
+    cases = {
+        "tạo asset game 2d bằng ai spritesheet chroma-key tách frame căn pivot tilemap": "ai-game-asset-generation",
+        "lặp cải thiện dựa trên kết quả chạy thật đánh giá từ sản phẩm đang chạy không tin compile sạch": "proof-driven-iteration",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
 def test_skills_agent_llm_batch_topics_match():
