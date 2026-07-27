@@ -290,6 +290,15 @@ async def agent_delete(agent_id: str, user: dict = Depends(auth.require_user)):
     return {"ok": True}
 
 
+@app.get("/api/agents/{agent_id}/conversations")
+async def agent_conversations(agent_id: str, user: dict = Depends(auth.require_user)):
+    """Các session (hội thoại) thuộc 1 agent — 'forge' là agent dựng sẵn.
+    Agent như một workspace: bấm vào → xem/tạo session của riêng nó (kiểu Claude Code)."""
+    if agent_id != "forge" and not db.get_agent(agent_id, user["id"]):
+        raise HTTPException(status_code=404, detail="Không tìm thấy agent")
+    return {"conversations": db.list_agent_conversations(agent_id, user["id"])}
+
+
 # ─── Gói & thanh toán tự động ────────────────────────────────────────────────
 
 @app.get("/api/plans")
@@ -463,7 +472,8 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
         if not db.get_conversation(conv_id, user["id"]):
             raise HTTPException(status_code=404, detail="Không tìm thấy hội thoại")
     else:
-        conv_id = db.create_conversation(user["id"], body.message, project_id=body.project_id)
+        conv_id = db.create_conversation(user["id"], body.message,
+                                         project_id=body.project_id, agent_id=body.agent_id)
 
     history = [
         {"role": m["role"], "content": m["content"]}

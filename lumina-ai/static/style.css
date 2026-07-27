@@ -868,3 +868,6 @@ a.widget-link:hover { color: var(--accent-2); text-decoration: underline; }
 
 /* Agent dựng sẵn (Lumina Forge) trong danh sách agent */
 .proj-item.builtin .title { color: var(--accent-2); font-weight: 600; }
+
+/* Mô tả phụ dưới tiêu đề dashboard/agent workspace */
+.dash-sub { color: var(--text-dim); font-size: 13px; margin: -6px 0 16px; max-width: 70ch; }

@@ -100,6 +100,7 @@ def _init_schema(conn: sqlite3.Connection):
         "ALTER TABLE usage_daily ADD COLUMN premium_count INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE usage_daily ADD COLUMN total_count INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE conversations ADD COLUMN project_id TEXT",   # gán hội thoại vào project (NULL = ngoài project)
+        "ALTER TABLE conversations ADD COLUMN agent_id TEXT",     # gán hội thoại vào 1 agent (workspace/session của agent)
     ):
         try:
             conn.execute(stmt)
@@ -119,19 +120,33 @@ def upsert_user(user_id: str, email: str, name: str, picture: str):
         conn.commit()
 
 
-def create_conversation(user_id: str, title: str, project_id: str | None = None) -> str:
+def create_conversation(user_id: str, title: str, project_id: str | None = None,
+                        agent_id: str | None = None) -> str:
     with _lock:
         conn = get_conn()
         conv_id = uuid.uuid4().hex
         now = int(time.time())
         # Chỉ gán project_id nếu project đó thuộc chính người dùng (tránh gán bừa).
         pid = project_id if (project_id and _project_owned(conn, project_id, user_id)) else None
+        # agent_id: id agent DB của người dùng, hoặc "forge" (agent dựng sẵn). Ngoài ra → None.
+        aid = agent_id if (agent_id == "forge" or (agent_id and get_agent(agent_id, user_id))) else None
         conn.execute(
-            "INSERT INTO conversations(id, user_id, title, project_id, created_at, updated_at) VALUES(?,?,?,?,?,?)",
-            (conv_id, user_id, title[:80], pid, now, now),
+            "INSERT INTO conversations(id, user_id, title, project_id, agent_id, created_at, updated_at) "
+            "VALUES(?,?,?,?,?,?,?)",
+            (conv_id, user_id, title[:80], pid, aid, now, now),
         )
         conn.commit()
         return conv_id
+
+
+def list_agent_conversations(agent_id: str, user_id: str, limit: int = 100) -> list[dict]:
+    with _lock:
+        rows = get_conn().execute(
+            "SELECT id, title, updated_at FROM conversations WHERE user_id=? AND agent_id=? "
+            "ORDER BY updated_at DESC LIMIT ?",
+            (user_id, agent_id, limit),
+        ).fetchall()
+        return [dict(r) for r in rows]
 
 
 # ─── Projects (mặt bàn riêng: nhóm hội thoại + bảng widget) ──────────────────

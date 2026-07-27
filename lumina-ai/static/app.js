@@ -745,6 +745,8 @@
   function newChat() {
     state.conversationId = null;
     state.projectId = null;              // "＋ Cuộc trò chuyện mới" = chat ngoài project
+    state.agentId = null;                // và ngoài agent
+    updateAgentBadge();
     closeDashboard();
     $("topbar-title").textContent = t("topNew");
     $("messages").innerHTML = "";
@@ -753,6 +755,7 @@
     $("welcome")?.classList.remove("hidden");
     loadConversations();
     loadProjects();
+    loadAgents();
   }
 
   // ── Projects (mặt bàn riêng: nhóm hội thoại + bảng widget sống) ────────────
@@ -811,9 +814,52 @@
   }
 
   function toggleAgent(a) {
-    state.agentId = state.agentId === a.id ? null : a.id;
+    // Bấm vào agent = MỞ WORKSPACE của nó (kiểu Claude Code: hiện/tạo session riêng) + bật agent.
+    state.agentId = a.id;
     updateAgentBadge();
     loadAgents();
+    openAgentWorkspace(a);
+  }
+
+  async function openAgentWorkspace(a) {
+    let convs = [];
+    try { convs = (await api(`/api/agents/${a.id}/conversations`)).conversations || []; } catch {}
+    $("messages").classList.add("hidden");
+    document.querySelector(".composer-wrap")?.classList.add("hidden");
+    const dash = $("dashboard");
+    dash.classList.remove("hidden");
+    dash.innerHTML = "";
+    const head = el("div", "dash-head");
+    head.appendChild(el("div", "dash-title", (a.emoji || "🤖") + " " + a.name));
+    const actions = el("div", "dash-actions");
+    const bNew = el("button", "dash-btn primary", "＋ Session mới");
+    bNew.addEventListener("click", () => newSessionInAgent(a));
+    actions.appendChild(bNew);
+    if (a.id === "forge")
+      head.appendChild(actions), dash.appendChild(el("div", "dash-sub", "Kỹ sư cấp cao + tự áp dụng toàn bộ 741 kỹ năng. Mỗi session là một cuộc trò chuyện riêng của agent này."));
+    else { head.appendChild(actions); }
+    dash.insertBefore(head, dash.firstChild);
+
+    const convWrap = el("div", "dash-convs");
+    convWrap.appendChild(el("div", "dash-subhead", "Session của agent này"));
+    if (!convs.length) convWrap.appendChild(el("div", "dash-empty", "Chưa có session nào. Bấm “＋ Session mới” để bắt đầu."));
+    for (const c of convs) {
+      const row = el("div", "dash-conv", c.title || "(không tiêu đề)");
+      row.addEventListener("click", () => { closeDashboard(); openConversation(c.id, c.title); });
+      convWrap.appendChild(row);
+    }
+    dash.appendChild(convWrap);
+  }
+
+  function newSessionInAgent(a) {
+    state.agentId = a.id;
+    state.conversationId = null;
+    closeDashboard();
+    updateAgentBadge();
+    $("topbar-title").textContent = (a.emoji || "🤖") + " " + a.name;
+    $("messages").innerHTML = "";
+    $("messages").appendChild($("welcome") || buildWelcomePlaceholder());
+    applyI18n();
   }
 
   function updateAgentBadge() {
@@ -992,6 +1038,9 @@
     state.conversationId = convId;
     $("topbar-title").textContent = title || "";
     const data = await api(`/api/conversations/${convId}`);
+    // Khôi phục ngữ cảnh Agent của session (để tiếp tục đúng agent, dù mở từ đâu).
+    state.agentId = (data.conversation && data.conversation.agent_id) || null;
+    updateAgentBadge(); loadAgents();
     const box = $("messages");
     box.innerHTML = "";
     for (const m of data.messages) {
@@ -1131,8 +1180,9 @@
           message: text,
           conversation_id: state.conversationId,
           project_id: state.conversationId ? null : state.projectId,
-          // Agent dựng sẵn "forge" → chạy chế độ ⚙️ Lumina Forge (mode="agent"), không phải agent DB.
-          agent_id: state.agentId === "forge" ? null : state.agentId,
+          // Agent dựng sẵn "forge": gắn tag "forge" cho session + chạy chế độ ⚙️ Forge (mode="agent").
+          // Backend không nạp persona DB cho "forge" (get_agent trả None) nhưng vẫn tag hội thoại.
+          agent_id: state.agentId,
           mode: state.agentId === "forge" ? "agent" : mode,
           images: images,
           videos: video ? [video.dataUrl] : [],

@@ -943,6 +943,32 @@ def test_agents_crud_and_isolation():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+def test_agent_sessions_tagging_and_listing():
+    """🤖 Agent như workspace: hội thoại gắn agent_id (kể cả 'forge') + liệt kê session của agent."""
+    from fastapi.testclient import TestClient
+    from app import auth, db
+    from app.main import app
+
+    uid = _new_user_id()
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "T", "picture": "", "is_admin": False}
+    try:
+        client = TestClient(app)
+        aid = db.create_agent(uid, "Trợ lý", "Hãy nói ngắn gọn.", "🤖")
+        c1 = db.create_conversation(uid, "session A", agent_id=aid)
+        c2 = db.create_conversation(uid, "session B", agent_id=aid)
+        cf = db.create_conversation(uid, "forge session", agent_id="forge")
+        db.create_conversation(uid, "ngoài agent")  # không gắn agent
+
+        got = {c["id"] for c in client.get(f"/api/agents/{aid}/conversations").json()["conversations"]}
+        assert got == {c1, c2}
+        assert cf in {c["id"] for c in client.get("/api/agents/forge/conversations").json()["conversations"]}
+        # agent không tồn tại (không phải forge) → 404
+        assert client.get("/api/agents/khongco/conversations").status_code == 404
+    finally:
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 def test_orchestrator_injects_agent_instructions():
     """system_extra (hướng dẫn agent) được chèn vào system prompt của orchestrator."""
     import asyncio
