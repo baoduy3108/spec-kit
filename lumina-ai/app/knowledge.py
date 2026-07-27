@@ -17,6 +17,7 @@ hơn, trả lời ngắn gọn đúng trọng tâm hơn; chủ đề hỏi lại
 từ đĩa không tốn lượt tìm kiếm nào.
 """
 
+import json
 import logging
 import os
 import re
@@ -102,8 +103,58 @@ def _get_conn() -> sqlite3.Connection:
                 )"""
             )
             _conn.execute("CREATE INDEX IF NOT EXISTS idx_facts_topic ON facts(topic)")
+            # Cột vector cho RAG thật (JSON các float); NULL nếu chưa nhúng / không có key.
+            try:
+                _conn.execute("ALTER TABLE facts ADD COLUMN vec TEXT")
+            except sqlite3.OperationalError:
+                pass  # cột đã tồn tại
             _conn.commit()
         return _conn
+
+
+def store_vector(fact_id: int, vec: list[float]) -> None:
+    """Lưu vector nhúng cho một fact (JSON)."""
+    conn = _get_conn()
+    with _lock:
+        conn.execute("UPDATE facts SET vec = ? WHERE id = ?", (json.dumps(vec), fact_id))
+        conn.commit()
+
+
+def facts_missing_vector(limit: int = 20) -> list[dict]:
+    """Các fact chưa có vector (để nhúng dần)."""
+    conn = _get_conn()
+    with _lock:
+        rows = conn.execute(
+            "SELECT id, topic, summary FROM facts WHERE vec IS NULL OR vec = '' LIMIT ?", (limit,)
+        ).fetchall()
+    return [{"id": r[0], "topic": r[1], "summary": r[2]} for r in rows]
+
+
+def semantic_lookup(query_vec: list[float], limit: int = 3, min_sim: float = 0.55) -> list[dict]:
+    """Tìm tri thức LIÊN QUAN VỀ NGHĨA: cosine giữa query_vec và vector đã lưu.
+
+    Thuần đọc SQLite + tính cosine trong Python (không cần numpy/DB vector). Trả
+    top-k mẩu vượt ngưỡng min_sim, kèm điểm 'sim'."""
+    from .embeddings import cosine
+    conn = _get_conn()
+    cutoff = int(time.time()) - MAX_AGE_DAYS * 86400
+    with _lock:
+        rows = conn.execute(
+            "SELECT topic, summary, url, source, vec FROM facts "
+            "WHERE vec IS NOT NULL AND vec != '' AND created_at >= ?", (cutoff,)
+        ).fetchall()
+    scored: list[tuple[float, dict]] = []
+    for topic, summary, url, source, vec_json in rows:
+        try:
+            vec = json.loads(vec_json)
+        except (ValueError, TypeError):
+            continue
+        sim = cosine(query_vec, vec)
+        if sim >= min_sim:
+            scored.append((sim, {"topic": topic, "summary": summary, "url": url,
+                                 "source": source, "sim": round(sim, 3)}))
+    scored.sort(key=lambda x: -x[0])
+    return [item for _, item in scored[:limit]]
 
 
 def extract_keywords(query: str, max_keywords: int = 6) -> list[str]:
@@ -338,8 +389,14 @@ async def gather(query: str, max_items: int = 3) -> list[dict]:
             return results[:max_items]
 
     items = lookup_local(query, limit=max_items)
+    # RAG thật: nếu có embeddings, tìm thêm theo NGỮ NGHĨA và ưu tiên (liên quan hơn
+    # tra khớp chuỗi). Không có key → semantic_gather trả [] → giữ nguyên hành vi cũ.
+    sem = await semantic_gather(query, max_items)
+    if sem:
+        seen = {it["topic"] for it in sem}
+        items = sem + [it for it in items if it["topic"] not in seen]
     if items:
-        return items
+        return items[:max_items]
     # Kho chưa có → "học" từ Wikipedia (tiếng Việt trước, thiếu thì tiếng Anh)
     for lang in ("vi", "en"):
         fact = await _fetch_wikipedia(query[:100], lang)
@@ -347,6 +404,28 @@ async def gather(query: str, max_items: int = 3) -> list[dict]:
             remember(**fact)
             return [fact]
     return []
+
+
+async def semantic_gather(query: str, limit: int = 3) -> list[dict]:
+    """RAG theo ngữ nghĩa: nhúng câu hỏi + đối chiếu cosine với kho. Best-effort.
+
+    Nhân tiện nhúng dần vài fact chưa có vector (backfill) để lần sau tìm tốt hơn.
+    Trả [] nếu không bật embeddings hoặc lỗi (tự lùi về tra từ khóa)."""
+    from . import embeddings
+    if not embeddings.embeddings_enabled():
+        return []
+    try:
+        for f in facts_missing_vector(limit=8):
+            v = await embeddings.embed_text((f["topic"] + ". " + f["summary"])[:2000])
+            if v:
+                store_vector(f["id"], v)
+        qv = await embeddings.embed_text(query)
+        if not qv:
+            return []
+        return semantic_lookup(qv, limit=limit)
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("semantic_gather lỗi: %s", exc)
+        return []
 
 
 def build_context(items: list[dict]) -> str:

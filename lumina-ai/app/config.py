@@ -45,6 +45,9 @@ CONFIG = {
     # 🎧 Whisper (chép lời video/âm thanh) — qua Groq (miễn phí) hoặc OpenAI.
     "GROQ_WHISPER_MODEL": os.getenv("GROQ_WHISPER_MODEL", "whisper-large-v3-turbo"),
     "OPENAI_WHISPER_MODEL": os.getenv("OPENAI_WHISPER_MODEL", "whisper-1"),
+    # 🔎 Embeddings cho RAG thật (tìm theo ngữ nghĩa) — Gemini (free) hoặc OpenAI.
+    "GEMINI_EMBED_MODEL": os.getenv("GEMINI_EMBED_MODEL", "text-embedding-004"),
+    "OPENAI_EMBED_MODEL": os.getenv("OPENAI_EMBED_MODEL", "text-embedding-3-small"),
     # 🔗 Xem video qua LINK (yt-dlp): giới hạn để không tốn tài nguyên / lạm dụng.
     "VIDEO_LINK_MAX_DURATION": int(os.getenv("VIDEO_LINK_MAX_DURATION", "1200")),   # giây (20 phút)
     "VIDEO_LINK_MAX_FILESIZE_MB": int(os.getenv("VIDEO_LINK_MAX_FILESIZE_MB", "80")),

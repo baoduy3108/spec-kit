@@ -77,7 +77,9 @@ Giới hạn có chủ đích: video tối đa **~3 phút, ~18MB**; xử lý m�
 
 > ⚠️ **Lưu ý khi tự deploy:** dịch vụ giọng đọc edge-tts gọi ra máy chủ Microsoft — hoạt động bình thường trên Render/máy cá nhân, nhưng có thể bị chặn bởi một số mạng doanh nghiệp/proxy hạn chế. Hãy thử tính năng này ngay sau khi deploy để chắc chắn mạng máy chủ của bạn kết nối được.
 
-**📚 Kho tri thức tự học (giảm token):** câu hỏi cần tra cứu → LUMINA đọc **kho nội bộ** trong thư mục `data/knowledge.db` trước (0 token, 0 mạng); chưa có thì "học" từ **Wikipedia API miễn phí** (tiếng Việt → tiếng Anh) rồi **lưu vào kho** — càng nhiều người hỏi, kho càng lớn, càng ít tốn lượt tìm kiếm. Vì nguồn mở ai cũng sửa được, tư liệu luôn kèm **link nguồn** và bộ não bị bắt **đối chiếu chéo** với hiểu biết + kết quả tìm kiếm, mâu thuẫn thì phải nói rõ. (Không thể tải cả Wikipedia/CommonCrawl về — hàng TB đến PB — nên "học dần theo câu hỏi thật" là bản khả thi và hiệu quả nhất của ý tưởng này.)
+**📚 Kho tri thức tự học (giảm token):** câu hỏi cần tra cứu → LUMINA đọc **kho nội bộ** trong thư mục `data/knowledge.db` trước (0 token, 0 mạng); chưa có thì "học" từ **Wikipedia API miễn phí** (tiếng Việt → tiếng Anh) rồi **lưu vào kho** — càng nhiều người hỏi, kho càng lớn, càng ít tốn lượt tìm kiếm.
+
+**🔎 RAG thật (tìm theo NGỮ NGHĨA):** ngoài tra khớp từ khóa, nếu có `GEMINI_API_KEY` (hoặc OpenAI), LUMINA **nhúng embeddings** cho tri thức + câu hỏi và tìm theo **cosine** (`app/embeddings.py` + `knowledge.semantic_lookup`) — tìm được mẩu *liên quan về nghĩa* dù không trùng chữ. Vector lưu ngay trong SQLite (không cần vector-DB riêng), nhúng dần (backfill) khi dùng. Không có key → tự lùi về tra từ khóa, không đổi hành vi. *(Skill `graphrag`/`rag-fundamentals` là tài liệu phương pháp; đây mới là RAG đang chạy thật.)* Vì nguồn mở ai cũng sửa được, tư liệu luôn kèm **link nguồn** và bộ não bị bắt **đối chiếu chéo** với hiểu biết + kết quả tìm kiếm, mâu thuẫn thì phải nói rõ. (Không thể tải cả Wikipedia/CommonCrawl về — hàng TB đến PB — nên "học dần theo câu hỏi thật" là bản khả thi và hiệu quả nhất của ý tưởng này.)
 
 ---
 
@@ -155,7 +157,8 @@ lumina-ai/
 │   ├── router.py           # ✦ Auto-Router "bù trừ" — trái tim của LUMINA (gate 🌌 Đỉnh cao theo gói)
 │   ├── orchestrator.py     # Điều phối 2 tầng bộ não + fallback + chế độ vẽ ảnh/nghiên cứu + giấu tên model
 │   ├── imagegen.py         # 🎨 Vẽ ảnh (Pollinations free, hoặc DALL-E nếu có OpenAI key)
-│   ├── knowledge.py        # 📚 Kho tri thức tự học (data/knowledge.db + Wikipedia free) — giảm token
+│   ├── knowledge.py        # 📚 Kho tri thức tự học (data/knowledge.db + Wikipedia free) + RAG ngữ nghĩa
+│   ├── embeddings.py       # 🔎 Nhúng embeddings (Gemini/OpenAI) + cosine cho RAG thật
 │   ├── recall.py           # 🧠 Trí nhớ dài hạn — nhớ hội thoại CŨ khi mở hội thoại MỚI (cách ly theo user)
 │   ├── webpage.py          # 🌐 Đọc link dán trong chat (httpx + BeautifulSoup) — mọi bộ não dùng được
 │   ├── media.py            # 🖼🎬 Xử lý ảnh/video đính kèm (data URL) + tách khung hình video (ffmpeg)

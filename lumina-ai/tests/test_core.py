@@ -1363,6 +1363,32 @@ def test_skills_library_has_at_least_728():
     assert len(skills._SKILLS) >= 728
 
 
+def test_rag_semantic_lookup_ranks_by_meaning():
+    """🔎 RAG thật: cosine + semantic_lookup xếp hạng theo NGỮ NGHĨA (không cần API key)."""
+    from app import knowledge
+    from app.embeddings import cosine
+
+    # cosine thuần: đồng hướng = 1, vuông góc = 0, chiều lệch = 0.
+    assert abs(cosine([1.0, 0.0], [1.0, 0.0]) - 1.0) < 1e-9
+    assert abs(cosine([1.0, 0.0], [0.0, 1.0])) < 1e-9
+    assert cosine([1.0, 0.0], []) == 0.0
+
+    # Lưu 2 fact + gán vector thủ công (mô phỏng embeddings, không gọi mạng).
+    knowledge.remember("mèo nhà", "Mèo là thú cưng phổ biến.", source="manual")
+    knowledge.remember("động cơ đốt trong", "Nguyên lý xi-lanh và piston.", source="manual")
+    conn = knowledge._get_conn()
+    with knowledge._lock:
+        cat = conn.execute("SELECT id FROM facts WHERE topic='mèo nhà'").fetchone()[0]
+        eng = conn.execute("SELECT id FROM facts WHERE topic='động cơ đốt trong'").fetchone()[0]
+    knowledge.store_vector(cat, [1.0, 0.0, 0.0])
+    knowledge.store_vector(eng, [0.0, 1.0, 0.0])
+
+    # Truy vấn gần "mèo" (vector [0.9,0.1,0]) → phải trả 'mèo nhà' đứng đầu.
+    res = knowledge.semantic_lookup([0.9, 0.1, 0.0], limit=2, min_sim=0.5)
+    assert res and res[0]["topic"] == "mèo nhà"
+    assert "sim" in res[0]
+
+
 def test_skills_match_english_queries_too():
     """Truy vấn TIẾNG ANH cũng khớp kỹ năng (fallback token tên slug), không phá khớp tiếng Việt."""
     from app import skills
