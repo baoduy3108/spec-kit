@@ -37,7 +37,8 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 | Tính năng | Cách dùng | Cần gì |
 |---|---|---|
 | 🖼 **Xem / hiểu ảnh** | Bấm 📎 đính kèm ảnh → hỏi "ảnh này là gì?" | Gemini (free) hoặc Claude — có sẵn |
-| 🎬 **Xem / hiểu video** | Bấm 📎 đính kèm video (≤~18MB) → hỏi về nội dung, hoặc "vẽ sơ đồ các bước trong video" | **Gemini** xem trực tiếp (cả âm thanh/chuyển động); ngoài ra LUMINA tự **tách 6 khung hình** rải đều → **Claude** (và mọi bộ não nhìn ảnh) cũng phân tích video & dựng sơ đồ được. Dùng ffmpeg tĩnh nhúng sẵn (imageio-ffmpeg), không cần cài đặt |
+| 🎬 **Xem / hiểu video (upload)** | Bấm 📎 đính kèm video (≤~18MB) → hỏi về nội dung, hoặc "vẽ sơ đồ các bước trong video" | **Gemini** xem trực tiếp (cả âm thanh/chuyển động); ngoài ra LUMINA tự **tách 6 khung hình** rải đều → **Claude** (và mọi bộ não nhìn ảnh) cũng phân tích video & dựng sơ đồ được. Dùng ffmpeg tĩnh nhúng sẵn (imageio-ffmpeg), không cần cài đặt |
+| 🔗 **Xem video qua LINK** | Dán link YouTube/Vimeo/TikTok… vào chat → hỏi/tóm tắt/"vẽ sơ đồ" | `yt-dlp` lấy **phụ đề gốc** (miễn phí) — không có thì trích audio → **Whisper** (cần `GROQ_API_KEY` miễn phí, hoặc OpenAI) — **cộng** khung hình tách từ video. Giới hạn video ≤ 20 phút / ≤ 80MB. *Tuân thủ ToS/bản quyền nền tảng nguồn.* |
 | 📄 **Đọc tệp** | Bấm 📎 đính kèm PDF/Word/Excel/txt → hỏi về nội dung | Đọc chữ trực tiếp — mọi bộ não đều dùng được |
 | 🌐 **Đọc link dán trong chat** | Dán bất kỳ link http(s) nào vào câu hỏi → LUMINA tự tải và đọc nội dung trang | **Mọi bộ não** (server tự tải trang, không phụ thuộc Claude/chế độ tìm kiếm) |
 | 🔬 **Nghiên cứu sâu** | Bấm nút **🔬 Nghiên cứu sâu** hoặc gõ "nghiên cứu sâu về…" → LUMINA tìm nhiều nguồn, viết báo cáo có trích dẫn | Bộ não có tìm kiếm (Gemini/Claude) |
@@ -153,7 +154,9 @@ lumina-ai/
 │   ├── knowledge.py        # 📚 Kho tri thức tự học (data/knowledge.db + Wikipedia free) — giảm token
 │   ├── recall.py           # 🧠 Trí nhớ dài hạn — nhớ hội thoại CŨ khi mở hội thoại MỚI (cách ly theo user)
 │   ├── webpage.py          # 🌐 Đọc link dán trong chat (httpx + BeautifulSoup) — mọi bộ não dùng được
-│   ├── media.py            # 🖼🎬 Xử lý ảnh/video đính kèm (data URL) cho bộ não nhìn được
+│   ├── media.py            # 🖼🎬 Xử lý ảnh/video đính kèm (data URL) + tách khung hình video (ffmpeg)
+│   ├── video_link.py       # 🔗 Xem video qua LINK (yt-dlp): phụ đề gốc + khung hình + Whisper
+│   ├── transcribe.py       # 🎧 Chép lời audio/video bằng Whisper (Groq/OpenAI)
 │   ├── files.py            # 📄 Đọc PDF/Word/Excel/txt đính kèm → tách chữ đưa vào ngữ cảnh
 │   ├── video_dub.py        # 🗣 Pipeline lồng tiếng + gắn phụ đề video (Gemini + edge-tts + ffmpeg)
 │   ├── engines/claude.py   # Tầng cao cấp: adaptive thinking, web search, xem ảnh, streaming

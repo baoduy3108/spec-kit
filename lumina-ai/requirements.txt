@@ -20,3 +20,6 @@ edge-tts>=6.1
 
 # 🌐 Đọc nội dung trang web khi người dùng dán link — hoạt động với MỌI bộ não
 beautifulsoup4>=4.12
+
+# 🎬 Xem video qua LINK (YouTube/Vimeo/TikTok...): tải video + lấy phụ đề gốc
+yt-dlp>=2024.1.0

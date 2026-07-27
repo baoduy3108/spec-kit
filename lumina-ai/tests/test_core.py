@@ -800,6 +800,57 @@ def test_extract_video_frames_real():
     asyncio.get_event_loop().run_until_complete(go())
 
 
+def test_video_link_detection_and_vtt_parse():
+    """🎬 Nhận diện link video + tách phụ đề WebVTT → văn bản sạch."""
+    from app import video_link
+
+    assert video_link.is_video_link("https://www.youtube.com/watch?v=abc123")
+    assert video_link.is_video_link("https://youtu.be/abc123")
+    assert video_link.is_video_link("https://vimeo.com/12345")
+    assert video_link.is_video_link("https://cdn.example.com/clip.mp4")
+    assert not video_link.is_video_link("https://en.wikipedia.org/wiki/Cat")
+    assert not video_link.is_video_link("không phải url")
+
+    vtt = (
+        "WEBVTT\n\n"
+        "00:00:00.000 --> 00:00:02.000\n"
+        "Xin chào các bạn\n\n"
+        "00:00:02.000 --> 00:00:04.000\n"
+        "Xin chào các bạn\n\n"          # dòng lặp (auto-caption) → phải gộp
+        "00:00:04.000 --> 00:00:06.000\n"
+        "<c>hôm nay</c> trời đẹp\n"
+    )
+    text = video_link._vtt_to_text(vtt)
+    assert "Xin chào các bạn" in text
+    assert text.count("Xin chào các bạn") == 1     # đã bỏ trùng lặp liên tiếp
+    assert "hôm nay" in text and "trời đẹp" in text
+    assert "-->" not in text and "WEBVTT" not in text and "<c>" not in text
+
+
+def test_video_link_build_context_and_whisper_gate():
+    from app import video_link, transcribe
+
+    assert video_link.build_context({"transcript": ""}) == ""
+    ctx = video_link.build_context({
+        "title": "Hướng dẫn nấu phở", "transcript": "đầu tiên ninh xương",
+        "transcript_source": "phụ đề gốc",
+    })
+    assert "Hướng dẫn nấu phở" in ctx and "ninh xương" in ctx and "phụ đề gốc" in ctx
+
+    # Không có key Whisper nào → chép lời trả "" (lùi an toàn về chỉ khung hình).
+    from app.config import CONFIG
+    old_g, old_o = CONFIG.get("GROQ_API_KEY"), CONFIG.get("OPENAI_API_KEY")
+    CONFIG["GROQ_API_KEY"] = ""
+    CONFIG["OPENAI_API_KEY"] = ""
+    try:
+        assert transcribe.whisper_enabled() is False
+        import asyncio
+        assert asyncio.get_event_loop().run_until_complete(
+            transcribe.transcribe_audio("/nonexistent/path.mp3")) == ""
+    finally:
+        CONFIG["GROQ_API_KEY"], CONFIG["OPENAI_API_KEY"] = old_g, old_o
+
+
 # ── Trí nhớ dài hạn: nhớ lại hội thoại CŨ khi mở hội thoại MỚI ──────────────
 
 def test_recall_finds_relevant_past_conversation():

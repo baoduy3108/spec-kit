@@ -36,7 +36,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, files, media, payments, recall, video_dub, webpage
+from . import auth, config, db, files, media, payments, recall, video_dub, video_link, webpage
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
 from .memory import trim_history
@@ -344,12 +344,35 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
     webpage_notes: list[str] = []
     fetched_pages: list[dict] = []
     urls = webpage.extract_urls(body.message)
-    if urls:
-        fetched_pages = await asyncio.gather(*(webpage.fetch_page(u) for u in urls))
+    # 🔗 Tách link VIDEO (YouTube/Vimeo/TikTok...) khỏi link trang thường —
+    # link video đi vào pipeline "xem video qua link" (khung hình + transcript).
+    video_urls = [u for u in urls if video_link.is_video_link(u)]
+    page_urls = [u for u in urls if u not in video_urls]
+    if page_urls:
+        fetched_pages = await asyncio.gather(*(webpage.fetch_page(u) for u in page_urls))
         for p in fetched_pages:
             webpage_notes.append(f"⚠️ {p['url']}: {p['error']}" if p.get("error")
                                  else f"✅ đã đọc {p['url']}")
         effective_message += webpage.build_context(fetched_pages)
+
+    # 🎬 Xem video qua LINK: chỉ xử lý 1 video/lượt (tốn tài nguyên). Bỏ qua ở chế
+    # độ 📝 Phụ đề (chế độ đó cần video/âm thanh gốc, dùng đường Gemini riêng).
+    link_frames: list[str] = []
+    link_video: dict = {}
+    if video_urls and body.mode != "subtitle":
+        link_video = await video_link.fetch_video_link(video_urls[0])
+        link_frames = link_video.get("frames") or []
+        if link_video.get("transcript"):
+            effective_message += video_link.build_context(link_video)
+        if link_video.get("error"):
+            webpage_notes.append(f"⚠️ video {video_urls[0]}: {link_video['error']}")
+        elif link_frames or link_video.get("transcript"):
+            bits = []
+            if link_frames:
+                bits.append(f"{len(link_frames)} khung hình")
+            if link_video.get("transcript"):
+                bits.append(link_video.get("transcript_source") or "transcript")
+            webpage_notes.append(f"✅ đã xem video ({', '.join(bits)})")
 
     # 🧠 Trí nhớ dài hạn: chỉ khi mở hội thoại MỚI (đã có lịch sử trong hội thoại
     # hiện tại thì không cần — nó tự thấy trong `history` rồi), tìm trong các hội
@@ -384,6 +407,10 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
             if frames:
                 n_video_frames = len(frames)
                 turn_images = (turn_images + frames)[:8]   # giới hạn tổng số ảnh/lượt
+    # Khung hình từ video-link cũng gắn như ảnh để bộ não "nhìn" được.
+    if link_frames:
+        n_video_frames += len(link_frames)
+        turn_images = (turn_images + link_frames)[:8]
     if turn_images:
         current_turn["images"] = turn_images
     messages = trim_history(history + [current_turn], CONFIG["MAX_CONTEXT_TOKENS"])
@@ -408,6 +435,13 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
             "type": "router", "mode": route.mode, "label": display_label,
             "conversation_id": conv_id,
         })
+        if link_video.get("transcript") or (link_video and link_frames):
+            label = (link_video.get("title") or "video")[:60]
+            src = link_video.get("transcript_source")
+            yield _sse({
+                "type": "search_status", "tool": "video_link",
+                "query": label + (f" ({src})" if src else ""),
+            })
         if n_video_frames:
             yield _sse({
                 "type": "search_status", "tool": "video_frames",

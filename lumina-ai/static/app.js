@@ -734,6 +734,7 @@
               : ev.tool === "skill" ? "🧩 Áp dụng kỹ năng: "
               : ev.tool === "learned" ? "🧠 Đã tiếp thu & ghi nhớ: "
               : ev.tool === "video_frames" ? "🎞 Đã tách khung hình video: "
+              : ev.tool === "video_link" ? "🎬 Đã xem video từ link: "
               : "🔍 Đang tìm kiếm: ";
             chip.textContent = prefix + (ev.query || "…");
             el.body.insertBefore(chip, el.content);

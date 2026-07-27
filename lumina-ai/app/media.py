@@ -127,24 +127,17 @@ async def _grab_frame(exe: str, path: str, ts: float) -> str | None:
     return "data:image/jpeg;base64," + base64.b64encode(out).decode("ascii")
 
 
-async def extract_video_frames(video_data_url: str, count: int = FRAME_COUNT) -> list[str]:
-    """Tách `count` khung hình rải đều theo thời lượng → danh sách data URL ảnh JPEG.
+async def extract_frames_from_path(path: str, count: int = FRAME_COUNT) -> list[str]:
+    """Tách `count` khung hình rải đều từ một FILE video trên đĩa → data URL JPEG.
 
-    Trả [] nếu thiếu ffmpeg, video hỏng, hoặc bất kỳ lỗi nào — để phần gọi tự lùi
-    về hành vi cũ (chỉ Gemini xem video trực tiếp) mà không vỡ luồng.
+    Trả [] nếu thiếu ffmpeg hoặc lỗi. Dùng chung cho video upload (đã ghi ra temp)
+    lẫn video tải từ link (yt-dlp).
     """
     exe = _ffmpeg_exe()
-    if not exe:
+    if not exe or not os.path.exists(path):
         return []
-    data = decode_video(video_data_url)
-    if not data:
-        return []
-    tmp_path = None
     try:
-        fd, tmp_path = tempfile.mkstemp(suffix=".mp4")
-        with os.fdopen(fd, "wb") as f:
-            f.write(data)
-        duration = await _probe_duration(exe, tmp_path)
+        duration = await _probe_duration(exe, path)
         if duration and duration > 0.3:
             # Rải đều, tránh sát đầu/cuối (dễ dính khung đen).
             timestamps = [duration * (i + 0.5) / count for i in range(count)]
@@ -153,12 +146,32 @@ async def extract_video_frames(video_data_url: str, count: int = FRAME_COUNT) ->
             timestamps = [0.5 + i * 2.0 for i in range(count)]
         frames: list[str] = []
         for ts in timestamps:
-            frame = await _grab_frame(exe, tmp_path, ts)
+            frame = await _grab_frame(exe, path, ts)
             if frame:
                 frames.append(frame)
         if frames:
             logger.info("Đã tách %d khung hình từ video (thời lượng ~%.1fs).", len(frames), duration)
         return frames
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Tách khung hình video thất bại: %s", e)
+        return []
+
+
+async def extract_video_frames(video_data_url: str, count: int = FRAME_COUNT) -> list[str]:
+    """Tách khung hình từ VIDEO dạng data URL (video upload) → data URL JPEG.
+
+    Trả [] nếu thiếu ffmpeg, video hỏng, hoặc bất kỳ lỗi nào — để phần gọi tự lùi
+    về hành vi cũ (chỉ Gemini xem video trực tiếp) mà không vỡ luồng.
+    """
+    data = decode_video(video_data_url)
+    if not data:
+        return []
+    tmp_path = None
+    try:
+        fd, tmp_path = tempfile.mkstemp(suffix=".mp4")
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+        return await extract_frames_from_path(tmp_path, count)
     except Exception as e:  # noqa: BLE001
         logger.warning("Tách khung hình video thất bại: %s", e)
         return []

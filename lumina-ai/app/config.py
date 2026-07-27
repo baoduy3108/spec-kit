@@ -42,6 +42,12 @@ CONFIG = {
     "GROQ_API_KEY": os.getenv("GROQ_API_KEY", ""),       # FREE tại console.groq.com
     "GROQ_MODEL": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
     "GROQ_BASE_URL": "https://api.groq.com/openai/v1",
+    # 🎧 Whisper (chép lời video/âm thanh) — qua Groq (miễn phí) hoặc OpenAI.
+    "GROQ_WHISPER_MODEL": os.getenv("GROQ_WHISPER_MODEL", "whisper-large-v3-turbo"),
+    "OPENAI_WHISPER_MODEL": os.getenv("OPENAI_WHISPER_MODEL", "whisper-1"),
+    # 🔗 Xem video qua LINK (yt-dlp): giới hạn để không tốn tài nguyên / lạm dụng.
+    "VIDEO_LINK_MAX_DURATION": int(os.getenv("VIDEO_LINK_MAX_DURATION", "1200")),   # giây (20 phút)
+    "VIDEO_LINK_MAX_FILESIZE_MB": int(os.getenv("VIDEO_LINK_MAX_FILESIZE_MB", "80")),
     "OPENROUTER_API_KEY": os.getenv("OPENROUTER_API_KEY", ""),  # FREE (nhiều model) tại openrouter.ai/keys
     "OPENROUTER_MODEL": os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free"),
     "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
