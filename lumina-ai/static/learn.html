@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bên trong bộ não LUMINA — Attention & MoE</title>
+<link rel="icon" href="/static/images/favicon.png">
+</head>
+<body>
+<style>
+  :root {
+    --bg: #0d0e14;
+    --bg-2: #14161f;
+    --bg-3: #1c1f2b;
+    --border: #262a3a;
+    --text: #e8eaf2;
+    --dim: #9aa0b5;
+    --faint: #5b6178;
+    --p: #8b7cf8;   /* purple */
+    --c: #4fc3f7;   /* cyan  */
+    --grad: linear-gradient(135deg, #8b7cf8 0%, #4fc3f7 100%);
+    --good: #57d9a3;
+    --shadow: 0 18px 48px rgba(0,0,0,.5);
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f5f5fa; --bg-2: #ffffff; --bg-3: #eef0f7; --border: #dcdfea;
+      --text: #191b26; --dim: #5a6178; --faint: #9aa0b5;
+      --p: #6d5ce8; --c: #1f9fd6;
+      --grad: linear-gradient(135deg, #6d5ce8 0%, #1f9fd6 100%);
+      --good: #12a37a; --shadow: 0 18px 48px rgba(60,60,90,.14);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d0e14; --bg-2: #14161f; --bg-3: #1c1f2b; --border: #262a3a;
+    --text: #e8eaf2; --dim: #9aa0b5; --faint: #5b6178;
+    --p: #8b7cf8; --c: #4fc3f7; --grad: linear-gradient(135deg, #8b7cf8 0%, #4fc3f7 100%);
+    --good: #57d9a3; --shadow: 0 18px 48px rgba(0,0,0,.5);
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f5fa; --bg-2: #ffffff; --bg-3: #eef0f7; --border: #dcdfea;
+    --text: #191b26; --dim: #5a6178; --faint: #9aa0b5;
+    --p: #6d5ce8; --c: #1f9fd6; --grad: linear-gradient(135deg, #6d5ce8 0%, #1f9fd6 100%);
+    --good: #12a37a; --shadow: 0 18px 48px rgba(60,60,90,.14);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 22px 90px; }
+
+  /* ── Hero ─────────────────────────────────────── */
+  header.hero {
+    position: relative; text-align: center;
+    padding: 68px 22px 40px;
+    background:
+      radial-gradient(60% 90% at 50% -10%, color-mix(in srgb, var(--p) 22%, transparent) 0%, transparent 70%);
+  }
+  .star {
+    font-size: 40px; line-height: 1;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 14px color-mix(in srgb, var(--p) 55%, transparent));
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: .28em;
+    text-transform: uppercase; color: var(--dim); margin: 18px 0 10px;
+  }
+  h1 {
+    font-size: clamp(30px, 6vw, 52px); line-height: 1.08; margin: 0 auto;
+    max-width: 16ch; text-wrap: balance; font-weight: 800; letter-spacing: -.02em;
+  }
+  h1 .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .lede { max-width: 60ch; margin: 20px auto 0; color: var(--dim); font-size: 17px; text-wrap: pretty; }
+
+  /* ── Section scaffolding ──────────────────────── */
+  section.stage { margin-top: 64px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--c); padding: 5px 11px; border: 1px solid var(--border); border-radius: 999px;
+    background: var(--bg-2);
+  }
+  .tag .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--grad); }
+  h2 { font-size: clamp(24px, 4vw, 34px); margin: 16px 0 6px; letter-spacing: -.015em; text-wrap: balance; }
+  .sub { color: var(--dim); max-width: 66ch; margin: 0 0 22px; }
+
+  .panel {
+    background: var(--bg-2); border: 1px solid var(--border); border-radius: 18px;
+    padding: 24px; box-shadow: var(--shadow);
+  }
+
+  /* ── Controls ─────────────────────────────────── */
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 20px; }
+  button.ctrl {
+    font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--text);
+    background: var(--bg-3); border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px 15px; cursor: pointer; transition: transform .12s, border-color .12s, background .12s;
+  }
+  button.ctrl:hover { border-color: color-mix(in srgb, var(--p) 60%, var(--border)); transform: translateY(-1px); }
+  button.ctrl:active { transform: translateY(0); }
+  button.ctrl.primary { background: var(--grad); border-color: transparent; color: #fff; }
+  :root[data-theme="light"] button.ctrl.primary { color: #fff; }
+  button.ctrl:focus-visible, .seg button:focus-visible, .tokline .tok:focus-visible {
+    outline: 2px solid var(--c); outline-offset: 2px;
+  }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .seg button {
+    font-family: var(--mono); font-size: 13px; color: var(--dim); background: var(--bg-3);
+    border: 0; padding: 9px 14px; cursor: pointer; border-right: 1px solid var(--border);
+  }
+  .seg button:last-child { border-right: 0; }
+  .seg button[aria-pressed="true"] { color: #fff; background: var(--grad); }
+  .spacer { flex: 1 1 auto; }
+  .hint { font-size: 13px; color: var(--faint); font-family: var(--mono); }
+
+  /* ── Attention viz ────────────────────────────── */
+  .attn-stage { position: relative; }
+  .arcs { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+  .tokline {
+    position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: 10px;
+    justify-content: center; padding: 8px 0 4px; min-height: 56px;
+  }
+  .tok {
+    font-family: var(--mono); font-size: 15px; padding: 9px 13px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--bg-3); color: var(--text);
+    cursor: pointer; transition: transform .18s, box-shadow .18s, border-color .18s, background .18s, color .18s;
+    position: relative;
+  }
+  .tok.query {
+    background: var(--grad); color: #fff; border-color: transparent; transform: translateY(-4px);
+    box-shadow: 0 10px 26px color-mix(in srgb, var(--p) 45%, transparent);
+  }
+  .tok .wt {
+    position: absolute; top: -10px; right: -6px; font-size: 10px; padding: 1px 5px; border-radius: 999px;
+    background: var(--c); color: #04121a; font-weight: 700; opacity: 0; transition: opacity .2s;
+  }
+  .legend-flow { display:flex; align-items:center; justify-content:center; gap:10px; margin: 26px 0 4px; color: var(--dim); font-size: 13px; font-family: var(--mono); }
+  .legend-flow .bar { width: 120px; height: 8px; border-radius: 999px; background: linear-gradient(90deg, color-mix(in srgb,var(--c) 15%, transparent), var(--c), var(--p)); }
+
+  .bars { margin-top: 8px; display: grid; gap: 7px; }
+  .brow { display: grid; grid-template-columns: 92px 1fr 52px; align-items: center; gap: 12px; }
+  .brow .lbl { font-family: var(--mono); font-size: 13px; color: var(--dim); text-align: right; white-space: nowrap; }
+  .brow .track { height: 16px; background: var(--bg-3); border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+  .brow .fill { height: 100%; width: 0; background: var(--grad); border-radius: 6px 0 0 6px; transition: width .5s cubic-bezier(.2,.7,.2,1); }
+  .brow .val { font-family: var(--mono); font-size: 12.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .brow.top .lbl { color: var(--text); font-weight: 700; }
+  .brow.top .val { color: var(--c); }
+
+  .readout {
+    margin-top: 22px; padding: 16px 18px; border-radius: 12px; border: 1px dashed var(--border);
+    background: color-mix(in srgb, var(--bg-3) 60%, transparent); font-size: 14.5px; color: var(--dim);
+  }
+  .readout b { color: var(--text); }
+  .readout .q { color: var(--p); font-family: var(--mono); }
+  .readout .k { color: var(--c); font-family: var(--mono); }
+  .formula {
+    font-family: var(--mono); font-size: 14px; color: var(--text); text-align: center;
+    margin: 4px 0 22px; padding: 12px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 10px;
+    overflow-x: auto;
+  }
+  .formula .muted { color: var(--faint); }
+
+  /* ── MoE viz ──────────────────────────────────── */
+  .moe-grid { display: grid; grid-template-columns: 150px 1fr; gap: 22px; align-items: center; }
+  @media (max-width: 640px) { .moe-grid { grid-template-columns: 1fr; } }
+  .router {
+    text-align: center; padding: 18px 14px; border-radius: 14px; border: 1px solid var(--border);
+    background: var(--bg-3); position: relative;
+  }
+  .router .rlabel { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--c); }
+  .router .rtok {
+    font-family: var(--mono); font-size: 17px; margin-top: 10px; padding: 8px 10px; border-radius: 9px;
+    background: var(--grad); color: #fff; display: inline-block; min-width: 90px;
+    transition: transform .3s;
+  }
+  .router .rnote { font-size: 12px; color: var(--faint); margin-top: 12px; }
+  .experts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 480px) { .experts { grid-template-columns: repeat(2, 1fr); } }
+  .exp {
+    border: 1px solid var(--border); border-radius: 12px; padding: 13px 10px; text-align: center;
+    background: var(--bg-3); color: var(--dim); position: relative; overflow: hidden;
+    transition: transform .3s, border-color .3s, color .3s, box-shadow .3s, opacity .3s;
+  }
+  .exp .en { font-family: var(--mono); font-size: 13px; }
+  .exp .ec { font-size: 11px; color: var(--faint); margin-top: 3px; }
+  .exp .gate {
+    font-family: var(--mono); font-size: 12px; margin-top: 8px; color: var(--faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .exp.dim { opacity: .42; }
+  .exp.active {
+    color: var(--text); border-color: transparent;
+    box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--p) 70%, transparent), 0 12px 26px color-mix(in srgb, var(--p) 30%, transparent);
+    transform: translateY(-3px);
+  }
+  .exp.active::before {
+    content:""; position:absolute; inset:0; background: var(--grad); opacity: .16;
+  }
+  .exp.active .gate { color: var(--c); }
+  .exp.active .ec { color: var(--dim); }
+
+  .moe-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+  @media (max-width: 480px) { .moe-stats { grid-template-columns: 1fr; } }
+  .stat { background: var(--bg-3); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .stat .n { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .stat .n .g { background: var(--grad); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .stat .t { font-size: 12.5px; color: var(--dim); margin-top: 2px; }
+
+  .takeaways { margin-top: 26px; display: grid; gap: 10px; }
+  .takeaways li { list-style: none; padding-left: 26px; position: relative; color: var(--dim); }
+  .takeaways li::before { content: "✦"; position: absolute; left: 0; top: 0; color: var(--p); }
+  .takeaways b { color: var(--text); }
+
+  .disclaimer {
+    margin-top: 14px; font-size: 12.5px; color: var(--faint); font-family: var(--mono);
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  footer { text-align: center; margin-top: 74px; color: var(--faint); font-size: 13px; }
+  footer .star { font-size: 18px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<header class="hero">
+  <div class="star">✦</div>
+  <div class="eyebrow">Bên trong bộ não LUMINA</div>
+  <h1>Cách máy <span class="g">chú ý</span> và <span class="g">phân công</span></h1>
+  <p class="lede">
+    Hai cơ chế nằm sau mọi mô hình ngôn ngữ hiện đại — <b>Self-Attention</b> giúp mỗi từ
+    biết phải nhìn vào từ nào, và <b>Mixture-of-Experts</b> giúp mô hình khổng lồ nhưng chỉ
+    tốn một phần nhỏ tính toán. Bấm để xem chúng chạy từng bước.
+  </p>
+</header>
+
+<div class="wrap">
+
+  <!-- ATTENTION -->
+  <section class="stage" id="attn">
+    <span class="tag"><span class="dot"></span> Cơ chế 01 · Self-Attention</span>
+    <h2>Mỗi từ tự hỏi: “tôi nên chú ý vào từ nào?”</h2>
+    <p class="sub">
+      Chọn một <b>từ truy vấn</b> (query). Mô hình so nó với mọi từ khác, tính điểm liên quan,
+      rồi <b>softmax</b> biến điểm thành trọng số cộng lại bằng 1 — độ dày mỗi đường là mức chú ý.
+    </p>
+
+    <div class="formula">
+      Attention(<span style="color:var(--p)">Q</span>,<span style="color:var(--c)">K</span>,V)
+      = softmax( <span style="color:var(--p)">Q</span>·<span style="color:var(--c)">Kᵀ</span> / √d ) · V
+      <span class="muted">  — điểm cao ⇒ trọng số cao ⇒ lấy nhiều thông tin từ từ đó</span>
+    </div>
+
+    <div class="panel">
+      <div class="attn-stage">
+        <svg class="arcs" id="arcs" aria-hidden="true"></svg>
+        <div class="tokline" id="tokline" role="listbox" aria-label="Các từ trong câu"></div>
+      </div>
+
+      <div class="legend-flow">
+        chú ý yếu <span class="bar"></span> chú ý mạnh
+      </div>
+
+      <div class="bars" id="bars"></div>
+
+      <div class="readout" id="readout"></div>
+
+      <div class="controls">
+        <button class="ctrl" id="attnPrev">‹ Từ trước</button>
+        <button class="ctrl primary" id="attnPlay">▶ Tự chạy</button>
+        <button class="ctrl" id="attnNext">Từ sau ›</button>
+        <div class="spacer"></div>
+        <span class="hint">Đầu chú ý:</span>
+        <div class="seg" id="headSeg" role="group" aria-label="Chọn đầu chú ý">
+          <button data-head="0" aria-pressed="true">Head 1 · cú pháp</button>
+          <button data-head="1" aria-pressed="false">Head 2 · lân cận</button>
+        </div>
+      </div>
+      <div class="disclaimer">
+        <span>ⓘ</span>
+        <span>Trọng số ở đây là <b>minh họa</b> để dễ hình dung, không trích từ một mô hình thật đang chạy.
+        Mô hình thật học các trọng số này từ dữ liệu.</span>
+      </div>
+    </div>
+
+    <ul class="takeaways">
+      <li><b>Nhiều đầu (multi-head):</b> mỗi “đầu” học một kiểu quan hệ khác nhau — cái nhìn cú pháp, cái nhìn lân cận — chạy song song rồi ghép lại.</li>
+      <li><b>Toàn cục:</b> mọi từ nhìn thấy mọi từ trong câu cùng lúc, nên mô hình bắt được liên hệ ở xa (như “nó” ↔ “mèo”).</li>
+    </ul>
+  </section>
+
+  <!-- MoE -->
+  <section class="stage" id="moe">
+    <span class="tag"><span class="dot"></span> Cơ chế 02 · Mixture-of-Experts</span>
+    <h2>Một bộ định tuyến, nhiều chuyên gia — chỉ gọi vài người</h2>
+    <p class="sub">
+      Thay vì một mạng dày đặc xử lý mọi thứ, MoE có <b>N chuyên gia</b> và một <b>router</b>.
+      Mỗi từ được router chấm điểm, chỉ <b>top-k</b> chuyên gia điểm cao nhất được kích hoạt —
+      mô hình có tổng dung lượng khổng lồ nhưng mỗi từ chỉ tốn một phần nhỏ tính toán.
+    </p>
+
+    <div class="panel">
+      <div class="moe-grid">
+        <div class="router">
+          <div class="rlabel">Router / Gate</div>
+          <div class="rtok" id="moeTok">“mèo”</div>
+          <div class="rnote" id="moeRoute">định tuyến →</div>
+        </div>
+        <div class="experts" id="experts"></div>
+      </div>
+
+      <div class="moe-stats">
+        <div class="stat"><div class="n" id="statTotal">8</div><div class="t">Chuyên gia (tổng dung lượng)</div></div>
+        <div class="stat"><div class="n"><span class="g" id="statActive">2</span></div><div class="t">Được kích hoạt cho từ này</div></div>
+        <div class="stat"><div class="n"><span class="g" id="statCompute">25%</span></div><div class="t">Tính toán thực sự dùng</div></div>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl" id="moePrev">‹ Từ trước</button>
+        <button class="ctrl primary" id="moePlay">▶ Tự chạy</button>
+        <button class="ctrl" id="moeNext">Từ sau ›</button>
+        <div class="spacer"></div>
+        <span class="hint">Top-k:</span>
+        <div class="seg" id="kSeg" role="group" aria-label="Số chuyên gia kích hoạt">
+          <button data-k="1" aria-pressed="false">1</button>
+          <button data-k="2" aria-pressed="true">2</button>
+          <button data-k="4" aria-pressed="false">4</button>
+        </div>
+      </div>
+      <div class="disclaimer">
+        <span>ⓘ</span>
+        <span>Cách định tuyến ở đây là <b>minh họa</b>. Thực tế router học tự chia việc; các chuyên gia
+        thường <b>không</b> tương ứng gọn gàng với “ngữ pháp” hay “con số” như nhãn demo.</span>
+      </div>
+    </div>
+
+    <ul class="takeaways">
+      <li><b>Thưa (sparse):</b> tổng tham số rất lớn, nhưng mỗi token chỉ chạy k/N chuyên gia → nhanh & rẻ hơn mạng dày đặc cùng dung lượng.</li>
+      <li><b>Chuyên môn hóa:</b> các token khác nhau đi tới các chuyên gia khác nhau; router học cách chia việc để mỗi chuyên gia giỏi một mảng.</li>
+      <li><b>Đánh đổi:</b> k lớn ⇒ chất lượng có thể tăng nhưng tốn tính toán hơn; k=1..2 là lựa chọn phổ biến.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <div class="star">✦</div>
+    LUMINA AI · Tư duy sâu, tri thức rộng
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ═══════════ ATTENTION ═══════════ */
+  var TOKENS = ["Con", "mèo", "đuổi", "con", "chuột", "vì", "nó", "đói"];
+  // Illustrative row-normalized attention matrices, per head. rows = query, cols = key.
+  // Head 0 "syntax/coreference": "nó"(6) -> "mèo"(1); "đói"(7) -> "nó"(6)/"mèo"(1); "đuổi"(2) -> subject/object.
+  var HEAD0 = [
+    [0.55,0.28,0.05,0.03,0.03,0.02,0.02,0.02],
+    [0.30,0.45,0.10,0.04,0.05,0.02,0.02,0.02],
+    [0.08,0.34,0.20,0.06,0.26,0.02,0.02,0.02],
+    [0.05,0.06,0.05,0.40,0.36,0.03,0.03,0.02],
+    [0.04,0.10,0.20,0.30,0.30,0.02,0.02,0.02],
+    [0.04,0.10,0.30,0.04,0.10,0.30,0.08,0.04],
+    [0.06,0.52,0.08,0.04,0.06,0.06,0.14,0.04],
+    [0.05,0.28,0.06,0.03,0.05,0.06,0.37,0.10]
+  ];
+  // Head 1 "local/adjacency": attend to neighbours.
+  function localRow(i, n) {
+    var r = [], s = 0;
+    for (var j = 0; j < n; j++) { var d = Math.abs(i - j); var v = Math.exp(-d * 0.9); r.push(v); s += v; }
+    for (var k = 0; k < n; k++) r[k] = r[k] / s;
+    return r;
+  }
+  var HEAD1 = TOKENS.map(function (_, i) { return localRow(i, TOKENS.length); });
+  var HEADS = [HEAD0, HEAD1];
+
+  var qIdx = 6;      // start on "nó" — the interesting one
+  var head = 0;
+  var attnTimer = null;
+
+  var tokline = document.getElementById("tokline");
+  var arcs = document.getElementById("arcs");
+  var barsEl = document.getElementById("bars");
+  var readout = document.getElementById("readout");
+
+  var tokEls = TOKENS.map(function (t, i) {
+    var el = document.createElement("div");
+    el.className = "tok";
+    el.setAttribute("role", "option");
+    el.tabIndex = 0;
+    el.innerHTML = t + '<span class="wt"></span>';
+    el.addEventListener("click", function () { setQuery(i); });
+    el.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setQuery(i); }
+    });
+    tokline.appendChild(el);
+    return el;
+  });
+
+  function lerpColor(a, b, t) {
+    return "rgb(" + Math.round(a[0]+(b[0]-a[0])*t) + "," + Math.round(a[1]+(b[1]-a[1])*t) + "," + Math.round(a[2]+(b[2]-a[2])*t) + ")";
+  }
+  var CYAN = [79,195,247], PURP = [139,124,248];
+
+  function renderAttn() {
+    var w = HEADS[head][qIdx];
+    var maxw = Math.max.apply(null, w);
+
+    // token chips
+    tokEls.forEach(function (el, j) {
+      el.classList.toggle("query", j === qIdx);
+      var wt = el.querySelector(".wt");
+      if (j === qIdx) { wt.style.opacity = "0"; }
+      else {
+        wt.textContent = Math.round(w[j] * 100);
+        wt.style.opacity = w[j] > 0.12 ? "1" : "0";
+      }
+    });
+
+    // arcs (SVG)
+    drawArcs(w, maxw);
+
+    // bars
+    var order = TOKENS.map(function (t, j) { return { j: j, t: t, v: w[j] }; })
+      .sort(function (a, b) { return b.v - a.v; });
+    barsEl.innerHTML = "";
+    order.forEach(function (o, rank) {
+      var row = document.createElement("div");
+      row.className = "brow" + (rank === 0 ? " top" : "");
+      row.innerHTML =
+        '<div class="lbl">' + (o.j === qIdx ? "▸ " : "") + o.t + '</div>' +
+        '<div class="track"><div class="fill"></div></div>' +
+        '<div class="val">' + (o.v * 100).toFixed(0) + '%</div>';
+      barsEl.appendChild(row);
+      var fill = row.querySelector(".fill");
+      requestAnimationFrame(function () { fill.style.width = (o.v / maxw * 100).toFixed(1) + "%"; });
+    });
+
+    // readout
+    var top = order[0];
+    readout.innerHTML =
+      'Từ truy vấn <span class="q">“' + TOKENS[qIdx] + '”</span> chú ý mạnh nhất vào ' +
+      '<span class="k">“' + top.t + '”</span> (<b>' + (top.v * 100).toFixed(0) + '%</b>). ' +
+      'Softmax đảm bảo tổng các trọng số của một từ truy vấn luôn bằng <b>100%</b> — mô hình phải “chia sự chú ý”.';
+  }
+
+  function drawArcs(w, maxw) {
+    // measure positions relative to the svg/attn-stage box
+    var box = arcs.getBoundingClientRect();
+    arcs.setAttribute("viewBox", "0 0 " + box.width + " " + box.height);
+    var qc = center(tokEls[qIdx], box);
+    var svg = "";
+    for (var j = 0; j < tokEls.length; j++) {
+      if (j === qIdx) continue;
+      var c = center(tokEls[j], box);
+      var strength = w[j] / maxw;
+      if (strength < 0.05) continue;
+      var t = w[j] / maxw;
+      var col = lerpColor(CYAN, PURP, t);
+      var mx = (qc.x + c.x) / 2;
+      var my = Math.min(qc.y, c.y) - 26 - strength * 30;
+      svg += '<path d="M ' + qc.x + ' ' + qc.y + ' Q ' + mx + ' ' + my + ' ' + c.x + ' ' + c.y + '" ' +
+        'fill="none" stroke="' + col + '" stroke-width="' + (1 + strength * 6).toFixed(2) + '" ' +
+        'stroke-linecap="round" opacity="' + (0.22 + strength * 0.6).toFixed(2) + '"/>';
+    }
+    arcs.innerHTML = svg;
+  }
+  function center(el, box) {
+    var r = el.getBoundingClientRect();
+    return { x: r.left - box.left + r.width / 2, y: r.top - box.top + r.height / 2 };
+  }
+
+  function setQuery(i) { qIdx = i; renderAttn(); }
+  document.getElementById("attnPrev").addEventListener("click", function () { setQuery((qIdx + TOKENS.length - 1) % TOKENS.length); });
+  document.getElementById("attnNext").addEventListener("click", function () { setQuery((qIdx + 1) % TOKENS.length); });
+  var attnPlay = document.getElementById("attnPlay");
+  attnPlay.addEventListener("click", function () {
+    if (attnTimer) { clearInterval(attnTimer); attnTimer = null; attnPlay.textContent = "▶ Tự chạy"; return; }
+    attnPlay.textContent = "⏸ Dừng";
+    attnTimer = setInterval(function () { setQuery((qIdx + 1) % TOKENS.length); }, 1500);
+  });
+  document.getElementById("headSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    head = +b.dataset.head;
+    Array.prototype.forEach.call(this.children, function (c) { c.setAttribute("aria-pressed", c === b ? "true" : "false"); });
+    renderAttn();
+  });
+
+  /* ═══════════ MoE ═══════════ */
+  var EXPERTS = [
+    { n: "E1", c: "ngữ pháp" }, { n: "E2", c: "danh từ" }, { n: "E3", c: "động từ" }, { n: "E4", c: "con số" },
+    { n: "E5", c: "cảm xúc" }, { n: "E6", c: "địa danh" }, { n: "E7", c: "logic" }, { n: "E8", c: "khác" }
+  ];
+  // Illustrative gate logits per example token (length 8). Different tokens -> different top experts.
+  var MOE_TOKENS = [
+    { t: "“mèo”",   g: [0.4, 3.1, 0.6, 0.1, 0.8, 0.2, 0.3, 0.5] },
+    { t: "“đuổi”",  g: [1.2, 0.5, 3.4, 0.1, 0.4, 0.1, 0.9, 0.3] },
+    { t: "“ba”",    g: [0.6, 0.4, 0.2, 3.6, 0.1, 0.3, 1.1, 0.4] },
+    { t: "“Paris”", g: [0.5, 1.3, 0.2, 0.3, 0.4, 3.5, 0.6, 0.4] },
+    { t: "“vì”",    g: [1.6, 0.2, 0.6, 0.2, 0.3, 0.1, 3.2, 0.5] },
+    { t: "“vui”",   g: [0.7, 0.6, 0.3, 0.1, 3.6, 0.2, 0.4, 0.6] }
+  ];
+  var mIdx = 0, topK = 2, moeTimer = null;
+
+  var expWrap = document.getElementById("experts");
+  var expEls = EXPERTS.map(function (e) {
+    var el = document.createElement("div");
+    el.className = "exp";
+    el.innerHTML = '<div class="en">' + e.n + '</div><div class="ec">' + e.c + '</div><div class="gate"></div>';
+    expWrap.appendChild(el);
+    return el;
+  });
+  var moeTok = document.getElementById("moeTok");
+  var moeRoute = document.getElementById("moeRoute");
+  var statActive = document.getElementById("statActive");
+  var statCompute = document.getElementById("statCompute");
+
+  function softmax(a) {
+    var m = Math.max.apply(null, a), ex = a.map(function (v) { return Math.exp(v - m); });
+    var s = ex.reduce(function (p, c) { return p + c; }, 0);
+    return ex.map(function (v) { return v / s; });
+  }
+
+  function renderMoE() {
+    var item = MOE_TOKENS[mIdx];
+    moeTok.textContent = item.t;
+    moeTok.style.transform = "scale(1.06)";
+    setTimeout(function () { moeTok.style.transform = "scale(1)"; }, 180);
+
+    var probs = softmax(item.g);
+    var ranked = probs.map(function (p, i) { return { i: i, p: p }; }).sort(function (a, b) { return b.p - a.p; });
+    var chosen = ranked.slice(0, topK).map(function (r) { return r.i; });
+    // renormalize gate weights across chosen (as real MoE combines only top-k)
+    var sumChosen = chosen.reduce(function (s, i) { return s + probs[i]; }, 0);
+
+    expEls.forEach(function (el, i) {
+      var isOn = chosen.indexOf(i) >= 0;
+      el.classList.toggle("active", isOn);
+      el.classList.toggle("dim", !isOn);
+      var gate = el.querySelector(".gate");
+      gate.textContent = isOn ? "gate " + (probs[i] / sumChosen * 100).toFixed(0) + "%" : "—";
+    });
+
+    var names = chosen.map(function (i) { return EXPERTS[i].n; });
+    moeRoute.textContent = "→ " + names.join(" + ");
+    statActive.textContent = topK;
+    statCompute.textContent = Math.round(topK / EXPERTS.length * 100) + "%";
+  }
+
+  document.getElementById("moePrev").addEventListener("click", function () { mIdx = (mIdx + MOE_TOKENS.length - 1) % MOE_TOKENS.length; renderMoE(); });
+  document.getElementById("moeNext").addEventListener("click", function () { mIdx = (mIdx + 1) % MOE_TOKENS.length; renderMoE(); });
+  var moePlay = document.getElementById("moePlay");
+  moePlay.addEventListener("click", function () {
+    if (moeTimer) { clearInterval(moeTimer); moeTimer = null; moePlay.textContent = "▶ Tự chạy"; return; }
+    moePlay.textContent = "⏸ Dừng";
+    moeTimer = setInterval(function () { mIdx = (mIdx + 1) % MOE_TOKENS.length; renderMoE(); }, 1600);
+  });
+  document.getElementById("kSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    topK = +b.dataset.k;
+    Array.prototype.forEach.call(this.children, function (c) { c.setAttribute("aria-pressed", c === b ? "true" : "false"); });
+    renderMoE();
+  });
+
+  /* init + keep arcs aligned on resize */
+  function init() { renderAttn(); renderMoE(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+  var rt;
+  window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(renderAttn, 120); });
+})();
+</script>
+
+</body>
+</html>
