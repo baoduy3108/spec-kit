@@ -827,6 +827,42 @@ def test_video_link_detection_and_vtt_parse():
     assert "-->" not in text and "WEBVTT" not in text and "<c>" not in text
 
 
+def test_widget_endpoints_status_and_knowledge():
+    """📊 Endpoint widget: status trả field an toàn (KHÔNG lộ tên model); knowledge trả tri thức đã học."""
+    from fastapi.testclient import TestClient
+    from app import auth, knowledge
+    from app.main import app
+
+    uid = _new_user_id()
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "T", "picture": "", "is_admin": False}
+    try:
+        client = TestClient(app)
+
+        # status: có đủ field, engines_ready là số, KHÔNG có tên nhà cung cấp.
+        r = client.get("/api/widget/status")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["type"] == "status"
+        assert isinstance(data["engines_ready"], int)
+        blob = str(data).lower()
+        for leak in ("claude", "gemini", "groq", "openai", "deepseek", "mistral", "ollama"):
+            assert leak not in blob, f"widget status lộ tên model: {leak}"
+
+        # knowledge: dạy 1 mẩu rồi widget phải tìm thấy.
+        knowledge.remember("thủ đô nước Pháp", "Paris là thủ đô của Pháp.", source="manual")
+        r = client.get("/api/widget/knowledge", params={"q": "thủ đô nước Pháp"})
+        assert r.status_code == 200
+        kd = r.json()
+        assert kd["type"] == "knowledge"
+        assert any("paris" in (it.get("summary", "") + it.get("topic", "")).lower() for it in kd["items"])
+
+        # loại không hỗ trợ → 404
+        assert client.get("/api/widget/khongco").status_code == 404
+    finally:
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 def test_video_link_build_context_and_whisper_gate():
     from app import video_link, transcribe
 

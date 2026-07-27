@@ -48,6 +48,7 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 | 🗣 **Lồng tiếng tự động** | Nút **🗣 Lồng tiếng phim** ở sidebar → chọn video, chọn ngôn ngữ → chờ 1-3 phút → tải video đã lồng tiếng + gắn phụ đề | Chỉ gói **Tháng/Năm** (tốn nhiều tài nguyên xử lý) — xem chi tiết bên dưới |
 | 🎤 **Nói bằng giọng** | Bấm 🎤 → nói → ra chữ | Chạy ngay trong trình duyệt (Chrome/Edge/Android), không cần server |
 | 📊 **Sơ đồ động (Mermaid)** | Hỏi "vẽ sơ đồ kiến trúc/luồng/tuần tự…" (hoặc mô tả ý, gửi kèm ảnh) → LUMINA xuất khối `mermaid`, giao diện tự render thành **sơ đồ tương tác** (bấm ⤢ để phóng to, cuộn để zoom, kéo để di chuyển) | **Mọi bộ não**; thư viện Mermaid nhúng sẵn (`static/vendor/`), nạp lười chỉ khi có sơ đồ |
+| ◉ **Widget sống trong chat** | Hỏi "tạo widget tin tức về X cập nhật liên tục", "đồng hồ đếm ngược tới…", "widget trạng thái" → LUMINA xuất khối `lumina-widget`, giao diện render **thẻ sống tự làm mới** (⏸ tạm dừng / ⟳ làm mới). Nối **data local thật**: tin tức (Google News), tri thức đã học, trạng thái app, đồng hồ/đếm ngược | **Mọi bộ não**; poll `/api/widget/*`, không bịa nguồn ngoài |
 | ✦ **Bộ não LUMINA (học)** | Link ở sidebar → trang giải thích động **Self-Attention & Mixture-of-Experts**, xem chạy từng bước | Trang tĩnh `static/learn.html`, không cần key |
 
 > Router tự nhận ra ý định ("vẽ…", "nghiên cứu sâu…") nên thường **không cần bấm nút**; các nút chỉ để ép chế độ khi muốn.

@@ -121,6 +121,111 @@
     document.body.appendChild(overlay);
   }
 
+  // ── Widget sống trong chat (nối data local, tự cập nhật) ──────────────────
+  // Bộ não xuất khối ```lumina-widget chứa JSON {type,title,query,interval,...}.
+  // Frontend render thành thẻ sống, poll endpoint LUMINA định kỳ. Thẻ tự dừng
+  // khi bị gỡ khỏi DOM (chuyển hội thoại) → không rò rỉ timer.
+  const WIDGET_MIN_INTERVAL = { news: 30, knowledge: 30, status: 15, clock: 1 };
+
+  function fmtClock(d) { return d.toLocaleTimeString("vi-VN"); }
+
+  function widgetCountdownText(spec) {
+    const target = new Date(spec.target || 0).getTime();
+    if (!target) return "—";
+    let diff = Math.floor((target - Date.now()) / 1000);
+    const past = diff < 0; diff = Math.abs(diff);
+    const d = Math.floor(diff / 86400), h = Math.floor((diff % 86400) / 3600),
+          m = Math.floor((diff % 3600) / 60), s = diff % 60;
+    const parts = [d ? d + "n" : "", (h < 10 ? "0" : "") + h + "g",
+                   (m < 10 ? "0" : "") + m + "p", (s < 10 ? "0" : "") + s + "s"].filter(Boolean);
+    return (past ? "đã qua " : "") + parts.join(" ");
+  }
+
+  async function widgetFetch(type, query) {
+    const r = await fetch(`/api/widget/${type}?q=${encodeURIComponent(query || "")}`,
+                          { credentials: "same-origin" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }
+
+  function renderWidgetBody(type, box, data, spec) {
+    box.innerHTML = "";
+    if (type === "news" || type === "knowledge") {
+      const items = (data && data.items) || [];
+      if (!items.length) { box.appendChild(el("div", "widget-empty", "Chưa có dữ liệu.")); return; }
+      const list = el("div", "widget-list");
+      for (const it of items) {
+        const row = el("div", "widget-item");
+        const title = it.title || it.topic || "";
+        if (it.url) {
+          const a = el("a", "widget-link", title);
+          a.href = it.url; a.target = "_blank"; a.rel = "noopener";
+          row.appendChild(a);
+        } else { row.appendChild(el("span", "widget-link", title)); }
+        if (it.summary) row.appendChild(el("div", "widget-sub", it.summary));
+        list.appendChild(row);
+      }
+      box.appendChild(list);
+    } else if (type === "status") {
+      const grid = el("div", "widget-stats");
+      grid.appendChild(statTile(data.plan, "Gói hiện tại"));
+      grid.appendChild(statTile(String(data.engines_ready), "Bộ não sẵn sàng"));
+      grid.appendChild(statTile(`${data.daily_used}/${data.daily_cap || "∞"}`, "Tin nhắn hôm nay"));
+      box.appendChild(grid);
+    } else if (type === "clock") {
+      const big = el("div", "widget-clock");
+      big.textContent = spec.mode === "countdown" ? widgetCountdownText(spec) : fmtClock(new Date());
+      box.appendChild(big);
+      if (spec.mode === "countdown" && spec.target)
+        box.appendChild(el("div", "widget-sub", "→ " + new Date(spec.target).toLocaleString("vi-VN")));
+    }
+  }
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function statTile(n, t) { const w = el("div", "widget-stat"); w.appendChild(el("div", "widget-stat-n", n)); w.appendChild(el("div", "widget-stat-t", t)); return w; }
+
+  async function renderWidgetsIn(root) {
+    const blocks = root.querySelectorAll(".lumina-widget:not([data-ready])");
+    for (const card of blocks) {
+      card.setAttribute("data-ready", "1");
+      let spec;
+      try { spec = JSON.parse(decodeURIComponent(card.getAttribute("data-spec") || "")); }
+      catch { card.setAttribute("data-error", "1"); continue; }
+      const type = (spec.type || "").toLowerCase();
+      if (!WIDGET_MIN_INTERVAL[type]) { card.setAttribute("data-error", "1"); continue; }
+      const interval = Math.max(WIDGET_MIN_INTERVAL[type], Number(spec.interval) || 0) * 1000;
+
+      card.innerHTML = "";
+      const head = el("div", "widget-head");
+      head.appendChild(el("span", "widget-title", spec.title || ({ news: "Tin tức trực tiếp", knowledge: "Tri thức đã học", status: "Trạng thái LUMINA", clock: spec.mode === "countdown" ? "Đếm ngược" : "Đồng hồ" }[type])));
+      const meta = el("span", "widget-meta", "");
+      const btnRefresh = el("button", "widget-btn", "⟳"); btnRefresh.title = "Làm mới";
+      const btnPause = el("button", "widget-btn", "⏸"); btnPause.title = "Tạm dừng / chạy";
+      const ctrls = el("div", "widget-ctrls"); ctrls.append(meta, btnRefresh, btnPause);
+      head.appendChild(ctrls);
+      const body = el("div", "widget-body");
+      card.append(head, body);
+
+      let paused = false, timer = null;
+      const isClient = type === "clock";
+      async function tick() {
+        if (!document.body.contains(card)) { if (timer) clearInterval(timer); return; }  // tự dọn khi gỡ
+        if (paused) return;
+        try {
+          if (isClient) { renderWidgetBody(type, body, null, spec); meta.textContent = ""; }
+          else {
+            const data = await widgetFetch(type, spec.query);
+            renderWidgetBody(type, body, data, spec);
+            meta.textContent = "cập nhật " + fmtClock(new Date());
+          }
+        } catch { meta.textContent = "lỗi tải — thử lại sau"; }
+      }
+      btnRefresh.addEventListener("click", tick);
+      btnPause.addEventListener("click", () => { paused = !paused; btnPause.textContent = paused ? "▶" : "⏸"; if (!paused) tick(); });
+      await tick();
+      timer = setInterval(tick, interval);
+    }
+  }
+
   function renderMarkdown(text) {
     const lines = escapeHtml(text).split("\n");
     const out = [];
@@ -134,6 +239,10 @@
         // Sơ đồ động: giữ mã gốc làm dự phòng, renderMermaidIn() sẽ thay bằng SVG.
         out.push(`<div class="mermaid-diagram" data-code="${encodeURIComponent(unescapeHtml(body))}">` +
                  `<pre class="mermaid-fallback"><code>${body}</code></pre></div>`);
+      } else if (codeLang === "lumina-widget") {
+        // Widget sống: giữ JSON gốc làm dự phòng, renderWidgetsIn() sẽ dựng thẻ.
+        out.push(`<div class="lumina-widget" data-spec="${encodeURIComponent(unescapeHtml(body))}">` +
+                 `<pre class="widget-fallback"><code>${body}</code></pre></div>`);
       } else {
         out.push(`<pre><code>${body}</code></pre>`);
       }
@@ -548,6 +657,7 @@
         const el = addAssistantMessage(modeLabel(m.mode));
         el.content.innerHTML = renderMarkdown(m.content);
         renderMermaidIn(el.content);
+        renderWidgetsIn(el.content);
         try {
           const cits = JSON.parse(m.citations || "[]");
           if (cits.length) renderCitations(el.body, cits);
@@ -787,6 +897,7 @@
     } finally {
       el.content.classList.remove("cursor-blink");
       renderMermaidIn(el.content);   // render sơ đồ Mermaid khi đã có đủ nội dung
+      renderWidgetsIn(el.content);   // dựng widget sống khi tin nhắn hoàn tất
       if (thinkingBox) {
         thinkingBox.classList.remove("active");
         thinkingBox.querySelector("summary").textContent =

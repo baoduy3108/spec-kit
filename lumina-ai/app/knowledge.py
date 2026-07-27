@@ -281,6 +281,39 @@ async def _fetch_news(query: str, lang: str = "vi", limit: int = 4) -> dict | No
         return None
 
 
+async def news_items(query: str, lang: str = "vi", limit: int = 6) -> list[dict]:
+    """Danh sách tin mới nhất (có cấu trúc) cho WIDGET tin tức trực tiếp.
+
+    Trả [{title, url}] từ Google News RSS (miễn phí, không cần key). Khác
+    `_fetch_news` (gộp thành 1 'fact' để đưa vào ngữ cảnh), hàm này giữ từng
+    mục riêng để frontend render thẻ sống. Best-effort, không raise → [] nếu lỗi.
+    """
+    hl = "vi" if lang == "vi" else "en-US"
+    gl = "VN" if lang == "vi" else "US"
+    url = ("https://news.google.com/rss/search?q=" + urllib.parse.quote(query)
+           + f"&hl={hl}&gl={gl}&ceid={gl}:{hl.split('-')[0]}")
+    try:
+        async with httpx.AsyncClient(timeout=10, headers={"User-Agent": "LUMINA-AI/1.0"}) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            xml = resp.text
+        out: list[dict] = []
+        for it in re.findall(r"<item>(.*?)</item>", xml, re.DOTALL)[:limit]:
+            m_title = re.search(r"<title>(.*?)</title>", it, re.DOTALL)
+            m_link = re.search(r"<link>(.*?)</link>", it, re.DOTALL)
+            if not m_title:
+                continue
+            title = re.sub(r"<[^>]+>", "", m_title.group(1)).strip()
+            title = (title.replace("&amp;", "&").replace("&#39;", "'")
+                          .replace("&quot;", '"').replace("&lt;", "<").replace("&gt;", ">"))
+            if title:
+                out.append({"title": title, "url": (m_link.group(1).strip() if m_link else "")})
+        return out
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("News widget RSS lỗi: %s", exc)
+        return []
+
+
 async def gather(query: str, max_items: int = 3) -> list[dict]:
     """Thu thập tư liệu: kho nội bộ trước (0 token) → [tin tức nếu câu thời sự] →
     Wikipedia (miễn phí) → lưu kho. Mọi mẩu đều kèm nhãn NGUỒN để chống bịp.

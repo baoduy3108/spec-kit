@@ -29,6 +29,7 @@ import asyncio
 import json
 import logging
 import os
+import time
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,7 +37,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, files, media, payments, recall, video_dub, video_link, webpage
+from . import auth, config, db, files, knowledge, media, payments, recall, video_dub, video_link, webpage
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
 from .memory import trim_history
@@ -118,6 +119,34 @@ async def logout(response: Response):
 async def me(user: dict = Depends(auth.require_user)):
     plan = db.get_effective_plan(user["id"])
     return {"user": user, "plan": plan}
+
+
+@app.get("/api/widget/{wtype}")
+async def widget_data(wtype: str, q: str = "", user: dict = Depends(auth.require_user)):
+    """📊 Nguồn dữ liệu cho WIDGET SỐNG trong chat — poll định kỳ từ frontend.
+
+    Chỉ trả dữ liệu LUMINA thật sự có (không bịa): tin tức trực tiếp, kho tri
+    thức đã học, trạng thái app. KHÔNG bao giờ lộ tên model/nhà cung cấp.
+    """
+    q = (q or "").strip()[:120]
+    now = int(time.time())
+    if wtype == "news":
+        items = await knowledge.news_items(q or "tin nóng", limit=6)
+        return {"type": "news", "query": q, "updated_at": now, "items": items}
+    if wtype == "knowledge":
+        items = knowledge.lookup_local(q, limit=6) if q else []
+        return {"type": "knowledge", "query": q, "updated_at": now,
+                "items": [{"topic": it.get("topic", ""), "summary": (it.get("summary") or "")[:240],
+                           "url": it.get("url", "")} for it in items]}
+    if wtype == "status":
+        plan = db.get_effective_plan(user["id"])
+        premium_used, total_used = db.get_daily_usage(user["id"])
+        # An toàn: chỉ trả SỐ LƯỢNG bộ não sẵn sàng, không nêu tên nhà cung cấp.
+        return {"type": "status", "updated_at": now,
+                "plan": plan.get("label", "Miễn phí"),
+                "engines_ready": len(orchestrator.available_engines()),
+                "daily_used": total_used, "daily_cap": plan.get("total_daily_cap", 0)}
+    raise HTTPException(status_code=404, detail="Loại widget không hỗ trợ")
 
 
 @app.get("/api/config")
