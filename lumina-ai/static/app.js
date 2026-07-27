@@ -40,17 +40,111 @@
         '<a href="$2" target="_blank" rel="noopener">$1</a>');
   }
 
+  function unescapeHtml(s) {
+    return s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+  }
+
+  // ── Sơ đồ Mermaid (nạp lười, chỉ khi có sơ đồ) ────────────────────────────
+  let _mermaidPromise = null;
+  function ensureMermaid() {
+    if (_mermaidPromise) return _mermaidPromise;
+    _mermaidPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "/static/vendor/mermaid.min.js";
+      s.onload = () => {
+        try {
+          window.mermaid.initialize({
+            startOnLoad: false, securityLevel: "strict", theme: "dark",
+            fontFamily: '"Segoe UI", system-ui, sans-serif',
+            themeVariables: {
+              primaryColor: "#1c1f2b", primaryTextColor: "#e8eaf2", primaryBorderColor: "#8b7cf8",
+              lineColor: "#4fc3f7", secondaryColor: "#14161f", tertiaryColor: "#14161f",
+              background: "#0d0e14", mainBkg: "#1c1f2b", textColor: "#e8eaf2",
+            },
+          });
+          resolve(window.mermaid);
+        } catch (e) { reject(e); }
+      };
+      s.onerror = () => reject(new Error("Không tải được thư viện sơ đồ."));
+      document.head.appendChild(s);
+    });
+    return _mermaidPromise;
+  }
+
+  let _mmId = 0;
+  async function renderMermaidIn(root) {
+    const blocks = root.querySelectorAll(".mermaid-diagram:not([data-rendered])");
+    if (!blocks.length) return;
+    let mermaid;
+    try { mermaid = await ensureMermaid(); }
+    catch { return; } // giữ nguyên phần mã dự phòng nếu không tải được
+    for (const el of blocks) {
+      el.setAttribute("data-rendered", "1");
+      const code = decodeURIComponent(el.getAttribute("data-code") || "");
+      try {
+        // Mermaid v9 render() trả về chuỗi SVG; v10+ trả về Promise<{svg}> — hỗ trợ cả hai.
+        const res = mermaid.render("mm-" + (++_mmId), code);
+        const svg = (res && typeof res.then === "function") ? (await res).svg
+                  : (typeof res === "string") ? res : (res && res.svg);
+        if (!svg) throw new Error("empty svg");
+        el.innerHTML = svg;
+        const btn = document.createElement("button");
+        btn.className = "mm-zoom"; btn.title = "Phóng to sơ đồ"; btn.textContent = "⤢";
+        btn.addEventListener("click", () => openDiagramZoom(el.querySelector("svg")));
+        el.appendChild(btn);
+      } catch {
+        el.setAttribute("data-error", "1"); // để lại <pre> mã gốc cho người dùng thấy
+      }
+    }
+  }
+
+  function openDiagramZoom(svg) {
+    if (!svg) return;
+    const overlay = document.createElement("div");
+    overlay.className = "mm-overlay";
+    const stage = document.createElement("div");
+    stage.className = "mm-stage";
+    stage.innerHTML = svg.outerHTML;
+    overlay.appendChild(stage);
+    let scale = 1, tx = 0, ty = 0, drag = false, px = 0, py = 0;
+    const apply = () => { stage.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; };
+    overlay.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      scale = Math.min(6, Math.max(0.4, scale * (e.deltaY < 0 ? 1.12 : 0.89))); apply();
+    }, { passive: false });
+    stage.addEventListener("pointerdown", (e) => { drag = true; px = e.clientX; py = e.clientY; stage.setPointerCapture(e.pointerId); });
+    stage.addEventListener("pointermove", (e) => { if (!drag) return; tx += e.clientX - px; ty += e.clientY - py; px = e.clientX; py = e.clientY; apply(); });
+    stage.addEventListener("pointerup", () => { drag = false; });
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) document.body.removeChild(overlay); });
+    document.addEventListener("keydown", function esc(e) { if (e.key === "Escape" && overlay.parentNode) { document.body.removeChild(overlay); document.removeEventListener("keydown", esc); } });
+    document.body.appendChild(overlay);
+  }
+
   function renderMarkdown(text) {
     const lines = escapeHtml(text).split("\n");
     const out = [];
-    let inCode = false, codeLines = [], inList = null, inTable = false;
+    let inCode = false, codeLines = [], codeLang = "", inList = null, inTable = false;
 
     const closeList = () => { if (inList) { out.push(`</${inList}>`); inList = null; } };
     const closeTable = () => { if (inTable) { out.push("</table>"); inTable = false; } };
+    const flushCode = () => {
+      const body = codeLines.join("\n");
+      if (codeLang === "mermaid") {
+        // Sơ đồ động: giữ mã gốc làm dự phòng, renderMermaidIn() sẽ thay bằng SVG.
+        out.push(`<div class="mermaid-diagram" data-code="${encodeURIComponent(unescapeHtml(body))}">` +
+                 `<pre class="mermaid-fallback"><code>${body}</code></pre></div>`);
+      } else {
+        out.push(`<pre><code>${body}</code></pre>`);
+      }
+      codeLines = []; codeLang = "";
+    };
 
     for (const line of lines) {
-      if (line.trimStart().startsWith("```")) {
-        if (inCode) { out.push(`<pre><code>${codeLines.join("\n")}</code></pre>`); codeLines = []; }
+      const fence = line.trimStart().match(/^```(\w*)/);
+      if (fence) {
+        if (inCode) { flushCode(); }
+        else { codeLang = (fence[1] || "").toLowerCase(); }
         inCode = !inCode;
         continue;
       }
@@ -453,6 +547,7 @@
       else {
         const el = addAssistantMessage(modeLabel(m.mode));
         el.content.innerHTML = renderMarkdown(m.content);
+        renderMermaidIn(el.content);
         try {
           const cits = JSON.parse(m.citations || "[]");
           if (cits.length) renderCitations(el.body, cits);
@@ -689,6 +784,7 @@
       }
     } finally {
       el.content.classList.remove("cursor-blink");
+      renderMermaidIn(el.content);   // render sơ đồ Mermaid khi đã có đủ nội dung
       if (thinkingBox) {
         thinkingBox.classList.remove("active");
         thinkingBox.querySelector("summary").textContent =

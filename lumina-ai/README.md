@@ -46,6 +46,8 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 | ⚙️ **Lumina Forge** | Bấm nút **⚙️ Lumina Forge** → LUMINA trả lời ở mức kỹ sư cấp cao, TỰ CO GIÃN theo quy mô: việc nhỏ (1 hàm, sửa lỗi) trả lời gọn (chọn ngôn ngữ phù hợp, kiến trúc ngắn gọn, bảo mật, test, Dockerfile/CI-CD nếu liên quan — hỗ trợ Python/TypeScript/JavaScript/Rust/Go/Java/C#/C++/SQL/Bash); việc lớn (kiến trúc hệ thống, nhiều bước) tự dùng đủ quy trình 6 giai đoạn nghiêm ngặt (SPEC → Design Review → Implementation → Validation → Review → Handover). Tự động áp dụng thêm kỹ năng chuyên môn phù hợp từ thư viện nội bộ khi khớp (xem bên dưới). Nếu chưa có code/tài liệu trong hội thoại, LUMINA sẽ hỏi bạn dán vào hoặc dùng 📎/dán link trước khi phân tích | Bộ não có tìm kiếm (Gemini/Claude) |
 | 🗣 **Lồng tiếng tự động** | Nút **🗣 Lồng tiếng phim** ở sidebar → chọn video, chọn ngôn ngữ → chờ 1-3 phút → tải video đã lồng tiếng + gắn phụ đề | Chỉ gói **Tháng/Năm** (tốn nhiều tài nguyên xử lý) — xem chi tiết bên dưới |
 | 🎤 **Nói bằng giọng** | Bấm 🎤 → nói → ra chữ | Chạy ngay trong trình duyệt (Chrome/Edge/Android), không cần server |
+| 📊 **Sơ đồ động (Mermaid)** | Hỏi "vẽ sơ đồ kiến trúc/luồng/tuần tự…" (hoặc mô tả ý, gửi kèm ảnh) → LUMINA xuất khối `mermaid`, giao diện tự render thành **sơ đồ tương tác** (bấm ⤢ để phóng to, cuộn để zoom, kéo để di chuyển) | **Mọi bộ não**; thư viện Mermaid nhúng sẵn (`static/vendor/`), nạp lười chỉ khi có sơ đồ |
+| ✦ **Bộ não LUMINA (học)** | Link ở sidebar → trang giải thích động **Self-Attention & Mixture-of-Experts**, xem chạy từng bước | Trang tĩnh `static/learn.html`, không cần key |
 
 > Router tự nhận ra ý định ("vẽ…", "nghiên cứu sâu…") nên thường **không cần bấm nút**; các nút chỉ để ép chế độ khi muốn.
 

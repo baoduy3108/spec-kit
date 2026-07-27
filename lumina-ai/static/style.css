@@ -692,3 +692,32 @@ body {
   background: var(--gradient); border: none; color: #0d0e14;
   padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer;
 }
+
+/* ── Sơ đồ Mermaid động ────────────────────────────────── */
+.mermaid-diagram {
+  position: relative; margin: 14px 0; padding: 14px; border-radius: 12px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  overflow-x: auto; text-align: center;
+}
+.mermaid-diagram svg { max-width: 100%; height: auto; }
+.mermaid-fallback { text-align: left; margin: 0; }
+.mermaid-diagram[data-rendered] .mermaid-fallback { display: none; }
+.mermaid-diagram[data-error] { border-color: #6b3b3b; }
+.mm-zoom {
+  position: absolute; top: 8px; right: 8px; width: 30px; height: 30px;
+  border-radius: 8px; border: 1px solid var(--border); background: var(--bg-3);
+  color: var(--text); font-size: 15px; cursor: pointer; opacity: .6; transition: opacity .15s;
+}
+.mm-zoom:hover { opacity: 1; }
+.mm-overlay {
+  position: fixed; inset: 0; z-index: 1000; background: rgba(6,7,12,.86);
+  backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
+  overflow: hidden; cursor: zoom-out;
+}
+.mm-stage {
+  cursor: grab; touch-action: none; transform-origin: center center;
+  transition: transform .05s linear; will-change: transform;
+}
+.mm-stage:active { cursor: grabbing; }
+.mm-stage svg { max-width: 92vw; max-height: 88vh; height: auto;
+  background: var(--bg-2); border-radius: 12px; padding: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
