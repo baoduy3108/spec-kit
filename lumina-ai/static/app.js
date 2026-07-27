@@ -781,35 +781,15 @@
     }
   }
 
-  // ── Agent tùy chỉnh (persona người dùng tự tạo) ───────────────────────────
-  async function loadAgents() {
-    let data;
-    try { data = await api("/api/agents"); } catch { return; }
+  // ── Agent DUY NHẤT: ⚙️ Lumina Forge (như Claude Code — bấm vào hiện/tạo session) ──
+  function loadAgents() {
     const list = $("agent-list");
     list.innerHTML = "";
-    // Agent DỰNG SẴN: ⚙️ Lumina Forge — chọn = chạy quy trình Forge + TOÀN BỘ thư viện kỹ năng.
     const forge = document.createElement("div");
     forge.className = "proj-item builtin" + (state.agentId === "forge" ? " active" : "");
     forge.innerHTML = `<span class="title">⚙️ Lumina Forge</span>`;
     forge.addEventListener("click", () => toggleAgent({ id: "forge", name: "Lumina Forge", emoji: "⚙️" }));
     list.appendChild(forge);
-    for (const a of data.agents) {
-      const item = document.createElement("div");
-      item.className = "proj-item" + (a.id === state.agentId ? " active" : "");
-      item.innerHTML = `<span class="title"></span><button class="edit" title="Sửa">✎</button><button class="del" title="Xóa">✕</button>`;
-      item.querySelector(".title").textContent = (a.emoji || "🤖") + " " + a.name;
-      item.querySelector(".title").addEventListener("click", () => toggleAgent(a));
-      item.addEventListener("click", (e) => { if (e.target === item) toggleAgent(a); });
-      item.querySelector(".edit").addEventListener("click", (e) => { e.stopPropagation(); openAgentModal(a); });
-      item.querySelector(".del").addEventListener("click", async (e) => {
-        e.stopPropagation();
-        if (!confirm(`Xóa agent "${a.name}"?`)) return;
-        await api(`/api/agents/${a.id}`, { method: "DELETE" });
-        if (state.agentId === a.id) { state.agentId = null; updateAgentBadge(); }
-        loadAgents();
-      });
-      list.appendChild(item);
-    }
   }
 
   function toggleAgent(a) {
@@ -862,46 +842,12 @@
   function updateAgentBadge() {
     const bar = $("agent-active-bar");
     if (!bar) return;
-    if (!state.agentId) { bar.classList.add("hidden"); return; }
     if (state.agentId === "forge") {
       bar.classList.remove("hidden");
       bar.querySelector(".agent-active-name").textContent = "⚙️ Lumina Forge";
-      return;
+    } else {
+      bar.classList.add("hidden");
     }
-    api("/api/agents").then((d) => {
-      const a = (d.agents || []).find((x) => x.id === state.agentId);
-      if (!a) { bar.classList.add("hidden"); return; }
-      bar.classList.remove("hidden");
-      bar.querySelector(".agent-active-name").textContent = (a.emoji || "🤖") + " " + a.name;
-    }).catch(() => {});
-  }
-
-  function openAgentModal(agent) {
-    state.agentEditId = agent ? agent.id : null;
-    $("agent-modal-title").textContent = agent ? "🤖 Sửa Agent" : "🤖 Tạo Agent";
-    $("agent-emoji").value = agent ? (agent.emoji || "🤖") : "🤖";
-    $("agent-name").value = agent ? agent.name : "";
-    $("agent-instructions").value = agent ? (agent.instructions || "") : "";
-    $("agent-modal").classList.remove("hidden");
-  }
-
-  async function saveAgent() {
-    const name = $("agent-name").value.trim();
-    const emoji = $("agent-emoji").value.trim() || "🤖";
-    const instructions = $("agent-instructions").value.trim();
-    if (!instructions) { alert("Agent cần có phần hướng dẫn."); return; }
-    const payload = { name: name || "Agent mới", emoji, instructions };
-    try {
-      if (state.agentEditId) {
-        await api(`/api/agents/${state.agentEditId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      } else {
-        const a = await api("/api/agents", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-        state.agentId = a.id;  // bật agent vừa tạo
-      }
-    } catch (e) { alert("Lỗi lưu agent: " + e.message); return; }
-    $("agent-modal").classList.add("hidden");
-    updateAgentBadge();
-    loadAgents();
   }
 
   async function createProject() {
@@ -1478,8 +1424,6 @@
   $("send").addEventListener("click", sendMessage);
   $("new-chat").addEventListener("click", newChat);
   $("new-project").addEventListener("click", createProject);
-  $("new-agent").addEventListener("click", () => openAgentModal(null));
-  $("agent-save").addEventListener("click", saveAgent);
   $("agent-off").addEventListener("click", () => { state.agentId = null; updateAgentBadge(); loadAgents(); });
   $("toggle-sidebar").addEventListener("click", () => $("sidebar").classList.toggle("collapsed"));
   document.querySelectorAll(".suggestion").forEach((btn) =>
