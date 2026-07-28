@@ -2082,6 +2082,28 @@ def test_skills_library_has_at_least_979():
     assert len(skills._SKILLS) >= 979
 
 
+def test_skills_library_has_at_least_987():
+    from app import skills
+    assert len(skills._SKILLS) >= 987
+
+
+def test_skills_game_genre_batch5_topics_match():
+    from app import skills
+    cases = {
+        "thu thập và thuần hóa quái vật monster taming creature collector bắt và sưu tầm hệ khắc chế nguyên tố type matchup chỉ số tiến hóa xây đội chiến đấu quái theo lượt ám ảnh sưu tầm": "creature-collector-and-monster-taming",
+        "phiêu lưu văn bản và tiểu thuyết tương tác text adventure interactive fiction parser so với lựa chọn mô hình thế giới ngôn ngữ lệnh câu đố bằng chữ văn xuôi là giao diện phân nhánh": "text-adventure-and-interactive-fiction",
+        "god game và mô phỏng simulation điều khiển gián tiếp các tác nhân tự chủ hành vi nổi lên từ luật đơn giản vòng quan sát và tác động nhẹ chiều sâu hệ thống mục tiêu người chơi": "god-game-and-simulation",
+        "tycoon và mô phỏng kinh doanh business sim xây và vận hành doanh nghiệp có lãi lõi kinh tế thu chi lợi nhuận giá và sự hài lòng khách hàng vòng tăng trưởng chiều sâu tối ưu": "tycoon-and-business-sim",
+        "thiết kế game gõ phím typing game biến gõ bàn phím thành lối chơi nhắm từ và câu độ khó theo tốc độ chính xác so với tốc độ tiến trình kỹ năng dạy gõ mười ngón": "typing-game-design",
+        "thiết kế game đố vui và trắc nghiệm trivia quiz viết câu hỏi và độ khó độ rộng danh mục và công bằng định dạng câu hỏi tính điểm và cơ chế rủi ro nhịp độ áp lực thời gian": "trivia-and-quiz-game-design",
+        "thiết kế roguelike deckbuilder slay the spire kết hợp lượt roguelike với xây bài trong lượt thưởng thẻ và làm mỏng bộ bài vật phẩm cổ vật relic thiết kế trận bản đồ độ khó leo thang khám phá build": "roguelike-deckbuilder-design",
+        "thiết kế escape room và câu đố môi trường environmental puzzle chuỗi câu đố liên kết tìm kiếm quan sát khóa và chìa thiết kế manh mối độ khó công bằng khoảnh khắc bừng sáng hệ gợi ý": "escape-room-and-environmental-puzzle",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_game_genre_batch4_topics_match():
     from app import skills
     cases = {
