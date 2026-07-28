@@ -2067,6 +2067,28 @@ def test_skills_library_has_at_least_955():
     assert len(skills._SKILLS) >= 955
 
 
+def test_skills_library_has_at_least_963():
+    from app import skills
+    assert len(skills._SKILLS) >= 963
+
+
+def test_skills_game_genre_batch2_topics_match():
+    from app import skills
+    cases = {
+        "thiết kế beat em up và game đánh đấm brawler khống chế đám đông nhiều kẻ địch crowd control combo tung hứng juggle di chuyển mặt phẳng 2.5d đợt encounter": "beat-em-up-and-brawler-design",
+        "thiết kế hack and slash character action stylish hệ combo sâu hủy đòn cancel thước phong cách xếp hạng style rank bộ chiêu né tạo lợi thế dodge offset just frame": "hack-and-slash-character-action",
+        "thiết kế game phiêu lưu trỏ và nhấp point and click adventure câu đố túi đồ kết hợp vật phẩm inventory logic tránh moon logic cây hội thoại bẫy dò pixel": "point-and-click-adventure-design",
+        "thiết kế walking sim và khám phá tự sự narrative exploration ưu tiên câu chuyện ít cơ chế kể chuyện qua môi trường dẫn dắt không chỉ dấu không khí nơi chốn": "walking-sim-and-narrative-exploration",
+        "thiết kế party game trò chơi tiệc tùng luật dễ tiếp cận chơi ngay nhiều người cùng máy động lực xã hội cơ chế bám đuổi hỗn loạn catch up đa dạng minigame": "party-game-design",
+        "thiết kế game thể thao sports mô phỏng so với arcade tính chân thực tái hiện cảm giác luật điều khiển ánh xạ hành động ai đồng đội chế độ sự nghiệp franchise": "sports-game-design",
+        "thiết kế game sandbox và xây dựng sáng tạo building công cụ construction hệ khối voxel mô-đun mục tiêu do người chơi tạo player driven vật lý hệ thống nổi lên chia sẻ cộng đồng": "sandbox-building-game-design",
+        "thiết kế twin stick và arena shooter bắn góc nhìn trên điều khiển tách rời di chuyển và ngắm bầy kẻ địch nhịp sinh spawn cảm giác vũ khí kéo địch kiting đợt leo thang": "twin-stick-and-arena-shooter-design",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_more_game_genre_topics_match():
     from app import skills
     cases = {
