@@ -2077,6 +2077,28 @@ def test_skills_library_has_at_least_971():
     assert len(skills._SKILLS) >= 971
 
 
+def test_skills_library_has_at_least_979():
+    from app import skills
+    assert len(skills._SKILLS) >= 979
+
+
+def test_skills_game_genre_batch4_topics_match():
+    from app import skills
+    cases = {
+        "dungeon crawler và blobber ô lưới di chuyển theo ô lập bản đồ điều hướng cả tổ đội là một khối party blob thiết kế trận và bẫy chiến lợi phẩm căng thẳng khám phá": "dungeon-crawler-and-blobber-design",
+        "thiết kế jrpg và quy ước rpg nhật câu chuyện tuyến tính và nhân vật hệ chiến đấu theo lượt atb hệ tổ đội và nghề chạm địch ngẫu nhiên cày cấp đề cao tự sự": "jrpg-design-and-conventions",
+        "thiết kế crpg rpg phương tây choice driven nhân vật do người chơi tạo và nhập vai lựa chọn phân nhánh có ý nghĩa và hậu quả phản ứng thế giới hội thoại kiểm tra kỹ năng nhiều lời giải": "crpg-and-choice-driven-design",
+        "thiết kế hero shooter bắn súng theo tướng dàn tướng độc đáo kỹ năng và vai trò riêng đội hình và cộng hưởng kinh tế chiêu cuối ultimate khắc chế counter pick chế độ theo mục tiêu": "hero-shooter-design",
+        "thiết kế extraction shooter bắn súng rút lui vòng lặp vào raid và thoát ra với rủi ro mất đồ sợ mất đồ gear fear căng thẳng pvpve điểm thoát rủi ro tiến hay rút": "extraction-shooter-design",
+        "thiết kế tactical shooter bắn súng chiến thuật thời gian hạ gục thấp sát thương cao chân thực nhịp chậm gunplay giật tản đạn kinh tế theo vòng giao tiếp phối hợp kiểm soát bản đồ tiện ích": "tactical-shooter-design",
+        "thiết kế puzzle platformer đố nhảy kết hợp cơ chế di chuyển với câu đố một cơ chế lõi đào sâu dạy qua thiết kế màn giới thiệu phát triển xoắn kết hợp cân bằng thao tác và tư duy": "puzzle-platformer-design",
+        "thiết kế dating sim và cơ chế lãng mạn romance thước quan hệ thiện cảm nhân vật hẹn hò với tuyến riêng xây chỉ số quản lý thời gian hệ quà tặng hội thoại tuyến tình cảm mở khóa": "dating-sim-and-romance-design",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_game_genre_batch3_topics_match():
     from app import skills
     cases = {
