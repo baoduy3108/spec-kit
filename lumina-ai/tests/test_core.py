@@ -2087,6 +2087,28 @@ def test_skills_library_has_at_least_987():
     assert len(skills._SKILLS) >= 987
 
 
+def test_skills_library_has_at_least_995():
+    from app import skills
+    assert len(skills._SKILLS) >= 995
+
+
+def test_skills_creative_writing_topics_match():
+    from app import skills
+    cases = {
+        "cấu trúc truyện và cốt truyện story structure plot ba hồi three act hành trình người hùng nhân quả biến cố khởi đầu cao trào cài cắm và hồi đáp setup payoff": "story-structure-and-plot",
+        "phát triển nhân vật và cung nhân vật character development arc động cơ và khát khao muốn so với cần khuyết điểm và vết thương cung thay đổi trưởng thành tính chủ động agency giọng riêng": "character-development-and-arc",
+        "văn phong và giọng văn prose style voice nhịp câu và biến đổi độ dài chọn từ chính xác cắt từ thừa ngôn ngữ cụ thể giọng điệu văn vực xây giọng văn riêng biên tập": "prose-style-and-voice",
+        "xây dựng thế giới cho truyện worldbuilding fiction bối cảnh đáng tin và nhất quán nội tại nguyên tắc tảng băng hòa thế giới vào câu chuyện hệ phép thuật luật văn hóa lịch sử tránh nhồi thông tin": "worldbuilding-for-fiction",
+        "viết hội thoại truyện cuốn hút compelling fiction dialogue giọng riêng từng nhân vật tầng nghĩa ẩn và điều không nói hội thoại làm nhiều việc tránh nói thẳng lộ liễu thẻ dẫn và cử chỉ": "writing-compelling-dialogue",
+        "cho thấy đừng kể show dont tell và dựng cảnh scene craft kịch tính hóa so với tóm tắt chi tiết cụ thể giác quan hé lộ cảm xúc qua hành động cảnh so với tóm tắt neo cảnh vào không gian": "show-dont-tell-and-scene-craft",
+        "nhịp truyện và căng thẳng narrative pacing tension điều tốc độ qua cảnh tóm tắt xây và giải căng thẳng cược và đồng hồ đếm ngược mồi câu và trang cuốn cliffhanger ngắt chương": "narrative-pacing-and-tension",
+        "ngôi kể và người kể chuyện point of view narration ngôi thứ nhất thứ ba hạn tri so với toàn tri khoảng cách trần thuật người kể không đáng tin lỗi nhảy đầu head hopping chọn thì": "point-of-view-and-narration",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_game_genre_batch5_topics_match():
     from app import skills
     cases = {

@@ -9,7 +9,7 @@ PARAMETER temperature 0.7
 PARAMETER top_p 0.9
 PARAMETER num_ctx 8192
 
-# System prompt nền. LƯU Ý: 987 skills của LUMINA được TIÊM ĐỘNG lúc chạy bởi
+# System prompt nền. LƯU Ý: 995 skills của LUMINA được TIÊM ĐỘNG lúc chạy bởi
 # orchestrator (không nhồi vào đây) — chỉ đặt giọng/nguyên tắc chung ở dưới.
 SYSTEM """Bạn là LUMINA — trợ lý AI tư duy sâu, trả lời rõ ràng, trung thực;
 không bịa; điều gì không chắc thì nói rõ là không chắc."""
