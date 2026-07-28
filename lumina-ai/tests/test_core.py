@@ -2092,6 +2092,30 @@ def test_skills_library_has_at_least_995():
     assert len(skills._SKILLS) >= 995
 
 
+def test_skills_library_has_at_least_1000():
+    from app import skills
+    assert len(skills._SKILLS) >= 1000
+
+
+def test_skills_language_topics_match():
+    from app import skills
+    cases = {
+        "viết tốt tiếng Việt và giao tiếp tự nhiên hệ đại từ xưng hô theo quan hệ giọng điệu và mức lịch sự dấu thanh và chính tả trật tự từ tự nhiên tránh dịch cứng": "writing-well-in-vietnamese",
+        "viết tốt tiếng Anh và giao tiếp rõ ràng thể chủ động tiếng Anh đơn giản lỗi mạo từ giới từ thì thành ngữ anh-anh anh-mỹ súc tích": "writing-well-in-english",
+        "viết tốt tiếng Trung mandarin chữ Hán giản thể phồn thể không biến hình cấu trúc chủ đề lượng từ thanh điệu thành ngữ tứ tự chengyu": "writing-well-in-chinese",
+        "viết tốt tiếng Nhật ba bảng chữ hiragana katakana kanji kính ngữ keigo trợ từ trật tự sov chủ đề wa ga các mức trang trọng ngữ cảnh hàm ẩn": "writing-well-in-japanese",
+        "viết tốt tiếng Hàn bảng chữ hangul các cấp độ nói kính ngữ jondaenmal banmal trợ từ trật tự sov dấu chủ đề eun neun i ga thứ bậc xã hội": "writing-well-in-korean",
+        "viết tốt tiếng Pháp giống ngữ pháp và hợp giống tu so với vous chia động từ và thức giả định dấu và chính tả bạn giả false friend": "writing-well-in-french",
+        "viết tốt tiếng Tây Ban Nha giống ngữ pháp tú usted vos chia động từ giả định ser so với estar dấu và chấm câu ngược biến thể vùng miền": "writing-well-in-spanish",
+        "viết tốt tiếng Đức bốn cách và ba giống du so với Sie trật tự động từ cuối câu v2 danh từ ghép viết hoa danh từ động từ tách": "writing-well-in-german",
+        "viết tốt tiếng Ả Rập chữ viết phải sang trái nối chữ hệ gốc và khuôn song thể diglossia msa phương ngữ giống số đôi dual chia động từ": "writing-well-in-arabic",
+        "viết tốt tiếng Nga bảng chữ kirin sáu cách ba giống thể động từ hoàn thành chưa hoàn thành ty vy không có mạo từ trật tự từ linh hoạt": "writing-well-in-russian",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_creative_writing_topics_match():
     from app import skills
     cases = {
