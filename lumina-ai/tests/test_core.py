@@ -2062,6 +2062,28 @@ def test_skills_library_has_at_least_947():
     assert len(skills._SKILLS) >= 947
 
 
+def test_skills_library_has_at_least_955():
+    from app import skills
+    assert len(skills._SKILLS) >= 955
+
+
+def test_skills_more_game_genre_topics_match():
+    from app import skills
+    cases = {
+        "thiết kế game bắn súng fps shooter cảm giác bắn gunplay thời gian hạ gục ttk vai trò cân bằng vũ khí di chuyển ngắm bắn bản đồ tầm nhìn sightline giật đạn": "fps-and-shooter-design",
+        "thiết kế bullet hell và game bắn máy bay shmup danmaku mẫu đạn hộp va chạm nhỏ dễ đọc rừng đạn lướt đạn graze tính điểm mẫu trùm boss pattern": "bullet-hell-and-shmup-design",
+        "thiết kế combat souls-like và action rpg chiến đấu chậm dựa thể lực stamina cam kết hồi phục đòn địch báo trước telegraph né đỡ phản đòn dodge parry lửa trại": "souls-like-and-action-rpg-combat",
+        "thiết kế game kinh dị sinh tồn survival horror khan hiếm tài nguyên yếu ớt căng thẳng dread hơn jump scare không khí ánh sáng âm thanh phòng an toàn safe room": "survival-horror-design",
+        "thiết kế game chiến thuật theo lượt turn based tactics di chuyển ô lưới vị trí vật che đánh sườn flanking tỉ lệ trúng rng lớp đơn vị kỹ năng chết vĩnh viễn": "turn-based-tactics-design",
+        "thiết kế auto battler và auto chess vòng lặp mua sắm kinh tế đặt quân chiến đấu tự động cộng hưởng tộc hệ synergy vàng lãi suất interest reroll đặt vị trí": "auto-battler-and-autochess-design",
+        "thiết kế game nông trại và mô phỏng cuộc sống farming life sim cozy chu kỳ ngày mùa kinh tế năng lượng thời gian trồng trọt quan hệ xã hội nhịp thư giãn": "farming-and-life-sim-design",
+        "thiết kế game gacha và dịch vụ trực tuyến live service quay ngẫu nhiên sưu tầm nhân vật tiền tệ premium hệ thống pity banner fomo daily giữ chân cá voi whale đạo đức": "gacha-and-live-service-design",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_medical_law_science_topics_match():
     from app import skills
     cases = {
