@@ -2037,6 +2037,28 @@ def test_skills_library_has_at_least_907():
     assert len(skills._SKILLS) >= 907
 
 
+def test_skills_library_has_at_least_915():
+    from app import skills
+    assert len(skills._SKILLS) >= 915
+
+
+def test_skills_animation_and_game_genre_topics_match():
+    from app import skills
+    cases = {
+        "three.js và web 3d đồ thị cảnh scene mesh material tải mô hình gltf phát animation clip animationmixer instancing": "three-js-and-web-3d",
+        "hoạt hình xương và bọc da skeletal skinning bind pose linear blend skinning trộn crossfade blend tree animation state machine root motion": "skeletal-animation-and-skinning",
+        "css animation và transition animate transform và opacity mượt 60fps compositor tránh reflow will-change prefers-reduced-motion": "css-animations-and-transitions",
+        "chuyển cảnh phần tử dùng chung shared element hero transition kỹ thuật flip view transitions api hero animation flutter": "shared-element-and-hero-transitions",
+        "hiệu năng animation web ngân sách khung hình 60fps luồng chính compositor tránh giật layout thrash requestanimationframe chuyển động có mục đích": "web-animation-performance",
+        "thiết kế roguelike roguelite lượt chơi run permadeath sinh màn ngẫu nhiên meta progression đa dạng build cộng hưởng synergy": "roguelike-design-and-procedural-runs",
+        "thiết kế deckbuilder và game thẻ bài kinh tế thẻ chi phí làm mỏng bộ bài cộng hưởng synergy archetype cỗ máy rút bài": "deckbuilder-and-card-game-design",
+        "thiết kế tower defense và đợt tấn công wave đường đi mê cung pathing vai trò tháp cây nâng cấp loại kẻ địch khắc chế nhịp leo thang": "tower-defense-and-wave-design",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_simulation_and_domain_topics_match():
     from app import skills
     cases = {
