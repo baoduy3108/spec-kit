@@ -1088,35 +1088,6 @@
   }
 
   // ── Goal Engine (giao mục tiêu: AI chia nhỏ + theo dõi tiến độ) ────────────
-  // ── 🧠 Bảng độ thành thạo kỹ năng (học theo hành vi thật: dùng + 👍/👎) ──
-  async function openSkillsStats() {
-    $("skills-modal").classList.remove("hidden");
-    $("skills-stats-summary").innerHTML = "<p class='payment-desc'>Đang tải…</p>";
-    $("skills-stats-list").innerHTML = "";
-    let data;
-    try { data = await api("/api/skills/stats"); }
-    catch (e) { $("skills-stats-summary").innerHTML = `<p class='payment-desc'>Lỗi: ${escapeHtml(e.message)}</p>`; return; }
-    $("skills-stats-summary").innerHTML =
-      `<div class="skills-summary-row"><b>${data.total_skills}</b> kỹ năng &nbsp;•&nbsp; ` +
-      `<b>${data.practiced}</b> đã được rèn (áp dụng thật ≥1 lần) &nbsp;•&nbsp; ` +
-      `<b>${data.total_skills - data.practiced}</b> còn 🌱 mới</div>`;
-    const practiced = data.skills.filter((s) => s.applied > 0);
-    if (!practiced.length) {
-      $("skills-stats-list").innerHTML =
-        "<p class='payment-desc'>Chưa kỹ năng nào được rèn. Bật ⚙️ Lumina Forge rồi hỏi (vd “viết test trước khi code”, “build game Minecraft”) — kỹ năng khớp sẽ được áp dụng và bắt đầu lên chỉ số. Bấm 👍 sau câu trả lời để nó giỏi nhanh hơn.</p>";
-      return;
-    }
-    $("skills-stats-list").innerHTML = practiced.map((s) => {
-      const use = s.usefulness == null ? "—" : Math.round(s.usefulness * 100) + "% 👍";
-      return `<div class="skill-stat-row">
-        <div class="skill-stat-main"><span class="skill-stat-name">${escapeHtml(s.name)}</span>
-        <span class="skill-stat-cat">${escapeHtml(s.category || "")}</span></div>
-        <div class="skill-stat-meta"><span class="skill-level">${escapeHtml(s.level)}</span>
-        <span>áp dụng ${s.applied}×</span><span>${use}</span></div>
-      </div>`;
-    }).join("");
-  }
-
   async function openGoals() {
     state.conversationId = null;
     $("messages").classList.add("hidden");
@@ -1797,7 +1768,6 @@
   $("new-project").addEventListener("click", createProject);
   $("agent-off").addEventListener("click", () => { state.agentId = null; updateAgentBadge(); loadAgents(); });
   $("goals-btn").addEventListener("click", openGoals);
-  $("skills-btn").addEventListener("click", openSkillsStats);
   $("journal-btn").addEventListener("click", openJournal);
   $("toggle-sidebar").addEventListener("click", () => $("sidebar").classList.toggle("collapsed"));
   document.querySelectorAll(".suggestion").forEach((btn) =>

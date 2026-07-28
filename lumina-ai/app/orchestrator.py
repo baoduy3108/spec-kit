@@ -317,7 +317,7 @@ class Orchestrator:
             if matched:
                 per_cap = 5000 if len(matched) == 1 else 2600
                 for skill in matched:
-                    yield {"type": "search_status", "tool": "skill", "query": skill.name, "slug": skill.slug}
+                    yield {"type": "search_status", "tool": "skill", "query": skill.name}
                     system_prompt += skills.build_skill_context(skill, max_chars=per_cap)
 
         started_output = False

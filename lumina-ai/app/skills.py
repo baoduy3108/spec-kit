@@ -143,33 +143,6 @@ def find_matching_skills(text: str, limit: int = 3) -> list[Skill]:
     return out
 
 
-# Bậc thành thạo — SUY TỪ HÀNH VI THẬT (số lần áp dụng + tỉ lệ 👍), không phải
-# "train trọng số". Kỹ năng dùng nhiều + được đánh giá hữu ích → bậc cao dần.
-_MASTERY_LEVELS = (
-    (0,   "🌱 Mới"),        # chưa từng áp dụng
-    (1,   "📗 Đang học"),   # đã dùng vài lần
-    (5,   "📘 Khá"),
-    (15,  "📙 Thành thạo"),
-    (40,  "🏆 Bậc thầy"),
-)
-
-
-def mastery(applied: int, up: int = 0, down: int = 0) -> dict:
-    """Tính độ thành thạo của một kỹ năng từ số lần áp dụng + phản hồi 👍/👎.
-
-    'score' = applied có điều chỉnh theo độ hữu ích: mỗi 👍 thưởng thêm, mỗi 👎
-    trừ bớt (kỹ năng bị chê thì không lên bậc dù dùng nhiều). Không âm."""
-    score = max(0.0, applied + 2.0 * up - 3.0 * down)
-    label = _MASTERY_LEVELS[0][1]
-    for threshold, name in _MASTERY_LEVELS:
-        if score >= threshold:
-            label = name
-    total = up + down
-    usefulness = round(up / total, 2) if total else None
-    return {"score": round(score, 1), "level": label,
-            "applied": applied, "up": up, "down": down, "usefulness": usefulness}
-
-
 def build_skill_context(skill: Skill, max_chars: int = _INJECT_MAX_CHARS) -> str:
     """Bọc thân kỹ năng trong chỉ thị THAM KHẢO + cắt độ dài để kiểm soát chi phí token."""
     body = skill.body

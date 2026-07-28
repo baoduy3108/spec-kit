@@ -3555,36 +3555,3 @@ def test_semantic_match_ranks_by_cosine_and_threshold(monkeypatch):
     skill_search._index.clear()
     skill_search._loaded = False
 
-
-def test_skill_mastery_levels_scale_with_usage():
-    from app import skills
-    # Chưa dùng → "Mới"; dùng nhiều + được 👍 → bậc cao dần.
-    assert "Mới" in skills.mastery(0)["level"]
-    assert "Đang học" in skills.mastery(2)["level"]
-    assert "Bậc thầy" in skills.mastery(50, up=6)["level"]
-    # 👎 kéo điểm xuống: nhiều lượt dùng nhưng bị chê thì không lên bậc cao.
-    che = skills.mastery(6, up=0, down=6)
-    assert che["score"] == 0.0 and "Mới" in che["level"]
-    # usefulness = tỉ lệ 👍/(👍+👎)
-    assert skills.mastery(4, up=3, down=1)["usefulness"] == 0.75
-    assert skills.mastery(4)["usefulness"] is None
-
-
-def test_skill_stats_track_applied_and_feedback():
-    from app import db, skills
-    slug = skills.all_skills()[0].slug
-    conv = "conv-" + uuid.uuid4().hex
-    before = db.get_skill_stat(slug)["applied"]
-    db.record_skill_applied(slug, conv)
-    db.record_skill_applied(slug, conv)
-    assert db.get_skill_stat(slug)["applied"] == before + 2
-    # 👍 cho hội thoại → cộng đúng kỹ năng vừa dùng trong hội thoại đó
-    assert db.record_skill_feedback(conv, 1) == slug
-    assert db.get_skill_stat(slug)["up"] >= 1
-    # 👎 cộng vào cột down
-    down_before = db.get_skill_stat(slug)["down"]
-    db.record_skill_feedback(conv, -1)
-    assert db.get_skill_stat(slug)["down"] == down_before + 1
-    # hội thoại không có kỹ năng nào → không tín dụng cho ai
-    assert db.record_skill_feedback("conv-" + uuid.uuid4().hex, 1) is None
-    assert db.record_skill_feedback(None, 1) is None

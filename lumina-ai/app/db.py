@@ -122,24 +122,6 @@ def _init_schema(conn: sqlite3.Connection):
         total_count INTEGER NOT NULL DEFAULT 0,    -- tổng số tin nhắn (kể cả engine free)
         PRIMARY KEY (user_id, day)
     );
-    -- Độ thành thạo kỹ năng: LUMINA "học theo hành vi thật" — mỗi lần một kỹ năng
-    -- được ÁP DỤNG thật + mỗi 👍/👎 sau đó làm chỉ số hữu dụng của kỹ năng đó
-    -- tự lên/xuống. Không phải "train trọng số" (kỹ năng là tài liệu .md), mà là
-    -- đo độ hữu dụng thực tế để xếp hạng & tiến hoá theo cách trung thực.
-    CREATE TABLE IF NOT EXISTS skill_stats (
-        slug TEXT PRIMARY KEY,
-        applied INTEGER NOT NULL DEFAULT 0,      -- số lần kỹ năng được tiêm vào câu trả lời
-        up INTEGER NOT NULL DEFAULT 0,           -- số 👍 cho câu trả lời có dùng kỹ năng này
-        down INTEGER NOT NULL DEFAULT 0,         -- số 👎
-        last_used INTEGER NOT NULL DEFAULT 0
-    );
-    -- Nhớ kỹ năng vừa áp dụng gần nhất trong mỗi hội thoại, để khi người dùng bấm
-    -- 👍/👎 cho hội thoại đó, cộng/trừ đúng kỹ năng đã dùng.
-    CREATE TABLE IF NOT EXISTS conv_skill (
-        conversation_id TEXT PRIMARY KEY,
-        slug TEXT NOT NULL,
-        updated_at INTEGER NOT NULL DEFAULT 0
-    );
     CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id, updated_at DESC);
     CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conversation_id, id);
     CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id, created_at DESC);
@@ -470,68 +452,6 @@ def recent_feedback_notes(user_id: str, limit: int = 20) -> list[str]:
             "ORDER BY created_at DESC LIMIT ?", (user_id, limit),
         ).fetchall()
     return [r[0] for r in rows]
-
-
-# ─── Độ thành thạo kỹ năng (học theo hành vi thật, không phải train trọng số) ──
-
-def record_skill_applied(slug: str, conversation_id: str | None = None) -> None:
-    """Ghi nhận một kỹ năng vừa được ÁP DỤNG thật trong một câu trả lời."""
-    if not slug:
-        return
-    now = int(time.time())
-    with _lock:
-        conn = get_conn()
-        conn.execute(
-            "INSERT INTO skill_stats(slug, applied, last_used) VALUES(?,1,?) "
-            "ON CONFLICT(slug) DO UPDATE SET applied=applied+1, last_used=?",
-            (slug, now, now),
-        )
-        if conversation_id:
-            conn.execute(
-                "INSERT INTO conv_skill(conversation_id, slug, updated_at) VALUES(?,?,?) "
-                "ON CONFLICT(conversation_id) DO UPDATE SET slug=excluded.slug, updated_at=excluded.updated_at",
-                (conversation_id, slug, now),
-            )
-        conn.commit()
-
-
-def record_skill_feedback(conversation_id: str | None, rating: int) -> str | None:
-    """Người dùng bấm 👍/👎 cho một hội thoại → cộng/trừ độ hữu dụng của kỹ năng
-    vừa dùng trong hội thoại đó. Trả về slug đã cập nhật (hoặc None nếu không có)."""
-    if not conversation_id:
-        return None
-    with _lock:
-        conn = get_conn()
-        row = conn.execute(
-            "SELECT slug FROM conv_skill WHERE conversation_id=?", (conversation_id,)
-        ).fetchone()
-        if not row:
-            return None
-        slug = row[0]
-        col = "up" if rating >= 0 else "down"
-        conn.execute(
-            f"INSERT INTO skill_stats(slug, {col}) VALUES(?,1) "
-            f"ON CONFLICT(slug) DO UPDATE SET {col}={col}+1",
-            (slug,),
-        )
-        conn.commit()
-        return slug
-
-
-def get_skill_stat(slug: str) -> dict:
-    with _lock:
-        row = get_conn().execute(
-            "SELECT slug, applied, up, down, last_used FROM skill_stats WHERE slug=?", (slug,)
-        ).fetchone()
-    return dict(row) if row else {"slug": slug, "applied": 0, "up": 0, "down": 0, "last_used": 0}
-
-
-def skill_stats_all() -> list[dict]:
-    with _lock:
-        rows = get_conn().execute(
-            "SELECT slug, applied, up, down, last_used FROM skill_stats"
-        ).fetchall()
-    return [dict(r) for r in rows]
 
 
 # ─── AI Time Capsule (nhật ký tiến hoá: ý tưởng/quyết định/đã bỏ/cột mốc) ──────
