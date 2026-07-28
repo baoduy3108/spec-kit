@@ -1849,6 +1849,28 @@ def test_skills_numerical_probabilistic_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_835():
+    from app import skills
+    assert len(skills._SKILLS) >= 835
+
+
+def test_skills_data_format_batch_topics_match():
+    from app import skills
+    cases = {
+        "protocol buffers protobuf mã hoá dữ liệu có cấu trúc thành nhị phân nhỏ gọn định dạng wire tag-length-value theo số hiệu trường không phải tên số hiệu field number nằm trên wire": "protobuf-and-wire-format",
+        "số nguyên độ dài biến đổi varint lưu số bằng ít byte nhất bảy bit mỗi byte cộng bit tiếp diễn continuation bit zigzag đan xen số dương và âm để số âm nhỏ vẫn ngắn": "varint-and-zigzag-encoding",
+        "tuần tự hoá nhị phân tự mô tả không cần schema messagepack cbor nhỏ và nhanh hơn json mà vẫn linh hoạt gắn nhãn kiểu dữ liệu gọn trong byte đầu": "binary-serialization-msgpack-and-cbor",
+        "giải tuần tự không sao chép zero-copy flatbuffers capnproto đọc dữ liệu thẳng trong buffer không cần bước parse giải mã truy cập trường theo offset qua bảng vtable": "flatbuffers-and-zero-copy-deserialization",
+        "apache avro tuần tự hoá bản ghi nhỏ gọn và tiến hoá schema an toàn avro không gắn tag trường inline schema quyết định bố cục schema registry lưu schema theo id và ép tương thích": "avro-and-schema-registry",
+        "json schema định nghĩa mô tả và ép kiểu dữ liệu json khai báo kiểu trường bắt buộc và ràng buộc kiểm định ở ranh giới tin cậy validate boundary additionalproperties kiểm soát trường thừa": "json-schema-and-validation",
+        "thứ tự byte endianness big-endian và little-endian cùng byte khác số network byte order phải cố định thứ tự byte trong định dạng tệp và mạng bố cục struct căn chỉnh alignment và đệm padding": "endianness-and-binary-layout",
+        "thương lượng nội dung content negotiation phục vụ đúng định dạng ngôn ngữ mã hoá header accept và accept-language kiểu media mime type content-type header vary quan trọng cho cache": "content-negotiation-and-media-types",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
