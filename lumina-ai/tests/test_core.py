@@ -2027,6 +2027,28 @@ def test_skills_library_has_at_least_891():
     assert len(skills._SKILLS) >= 891
 
 
+def test_skills_library_has_at_least_899():
+    from app import skills
+    assert len(skills._SKILLS) >= 899
+
+
+def test_skills_game_systems_topics_match():
+    from app import skills
+    cases = {
+        "âm thanh game và nhạc thích ứng phân lớp biến thể ducking nhạc tương tác theo lối chơi stem stinger": "game-audio-and-adaptive-music",
+        "hiệu ứng shader và hậu xử lý post-processing render ra texture bloom quầng sáng tone mapping color grading vignette": "shader-effects-and-post-processing",
+        "nhập liệu game hỗ trợ tay cầm controller ánh xạ hành động gán lại phím rebinding vùng chết dead zone": "input-and-controller-support",
+        "điều khiển cảm ứng và game mobile cần điều khiển ảo virtual joystick cử chỉ vuốt tầm với ngón cái mục tiêu chạm to": "touch-controls-and-mobile-games",
+        "atlas sprite đóng gói texture gộp nhiều ảnh vào một texture giảm draw call bin packing đệm chống rỉ màu bleeding": "sprite-atlas-and-texture-packing",
+        "wave function collapse wfc điền lưới tile theo luật kề adjacency chọn ô entropy thấp nhất lan truyền propagate": "wave-function-collapse",
+        "hệ thống chiến đấu và hitbox vùng nhận đòn hurtbox dữ liệu khung hình startup active recovery hitstun combo i-frame": "combat-systems-and-hitboxes",
+        "hệ thống túi đồ và vật phẩm inventory item xếp chồng stack trang bị equipment độ hiếm rarity bảng rơi đồ loot table": "inventory-and-item-systems",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_ux_ui_deep_topics_match():
     from app import skills
     cases = {
