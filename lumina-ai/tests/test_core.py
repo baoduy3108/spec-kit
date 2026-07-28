@@ -1973,6 +1973,28 @@ def test_skills_agent_infra_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_875():
+    from app import skills
+    assert len(skills._SKILLS) >= 875
+
+
+def test_skills_build_and_deps_batch_topics_match():
+    from app import skills
+    cases = {
+        "build tăng dần incremental chỉ dựng lại phần đã thay đổi và build kín hermetic cho kết quả giống nhau mọi nơi đồ thị build target và phụ thuộc phát hiện thay đổi theo nội dung băm khai báo đủ input": "incremental-and-hermetic-builds",
+        "đánh đổi giữa một kho lớn monorepo và nhiều kho nhỏ polyrepo thay đổi nguyên tử xuyên nhiều project sở hữu độc lập monorepo cần công cụ phát hiện target bị ảnh hưởng build caching code owners": "monorepo-and-polyrepo-tooling",
+        "đánh số phiên bản ngữ nghĩa semantic versioning major minor patch để truyền đạt tương thích thế nào là thay đổi phá vỡ breaking change định luật hyrum toán tử khoảng phiên bản caret tilde": "semantic-versioning-and-compatibility",
+        "giải phụ thuộc dependency resolution biến các khoảng phiên bản mong muốn thành một tập gói cụ thể tái lập được bài toán thoả mãn ràng buộc kiểu sat lockfile ghim đồ thị đã giải chính xác commit lockfile": "dependency-resolution-and-lockfiles",
+        "địa ngục phụ thuộc dependency hell và bài toán phụ thuộc kim cương diamond hai phụ thuộc cần phiên bản không tương thích của một thư viện chung native toàn cục chỉ một phiên bản thắng": "dependency-hell-and-diamond-dependencies",
+        "tốc độ vòng lặp sửa-thấy-kết-quả quyết định năng suất lập trình hot reload thay module nóng hot module replacement biên dịch tăng dần giữ nguyên trạng thái khi sửa dev server vite webpack": "hot-reload-and-fast-feedback",
+        "liên kết linking và loader biến các mã biên dịch riêng thành một chương trình chạy được liên kết tĩnh static và động dynamic phân giải ký hiệu symbol resolution lỗi symbol not found dll hell": "linking-and-loaders",
+        "tiêm phụ thuộc dependency injection và đảo ngược điều khiển inversion of control ioc không để đối tượng tự tạo phụ thuộc mà truyền vào constructor injection lập trình theo giao diện interface di giúp test và mock": "dependency-injection-and-inversion-of-control",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
