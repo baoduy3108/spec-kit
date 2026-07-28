@@ -1929,6 +1929,28 @@ def test_skills_web_security_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_859():
+    from app import skills
+    assert len(skills._SKILLS) >= 859
+
+
+def test_skills_download_crawl_batch_topics_match():
+    from app import skills
+    cases = {
+        "tải phân đoạn song song tăng tốc download chia tệp thành nhiều dải byte tải qua nhiều kết nối http range request ghi mỗi đoạn vào đúng offset trong tệp không cần bước gộp merge": "segmented-parallel-downloading",
+        "tải tiếp resumable download tiếp tục từ chỗ đã dừng http range request tải từ offset đã lưu if-range etag last-modified phát hiện tệp đã thay đổi để khởi động lại không nối dữ liệu hỏng": "resumable-downloads-and-range-requests",
+        "độ tin cậy trình quản lý tải xuống thử lại với backoff khi lỗi tạm thời hoàn tất nguyên tử ghi tệp tạm rồi đổi tên lưu trạng thái phần đã tải để sống sót qua khởi động lại app": "download-manager-reliability",
+        "phát trực tuyến thích ứng hls m3u8 và mpeg-dash chia video thành nhiều segment nhỏ manifest playlist master và media tải các segment rồi ghép hoặc remux thành một tệp playlist trực tiếp live và vod": "hls-dash-segment-downloading",
+        "giới hạn băng thông throttling tự giới hạn tốc độ tải bằng token bucket lập lịch tải hàng đợi giới hạn số tải đồng thời chia ngân sách băng thông chung cho nhiều kết nối song song": "bandwidth-throttling-and-download-scheduling",
+        "sao lưu toàn bộ website để dùng offline mirror kiểu wget httrack thu thập đệ quy theo liên kết crawling viết lại url thành đường dẫn tương đối để bản sao chạy offline giới hạn phạm vi cùng tên miền và độ sâu": "website-mirroring-and-crawling",
+        "crawler lịch sự tránh gây hại và bị chặn tuân thủ robots.txt allow disallow crawl-delay giới hạn tốc độ và số kết nối đồng thời mỗi máy chủ tôn trọng 429 và retry-after": "crawler-politeness-and-robots-txt",
+        "chuẩn hoá url canonicalization để nhận ra các url khác nhau trỏ cùng một trang khử trùng lặp tránh tải lại vô tận và bẫy crawler bỏ fragment sắp xếp query thẻ canonical và băm nội dung": "url-normalization-and-crawl-dedup",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
