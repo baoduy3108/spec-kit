@@ -139,6 +139,20 @@ class MistralEngine(OpenAICompatibleEngine):
         self.api_key = CONFIG["MISTRAL_API_KEY"]
 
 
+class KimiEngine(OpenAICompatibleEngine):
+    """Kimi (Moonshot AI) API tương thích OpenAI — model Kimi K3 (MoE 2.8T, 104B
+    active/token, ngữ cảnh ~1M). App CHỈ gọi API của họ (không host trọng số);
+    key + base URL lấy tại platform.kimi.ai."""
+
+    name = "kimi"
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = CONFIG["KIMI_BASE_URL"].rstrip("/")
+        self.model = CONFIG["KIMI_MODEL"]
+        self.api_key = CONFIG["KIMI_API_KEY"]
+
+
 class GitHubModelsEngine(OpenAICompatibleEngine):
     """GitHub Models — free (có hạn mức) qua endpoint OpenAI-compatible.
     Xác thực bằng GitHub token miễn phí (dùng như api_key). Model dạng 'publisher/name'."""

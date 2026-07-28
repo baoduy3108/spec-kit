@@ -62,6 +62,13 @@ CONFIG = {
     "MISTRAL_API_KEY": os.getenv("MISTRAL_API_KEY", ""),
     "MISTRAL_MODEL": os.getenv("MISTRAL_MODEL", "mistral-small-latest"),
     "MISTRAL_BASE_URL": os.getenv("MISTRAL_BASE_URL", "https://api.mistral.ai/v1"),
+    # Kimi (Moonshot AI) — model Kimi K3 MoE 2.8T (104B active/token, ngữ cảnh ~1M).
+    # KHÔNG tự host trọng số (cần cụm GPU nhiều TB VRAM); dùng API tương thích OpenAI
+    # tại platform.kimi.ai. Lấy key + xác nhận base URL đúng ở trang đó rồi điền KIMI_BASE_URL
+    # nếu khác (một số vùng dùng https://api.moonshot.ai/v1 hoặc https://api.moonshot.cn/v1).
+    "KIMI_API_KEY": os.getenv("KIMI_API_KEY", ""),
+    "KIMI_MODEL": os.getenv("KIMI_MODEL", "kimi-k3"),
+    "KIMI_BASE_URL": os.getenv("KIMI_BASE_URL", "https://api.kimi.ai/v1"),
     "OLLAMA_BASE_URL": os.getenv("OLLAMA_BASE_URL", ""),  # ví dụ http://localhost:11434/v1 (model chạy trên máy bạn)
     "OLLAMA_MODEL": os.getenv("OLLAMA_MODEL", "llama3.1"),
     # LỚP DỰ PHÒNG LOCAL: khi hết token API (cho nhiều người dùng toàn cầu),
@@ -110,7 +117,7 @@ CONFIG = {
     # ── Độ bền / hiệu năng (kế thừa khung mẫu) ──────────────────
     # Chuỗi engine MIỄN PHÍ/RẺ — dùng khi hết lượt cao cấp hoặc khi engine chính lỗi.
     # Thứ tự ưu tiên: Gemini free → Groq free → GitHub Models free → OpenRouter → DeepSeek rẻ → Mistral → Ollama (máy bạn) → OpenAI.
-    "FREE_FALLBACK_CHAIN": ["gemini", "groq", "github", "openrouter", "deepseek", "mistral", "ollama", "openai"],
+    "FREE_FALLBACK_CHAIN": ["gemini", "groq", "github", "openrouter", "deepseek", "mistral", "kimi", "ollama", "openai"],
     "CIRCUIT_BREAKER_THRESHOLD": int(os.getenv("CIRCUIT_BREAKER_THRESHOLD", "5")),
     "CIRCUIT_BREAKER_TIMEOUT": int(os.getenv("CIRCUIT_BREAKER_TIMEOUT", "60")),
     "CACHE_TTL": int(os.getenv("CACHE_TTL", "3600")),
@@ -222,7 +229,7 @@ def has_any_engine() -> bool:
     return bool(
         CONFIG["ANTHROPIC_API_KEY"] or CONFIG["GEMINI_API_KEY"] or CONFIG["GROQ_API_KEY"]
         or CONFIG["OPENROUTER_API_KEY"] or CONFIG["DEEPSEEK_API_KEY"]
-        or CONFIG["MISTRAL_API_KEY"]
+        or CONFIG["MISTRAL_API_KEY"] or CONFIG["KIMI_API_KEY"]
         or CONFIG["OLLAMA_BASE_URL"] or CONFIG["GITHUB_MODELS_API_KEY"]
         or CONFIG["OPENAI_API_KEY"]
     )

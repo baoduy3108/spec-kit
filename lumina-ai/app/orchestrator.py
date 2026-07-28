@@ -21,6 +21,7 @@ from .engines.gemini import GeminiEngine
 from .engines.openai_compatible import (
     DeepSeekEngine,
     MistralEngine,
+    KimiEngine,
     GitHubModelsEngine,
     GroqEngine,
     OllamaEngine,
@@ -163,6 +164,7 @@ class Orchestrator:
             "openrouter": OpenRouterEngine(),
             "deepseek": DeepSeekEngine(),
             "mistral": MistralEngine(),
+            "kimi": KimiEngine(),
             "ollama": OllamaEngine(),
             "openai": OpenAIEngine(),
         }

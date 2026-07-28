@@ -315,6 +315,20 @@ def test_mistral_engine_registered():
         assert not o.engines["mistral"].available()
 
 
+def test_kimi_engine_registered():
+    """Kimi K3 (Moonshot, API tương thích OpenAI) được đăng ký trong chuỗi free,
+    dùng qua API (KHÔNG host trọng số 2.8T), tắt khi thiếu key."""
+    from app.orchestrator import Orchestrator
+    from app.config import CONFIG
+    o = Orchestrator()
+    assert "kimi" in o.engines
+    assert "kimi" in o.free_chain
+    assert o.engines["kimi"].model == CONFIG["KIMI_MODEL"]
+    assert "kimi" in o.engines["kimi"].base_url or "moonshot" in o.engines["kimi"].base_url
+    if not CONFIG["KIMI_API_KEY"]:
+        assert not o.engines["kimi"].available()
+
+
 # ── Đa phương thức: xử lý ảnh (media) ───────────────────────────────────────
 
 def test_parse_data_url_valid():
