@@ -97,6 +97,14 @@ _AGENT_DIRECTIVE = (
     "  PHASE 5 — REVIEW: tự rà soát như reviewer độc lập, nêu rõ điểm còn yếu.\n"
     "  PHASE 6 — HANDOVER: chỉ kết luận 'hoàn thành' khi thật sự tự tin cao (~95%) và không còn "
     "lỗi đã biết; nếu chưa đạt, nói rõ lý do và KHÔNG kết luận đã xong.\n"
+    "GAME / ĐỒ HOẠ / TƯƠNG TÁC (khi yêu cầu là dựng game, demo tương tác, hiệu ứng, hoặc UI động): "
+    "áp dụng đầy đủ các kỹ năng chuyên môn được nạp kèm bên dưới (vòng lặp game dt cố định, va chạm, "
+    "điều khiển nhân vật có coyote-time/jump-buffer, hệ hạt, ánh sáng 2D, HUD, game feel & juice — "
+    "squash&stretch, screen shake, âm thanh). Ưu tiên xuất một demo CHẠY ĐƯỢC NGAY: bọc mã trong khối "
+    "```lumina-run (một tệp HTML/JS/canvas tự chứa, KHÔNG thư viện ngoài) để người dùng bấm chơi liền "
+    "trong khung chat; tự chịu trách nhiệm về hiệu năng (chỉ vẽ phần thấy được) và trải nghiệm (điều "
+    "khiển rõ, phản hồi tức thì). Sau khi viết, TỰ PHẢN BIỆN như một reviewer: rà lỗi biên/bug rồi sửa "
+    "trước khi giao.\n"
     "THÀNH THẬT (bắt buộc, áp dụng cả 2 trường hợp): bạn KHÔNG có quyền truy cập trực tiếp hệ "
     "thống tệp hay kho mã nguồn thật của người dùng — bạn chỉ thấy nội dung cuộc trò chuyện này "
     "cùng các tệp/trang web mà người dùng đã đính kèm hoặc dán link. TUYỆT ĐỐI không giả vờ đã "
@@ -297,10 +305,15 @@ class Orchestrator:
         # cùng một thư viện, "nhúng" vào cả agent lẫn Forge (không cắt cái nào). So khớp
         # tin nhắn, tiêm kỹ năng khớp nhất nếu có (0 chi phí nếu không khớp).
         if messages and (route.mode == "agent" or system_extra):
-            skill = skills.find_matching_skill(original_last_user)
-            if skill:
-                yield {"type": "search_status", "tool": "skill", "query": skill.name, "slug": skill.slug}
-                system_prompt += skills.build_skill_context(skill)
+            # Yêu cầu lớn (dựng game/hệ thống nhiều phần) thường chạm nhiều lĩnh vực →
+            # nạp tối đa 3 kỹ năng liên quan cùng lúc (mỗi cái cắt ngắn hơn để giữ ngân
+            # sách token). Yêu cầu ngắn thường chỉ khớp 1 kỹ năng nên vẫn như cũ.
+            matched = skills.find_matching_skills(original_last_user, limit=3)
+            if matched:
+                per_cap = 5000 if len(matched) == 1 else 2600
+                for skill in matched:
+                    yield {"type": "search_status", "tool": "skill", "query": skill.name, "slug": skill.slug}
+                    system_prompt += skills.build_skill_context(skill, max_chars=per_cap)
 
         started_output = False
         chain = self._chain_for(use_premium)

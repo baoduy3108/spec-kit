@@ -112,6 +112,29 @@ def find_matching_skill(text: str) -> Skill | None:
     return best if best_score >= _MIN_MATCH_SCORE else None
 
 
+def find_matching_skills(text: str, limit: int = 3) -> list[Skill]:
+    """Trả về TỐI ĐA `limit` kỹ năng khớp nhất (điểm cao → thấp, hoà thì slug nhỏ
+    thắng — cùng quy tắc với find_matching_skill). Dùng cho ⚙️ Lumina Forge khi
+    một yêu cầu lớn (vd 'dựng game') chạm nhiều lĩnh vực: nạp vài tài liệu liên
+    quan cùng lúc thay vì chỉ một. Rỗng nếu không khớp gì."""
+    t = (text or "").strip().lower()
+    if len(t) < 4:
+        return []
+    scored = [(sum(1 for kw in sk.keywords if kw in t), sk) for sk in _SKILLS]
+    scored = [(s, sk) for s, sk in scored if s >= _MIN_MATCH_SCORE]
+    if not scored:  # giai đoạn 2 — token tiếng Anh từ slug; fallback yếu → chỉ lấy 1
+        best = find_matching_skill(text)
+        return [best] if best else []
+    scored.sort(key=lambda x: (-x[0], x[1].slug))
+    # Kỹ năng khớp nhất luôn lấy (điểm ≥1); các kỹ năng THÊM chỉ nạp khi bằng chứng
+    # mạnh (điểm ≥2) → yêu cầu chi tiết mới kéo nhiều skill, câu mơ hồ chỉ 1 (tránh nhiễu).
+    out = [scored[0][1]]
+    for s, sk in scored[1:max(1, limit)]:
+        if s >= 2:
+            out.append(sk)
+    return out
+
+
 # Bậc thành thạo — SUY TỪ HÀNH VI THẬT (số lần áp dụng + tỉ lệ 👍), không phải
 # "train trọng số". Kỹ năng dùng nhiều + được đánh giá hữu ích → bậc cao dần.
 _MASTERY_LEVELS = (
@@ -139,11 +162,11 @@ def mastery(applied: int, up: int = 0, down: int = 0) -> dict:
             "applied": applied, "up": up, "down": down, "usefulness": usefulness}
 
 
-def build_skill_context(skill: Skill) -> str:
+def build_skill_context(skill: Skill, max_chars: int = _INJECT_MAX_CHARS) -> str:
     """Bọc thân kỹ năng trong chỉ thị THAM KHẢO + cắt độ dài để kiểm soát chi phí token."""
     body = skill.body
-    if len(body) > _INJECT_MAX_CHARS:
-        body = body[:_INJECT_MAX_CHARS].rstrip() + "\n[...cắt bớt...]"
+    if len(body) > max_chars:
+        body = body[:max_chars].rstrip() + "\n[...cắt bớt...]"
     return (
         f"\n\n[TÀI LIỆU KỸ NĂNG THAM KHẢO — \"{skill.name}\": LUMINA KHÔNG có công cụ chạy "
         "bash/git/browser/MCP thật như một coding agent thật (vd Claude Code) — nếu tài liệu "

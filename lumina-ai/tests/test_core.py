@@ -3408,6 +3408,21 @@ def test_skills_advanced_data_engineering_topics_match():
         assert skill.slug == expected_slug, (text, skill.slug)
 
 
+def test_find_matching_skills_multi_for_rich_request():
+    from app import skills
+    # Yêu cầu chi tiết dùng đúng từ vựng skill → kéo NHIỀU kỹ năng liên quan.
+    q = ("dựng game platformer: tilemap bản đồ ô lưới và thiết kế màn chơi; điều khiển nhân vật "
+         "character controller có coyote time đệm nhảy jump buffer; hệ thống hạt particle system "
+         "làm lửa; ánh sáng 2d động; giao diện game hud thanh máu điểm số")
+    got = {s.slug for s in skills.find_matching_skills(q, limit=4)}
+    assert "character-controller-and-platformer-movement" in got
+    assert len(got) >= 2  # ít nhất 2 kỹ năng game được nạp cùng lúc
+    # Câu mơ hồ / một chủ đề → chỉ 1 kỹ năng (không nhồi nhiễu).
+    assert len(skills.find_matching_skills("làm sao viết test trước khi code", limit=4)) == 1
+    # Không liên quan → rỗng.
+    assert skills.find_matching_skills("hôm nay trời đẹp không đi chơi đâu", limit=4) == []
+
+
 def test_skill_mastery_levels_scale_with_usage():
     from app import skills
     # Chưa dùng → "Mới"; dùng nhiều + được 👍 → bậc cao dần.
