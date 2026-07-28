@@ -2017,6 +2017,28 @@ def test_skills_build_and_deps_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_883():
+    from app import skills
+    assert len(skills._SKILLS) >= 883
+
+
+def test_skills_game_dev_deep_topics_match():
+    from app import skills
+    cases = {
+        "làm tilemap bản đồ ô lưới ghép tile tự động autotiling bitmask và thiết kế màn chơi level pacing": "tilemap-and-level-design",
+        "thêm ánh sáng 2d động đổ bóng shadow từ vật cản light map trộn cộng additive normal map giả chiều sâu": "2d-lighting-and-shadows",
+        "hệ thống hạt particle system làm lửa khói nổ tia lửa trail với gpu instancing hàng nghìn hạt vfx": "particle-systems-and-vfx",
+        "điều khiển nhân vật platformer di chuyển nhảy với coyote time đệm nhảy jump buffer độ cao nhảy thay đổi": "character-controller-and-platformer-movement",
+        "kiến trúc ecs entity component system thực thể là id component là dữ liệu ưu tiên kết hợp thay vì kế thừa": "entity-component-system-architecture",
+        "hệ thống lưu game save serialize ghi trạng thái ra đĩa ghi nguyên tử tránh hỏng file save phiên bản schema": "save-systems-and-serialization",
+        "thiết kế giao diện game hud thanh máu đạn điểm số minimap ui diegetic điều hướng tay cầm gamepad": "game-ui-and-hud-design",
+        "hệ thống hội thoại dialogue game cây phân nhánh lựa chọn điều kiện cờ flag biến trạng thái quest": "dialogue-and-narrative-systems",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
