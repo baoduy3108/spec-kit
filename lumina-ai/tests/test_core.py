@@ -2072,6 +2072,28 @@ def test_skills_library_has_at_least_963():
     assert len(skills._SKILLS) >= 963
 
 
+def test_skills_library_has_at_least_971():
+    from app import skills
+    assert len(skills._SKILLS) >= 971
+
+
+def test_skills_game_genre_batch3_topics_match():
+    from app import skills
+    cases = {
+        "chiến thuật thời gian thực real time tactics rtt không xây căn cứ không kinh tế vị trí và vật che kỹ năng đơn vị điều khiển micro đánh sườn tầm nhìn tổ đội nhỏ tạm dừng lên kế hoạch": "real-time-tactics-design",
+        "trò chơi thẻ bài sưu tầm tcg ccg constructed thi đấu tam giác tài nguyên nhịp lợi thế thẻ nguyên mẫu bộ bài và meta thiết kế mana đường cong tương tác chồng stack xoay vòng set": "tcg-and-competitive-card-design",
+        "match 3 và cơ chế câu đố lưới ghép và chuỗi đổ combo cascade tạo mảnh đặc biệt mục tiêu ràng buộc màn kinh tế lượt đi phản hồi đã mắt juicy": "match-3-and-puzzle-mechanic",
+        "thiết kế game chạy vô tận endless runner tự động chạy điều khiển một chạm sinh chướng ngại thủ tục tăng tốc độ khó đuổi điểm suýt trúng near miss chơi lại tức thì": "endless-runner-design",
+        "thiết kế vampire survivors bullet heaven survivors-like tự động tấn công chống bầy quái khổng lồ lên cấp vũ khí bị động tiến hóa cộng hưởng build bầy quái leo thang roguelite": "vampire-survivors-and-bullet-heaven",
+        "thiết kế nhiều người bất đối xứng asymmetric multiplayer các phe luật mục tiêu sức mạnh khác nhau one vs many cân bằng vai trò không cân bằng thông tin bất đối xứng phản đòn": "asymmetric-multiplayer-design",
+        "thiết kế mô phỏng bay và phương tiện flight vehicle sim phổ độ chân thực sim tới arcade vật lý bay trục điều khiển đồng hồ hệ thống phản hồi phân tầng hỗ trợ assists nhiệm vụ sandbox": "flight-and-vehicle-sim-design",
+        "thiết kế board game và trò chơi bàn tabletop cơ chế lõi đặt thợ kiểm soát vùng engine building tương tác người chơi may rủi kỹ năng thời gian chờ co giãn số người rõ ràng luật dễ dạy": "board-game-and-tabletop-design",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_game_genre_batch2_topics_match():
     from app import skills
     cases = {
