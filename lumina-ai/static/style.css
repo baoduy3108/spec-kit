@@ -906,6 +906,18 @@ a.widget-link:hover { color: var(--accent-2); text-decoration: underline; }
 .fb-btn:hover { opacity: 1; border-color: var(--accent); }
 .fb-btn.chosen { opacity: 1; border-color: var(--accent-2); background: rgba(79,195,247,.12); }
 .fb-btn:disabled { cursor: default; }
+
+/* ── 🧠 Bảng độ thành thạo kỹ năng ─────────────────────── */
+.skills-summary-row { font-size: 14px; margin: 4px 0 12px; color: var(--text); }
+.skills-summary-row b { color: var(--accent-2); }
+#skills-stats-list { max-height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.skill-stat-row { display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; }
+.skill-stat-main { display: flex; flex-direction: column; min-width: 0; }
+.skill-stat-name { font-weight: 600; font-size: 14px; }
+.skill-stat-cat { font-size: 11px; opacity: .6; }
+.skill-stat-meta { display: flex; align-items: center; gap: 10px; font-size: 12px; opacity: .85; white-space: nowrap; }
+.skill-level { font-weight: 600; }
 .fb-thanks { font-size: 12px; color: var(--text-dim); }
 
 /* ── Trí nhớ dự án (editor trong dashboard) ────────────── */

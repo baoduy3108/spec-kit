@@ -39,7 +39,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, files, knowledge, media, payments, recall, video_dub, video_link, webpage
+from . import auth, config, db, files, knowledge, media, payments, recall, skills, video_dub, video_link, webpage
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
 from .memory import trim_history
@@ -403,7 +403,25 @@ class _FeedbackBody(BaseModel):
 async def submit_feedback(body: _FeedbackBody, user: dict = Depends(auth.require_user)):
     """👍/👎 cho câu trả lời — LUMINA đo độ hữu dụng theo hành vi thật để tiến hoá."""
     db.add_feedback(user["id"], body.conversation_id, body.rating, body.note)
-    return {"ok": True, "summary": db.feedback_summary(user["id"])}
+    # Nếu câu trả lời đó có dùng một kỹ năng nội bộ, cộng/trừ độ thành thạo của nó.
+    skill_slug = db.record_skill_feedback(body.conversation_id, body.rating)
+    return {"ok": True, "summary": db.feedback_summary(user["id"]), "skill": skill_slug}
+
+
+@app.get("/api/skills/stats")
+async def skills_stats(user: dict = Depends(auth.require_user)):
+    """Bảng độ thành thạo kỹ năng: LUMINA giỏi dần những kỹ năng dùng nhiều + được
+    đánh giá hữu ích (học theo hành vi thật, không phải 'train trọng số')."""
+    stats = {s["slug"]: s for s in db.skill_stats_all()}
+    rows = []
+    for sk in skills.all_skills():
+        st = stats.get(sk.slug, {"applied": 0, "up": 0, "down": 0, "last_used": 0})
+        m = skills.mastery(st["applied"], st["up"], st["down"])
+        rows.append({"slug": sk.slug, "name": sk.name, "category": sk.category,
+                     "last_used": st["last_used"], **m})
+    rows.sort(key=lambda r: (-r["score"], r["name"]))
+    practiced = sum(1 for r in rows if r["applied"] > 0)
+    return {"total_skills": len(rows), "practiced": practiced, "skills": rows[:200]}
 
 
 # ─── Version hóa suy nghĩ (lưu v1..vN của một artifact/câu trả lời, quay lại) ──
@@ -845,6 +863,9 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
                     answer_parts.append(event["text"])
                 elif event["type"] == "citations":
                     citations.extend(event.get("items", []))
+                elif event.get("type") == "search_status" and event.get("tool") == "skill" and event.get("slug"):
+                    # Kỹ năng vừa được áp dụng thật → ghi nhận để tính độ thành thạo.
+                    db.record_skill_applied(event["slug"], conv_id)
                 yield _sse(event)
         except Exception:
             logger.exception("Lỗi stream")

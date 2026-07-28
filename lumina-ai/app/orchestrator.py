@@ -299,7 +299,7 @@ class Orchestrator:
         if messages and (route.mode == "agent" or system_extra):
             skill = skills.find_matching_skill(original_last_user)
             if skill:
-                yield {"type": "search_status", "tool": "skill", "query": skill.name}
+                yield {"type": "search_status", "tool": "skill", "query": skill.name, "slug": skill.slug}
                 system_prompt += skills.build_skill_context(skill)
 
         started_output = False

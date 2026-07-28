@@ -71,6 +71,11 @@ def load_skills() -> list[Skill]:
 _SKILLS: list[Skill] = load_skills()
 
 
+def all_skills() -> list[Skill]:
+    """Toàn bộ kỹ năng đã nạp (đọc-chỉ) — dùng cho bảng độ thành thạo."""
+    return _SKILLS
+
+
 def _name_tokens(slug: str) -> tuple[str, ...]:
     """Token tiếng Anh từ slug (vd 'test-driven-development' → test, driven, development)
     để truy vấn TIẾNG ANH cũng khớp được kỹ năng (keywords_vi chỉ khớp câu tiếng Việt)."""
@@ -105,6 +110,33 @@ def find_matching_skill(text: str) -> Skill | None:
             best_score = score
             best = skill
     return best if best_score >= _MIN_MATCH_SCORE else None
+
+
+# Bậc thành thạo — SUY TỪ HÀNH VI THẬT (số lần áp dụng + tỉ lệ 👍), không phải
+# "train trọng số". Kỹ năng dùng nhiều + được đánh giá hữu ích → bậc cao dần.
+_MASTERY_LEVELS = (
+    (0,   "🌱 Mới"),        # chưa từng áp dụng
+    (1,   "📗 Đang học"),   # đã dùng vài lần
+    (5,   "📘 Khá"),
+    (15,  "📙 Thành thạo"),
+    (40,  "🏆 Bậc thầy"),
+)
+
+
+def mastery(applied: int, up: int = 0, down: int = 0) -> dict:
+    """Tính độ thành thạo của một kỹ năng từ số lần áp dụng + phản hồi 👍/👎.
+
+    'score' = applied có điều chỉnh theo độ hữu ích: mỗi 👍 thưởng thêm, mỗi 👎
+    trừ bớt (kỹ năng bị chê thì không lên bậc dù dùng nhiều). Không âm."""
+    score = max(0.0, applied + 2.0 * up - 3.0 * down)
+    label = _MASTERY_LEVELS[0][1]
+    for threshold, name in _MASTERY_LEVELS:
+        if score >= threshold:
+            label = name
+    total = up + down
+    usefulness = round(up / total, 2) if total else None
+    return {"score": round(score, 1), "level": label,
+            "applied": applied, "up": up, "down": down, "usefulness": usefulness}
 
 
 def build_skill_context(skill: Skill) -> str:
