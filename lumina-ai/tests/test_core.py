@@ -2047,6 +2047,28 @@ def test_skills_library_has_at_least_923():
     assert len(skills._SKILLS) >= 923
 
 
+def test_skills_library_has_at_least_931():
+    from app import skills
+    assert len(skills._SKILLS) >= 931
+
+
+def test_skills_game_genre_and_education_topics_match():
+    from app import skills
+    cases = {
+        "thiết kế moba đấu trường đội lane creep lính tháp mục tiêu kinh tế last hit vàng bộ kỹ năng tướng vai trò giao tranh tổng team fight snowball": "moba-design",
+        "hệ thống rpg và tiến trình nhân vật chỉ số thuộc tính stats kinh nghiệm lên cấp cây kỹ năng build loot trang bị công thức sát thương scaling class": "rpg-systems-and-progression",
+        "thiết kế thế giới mở và sandbox tự do phi tuyến điểm quan tâm mật độ points of interest kể chuyện qua môi trường lối chơi nổi lên emergent tránh filler": "open-world-and-sandbox-design",
+        "immersive sim và thiết kế hệ thống các hệ thống tương tác thay vì kịch bản scripted nhiều lời giải luật thế giới nhất quán lối chơi nổi lên emergent agency": "immersive-sim-and-systemic-design",
+        "thiết kế game nhàn rỗi và tăng dần idle incremental clicker tăng trưởng hàm mũ số lớn vòng mua máy phát generators prestige reset offline": "idle-and-incremental-game-design",
+        "thiết kế game xây thành phố và quản lý management sim chuỗi cung ứng vòng sản xuất nhu cầu dịch vụ quy hoạch phân vùng zoning cân bằng kinh tế upkeep": "city-builder-and-management-design",
+        "thiết kế giảng dạy instructional design thiết kế ngược từ kết quả backward design mục tiêu học tập thang bloom quy trình addie căn chỉnh alignment": "instructional-design-and-backward-design",
+        "thiết kế game giáo dục và gamification động lực nội tại ngoại lai lồng học vào cơ chế lõi điểm huy hiệu bảng xếp hạng tránh pointsification": "educational-game-and-gamification-design",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_game_genre_topics_match():
     from app import skills
     cases = {

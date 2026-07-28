@@ -85,11 +85,26 @@ các tên này (từ chối nếu bạn lỡ thêm vào `--sources`).
 > GSM8K/MATH có **cả** train và test: dùng **train** để SFT, giữ **test** để eval —
 > script tự lấy đúng split train.
 
-## 🖼️ Đa phương thức (UI→code) — cần VLM, KHÔNG hợp pipeline LoRA-text này
+## 🖼️ Đa phương thức (UI→code / ảnh→code) — cần VLM, KHÔNG hợp pipeline LoRA-text này
 
 | Dataset | Vì sao chưa dùng |
 |---|---|
-| Vision2UI, RICO, Pix2Code | Là **ảnh giao diện → code/annotation**. Fine-tune cần **model thị giác (VLM)** + pipeline ảnh, khác hẳn LoRA text ở đây. Muốn làm UI-from-image thì phải chọn model nền đa phương thức (Qwen2.5-VL…) và pipeline riêng — ngoài phạm vi scaffold hiện tại. |
+| Vision2UI (`xcodemind/vision2ui`), RICO (`creative-graphic-design/Rico`), WebCode2M (`xcodemind/webcode2m`), Pix2Code | Đều là **ảnh giao diện → code/annotation**. Fine-tune cần **model thị giác-ngôn ngữ (VLM)** + pipeline xử lý ảnh, KHÁC HẲN LoRA text-only ở scaffold này (chỉ nhận JSONL chat text). |
+
+**Muốn làm "ảnh UI → code" thật sự:** chọn **model nền ĐA PHƯƠNG THỨC** (Qwen2.5-VL, Llama-3.2-Vision, InternVL…) và một pipeline riêng cặp `{ảnh, code}` — không nhét được vào `train_lora.py` hiện tại (nó chỉ tokenize text). Đây là một nhánh dự án riêng, không phải bật một cờ. *(LUMINA vốn đã có skill `image-to-code` để LÀM việc ảnh→code lúc CHẠY bằng model VLM qua API — khác với TRAIN một VLM.)*
+
+## 🧱 Chọn MODEL NỀN để fine-tune — sự thật về cỡ model
+
+Fine-tune cần một **model nền mở**. Nhưng cỡ model quyết định bạn có tự làm nổi không:
+
+| Model bạn gửi | Cỡ | Tự fine-tune/host được? |
+|---|---|---|
+| `nvidia/nemo-megatron-gpt-20B` | 20B | ⚠️ **Ranh giới.** QLoRA 20B cần ~1 GPU 48GB (A6000) hoặc 2×24GB. Thuê cloud vài giờ được. Inference cũng cần GPU khủng — không chạy nổi trên máy phổ thông. |
+| `nvidia/NVIDIA-Nemotron-3-Ultra-550B` | 550B (MoE) | ❌ **KHÔNG.** Cần cụm nhiều chục GPU (hàng trăm nghìn–triệu $). Không cá nhân nào tự host/fine-tune. |
+| `moonshotai/Kimi-K3` | 2.8T (MoE) | ❌ **KHÔNG.** Cần TB VRAM / cụm GPU triệu đô. (Đã tích hợp qua **API** trong LUMINA — dùng được; **tự host thì không.**) |
+| `nvidia/MiniMax-M3-DSpark` | (kiểm card) | Tuỳ cỡ — đọc số tham số trên card rồi đối chiếu bảng trên. |
+
+> **Con đường THẬT để "có API riêng, 0đ, không cần API ai":** fine-tune một model nền **NHỎ (7B–14B)** bằng `train_lora.py`, xuất GGUF, chạy local qua **Ollama + `LOCAL_ONLY=true`** (xem `export_ollama.md`). Model 20B là trần trên nếu bạn có GPU mạnh. Model 550B/2.8T **không thể tự host** — chỉ dùng được qua API của nhà cung cấp. Không có cách nào "LLM học dần rồi tự thành trọng số của bạn" mà không qua bước fine-tune một model nền cỡ vừa trên GPU thật.
 
 ## 🧱 Corpus PRE-TRAINING — KHÔNG dùng để LoRA model nhỏ
 
