@@ -2032,6 +2032,28 @@ def test_skills_library_has_at_least_899():
     assert len(skills._SKILLS) >= 899
 
 
+def test_skills_library_has_at_least_907():
+    from app import skills
+    assert len(skills._SKILLS) >= 907
+
+
+def test_skills_simulation_and_domain_topics_match():
+    from app import skills
+    cases = {
+        "động học ngược inverse kinematics ik giải góc khớp đặt đầu cuối end effector giải hai khớp analytic ccd fabrik": "inverse-kinematics-for-animation",
+        "mười hai nguyên tắc hoạt hình disney co giãn squash and stretch lấy đà anticipation chậm vào ra slow in out cung arc": "animation-twelve-principles",
+        "nhạc lý cơ bản sáng tác âm giai scale hợp âm ba triad vòng hòa thanh progression căng và giải quyết tension resolution": "music-theory-basics",
+        "hệ điều khiển và bộ pid vòng phản hồi feedback loop tỉ lệ tích phân vi phân p i d chỉnh tham số tuning vọt lố overshoot": "control-systems-and-pid",
+        "robot học động học và điều khiển hệ trục tọa độ frame transform bậc tự do degrees of freedom lập kế hoạch chuyển động tránh vật cản": "robotics-kinematics-and-control",
+        "mô phỏng vải và vật thể mềm soft body hệ khối lượng lò xo mass-spring tích phân verlet động lực dựa vị trí position based dynamics pbd": "cloth-and-soft-body-simulation",
+        "mô phỏng chất lỏng cơ bản fluid simulation lưới eulerian so với hạt sph đối lưu advection chiếu áp suất giữ không nén": "fluid-simulation-basics",
+        "dự báo chuỗi thời gian time series forecasting xu hướng mùa vụ tính dừng stationarity sai phân arima backtesting rolling origin": "time-series-forecasting",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_game_systems_topics_match():
     from app import skills
     cases = {
