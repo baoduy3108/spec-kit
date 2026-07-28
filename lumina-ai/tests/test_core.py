@@ -2042,6 +2042,28 @@ def test_skills_library_has_at_least_915():
     assert len(skills._SKILLS) >= 915
 
 
+def test_skills_library_has_at_least_923():
+    from app import skills
+    assert len(skills._SKILLS) >= 923
+
+
+def test_skills_game_genre_topics_match():
+    from app import skills
+    cases = {
+        "thiết kế rts chiến thuật thời gian thực kinh tế thu thập tài nguyên vĩ mô vi mô macro micro build order tech tree khắc chế sương mù chiến tranh": "rts-and-strategy-design",
+        "thiết kế metroidvania khám phá bản đồ liên thông mở khóa bằng năng lực ability gate khóa và chìa quay lại vùng cũ backtracking": "metroidvania-design",
+        "thiết kế game nhịp điệu rhythm cửa sổ thời gian bậc chấm perfect miss soạn beatmap theo nhạc độ trễ âm thanh hiệu chỉnh calibration": "rhythm-game-design",
+        "thiết kế game đối kháng fighting thế giằng co neutral footsies lớp đoán ý mixup khoảng cách spacing hệ combo hủy đòn cancel thanh nộ meter": "fighting-game-design",
+        "thiết kế game đua xe racing mô hình điều khiển arcade so với sim thiết kế đường đua racing line drift bám đường grip rubber banding": "racing-game-design",
+        "thiết kế game sinh tồn và chế tạo survival crafting vòng lặp tài nguyên khan hiếm nhu cầu đói khát cây chế tạo xây căn cứ base building": "survival-and-crafting-design",
+        "thiết kế game lén lút stealth nhận thức kẻ địch nón nhìn vision cone nghe âm thanh trạng thái cảnh giác alert vật che lối đi đánh lạc hướng": "stealth-game-design",
+        "thiết kế game giải đố puzzle cơ chế lõi không gian luật dạy không cần tutorial khoảnh khắc bừng sáng aha giới thiệu phát triển xoắn kết hợp": "puzzle-game-design",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_animation_and_game_genre_topics_match():
     from app import skills
     cases = {
