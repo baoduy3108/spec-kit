@@ -1,0 +1,11 @@
+# Fine-tune LUMINA local model — CẦN máy có GPU CUDA.
+# (Không cài trong app chính; chỉ dùng khi bạn tự fine-tune.)
+transformers>=4.44
+datasets>=2.20
+peft>=0.12
+trl>=0.9
+accelerate>=0.33
+bitsandbytes>=0.43        # QLoRA 4-bit (Linux/CUDA)
+sentencepiece
+# Tùy chọn — nhanh/nhẹ hơn nhiều trên 1 GPU (thay cho luồng transformers thuần):
+#   pip install "unsloth[cu121] @ git+https://github.com/unslothai/unsloth.git"
