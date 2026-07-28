@@ -2057,6 +2057,28 @@ def test_skills_library_has_at_least_939():
     assert len(skills._SKILLS) >= 939
 
 
+def test_skills_library_has_at_least_947():
+    from app import skills
+    assert len(skills._SKILLS) >= 947
+
+
+def test_skills_medical_law_science_topics_match():
+    from app import skills
+    cases = {
+        "lập luận lâm sàng và chẩn đoán clinical reasoning khai thác bệnh sử khám chẩn đoán phân biệt differential xác suất trước sau test độ nhạy đặc hiệu red flag thiên kiến": "clinical-reasoning-and-diagnosis",
+        "dược lý và tác dụng thuốc pharmacology dược động học hấp thu phân bố chuyển hóa thải trừ adme dược lực học thụ thể chủ vận đối vận liều đáp ứng bán thải": "pharmacology-and-drug-action",
+        "luật hợp đồng cơ bản contract law hình thành đề nghị chấp nhận đối giá consideration vi phạm và biện pháp khắc phục breach remedies điều khoản bồi hoàn giới hạn trách nhiệm": "contract-law-fundamentals",
+        "luật sở hữu trí tuệ intellectual property bản quyền copyright bằng sáng chế patent nhãn hiệu trademark bí mật thương mại cấp phép mã nguồn mở": "intellectual-property-law",
+        "phản ứng hóa học và tỉ lượng stoichiometry cân bằng phương trình mol khối lượng mol chất giới hạn hiệu suất oxi hóa khử redox bảo toàn khối lượng": "chemical-reactions-and-stoichiometry",
+        "cơ học quỹ đạo và bay vũ trụ orbital mechanics định luật kepler vận tốc quỹ đạo phương trình tên lửa delta-v chuyển quỹ đạo hohmann vận tốc thoát": "orbital-mechanics-and-spaceflight",
+        "thiết kế visual novel và truyện phân nhánh branching narrative tuyến truyện lựa chọn có ý nghĩa hậu quả biến cờ trạng thái nhiều kết thúc ảo giác lựa chọn": "visual-novel-and-branching-narrative",
+        "thiết kế mmo và nền kinh tế ảo virtual economy thế giới bền vững persistent sharding endgame guild nguồn tạo điểm hút faucet sink lạm phát nhà đấu giá": "mmo-design-and-virtual-economies",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_science_bio_finance_topics_match():
     from app import skills
     cases = {
