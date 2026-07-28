@@ -329,6 +329,28 @@ def test_kimi_engine_registered():
         assert not o.engines["kimi"].available()
 
 
+def test_local_only_mode_uses_only_local_engines():
+    """LOCAL_ONLY=true: LUMINA chỉ dùng model local (Ollama), KHÔNG gọi API ngoài nào
+    (không Claude/Gemini/Groq/Kimi…) → 0 token, bộ não riêng chạy trên máy người dùng."""
+    from app.config import CONFIG
+    from app.orchestrator import Orchestrator
+    orig = CONFIG.get("LOCAL_ONLY")
+    try:
+        CONFIG["LOCAL_ONLY"] = True
+        o = Orchestrator()
+        chain = o._chain_for(use_premium=True)  # kể cả 'cao cấp' cũng KHÔNG được có API ngoài
+        assert "claude" not in chain
+        for ext in ("gemini", "groq", "github", "openrouter", "deepseek", "mistral", "kimi", "openai"):
+            assert ext not in chain, ext
+        assert chain and all(n == "ollama" or n.startswith("ollama-") for n in chain)
+    finally:
+        CONFIG["LOCAL_ONLY"] = orig
+    # Mặc định (LOCAL_ONLY off): vẫn có API ngoài + cao cấp bắt đầu bằng Claude.
+    o2 = Orchestrator()
+    assert o2._chain_for(use_premium=True)[0] == "claude"
+    assert "gemini" in o2.free_chain
+
+
 # ── Đa phương thức: xử lý ảnh (media) ───────────────────────────────────────
 
 def test_parse_data_url_valid():

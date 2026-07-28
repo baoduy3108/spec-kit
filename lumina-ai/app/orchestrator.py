@@ -187,14 +187,25 @@ class Orchestrator:
             else:
                 self.free_chain += local_names
 
+        # ── Chế độ 100% LOCAL ───────────────────────────────────────
+        # LOCAL_ONLY=true: chỉ giữ lại các bộ não CHẠY TRÊN MÁY (Ollama + model local),
+        # loại mọi engine gọi API bên ngoài → không bao giờ tốn token / phụ thuộc API.
+        self.local_only = bool(CONFIG.get("LOCAL_ONLY"))
+        if self.local_only:
+            local_set = {"ollama", *local_names}
+            self.free_chain = [n for n in self.free_chain if n in local_set]
+            if not self.free_chain and "ollama" in self.engines:
+                self.free_chain = ["ollama", *local_names]
+
     def _chain_for(self, use_premium: bool) -> list[str]:
-        """Chuỗi engine theo tầng. Cao cấp: Claude trước rồi mới tới free (dự phòng khi lỗi)."""
-        if use_premium:
+        """Chuỗi engine theo tầng. Cao cấp: Claude trước rồi mới tới free (dự phòng khi lỗi).
+        Ở chế độ LOCAL_ONLY: KHÔNG bao giờ dùng Claude/API ngoài, chỉ chuỗi local."""
+        if use_premium and not self.local_only:
             return ["claude"] + self.free_chain
         return list(self.free_chain)
 
     def available_engines(self) -> list[str]:
-        names = ["claude"] + self.free_chain
+        names = self.free_chain if self.local_only else ["claude"] + self.free_chain
         return [n for n in names if self.engines[n].available()]
 
     def has_free_engine(self) -> bool:

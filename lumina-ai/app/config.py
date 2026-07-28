@@ -71,6 +71,12 @@ CONFIG = {
     "KIMI_BASE_URL": os.getenv("KIMI_BASE_URL", "https://api.kimi.ai/v1"),
     "OLLAMA_BASE_URL": os.getenv("OLLAMA_BASE_URL", ""),  # ví dụ http://localhost:11434/v1 (model chạy trên máy bạn)
     "OLLAMA_MODEL": os.getenv("OLLAMA_MODEL", "llama3.1"),
+    # CHẾ ĐỘ 100% LOCAL (LOCAL_ONLY=true): LUMINA CHỈ dùng model chạy trên máy bạn
+    # (Ollama), KHÔNG bao giờ gọi bất kỳ API bên ngoài nào (Claude/Gemini/Groq/Kimi…).
+    # → 0đ token, không cần API key nào, không phụ thuộc ai — "bộ não riêng của bạn"
+    # = LUMINA (router + skills) + model local. Đánh đổi: chất lượng ở mức model local
+    # (7B–70B chạy nổi trên máy cá nhân), yếu hơn model frontier trên cloud.
+    "LOCAL_ONLY": os.getenv("LOCAL_ONLY", "false").lower() in ("1", "true", "yes", "on"),
     # LỚP DỰ PHÒNG LOCAL: khi hết token API (cho nhiều người dùng toàn cầu),
     # LUMINA vẫn trả lời được bằng các model chạy NỘI BỘ qua Ollama. Một endpoint
     # Ollama phục vụ được nhiều model — liệt kê ở đây, LUMINA sẽ lần lượt thử.

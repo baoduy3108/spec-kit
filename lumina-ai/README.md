@@ -22,6 +22,9 @@ LUMINA là web chatbot AI "bù trừ": bạn chỉ cần gõ câu hỏi, hệ th
 
 → Bạn chỉ tốn tiền Claude cho vài lượt cao cấp; phần còn lại chạy bằng API miễn phí. **Không có Claude cũng được** — LUMINA chạy 100% bằng bộ não free.
 
+> **🔒 Chế độ 100% LOCAL (`LOCAL_ONLY=true`) — "API riêng của bạn, 0đ token, không phụ thuộc ai":**
+> LUMINA **KHÔNG phải một model** (không có trọng số riêng) — nó là **router + thư viện skills**, luôn cần MỘT bộ não sinh câu trả lời. Bật `LOCAL_ONLY=true` để bộ não đó **chỉ là model chạy trên máy bạn** (Ollama): LUMINA **không bao giờ gọi bất kỳ API ngoài nào** (Claude/Gemini/Groq/Kimi…). Kết quả: **0đ token, không cần API key nào, chạy hoàn toàn trên phần cứng của bạn** = LUMINA (router + 875 skills) + model local của bạn. Đánh đổi **duy nhất**: chất lượng ở mức model local chạy nổi trên máy cá nhân (7B–70B), **yếu hơn** model frontier trên cloud (Kimi 2.8T / Claude — những model đó cần cụm GPU triệu đô nên KHÔNG thể tự host). Đây là hiện thực đúng nghĩa của "chỉ LUMINA, không route ra ngoài".
+
 Router tự chọn chế độ theo câu hỏi (⚡ nhanh · ✨ cân bằng · 🧠 tư duy sâu · 🔍 tìm kiếm web · 🌌 đỉnh cao) — nhưng **người dùng chỉ thấy tên "LUMINA"**, không thấy tên model.
 
 **Độ bền kiểu ChatGPT:** bộ não nào lỗi → tự nhảy sang cái kế tiếp (circuit breaker + fallback), người dùng không thấy gì.
