@@ -3423,6 +3423,29 @@ def test_find_matching_skills_multi_for_rich_request():
     assert skills.find_matching_skills("hôm nay trời đẹp không đi chơi đâu", limit=4) == []
 
 
+def test_semantic_match_ranks_by_cosine_and_threshold(monkeypatch):
+    import asyncio
+    from app import skill_search, skills
+    a, b = skills.all_skills()[0].slug, skills.all_skills()[1].slug
+    skill_search._index.clear()
+    skill_search._index[a] = {"hash": "x", "vec": [1.0, 0.0]}
+    skill_search._index[b] = {"hash": "x", "vec": [0.0, 1.0]}
+    skill_search._loaded = True
+    monkeypatch.setattr(skill_search, "embeddings_enabled", lambda: True)
+    async def qembed(_):  # câu hỏi gần vector của skill a
+        return [0.9, 0.1]
+    monkeypatch.setattr(skill_search, "embed_text", qembed)
+    got = asyncio.run(skill_search.semantic_match("bất kỳ", limit=1, min_sim=0.5))
+    assert got and got[0].slug == a
+    # Ngưỡng quá cao → loại hết (không đủ giống thì không nạp bừa).
+    assert asyncio.run(skill_search.semantic_match("bất kỳ", limit=1, min_sim=0.999)) == []
+    # Tắt embeddings (không có key) → rỗng, lùi về từ khóa.
+    monkeypatch.setattr(skill_search, "embeddings_enabled", lambda: False)
+    assert asyncio.run(skill_search.semantic_match("bất kỳ")) == []
+    skill_search._index.clear()
+    skill_search._loaded = False
+
+
 def test_skill_mastery_levels_scale_with_usage():
     from app import skills
     # Chưa dùng → "Mới"; dùng nhiều + được 👍 → bậc cao dần.

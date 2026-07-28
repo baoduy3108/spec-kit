@@ -39,7 +39,8 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, files, knowledge, media, payments, recall, skills, video_dub, video_link, webpage
+from . import auth, config, db, files, knowledge, media, payments, recall, skill_search, skills, video_dub, video_link, webpage
+from .embeddings import embeddings_enabled
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
 from .memory import trim_history
@@ -76,6 +77,9 @@ async def startup():
     logger.info("✦ %s v%s sẵn sàng — engines: %s",
                 CONFIG["APP_NAME"], CONFIG["APP_VERSION"],
                 ", ".join(orchestrator.available_engines()) or "CHƯA CÓ (thiếu API key)")
+    # Dựng index ngữ nghĩa cho khớp kỹ năng (chạy NỀN, chỉ khi có key embeddings).
+    if embeddings_enabled():
+        asyncio.create_task(skill_search.build_index())
 
 
 # ─── Auth ────────────────────────────────────────────────────────────────────

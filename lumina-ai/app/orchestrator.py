@@ -30,6 +30,7 @@ from .engines.openai_compatible import (
 )
 from . import knowledge
 from . import skills
+from . import skill_search
 from .imagegen import generate_image
 from .media import has_images, has_videos
 from .monitor import monitor
@@ -309,6 +310,10 @@ class Orchestrator:
             # nạp tối đa 3 kỹ năng liên quan cùng lúc (mỗi cái cắt ngắn hơn để giữ ngân
             # sách token). Yêu cầu ngắn thường chỉ khớp 1 kỹ năng nên vẫn như cũ.
             matched = skills.find_matching_skills(original_last_user, limit=3)
+            if not matched:
+                # Từ khóa không trúng → thử khớp NGỮ NGHĨA (chỉ khi có key embeddings;
+                # không có key thì trả rỗng, giữ nguyên hành vi cũ).
+                matched = await skill_search.semantic_match(original_last_user, limit=2)
             if matched:
                 per_cap = 5000 if len(matched) == 1 else 2600
                 for skill in matched:

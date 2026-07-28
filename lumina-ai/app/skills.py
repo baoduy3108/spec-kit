@@ -76,6 +76,14 @@ def all_skills() -> list[Skill]:
     return _SKILLS
 
 
+_BY_SLUG = {s.slug: s for s in _SKILLS}
+
+
+def get_skill(slug: str) -> Skill | None:
+    """Tra kỹ năng theo slug (dùng cho khớp ngữ nghĩa + thống kê)."""
+    return _BY_SLUG.get(slug)
+
+
 def _name_tokens(slug: str) -> tuple[str, ...]:
     """Token tiếng Anh từ slug (vd 'test-driven-development' → test, driven, development)
     để truy vấn TIẾNG ANH cũng khớp được kỹ năng (keywords_vi chỉ khớp câu tiếng Việt)."""
