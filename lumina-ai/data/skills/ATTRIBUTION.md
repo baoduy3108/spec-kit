@@ -55,7 +55,7 @@ retries-timeouts-and-heartbeats, signals-queries-and-workflow-interaction) lấy
 **temporalio/temporal** (MIT, https://github.com/temporalio/temporal); nhóm *game/animation craft*
 (game-loop-and-fixed-timestep, collision-detection-and-response, easing-and-animation-timing,
 webgl-and-shader-fundamentals) lấy cảm hứng chủ đề từ **MengTo/Skills** (MIT,
-https://github.com/MengTo/Skills). Toàn bộ câu chữ là của LUMINA, không sao chép SKILL.md gốc.
+https://github.com/MengTo/Skills). Toàn bộ câu chữ là của LUMINA, không sao chép SKILL.md gốc. Nhóm *agent infra* (coding-agent-architecture, sandboxed-code-execution-for-agents, agent-computer-interface, agent-file-editing-and-diffs, agent-safety-and-action-guardrails) lấy cảm hứng khái niệm từ **OpenHands/OpenHands** (MIT, https://github.com/OpenHands/OpenHands); nhóm *browser agent* (browser-automation-for-agents, web-perception-and-dom-for-agents, computer-use-and-gui-agents) từ **browser-use/browser-use** (MIT, https://github.com/browser-use/browser-use). Ghost-Downloader-3 là GPL nên KHÔNG dùng làm nguồn (chỉ viết prose gốc về chủ đề phổ quát).
 
 LUMINA chủ động **KHÔNG** đưa vào bất kỳ nội dung nào từ nguồn có giấy phép hạn chế (GPL, phi thương
 mại/NC, hay tài liệu có bản quyền doanh nghiệp) — chỉ giữ lại phần bảng trên là các skill chuyển thể

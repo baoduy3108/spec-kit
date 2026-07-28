@@ -1951,6 +1951,28 @@ def test_skills_download_crawl_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_867():
+    from app import skills
+    assert len(skills._SKILLS) >= 867
+
+
+def test_skills_agent_infra_batch_topics_match():
+    from app import skills
+    cases = {
+        "kiến trúc agent lập trình tự động coding agent vòng lặp quan sát suy nghĩ hành động observe-think-act trên workspace sandbox bộ công cụ đọc sửa file chạy lệnh chạy test điều kiện dừng": "coding-agent-architecture",
+        "thực thi mã trong sandbox cho agent chạy code an toàn container microvm cách ly filesystem và mạng giới hạn tài nguyên không truy cập host môi trường tạm ephemeral mỗi tác vụ kiểm soát egress": "sandboxed-code-execution-for-agents",
+        "giao diện agent-máy tính aci thiết kế bộ công cụ và quan sát cho model không phải cho người đầu ra công cụ ngắn gọn lan can guardrail chặn lỗi agent phản hồi sau mỗi hành động": "agent-computer-interface",
+        "agent điều khiển trình duyệt thật làm tác vụ web browser-use playwright vòng lặp cảm nhận quyết định hành động bộ hành động click gõ điều hướng cuộn chờ nội dung động selector dễ vỡ chống bot": "browser-automation-for-agents",
+        "cảm nhận trang web cho agent biến trang thành thứ llm hiểu html thô quá lớn và nhiễu dùng cây trợ năng accessibility tree trích và đánh số phần tử tương tác indexing interactive elements": "web-perception-and-dom-for-agents",
+        "agent dùng máy tính bằng thị giác gui agent chụp màn hình suy luận rồi xuất thao tác chuột bàn phím theo toạ độ điểm ảnh định vị toạ độ grounding set-of-mark đánh dấu phần tử": "computer-use-and-gui-agents",
+        "agent sửa file tin cậy bài toán biểu diễn chỉnh sửa ghi đè cả file so với diff hợp nhất so với khối tìm và thay thế search-replace định dạng diff theo số dòng dễ vỡ với llm công cụ edit nên từ chối sửa sai": "agent-file-editing-and-diffs",
+        "an toàn agent hành động khác với an toàn nội dung đầu ra lan can hành động action guardrails phạm vi quyền tối thiểu least privilege người xác nhận human-in-the-loop cho hành động hệ trọng không thể hoàn tác": "agent-safety-and-action-guardrails",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
