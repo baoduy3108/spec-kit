@@ -1893,6 +1893,28 @@ def test_skills_durable_game_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_851():
+    from app import skills
+    assert len(skills._SKILLS) >= 851
+
+
+def test_skills_web_security_batch_topics_match():
+    from app import skills
+    cases = {
+        "giả mạo yêu cầu liên trang csrf cookie tự gửi kèm nên nguy hiểm cho request thay đổi trạng thái token chống csrf synchronizer và double-submit cookie samesite lax strict": "csrf-and-same-site-defenses",
+        "giả mạo yêu cầu phía máy chủ ssrf server tự gọi url do người dùng nhập tấn công endpoint metadata đám mây 169.254.169.254 phòng thủ bằng allowlist và chặn egress mạng": "ssrf-and-url-fetch-safety",
+        "chèn mã kịch bản liên trang xss dữ liệu kẻ tấn công thành script chạy trong trình duyệt mã hoá đầu ra output encoding theo ngữ cảnh không phải lọc đầu vào xss lưu trữ phản chiếu và dom": "xss-and-output-encoding",
+        "tiêm sql injection dữ liệu kẻ tấn công biến câu truy vấn thành vũ khí sửa thật bằng truy vấn tham số hoá prepared statement tách mã khỏi dữ liệu nối chuỗi là gốc rễ lỗ hổng": "sql-injection-and-parameterized-queries",
+        "cướp nhấp chuột clickjacking ui redressing nhúng site vào iframe trong suốt đè lên nội dung mồi phòng thủ x-frame-options và csp frame-ancestors samesite không ngăn được clickjacking": "clickjacking-and-frame-protection",
+        "cố định phiên session fixation kẻ tấn công kiểm soát session id trước rồi chiếm đăng nhập tái tạo session id khi đổi quyền đăng nhập cờ cookie an toàn httponly secure samesite": "session-fixation-and-secure-sessions",
+        "kiểm soát truy cập bị hỏng broken access control idor tham chiếu trực tiếp đối tượng đổi id trong request để xem dữ liệu người khác phân quyền phía máy chủ trên mọi request giấu id hay dùng uuid không phải bảo mật": "idor-and-broken-access-control",
+        "giải tuần tự không an toàn insecure deserialization biến byte không tin cậy thành đối tượng có thể chạy mã chuỗi gadget chain thực thi mã từ xa rce serializer nhị phân java pickle php .net nguy hiểm": "insecure-deserialization-and-gadget-chains",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
