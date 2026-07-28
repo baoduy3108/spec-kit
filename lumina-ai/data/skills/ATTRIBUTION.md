@@ -48,6 +48,15 @@ tự biên soạn từ kiến thức ngành phổ thông (giáo trình, chuẩn 
 tri thức/nguyên lý phổ quát không thuộc bản quyền của riêng ai, được diễn đạt bằng lời của LUMINA —
 KHÔNG sao chép câu chữ từ nguồn nào, nên không cần và không kèm ghi công bên thứ ba.
 
+**Nguồn CẢM HỨNG chủ đề (không copy nội dung — chỉ dùng để chọn chủ đề đáng viết):** một số nhóm skill
+nội dung gốc được gợi ý chủ đề từ dự án mã nguồn mở giấy phép cho phép, ví dụ nhóm *durable execution /
+workflow* (durable-execution-and-workflow-engines, workflow-determinism-and-replay,
+retries-timeouts-and-heartbeats, signals-queries-and-workflow-interaction) lấy cảm hứng khái niệm từ
+**temporalio/temporal** (MIT, https://github.com/temporalio/temporal); nhóm *game/animation craft*
+(game-loop-and-fixed-timestep, collision-detection-and-response, easing-and-animation-timing,
+webgl-and-shader-fundamentals) lấy cảm hứng chủ đề từ **MengTo/Skills** (MIT,
+https://github.com/MengTo/Skills). Toàn bộ câu chữ là của LUMINA, không sao chép SKILL.md gốc.
+
 LUMINA chủ động **KHÔNG** đưa vào bất kỳ nội dung nào từ nguồn có giấy phép hạn chế (GPL, phi thương
 mại/NC, hay tài liệu có bản quyền doanh nghiệp) — chỉ giữ lại phần bảng trên là các skill chuyển thể
 từ nguồn mã nguồn mở giấy phép cho phép (MIT/Apache-2.0/CC-BY), theo đúng điều khoản ghi công của

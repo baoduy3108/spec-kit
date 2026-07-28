@@ -1871,6 +1871,28 @@ def test_skills_data_format_batch_topics_match():
         assert s is not None and s.slug == expected, (text, s.slug if s else None)
 
 
+def test_skills_library_has_at_least_843():
+    from app import skills
+    assert len(skills._SKILLS) >= 843
+
+
+def test_skills_durable_game_batch_topics_match():
+    from app import skills
+    cases = {
+        "thực thi bền vững durable execution quy trình chạy dài chịu được sập máy khởi động lại engine lưu từng bước để workflow tiếp tục đúng chỗ đã dừng workflow và activity temporal": "durable-execution-and-workflow-engines",
+        "tính tất định determinism của workflow phát lại replay dựng lại trạng thái từ lịch sử sự kiện event-sourced mọi ngẫu nhiên đồng hồ i/o trực tiếp phá vỡ replay side effect phải nằm trong activity": "workflow-determinism-and-replay",
+        "chính sách thử lại retry với backoff cho từng bước activity họ timeout schedule-to-start start-to-close heartbeat phát hiện bước chạy dài bị treo idempotency bắt buộc khi có retry": "retries-timeouts-and-heartbeats",
+        "tương tác với workflow đang chạy signal query signal gửi sự kiện đầu vào bất đồng bộ query đọc trạng thái hiện tại mà không thay đổi mẫu chờ điều kiện wait-for-condition human-in-the-loop": "signals-queries-and-workflow-interaction",
+        "vòng lặp game game loop vật lý cần bước thời gian cố định fixed timestep còn render chạy nhanh tuỳ máy di chuyển theo delta-time độc lập khung hình mẫu accumulator nội suy interpolation": "game-loop-and-fixed-timestep",
+        "phát hiện va chạm collision detection và phản hồi kiểm tra hộp bao aabb broad phase narrow phase phân vùng không gian va chạm quét liên tục swept chống xuyên tường tunneling giải quyết tách trục axis-separated để trượt": "collision-detection-and-response",
+        "chuyển động không tuyến tính đường cong easing và nhịp animation tự nhiên ease-out ease-in ease-in-out dùng khi nào cubic-bezier và vật lý lò xo spring so le stagger reduced-motion": "easing-and-animation-timing",
+        "gpu vẽ mọi thứ trên web pipeline webgl opengl và shader vertex shader định vị mỗi đỉnh fragment shader tô màu mỗi điểm ảnh buffer attribute uniform varying chuỗi ma trận mvp gộp draw call": "webgl-and-shader-fundamentals",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_agent_llm_batch_topics_match():
     from app import skills
     cases = {
