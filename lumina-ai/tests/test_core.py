@@ -2022,6 +2022,28 @@ def test_skills_library_has_at_least_883():
     assert len(skills._SKILLS) >= 883
 
 
+def test_skills_library_has_at_least_891():
+    from app import skills
+    assert len(skills._SKILLS) >= 891
+
+
+def test_skills_ux_ui_deep_topics_match():
+    from app import skills
+    cases = {
+        "khung dây wireframe và tạo mẫu prototype mức độ chi tiết fidelity lo-fi hi-fi mẫu bấm được clickable": "wireframing-and-prototyping",
+        "tìm kiếm và lọc search filter gợi ý autocomplete lọc faceted trạng thái không có kết quả lưu vào url": "search-and-filter-ux",
+        "trải nghiệm người dùng mới onboarding đưa tới aha moment thiết lập dần trạng thái rỗng dạy cách dùng": "onboarding-and-first-run-experience",
+        "thiết kế thông báo toast snackbar mức độ nghiêm trọng tự ẩn có nút hoàn tác undo tránh quá tải": "notification-and-toast-design",
+        "bảng dữ liệu data table căn cột số phải chữ trái tiêu đề dính sticky ảo hóa hàng virtualization chọn hàng bulk": "data-tables-and-grids",
+        "bảng lệnh command palette cmd ctrl k tìm kiếm mờ fuzzy phím tắt shortcut quản lý tiêu điểm focus": "command-palette-and-keyboard-ux",
+        "tiết lộ dần progressive disclosure ẩn phần nâng cao nút xem thêm accordion mặc định hợp lý": "progressive-disclosure",
+        "thông báo lỗi và khôi phục nói lỗi gì và cách sửa không đổ lỗi cho người dùng đặt inline giữ lại dữ liệu đã nhập": "error-messages-and-recovery",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_game_dev_deep_topics_match():
     from app import skills
     cases = {
