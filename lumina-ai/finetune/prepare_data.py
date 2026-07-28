@@ -95,6 +95,52 @@ def _xlam(row):
     return _norm(q, ans_s, "Công cụ khả dụng (JSON): " + tools_s)
 
 
+def _aya(row):
+    # Aya (đa ngôn ngữ): inputs → user, targets → assistant.
+    u = (row.get("inputs") or "").strip()
+    a = (row.get("targets") or "").strip()
+    return _norm(u, a) if u and a else None
+
+
+def _lima(row):
+    # LIMA: 'conversations' là LIST CHUỖI xen kẽ user/assistant (không phải dict).
+    conv = row.get("conversations")
+    if not isinstance(conv, list) or len(conv) < 2:
+        return None
+    out = []
+    for i, turn in enumerate(conv):
+        txt = (turn if isinstance(turn, str) else str(turn)).strip()
+        if not txt:
+            return None
+        out.append({"role": "user" if i % 2 == 0 else "assistant", "content": txt})
+    return out if len(out) >= 2 else None
+
+
+def _capybara(row):
+    # Capybara: 'conversation' là list các lượt, mỗi lượt có input + output.
+    conv = row.get("conversation") or row.get("conversations")
+    if not isinstance(conv, list):
+        return None
+    out = []
+    for turn in conv:
+        u = (turn.get("input") or "").strip()
+        a = (turn.get("output") or "").strip()
+        if u:
+            out.append({"role": "user", "content": u})
+        if a:
+            out.append({"role": "assistant", "content": a})
+    return out if len(out) >= 2 else None
+
+
+def _swesmith(row):
+    # SWE-smith (DỮ LIỆU TRAIN, không phải benchmark): mô tả lỗi → patch sửa.
+    prob = (row.get("problem_statement") or row.get("issue") or "").strip()
+    patch = (row.get("patch") or row.get("gold_patch") or "").strip()
+    if not prob or not patch:
+        return None
+    return _norm(prob, "```diff\n" + patch + "\n```")
+
+
 def _auto(row):
     """Tự nhận diện format phổ biến → cặp user/assistant."""
     if isinstance(row.get("messages"), list):
@@ -127,8 +173,15 @@ SOURCES = {
     "ultrachat":  ("HuggingFaceH4/ultrachat_200k", None, "train_sft", _ultrachat, "MIT"),
     "openhermes": ("teknium/OpenHermes-2.5", None, "train", _sharegpt, "kiểm giấy phép từng nguồn con"),
     "openorca":   ("Open-Orca/OpenOrca", None, "train", _openorca, "MIT (data); sinh từ GPT"),
+    "norobots":   ("HuggingFaceH4/no_robots", None, "train", _ultrachat, "CC BY-NC 4.0 — người viết, rất sạch"),
+    "tulu2":      ("allenai/tulu-v2-sft-mixture", None, "train", _ultrachat, "ODC-BY; hỗn hợp nhiều SFT chất lượng"),
+    "lima":       ("GAIR/lima", None, "train", _lima, "1k mẫu CỰC sạch (gated — cần đăng nhập HF)"),
+    "capybara":   ("LDJnr/Capybara", None, "train", _capybara, "hội thoại nhiều lượt, reasoning"),
+    "wizardlm":   ("WizardLMTeam/WizardLM_evol_instruct_70k", None, "train", _auto, "Evol-Instruct 70k"),
+    "aya":        ("CohereLabs/aya_dataset", None, "train", _aya, "đa ngôn ngữ 100+ (gated — cần đăng nhập HF)"),
     # code reasoning (mạnh nhất) — có thể cần chỉnh config/split theo card
     "opencodereasoning":  ("nvidia/OpenCodeReasoning", None, "train", _auto, "code reasoning ~735k; có thể cần config"),
+    "opencodereasoning2": ("nvidia/OpenCodeReasoning-2", None, "python", _auto, "~2.16M; split theo ngôn ngữ: python|cpp"),
     "opencodeinstruct":   ("nvidia/OpenCodeInstruct", None, "train", _auto, "5M instruction code"),
     # competitive (SFT problem→solution; coi chừng trùng benchmark)
     "apps":         ("codeparrot/apps", None, "train", _auto, "dùng split train; cẩn thận contamination"),
@@ -138,9 +191,10 @@ SOURCES = {
     "numinamath": ("AI-MO/NuminaMath-CoT", None, "train", _auto, "CoT toán chất lượng cao"),
     "gsm8k":      ("gsm8k", "main", "train", _auto, "CHỈ split train (test để eval)"),
     "math":       ("EleutherAI/hendrycks_math", "algebra", "train", _auto, "cần chọn config môn học; CHỈ train"),
-    # agent / tool use
+    # agent / tool use / SWE
     "xlam":     ("Salesforce/xlam-function-calling-60k", None, "train", _xlam, "60k function-calling"),
     "toolbench":("ToolBench/ToolBench", None, "train", _sharegpt, "tool-use; format phức tạp, có thể cần chỉnh"),
+    "swesmith": ("SWE-bench/SWE-smith", None, "train", _swesmith, "DỮ LIỆU TRAIN cho SWE-agent (KHÁC SWE-bench benchmark)"),
 }
 
 
