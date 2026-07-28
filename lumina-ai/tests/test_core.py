@@ -2052,6 +2052,28 @@ def test_skills_library_has_at_least_931():
     assert len(skills._SKILLS) >= 931
 
 
+def test_skills_library_has_at_least_939():
+    from app import skills
+    assert len(skills._SKILLS) >= 939
+
+
+def test_skills_science_bio_finance_topics_match():
+    from app import skills
+    cases = {
+        "thiết kế battle royale sinh tồn cuối cùng vòng bo thu hẹp shrinking zone storm người cuối trụ lại phân bố loot nhặt đồ mật độ người chơi bản đồ lớn": "battle-royale-design",
+        "thiết kế 4x và đại chiến lược grand strategy khám phá mở rộng khai thác tiêu diệt theo lượt quản lý đế chế cây công nghệ thể chế kinh tế sản lượng yields ngoại giao": "fourx-grand-strategy-design",
+        "sinh học phân tử và biểu hiện gen cấu trúc adn dna chuỗi xoắn kép giáo lý trung tâm dna rna protein phiên mã dịch mã mã di truyền codon điều hòa": "molecular-biology-and-gene-expression",
+        "tin sinh học và phân tích chuỗi bioinformatics gióng hàng alignment blast định dạng fasta fastq sam vcf quy trình ngs variant calling lắp ráp bộ gen": "bioinformatics-and-sequence-analysis",
+        "trực giác cơ học lượng tử quantum mechanics lưỡng tính sóng hạt chồng chập superposition hàm sóng xác suất nguyên lý bất định rối lượng tử entanglement": "quantum-mechanics-intuition",
+        "nhiệt động lực học và entropy bốn định luật bảo toàn năng lượng entropy và mũi tên thời gian nhiệt và công nhiệt độ thuận nghịch năng lượng tự do": "thermodynamics-and-entropy",
+        "thu nhập cố định và định giá trái phiếu bond coupon mệnh giá kỳ hạn giá trị hiện tại lợi suất đáo hạn ytm duration convexity đường cong lợi suất": "fixed-income-and-bond-pricing",
+        "rủi ro tín dụng và mô hình vỡ nợ credit risk xác suất vỡ nợ pd tổn thất lgd dư nợ ead tổn thất kỳ vọng chấm điểm tín dụng chênh lệch spread": "credit-risk-and-default-modeling",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_game_genre_and_education_topics_match():
     from app import skills
     cases = {
