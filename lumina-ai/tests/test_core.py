@@ -2181,6 +2181,28 @@ def test_skills_library_has_at_least_1029():
     assert len(skills._SKILLS) >= 1029
 
 
+def test_skills_library_has_at_least_1037():
+    from app import skills
+    assert len(skills._SKILLS) >= 1037
+
+
+def test_skills_advanced_chuyen_topics_match():
+    from app import skills
+    cases = {
+        "số học và chia hết thi chuyên olympiad tính chia hết và ước bội số nguyên tố và phân tích thừa số ước chung lớn nhất euclid số học đồng dư modulo định lý fermat nhỏ phương trình nghiệm nguyên diophantine": "number-theory-and-divisibility",
+        "bất đẳng thức và cực trị thi chuyên olympiad bất đẳng thức am gm cosi cauchy schwarz bunhiacopxki trung bình lũy thừa và sắp xếp lại jensen và tính lồi kỹ thuật đổi biến chuẩn hóa tổng bình phương sos": "inequalities-and-optimization",
+        "tổ hợp và đếm thi chuyên olympiad quy tắc cộng và nhân đếm chỉnh hợp hoán vị tổ hợp nhị thức newton nguyên lý bù trừ song ánh đếm nguyên lý dirichlet chuồng bồ câu truy hồi và hàm sinh": "combinatorics-and-counting",
+        "động lực học vật rắn và chuyển động quay chuyên lý mô men lực mô men quán tính mô men động lượng và bảo toàn động năng quay chuyển động lăn không trượt định lý trục song song": "rigid-body-and-rotational-dynamics",
+        "thuyết động học phân tử và nhiệt động lực học chuyên lý phương trình khí lý tưởng nhiệt độ và động năng phân tử phân bố vận tốc maxwell boltzmann nguyên lý thứ nhất và nội năng động cơ nhiệt và hiệu suất": "kinetic-theory-and-gas-laws",
+        "cân bằng hóa học và động hóa học chuyên hóa phản ứng thuận nghịch hằng số cân bằng k nguyên lý chuyển dịch le chatelier tốc độ phản ứng và định luật tốc độ năng lượng hoạt hóa và arrhenius chất xúc tác": "chemical-equilibrium-and-kinetics",
+        "điện hóa học và phản ứng oxi hóa khử chuyên hóa số oxi hóa và cân bằng phản ứng oxi hóa khử pin điện hóa galvani thế điện cực chuẩn và suất điện động dãy điện hóa điện phân và định luật faraday": "electrochemistry-and-redox",
+        "cân bằng axit bazơ chuyên hóa thuyết bronsted lowry cho nhận proton axit bazơ mạnh và yếu hằng số ka kb và pka thang ph poh và tính toán dung dịch đệm henderson hasselbalch thủy phân muối đường cong chuẩn độ": "acid-base-and-ph-equilibria",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_thpt_subjects_topics_match():
     from app import skills
     cases = {
