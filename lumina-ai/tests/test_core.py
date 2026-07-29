@@ -2176,6 +2176,28 @@ def test_skills_library_has_at_least_1021():
     assert len(skills._SKILLS) >= 1021
 
 
+def test_skills_library_has_at_least_1029():
+    from app import skills
+    assert len(skills._SKILLS) >= 1029
+
+
+def test_skills_thpt_subjects_topics_match():
+    from app import skills
+    cases = {
+        "lượng giác và hàm số thpt sin cos tan tỉ số lượng giác đường tròn lượng giác và radian công thức lượng giác biến đổi đồ thị và tính tuần hoàn giải phương trình lượng giác hàm số tập xác định": "trigonometry-and-functions",
+        "mũ và logarit thpt hàm số mũ tăng giảm theo cấp số nhân số e cơ số tự nhiên định nghĩa và tính chất logarit giải phương trình mũ và logarit đồ thị hàm mũ ứng dụng lãi kép chu kỳ bán rã": "exponentials-and-logarithms",
+        "dao động và sóng thpt dao động điều hòa biên độ chu kỳ tần số con lắc và lò xo tính chất sóng bước sóng tốc độ sóng ngang và sóng dọc giao thoa sóng dừng và cộng hưởng sóng âm": "oscillations-and-waves",
+        "quang học và ánh sáng thpt phản xạ và khúc xạ ánh sáng định luật snell và phản xạ toàn phần thấu kính và gương tạo ảnh bản chất sóng của ánh sáng giao thoa nhiễu xạ quang phổ điện từ tán sắc": "optics-and-light",
+        "hóa hữu cơ cơ bản thpt cacbon liên kết và mạch cacbon hydrocacbon ankan anken ankin thơm nhóm chức ancol axit este anđehit amin đồng phân danh pháp gọi tên các loại phản ứng hữu cơ": "organic-chemistry-basics",
+        "sinh thái học và hệ sinh thái thpt quần thể và quần xã sinh vật chuỗi và lưới thức ăn bậc dinh dưỡng dòng năng lượng và tháp sinh khối chu trình sinh địa hóa quan hệ giữa các loài diễn thế đa dạng sinh học": "ecology-and-ecosystems",
+        "tổng quan lịch sử thế giới các nền văn minh cổ đại và đế chế thời trung cổ thời đại khám phá các cuộc cách mạng khoa học công nghiệp chính trị hai cuộc thế chiến chiến tranh lạnh thời hiện đại": "world-history-overview",
+        "địa lý tự nhiên và khí hậu thpt cấu tạo trái đất và kiến tạo mảng địa hình dạng đất khí quyển và thời tiết đới khí hậu và yếu tố hình thành vòng tuần hoàn nước tài nguyên thiên nhiên biến đổi khí hậu": "physical-geography-and-climate",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_knowledge_science_topics_match():
     from app import skills
     cases = {
