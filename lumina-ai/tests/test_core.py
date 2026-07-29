@@ -2186,6 +2186,32 @@ def test_skills_library_has_at_least_1037():
     assert len(skills._SKILLS) >= 1037
 
 
+def test_skills_library_has_at_least_1061():
+    from app import skills
+    assert len(skills._SKILLS) >= 1061
+
+
+def test_skills_deep_math_physics_chem_topics_match():
+    from app import skills
+    cases = {
+        "phương trình hàm thi chuyên olympiad tìm tất cả hàm số thỏa mãn kỹ thuật thế giá trị đặc biệt tính đơn ánh toàn ánh điểm bất động phương trình cauchy chứng minh chặt không còn nghiệm khác": "functional-equations",
+        "số phức thi chuyên toán nâng cao đơn vị ảo i và phép toán mặt phẳng phức mô đun và acgumen dạng lượng giác và mũ định lý moivre căn bậc n của đơn vị": "complex-numbers",
+        "hình học phẳng olympiad thi chuyên các tâm tam giác tứ giác nội tiếp và góc nội tiếp phương tích của điểm định lý ptolemy ceva menelaus chứng minh đồng quy thẳng hàng": "plane-geometry-olympiad",
+        "quy nạp toán học và phương pháp chứng minh thi chuyên quy nạp yếu và mạnh chứng minh phản chứng nguyên lý cực hạn bất biến và đơn biến chuồng bồ câu": "mathematical-induction-and-proof",
+        "mạch điện xoay chiều chuyên lý dòng điện xoay chiều và giá trị hiệu dụng rms dung kháng cảm kháng và tổng trở mạch rlc nối tiếp hiện tượng cộng hưởng": "ac-circuits-and-impedance",
+        "thuyết tương đối hẹp chuyên lý hai tiên đề einstein sự giãn nở thời gian sự co độ dài phép biến đổi lorentz động lượng và năng lượng tương đối tính": "special-relativity-deep",
+        "tĩnh điện và điện trường chuyên lý định luật coulomb lực điện điện trường và đường sức định luật gauss điện thế tụ điện và điện dung": "electrostatics-and-electric-fields",
+        "hấp dẫn và định luật kepler chuyên lý định luật vạn vật hấp dẫn newton chuyển động quỹ đạo và vệ tinh vận tốc thoát ba định luật kepler": "gravitation-and-kepler",
+        "nhiệt hóa học chuyên hóa enthalpy và nhiệt phản ứng định luật hess nhiệt tạo thành chuẩn năng lượng liên kết entropy và năng lượng tự do gibbs": "thermochemistry-and-hess-law",
+        "cơ chế phản ứng hữu cơ chuyên hóa tác nhân ái nhân và ái điện tử phản ứng thế sn1 sn2 phản ứng tách e1 e2 phản ứng cộng vào nối đôi markovnikov": "organic-reaction-mechanisms",
+        "cấu hình electron và số lượng tử chuyên hóa các obitan s p d f bốn số lượng tử nguyên lý vững bền aufbau quy tắc hund nguyên lý loại trừ pauli": "electron-configuration-and-quantum-numbers",
+        "dung dịch và tính chất tập hợp chuyên hóa độ tan tích số tan ksp tăng nhiệt độ sôi giảm nhiệt độ đông đặc áp suất thẩm thấu": "solutions-and-colligative-properties",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_advanced_chuyen_topics_match():
     from app import skills
     cases = {
