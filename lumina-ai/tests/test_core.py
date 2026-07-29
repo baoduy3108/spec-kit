@@ -2191,6 +2191,30 @@ def test_skills_library_has_at_least_1061():
     assert len(skills._SKILLS) >= 1061
 
 
+def test_skills_library_has_at_least_1077():
+    from app import skills
+    assert len(skills._SKILLS) >= 1077
+
+
+def test_skills_deep_bio_humanities_topics_match():
+    from app import skills
+    cases = {
+        "di truyền phân tử và công nghệ sinh học chuyên sinh nhân đôi adn phiên mã và dịch mã giáo lý trung tâm điều hòa gen đột biến gen công nghệ pcr crispr": "molecular-genetics-and-biotech",
+        "hô hấp tế bào và chuyển hóa chuyên sinh đường phân chu trình krebs chuỗi vận chuyển electron atp năng lượng của tế bào hô hấp hiếu khí và kị khí lên men enzyme": "cellular-respiration-and-metabolism",
+        "miễn dịch học và bệnh tật chuyên sinh tác nhân gây bệnh miễn dịch tự nhiên và thu được kháng thể tế bào b và t trí nhớ miễn dịch và tiêm vắc xin": "immunology-and-disease",
+        "di truyền quần thể và tiến hóa chuyên sinh tần số alen và kiểu gen nguyên lý hardy weinberg các nhân tố tiến hóa chọn lọc phiêu bạt dòng gen đột biến": "population-genetics-and-evolution",
+        "hệ thần kinh và hệ nội tiết chuyên sinh tế bào thần kinh và điện thế hoạt động xináp và chất dẫn truyền thần kinh phản xạ hoocmon và các tuyến nội tiết": "nervous-and-endocrine-systems",
+        "phân tích và phê bình văn học chuyên văn phân tích chủ đề nhân vật cốt truyện biện pháp tu từ ẩn dụ biểu tượng giọng điệu diễn giải ý nghĩa tác phẩm": "literary-analysis-and-criticism",
+        "tổng quan lịch sử việt nam văn lang âu lạc và thời bắc thuộc các triều đại phong kiến độc lập các cuộc kháng chiến chống ngoại xâm thời pháp thuộc": "vietnamese-history-overview",
+        "triết học và tư duy phản biện các nhánh triết học siêu hình nhận thức đạo đức logic các khung đạo đức thuyết vị lợi nghĩa vụ đức hạnh nhận diện ngụy biện và đánh giá bằng chứng": "philosophy-and-critical-thinking",
+        "logic hình thức và lập luận logic mệnh đề và logic vị từ bảng chân trị tính hợp lệ và tính đúng đắn suy luận diễn dịch và quy nạp lượng từ": "formal-logic-and-argumentation",
+        "thiên văn học và vũ trụ học hệ mặt trời các ngôi sao và vòng đời sao thiên hà vụ nổ lớn big bang và sự giãn nở vũ trụ vật chất tối": "astronomy-and-cosmology",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_deep_math_physics_chem_topics_match():
     from app import skills
     cases = {
