@@ -34,6 +34,18 @@ class ChatRequest(BaseModel):
     mode: Optional[str] = None
 
 
+class ComposeRequest(BaseModel):
+    """📚 Tổng hợp nhiều tệp thành 1 FILE mới (đọc → nghĩ → tổng hợp → xuất file)."""
+    # Tệp nguồn (PDF/Word/Excel/txt) để LUMINA đọc và tổng hợp — tối đa 3 tệp.
+    files: list[FileAttachment] = Field(default_factory=list, max_length=3)
+    # Yêu cầu/ý muốn của người dùng (vd "tổng hợp thành một cuốn sách mạch lạc").
+    instruction: str = Field(default="", max_length=8000)
+    # Tiêu đề của tài liệu/sách đầu ra.
+    title: str = Field(default="Tài liệu tổng hợp", max_length=300)
+    # Định dạng file xuất ra: "docx" (khuyên dùng, mọi ngôn ngữ) | "pdf" | "html".
+    format: str = "docx"
+
+
 class SearchResult(BaseModel):
     title: str = ""
     url: str = ""

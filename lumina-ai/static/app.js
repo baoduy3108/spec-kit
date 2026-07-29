@@ -1646,6 +1646,62 @@
       });
       box.appendChild(chip);
     });
+
+    // 📚 Có tệp đính kèm → hiện nút "Tổng hợp thành file": LUMINA đọc tất cả các
+    // tệp, nghĩ, tổng hợp kiến thức thành MỘT tài liệu/sách mới rồi cho tải về.
+    if (state.attachedFiles.length >= 1) {
+      const btn = document.createElement("button");
+      btn.className = "compose-btn";
+      btn.id = "compose-btn";
+      btn.textContent = "📚 Tổng hợp thành file";
+      btn.title = "LUMINA đọc tất cả tệp trên → tổng hợp thành 1 tài liệu/sách mới (docx / pdf / html) để tải về";
+      btn.addEventListener("click", composeFromFiles);
+      box.appendChild(btn);
+    }
+  }
+
+  // 📚 Gọi /api/compose: gửi các tệp nguồn → nhận về FILE tổng hợp → tự tải xuống.
+  async function composeFromFiles() {
+    if (!state.attachedFiles.length) return;
+    const btn = $("compose-btn");
+    const title = (prompt("Tên tài liệu/sách đầu ra:", "Tài liệu tổng hợp") || "").trim();
+    if (title === null) return;
+    let fmt = (prompt("Định dạng file? Gõ: docx (khuyên dùng, mọi ngôn ngữ) / pdf / html", "docx") || "docx")
+      .trim().toLowerCase();
+    if (!["docx", "pdf", "html"].includes(fmt)) fmt = "docx";
+    const instruction = ($("input")?.value || "").trim();
+
+    if (btn) { btn.disabled = true; btn.textContent = "📚 Đang đọc & tổng hợp…"; }
+    try {
+      const resp = await fetch("/api/compose", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          files: state.attachedFiles.map((f) => ({ name: f.name, data_url: f.dataUrl })),
+          instruction, title: title || "Tài liệu tổng hợp", format: fmt,
+        }),
+      });
+      if (!resp.ok) {
+        let msg = "Không tổng hợp được tệp.";
+        try { msg = (await resp.json()).detail || msg; } catch (e) {}
+        alert("⚠️ " + msg);
+        return;
+      }
+      const blob = await resp.blob();
+      // Lấy tên file từ header nếu có, không thì tự đặt.
+      const cd = resp.headers.get("content-disposition") || "";
+      const m = /filename\*=UTF-8''([^;]+)/.exec(cd) || /filename="?([^";]+)"?/.exec(cd);
+      const fname = m ? decodeURIComponent(m[1]) : `${title || "tai-lieu"}.${fmt}`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = fname;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert("⚠️ Lỗi mạng khi tổng hợp — thử lại.");
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "📚 Tổng hợp thành file"; }
+    }
   }
 
   function readAsDataUrl(file) {

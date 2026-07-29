@@ -43,6 +43,7 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · C
 | 🎬 **Xem / hiểu video (upload)** | Bấm 📎 đính kèm video (≤~18MB) → hỏi về nội dung, hoặc "vẽ sơ đồ các bước trong video" | **Gemini** xem trực tiếp (cả âm thanh/chuyển động); ngoài ra LUMINA tự **tách 6 khung hình** rải đều → **Claude** (và mọi bộ não nhìn ảnh) cũng phân tích video & dựng sơ đồ được. Dùng ffmpeg tĩnh nhúng sẵn (imageio-ffmpeg), không cần cài đặt |
 | 🔗 **Xem video qua LINK** | Dán link YouTube/Vimeo/TikTok… vào chat → hỏi/tóm tắt/"vẽ sơ đồ" | `yt-dlp` lấy **phụ đề gốc** (miễn phí) — không có thì trích audio → **Whisper** (cần `GROQ_API_KEY` miễn phí, hoặc OpenAI) — **cộng** khung hình tách từ video. Giới hạn video ≤ 20 phút / ≤ 80MB. *Tuân thủ ToS/bản quyền nền tảng nguồn.* |
 | 📄 **Đọc tệp** | Bấm 📎 đính kèm PDF/Word/Excel/txt → hỏi về nội dung | Đọc chữ trực tiếp — mọi bộ não đều dùng được |
+| 📚 **Tổng hợp tệp → file mới** | Đính kèm ≥1 tệp (vd 2 bản PDF Đạo Đức Kinh) → bấm **📚 Tổng hợp thành file** → LUMINA đọc tất cả, nghĩ, tổng hợp kiến thức thành **một tài liệu/sách mới** rồi cho tải về (**docx** / **pdf** / **html**) | `docgen.py` + `POST /api/compose`. docx (python-docx) hợp mọi ngôn ngữ & sửa được; pdf (fpdf2) hợp Latin/Việt; html mở trên điện thoại rồi "Lưu thành PDF" |
 | 🌐 **Đọc link dán trong chat** | Dán bất kỳ link http(s) nào vào câu hỏi → LUMINA tự tải và đọc nội dung trang | **Mọi bộ não** (server tự tải trang, không phụ thuộc Claude/chế độ tìm kiếm) |
 | 🔬 **Nghiên cứu sâu** | Bấm nút **🔬 Nghiên cứu sâu** hoặc gõ "nghiên cứu sâu về…" → LUMINA tìm nhiều nguồn, viết báo cáo có trích dẫn | Bộ não có tìm kiếm (Gemini/Claude) |
 | 🎨 **Vẽ ảnh** | Bấm nút **🎨 Vẽ ảnh** hoặc gõ "vẽ con mèo…" → ra ảnh | **Miễn phí, không cần key** (Pollinations); tự dùng DALL-E nếu có `OPENAI_API_KEY` |
@@ -179,6 +180,7 @@ lumina-ai/
 │   ├── video_link.py       # 🔗 Xem video qua LINK (yt-dlp): phụ đề gốc + khung hình + Whisper
 │   ├── transcribe.py       # 🎧 Chép lời audio/video bằng Whisper (Groq/OpenAI)
 │   ├── files.py            # 📄 Đọc PDF/Word/Excel/txt đính kèm → tách chữ đưa vào ngữ cảnh
+│   ├── docgen.py           # 📚 Sinh FILE tổng hợp (Markdown → docx/pdf/html) cho /api/compose
 │   ├── video_dub.py        # 🗣 Pipeline lồng tiếng + gắn phụ đề video (Gemini + edge-tts + ffmpeg)
 │   ├── engines/claude.py   # Tầng cao cấp: adaptive thinking, web search, xem ảnh, streaming
 │   ├── engines/gemini.py   # Tầng free: Gemini + search grounding + xem ảnh/video

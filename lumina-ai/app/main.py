@@ -39,7 +39,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, files, knowledge, media, payments, recall, skill_search, skills, video_dub, video_link, webpage
+from . import auth, config, db, docgen, files, knowledge, media, payments, recall, skill_search, skills, video_dub, video_link, webpage
 from .embeddings import embeddings_enabled
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
@@ -48,7 +48,7 @@ from .monitor import monitor
 from .orchestrator import orchestrator
 from .ratelimit import UserRateLimiter
 from .router import decide_route
-from .schemas import ChatRequest, CreateOrderRequest, DubRequest, PaypalCaptureRequest
+from .schemas import ChatRequest, ComposeRequest, CreateOrderRequest, DubRequest, PaypalCaptureRequest
 
 logging.basicConfig(level=getattr(logging, CONFIG["LOG_LEVEL"], logging.INFO))
 logger = logging.getLogger("lumina")
@@ -865,6 +865,91 @@ async def chat_stream(body: ChatRequest, user: dict = Depends(auth.require_user)
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+# ─── 📚 Tổng hợp nhiều tệp → 1 FILE mới (đọc → nghĩ → tổng hợp → xuất sách) ────
+
+_COMPOSE_DIRECTIVE = (
+    "\n\n[NHIỆM VỤ TỔNG HỢP TÀI LIỆU — hãy ĐỌC KỸ toàn bộ nội dung các tệp nguồn ở "
+    "trên, SUY NGHĨ, rồi TỔNG HỢP thành MỘT tài liệu/cuốn sách MỚI mạch lạc, văn phong "
+    "hay, có chiều sâu — KHÔNG chỉ ghép nối. Hãy chắt lọc, đối chiếu, kết nối kiến thức "
+    "từ TẤT CẢ các nguồn thành một chỉnh thể thống nhất. Xuất ra Markdown thuần: dùng "
+    "'# ' cho tiêu đề chương, '## '/'### ' cho mục con, '- ' cho gạch đầu dòng, '> ' cho "
+    "trích dẫn, dòng trống giữa các đoạn. Viết đầy đủ, chi tiết, có mở đầu và kết luận. "
+    "CHỈ xuất nội dung tài liệu (không lời dẫn, không giải thích thêm ngoài lề).]"
+)
+
+# Giới hạn độ dài Markdown tổng hợp để tránh file khổng lồ / tốn bộ nhớ.
+_COMPOSE_MAX_CHARS = 120_000
+
+
+@app.post("/api/compose")
+async def compose_document(body: ComposeRequest, user: dict = Depends(auth.require_user)):
+    """Đọc nhiều tệp → bộ não tổng hợp thành 1 tài liệu → trả FILE (docx/pdf/html) để tải.
+
+    Ví dụ: gửi 2 file PDF Đạo Đức Kinh → LUMINA đọc cả hai, nghĩ, tổng hợp kiến thức
+    thành một cuốn sách mới và xuất ra file tải về được.
+    """
+    if body.format not in ("docx", "pdf", "html"):
+        raise HTTPException(status_code=400, detail="Định dạng chỉ hỗ trợ docx, pdf hoặc html.")
+    if not body.files:
+        raise HTTPException(status_code=400, detail="Cần ít nhất 1 tệp nguồn để tổng hợp.")
+
+    # Đọc chữ từ các tệp nguồn (giống luồng chat) và chèn vào ngữ cảnh.
+    extracted = [files.extract_text(f.name or "tệp", f.data_url) for f in body.files]
+    read_notes = [e["name"] for e in extracted if not e.get("error")]
+    if not read_notes:
+        raise HTTPException(status_code=400, detail="Không đọc được tệp nào (định dạng không hỗ trợ hoặc tệp lỗi).")
+
+    instruction = body.instruction.strip() or "Tổng hợp toàn bộ kiến thức từ các tệp trên thành một tài liệu hoàn chỉnh."
+    prompt = instruction + files.build_context(extracted) + _COMPOSE_DIRECTIVE
+
+    # Chọn tầng bộ não theo gói (dùng chung hạn mức ngày với chat): còn lượt cao cấp
+    # → Claude; hết → engine free; chạm tổng → chặn (mời nâng cấp).
+    plan = db.get_effective_plan(user["id"])
+    daily_ok, use_premium, _ = db.consume_daily_usage(
+        user["id"], plan["premium_daily_cap"], plan["total_daily_cap"]
+    )
+    if not daily_ok:
+        raise HTTPException(
+            status_code=429,
+            detail="Hôm nay bạn đã dùng khá nhiều rồi 😊 — Nâng cấp gói Tháng/Năm để tiếp tục.",
+        )
+    if use_premium and not orchestrator.engines["claude"].available() and orchestrator.has_free_engine():
+        use_premium = False
+    route = decide_route(prompt, history_len=0, apex_allowed=plan["apex_allowed"])
+
+    parts: list[str] = []
+    try:
+        async for event in orchestrator.run(
+            [{"role": "user", "content": prompt}], route, use_premium=use_premium,
+        ):
+            if event.get("type") == "text":
+                parts.append(event["text"])
+                if sum(len(p) for p in parts) > _COMPOSE_MAX_CHARS:
+                    break
+    except Exception:
+        logger.exception("Lỗi tổng hợp tài liệu")
+        raise HTTPException(status_code=502, detail="Bộ não gặp lỗi khi tổng hợp — thử lại sau.")
+
+    markdown = "".join(parts).strip()
+    if not markdown:
+        raise HTTPException(status_code=502, detail="Không tạo được nội dung tổng hợp — thử lại.")
+
+    try:
+        data, mime, ext = docgen.generate(body.format, body.title.strip() or "Tài liệu tổng hợp", markdown)
+    except Exception:
+        logger.exception("Lỗi sinh file %s", body.format)
+        raise HTTPException(status_code=500, detail=f"Không tạo được file {body.format}. Hãy thử định dạng docx.")
+
+    from urllib.parse import quote
+    # filename= phải là ASCII (header là latin-1); tên tiếng Việt đầy đủ đặt ở filename*.
+    unicode_name = (re.sub(r"[^\w\-. ]+", "", body.title.strip())[:60].strip() or "tai-lieu")
+    ascii_name = (re.sub(r"[^A-Za-z0-9\-_. ]+", "", unicode_name).strip() or "document")
+    disposition = (f"attachment; filename=\"{ascii_name}.{ext}\"; "
+                   f"filename*=UTF-8''{quote(unicode_name + '.' + ext)}")
+    logger.info("Compose: %d tệp → %s (%d bytes) user=%s", len(read_notes), ext, len(data), user["email"])
+    return Response(content=data, media_type=mime, headers={"Content-Disposition": disposition})
 
 
 # ─── 🗣 Lồng tiếng + gắn phụ đề video (job chạy nền — có thể mất 1-3 phút) ────

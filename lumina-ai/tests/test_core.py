@@ -699,6 +699,75 @@ def test_versions_crud():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+# ── 📚 Tổng hợp tệp → FILE mới (docgen + /api/compose) ───────────────────────
+
+def test_docgen_generates_all_formats_with_vietnamese():
+    from app import docgen
+    md = ("# Chương 1\n\nĐạo khả đạo, phi thường đạo.\n\n## Mục con\n\n"
+          "- Vô danh thiên địa\n- Hữu danh vạn vật\n\n> Trích dẫn.\n\n---\n\nĐoạn kết.")
+    docx_bytes, mime_d, ext_d = docgen.generate("docx", "Đạo Đức Kinh", md)
+    pdf_bytes, mime_p, ext_p = docgen.generate("pdf", "Đạo Đức Kinh", md)
+    html_bytes, mime_h, ext_h = docgen.generate("html", "Đạo Đức Kinh", md)
+    assert ext_d == "docx" and len(docx_bytes) > 500
+    assert ext_p == "pdf" and pdf_bytes[:4] == b"%PDF"
+    assert ext_h == "html" and b"<h1>" in html_bytes and "Chương".encode() in html_bytes
+    # docx đọc lại được và giữ tiếng Việt
+    import io as _io
+    import docx as _docx
+    doc = _docx.Document(_io.BytesIO(docx_bytes))
+    texts = "\n".join(p.text for p in doc.paragraphs)
+    assert "Đạo khả đạo" in texts and "Chương 1" in texts
+
+
+def test_docgen_unknown_format_defaults_docx():
+    from app import docgen
+    data, mime, ext = docgen.generate("weird", "T", "# H\n\ndoan")
+    assert ext == "docx"
+
+
+def test_compose_endpoint_synthesizes_file():
+    """/api/compose: đọc tệp → (bộ não giả) tổng hợp → trả FILE tải về."""
+    import base64
+    from fastapi.testclient import TestClient
+    from app import auth
+    from app.main import app, orchestrator
+
+    uid = _new_user_id()
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "T", "picture": "", "is_admin": False}
+
+    async def _fake_run(messages, route, use_premium=True, system_extra=""):
+        yield {"type": "text", "text": "# Sách tổng hợp\n\nNội dung tổng hợp từ hai tệp nguồn."}
+
+    orig = orchestrator.run
+    orchestrator.run = _fake_run
+    try:
+        client = TestClient(app)
+        src = base64.b64encode("Đạo khả đạo, phi thường đạo.".encode()).decode()
+        data_url = f"data:text/plain;base64,{src}"
+        # docx
+        r = client.post("/api/compose", json={
+            "files": [{"name": "nguon1.txt", "data_url": data_url},
+                      {"name": "nguon2.txt", "data_url": data_url}],
+            "instruction": "Tổng hợp thành sách", "title": "Đạo Đức Kinh Tổng Hợp", "format": "docx"})
+        assert r.status_code == 200, r.text
+        assert "wordprocessingml" in r.headers["content-type"]
+        assert ".docx" in r.headers["content-disposition"]
+        assert len(r.content) > 500
+        # pdf
+        r2 = client.post("/api/compose", json={
+            "files": [{"name": "n.txt", "data_url": data_url}], "format": "pdf", "title": "T"})
+        assert r2.status_code == 200 and r2.content[:4] == b"%PDF"
+        # không tệp → 400
+        assert client.post("/api/compose", json={"files": [], "format": "docx"}).status_code == 400
+        # định dạng sai → 400
+        assert client.post("/api/compose", json={
+            "files": [{"name": "n.txt", "data_url": data_url}], "format": "xls"}).status_code == 400
+    finally:
+        orchestrator.run = orig
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 # ── Media: video đính kèm ────────────────────────────────────────────────────
 
 def test_media_parse_video_data_url():
