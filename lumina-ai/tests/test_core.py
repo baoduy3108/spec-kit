@@ -2196,6 +2196,30 @@ def test_skills_library_has_at_least_1077():
     assert len(skills._SKILLS) >= 1077
 
 
+def test_skills_library_has_at_least_1087():
+    from app import skills
+    assert len(skills._SKILLS) >= 1087
+
+
+def test_skills_calculus_science_topics_match():
+    from app import skills
+    cases = {
+        "giới hạn và tính liên tục giải tích thpt khái niệm giới hạn hàm số giới hạn một bên và vô cực kỹ thuật tính giới hạn dạng vô định tính liên tục định lý giá trị trung gian": "limits-and-continuity",
+        "đạo hàm và khảo sát hàm số thpt quy tắc tính đạo hàm hàm hợp tích thương tính đơn điệu và cực trị tính lồi lõm và điểm uốn vẽ đồ thị khảo sát hàm số bài toán tối ưu": "derivatives-and-function-analysis",
+        "kỹ thuật tích phân giải tích thpt nguyên hàm định lý cơ bản giải tích tích phân xác định phương pháp đổi biến tích phân từng phần ứng dụng tính diện tích và thể tích": "integration-techniques",
+        "phương trình vi phân nhập môn phương trình cấp một tách biến và tuyến tính điều kiện đầu mô hình tăng trưởng và phân rã theo hàm mũ phương trình vi phân cấp hai": "differential-equations-intro",
+        "ma trận và hệ phương trình tuyến tính phép toán ma trận định thức ma trận nghịch đảo giải hệ phương trình khử gauss quy tắc cramer": "matrices-and-linear-systems",
+        "xác suất tổ hợp thi chuyên không gian mẫu và biến cố xác suất bằng cách đếm xác suất có điều kiện và độc lập quy tắc cộng và nhân đếm phần bù kỳ vọng": "combinatorial-probability",
+        "toán rời rạc và lý thuyết tập hợp tập hợp và các phép toán quan hệ và ánh xạ nguyên lý chuồng bồ câu tổ hợp cơ bản số học đồng dư nền tảng tin học": "discrete-math-and-set-theory",
+        "địa chất học và khoa học trái đất cấu tạo trái đất và kiến tạo mảng đá và chu trình đá khoáng vật thời gian địa chất và hóa thạch động đất và núi lửa": "geology-and-earth-science",
+        "khoa học môi trường và phát triển bền vững hệ sinh thái và đa dạng sinh học ô nhiễm biến đổi khí hậu cạn kiệt tài nguyên năng lượng tái tạo": "environmental-science-and-sustainability",
+        "phương pháp khoa học và thí nghiệm giả thuyết biến số và nhóm đối chứng thiết kế thí nghiệm thu thập và phân tích dữ liệu bản chất tri thức khoa học lý thuyết và tái lặp": "scientific-method-and-experimentation",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_deep_bio_humanities_topics_match():
     from app import skills
     cases = {
