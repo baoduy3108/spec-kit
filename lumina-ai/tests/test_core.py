@@ -2171,6 +2171,28 @@ def test_skills_library_has_at_least_1013():
     assert len(skills._SKILLS) >= 1013
 
 
+def test_skills_library_has_at_least_1021():
+    from app import skills
+    assert len(skills._SKILLS) >= 1021
+
+
+def test_skills_knowledge_science_topics_match():
+    from app import skills
+    cases = {
+        "cơ học newton và lực ba định luật chuyển động lực hấp dẫn ma sát pháp tuyến biểu đồ vật thể tự do động lượng và xung lượng công năng lượng và bảo toàn chuyển động tròn": "newtonian-mechanics-and-forces",
+        "điện từ học cơ bản electromagnetism điện tích và điện trường điện áp dòng điện điện trở từ tính và nam châm điện cảm ứng điện từ hợp nhất maxwell sóng điện từ và ánh sáng": "electromagnetism-fundamentals",
+        "cấu tạo nguyên tử và bảng tuần hoàn proton neutron electron số hiệu nguyên tử và đồng vị lớp electron và cấu hình tổ chức bảng tuần hoàn xu hướng tuần hoàn độ âm điện": "atomic-structure-and-periodic-table",
+        "liên kết hóa học và phản ứng liên kết ion cộng hóa trị kim loại vì sao nguyên tử liên kết quy tắc bát tử hình dạng phân tử và phân cực phương trình hóa học cân bằng axit bazơ": "chemical-bonding-and-reactions",
+        "sinh học tế bào và di truyền cấu trúc tế bào và bào quan tế bào nhân sơ và nhân thực phân bào nguyên phân giảm phân adn và nhiễm sắc thể di truyền mendel gen alen trội lặn": "cell-biology-and-heredity",
+        "tiến hóa và chọn lọc tự nhiên biến dị di truyền sống sót khác biệt hậu duệ có biến đổi bằng chứng hóa thạch adn tương đồng hình thành loài hiểu lầm thường gặp đa dạng sự sống": "evolution-and-natural-selection",
+        "trực giác giải tích calculus giới hạn đạo hàm là tốc độ thay đổi độ dốc tích phân là tích lũy diện tích định lý cơ bản liên hệ đạo hàm tích phân tốc độ thay đổi và tích lũy": "calculus-intuition",
+        "trực giác đại số tuyến tính linear algebra vector và không gian vector ma trận là phép biến đổi tuyến tính nhân ma trận là hợp phép biến đổi định thức vector riêng trị riêng tích vô hướng": "linear-algebra-intuition",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_econ_psych_eng_topics_match():
     from app import skills
     cases = {
