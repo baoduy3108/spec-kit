@@ -2166,6 +2166,28 @@ def test_skills_library_has_at_least_1000():
     assert len(skills._SKILLS) >= 1000
 
 
+def test_skills_library_has_at_least_1013():
+    from app import skills
+    assert len(skills._SKILLS) >= 1013
+
+
+def test_skills_econ_psych_eng_topics_match():
+    from app import skills
+    cases = {
+        "kinh tế học vi mô và hành vi thị trường microeconomics cung và cầu điểm cân bằng độ co giãn giá thặng dư tiêu dùng tư duy cận biên cấu trúc thị trường độc quyền ngoại ứng": "microeconomics-and-market-behavior",
+        "kinh tế học vĩ mô macroeconomics tổng sản phẩm và tăng trưởng gdp lạm phát thất nghiệp chu kỳ kinh tế chính sách tiền tệ ngân hàng trung ương lãi suất chính sách tài khóa": "macroeconomics-fundamentals",
+        "kinh tế học hành vi behavioral economics con người lệch khỏi mô hình duy lý lý thuyết triển vọng và ngại thua kế toán tinh thần thiên lệch hiện tại mặc định kiến trúc lựa chọn cú hích nudge": "behavioral-economics-and-nudges",
+        "thiên lệch nhận thức và ra quyết định cognitive bias tư duy hệ 1 và hệ 2 thiên lệch xác nhận mỏ neo tính sẵn có nhận thức muộn tự tin thái quá chiến lược khử thiên lệch": "cognitive-biases-and-decision-making",
+        "tâm lý học trí nhớ và học tập memory learning mã hóa lưu trữ truy xuất trí nhớ làm việc và dài hạn đường cong quên lặp lại ngắt quãng luyện truy xuất xen kẽ": "memory-and-learning-psychology",
+        "tâm lý học xã hội social psychology tuân theo và phục tùng thuyết phục và ảnh hưởng nguyên tắc cialdini quy kết bất hòa nhận thức bằng chứng xã hội nội nhóm ngoại nhóm sức mạnh hoàn cảnh": "social-psychology-fundamentals",
+        "mạch điện tử tương tự analog circuit định luật ohm và kirchhoff chia áp mạch rc rl và hằng số thời gian trở kháng và bộ lọc diode và transistor khuếch đại thuật toán op-amp": "analog-circuit-design-fundamentals",
+        "tĩnh học và sức bền vật liệu statics cân bằng lực và biểu đồ vật thể tự do mô men và mô men xoắn ứng suất và biến dạng kéo nén cắt uốn và dầm hệ số an toàn": "statics-and-mechanics-of-materials",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_language_topics_match():
     from app import skills
     cases = {
