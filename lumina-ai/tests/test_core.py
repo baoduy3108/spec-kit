@@ -831,6 +831,27 @@ def test_graph_endpoints():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+# ── 🌍 Worldmonitor: số liệu quốc gia cập nhật ───────────────────────────────
+
+def test_worldmonitor_detection_and_parse():
+    from app import worldmonitor as w
+    # phát hiện tên nước Việt/Anh, không để "hà" nuốt "hàn quốc"
+    assert w.detect_country("dân số việt nam bao nhiêu") == "Vietnam"
+    assert w.detect_country("thủ đô của pháp") == "France"
+    assert w.detect_country("kinh tế hàn quốc") == "South Korea"
+    assert w.detect_country("vẽ con mèo dễ thương") is None
+    # is_world_query cần cả tên nước + từ khóa số liệu
+    assert w.is_world_query("dân số nhật bản") is True
+    assert w.is_world_query("hôm nay trời đẹp") is False
+    assert w.is_world_query("nhật bản có anime hay") is False  # có nước nhưng không hỏi số liệu
+    # parse JSON REST Countries → summary có số liệu
+    sample = {"name": {"common": "Vietnam"}, "capital": ["Hanoi"], "population": 98000000,
+              "area": 331212.0, "region": "Asia", "subregion": "South-Eastern Asia",
+              "currencies": {"VND": {"name": "Vietnamese dong"}}, "languages": {"vie": "Vietnamese"}}
+    fact = w._parse_country(sample)
+    assert fact["source"] == "worldmonitor" and "Hanoi" in fact["summary"] and "98.000.000" in fact["summary"]
+
+
 # ── Media: video đính kèm ────────────────────────────────────────────────────
 
 def test_media_parse_video_data_url():

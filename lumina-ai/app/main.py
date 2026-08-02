@@ -39,7 +39,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, docgen, files, graph_rag, knowledge, media, payments, recall, skill_search, skills, video_dub, video_link, webpage
+from . import auth, config, db, docgen, files, graph_rag, knowledge, media, payments, recall, skill_search, skills, video_dub, video_link, webpage, worldmonitor
 from .embeddings import embeddings_enabled
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
@@ -984,6 +984,19 @@ async def graph_query(q: str, scope: str = "local", user: dict = Depends(auth.re
     else:
         res = graph_rag.local_search(q)
     return {"result": res, "context": graph_rag.build_context(res), "stats": graph_rag.stats()}
+
+
+# ─── 🌍 Worldmonitor: số liệu quốc gia cập nhật thật (REST Countries) ────────
+
+@app.get("/api/world")
+async def world_lookup(country: str, user: dict = Depends(auth.require_user)):
+    """Số liệu quốc gia tươi (dân số/thủ đô/tiền tệ…). Nhận tên Việt hoặc Anh."""
+    en = worldmonitor.detect_country(country) or country.strip()
+    fact = await worldmonitor.fetch_country(en, "vi")
+    if not fact:
+        raise HTTPException(status_code=404, detail="Không tìm thấy quốc gia (hoặc nguồn tạm lỗi).")
+    knowledge.remember(**fact)  # lưu kho → trọng số dày lên
+    return {"country": fact["topic"], "summary": fact["summary"], "source": "REST Countries"}
 
 
 # ─── 🗣 Lồng tiếng + gắn phụ đề video (job chạy nền — có thể mất 1-3 phút) ────

@@ -376,6 +376,18 @@ async def gather(query: str, max_items: int = 3) -> list[dict]:
     if len(query) < 4:
         return []
 
+    # 🌍 Worldmonitor: câu hỏi về QUỐC GIA → số liệu TƯƠI (REST Countries, không key),
+    # lưu vào kho để "trọng số" thế giới của LUMINA dày lên. Best-effort.
+    try:
+        from . import worldmonitor
+        if worldmonitor.is_world_query(query):
+            wm = await worldmonitor.gather(query, "vi")
+            if wm:
+                remember(**wm)
+                return [wm] + lookup_local(query, limit=max(0, max_items - 1))
+    except Exception:  # noqa: BLE001 — nguồn phụ, hỏng thì bỏ qua
+        pass
+
     # Câu THỜI SỰ → luôn học tin mới (không cache lâu; tin tức cũ rất nhanh).
     if is_news_query(query):
         results: list[dict] = []
