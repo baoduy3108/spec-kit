@@ -130,6 +130,38 @@
   </div>
 
 
+  <!-- ── Modal Tạo/Sửa Agent ────────────────────────────── -->
+  <div id="agent-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:560px">
+      <button class="modal-close" data-close="agent-modal">✕</button>
+      <h2 class="modal-title">🤖 Agent của bạn</h2>
+      <p class="payment-desc">Tạo một trợ lý riêng: đặt tên, biểu tượng và “tính cách/hướng dẫn” (persona). Bật <b>Chia sẻ</b> để đưa lên 🌐 Chợ cho người khác cài.</p>
+      <div style="display:flex;gap:8px;margin:10px 0">
+        <input id="agent-emoji" maxlength="4" placeholder="🤖" style="width:64px;text-align:center;font-size:22px">
+        <input id="agent-name" maxlength="60" placeholder="Tên agent (vd: Gia sư Toán)" style="flex:1">
+      </div>
+      <textarea id="agent-instr" class="agent-instructions" rows="7" placeholder="Hướng dẫn/persona: 'Bạn là gia sư Toán THPT, giải thích từng bước, luôn kiểm tra lại đáp án…'"></textarea>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px">
+        <input type="checkbox" id="agent-share-chk"> 🌐 Chia sẻ lên Chợ Agent (công khai)
+      </label>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button id="agent-save" class="upgrade-btn" style="flex:1">Lưu agent</button>
+        <button id="agent-del" class="dash-btn hidden" style="color:#e66">🗑 Xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal Chợ Agent (cộng đồng) ─────────────────────── -->
+  <div id="market-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:680px">
+      <button class="modal-close" data-close="market-modal">✕</button>
+      <h2 class="modal-title">🌐 Chợ Agent</h2>
+      <p class="payment-desc">Khám phá agent do cộng đồng chia sẻ — bấm <b>Cài</b> để thêm vào “Agent của tôi”.</p>
+      <input id="market-search" placeholder="🔍 Tìm agent (tên hoặc mô tả)…" style="width:100%;margin-bottom:10px">
+      <div id="market-list" class="market-list"></div>
+    </div>
+  </div>
+
   <!-- ── Modal Nâng cấp gói ─────────────────────────────── -->
   <div id="upgrade-modal" class="modal-overlay hidden">
     <div class="modal">

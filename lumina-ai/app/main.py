@@ -269,6 +269,9 @@ class _AgentUpdate(BaseModel):
     emoji: Optional[str] = None
     instructions: Optional[str] = None
 
+class _AgentShare(BaseModel):
+    shared: bool = True
+
 
 @app.get("/api/agents")
 async def agents_list(user: dict = Depends(auth.require_user)):
@@ -296,6 +299,31 @@ async def agent_delete(agent_id: str, user: dict = Depends(auth.require_user)):
     if not db.delete_agent(agent_id, user["id"]):
         raise HTTPException(status_code=404, detail="Không tìm thấy agent")
     return {"ok": True}
+
+
+# ─── 🌐 Chợ Agent (cộng đồng: chia sẻ + khám phá + cài agent của người khác) ──
+
+@app.post("/api/agents/{agent_id}/share")
+async def agent_share(agent_id: str, body: _AgentShare, user: dict = Depends(auth.require_user)):
+    """Chủ agent bật/tắt công khai lên chợ (tên tác giả = tên người dùng)."""
+    if not db.set_agent_shared(agent_id, user["id"], body.shared, author=user.get("name", "")):
+        raise HTTPException(status_code=404, detail="Không tìm thấy agent")
+    return {"ok": True, "shared": body.shared}
+
+
+@app.get("/api/marketplace")
+async def marketplace_list(q: str = "", user: dict = Depends(auth.require_user)):
+    """Chợ Agent: các agent cộng đồng chia sẻ, xếp theo phổ biến."""
+    return {"agents": db.list_shared_agents(query=q, exclude_user=user["id"])}
+
+
+@app.post("/api/marketplace/{agent_id}/install")
+async def marketplace_install(agent_id: str, user: dict = Depends(auth.require_user)):
+    """Cài (fork) một agent công khai vào bộ sưu tập của mình."""
+    agent = db.install_shared_agent(agent_id, user["id"])
+    if not agent:
+        raise HTTPException(status_code=404, detail="Không cài được (agent không công khai hoặc là của bạn).")
+    return agent
 
 
 # ─── Goal Engine (giao mục tiêu: AI chia nhỏ + theo dõi tiến độ) ──────────────

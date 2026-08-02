@@ -868,6 +868,10 @@
 
   $("admin-btn").addEventListener("click", openAdminModal);
 
+  $("agent-save").addEventListener("click", saveAgent);
+  $("agent-del").addEventListener("click", deleteAgent);
+  $("market-search").addEventListener("input", (e) => renderMarket(e.target.value));
+
   document.querySelectorAll(".modal-close").forEach((btn) =>
     btn.addEventListener("click", () => {
       clearInterval(pollTimer); clearInterval(dubPollTimer);
@@ -943,14 +947,107 @@
   }
 
   // ── Agent DUY NHẤT: ⚙️ Lumina Forge (như Claude Code — bấm vào hiện/tạo session) ──
-  function loadAgents() {
+  async function loadAgents() {
     const list = $("agent-list");
     list.innerHTML = "";
+    // ⚙️ Lumina Forge (dựng sẵn)
     const forge = document.createElement("div");
     forge.className = "proj-item builtin" + (state.agentId === "forge" ? " active" : "");
     forge.innerHTML = `<span class="title">⚙️ Lumina Forge</span>`;
     forge.addEventListener("click", () => toggleAgent({ id: "forge", name: "Lumina Forge", emoji: "⚙️" }));
     list.appendChild(forge);
+
+    // 🤖 Agent của người dùng (tạo riêng / cài từ chợ)
+    let mine = [];
+    try { mine = (await api("/api/agents")).agents || []; } catch {}
+    for (const a of mine) {
+      const row = document.createElement("div");
+      row.className = "proj-item" + (state.agentId === a.id ? " active" : "");
+      const shared = a.shared ? " · 🌐" : "";
+      row.innerHTML = `<span class="title">${a.emoji || "🤖"} ${escapeHtml(a.name)}${shared}</span>` +
+        `<button class="proj-edit" title="Sửa / chia sẻ">⚙</button>`;
+      row.querySelector(".title").addEventListener("click", () => toggleAgent(a));
+      row.querySelector(".proj-edit").addEventListener("click", (e) => { e.stopPropagation(); openAgentModal(a); });
+      list.appendChild(row);
+    }
+
+    // ＋ Tạo agent  +  🌐 Chợ
+    const actions = document.createElement("div");
+    actions.className = "agent-actions";
+    actions.innerHTML = `<button class="agent-mini" id="agent-new-btn">＋ Tạo agent</button>` +
+      `<button class="agent-mini" id="market-open-btn">🌐 Chợ</button>`;
+    list.appendChild(actions);
+    $("agent-new-btn").addEventListener("click", () => openAgentModal(null));
+    $("market-open-btn").addEventListener("click", openMarketplace);
+  }
+
+  function escapeHtml(s) { const d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
+
+  // ── Tạo / sửa / chia sẻ / xóa Agent ──────────────────────────────
+  function openAgentModal(a) {
+    state.agentEditId = a ? a.id : null;
+    $("agent-emoji").value = a ? (a.emoji || "🤖") : "🤖";
+    $("agent-name").value = a ? a.name : "";
+    $("agent-instr").value = a ? (a.instructions || "") : "";
+    $("agent-share-chk").checked = !!(a && a.shared);
+    $("agent-del").classList.toggle("hidden", !a);
+    $("agent-modal").classList.remove("hidden");
+  }
+
+  async function saveAgent() {
+    const payload = {
+      name: $("agent-name").value.trim() || "Agent",
+      emoji: $("agent-emoji").value.trim() || "🤖",
+      instructions: $("agent-instr").value.trim(),
+    };
+    if (!payload.instructions) { alert("⚠️ Agent cần phần hướng dẫn (persona)."); return; }
+    let agent;
+    try {
+      if (state.agentEditId) agent = await api(`/api/agents/${state.agentEditId}`, { method: "PUT", body: JSON.stringify(payload) });
+      else agent = await api("/api/agents", { method: "POST", body: JSON.stringify(payload) });
+      // đồng bộ trạng thái chia sẻ
+      await api(`/api/agents/${agent.id}/share`, { method: "POST", body: JSON.stringify({ shared: $("agent-share-chk").checked }) });
+    } catch (e) { alert("⚠️ Không lưu được agent."); return; }
+    $("agent-modal").classList.add("hidden");
+    loadAgents();
+  }
+
+  async function deleteAgent() {
+    if (!state.agentEditId || !confirm("Xóa agent này?")) return;
+    try { await api(`/api/agents/${state.agentEditId}`, { method: "DELETE" }); } catch {}
+    $("agent-modal").classList.add("hidden");
+    if (state.agentId === state.agentEditId) { state.agentId = null; updateAgentBadge(); }
+    loadAgents();
+  }
+
+  // ── 🌐 Chợ Agent (cộng đồng) ─────────────────────────────────────
+  async function openMarketplace() {
+    $("market-modal").classList.remove("hidden");
+    await renderMarket("");
+  }
+  async function renderMarket(q) {
+    const box = $("market-list");
+    box.innerHTML = `<div class="dash-empty">Đang tải…</div>`;
+    let agents = [];
+    try { agents = (await api("/api/marketplace?q=" + encodeURIComponent(q || ""))).agents || []; } catch {}
+    box.innerHTML = "";
+    if (!agents.length) { box.innerHTML = `<div class="dash-empty">Chưa có agent nào trên chợ. Hãy tạo và chia sẻ agent đầu tiên!</div>`; return; }
+    for (const a of agents) {
+      const card = el("div", "market-card");
+      card.innerHTML = `<div class="market-head"><span class="market-emoji">${a.emoji || "🤖"}</span>` +
+        `<div><div class="market-name">${escapeHtml(a.name)}</div>` +
+        `<div class="market-meta">bởi ${escapeHtml(a.author || "Ẩn danh")} · ⬇ ${a.installs || 0}</div></div></div>` +
+        `<div class="market-preview">${escapeHtml(a.preview || "")}</div>`;
+      const btn = el("button", "agent-mini", a.mine ? "✓ Của bạn" : "＋ Cài");
+      if (a.mine) btn.disabled = true;
+      else btn.addEventListener("click", async () => {
+        btn.disabled = true; btn.textContent = "Đang cài…";
+        try { await api(`/api/marketplace/${a.id}/install`, { method: "POST" }); btn.textContent = "✓ Đã cài"; loadAgents(); }
+        catch { btn.disabled = false; btn.textContent = "＋ Cài"; alert("⚠️ Không cài được."); }
+      });
+      card.appendChild(btn);
+      box.appendChild(card);
+    }
   }
 
   function toggleAgent(a) {

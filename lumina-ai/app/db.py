@@ -136,6 +136,11 @@ def _init_schema(conn: sqlite3.Connection):
         "ALTER TABLE conversations ADD COLUMN project_id TEXT",   # gán hội thoại vào project (NULL = ngoài project)
         "ALTER TABLE conversations ADD COLUMN agent_id TEXT",     # gán hội thoại vào 1 agent (workspace/session của agent)
         "ALTER TABLE projects ADD COLUMN memory TEXT NOT NULL DEFAULT ''",  # trí nhớ dự án (kiến trúc/quyết định/file/lý do bỏ)
+        # 🌐 Chợ Agent (cộng đồng): chia sẻ agent cho người khác dùng.
+        "ALTER TABLE agents ADD COLUMN shared INTEGER NOT NULL DEFAULT 0",   # 1 = công khai lên chợ
+        "ALTER TABLE agents ADD COLUMN installs INTEGER NOT NULL DEFAULT 0", # số lượt người khác cài (độ phổ biến)
+        "ALTER TABLE agents ADD COLUMN author TEXT NOT NULL DEFAULT ''",     # tên hiển thị người tạo
+        "ALTER TABLE agents ADD COLUMN origin_id TEXT NOT NULL DEFAULT ''",  # nếu cài từ chợ: id agent gốc (chống cài trùng)
     ):
         try:
             conn.execute(stmt)
@@ -319,6 +324,80 @@ def delete_agent(agent_id: str, user_id: str) -> bool:
         cur = conn.execute("DELETE FROM agents WHERE id=? AND user_id=?", (agent_id, user_id))
         conn.commit()
         return cur.rowcount > 0
+
+
+# ─── 🌐 Chợ Agent: chia sẻ / khám phá / cài (vòng cộng đồng) ──────────────────
+
+def set_agent_shared(agent_id: str, user_id: str, shared: bool, author: str = "") -> bool:
+    """Chủ agent bật/tắt công khai lên chợ."""
+    with _lock:
+        conn = get_conn()
+        cur = conn.execute("SELECT id FROM agents WHERE id=? AND user_id=?",
+                           (agent_id, user_id)).fetchone()
+        if not cur:
+            return False
+        conn.execute("UPDATE agents SET shared=?, author=?, updated_at=? WHERE id=?",
+                     (1 if shared else 0, (author or "").strip()[:60], int(time.time()), agent_id))
+        conn.commit()
+        return True
+
+
+def list_shared_agents(query: str = "", limit: int = 60, exclude_user: str = "") -> list[dict]:
+    """Chợ: các agent công khai, xếp theo phổ biến (installs) rồi mới cập nhật."""
+    q = f"%{(query or '').strip().lower()}%"
+    with _lock:
+        rows = get_conn().execute(
+            """SELECT id, user_id, name, emoji, instructions, author, installs, updated_at
+               FROM agents WHERE shared=1 AND (?='%%' OR lower(name) LIKE ? OR lower(instructions) LIKE ?)
+               ORDER BY installs DESC, updated_at DESC LIMIT ?""",
+            (q, q, q, limit),
+        ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["mine"] = (d.pop("user_id") == exclude_user)
+        d["preview"] = (d["instructions"] or "")[:180]
+        del d["instructions"]
+        out.append(d)
+    return out
+
+
+def get_shared_agent(agent_id: str) -> dict | None:
+    """Lấy 1 agent CÔNG KHAI theo id (không cần là chủ) để cài/xem."""
+    with _lock:
+        row = get_conn().execute(
+            "SELECT * FROM agents WHERE id=? AND shared=1", (agent_id,)).fetchone()
+        return dict(row) if row else None
+
+
+def install_shared_agent(shared_agent_id: str, user_id: str) -> dict | None:
+    """Sao chép (fork) một agent công khai vào bộ sưu tập của người dùng.
+
+    Trả về agent mới; None nếu không tìm thấy. Chống cài trùng (đã cài rồi → trả agent cũ),
+    không cho tự cài agent của chính mình, và tăng đếm installs của agent gốc.
+    """
+    src = get_shared_agent(shared_agent_id)
+    if not src:
+        return None
+    with _lock:
+        conn = get_conn()
+        if src["user_id"] == user_id:
+            return None  # của mình rồi, khỏi cài
+        dup = conn.execute("SELECT * FROM agents WHERE user_id=? AND origin_id=?",
+                           (user_id, shared_agent_id)).fetchone()
+        if dup:
+            return dict(dup)  # đã cài trước đó
+        aid = uuid.uuid4().hex
+        now = int(time.time())
+        conn.execute(
+            "INSERT INTO agents(id, user_id, name, emoji, instructions, created_at, updated_at, origin_id) "
+            "VALUES(?,?,?,?,?,?,?,?)",
+            (aid, user_id, src["name"], src["emoji"], src["instructions"], now, now, shared_agent_id),
+        )
+        conn.execute("UPDATE agents SET installs=installs+1 WHERE id=?", (shared_agent_id,))
+        conn.commit()
+        row = conn.execute("SELECT id, name, emoji, instructions FROM agents WHERE id=?", (aid,)).fetchone()
+        return dict(row)
 
 
 # ─── Goal Engine (giao mục tiêu: AI chia nhỏ + theo dõi tiến độ) ──────────────

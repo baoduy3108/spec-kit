@@ -787,6 +787,63 @@ def test_compose_endpoint_synthesizes_file():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+# ── 🌐 Chợ Agent (cộng đồng: chia sẻ + cài) ──────────────────────────────────
+
+def test_agent_marketplace_share_and_install():
+    from app import db
+    author = _new_user_id()
+    buyer = _new_user_id()
+    db.upsert_user(author, f"{author}@x.com", "Tác Giả", "")
+    db.upsert_user(buyer, f"{buyer}@x.com", "Người Cài", "")
+    # tác giả tạo agent, ban đầu KHÔNG lên chợ
+    aid = db.create_agent(author, "Trợ lý Toán", "Bạn là gia sư Toán chuyên nghiệp.", "🧮")
+    assert not any(a["id"] == aid for a in db.list_shared_agents())
+    # chia sẻ → xuất hiện trên chợ với tên tác giả
+    assert db.set_agent_shared(aid, author, True, author="Tác Giả")
+    shop = db.list_shared_agents(exclude_user=buyer)
+    row = next((a for a in shop if a["id"] == aid), None)
+    assert row and row["author"] == "Tác Giả" and row["mine"] is False and "gia sư" in row["preview"]
+    # người khác cài → có bản sao trong bộ sưu tập của họ, installs tăng
+    inst = db.install_shared_agent(aid, buyer)
+    assert inst and inst["name"] == "Trợ lý Toán"
+    assert any(a["id"] == inst["id"] for a in db.list_agents(buyer))
+    assert db.get_shared_agent(aid)["installs"] == 1
+    # cài lại → không tạo trùng, trả bản đã có
+    inst2 = db.install_shared_agent(aid, buyer)
+    assert inst2["id"] == inst["id"]
+    assert db.get_shared_agent(aid)["installs"] == 1  # không tăng nữa
+    # không cho tự cài agent của chính mình
+    assert db.install_shared_agent(aid, author) is None
+    # gỡ chia sẻ → biến khỏi chợ
+    db.set_agent_shared(aid, author, False)
+    assert not any(a["id"] == aid for a in db.list_shared_agents())
+
+
+def test_agent_marketplace_endpoints():
+    from fastapi.testclient import TestClient
+    from app import auth, db
+    from app.main import app
+    author = _new_user_id(); buyer = _new_user_id()
+    db.upsert_user(author, f"{author}@x.com", "AuthorX", "")
+    aid = db.create_agent(author, "Agent Chia Sẻ", "Persona test", "🤝")
+
+    def as_user(uid, name):
+        app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                               "name": name, "picture": "", "is_admin": False}
+    client = TestClient(app)
+    try:
+        as_user(author, "AuthorX")
+        assert client.post(f"/api/agents/{aid}/share", json={"shared": True}).status_code == 200
+        as_user(buyer, "Buyer")
+        shop = client.get("/api/marketplace").json()["agents"]
+        assert any(a["id"] == aid for a in shop)
+        r = client.post(f"/api/marketplace/{aid}/install")
+        assert r.status_code == 200 and r.json()["name"] == "Agent Chia Sẻ"
+        assert any(a["name"] == "Agent Chia Sẻ" for a in client.get("/api/agents").json()["agents"])
+    finally:
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 # ── 📊 GraphRAG: đồ thị tri thức ─────────────────────────────────────────────
 
 def test_graph_rag_ingest_and_search():
