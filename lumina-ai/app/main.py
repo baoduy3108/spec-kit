@@ -39,7 +39,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, docgen, files, knowledge, media, payments, recall, skill_search, skills, video_dub, video_link, webpage
+from . import auth, config, db, docgen, files, graph_rag, knowledge, media, payments, recall, skill_search, skills, video_dub, video_link, webpage
 from .embeddings import embeddings_enabled
 from .cache import ResponseCache
 from .config import CONFIG, PLANS, validate_config
@@ -48,7 +48,7 @@ from .monitor import monitor
 from .orchestrator import orchestrator
 from .ratelimit import UserRateLimiter
 from .router import decide_route
-from .schemas import ChatRequest, ComposeRequest, CreateOrderRequest, DubRequest, PaypalCaptureRequest
+from .schemas import ChatRequest, ComposeRequest, CreateOrderRequest, DubRequest, GraphIngestRequest, PaypalCaptureRequest
 
 logging.basicConfig(level=getattr(logging, CONFIG["LOG_LEVEL"], logging.INFO))
 logger = logging.getLogger("lumina")
@@ -902,7 +902,22 @@ async def compose_document(body: ComposeRequest, user: dict = Depends(auth.requi
         raise HTTPException(status_code=400, detail="Không đọc được tệp nào (định dạng không hỗ trợ hoặc tệp lỗi).")
 
     instruction = body.instruction.strip() or "Tổng hợp toàn bộ kiến thức từ các tệp trên thành một tài liệu hoàn chỉnh."
-    prompt = instruction + files.build_context(extracted) + _COMPOSE_DIRECTIVE
+    prompt = instruction + files.build_context(extracted)
+
+    # 📊 GraphRAG: nạp nội dung các tệp vào ĐỒ THỊ TRI THỨC rồi chèn "bức tranh toàn
+    # cục" (thực thể trung tâm + liên kết) — giúp bộ não NỐI kiến thức GIỮA các tệp
+    # khi tổng hợp (đúng bài toán "gộp 2 file thành 1 sách"). Lỗi thì bỏ qua, không sập.
+    try:
+        for e in extracted:
+            if not e.get("error") and e.get("text"):
+                graph_rag.ingest_text(e["text"], source=e.get("name", "tệp"))
+        graph_ctx = graph_rag.build_context(graph_rag.global_overview(10))
+        if graph_ctx:
+            prompt += graph_ctx
+    except Exception:  # noqa: BLE001 — GraphRAG chỉ là phụ trợ, không được làm hỏng tổng hợp
+        logger.exception("GraphRAG ingest/overview lỗi (bỏ qua)")
+
+    prompt += _COMPOSE_DIRECTIVE
 
     # Chọn tầng bộ não theo gói (dùng chung hạn mức ngày với chat): còn lượt cao cấp
     # → Claude; hết → engine free; chạm tổng → chặn (mời nâng cấp).
@@ -950,6 +965,25 @@ async def compose_document(body: ComposeRequest, user: dict = Depends(auth.requi
                    f"filename*=UTF-8''{quote(unicode_name + '.' + ext)}")
     logger.info("Compose: %d tệp → %s (%d bytes) user=%s", len(read_notes), ext, len(data), user["email"])
     return Response(content=data, media_type=mime, headers={"Content-Disposition": disposition})
+
+
+# ─── 📊 GraphRAG: đồ thị tri thức (nạp tài liệu → hỏi local/global) ──────────
+
+@app.post("/api/graph/ingest")
+async def graph_ingest(body: GraphIngestRequest, user: dict = Depends(auth.require_user)):
+    """Nạp một đoạn văn bản/tài liệu vào đồ thị tri thức (trích thực thể + quan hệ)."""
+    added = graph_rag.ingest_text(body.text, source=body.source)
+    return {"added": added, "stats": graph_rag.stats()}
+
+
+@app.get("/api/graph/query")
+async def graph_query(q: str, scope: str = "local", user: dict = Depends(auth.require_user)):
+    """Hỏi đồ thị: scope=local (bám thực thể trong câu hỏi) | global (chủ đề toàn cục)."""
+    if scope == "global":
+        res = graph_rag.global_overview()
+    else:
+        res = graph_rag.local_search(q)
+    return {"result": res, "context": graph_rag.build_context(res), "stats": graph_rag.stats()}
 
 
 # ─── 🗣 Lồng tiếng + gắn phụ đề video (job chạy nền — có thể mất 1-3 phút) ────

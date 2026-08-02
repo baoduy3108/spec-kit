@@ -46,6 +46,12 @@ class ComposeRequest(BaseModel):
     format: str = "docx"
 
 
+class GraphIngestRequest(BaseModel):
+    """📊 Nạp văn bản/tài liệu vào ĐỒ THỊ TRI THỨC (GraphRAG)."""
+    text: str = Field(min_length=1, max_length=200000)
+    source: str = Field(default="", max_length=200)
+
+
 class SearchResult(BaseModel):
     title: str = ""
     url: str = ""

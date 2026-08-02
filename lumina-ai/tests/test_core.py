@@ -787,6 +787,50 @@ def test_compose_endpoint_synthesizes_file():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+# ── 📊 GraphRAG: đồ thị tri thức ─────────────────────────────────────────────
+
+def test_graph_rag_ingest_and_search():
+    from app import graph_rag as g
+    g.reset()
+    g.ingest_text("Lão Tử viết Đạo Đức Kinh. Lão Tử sống ở nước Sở.")
+    g.ingest_text("Trang Tử kế thừa Lão Tử. Trang Tử viết Nam Hoa Kinh.")
+    st = g.stats()
+    assert st["nodes"] >= 4 and st["edges"] >= 3
+    # local: quanh "Lão Tử" phải thấy Đạo Đức Kinh + Trang Tử
+    local = g.local_search("Lão Tử liên quan gì")
+    ctx = g.build_context(local)
+    assert "Lão Tử" in ctx and ("Đạo Đức Kinh" in ctx or "Trang Tử" in ctx)
+    # global: hub hàng đầu là Lão Tử hoặc Đạo Đức Kinh
+    hubs = g.global_overview(5)["hubs"]
+    assert any(h["entity"] in ("Lão Tử", "Đạo Đức Kinh") for h in hubs)
+    # entity extraction KHÔNG bắt mảnh giữa từ (không có "ết"/"ống")
+    names = {h["entity"] for h in hubs}
+    assert not any(n.startswith(("ế", "ố", "ừ", "ó ")) for n in names)
+    g.reset()
+    assert g.stats() == {"nodes": 0, "edges": 0}
+
+
+def test_graph_endpoints():
+    from fastapi.testclient import TestClient
+    from app import auth, graph_rag
+    from app.main import app
+    graph_rag.reset()
+    uid = _new_user_id()
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "T", "picture": "", "is_admin": False}
+    try:
+        client = TestClient(app)
+        r = client.post("/api/graph/ingest", json={"text": "Hà Nội là thủ đô Việt Nam. Việt Nam ở Đông Nam Á."})
+        assert r.status_code == 200 and r.json()["stats"]["nodes"] >= 3
+        r = client.get("/api/graph/query", params={"q": "Việt Nam", "scope": "local"})
+        assert r.status_code == 200 and "Việt Nam" in r.json()["context"]
+        r = client.get("/api/graph/query", params={"q": "", "scope": "global"})
+        assert r.status_code == 200 and r.json()["result"]["scope"] == "global"
+    finally:
+        graph_rag.reset()
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 # ── Media: video đính kèm ────────────────────────────────────────────────────
 
 def test_media_parse_video_data_url():
