@@ -719,6 +719,25 @@ def test_docgen_generates_all_formats_with_vietnamese():
     assert "Đạo khả đạo" in texts and "Chương 1" in texts
 
 
+def test_files_ext_detection_and_optional_markitdown():
+    """files.py: nhận mimetype từ đuôi khi octet-stream; text luôn đọc được (2 tầng)."""
+    import base64
+    from app import files
+
+    def durl(mime, data):
+        return f"data:{mime};base64," + base64.b64encode(data).decode()
+
+    # text/plain luôn đọc được (markitdown hay fallback đều xong)
+    r = files.extract_text("a.txt", durl("text/plain", "Xin chào LUMINA".encode()))
+    assert r["error"] == "" and "LUMINA" in r["text"]
+    # octet-stream + đuôi .md → suy ra mimetype và đọc được
+    r = files.extract_text("note.md", durl("application/octet-stream", "# Tiêu đề\n\nnội dung".encode()))
+    assert r["error"] == "" and "Tiêu đề" in r["text"]
+    # định dạng lạ không có đuôi hỗ trợ → lỗi nhẹ nhàng, không raise
+    r = files.extract_text("x.bin", durl("application/x-thing", b"\x00\x01\x02"))
+    assert r["text"] == "" and r["error"]
+
+
 def test_docgen_unknown_format_defaults_docx():
     from app import docgen
     data, mime, ext = docgen.generate("weird", "T", "# H\n\ndoan")
