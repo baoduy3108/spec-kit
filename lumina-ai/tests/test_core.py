@@ -787,6 +787,60 @@ def test_compose_endpoint_synthesizes_file():
         app.dependency_overrides.pop(auth.require_user, None)
 
 
+# ── 🔑 API riêng + ~30 LLM phụ ───────────────────────────────────────────────
+
+def test_orchestrator_has_many_openrouter_brains():
+    from app.orchestrator import Orchestrator
+    o = Orchestrator()
+    orn = [n for n in o.engines if n.startswith("openrouter")]
+    assert len(orn) >= 30  # base + ~30 model free
+    assert len(o.free_chain) >= 40  # tổng bộ não free rất nhiều
+
+
+def test_api_key_lifecycle_and_openai_endpoint():
+    from fastapi.testclient import TestClient
+    from app import auth, db
+    from app.main import app, orchestrator
+
+    uid = _new_user_id()
+    db.upsert_user(uid, f"{uid}@x.com", "APIUser", "")
+    app.dependency_overrides[auth.require_user] = lambda: {"id": uid, "email": f"{uid}@x.com",
+                                                           "name": "APIUser", "picture": "", "is_admin": False}
+
+    async def _fake_run(messages, route, use_premium=True, system_extra=""):
+        yield {"type": "text", "text": "Xin chào từ LUMINA API."}
+
+    orig = orchestrator.run
+    orchestrator.run = _fake_run
+    try:
+        client = TestClient(app)
+        # tạo key
+        r = client.post("/api/keys", json={"name": "test"})
+        assert r.status_code == 200
+        raw = r.json()["key"]
+        assert raw.startswith("lum_")
+        assert len(client.get("/api/keys").json()["keys"]) == 1
+        # gọi /v1/chat/completions bằng Bearer key (không cookie)
+        r = client.post("/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {raw}"},
+                        json={"model": "lumina", "messages": [{"role": "user", "content": "hi"}]})
+        assert r.status_code == 200, r.text
+        j = r.json()
+        assert j["model"] == "lumina" and j["object"] == "chat.completion"
+        assert "LUMINA API" in j["choices"][0]["message"]["content"]
+        # key sai → 401
+        assert client.post("/v1/chat/completions", headers={"Authorization": "Bearer lum_bad"},
+                           json={"messages": [{"role": "user", "content": "x"}]}).status_code == 401
+        # thu hồi key
+        kid = client.get("/api/keys").json()["keys"][0]["id"]
+        assert client.delete(f"/api/keys/{kid}").status_code == 200
+        assert client.post("/v1/chat/completions", headers={"Authorization": f"Bearer {raw}"},
+                           json={"messages": [{"role": "user", "content": "x"}]}).status_code == 401
+    finally:
+        orchestrator.run = orig
+        app.dependency_overrides.pop(auth.require_user, None)
+
+
 # ── 🌐 Chợ Agent (cộng đồng: chia sẻ + cài) ──────────────────────────────────
 
 def test_agent_marketplace_share_and_install():

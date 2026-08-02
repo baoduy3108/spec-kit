@@ -54,6 +54,7 @@
       <button id="journal-btn" class="admin-btn">🕰 Nhật ký tiến hoá</button>
       <button id="dub-btn" class="admin-btn" data-i18n="dub">🗣 Lồng tiếng phim</button>
       <a id="learn-btn" class="admin-btn" href="/static/learn.html" target="_blank" rel="noopener" data-i18n="learn" style="display:block;text-decoration:none;text-align:left">✦ Bộ não LUMINA: Attention & MoE</a>
+      <button id="apikey-btn" class="admin-btn">🔑 API của tôi</button>
       <button id="admin-btn" class="admin-btn hidden" data-i18n="orders">🛠 Đơn hàng</button>
 
       <div class="sidebar-footer">
@@ -159,6 +160,29 @@
       <p class="payment-desc">Khám phá agent do cộng đồng chia sẻ — bấm <b>Cài</b> để thêm vào “Agent của tôi”.</p>
       <input id="market-search" placeholder="🔍 Tìm agent (tên hoặc mô tả)…" style="width:100%;margin-bottom:10px">
       <div id="market-list" class="market-list"></div>
+    </div>
+  </div>
+
+  <!-- ── Modal API riêng ─────────────────────────────────── -->
+  <div id="apikey-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:620px">
+      <button class="modal-close" data-close="apikey-modal">✕</button>
+      <h2 class="modal-title">🔑 API riêng của LUMINA</h2>
+      <p class="payment-desc">Dùng LUMINA như một API (tương thích OpenAI) trong app/script của bạn. Trỏ SDK OpenAI vào <b><span id="api-base"></span>/v1</b>, model để <b>"lumina"</b>. Bộ não tự chọn (Claude→free→local), không lộ tên model thật.</p>
+      <div style="display:flex;gap:8px;margin:8px 0">
+        <input id="apikey-name" maxlength="60" placeholder="Tên key (vd: app của tôi)" style="flex:1">
+        <button id="apikey-new" class="upgrade-btn" style="width:auto;padding:8px 16px">＋ Tạo key</button>
+      </div>
+      <div id="apikey-fresh" class="hidden" style="margin:10px 0;padding:10px 12px;background:var(--bg-3);border:1px solid var(--accent);border-radius:10px">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">⚠️ Chỉ hiện MỘT LẦN — sao chép ngay:</div>
+        <code id="apikey-fresh-val" style="word-break:break-all;font-size:12.5px"></code>
+        <button class="dash-btn" style="margin-top:6px" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('apikey-fresh-val').textContent)">📋 Sao chép</button>
+      </div>
+      <div id="apikey-list" style="margin:10px 0"></div>
+      <details style="margin-top:10px">
+        <summary style="cursor:pointer;color:var(--text-dim);font-size:13px">📖 Ví dụ gọi (curl)</summary>
+        <pre id="api-example" style="background:var(--bg-3);border-radius:8px;padding:12px;overflow-x:auto;font-size:11.5px;margin-top:8px"></pre>
+      </details>
     </div>
   </div>
 

@@ -196,6 +196,25 @@ class Orchestrator:
             else:
                 self.free_chain += local_names
 
+        # ── ~30 bộ não phụ MIỄN PHÍ qua OpenRouter (một key, nhiều model) ──
+        # Đăng ký mỗi model trong OPENROUTER_MODELS thành 1 engine (openrouter-2,3…)
+        # và chèn ngay sau "openrouter" trong chuỗi free. Chỉ available() khi có
+        # OPENROUTER_API_KEY → không tốn gì nếu chưa cấu hình. Model đầu tiên đã là
+        # "openrouter" gốc nên bỏ qua nó ở đây để khỏi trùng.
+        or_names: list[str] = []
+        base_or = CONFIG.get("OPENROUTER_MODEL")
+        for i, model in enumerate(CONFIG.get("OPENROUTER_MODELS", []), start=2):
+            if model == base_or:
+                continue
+            ename = f"openrouter-{i}"
+            self.engines[ename] = OpenRouterEngine(model=model, name=ename)
+            or_names.append(ename)
+        if or_names and "openrouter" in self.free_chain:
+            pos = self.free_chain.index("openrouter") + 1
+            self.free_chain[pos:pos] = or_names
+        elif or_names:
+            self.free_chain += or_names
+
         # ── Chế độ 100% LOCAL ───────────────────────────────────────
         # LOCAL_ONLY=true: chỉ giữ lại các bộ não CHẠY TRÊN MÁY (Ollama + model local),
         # loại mọi engine gọi API bên ngoài → không bao giờ tốn token / phụ thuộc API.

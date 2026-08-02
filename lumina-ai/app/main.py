@@ -31,6 +31,7 @@ import logging
 import os
 import re
 import time
+import uuid
 from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
@@ -271,6 +272,14 @@ class _AgentUpdate(BaseModel):
 
 class _AgentShare(BaseModel):
     shared: bool = True
+
+class _ApiKeyCreate(BaseModel):
+    name: str = ""
+
+class _ChatCompletions(BaseModel):
+    model: str = "lumina"
+    messages: list[dict] = []
+    stream: bool = False
 
 
 @app.get("/api/agents")
@@ -1025,6 +1034,87 @@ async def world_lookup(country: str, user: dict = Depends(auth.require_user)):
         raise HTTPException(status_code=404, detail="Không tìm thấy quốc gia (hoặc nguồn tạm lỗi).")
     knowledge.remember(**fact)  # lưu kho → trọng số dày lên
     return {"country": fact["topic"], "summary": fact["summary"], "source": "REST Countries"}
+
+
+# ─── 🔑 API riêng của LUMINA (quản lý key + endpoint OpenAI-compatible) ──────
+
+@app.post("/api/keys")
+async def api_key_create(body: _ApiKeyCreate, user: dict = Depends(auth.require_user)):
+    """Tạo API key mới (chỉ hiện KEY GỐC một lần — hãy lưu lại ngay)."""
+    raw = db.create_api_key(user["id"], body.name)
+    return {"key": raw, "note": "Lưu lại ngay — key này chỉ hiện một lần.", "keys": db.list_api_keys(user["id"])}
+
+
+@app.get("/api/keys")
+async def api_key_list(user: dict = Depends(auth.require_user)):
+    return {"keys": db.list_api_keys(user["id"])}
+
+
+@app.delete("/api/keys/{key_id}")
+async def api_key_delete(key_id: str, user: dict = Depends(auth.require_user)):
+    if not db.delete_api_key(key_id, user["id"]):
+        raise HTTPException(status_code=404, detail="Không tìm thấy key.")
+    return {"ok": True}
+
+
+@app.post("/v1/chat/completions")
+async def openai_compatible_chat(body: _ChatCompletions, user: dict = Depends(auth.require_api_key)):
+    """API tương thích OpenAI: trỏ SDK OpenAI vào <host>/v1 với API key LUMINA.
+
+    Định tuyến qua bộ não nhiều tầng (Claude→free→local) như chat web. Người dùng
+    thấy tên model là 'lumina' — KHÔNG lộ model thật. Hỗ trợ stream & non-stream.
+    """
+    msgs = [{"role": m.get("role", "user"), "content": str(m.get("content", ""))}
+            for m in body.messages if m.get("content")]
+    if not msgs:
+        raise HTTPException(status_code=400, detail="messages rỗng.")
+
+    plan = db.get_effective_plan(user["id"])
+    daily_ok, use_premium, _ = db.consume_daily_usage(
+        user["id"], plan["premium_daily_cap"], plan["total_daily_cap"])
+    if not daily_ok:
+        raise HTTPException(status_code=429, detail="Hết lượt hôm nay — nâng cấp gói để dùng tiếp.")
+    if use_premium and not orchestrator.engines["claude"].available() and orchestrator.has_free_engine():
+        use_premium = False
+
+    last_user = next((m["content"] for m in reversed(msgs) if m["role"] == "user"), "")
+    route = decide_route(last_user, history_len=len(msgs) - 1,
+                         apex_allowed=plan["apex_allowed"] and use_premium)
+    created = int(time.time())
+    cid = "chatcmpl-" + uuid.uuid4().hex[:24]
+
+    if body.stream:
+        async def sse():
+            try:
+                async for event in orchestrator.run(msgs, route, use_premium=use_premium):
+                    if event.get("type") == "text" and event.get("text"):
+                        chunk = {"id": cid, "object": "chat.completion.chunk", "created": created,
+                                 "model": "lumina", "choices": [{"index": 0, "delta": {"content": event["text"]},
+                                                                 "finish_reason": None}]}
+                        yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+            except Exception:
+                logger.exception("Lỗi /v1 stream")
+            done = {"id": cid, "object": "chat.completion.chunk", "created": created, "model": "lumina",
+                    "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]}
+            yield f"data: {json.dumps(done)}\n\n"
+            yield "data: [DONE]\n\n"
+        return StreamingResponse(sse(), media_type="text/event-stream",
+                                 headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+    parts: list[str] = []
+    try:
+        async for event in orchestrator.run(msgs, route, use_premium=use_premium):
+            if event.get("type") == "text":
+                parts.append(event["text"])
+    except Exception:
+        logger.exception("Lỗi /v1")
+        raise HTTPException(status_code=502, detail="Bộ não gặp lỗi — thử lại.")
+    answer = "".join(parts).strip()
+    return {
+        "id": cid, "object": "chat.completion", "created": created, "model": "lumina",
+        "choices": [{"index": 0, "message": {"role": "assistant", "content": answer}, "finish_reason": "stop"}],
+        "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+    }
 
 
 # ─── 🗣 Lồng tiếng + gắn phụ đề video (job chạy nền — có thể mất 1-3 phút) ────

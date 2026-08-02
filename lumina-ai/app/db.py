@@ -60,6 +60,15 @@ def _init_schema(conn: sqlite3.Connection):
         created_at INTEGER,
         updated_at INTEGER
     );
+    CREATE TABLE IF NOT EXISTS api_keys (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        key_hash TEXT NOT NULL UNIQUE,   -- sha256 của key (không lưu key gốc)
+        prefix TEXT NOT NULL,            -- vài ký tự đầu để người dùng nhận diện
+        name TEXT DEFAULT '',
+        created_at INTEGER,
+        last_used INTEGER DEFAULT 0
+    );
     CREATE TABLE IF NOT EXISTS agents (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
@@ -324,6 +333,61 @@ def delete_agent(agent_id: str, user_id: str) -> bool:
         cur = conn.execute("DELETE FROM agents WHERE id=? AND user_id=?", (agent_id, user_id))
         conn.commit()
         return cur.rowcount > 0
+
+
+# ─── 🔑 API keys (LUMINA làm API riêng — OpenAI-compatible) ───────────────────
+import hashlib  # noqa: E402
+
+
+def _hash_key(key: str) -> str:
+    return hashlib.sha256(key.encode()).hexdigest()
+
+
+def create_api_key(user_id: str, name: str = "") -> str:
+    """Sinh 1 API key mới cho người dùng. Trả về KEY GỐC (chỉ hiện 1 lần)."""
+    raw = "lum_" + secrets.token_hex(24)
+    with _lock:
+        conn = get_conn()
+        conn.execute(
+            "INSERT INTO api_keys(id, user_id, key_hash, prefix, name, created_at) VALUES(?,?,?,?,?,?)",
+            (uuid.uuid4().hex, user_id, _hash_key(raw), raw[:12], (name or "").strip()[:60], int(time.time())),
+        )
+        conn.commit()
+    return raw
+
+
+def list_api_keys(user_id: str) -> list[dict]:
+    with _lock:
+        rows = get_conn().execute(
+            "SELECT id, prefix, name, created_at, last_used FROM api_keys WHERE user_id=? ORDER BY created_at DESC",
+            (user_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def delete_api_key(key_id: str, user_id: str) -> bool:
+    with _lock:
+        conn = get_conn()
+        cur = conn.execute("DELETE FROM api_keys WHERE id=? AND user_id=?", (key_id, user_id))
+        conn.commit()
+        return cur.rowcount > 0
+
+
+def user_by_api_key(raw_key: str) -> dict | None:
+    """Tra người dùng theo API key (Bearer). Cập nhật last_used. None nếu sai."""
+    if not raw_key or not raw_key.startswith("lum_"):
+        return None
+    kh = _hash_key(raw_key)
+    with _lock:
+        conn = get_conn()
+        row = conn.execute("SELECT user_id FROM api_keys WHERE key_hash=?", (kh,)).fetchone()
+        if not row:
+            return None
+        conn.execute("UPDATE api_keys SET last_used=? WHERE key_hash=?", (int(time.time()), kh))
+        conn.commit()
+        uid = row["user_id"]
+        u = conn.execute("SELECT id, email, name, picture FROM users WHERE id=?", (uid,)).fetchone()
+        return dict(u) if u else {"id": uid, "email": "", "name": "", "picture": ""}
 
 
 # ─── 🌐 Chợ Agent: chia sẻ / khám phá / cài (vòng cộng đồng) ──────────────────

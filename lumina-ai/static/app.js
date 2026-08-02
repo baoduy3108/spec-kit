@@ -872,6 +872,10 @@
   $("agent-del").addEventListener("click", deleteAgent);
   $("market-search").addEventListener("input", (e) => renderMarket(e.target.value));
 
+  // 🔑 API riêng
+  $("apikey-btn").addEventListener("click", openApiKeys);
+  $("apikey-new").addEventListener("click", createApiKey);
+
   document.querySelectorAll(".modal-close").forEach((btn) =>
     btn.addEventListener("click", () => {
       clearInterval(pollTimer); clearInterval(dubPollTimer);
@@ -982,6 +986,52 @@
   }
 
   function escapeHtml(s) { const d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
+
+  // ── 🔑 API riêng của LUMINA ──────────────────────────────────────
+  async function openApiKeys() {
+    const base = location.origin;
+    $("api-base").textContent = base;
+    $("api-example").textContent =
+      `curl ${base}/v1/chat/completions \\\n` +
+      `  -H "Authorization: Bearer lum_KEY_CUA_BAN" \\\n` +
+      `  -H "Content-Type: application/json" \\\n` +
+      `  -d '{"model":"lumina","messages":[{"role":"user","content":"Xin chào"}]}'`;
+    $("apikey-fresh").classList.add("hidden");
+    $("apikey-modal").classList.remove("hidden");
+    await renderApiKeys();
+  }
+  async function renderApiKeys() {
+    const box = $("apikey-list");
+    box.innerHTML = `<div class="dash-empty">Đang tải…</div>`;
+    let keys = [];
+    try { keys = (await api("/api/keys")).keys || []; } catch {}
+    box.innerHTML = "";
+    if (!keys.length) { box.innerHTML = `<div class="dash-empty">Chưa có key nào. Bấm “＋ Tạo key”.</div>`; return; }
+    for (const k of keys) {
+      const row = el("div", "market-card");
+      row.style.padding = "10px 12px";
+      const d = new Date((k.created_at || 0) * 1000).toLocaleDateString("vi");
+      row.innerHTML = `<div style="display:flex;align-items:center;gap:10px">` +
+        `<code style="flex:1">${escapeHtml(k.prefix)}…&nbsp; <span style="color:var(--text-dim);font-size:12px">${escapeHtml(k.name || "")} · ${d}</span></code></div>`;
+      const del = el("button", "agent-mini", "🗑 Thu hồi");
+      del.style.flex = "0 0 auto";
+      del.addEventListener("click", async () => {
+        if (!confirm("Thu hồi key này? App đang dùng sẽ ngừng hoạt động.")) return;
+        try { await api(`/api/keys/${k.id}`, { method: "DELETE" }); renderApiKeys(); } catch { alert("⚠️ Không thu hồi được."); }
+      });
+      row.appendChild(del);
+      box.appendChild(row);
+    }
+  }
+  async function createApiKey() {
+    let res;
+    try { res = await api("/api/keys", { method: "POST", body: JSON.stringify({ name: $("apikey-name").value.trim() }) }); }
+    catch { alert("⚠️ Không tạo được key."); return; }
+    $("apikey-name").value = "";
+    $("apikey-fresh-val").textContent = res.key;
+    $("apikey-fresh").classList.remove("hidden");
+    renderApiKeys();
+  }
 
   // ── Tạo / sửa / chia sẻ / xóa Agent ──────────────────────────────
   function openAgentModal(a) {

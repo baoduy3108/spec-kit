@@ -184,13 +184,19 @@ class OllamaEngine(OpenAICompatibleEngine):
 
 
 class OpenRouterEngine(OpenAICompatibleEngine):
+    """OpenRouter phục vụ HÀNG TRĂM model qua MỘT key — nên (giống Ollama) có thể
+    tạo nhiều instance, mỗi cái một model, để có thêm nhiều "bộ não phụ" miễn phí.
+    `model`/`name` cho phép đăng ký openrouter, openrouter-2, ... (xem OPENROUTER_MODELS)."""
+
     name = "openrouter"
 
-    def __init__(self):
+    def __init__(self, model: str | None = None, name: str | None = None):
         super().__init__()
         self.base_url = CONFIG["OPENROUTER_BASE_URL"]
-        self.model = CONFIG["OPENROUTER_MODEL"]
+        self.model = model or CONFIG["OPENROUTER_MODEL"]
         self.api_key = CONFIG["OPENROUTER_API_KEY"]
+        if name:
+            self.name = name
         # OpenRouter khuyến nghị (không bắt buộc) gửi 2 header này
         self.extra_headers = {
             "HTTP-Referer": "https://lumina-ai.app",

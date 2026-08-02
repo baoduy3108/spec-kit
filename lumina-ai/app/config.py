@@ -54,6 +54,30 @@ CONFIG = {
     "OPENROUTER_API_KEY": os.getenv("OPENROUTER_API_KEY", ""),  # FREE (nhiều model) tại openrouter.ai/keys
     "OPENROUTER_MODEL": os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free"),
     "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
+    # ~30 model FREE trên OpenRouter → mỗi cái thành 1 "bộ não phụ" (đăng ký như
+    # LOCAL_MODELS). Chỉ hoạt động khi có OPENROUTER_API_KEY; danh sách sửa qua biến
+    # OPENROUTER_MODELS. Model free trên OpenRouter thay đổi theo thời gian — engine
+    # nào chết thì fallback tự nhảy sang cái kế, nên để dư nhiều cái là an toàn.
+    "OPENROUTER_MODELS": [
+        m.strip() for m in os.getenv(
+            "OPENROUTER_MODELS",
+            "meta-llama/llama-3.3-70b-instruct:free,meta-llama/llama-3.1-8b-instruct:free,"
+            "meta-llama/llama-3.2-3b-instruct:free,meta-llama/llama-3.2-11b-vision-instruct:free,"
+            "google/gemma-2-9b-it:free,google/gemma-3-27b-it:free,google/gemma-3-12b-it:free,"
+            "google/gemma-3-4b-it:free,mistralai/mistral-7b-instruct:free,"
+            "mistralai/mistral-nemo:free,mistralai/mistral-small-3.1-24b-instruct:free,"
+            "mistralai/mistral-small-3.2-24b-instruct:free,qwen/qwen-2.5-72b-instruct:free,"
+            "qwen/qwen-2.5-7b-instruct:free,qwen/qwen-2.5-coder-32b-instruct:free,"
+            "qwen/qwq-32b:free,qwen/qwen3-235b-a22b:free,qwen/qwen3-32b:free,"
+            "qwen/qwen3-14b:free,qwen/qwen3-8b:free,qwen/qwen3-4b:free,"
+            "deepseek/deepseek-r1:free,deepseek/deepseek-chat:free,"
+            "deepseek/deepseek-r1-distill-llama-70b:free,deepseek/deepseek-r1-distill-qwen-32b:free,"
+            "deepseek/deepseek-r1-0528:free,nousresearch/deephermes-3-llama-3-8b-preview:free,"
+            "microsoft/phi-3-medium-128k-instruct:free,microsoft/phi-3-mini-128k-instruct:free,"
+            "thudm/glm-4-9b:free,tngtech/deepseek-r1t-chimera:free,"
+            "moonshotai/kimi-vl-a3b-thinking:free",
+        ).split(",") if m.strip()
+    ],
     "DEEPSEEK_API_KEY": os.getenv("DEEPSEEK_API_KEY", ""),  # cực rẻ tại platform.deepseek.com
     "DEEPSEEK_MODEL": os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
     "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",

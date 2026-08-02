@@ -77,6 +77,21 @@ def require_user(request: Request) -> dict:
     }
 
 
+def require_api_key(request: Request) -> dict:
+    """Dependency cho API riêng: xác thực bằng 'Authorization: Bearer lum_…'.
+
+    Cho phép ứng dụng ngoài gọi LUMINA như một API (OpenAI-compatible). Trả user
+    hoặc 401. (Không dùng cookie — dành cho gọi máy-tới-máy.)"""
+    from . import db  # tránh import vòng
+    header = request.headers.get("authorization", "")
+    raw = header[7:].strip() if header.lower().startswith("bearer ") else ""
+    user = db.user_by_api_key(raw)
+    if not user:
+        raise HTTPException(status_code=401, detail="API key không hợp lệ. Gửi 'Authorization: Bearer lum_...'.")
+    email = user.get("email", "")
+    return {**user, "is_admin": bool(email) and email.lower() in CONFIG["ADMIN_EMAILS"]}
+
+
 def require_admin(user: dict) -> dict:
     """Chặn truy cập nếu không phải email quản trị (danh sách ADMIN_EMAILS)."""
     if not user.get("is_admin"):
