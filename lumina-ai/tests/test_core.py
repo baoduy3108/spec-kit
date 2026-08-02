@@ -2201,6 +2201,26 @@ def test_skills_library_has_at_least_1087():
     assert len(skills._SKILLS) >= 1087
 
 
+def test_skills_library_has_at_least_1093():
+    from app import skills
+    assert len(skills._SKILLS) >= 1093
+
+
+def test_skills_contest_and_motion_topics_match():
+    from app import skills
+    cases = {
+        "lập trình thi đấu thi chuyên tin olympiad chiến lược giải bài và đọc ràng buộc độ phức tạp thuật toán và cấu trúc dữ liệu cốt lõi quy hoạch động thuật toán đồ thị tham lam greedy kỹ thuật thi codeforces": "competitive-programming-techniques",
+        "hình học không gian nâng cao thi chuyên thpt đường thẳng và mặt phẳng trong không gian góc và khoảng cách khối đa diện lăng trụ chóp cầu thể tích và diện tích thiết diện phương pháp tọa độ": "advanced-solid-geometry",
+        "hóa phân tích chuyên hóa phân tích định tính và định lượng chuẩn độ axit bazơ oxi hóa khử tạo phức phân tích khối lượng phổ và sắc ký đường chuẩn sai số và độ chính xác": "analytical-chemistry",
+        "hoạt ảnh lottie và dotlottie định dạng lottie json xuất từ after effects bodymovin phát lottie trên web và di động định dạng dotlottie nhỏ gọn tương tác và điều khiển tối ưu": "lottie-and-dotlottie-animation",
+        "kỹ thuật hoạt ảnh svg hoạt ảnh svg bằng css và js vẽ nét theo stroke dasharray biến hình morphing đường path so sánh smil css js chuyển động theo đường path hiệu năng": "svg-animation-techniques",
+        "quy trình thiết kế chuyển động với ai từ thiết kế tĩnh hoặc prompt ra hoạt ảnh ui motion graphics chọn định dạng css gsap lottie video lập kế hoạch timeline và keyframe easing và biên đạo xuất json dotlottie": "ai-motion-design-workflow",
+    }
+    for text, expected in cases.items():
+        s = skills.find_matching_skill(text)
+        assert s is not None and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_calculus_science_topics_match():
     from app import skills
     cases = {
