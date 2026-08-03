@@ -912,7 +912,10 @@ function newGame(){
   score=0; displayed=0; charge=0; combo=0; drag=null; aimMode=false; reviveUsed=false; bhState=null; bhDust=[];
   // MÀN "NUỐT THIÊN THẠCH": Hố Đen nạp sẵn 0.8 (ăn thiên thạch là BẢN CHẤT màn này — không bắt cày 5 hàng
   // chỉ để bật được quyền năng lần đầu); cộng hoàn-nạp khi nuốt X ở detonate -> qua màn công bằng.
-  if(mode==='level' && LEVELS[curLevel] && LEVELS[curLevel].o.t==='eat') charge=0.8;
+  if(mode==='level' && LEVELS[curLevel]){
+    if(LEVELS[curLevel].o.t==='eat') charge=0.8;
+    else if(LEVELS[curLevel].boss) charge=0.5; // Boss levels get 50% starting charge
+  }
   state='play'; particles=[]; pops=[]; sweeps=[]; shake=0; flash=0; danger=0; comboGlow=0;
   timeLeft=(mode==='time')?TIME_LIMIT:0;
   gravCount=GRAV_EVERY; gravAxis=0; gravAnim.length=0; gravRings.length=0;
