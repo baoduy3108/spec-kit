@@ -2401,6 +2401,22 @@ def test_skills_library_has_at_least_1093():
     assert len(skills._SKILLS) >= 1093
 
 
+def test_skills_library_has_at_least_1099():
+    from app import skills
+    assert len(skills._SKILLS) >= 1099
+
+
+def test_skills_prompt_optimization_and_briefing_topics_match():
+    from app import skills
+    for text, expected in [
+        ("làm sao tối ưu prompt tự động theo thước đo bằng dspy", "automatic-prompt-optimization"),
+        ("dùng prompt optimizer opro cải thiện chỉ dẫn", "automatic-prompt-optimization"),
+        ("làm bản tin 30 ngày qua tổng hợp thay đổi gần đây", "last-30-days-briefing"),
+    ]:
+        s = skills.find_matching_skill(text)
+        assert s and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_contest_and_motion_topics_match():
     from app import skills
     cases = {
