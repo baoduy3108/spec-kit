@@ -59,11 +59,42 @@ ollama create lumina-local -f Modelfile.example
 Xong: LUMINA (router + 875 skills) + **model bạn tự fine-tune** = bộ não riêng, chạy 100%
 trên máy bạn, không tốn token, không gọi API ngoài nào.
 
+## Chạy trên KAGGLE (GPU miễn phí) — không cần máy có GPU
+
+Không có GPU ở nhà? Dùng **`kaggle_lumina_lora.ipynb`** — chạy trọn quy trình QLoRA
+trên GPU free của Kaggle (2×T4 16GB / P100), xuất **LoRA adapter** (~50–400MB) tải về.
+1. kaggle.com → **New Notebook** → **File → Import Notebook** → chọn `kaggle_lumina_lora.ipynb`.
+2. **Settings → Accelerator → GPU T4 x2**, bật **Internet**.
+3. **Run All**. Xong thì tab **Output** → tải `lumina-lora.zip`.
+> Kaggle free chỉ đủ cho model **≤ 7–8B** (mặc định Qwen2.5-7B). **22B KHÔNG train nổi** ở đây.
+
+### Bake skills vào model (tùy chọn — KHÔNG khuyến nghị làm chính)
+```bash
+python prepare_data.py --sources skills --max-per-source 2000 --out data/skills.jsonl
+# trộn với dataset thật:  --sources no_robots,dolly,skills
+```
+Skills đã **miễn phí qua tiêm prompt lúc chạy** (tốt hơn) — chỉ bake nếu bạn CỐ TÌNH
+muốn nhét một phần hành vi skill vào trọng số, chấp nhận kém hơn + mất khả năng sửa `.md`.
+
+## ❌ "Nén 22B từ 16-bit → 4-bit thành file < 400MB, làm model mới" — không thể
+
+Giới hạn **vật lý**: 22B ở 4-bit = **~11–13GB**, không phải 400MB (400MB/22B ≈ 0,15
+bit/tham số — dưới cả mức ternary 1.58-bit, model sẽ hỏng hoàn toàn).
+- **AWQ** ([mit-han-lab/llm-awq](https://github.com/mit-han-lab/llm-awq)) là 4-bit THẬT,
+  chất lượng gần nguyên bản — nhưng 22B AWQ vẫn ~11–13GB; nó để **chạy** 22B trên 1 GPU
+  16–24GB, không phải thu nhỏ xuống 400MB.
+- Cái **< 400MB** duy nhất hợp lý là **LoRA adapter** — *bản vá* cần model gốc kèm theo,
+  không phải model 22B đứng một mình.
+- Muốn *file nhỏ chạy tốt*: chọn model **3B–8B** rồi AWQ/GGUF 4-bit → ~2–5GB. Đó là
+  đường thực tế. (Ô cuối trong notebook Kaggle giải thích kỹ hơn.)
+
 ## Tệp trong thư mục
 
+- `kaggle_lumina_lora.ipynb` — **notebook chạy QLoRA trọn gói trên Kaggle GPU free** (dễ nhất).
 - `DATASETS.md` — danh sách dataset nên dùng (kèm giấy phép) + cái KHÔNG nên dùng và vì sao.
 - `requirements.txt` — thư viện (transformers, datasets, peft, trl, bitsandbytes…).
-- `prepare_data.py` — tải & chuẩn hoá các dataset SFT về format chat JSONL thống nhất.
+- `prepare_data.py` — tải & chuẩn hoá các dataset SFT về format chat JSONL (có nguồn `skills`).
 - `train_lora.py` — fine-tune QLoRA (4-bit) bằng TRL `SFTTrainer`.
+- `vlm/` — bản cho model NHÌN ẢNH (VLM): `prepare_vlm_data.py` + `train_vlm_lora.py`.
 - `export_ollama.md` — gộp LoRA, convert GGUF (llama.cpp), tạo Modelfile.
 - `Modelfile.example` — mẫu Ollama Modelfile nạp model đã fine-tune.

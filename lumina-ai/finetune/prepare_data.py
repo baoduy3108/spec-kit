@@ -198,10 +198,49 @@ SOURCES = {
 }
 
 
+def _iter_skill_pairs(skills_dir):
+    """Đọc data/skills/*.md của LUMINA → cặp SFT (dạy VĂN PHONG/ĐỊNH DẠNG skill).
+
+    ⚠️ Đọc README: nhồi skills vào TRỌNG SỐ thường KÉM HƠN tiêm prompt lúc chạy
+    (đang dùng), và mất khả năng sửa skill bằng edit .md. Nguồn này chỉ dành cho ai
+    CỐ TÌNH muốn bake một phần hành vi skill vào model — không khuyến nghị làm chính.
+    """
+    if not os.path.isdir(skills_dir):
+        print(f"  ! không thấy thư mục skills: {skills_dir}")
+        return
+    for fn in sorted(os.listdir(skills_dir)):
+        if not fn.endswith(".md") or fn.upper().startswith("ATTRIBUTION"):
+            continue
+        try:
+            with open(os.path.join(skills_dir, fn), encoding="utf-8") as fh:
+                raw = fh.read()
+        except OSError:
+            continue
+        name, desc, body = fn[:-3], "", raw
+        if raw.startswith("---"):
+            end = raw.find("\n---", 3)
+            if end != -1:
+                fm, body = raw[3:end], raw[end + 4:]
+                for line in fm.splitlines():
+                    if line.startswith("name:"):
+                        name = line[5:].strip()
+                    elif line.startswith("description:"):
+                        desc = line[12:].strip()
+        body = body.strip()
+        if not body:
+            continue
+        topic = desc or name
+        yield _norm(f"Hướng dẫn chuyên sâu về: {topic}", body)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sources", default="dolly,ultrachat",
-                    help="Danh sách nguồn, phẩy ngăn cách. Xem --list.")
+                    help="Danh sách nguồn, phẩy ngăn cách. Xem --list. "
+                         "Nguồn đặc biệt 'skills' = bake skills LUMINA (xem --skills-dir).")
+    ap.add_argument("--skills-dir",
+                    default=os.path.join(os.path.dirname(__file__), "..", "data", "skills"),
+                    help="Thư mục skills .md khi dùng nguồn 'skills'.")
     ap.add_argument("--max-per-source", type=int, default=8000)
     ap.add_argument("--out", default="data/train.jsonl")
     ap.add_argument("--seed", type=int, default=42)
@@ -212,23 +251,39 @@ def main():
         print("Nguồn SFT hỗ trợ (fine-tune được):")
         for n, (hid, cfg, sp, _, note) in SOURCES.items():
             print(f"  {n:16s} {hid} [{cfg or '-'}:{sp}]  — {note}")
+        print(f"  {'skills':16s} (LOCAL) data/skills/*.md — bake skill LUMINA (KHÔNG khuyến nghị làm chính)")
         print("\nBENCHMARK — CẤM train (chỉ eval):")
         for n, why in EVAL_ONLY.items():
             print(f"  {n:16s} {why}")
         return
 
-    try:
-        from datasets import load_dataset
-    except ImportError:
-        raise SystemExit("Thiếu thư viện: pip install -r requirements.txt")
+    names = [s.strip().lower() for s in args.sources.split(",") if s.strip()]
+    needs_hf = any(n in SOURCES for n in names)
+    load_dataset = None
+    if needs_hf:
+        try:
+            from datasets import load_dataset
+        except ImportError:
+            raise SystemExit("Thiếu thư viện: pip install -r requirements.txt")
 
     random.seed(args.seed)
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     total = 0
     with open(args.out, "w", encoding="utf-8") as f:
-        for name in [s.strip().lower() for s in args.sources.split(",") if s.strip()]:
+        for name in names:
             if name in EVAL_ONLY:
                 print(f"[TỪ CHỐI] '{name}' là BENCHMARK — không train vào. {EVAL_ONLY[name]}")
+                continue
+            if name == "skills":
+                print(f"[đọc] skills LUMINA ← {args.skills_dir}")
+                kept = 0
+                for msgs in _iter_skill_pairs(args.skills_dir):
+                    if kept >= args.max_per_source:
+                        break
+                    f.write(json.dumps({"messages": msgs}, ensure_ascii=False) + "\n")
+                    kept += 1
+                    total += 1
+                print(f"  → giữ {kept} mẫu (⚠️ tiêm prompt lúc chạy vẫn tốt hơn — xem README)")
                 continue
             if name not in SOURCES:
                 print(f"[bỏ qua] nguồn không hỗ trợ: {name} (xem --list)")
