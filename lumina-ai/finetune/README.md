@@ -95,6 +95,7 @@ bit/tham số — dưới cả mức ternary 1.58-bit, model sẽ hỏng hoàn t
 - `requirements.txt` — thư viện (transformers, datasets, peft, trl, bitsandbytes…).
 - `prepare_data.py` — tải & chuẩn hoá các dataset SFT về format chat JSONL (có nguồn `skills`).
 - `train_lora.py` — fine-tune QLoRA (4-bit) bằng TRL `SFTTrainer`.
-- `vlm/` — bản cho model NHÌN ẢNH (VLM): `prepare_vlm_data.py` + `train_vlm_lora.py`.
+- `merge_lora.py` — **gộp adapter vào model nền (1 lệnh)** → model độc lập, không cần gửi file cho ai.
+- `vlm/` — bản cho model NHÌN ẢNH (VLM): `prepare_vlm_data.py` (Rico/Vision2UI/WebCode2M) + `train_vlm_lora.py`.
 - `export_ollama.md` — gộp LoRA, convert GGUF (llama.cpp), tạo Modelfile.
 - `Modelfile.example` — mẫu Ollama Modelfile nạp model đã fine-tune.

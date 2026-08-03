@@ -5,14 +5,11 @@ biến nó thành model chạy được trong Ollama, rồi cho LUMINA dùng ở
 
 ## 1) Gộp LoRA adapter vào model nền (ra model FP16 đầy đủ)
 
-```python
-# merge.py — chạy trên máy GPU
-from peft import AutoPeftModelForCausalLM
-from transformers import AutoTokenizer
-m = AutoPeftModelForCausalLM.from_pretrained("out/lumina-lora", torch_dtype="auto")
-m = m.merge_and_unload()                       # gộp adapter vào weights
-m.save_pretrained("out/lumina-merged")
-AutoTokenizer.from_pretrained("out/lumina-lora").save_pretrained("out/lumina-merged")
+Một lệnh — **không cần gửi file cho ai**, chạy ngay tại máy bạn (hoặc Kaggle/Colab):
+
+```bash
+python merge_lora.py --adapter out/lumina-lora --out out/lumina-merged
+# base tự đọc từ adapter; ép base khác thì thêm --base <hf_id>
 ```
 
 ## 2) Convert sang GGUF + quantize (dùng llama.cpp)
