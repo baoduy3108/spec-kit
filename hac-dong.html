@@ -368,7 +368,7 @@ if (typeof google !== 'undefined') {
       </div>
       <div class="modesTitle">📖 Câu chuyện & Hồ sơ</div>
       <button class="campBtn" data-act="camp" id="campBtn">🚀  Chiến Dịch — Nuốt Chửng Vũ Trụ</button>
-      <button class="campBtn" data-act="hidden" id="hiddenBtn" style="opacity:0.6">🌑  Hắc Động Huyền Bí (Mở khoá sau 317)</button>
+      <button class="campBtn" data-act="hidden" id="hiddenBtn" style="display:none">🌑  Hắc Động Huyền Bí (Mở khoá sau 317)</button>
       <button class="evoBtn" data-act="evo" id="evoOpenBtn">🕳️  Hồ Sơ Hố Đen</button>
       <div class="row"><span id="langLabel">Ngôn ngữ</span><div class="seg"><button data-act="lang" data-v="vi" id="segVi">VI</button><button data-act="lang" data-v="en" id="segEn">EN</button></div></div>
       <div class="row"><span id="sndLabel">Âm thanh &amp; nhạc</span><button class="tgl" data-act="snd" id="sndTgl">Bật</button></div>
@@ -2743,7 +2743,7 @@ function updateMenuTexts(){ $('menuTitle').textContent=t('menuTitle'); $('langLa
   $('campBtn').textContent='🚀  '+(lang==='vi'?'Chiến Dịch':'Campaign')+' · '+lvDone+'/'+LEVELS.length;
   const hiddenDone=isHiddenUnlocked()?lvStars.slice(318,354).filter(s2=>s2>0).length:0;
   $('hiddenBtn').textContent='🌑  '+(lang==='vi'?'Hắc Động Huyền Bí':'Black Dragon Mystery')+(isHiddenUnlocked()?' · '+hiddenDone+'/36':' (🔒 Mở khoá sau 317)');
-  $('hiddenBtn').style.opacity=isHiddenUnlocked()?'1':'0.5';
+  $('hiddenBtn').style.display=isHiddenUnlocked()?'block':'none';  // Hidden button only visible when unlocked
   $('streakRow').textContent=t('streakDays')(streak);
   $('journeyLabel').textContent=t('journeyLabel');
   const jp=journeyProgress();
