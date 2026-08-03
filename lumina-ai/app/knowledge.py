@@ -365,6 +365,56 @@ async def news_items(query: str, lang: str = "vi", limit: int = 6) -> list[dict]
         return []
 
 
+# ── "N NGÀY QUA CÓ GÌ MỚI" — bản tin cửa sổ thời gian (skill last-30-days-briefing) ──
+_RECENT_CUES = (
+    "có gì mới", "gì mới", "cập nhật mới", "ngày qua", "tuần qua", "tháng qua",
+    "gần đây có gì", "điểm tin", "tổng hợp gần đây", "thay đổi gần đây",
+    "what's new", "whats new", "last 30 days", "last 7 days", "past month",
+    "past week", "recently", "roundup", "since last",
+)
+
+
+def is_recent_digest_query(query: str) -> bool:
+    """Câu hỏi kiểu 'N ngày qua có gì mới / what changed recently' → cần bản tin
+    cửa sổ thời gian (khác câu thời sự chung: đây đòi TỔNG HỢP theo mốc thời gian)."""
+    low = (query or "").lower()
+    return any(c in low for c in _RECENT_CUES)
+
+
+def recent_window_days(query: str, default: int = 30) -> int:
+    """Rút số ngày của cửa sổ từ câu hỏi ('30 ngày qua'→30, 'tuần qua'→7,
+    'tháng qua'→30). Không nêu rõ → mặc định 30. Chặn trong [1, 365]."""
+    low = (query or "").lower()
+    m = re.search(r"(\d{1,3})\s*(?:ngày|day)", low)
+    if m:
+        return max(1, min(365, int(m.group(1))))
+    if "tuần" in low or "week" in low:
+        return 7
+    if "tháng" in low or "month" in low:
+        return 30
+    return default
+
+
+async def _fetch_recent_digest(query: str, days: int = 30, lang: str = "vi") -> dict | None:
+    """Bản tin ~N ngày qua: dùng toán tử Google News `when:Nd` để LỌC ĐÚNG cửa sổ,
+    gộp tiêu đề mới nhất + link, đóng nhãn tin tức (Tầng 1 — độ tin thấp-vừa, đối
+    chiếu nhiều nguồn). Best-effort → None nếu lỗi/không có tin."""
+    items = await news_items(f"{query} when:{days}d", lang, limit=8)
+    if not items:
+        return None
+    lines = "\n".join(f"- {it['title']} ({it['url']})" for it in items if it.get("title"))
+    if not lines:
+        return None
+    return {
+        "topic": f"bản tin {days} ngày qua: {query[:50].lower()}",
+        "summary": (f"Điểm tin ~{days} NGÀY QUA (nguồn tin tức — CHƯA kiểm chứng, tin mới "
+                    f"= ÍT tin cậy nhất, PHẢI đối chiếu nhiều nguồn):\n{lines}"),
+        "url": items[0].get("url") or "https://news.google.com",
+        "source": "news",
+        "lang": lang,
+    }
+
+
 async def gather(query: str, max_items: int = 3) -> list[dict]:
     """Thu thập tư liệu: kho nội bộ trước (0 token) → [tin tức nếu câu thời sự] →
     Wikipedia (miễn phí) → lưu kho. Mọi mẩu đều kèm nhãn NGUỒN để chống bịp.
@@ -387,6 +437,18 @@ async def gather(query: str, max_items: int = 3) -> list[dict]:
                 return [wm] + lookup_local(query, limit=max(0, max_items - 1))
     except Exception:  # noqa: BLE001 — nguồn phụ, hỏng thì bỏ qua
         pass
+
+    # 📅 "N NGÀY QUA CÓ GÌ MỚI" → bản tin cửa sổ thời gian (lọc đúng ngày qua
+    # Google News `when:Nd`). Cụ thể hơn câu thời sự chung nên xét TRƯỚC.
+    if is_recent_digest_query(query):
+        days = recent_window_days(query)
+        results: list[dict] = []
+        dig = await _fetch_recent_digest(query, days, "vi")
+        if dig:
+            results.append(dig)
+        results.extend(lookup_local(query, limit=max(0, max_items - 1)))
+        if results:
+            return results[:max_items]
 
     # Câu THỜI SỰ → luôn học tin mới (không cache lâu; tin tức cũ rất nhanh).
     if is_news_query(query):

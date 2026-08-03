@@ -2412,9 +2412,38 @@ def test_skills_prompt_optimization_and_briefing_topics_match():
         ("làm sao tối ưu prompt tự động theo thước đo bằng dspy", "automatic-prompt-optimization"),
         ("dùng prompt optimizer opro cải thiện chỉ dẫn", "automatic-prompt-optimization"),
         ("làm bản tin 30 ngày qua tổng hợp thay đổi gần đây", "last-30-days-briefing"),
+        ("thiết kế vòng lặp agent plan act observe có ngân sách bước", "agent-loop-engineering"),
     ]:
         s = skills.find_matching_skill(text)
         assert s and s.slug == expected, (text, s.slug if s else None)
+
+
+def test_skills_library_has_at_least_1100():
+    from app import skills
+    assert len(skills._SKILLS) >= 1100
+
+
+def test_recent_digest_detection_and_window():
+    """'N ngày qua có gì mới' được nhận diện + rút đúng số ngày cửa sổ; câu số liệu
+    quốc gia thường KHÔNG bị nhận nhầm là bản tin."""
+    from app import knowledge as k
+    assert k.is_recent_digest_query("AI có gì mới 30 ngày qua")
+    assert k.is_recent_digest_query("what's new in AI last 7 days")
+    assert not k.is_recent_digest_query("dân số việt nam bao nhiêu")
+    assert k.recent_window_days("30 ngày qua") == 30
+    assert k.recent_window_days("7 ngày qua") == 7
+    assert k.recent_window_days("tuần qua") == 7
+    assert k.recent_window_days("tháng qua") == 30
+    assert k.recent_window_days("có gì mới") == 30          # mặc định
+    assert 1 <= k.recent_window_days("999 ngày qua") <= 365  # chặn biên
+
+
+def test_recent_digest_gather_offline_never_raises():
+    """gather() với câu 'N ngày qua' KHÔNG được raise khi offline (nguồn phụ)."""
+    import asyncio
+    from app import knowledge
+    out = asyncio.run(knowledge.gather("công nghệ AI có gì mới 30 ngày qua"))
+    assert isinstance(out, list)
 
 
 def test_skills_contest_and_motion_topics_match():
