@@ -14,6 +14,7 @@ from typing import AsyncIterator
 
 import httpx
 
+from .. import keyring
 from ..config import CONFIG
 from ..schemas import RouteDecision
 from ..search.engines import web_search
@@ -23,18 +24,32 @@ logger = logging.getLogger("lumina.oai")
 
 
 class OpenAICompatibleEngine(BaseEngine):
-    """Cấu hình qua thuộc tính lớp con: name, base_url, model, api_key, is_local."""
+    """Cấu hình qua thuộc tính lớp con: name, base_url, model, api_key, is_local.
+
+    XOAY VÒNG ĐA KEY: lớp con điền `api_keys` (danh sách) — thường từ
+    CONFIG["<X>_API_KEYS"] (gộp hạn mức free nhiều tài khoản). Nếu chỉ có 1 key
+    thì `api_keys` có 1 phần tử. `stream_chat` thử lần lượt các key theo thứ tự
+    round-robin và nhảy sang key kế khi gặp 429/401/403 — MIỄN LÀ chưa phát chữ
+    nào ra (không thể retry giữa chừng dòng stream)."""
 
     base_url = ""
     model = ""
     api_key = ""
+    api_keys: list[str] = []  # danh sách key để xoay vòng (nếu rỗng → dùng [api_key])
     is_local = False  # Ollama chạy nội bộ — không cần key
     extra_headers: dict = {}  # header phụ (ví dụ OpenRouter khuyến nghị Referer/Title)
+
+    def _keys(self) -> list[str]:
+        """Danh sách key khả dụng (đã loại rỗng), fallback về api_key đơn."""
+        keys = [k for k in (self.api_keys or []) if k]
+        if not keys and self.api_key:
+            keys = [self.api_key]
+        return keys
 
     def available(self) -> bool:
         if self.is_local:
             return bool(self.base_url)
-        return bool(self.api_key and self.base_url)
+        return bool(self._keys() and self.base_url)
 
     async def stream_chat(
         self, messages: list[dict], route: RouteDecision, system: str
@@ -62,9 +77,48 @@ class OpenAICompatibleEngine(BaseEngine):
             "max_tokens": max_out,
             "stream": True,
         }
+
+        # ── Xoay vòng key: thử lần lượt cho tới khi có key trả lời ──────────
+        if self.is_local:
+            keys: list[str] = [""]  # Ollama không cần key nhưng vẫn chạy 1 lượt
+        else:
+            keys = self._keys()
+            if not keys:
+                raise EngineError(f"Bộ não '{self.name}' chưa có API key.", retryable=False)
+        order = keyring.rotation_order(self.name, len(keys)) or [0]
+
+        last_err: EngineError | None = None
+        for pos, idx in enumerate(order):
+            key = keys[idx]
+            got_text = False
+            try:
+                async for ev in self._stream_once(payload, key):
+                    if ev.get("type") == "text":
+                        got_text = True
+                    yield ev
+            except EngineError as exc:
+                # Chỉ xoay sang key KHÁC khi: lỗi do key (429/401/403), CHƯA phát
+                # chữ nào (không thể retry giữa dòng), và còn key để thử.
+                if exc.rotate and not got_text and pos < len(order) - 1:
+                    last_err = exc
+                    logger.info("%s key #%d lỗi (%s) → thử key kế", self.name, idx, exc.friendly_message)
+                    continue
+                raise
+            # Thành công với key này.
+            if citations:
+                yield {"type": "citations", "items": citations}
+            yield {"type": "final", "usage": {}, "stop_reason": "end_turn"}
+            return
+
+        # Hết key mà vẫn lỗi.
+        raise last_err or EngineError(f"Mọi API key của bộ não '{self.name}' đều lỗi.")
+
+    async def _stream_once(self, payload: dict, key: str) -> AsyncIterator[dict]:
+        """Gọi API MỘT LẦN với MỘT key. Chỉ phát event 'text'; raise EngineError
+        khi thất bại (đánh dấu rotate=True cho lỗi do key để lớp trên xoay key)."""
         headers = dict(self.extra_headers)
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
 
         got_text = False
         try:
@@ -73,7 +127,15 @@ class OpenAICompatibleEngine(BaseEngine):
                     "POST", f"{self.base_url}/chat/completions", headers=headers, json=payload
                 ) as resp:
                     if resp.status_code in (401, 403):
-                        raise EngineError(f"Khóa API của bộ não '{self.name}' không hợp lệ.", retryable=False)
+                        raise EngineError(
+                            f"Khóa API của bộ não '{self.name}' không hợp lệ.",
+                            retryable=False, rotate=True,
+                        )
+                    if resp.status_code == 429:
+                        raise EngineError(
+                            f"Bộ não '{self.name}' đang bị giới hạn tốc độ (429).",
+                            rotate=True,
+                        )
                     if resp.status_code >= 400:
                         body = (await resp.aread()).decode(errors="ignore")[:200]
                         logger.error("%s HTTP %s: %s", self.name, resp.status_code, body)
@@ -101,10 +163,6 @@ class OpenAICompatibleEngine(BaseEngine):
         if not got_text:
             raise EngineError(f"Bộ não '{self.name}' trả về nội dung rỗng.")
 
-        if citations:
-            yield {"type": "citations", "items": citations}
-        yield {"type": "final", "usage": {}, "stop_reason": "end_turn"}
-
 
 class DeepSeekEngine(OpenAICompatibleEngine):
     name = "deepseek"
@@ -113,7 +171,8 @@ class DeepSeekEngine(OpenAICompatibleEngine):
         super().__init__()
         self.base_url = CONFIG["DEEPSEEK_BASE_URL"]
         self.model = CONFIG["DEEPSEEK_MODEL"]
-        self.api_key = CONFIG["DEEPSEEK_API_KEY"]
+        self.api_keys = CONFIG["DEEPSEEK_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["DEEPSEEK_API_KEY"]
 
 
 class GroqEngine(OpenAICompatibleEngine):
@@ -123,7 +182,8 @@ class GroqEngine(OpenAICompatibleEngine):
         super().__init__()
         self.base_url = CONFIG["GROQ_BASE_URL"]
         self.model = CONFIG["GROQ_MODEL"]
-        self.api_key = CONFIG["GROQ_API_KEY"]
+        self.api_keys = CONFIG["GROQ_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["GROQ_API_KEY"]
 
 
 class MistralEngine(OpenAICompatibleEngine):
@@ -136,7 +196,8 @@ class MistralEngine(OpenAICompatibleEngine):
         super().__init__()
         self.base_url = CONFIG["MISTRAL_BASE_URL"].rstrip("/")
         self.model = CONFIG["MISTRAL_MODEL"]
-        self.api_key = CONFIG["MISTRAL_API_KEY"]
+        self.api_keys = CONFIG["MISTRAL_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["MISTRAL_API_KEY"]
 
 
 class KimiEngine(OpenAICompatibleEngine):
@@ -150,7 +211,8 @@ class KimiEngine(OpenAICompatibleEngine):
         super().__init__()
         self.base_url = CONFIG["KIMI_BASE_URL"].rstrip("/")
         self.model = CONFIG["KIMI_MODEL"]
-        self.api_key = CONFIG["KIMI_API_KEY"]
+        self.api_keys = CONFIG["KIMI_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["KIMI_API_KEY"]
 
 
 class GitHubModelsEngine(OpenAICompatibleEngine):
@@ -162,7 +224,8 @@ class GitHubModelsEngine(OpenAICompatibleEngine):
         super().__init__()
         self.base_url = CONFIG["GITHUB_MODELS_BASE_URL"].rstrip("/")
         self.model = CONFIG["GITHUB_MODELS_MODEL"]
-        self.api_key = CONFIG["GITHUB_MODELS_API_KEY"]
+        self.api_keys = CONFIG["GITHUB_MODELS_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["GITHUB_MODELS_API_KEY"]
 
 
 class OllamaEngine(OpenAICompatibleEngine):
@@ -194,7 +257,8 @@ class OpenRouterEngine(OpenAICompatibleEngine):
         super().__init__()
         self.base_url = CONFIG["OPENROUTER_BASE_URL"]
         self.model = model or CONFIG["OPENROUTER_MODEL"]
-        self.api_key = CONFIG["OPENROUTER_API_KEY"]
+        self.api_keys = CONFIG["OPENROUTER_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["OPENROUTER_API_KEY"]
         if name:
             self.name = name
         # OpenRouter khuyến nghị (không bắt buộc) gửi 2 header này
@@ -211,4 +275,5 @@ class OpenAIEngine(OpenAICompatibleEngine):
         super().__init__()
         self.base_url = CONFIG["OPENAI_BASE_URL"]
         self.model = CONFIG["OPENAI_MODEL"]
-        self.api_key = CONFIG["OPENAI_API_KEY"]
+        self.api_keys = CONFIG["OPENAI_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["OPENAI_API_KEY"]

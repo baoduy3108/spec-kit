@@ -10,6 +10,7 @@ from typing import AsyncIterator
 
 import httpx
 
+from .. import keyring
 from ..config import CONFIG
 from ..media import parse_data_url, parse_video_data_url
 from ..schemas import RouteDecision
@@ -26,8 +27,14 @@ _LONG_MODES = ("deep", "apex", "search", "research", "agent", "critique")
 class GeminiEngine(BaseEngine):
     name = "gemini"
 
+    def _keys(self) -> list[str]:
+        keys = [k for k in (CONFIG["GEMINI_API_KEYS"] or []) if k]
+        if not keys and CONFIG["GEMINI_API_KEY"]:
+            keys = [CONFIG["GEMINI_API_KEY"]]
+        return keys
+
     def available(self) -> bool:
-        return bool(CONFIG["GEMINI_API_KEY"])
+        return bool(self._keys())
 
     def supports_vision(self) -> bool:
         return True
@@ -66,19 +73,39 @@ class GeminiEngine(BaseEngine):
         if route.use_web_search:
             payload["tools"] = [{"google_search": {}}]  # Search grounding
 
-        url = f"{_BASE}/{CONFIG['GEMINI_MODEL']}:generateContent?key={CONFIG['GEMINI_API_KEY']}"
         # Video cần nhiều thời gian xử lý khung hình hơn hẳn ảnh/chữ.
         timeout = 240 if has_video else 120
-        try:
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                resp = await client.post(url, json=payload)
-                resp.raise_for_status()
-                data = resp.json()
-        except httpx.HTTPStatusError as exc:
-            logger.error("Gemini HTTP %s: %s", exc.response.status_code, exc.response.text[:300])
-            raise EngineError(f"Gemini gặp lỗi ({exc.response.status_code}).")
-        except httpx.HTTPError:
-            raise EngineError("Không kết nối được tới Gemini.")
+
+        # ── Xoay vòng nhiều key (gộp hạn mức free nhiều tài khoản Gemini) ──
+        keys = self._keys()
+        if not keys:
+            raise EngineError("Gemini chưa có API key.", retryable=False)
+        order = keyring.rotation_order("gemini", len(keys)) or [0]
+        data = None
+        last_err: EngineError | None = None
+        for pos, idx in enumerate(order):
+            url = f"{_BASE}/{CONFIG['GEMINI_MODEL']}:generateContent?key={keys[idx]}"
+            try:
+                async with httpx.AsyncClient(timeout=timeout) as client:
+                    resp = await client.post(url, json=payload)
+                    resp.raise_for_status()
+                    data = resp.json()
+                break
+            except httpx.HTTPStatusError as exc:
+                code = exc.response.status_code
+                logger.error("Gemini HTTP %s: %s", code, exc.response.text[:300])
+                # 429 (hết lượt) / 401-403 (key hỏng) → thử key kế nếu còn.
+                if code in (401, 403, 429) and pos < len(order) - 1:
+                    last_err = EngineError(f"Gemini key #{idx} lỗi ({code}).")
+                    continue
+                raise EngineError(f"Gemini gặp lỗi ({code}).")
+            except httpx.HTTPError:
+                if pos < len(order) - 1:
+                    last_err = EngineError("Không kết nối được tới Gemini.")
+                    continue
+                raise EngineError("Không kết nối được tới Gemini.")
+        if data is None:
+            raise last_err or EngineError("Không kết nối được tới Gemini.")
 
         candidates = data.get("candidates") or []
         if not candidates:

@@ -19,6 +19,26 @@ def _bool(name: str, default: bool = False) -> bool:
     return os.getenv(name, str(default)).strip().lower() in ("1", "true", "yes", "on")
 
 
+def _multikey(prefix: str) -> list[str]:
+    """Đọc NHIỀU API key (phân tách bằng dấu phẩy) từ biến {PREFIX}_API_KEYS,
+    fallback về {PREFIX}_API_KEY (một key). Loại rỗng + trùng lặp, giữ thứ tự.
+
+    Mục đích: chủ web MUỐN gộp hạn mức FREE của nhiều tài khoản — ví dụ
+    GROQ_API_KEYS=key1,key2,...,key15 — để phục vụ đông người dùng (app Android
+    công khai) mà không đụng trần free của một key. LUMINA xoay vòng qua các key
+    này (round-robin) và tự nhảy sang key kế khi gặp 429 (hết lượt) / key hỏng.
+    """
+    raw = os.getenv(f"{prefix}_API_KEYS", "") or os.getenv(f"{prefix}_API_KEY", "")
+    keys: list[str] = []
+    seen: set[str] = set()
+    for k in raw.split(","):
+        k = k.strip()
+        if k and k not in seen:
+            seen.add(k)
+            keys.append(k)
+    return keys
+
+
 CONFIG = {
     # ── Thương hiệu ─────────────────────────────────────────────
     "APP_NAME": "LUMINA AI",
@@ -41,6 +61,18 @@ CONFIG = {
     "GEMINI_MODEL": os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
     "GROQ_API_KEY": os.getenv("GROQ_API_KEY", ""),       # FREE tại console.groq.com
     "GROQ_MODEL": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+    # ── XOAY VÒNG NHIỀU KEY (gộp hạn mức free của nhiều tài khoản) ──
+    # Điền {NHÀ_CUNG_CẤP}_API_KEYS=key1,key2,... (nhiều key phẩy) để nhân trần
+    # hạn mức free lên — LUMINA xoay vòng qua các key và tự nhảy key khi 429/hỏng.
+    # Nếu chỉ có 1 key thì cứ để {NHÀ_CUNG_CẤP}_API_KEY như cũ (tự gộp vào danh sách).
+    "GEMINI_API_KEYS": _multikey("GEMINI"),
+    "GROQ_API_KEYS": _multikey("GROQ"),
+    "OPENROUTER_API_KEYS": _multikey("OPENROUTER"),
+    "DEEPSEEK_API_KEYS": _multikey("DEEPSEEK"),
+    "MISTRAL_API_KEYS": _multikey("MISTRAL"),
+    "KIMI_API_KEYS": _multikey("KIMI"),
+    "GITHUB_MODELS_API_KEYS": _multikey("GITHUB_MODELS"),
+    "OPENAI_API_KEYS": _multikey("OPENAI"),
     "GROQ_BASE_URL": "https://api.groq.com/openai/v1",
     # 🎧 Whisper (chép lời video/âm thanh) — qua Groq (miễn phí) hoặc OpenAI.
     "GROQ_WHISPER_MODEL": os.getenv("GROQ_WHISPER_MODEL", "whisper-large-v3-turbo"),

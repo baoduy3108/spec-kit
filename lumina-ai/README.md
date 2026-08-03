@@ -126,6 +126,14 @@ Cần tối thiểu một trong số này (khuyến nghị điền **Gemini free
 ### c) (Tùy chọn) Thêm bộ não dự phòng
 Điền càng nhiều key thì càng bền (bộ não này lỗi/hết hạn mức thì nhảy sang cái khác): `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, hoặc `OLLAMA_BASE_URL` (tự host model trên máy riêng).
 
+**🔁 Gộp nhiều key free để phục vụ ĐÔNG người (vd đưa app lên Android).** Mỗi tài khoản free có trần lượt/phút. Muốn nhiều người dùng cùng lúc mà không đụng trần, tạo nhiều tài khoản free rồi điền các key cách nhau bằng **dấu phẩy** vào biến `*_API_KEYS` — LUMINA **xoay vòng** qua chúng và tự nhảy sang key kế khi một key hết lượt (429) hoặc hỏng:
+```
+GROQ_API_KEYS=gsk_key1,gsk_key2,gsk_key3,...
+GEMINI_API_KEYS=AIza_key1,AIza_key2,...
+OPENROUTER_API_KEYS=sk-or-key1,sk-or-key2,...
+```
+Cũng dùng được với `DEEPSEEK_API_KEYS`, `MISTRAL_API_KEYS`, `KIMI_API_KEYS`, `GITHUB_MODELS_API_KEYS`, `OPENAI_API_KEYS`. Chỉ có 1 key thì cứ để `*_API_KEY` như cũ. *(Lưu ý: tạo hàng loạt tài khoản free có thể vi phạm điều khoản của nhà cung cấp — tự cân nhắc.)*
+
 ### d) Cấu hình gói trả phí (tùy chọn)
 Bán gói thì cần cổng thanh toán — xem **mục 6** (SePay cho khách VN, PayPal cho khách quốc tế). Đặt `ADMIN_EMAILS=email-cua-ban@gmail.com` để mở mục **🛠 Đơn hàng** trên web. Không bán gói cũng được — web vẫn chạy free bình thường.
 

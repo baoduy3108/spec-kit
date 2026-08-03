@@ -4179,3 +4179,166 @@ def test_semantic_match_ranks_by_cosine_and_threshold(monkeypatch):
     skill_search._index.clear()
     skill_search._loaded = False
 
+
+
+# ── Xoay vòng nhiều API key (gộp hạn mức free nhiều tài khoản) ──────────
+
+def test_multikey_config_parses_dedups_and_falls_back(monkeypatch):
+    """_multikey đọc {PREFIX}_API_KEYS (nhiều key phẩy), loại rỗng+trùng, giữ thứ tự;
+    thiếu thì fallback về {PREFIX}_API_KEY đơn."""
+    from app import config
+    monkeypatch.setenv("XPROV_API_KEYS", " k1 , k2 ,, k1 , k3 ")
+    assert config._multikey("XPROV") == ["k1", "k2", "k3"]
+    monkeypatch.delenv("XPROV_API_KEYS", raising=False)
+    monkeypatch.setenv("XPROV_API_KEY", "solo")
+    assert config._multikey("XPROV") == ["solo"]
+    monkeypatch.delenv("XPROV_API_KEY", raising=False)
+    assert config._multikey("XPROV") == []
+
+
+def test_keyring_round_robin_advances_start():
+    """rotation_order xoay điểm bắt đầu mỗi lần gọi → cân bằng tải qua các key."""
+    from app import keyring
+    keyring.reset()
+    assert keyring.rotation_order("p", 3) == [0, 1, 2]
+    assert keyring.rotation_order("p", 3) == [1, 2, 0]
+    assert keyring.rotation_order("p", 3) == [2, 0, 1]
+    assert keyring.rotation_order("p", 3) == [0, 1, 2]
+    # Nhà cung cấp khác có bộ đếm riêng.
+    assert keyring.rotation_order("q", 2) == [0, 1]
+    # Biên: 1 key → [0]; 0 key → rỗng.
+    assert keyring.rotation_order("p", 1) == [0]
+    assert keyring.rotation_order("p", 0) == []
+    keyring.reset()
+
+
+def test_engine_keys_and_availability_reflect_multikey():
+    """Engine với danh sách api_keys → _keys() trả đủ, available() True; rỗng → False."""
+    from app.engines.openai_compatible import GroqEngine
+    e = GroqEngine()
+    e.api_keys = ["a", "b", "c"]
+    e.api_key = "a"
+    assert e._keys() == ["a", "b", "c"]
+    assert e.available() is True
+    e.api_keys = []
+    e.api_key = ""
+    assert e._keys() == []
+    assert e.available() is False
+    # Chỉ có api_key đơn (không có api_keys) vẫn hoạt động (tương thích ngược).
+    e.api_key = "solo"
+    assert e._keys() == ["solo"]
+    assert e.available() is True
+
+
+def test_multikey_rotation_skips_dead_key_then_succeeds():
+    """stream_chat nhảy sang key kế khi key đầu 429/hỏng (rotate=True) và CHƯA phát
+    chữ nào — key thứ hai trả lời thành công."""
+    import asyncio
+    from app.engines.openai_compatible import OpenAICompatibleEngine
+    from app.engines.base import EngineError
+    from app import keyring
+    from app.schemas import RouteDecision
+
+    keyring.reset()
+
+    class FakeEngine(OpenAICompatibleEngine):
+        name = "fake-rot"
+        base_url = "http://x"
+        used_keys: list[str] = []
+
+        async def _stream_once(self, payload, key):
+            type(self).used_keys.append(key)
+            if key == "bad":               # key hết lượt → yêu cầu xoay
+                raise EngineError("429", rotate=True)
+            yield {"type": "text", "text": "ok"}
+
+    FakeEngine.used_keys = []
+    e = FakeEngine()
+    e.api_keys = ["bad", "good"]
+    route = RouteDecision(mode="fast", label="x", model="m", use_web_search=False)
+
+    async def run():
+        return [ev async for ev in e.stream_chat([{"role": "user", "content": "hi"}], route, "sys")]
+
+    events = asyncio.run(run())
+    assert FakeEngine.used_keys == ["bad", "good"]      # thử bad trước, rồi good
+    assert any(ev.get("type") == "text" and ev["text"] == "ok" for ev in events)
+    assert events[-1]["type"] == "final"
+    keyring.reset()
+
+
+def test_multikey_rotation_does_not_retry_after_text_emitted():
+    """Nếu ĐÃ phát chữ rồi mới lỗi → KHÔNG xoay key (tránh lặp nội dung), ném lỗi ra."""
+    import asyncio
+    from app.engines.openai_compatible import OpenAICompatibleEngine
+    from app.engines.base import EngineError
+    from app import keyring
+    from app.schemas import RouteDecision
+
+    keyring.reset()
+
+    class MidFailEngine(OpenAICompatibleEngine):
+        name = "fake-midfail"
+        base_url = "http://x"
+        tries = 0
+
+        async def _stream_once(self, payload, key):
+            type(self).tries += 1
+            yield {"type": "text", "text": "phần đầu "}
+            raise EngineError("đứt giữa chừng", rotate=True)
+
+    MidFailEngine.tries = 0
+    e = MidFailEngine()
+    e.api_keys = ["k1", "k2"]
+    route = RouteDecision(mode="fast", label="x", model="m", use_web_search=False)
+
+    async def run():
+        out = []
+        async for ev in e.stream_chat([{"role": "user", "content": "hi"}], route, "sys"):
+            out.append(ev)
+        return out
+
+    try:
+        asyncio.run(run())
+        assert False, "phải ném EngineError"
+    except EngineError:
+        pass
+    assert MidFailEngine.tries == 1     # KHÔNG thử key thứ hai sau khi đã phát chữ
+    keyring.reset()
+
+
+def test_multikey_non_rotate_error_does_not_rotate():
+    """Lỗi KHÔNG phải do key (rotate=False, vd rỗng nội dung) → không phí key khác."""
+    import asyncio
+    from app.engines.openai_compatible import OpenAICompatibleEngine
+    from app.engines.base import EngineError
+    from app import keyring
+    from app.schemas import RouteDecision
+
+    keyring.reset()
+
+    class EmptyEngine(OpenAICompatibleEngine):
+        name = "fake-empty"
+        base_url = "http://x"
+        tries = 0
+
+        async def _stream_once(self, payload, key):
+            type(self).tries += 1
+            raise EngineError("rỗng", rotate=False)
+            yield  # pragma: no cover
+
+    EmptyEngine.tries = 0
+    e = EmptyEngine()
+    e.api_keys = ["k1", "k2", "k3"]
+    route = RouteDecision(mode="fast", label="x", model="m", use_web_search=False)
+
+    async def run():
+        return [ev async for ev in e.stream_chat([{"role": "user", "content": "hi"}], route, "sys")]
+
+    try:
+        asyncio.run(run())
+        assert False
+    except EngineError:
+        pass
+    assert EmptyEngine.tries == 1       # dừng ngay, không xoay
+    keyring.reset()
