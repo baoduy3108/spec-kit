@@ -1215,7 +1215,7 @@ const EASTER_EGGS=[
   {id:'lvl30_void', trigger:()=>mode==='level'&&curLevel===29, effect:()=>{ pop('💀 GỌI HỏI HƯ KHÔNG 💀', true, 28, '#7c6bff'); score+=2000; flash=1; unlockAch('cmp_30'); }, rarity:'myth'},
 
   /* Secret patterns */
-  {id:'speedrun', trigger:()=>mode==='level'&&totalGameTime<30000&&score>1000, effect:()=>{ pop('⏱️ CHẠY NHANH NHƯ GIÓ ⏱️', true, 22, '#3dd6ff'); score+=Math.round(score*0.2); }, rarity:'hidden'},
+  {id:'speedrun', trigger:()=>mode==='level'&&score>1000, effect:()=>{ pop('⏱️ CHẠY NHANH NHƯ GIÓ ⏱️', true, 22, '#3dd6ff'); score+=Math.round(score*0.2); }, rarity:'hidden'},
   {id:'perfect_clear', trigger:()=>combo>=20&&lastCleared>=4, effect:()=>{ pop('💎 HOÀN HẢO TUYỆT VỜI 💎', true, 24, '#ffd54d'); score+=Math.round(score*0.15); }, rarity:'hidden'},
   {id:'grid_master', trigger:()=>mode==='level'&&score>5000&&lastCleared>=6, effect:()=>{ pop('👑 VUA LƯỚI ĐẤT 👑', true, 26, '#ff6b35'); }, rarity:'epic'},
 ];
