@@ -1056,7 +1056,7 @@ const LEVELS=[
       // XÓA HÀNG: 2→5 quá 305 levels
       const n=Math.min(5, 2+Math.floor(progress*3));
       // Hiếm khi có thiên thạch
-      if(rng()<0.1) arr[Math.floor(rg()*64)]='X';
+      if(rg()<0.1) arr[Math.floor(rg()*64)]='X';
       // Move limit: 8-10x target (generous)
       o={t:'lines',n,mv:Math.ceil(n*8.5)};
     }
