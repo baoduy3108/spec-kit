@@ -1024,53 +1024,84 @@ const LEVELS=[
  {b:P('00000000|00777700|00700700|00000000|00000000|00700700|00777700|00000000'),o:{t:'lines',n:4,mv:20}},
  {b:P('00000000|00666600|00600600|00000000|00000000|00600600|00666600|00000000'),o:{t:'lines',n:6,mv:30}},
 ];
-(function genLevels(){ // màn 13-40: sinh theo seed, độ khó leo thang (mật độ + thiên thạch + lượt eo hẹp)
-  // ĐỘ KHÓ ĐÃ HIỆU CHỈNH (b25): trước đây mục tiêu score/lines leo vô lý (VD màn 40 đòi xóa 10 hàng/16 lượt —
-  // BẤT KHẢ vì 16 khối ~64 ô không đủ lấp 10 hàng; score đòi 1200+ khi trần chỉ ~40-200). Đo bằng bot rồi
-  // hiệu chỉnh: xen kẽ XÓA HÀNG / NUỐT THIÊN THẠCH (cả hai đều cân được), lượt tỉ lệ với mục tiêu, bàn thoáng hơn.
+(function genLevels(){ // REWRITE b55: Màn 13-318 - density thấp, objectives fair
+  // KEY CHANGES:
+  //  • Density giảm 50%+: 3-6% thay 6-12% → board luôn có chỗ đặt
+  //  • Move limit = 8-10x target (để buffer) thay 6x (quá sát)
+  //  • Difficulty dễ dàng tăng (ko btrack nhảy cóc)
+  //  • Boss every 10 levels: 20,30,40,...,310 (15 boss levels)
   for(let i=12;i<318;i++){ const rg=mulberry32(4300+i*71);
+    const progress=(i-12)/305;  // 0→1 qua 305 levels
     const ot=(i%2===0)?'lines':'eat';
-    // bàn khởi đầu THOÁNG: màn XÓA HÀNG chỉ vài khối trang trí (khối rải nhiều chỉ cản việc lấp hàng);
-    // màn NUỐT cũng thoáng để còn chỗ nạp Hố Đen. Mật độ thấp = độ khó đến từ MỤC TIÊU/LƯỢT, không từ bàn nghẹt.
-    const dens=(ot==='eat')?Math.min(0.12, 0.06+0.003*(i-12)):Math.min(0.09, 0.04+0.0022*(i-12));
+
+    // DENSITY: bắt đầu 3%, cuối 6% (từng bước)
+    const dens=(ot==='eat')?
+      (0.03 + progress*0.03):  // eat: 3-6%
+      (0.03 + progress*0.025);  // lines: 3-5.5%
+
     let b=''; for(let k=0;k<64;k++) b+= rg()<dens ? String(1+(rg()*8|0)) : '0';
     const arr=b.split('');
     let o;
+
     if(ot==='eat'){
-      const en=Math.min(4,2+((i-12)/9|0)), w=2, h=en>=3?2:1;   // 2..4 thiên thạch xếp CỤM ô vuông
-      const or=2+((rg()*3)|0), oc=2+((rg()*3)|0); let put=0;
+      // NUỐT THIÊN THẠCH: 2→4 quá 305 levels
+      const en=Math.min(4, 2+Math.floor(progress*2));
+      const w=2, h=en>=3?2:1;
+      const or=2+Math.floor(rg()*4), oc=2+Math.floor(rg()*4);
+      let put=0;
       for(let dr=0;dr<h&&put<en;dr++) for(let dc=0;dc<w&&put<en;dc++){ arr[(or+dr)*N+(oc+dc)]='X'; put++; }
-      o={t:'eat',n:en,mv:24+((i-12)/6|0)*2+(en>=4?6:2)};
+      // Move limit: 8-10x target (generous)
+      o={t:'eat',n:en,mv:Math.ceil(en*9)};
     } else {
-      if((i-12)%8===7) arr[(rg()*64)|0]='X';                  // thi thoảng 1 thiên thạch chướng ngại
-      const n=Math.min(6,4+((i-12)/9|0));                     // 4..6 hàng (không leo tới 10 bất khả)
-      o={t:'lines',n,mv:n*6+2};                               // ~6 lượt/hàng + đệm — rất rộng để qua kể cả chơi vụng
+      // XÓA HÀNG: 2→5 quá 305 levels
+      const n=Math.min(5, 2+Math.floor(progress*3));
+      // Hiếm khi có thiên thạch
+      if(rng()<0.1) arr[Math.floor(rg()*64)]='X';
+      // Move limit: 8-10x target (generous)
+      o={t:'lines',n,mv:Math.ceil(n*8.5)};
     }
+
     LEVELS.push({b:arr.join(''),o,boss:((i+1)%10===0)?1:0});
   }
 })();
-(function genHiddenLevels(){ // Levels 318-353: 36 ultra-hard hidden campaign (mở khoá sau khi xong main campaign)
-  // Độ khó cực cao: mật độ cao, lượt ít, thiên thạch nhiều. Chỉ cho những ai beat main campaign.
-  for(let i=318;i<354;i++){ const rg=mulberry32(5500+i*83); // seed khác genLevels để levels khác biệt
+(function genHiddenLevels(){ // REWRITE b55: Levels 318-353 - ultra-hard nhưng still playable
+  // Hidden campaign: Độ khó cao (10-18% density) nhưng ko impossible
+  // Move limit đủ để thắng nếu chơi smart (6-8x target)
+  for(let i=318;i<354;i++){ const rg=mulberry32(5500+i*83);
+    const progress=(i-318)/35;  // 0→1 qua 36 levels
     const ot=(i%2===0)?'lines':'eat';
-    // Mật độ ULTRA cao: 30-40% board full (vs 15% ở main campaign)
-    const dens=(ot==='eat')?Math.min(0.35, 0.25+0.002*(i-318)):Math.min(0.30, 0.20+0.002*(i-318));
+
+    // DENSITY: 10-18% (cao hơn main nhưng ko vô lý)
+    const dens=(ot==='eat')?
+      (0.10 + progress*0.08):  // eat: 10-18%
+      (0.10 + progress*0.07);  // lines: 10-17%
+
     let b=''; for(let k=0;k<64;k++) b+= rg()<dens ? String(1+(rg()*8|0)) : '0';
     const arr=b.split('');
     let o;
+
     if(ot==='eat'){
-      // Eat levels: 3-5 thiên thạch, ít lượt hơn
-      const en=Math.min(5,3+((i-318)/6|0)), w=2, h=en>=4?2:1;
-      const or=1+((rg()*4)|0), oc=1+((rg()*4)|0); let put=0;
-      for(let dr=0;dr<h&&put<en;dr++) for(let dc=0;dc<w&&put<en;dc++){ if((or+dr)*N+(oc+dc)<64) arr[(or+dr)*N+(oc+dc)]='X'; put++; }
-      o={t:'eat',n:en,mv:Math.max(18, 20-((i-318)/9|0)*2)}; // 20→18 lượt, giảm dần
+      // NUỐT: 3→5 thiên thạch
+      const en=Math.min(5, 3+Math.floor(progress*2));
+      const w=2, h=en>=4?2:1;
+      const or=1+Math.floor(rg()*5), oc=1+Math.floor(rg()*5);
+      let put=0;
+      for(let dr=0;dr<h&&put<en;dr++) for(let dc=0;dc<w&&put<en;dc++){
+        if((or+dr)*N+(oc+dc)<64) arr[(or+dr)*N+(oc+dc)]='X';
+        put++;
+      }
+      // Move limit: 6-7x (tight but fair)
+      o={t:'eat',n:en,mv:Math.ceil(en*6.5)};
     } else {
-      // Lines levels: 5-7 hàng, lượt cắt xén
-      if((i-318)%6===5) arr[(rg()*64)|0]='X';
-      const n=Math.min(7,5+((i-318)/8|0));
-      o={t:'lines',n,mv:Math.max(12, n*4-2)}; // Rất khó: chỉ ~4 lượt/hàng
+      // XÓA HÀNG: 5→7 hàng
+      const n=Math.min(7, 5+Math.floor(progress*2));
+      // 20% chance thiên thạch (obstacle)
+      if(rg()<0.2) arr[Math.floor(rg()*64)]='X';
+      // Move limit: 6-8x (tight but fair)
+      o={t:'lines',n,mv:Math.ceil(n*6.8)};
     }
-    LEVELS.push({b:arr.join(''),o,boss:((i+1)%10===0)?1:0, hidden:true}); // flag hidden=true để tracking
+
+    LEVELS.push({b:arr.join(''),o,boss:((i+1)%10===0)?1:0});
   }
 })();
 let curLevel=0, lvMoves=0, lvLines=0, lvEat=0, lvWon=false;
