@@ -1024,81 +1024,81 @@ const LEVELS=[
  {b:P('00000000|00777700|00700700|00000000|00000000|00700700|00777700|00000000'),o:{t:'lines',n:4,mv:20}},
  {b:P('00000000|00666600|00600600|00000000|00000000|00600600|00666600|00000000'),o:{t:'lines',n:6,mv:30}},
 ];
-(function genLevels(){ // REWRITE b55: Màn 13-318 - density thấp, objectives fair
+(function genLevels(){ // REWRITE b56: Ultra-easy - 1-3% density để tất cả levels passable
   // KEY CHANGES:
-  //  • Density giảm 50%+: 3-6% thay 6-12% → board luôn có chỗ đặt
-  //  • Move limit = 8-10x target (để buffer) thay 6x (quá sát)
-  //  • Difficulty dễ dàng tăng (ko btrack nhảy cóc)
+  //  • Density RẤT THẤP: 1-3% (chắc chắn solvable)
+  //  • Move limit = 10-15x target (siêu generous)
+  //  • Difficulty tăng từ từ qua 305 levels
   //  • Boss every 10 levels: 20,30,40,...,310 (15 boss levels)
   for(let i=12;i<318;i++){ const rg=mulberry32(4300+i*71);
     const progress=(i-12)/305;  // 0→1 qua 305 levels
     const ot=(i%2===0)?'lines':'eat';
 
-    // DENSITY: bắt đầu 3%, cuối 6% (từng bước)
+    // DENSITY: bắt đầu 1%, cuối 3% (rất thấp để passable)
     const dens=(ot==='eat')?
-      (0.03 + progress*0.03):  // eat: 3-6%
-      (0.03 + progress*0.025);  // lines: 3-5.5%
+      (0.01 + progress*0.02):  // eat: 1-3%
+      (0.01 + progress*0.015);  // lines: 1-2.5%
 
     let b=''; for(let k=0;k<64;k++) b+= rg()<dens ? String(1+(rg()*8|0)) : '0';
     const arr=b.split('');
     let o;
 
     if(ot==='eat'){
-      // NUỐT THIÊN THẠCH: 2→4 quá 305 levels
-      const en=Math.min(4, 2+Math.floor(progress*2));
-      const w=2, h=en>=3?2:1;
+      // NUỐT THIÊN THẠCH: 2→3 quá 305 levels (ít hơn để dễ)
+      const en=Math.min(3, 2+Math.floor(progress*1));
+      const w=2, h=en>=2?2:1;
       const or=2+Math.floor(rg()*4), oc=2+Math.floor(rg()*4);
       let put=0;
       for(let dr=0;dr<h&&put<en;dr++) for(let dc=0;dc<w&&put<en;dc++){ arr[(or+dr)*N+(oc+dc)]='X'; put++; }
-      // Move limit: 8-10x target (generous)
-      o={t:'eat',n:en,mv:Math.ceil(en*9)};
+      // Move limit: 15x target (siêu generous để chắc thắng)
+      o={t:'eat',n:en,mv:Math.ceil(en*15)};
     } else {
-      // XÓA HÀNG: 2→5 quá 305 levels
-      const n=Math.min(5, 2+Math.floor(progress*3));
+      // XÓA HÀNG: 2→3 quá 305 levels (ít hơn để dễ)
+      const n=Math.min(3, 2+Math.floor(progress*1));
       // Hiếm khi có thiên thạch
-      if(rg()<0.1) arr[Math.floor(rg()*64)]='X';
-      // Move limit: 8-10x target (generous)
-      o={t:'lines',n,mv:Math.ceil(n*8.5)};
+      if(rg()<0.05) arr[Math.floor(rg()*64)]='X';
+      // Move limit: 12x target (siêu generous)
+      o={t:'lines',n,mv:Math.ceil(n*12)};
     }
 
     LEVELS.push({b:arr.join(''),o,boss:((i+1)%10===0)?1:0});
   }
 })();
-(function genHiddenLevels(){ // REWRITE b55: Levels 318-353 - ultra-hard nhưng still playable
-  // Hidden campaign: Độ khó cao (10-18% density) nhưng ko impossible
-  // Move limit đủ để thắng nếu chơi smart (6-8x target)
+(function genHiddenLevels(){ // REWRITE b56: Levels 318-353 - hard but fair (5-12% density)
+  // Hidden campaign: Độ khó cao (5-12% density) nhưng still solvable
+  // Move limit đủ để thắng nếu chơi smart (8-12x target)
   for(let i=318;i<354;i++){ const rg=mulberry32(5500+i*83);
     const progress=(i-318)/35;  // 0→1 qua 36 levels
     const ot=(i%2===0)?'lines':'eat';
 
-    // DENSITY: 10-18% (cao hơn main nhưng ko vô lý)
+    // DENSITY: 5-12% (cao hơn main nhưng realistic)
     const dens=(ot==='eat')?
-      (0.10 + progress*0.08):  // eat: 10-18%
-      (0.10 + progress*0.07);  // lines: 10-17%
+      (0.05 + progress*0.07):  // eat: 5-12%
+      (0.05 + progress*0.06);  // lines: 5-11%
 
     let b=''; for(let k=0;k<64;k++) b+= rg()<dens ? String(1+(rg()*8|0)) : '0';
     const arr=b.split('');
     let o;
 
     if(ot==='eat'){
-      // NUỐT: 3→5 thiên thạch
-      const en=Math.min(5, 3+Math.floor(progress*2));
-      const w=2, h=en>=4?2:1;
+      // NUỐT: 3→4 thiên thạch
+      const en=Math.min(4, 3+Math.floor(progress*1));
+      const w=2, h=en>=3?2:1;
       const or=1+Math.floor(rg()*5), oc=1+Math.floor(rg()*5);
       let put=0;
       for(let dr=0;dr<h&&put<en;dr++) for(let dc=0;dc<w&&put<en;dc++){
         if((or+dr)*N+(oc+dc)<64) arr[(or+dr)*N+(oc+dc)]='X';
         put++;
       }
-      // Move limit: 6-7x (tight but fair)
-      o={t:'eat',n:en,mv:Math.ceil(en*6.5)};
+      // Move limit: 9-12x (generous, fair)
+      o={t:'eat',n:en,mv:Math.ceil(en*10)};
     } else {
-      // XÓA HÀNG: 5→7 hàng
-      const n=Math.min(7, 5+Math.floor(progress*2));
-      // 20% chance thiên thạch (obstacle)
-      if(rg()<0.2) arr[Math.floor(rg()*64)]='X';
-      // Move limit: 6-8x (tight but fair)
-      o={t:'lines',n,mv:Math.ceil(n*6.8)};
+      // XÓA HÀNG: 4→6 hàng
+      const n=Math.min(6, 4+Math.floor(progress*2));
+      // 10% chance thiên thạch (obstacle)
+      if(rg()<0.1) arr[Math.floor(rg()*64)]='X';
+      // Move limit: 8-10x (generous, fair)
+      o={t:'lines',n,mv:Math.ceil(n*9)};
     }
 
     LEVELS.push({b:arr.join(''),o,boss:((i+1)%10===0)?1:0});
