@@ -2948,6 +2948,17 @@ themeIdx=loadTheme(); if(!THEMES[themeIdx]||THEMES[themeIdx].unlock>best) themeI
 newGame(); applyLang();
 setTimeout(()=>toast(t('hint')),500);
 requestAnimationFrame(loop);
+
+// TEST API: Expose functions for automated testing
+window.__gameAPI = {
+  getState: ()=>({curLevel, mode, lvWon, gameOver, score, lvMoves, lvLines, lvEat, grid: grid.map(r=>[...r]), tray: tray.map(p=>p?{cells:p.cells,w:p.w,h:p.h}:null), state}),
+  setLevel: (lvl)=>{ curLevel=lvl-1; mode='level'; },
+  newGame: ()=>newGame(),
+  canPlace: (p,r,c)=>{for(const v of p.cells){const gr=r+v[0],gc=c+v[1];if(gr<0||gr>=N||gc<0||gc>=N||grid[gr][gc])return false;}return true;},
+  placePiece: (idx,r,c)=>placePiece(idx,r,c),
+  anyPlaceable: ()=>{for(const p of tray)if(p){for(let r=0;r<=N-p.h;r++)for(let c=0;c<=N-p.w;c++)if(window.__gameAPI.canPlace(p,r,c))return true;}return false;},
+  testLevel: async(lvl)=>{window.__gameAPI.setLevel(lvl);window.__gameAPI.newGame();for(let i=0;i<200;i++){if(window.__gameAPI.getState().lvWon)return{passed:true,moves:i};if(!window.__gameAPI.anyPlaceable())return{passed:false,reason:'stuck'};const placeable=[];for(let j=0;j<3;j++){const p=tray[j];if(!p)continue;for(let r=0;r<=N-p.h;r++)for(let c=0;c<=N-p.w;c++)if(window.__gameAPI.canPlace(p,r,c))placeable.push({idx:j,r,c});}if(placeable.length>0){const choice=placeable[Math.floor(Math.random()*placeable.length)];window.__gameAPI.placePiece(choice.idx,choice.r,choice.c);await new Promise(r=>setTimeout(r,50));}else return{passed:false,reason:'stuck'};}return{passed:false,reason:'timeout'};}
+};
 })();
 </script>
 </body>
