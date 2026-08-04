@@ -1032,7 +1032,7 @@ const LEVELS=[
     const ot=(i%2===0)?'lines':'eat';
     // bàn khởi đầu THOÁNG: màn XÓA HÀNG chỉ vài khối trang trí (khối rải nhiều chỉ cản việc lấp hàng);
     // màn NUỐT cũng thoáng để còn chỗ nạp Hố Đen. Mật độ thấp = độ khó đến từ MỤC TIÊU/LƯỢT, không từ bàn nghẹt.
-    const dens=(ot==='eat')?Math.min(0.15, 0.08+0.004*(i-12)):Math.min(0.11, 0.06+0.003*(i-12));
+    const dens=(ot==='eat')?Math.min(0.12, 0.06+0.003*(i-12)):Math.min(0.09, 0.04+0.0022*(i-12));
     let b=''; for(let k=0;k<64;k++) b+= rg()<dens ? String(1+(rg()*8|0)) : '0';
     const arr=b.split('');
     let o;
