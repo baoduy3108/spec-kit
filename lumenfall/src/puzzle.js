@@ -29,8 +29,8 @@ export const DIR = {
   D: 2,
   L: 3,
 };
-const DX = [0, 1, 0, -1];
-const DY = [-1, 0, 1, 0];
+export const DX = [0, 1, 0, -1];
+export const DY = [-1, 0, 1, 0];
 
 /** Piece kinds. `rot` is 0..3 for pieces that have an orientation. */
 export const KIND = {

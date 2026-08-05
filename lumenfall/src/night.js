@@ -26,12 +26,12 @@ export const NIGHT = {
 };
 
 export const UPGRADES = [
-  { id: 'reach', name: 'Long Arm', blurb: '+30 hook range, per level.', cost: 40, mult: 2.6, levels: 8 },
-  { id: 'hands', name: 'Deep Pockets', blurb: '+6 mote capacity, per level.', cost: 60, mult: 2.8, levels: 8 },
-  { id: 'wick', name: 'Steady Wick', blurb: 'Lanterns lose 18% less charge, per level.', cost: 120, mult: 3.2, levels: 6 },
-  { id: 'yield', name: 'Bright Oil', blurb: '+35% lumens from every lantern, per level.', cost: 90, mult: 3.0, levels: 12 },
+  { id: 'window', name: 'Slow Hand', blurb: 'The catch window is wider, per level.', cost: 30, mult: 2.4, levels: 6 },
+  { id: 'tempo', name: 'Quick Source', blurb: 'Pulses leave sooner, per level.', cost: 70, mult: 2.9, levels: 7 },
+  { id: 'nodes', name: 'One More Node', blurb: 'Another node joins the board.', cost: 150, mult: 3.6, levels: 6 },
+  { id: 'yield', name: 'Bright Oil', blurb: '+35% lumens from every node, per level.', cost: 90, mult: 3.0, levels: 12 },
+  { id: 'wick', name: 'Steady Wick', blurb: 'Nodes lose 18% less charge, per level.', cost: 120, mult: 3.2, levels: 6 },
   { id: 'night', name: 'Night Watch', blurb: 'Offline runs +4h longer and +10% better.', cost: 200, mult: 3.4, levels: 6 },
-  { id: 'pick', name: 'Skeleton Key', blurb: 'Locks start with one mirror already right.', cost: 350, mult: 5, levels: 4 },
 ];
 
 export function newNight(seed, embers = 0, night = 1) {
@@ -173,13 +173,7 @@ export function buyUpgrade(state, id) {
   return true;
 }
 
-export function runBonuses(state) {
-  return {
-    embersMult: embersMultiplier(state.embers),
-    carryBonus: 6 * level(state, 'hands'),
-    rangeBonus: 30 * level(state, 'reach'),
-  };
-}
+
 
 // --- echoes ---------------------------------------------------------------
 //

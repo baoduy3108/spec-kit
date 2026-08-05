@@ -22,30 +22,41 @@
                                   LUMENFALL
 ```
 
-The trick that makes it one game instead of four modes: **a lantern is the
-same object in all four layers.**
+**None of the four control schemes survived.** Swinging on a rope was fun to
+build and unplayable to hand someone — so the fifth game keeps the four
+*cores* and throws the four *interfaces* away:
 
-- **1×3 · THE CLIMB.** You hold to hook a lantern and let go to fly. A perfect
-  release — the tangent that fires you at the *next* lantern — pours every mote
-  you are carrying into the one you just left. The shaft is persistent, and an
-  echo of your last climb swings beside you, lighting what it lit, at half
-  weight.
-- **2×4 · THE ENGINE.** Every lit lantern keeps the beam board it was unlocked
-  with, and how well that board is routed *is* its lumens per second, forever,
-  including while the tab is closed. You do not buy a better lantern. You route
-  it better. The solver knows each board's ceiling, so the game can tell you
-  "×1.06, and ×1.62 is possible" — an idle upgrade curve made of puzzles.
-- **3×2 · THE COMMONS.** Charge decays whether or not anyone is watching, on
-  the same exponential the earnings integrate over. Dawn breaks when the whole
-  shaft is bright enough, and hands you embers and a new shaft.
-- **4×1 · THE LOCK.** A sealed lantern opens a beam puzzle mid-climb. You hang
-  still while you think — but the dark keeps rising underneath you. A puzzle
-  you can stare at forever is not part of an action game.
+| taken from | the core, not the controls |
+|---|---|
+| NOVA HOOK | the value of a single moment of commitment |
+| PRISM | arranging a static thing so energy flows well |
+| HYPHAE | what you built keeps working without you |
+| EMBERFALL | it fades for everyone, all the time |
 
-And they feed each other in a circle: the climb lights lanterns → each lantern
-becomes a board you route → routed lanterns pay the lumens that buy reach and
-capacity → which buy a better climb → which reaches the sealed lanterns higher
-up, whose locks are harder, while the dark rises faster.
+What those four make together is a form of play none of them had: **a pulse
+walks the line you routed, and you tap once as the ring closes on each node.**
+One finger. No reflexes, no dexterity, no failure state — a beat, not a test.
+
+The trick that makes it one game instead of four modes: **a node is the same
+object in all four cores.**
+
+- **1×3 · THE BEAT.** A pulse leaves the source and walks the beam. At each
+  node a ring closes; one tap inside it catches the pulse, charges the node,
+  and extends your chain. Miss and the node still keeps a little light — the
+  game never takes progress away, it only pays you less.
+- **2×4 · THE ROUTE.** Which nodes are on the beat is decided entirely by how
+  the mirrors are turned. Tap a mirror to re-route. The exhaustive solver knows
+  every board's ceiling, so the game can honestly say "this is 1.2 of a
+  possible 1.6" — an idle upgrade curve made of puzzles rather than purchases.
+- **3×2 · THE NIGHT.** Charged nodes earn lumens per second, including while
+  the tab is closed, and decay on the same exponential the earnings integrate
+  over. You come back to more than you left, and less than you hoped.
+- **4×1 · THE DAWN.** When the board is bright enough the night breaks: embers,
+  a permanent multiplier, and a new board to route from scratch.
+
+They feed each other in a circle: routing decides where the beats are → beats
+charge the nodes → charged nodes pay lumens → lumens widen the window, quicken
+the source and add nodes → which makes routing matter more.
 
 ## Play
 
@@ -56,15 +67,15 @@ npm run build     # rebuild it from src/
 npm test          # 15 tests
 ```
 
-Hold anywhere (or space) to hook, let go in the green arc. Tap the mirrors when
-a lock opens. Tap outside a board to leave it.
+Tap anywhere as the ring closes on a node. Tap a mirror to re-route the beam.
+That is the whole control scheme.
 
 ## The parts
 
 ```
 src/core.js     maths, seeded rng, number formatting        (pure)
-src/sim.js      the climb: hook, swing, release, motes, dark (pure)
-src/puzzle.js   the beam board: as a lock, and as a machine  (pure)
+src/pulse.js    the beat: the pulse, the ring, the catch      (pure)
+src/puzzle.js   the beam: routing, scoring, the solver         (pure)
 src/night.js    decay, offline earnings, dawn, echoes        (pure)
 src/main.js     canvas, screens, save
 ```
