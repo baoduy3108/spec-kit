@@ -15,6 +15,8 @@ export class Renderer {
     this.t = 0;
     /** Device-pixel scale; main.js updates this on resize. */
     this.scale = 1;
+    /** Set while the intro is asking for the player's very first press. */
+    this.emphasis = false;
   }
 
   /** world y -> canvas y */
@@ -118,6 +120,20 @@ export class Renderer {
         g.beginPath();
         g.arc(a.x, y, 26 + Math.sin(this.t * 9) * 2.5, 0, TAU);
         g.stroke();
+
+        if (this.emphasis) {
+          // A second, breathing halo so a first-time player cannot miss it.
+          const grow = (this.t % 1.1) / 1.1;
+          g.save();
+          g.globalAlpha = 1 - grow;
+          g.strokeStyle = '#7dff9c';
+          g.lineWidth = 3;
+          g.setLineDash([8, 10]);
+          g.beginPath();
+          g.arc(a.x, y, 34 + grow * 46, 0, TAU);
+          g.stroke();
+          g.restore();
+        }
       }
     }
   }

@@ -16,6 +16,7 @@ const ASSETS = [
   './src/core/loop.js',
   './src/core/mathx.js',
   './src/core/rng.js',
+  './src/game/coach.js',
   './src/game/config.js',
   './src/game/level.js',
   './src/game/physics.js',

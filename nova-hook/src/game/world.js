@@ -33,9 +33,10 @@ export class World {
     this.reset(1, 'endless');
   }
 
-  reset(seed, mode = 'endless') {
+  reset(seed, mode = 'endless', opts = {}) {
+    const safeUntil = opts.safeUntil || 0;
     this.rng = makeRng(seed);
-    this.level = new Level(this.rng);
+    this.level = new Level(this.rng, safeUntil);
     this.run = newRun(seed, mode);
     this.player = {
       x: VIEW.W / 2,
@@ -49,7 +50,8 @@ export class World {
     this.tether = null;
     this.candidate = null;
     this.cam = { y: 0 };
-    this.voidY = -520;
+    // The intro run gets extra breathing room before the void matters.
+    this.voidY = -520 - (safeUntil ? 700 : 0);
     this.maxY = this.player.y;
     this.trail = [];
     this.invuln = 1.2;

@@ -9,7 +9,7 @@ Flappy Bird is "flap". Crossy Road is "hop". NOVA HOOK is **"let go"**.
 
 That single constraint is what makes it worth building:
 
-- **One input.** Hold and release. No buttons, no tutorial, no menu to learn.
+- **One input.** Hold and release. No buttons, no menu, nothing to configure.
   A first-time player understands the game in four seconds because the green
   arc on the screen tells them exactly what to do.
 - **A real skill ceiling.** The release window is a tangent-point calculation
@@ -19,6 +19,29 @@ That single constraint is what makes it worth building:
 - **Runs are 20–60 seconds.** Death is instant and unambiguous, the restart
   button is under the thumb that just died, and the number to beat is on
   screen. That is the loop that produces "one more go".
+
+## The first sixty seconds
+
+A hyper-casual game gets one chance to explain itself, and a text tutorial
+spends that chance badly. NOVA HOOK teaches inside a real run (`game/coach.js`):
+
+- **The world waits.** Until the first hook lands, time runs at 0.34x. A new
+  player cannot be "too slow" for their first press, and the anchor they should
+  grab wears a pulsing dashed halo.
+- **Bullet time on the first swing.** As the swing sweeps towards the release
+  window, time drops to 0.42x. The player experiences the timing of a perfect
+  release before they are fast enough to hit it at full speed.
+- **The shaft is disarmed.** No hazards, no frail anchors below 2,600px, and
+  the void starts 700px further down. Nothing can kill you before you have
+  understood the verb.
+- **It reacts to what happened.** If the first release lands in the arc the
+  next line reads "PERFECT — a clean release aims you at the next ring"; if it
+  missed, "Missed it — the green arc points at the next ring".
+- **It leaves.** Six short lines, no taps to dismiss, no modal, and it never
+  returns. The run it coaches is a real scoring run, so nothing is wasted.
+
+Every step is a pure predicate over a counter object, so the whole flow is
+unit-tested without a browser.
 
 ## Why it can chart
 

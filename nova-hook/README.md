@@ -8,7 +8,7 @@ swing around it, and let go — and the exact moment you let go is the whole
 game.
 
 - Zero dependencies. Zero art assets. Zero network calls.
-- ~95 KB, one HTML file, playable offline, installable as a PWA.
+- ~100 KB, one HTML file, playable offline, installable as a PWA.
 - Runs on a phone, a tablet, a laptop, or a smart fridge with a browser.
 
 ## Play
@@ -27,6 +27,11 @@ npm run build                   # -> dist/nova-hook.html
 
 **Controls:** hold anywhere to hook, let go to release. Space bar works too.
 That is the entire control scheme.
+
+Your first run is coached: the world crawls until you throw your first hook,
+drops into bullet time as your first swing approaches the release window, and
+holds back every hazard until you have the rhythm. It ends by itself and never
+comes back — `Settings → Replay the intro` if you want it again.
 
 ## The loop
 
@@ -50,6 +55,7 @@ there on the screen.
 
 | | |
 |---|---|
+| Guided first run | The intro coaches you through your first hook, release and chain — inside a real run |
 | Endless mode | Procedurally generated, gets denser forever |
 | Daily Run | One seed per calendar day — everybody plays the identical shaft |
 | Missions | Three daily objectives, deterministic from the day's seed |
@@ -78,6 +84,7 @@ src/
     physics.js attach / swing / release maths                (pure)
     level.js   procedural shaft generation                   (pure)
     scoring.js combo, score, Nova bookkeeping                (pure)
+    coach.js   the guided first run                          (pure)
     world.js   simulation: player, tether, collisions, void
     render.js  all drawing (reads the world, never writes)
   meta/      progression
@@ -97,7 +104,7 @@ in CI (see below).
 npm test
 ```
 
-48 tests, no test framework, no dependencies — just `node --test`. Beyond the
+56 tests, no test framework, no dependencies — just `node --test`. Beyond the
 usual unit coverage of the maths, the suite includes:
 
 - **A headless play-through.** `tests/world.test.js` flies an autopilot through

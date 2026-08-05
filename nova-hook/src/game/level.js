@@ -154,8 +154,10 @@ function makeHazard(rng, prev, anchor, diff) {
  * order, starting from segment 0.
  */
 export class Level {
-  constructor(rng) {
+  constructor(rng, safeUntil = 0) {
     this.rng = rng;
+    /** Below this altitude nothing dangerous spawns (used by the intro run). */
+    this.safeUntil = safeUntil;
     this.anchors = [];
     this.shards = [];
     this.hazards = [];
@@ -169,6 +171,11 @@ export class Level {
     let guard = 0;
     while (this.last.y < topY && guard++ < 200) {
       const diff = difficultyAt(this.last.y);
+      if (this.last.y < this.safeUntil) {
+        diff.hazard = 0;
+        diff.extraHazard = 0;
+        diff.frail = 0;
+      }
       const seg = genSegment(this.rng, this.last, diff);
       // Now that we know where the chain goes, aim the previous sweet spot.
       this.last.nextX = seg.anchor.x;

@@ -9,6 +9,7 @@ import { Loop } from './core/loop.js';
 import { dailySeed, dayKey, makeRng } from './core/rng.js';
 import { clamp } from './core/mathx.js';
 import { NOVA, VIEW, multiplierFor } from './game/config.js';
+import { Coach, TUTORIAL_SAFE_UNTIL } from './game/coach.js';
 import { Renderer } from './game/render.js';
 import { summary } from './game/scoring.js';
 import { World } from './game/world.js';
@@ -27,6 +28,7 @@ const input = new Input(canvas);
 const art = new Art(makeRng(20260804));
 const world = new World(onGameEvent);
 const renderer = new Renderer(ctx, art);
+const coach = new Coach();
 const loop = new Loop({ update, render });
 
 let phase = 'title'; // title | play | over | menu
@@ -121,7 +123,11 @@ function startRun(nextMode) {
   ensureToday();
   mode = nextMode;
   const seed = mode === 'daily' ? dailySeed() : (Math.random() * 0x7fffffff) | 0;
-  world.reset(seed, mode);
+  // The intro run is a real run — it just holds your hand through it.
+  const intro = !data.seenTutorial && mode === 'endless';
+  world.reset(seed, mode, intro ? { safeUntil: TUTORIAL_SAFE_UNTIL } : {});
+  if (intro) coach.start();
+  else coach.reset();
   fx.clear();
   fx.reduceMotion = data.settings.reduceMotion;
   input.reset();
@@ -129,13 +135,17 @@ function startRun(nextMode) {
   deathTimer = 0;
   hideAll();
   $('#hud').classList.remove('hidden');
-  $('#hud-hint').style.opacity = data.runs < 3 ? '1' : '0';
+  $('#hud-hint').textContent = coach.active ? coach.text : 'HOLD to hook · LET GO inside the green arc';
+  $('#hud-hint').classList.toggle('coach', coach.active);
+  $('#hud-hint').style.opacity = coach.active || data.runs < 3 ? '1' : '0';
   audio.unlock();
   if (data.settings.music) audio.startMusic();
 }
 
 function endRun() {
   phase = 'over';
+  coach.finish();
+  data.seenTutorial = true;
   const sum = summary(world.run);
   const earnedCoins = coinsForRun(sum);
   const missionResult = applyRun(data.missions.list, { ...sum, runs: 1 });
@@ -219,6 +229,7 @@ function buzz(ms) {
 }
 
 function onGameEvent(type, e) {
+  coach.onEvent(type, e);
   const pal = art.palette;
   switch (type) {
     case 'hook':
@@ -300,6 +311,12 @@ function onGameEvent(type, e) {
 // --- loop -----------------------------------------------------------------
 
 function update(dt) {
+  // Pausing is checked, not remembered: if a visibilitychange event is ever
+  // missed the game still resumes by itself on the next frame.
+  if (document.hidden) {
+    input.clear();
+    return;
+  }
   fx.update(dt);
   if (phase === 'play') world.update(dt, input);
   else if (phase !== 'over') world.idle(dt);
@@ -310,7 +327,9 @@ function render(raw) {
   // Screen shake, hit-stop and the death hand-off all run on real time so
   // slow motion never stretches the wait for the results screen.
   fx.updateRealtime(raw);
-  loop.timeScale = fx.timeScale;
+  const coachScale = phase === 'play' ? coach.update(world, raw) : 1;
+  loop.timeScale = fx.timeScale * coachScale;
+  renderer.emphasis = coach.emphasising;
   renderer.draw(world, fx, raw);
   if (phase === 'play') {
     hud();
@@ -352,7 +371,23 @@ function hud() {
     $('#nova-wrap').classList.toggle('full', run.novaCharge >= 1 || run.novaTimer > 0);
     lastHud.nova = pct;
   }
-  if (data.runs >= 3 || run.perfects > 0) $('#hud-hint').style.opacity = '0';
+  const hint = $('#hud-hint');
+  if (coach.active) {
+    if (lastHud.coach !== coach.text) {
+      hint.textContent = coach.text;
+      hint.classList.add('coach');
+      hint.style.opacity = '1';
+      lastHud.coach = coach.text;
+    }
+  } else if (lastHud.coach) {
+    // The intro just ended: drop its styling in one place, whatever else the
+    // run has done so far.
+    hint.classList.remove('coach');
+    hint.style.opacity = '0';
+    lastHud.coach = null;
+  } else if (data.runs >= 3 || run.perfects > 0) {
+    hint.style.opacity = '0';
+  }
 }
 
 // --- shop / missions / settings ------------------------------------------
@@ -487,6 +522,12 @@ document.addEventListener('click', (ev) => {
       renderSettings();
       show('s-settings');
       break;
+    case 'intro':
+      data.seenTutorial = false;
+      persist();
+      toast('The intro will play on your next run');
+      goTitle();
+      break;
     case 'wipe':
       if (confirm('Erase local progress, skins and records?')) {
         data = store.reset();
@@ -510,13 +551,13 @@ $('#screens').addEventListener('pointerdown', (ev) => ev.stopPropagation());
 // --- lifecycle ------------------------------------------------------------
 
 document.addEventListener('visibilitychange', () => {
+  // The loop itself keeps running (requestAnimationFrame is already throttled
+  // in background tabs); only the audio and the grace period react here.
   if (document.hidden) {
-    loop.stop();
     audio.stopMusic();
   } else {
     input.reset();
     if (phase === 'play') world.invuln = Math.max(world.invuln, 0.8);
-    loop.start();
     if (data.settings.music) audio.startMusic();
   }
 });
@@ -542,6 +583,7 @@ window.__novaHook = {
   input,
   audio,
   art,
+  coach,
   get phase() {
     return phase;
   },
