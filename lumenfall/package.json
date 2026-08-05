@@ -1,0 +1,6 @@
+{
+  "name": "lumenfall",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test tests/", "build": "node tools/build.js", "serve": "python3 -m http.server 8080" }
+}

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<meta name="theme-color" content="#060810"/>
+<meta name="description" content="LUMENFALL — climb it, pick it, tend it, share it. One lantern, four games."/>
+<title>LUMENFALL</title>
+<link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+<div id="stage">
+  <canvas id="view" width="540" height="960"></canvas>
+
+  <div id="hud" class="hidden">
+    <div class="row top">
+      <div class="stat"><b id="h-depth">0m</b><span>HEIGHT</span></div>
+      <div class="stat"><b id="h-carry">0</b><span>CARRYING</span></div>
+      <div class="stat right"><b id="h-combo">—</b><span>CHAIN</span></div>
+    </div>
+    <p id="h-hint">HOLD to hook · LET GO in the green arc to pour your light in</p>
+  </div>
+
+  <section id="s-title" class="screen">
+    <h1>LUMEN<span>FALL</span></h1>
+    <p class="tag">climb it · pick it · tend it · share it</p>
+    <div class="grid">
+      <div><b id="t-lumens">0</b><span>LUMENS</span></div>
+      <div><b id="t-rate">0/s</b><span>WHILE YOU SLEEP</span></div>
+      <div><b id="t-embers">0</b><span>EMBERS</span></div>
+      <div><b id="t-night">1</b><span>NIGHT</span></div>
+    </div>
+    <div class="dawnbar"><div id="t-dawnfill"></div><span id="t-dawnlabel">0% TO DAWN</span></div>
+    <button class="btn primary" data-a="climb">CLIMB</button>
+    <div class="row">
+      <button class="btn" data-a="tend">TEND<em id="t-afford"></em></button>
+      <button class="btn dawn hidden" data-a="dawn" id="t-dawnbtn">BREAK DAWN</button>
+    </div>
+    <p class="fine" id="t-echo"></p>
+  </section>
+
+  <section id="s-tend" class="screen hidden">
+    <h2>TEND</h2>
+    <p class="tag"><b id="d-lumens">0</b> lumens · <b id="d-rate">0/s</b> from <b id="d-lit">0</b> lit lanterns</p>
+    <div id="upgrades" class="list"></div>
+    <p class="fine">Lanterns earn while the tab is closed, and the dark eats them at the same time.</p>
+    <button class="btn primary" data-a="home">BACK</button>
+  </section>
+
+  <section id="s-over" class="screen hidden">
+    <p class="kicker" id="o-cause">THE DARK TOOK YOU</p>
+    <h2 class="big" id="o-depth">0m</h2>
+    <div class="grid">
+      <div><b id="o-banked">0</b><span>POURED IN</span></div>
+      <div><b id="o-chain">0</b><span>BEST CHAIN</span></div>
+      <div><b id="o-locks">0</b><span>LOCKS PICKED</span></div>
+      <div><b id="o-acc">0%</b><span>PERFECT</span></div>
+    </div>
+    <p class="fine" id="o-note"></p>
+    <button class="btn primary" data-a="climb">CLIMB AGAIN</button>
+    <button class="btn" data-a="home">HOME</button>
+  </section>
+
+  <section id="s-dawn" class="screen hidden">
+    <h2>DAWN</h2>
+    <p class="tag" id="w-line"></p>
+    <button class="btn primary" data-a="home">A NEW NIGHT</button>
+  </section>
+
+  <div id="away" class="screen hidden">
+    <h2>IT BURNED WITHOUT YOU</h2>
+    <p class="tag" id="a-time"></p>
+    <p class="big" id="a-gain">0</p>
+    <p class="fine" id="a-note"></p>
+    <button class="btn primary" data-a="close-away">GOOD</button>
+  </div>
+
+  <div id="toast" class="hidden"></div>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
