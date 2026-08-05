@@ -956,7 +956,7 @@ function placePiece(idx,row,col){
       const smallest=()=>SHAPES.slice().sort((a,b)=>a.length-b.length)
         .map(s2=>{ const d2=shapeDim(s2); return {cells:s2,w:d2.w,h:d2.h}; }).find(p2=>anyPlacement(p2));
       for(let ti=0;ti<3;ti++){ if(!anyPlacement(tray[ti])){ const fit=smallest();
-        if(fit) tray[ti]={cells:fit.cells,w:fit.w,h:fit.h,color:TH.blocks[(Math.random()*TH.blocks.length)|0]}; } } } }
+        if(fit && Math.random()>0.15) tray[ti]={cells:fit.cells,w:fit.w,h:fit.h,color:TH.blocks[(Math.random()*TH.blocks.length)|0]}; } } } }
   checkOver(); updateDanger();
 }
 function boardFill(){ let n2=0; for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(grid[r][c]) n2++; return n2/(N*N); }
