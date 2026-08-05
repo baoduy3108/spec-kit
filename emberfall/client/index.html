@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#05060f" />
+    <meta name="description" content="EMBERFALL — a shared world where the light is a common resource." />
+    <title>EMBERFALL</title>
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+
+    <div id="hud" class="hidden">
+      <div class="top">
+        <div class="stat"><b id="carry">0</b><span>CARRYING</span></div>
+        <div class="stat"><b id="banked">0</b><span>BANKED TONIGHT</span></div>
+        <div class="stat right"><b id="online">0</b><span>LAMPLIGHTERS</span></div>
+      </div>
+      <div class="dawnbar">
+        <div id="dawn-fill"></div>
+        <span id="dawn-label">NIGHT 1 · 0% TO DAWN</span>
+      </div>
+      <canvas id="map" width="150" height="150"></canvas>
+      <p id="hint">Move toward the light. Fill your hands, then bring them to a beacon.</p>
+    </div>
+
+    <div id="join" class="screen">
+      <h1>EMBER<span>FALL</span></h1>
+      <p class="tag">the dark comes back every night · so does everyone else</p>
+      <input id="name" maxlength="16" placeholder="your name" autocomplete="off" spellcheck="false" />
+      <button id="play" class="btn">CARRY THE LIGHT</button>
+      <p id="status" class="fine">connecting…</p>
+      <div class="rules">
+        <p><b>Motes</b> grow where it is bright. Pick them up by touching them.</p>
+        <p><b>Beacons</b> turn what you carry into light. Bank together — a crowd is worth more.</p>
+        <p><b>Shades</b> come out of the dark and take what you are holding. Light burns them.</p>
+        <p><b>Dawn</b> breaks when the whole map is bright. Everyone who helped is named.</p>
+      </div>
+    </div>
+
+    <div id="dawn" class="screen hidden">
+      <h2>DAWN</h2>
+      <p id="dawn-night" class="tag"></p>
+      <ol id="board"></ol>
+      <button id="dawn-close" class="btn">CARRY ON</button>
+    </div>
+
+    <div id="toast" class="hidden"></div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
