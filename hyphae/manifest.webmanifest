@@ -1,0 +1,13 @@
+{
+  "name": "HYPHAE",
+  "short_name": "HYPHAE",
+  "description": "An idle game about a fungal network learning to think. It grows while you are away.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050d0b",
+  "theme_color": "#050d0b",
+  "categories": ["games", "entertainment"],
+  "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
