@@ -1285,6 +1285,11 @@ function clearLines(){
     combo++; unlockAch('firstclear'); comboGlow=Math.min(1,combo/5);
     let pts=cleared*10+Math.max(0,cleared-1)*8;
     if(combo>=2){ pts=Math.round(pts*(1+(combo-1)*0.3)); pop(t('combo')+combo,true,24+Math.min(combo,10)*3,combo>=7?'#ffe14d':(combo>=4?'#ffd54d':'#fff0b0')); sndCombo(combo);
+      // Chuỗi combo bonuses (chain rewards)
+      if(combo===2) pts+=180;
+      else if(combo===3) pts+=300;
+      else if(combo===4) pts+=500;
+      else if(combo>=5) pts+=800;
       // ĐÃ TAY: chuỗi càng cao rung/chớp/tàn lửa càng mạnh — khoảnh khắc "quay clip"
       shake=Math.min(shake+2+combo*0.7,18); flash=Math.min(flash+0.05*combo,0.9);
       const em=Math.min(combo,10); for(let e=0;e<em;e++) particles.push({x:gridX+gridSize*0.5+(Math.random()-0.5)*gridSize*0.7,y:gridY+gridSize*0.55,vx:(Math.random()-0.5)*2.4,vy:-1.6-Math.random()*2.4,life:1,decay:0.018,size:2+Math.random()*2.4,color:combo>=7?'#ffe14d':(combo>=4?'#ffd54d':'#ff9e3d'),ember:true}); }
