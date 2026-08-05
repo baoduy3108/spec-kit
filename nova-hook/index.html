@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
+    />
+    <meta name="theme-color" content="#080b1e" />
+    <meta name="description" content="NOVA HOOK — one thumb, one rope, infinite orbit. A free arcade climber that runs in your browser." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>NOVA HOOK</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="stage">
+        <canvas id="game" width="540" height="960"></canvas>
+
+        <!-- in-run HUD -->
+        <div id="hud" class="hidden">
+          <div class="hud-row">
+            <div class="stat">
+              <b id="hud-score">0</b>
+              <span>SCORE</span>
+            </div>
+            <div class="stat right">
+              <b id="hud-depth">0m</b>
+              <span>ALTITUDE</span>
+            </div>
+          </div>
+          <div id="hud-combo" class="combo">
+            <b id="combo-mult">x1.0</b>
+            <i id="combo-chain">CHAIN 0</i>
+          </div>
+          <div id="nova-wrap">
+            <div id="nova-bar"></div>
+            <span id="nova-label">NOVA</span>
+          </div>
+          <p id="hud-hint">HOLD to hook · LET GO inside the green arc</p>
+        </div>
+
+        <!-- screens -->
+        <div id="screens">
+          <section id="s-title" class="screen">
+            <div class="logo">
+              <h1>NOVA<span>HOOK</span></h1>
+              <p class="tag">one thumb · one rope · infinite orbit</p>
+            </div>
+            <div class="records">
+              <div><b id="t-best">0</b><span>BEST</span></div>
+              <div><b id="t-depth">0m</b><span>DEEPEST</span></div>
+              <div><b id="t-coins">0</b><span>SHARDS</span></div>
+            </div>
+            <button class="btn primary" data-action="play">PLAY</button>
+            <button class="btn ghost" data-action="daily">
+              DAILY RUN <em id="t-daily"></em>
+            </button>
+            <div class="row">
+              <button class="btn small" data-action="shop">SKINS</button>
+              <button class="btn small" data-action="missions">
+                MISSIONS<i id="t-mission-dot" class="dot hidden"></i>
+              </button>
+              <button class="btn small" data-action="settings">⚙</button>
+            </div>
+            <p class="fine">Free. No account. Works offline.</p>
+          </section>
+
+          <section id="s-over" class="screen hidden">
+            <p class="kicker" id="o-cause">SWALLOWED BY THE VOID</p>
+            <h2 class="score" id="o-score">0</h2>
+            <p class="best-note" id="o-note"></p>
+            <div class="grid">
+              <div><b id="o-depth">0m</b><span>ALTITUDE</span></div>
+              <div><b id="o-chain">0</b><span>BEST CHAIN</span></div>
+              <div><b id="o-shards">0</b><span>SHARDS</span></div>
+              <div><b id="o-acc">0%</b><span>PERFECT</span></div>
+            </div>
+            <div id="o-missions" class="mission-mini"></div>
+            <button class="btn revive" data-action="revive" id="o-revive">
+              SECOND WIND<em>free · once per run</em>
+            </button>
+            <button class="btn primary" data-action="retry">RUN AGAIN</button>
+            <div class="row">
+              <button class="btn small" data-action="share">SHARE</button>
+              <button class="btn small" data-action="home">HOME</button>
+            </div>
+          </section>
+
+          <section id="s-shop" class="screen hidden">
+            <h2>SKINS</h2>
+            <p class="sub"><b id="shop-coins">0</b> shards banked</p>
+            <div id="shop-list" class="list"></div>
+            <p class="fine">Cosmetic only. Skins never change speed, hitbox or scoring.</p>
+            <button class="btn primary" data-action="home">BACK</button>
+          </section>
+
+          <section id="s-missions" class="screen hidden">
+            <h2>DAILY MISSIONS</h2>
+            <p class="sub" id="missions-reset">Resets at midnight, local time.</p>
+            <div id="mission-list" class="list"></div>
+            <button class="btn primary" data-action="home">BACK</button>
+          </section>
+
+          <section id="s-settings" class="screen hidden">
+            <h2>SETTINGS</h2>
+            <div class="list">
+              <label class="toggle"><span>Sound effects</span><input type="checkbox" data-setting="sfx" /></label>
+              <label class="toggle"><span>Music</span><input type="checkbox" data-setting="music" /></label>
+              <label class="toggle"><span>Reduced motion</span><input type="checkbox" data-setting="reduceMotion" /></label>
+              <label class="toggle"><span>Haptics</span><input type="checkbox" data-setting="haptics" /></label>
+            </div>
+            <button class="btn danger" data-action="wipe">ERASE LOCAL DATA</button>
+            <p class="fine">
+              Everything is stored on this device only. No accounts, no tracking, no ads SDK.
+            </p>
+            <button class="btn primary" data-action="home">BACK</button>
+          </section>
+        </div>
+
+        <div id="toast" class="hidden"></div>
+      </div>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
