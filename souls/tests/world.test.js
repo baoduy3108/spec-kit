@@ -1,12 +1,18 @@
-// The map's claim: it folds back on itself, and it can never strand you.
+// The map's claims: it is one place, it folds back on itself, it never
+// strands you, and it gets worse the further in you go.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  AREAS,
+  BOSSES,
+  FIRES,
   FOES,
+  FOE_IDS,
   LINKS,
   ROOMS,
+  START,
   clearRoom,
   depths,
   exitsFrom,
@@ -23,114 +29,148 @@ import {
   threatOf,
 } from '../src/world.js';
 
-test('every room exists, is reachable, and nothing points at nowhere', () => {
+test('the world is the size it claims to be', () => {
+  assert.equal(AREAS.length, 36, '36 areas');
+  assert.equal(BOSSES.length, 18, '18 bosses');
+  assert.ok(ROOMS.length >= 300, `several hundred rooms (${ROOMS.length})`);
+  assert.ok(FOE_IDS.length >= 60, `sixty-odd foe types (${FOE_IDS.length})`);
+  assert.ok(FIRES.length >= 10, `enough fires to make the walk back bearable (${FIRES.length})`);
+  assert.equal(new Set(ROOMS.map((r) => r.id)).size, ROOMS.length, 'no duplicate rooms');
+  assert.equal(new Set(BOSSES.map((b) => b.id)).size, BOSSES.length, 'no duplicate bosses');
+});
+
+test('nothing points at a room that does not exist', () => {
   const ids = new Set(ROOMS.map((r) => r.id));
-  assert.equal(ids.size, ROOMS.length, 'no duplicate room ids');
   for (const edge of LINKS) {
     assert.ok(ids.has(edge.a), `${edge.a} is not a room`);
     assert.ok(ids.has(edge.b), `${edge.b} is not a room`);
   }
-  assert.ok(fullyConnected(), 'the whole map has to be one place');
+  for (const room of ROOMS) {
+    for (const kind of room.foes || []) assert.ok(FOES[kind], `${kind} has no stat block`);
+  }
 });
 
-test('the long way round is walkable before any shortcut is open', () => {
+test('it is one place, and every room can be walked to', () => {
+  assert.ok(fullyConnected(), 'the whole map has to be one place');
   const world = newWorld();
-  const route = routeBetween(world, 'fire', 'lantern');
-  assert.ok(route, 'you can always reach the boss the hard way');
-  assert.equal(route[0], 'fire');
-  assert.equal(route[route.length - 1], 'lantern');
-  assert.ok(route.length >= 8, `the first walk should be long (${route.length} rooms)`);
+  const seen = reachable(world);
+  assert.ok(
+    seen.size > ROOMS.length * 0.55,
+    `most of it is open before any shortcut (${seen.size}/${ROOMS.length})`,
+  );
 });
 
 test('no room can strand you away from every fire', () => {
   assert.deepEqual(strandedRooms(), [], 'a room you cannot leave is a lost save');
 });
 
-test('a shortcut only opens from the far side, and only once', () => {
+test('the first walk to the end is long', () => {
   const world = newWorld();
-  assert.equal(openShortcut(world, 'crypt-ladder'), false, 'not from the fire');
-  world.at = 'crypt';
-  assert.equal(openShortcut(world, 'crypt-ladder'), true);
-  assert.equal(openShortcut(world, 'crypt-ladder'), false, 'and not twice');
-  assert.ok(exitsFrom(world, 'yard').includes('crypt'), 'now it works both ways');
+  const end = AREAS[AREAS.length - 2].exit;
+  const route = routeBetween(world, START, end);
+  assert.ok(route, 'the end is reachable the hard way');
+  assert.ok(route.length >= 60, `it should be a journey (${route.length} rooms)`);
 });
 
-test('every shortcut actually shortens something', () => {
-  const shortcuts = LINKS.filter((l) => l.shortcut).map((l) => l.shortcut);
-  assert.ok(shortcuts.length >= 4, 'a world this size needs several folds');
-  for (const name of shortcuts) {
-    const fromFire = shortcutValue(name, 'fire', 'lantern');
-    const fromAshes = shortcutValue(name, 'ashes', 'lantern');
+test('every fold actually folds something', () => {
+  const folds = LINKS.filter((l) => l.shortcut).map((l) => l.shortcut);
+  assert.ok(folds.length >= 8, `a world this size needs plenty of folds (${folds.length})`);
+  for (const name of folds) {
     assert.ok(
-      fromFire > 0 || fromAshes > 0,
-      `${name} saves nothing from any fire — it is scenery, not a shortcut`,
+      shortcutValue(name) > 0,
+      `${name} saves nothing — that is scenery, not a shortcut`,
     );
   }
 });
 
-test('opening everything makes the world small, which is the point', () => {
+test('a fold opens from the far side only, and only once', () => {
+  const edge = LINKS.find((l) => l.shortcut);
+  const world = newWorld();
+  assert.equal(openShortcut(world, edge.shortcut), false, 'not from wherever you happen to be');
+  world.at = edge.opensFrom;
+  assert.equal(openShortcut(world, edge.shortcut), true);
+  assert.equal(openShortcut(world, edge.shortcut), false, 'and not twice');
+  assert.ok(exitsFrom(world, edge.b).includes(edge.a), 'now it works both ways');
+});
+
+test('opening the folds makes the world smaller, which is the point', () => {
   const shut = newWorld();
   const open = newWorld();
   open.opened = LINKS.filter((l) => l.shortcut).map((l) => l.shortcut);
-  const before = routeBetween(shut, 'fire', 'lantern').length;
-  const after = routeBetween(open, 'fire', 'lantern').length;
-  assert.ok(after < before, `the map has to shrink as you learn it (${before} → ${after})`);
+  const end = AREAS[AREAS.length - 2].exit;
+  const before = routeBetween(shut, START, end).length;
+  const after = routeBetween(open, START, end).length;
+  assert.ok(after < before * 0.8, `the map has to shrink as you learn it (${before} → ${after})`);
 });
 
-test('walking is one room at a time, and sitting at a fire moves your respawn', () => {
+test('walking is one room at a time, and a fire moves your respawn', () => {
   const world = newWorld();
-  assert.equal(moveTo(world, 'crypt'), false, 'no teleporting across the map');
-  assert.equal(moveTo(world, 'yard'), true);
-  assert.equal(world.at, 'yard');
-  assert.ok(world.seen.includes('yard'));
+  const far = ROOMS[ROOMS.length - 1].id;
+  assert.equal(moveTo(world, far), false, 'no teleporting');
 
-  const route = routeBetween(world, 'yard', 'ossuary');
+  const fire = FIRES.find((f) => f !== START);
+  const route = routeBetween(world, START, fire);
   for (const id of route.slice(1)) assert.equal(moveTo(world, id), true, `walk to ${id}`);
-  assert.equal(world.fire, 'ossuary', 'the last fire you sat at is where you come back');
+  assert.equal(world.fire, fire, 'the last fire you sat at is where you come back');
+  assert.ok(world.seen.length === route.length);
 });
 
 test('rooms hold real foes, and clearing one empties it', () => {
   const world = newWorld();
   const packed = ROOMS.filter((r) => r.foes && r.foes.length);
-  assert.ok(packed.length >= 8, 'a map to explore needs things living in it');
-  for (const room of packed) {
-    for (const kind of room.foes) assert.ok(FOES[kind], `${kind} has no stat block`);
-  }
-  assert.ok(foesIn(world, 'yard').length > 0);
-  clearRoom(world, 'yard');
-  assert.equal(foesIn(world, 'yard').length, 0);
+  assert.ok(packed.length >= 200, `the map has to be inhabited (${packed.length} rooms)`);
+  const room = packed[0];
+  assert.ok(foesIn(world, room.id).length > 0);
+  clearRoom(world, room.id);
+  assert.equal(foesIn(world, room.id).length, 0);
 });
 
-test('it gets more dangerous the further in you go', () => {
-  const deep = depths();
-  const near = ROOMS.filter((r) => deep.get(r.id) <= 3 && r.foes);
-  const far = ROOMS.filter((r) => deep.get(r.id) >= 6 && r.foes);
-  assert.ok(near.length && far.length, 'the map needs a near half and a far half');
+test('felling a boss is remembered', () => {
+  const world = newWorld();
+  const lair = ROOMS.find((r) => r.boss);
+  clearRoom(world, lair.id);
+  assert.ok(world.felled.includes(lair.boss));
+});
 
+test('every boss sits behind fog with a fire close enough to retry from', () => {
+  const world = newWorld();
+  for (const boss of BOSSES) {
+    const lair = ROOMS.find((r) => r.boss === boss.id);
+    assert.ok(lair, `${boss.id} has no room`);
+    assert.equal(roomOf(lair.id).kind, 'fog');
+    const nearest = Math.min(
+      ...FIRES.map((f) => (routeBetween(world, f, lair.id) || { length: 999 }).length),
+    );
+    assert.ok(nearest <= 16, `${boss.id} is ${nearest} rooms from a fire — too far to retry`);
+  }
+});
+
+test('it bites harder the further in you go', () => {
+  const deep = depths();
+  const near = ROOMS.filter((r) => deep.get(r.id) <= 12 && r.foes.length);
+  const far = ROOMS.filter((r) => deep.get(r.id) >= 60 && r.foes.length);
+  assert.ok(near.length && far.length, 'the map needs a near half and a far half');
   const mean = (rooms) => rooms.reduce((s, r) => s + threatOf(r.id), 0) / rooms.length;
   assert.ok(
-    mean(far) > mean(near) * 1.5,
-    `the far rooms have to bite harder (${Math.round(mean(near))} vs ${Math.round(mean(far))})`,
+    mean(far) > mean(near) * 2,
+    `the far rooms have to bite much harder (${Math.round(mean(near))} vs ${Math.round(mean(far))})`,
   );
-  for (const room of ROOMS) assert.ok(deep.has(room.id), `${room.id} is off the map`);
 });
 
-test('there is a fire before each boss, and bosses sit behind fog', () => {
-  const world = newWorld();
-  for (const boss of ROOMS.filter((r) => r.boss)) {
-    assert.equal(roomOf(boss.id).kind, 'fog');
-    const fires = ROOMS.filter((r) => r.kind === 'bonfire');
-    const nearest = Math.min(
-      ...fires.map((f) => (routeBetween(world, f.id, boss.id) || { length: 99 }).length),
-    );
-    assert.ok(nearest <= 4, `${boss.id} is ${nearest} rooms from the nearest fire — too far to retry`);
+test('the foe roster is varied, not one creature wearing hats', () => {
+  const families = new Set(FOE_IDS.map((id) => FOES[id].family));
+  assert.ok(families.size >= 14, `enough distinct creatures (${families.size})`);
+  const speeds = FOE_IDS.map((id) => FOES[id].speed);
+  assert.ok(Math.max(...speeds) > Math.min(...speeds) * 4, 'some are fast, some are slow');
+  for (const id of FOE_IDS) {
+    assert.ok(FOES[id].hp > 0 && FOES[id].damage > 0 && FOES[id].essence > 0, `${id} is a real foe`);
   }
 });
 
 test('reachability grows as you open the world, never shrinks', () => {
   const world = newWorld();
   let previous = reachable(world).size;
-  for (const name of ['crypt-ladder', 'gallery-lift', 'belfry-rope', 'rampart-drop']) {
+  for (const name of LINKS.filter((l) => l.shortcut).map((l) => l.shortcut)) {
     world.opened.push(name);
     const now = reachable(world).size;
     assert.ok(now >= previous, 'opening a door can never close another');
