@@ -131,6 +131,101 @@ export const AREAS = [
 AREAS.find((a) => a.id === 'catacombs').to.push('winding-stair');
 AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 
+// --- rooms written by hand -------------------------------------------------
+//
+// The generator lays out a world of the right shape; this is where it becomes
+// a place. Any area listed here replaces its generated rooms entirely — the
+// name, what is in it, what it looks like, and exactly which creature stands
+// where. Areas not listed here are still grown, so the game stays playable
+// while the map is hand-written one area at a time.
+//
+// The undercroft is the template. Seven rooms, each one authored.
+
+export const HANDMADE = {
+  undercroft: [
+    {
+      key: 'cell',
+      kind: 'hall',
+      name: { en: 'The Cell', vi: 'Xà Lim' },
+      line: {
+        en: 'Straw, a drain, and a door someone left open a long time ago.',
+        vi: 'Rơm, một cái cống, và cánh cửa ai đó bỏ ngỏ từ rất lâu rồi.',
+      },
+      foes: [],
+      light: 'dim',
+    },
+    {
+      key: 'ash-pit',
+      kind: 'yard',
+      name: { en: 'The Ash Pit', vi: 'Hố Tro' },
+      line: {
+        en: 'A fire that has been kept, badly, by nobody, for years.',
+        vi: 'Một ngọn lửa được giữ, một cách tệ hại, bởi không ai, suốt nhiều năm.',
+      },
+      foes: [],
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'long-drain',
+      kind: 'bridge',
+      name: { en: 'The Long Drain', vi: 'Rãnh Dài' },
+      line: {
+        en: 'Water runs the wrong way here. Two of them are standing in it.',
+        vi: 'Nước ở đây chảy ngược. Hai đứa nó đang đứng trong đó.',
+      },
+      foes: ['husk', 'husk-torch'],
+      light: 'dark',
+    },
+    {
+      key: 'kennel',
+      kind: 'cave',
+      name: { en: 'The Kennel', vi: 'Chuồng Chó' },
+      line: {
+        en: 'It hears you before you are through the arch. It always does.',
+        vi: 'Nó nghe thấy bạn trước khi bạn qua khỏi vòm cửa. Lúc nào cũng vậy.',
+      },
+      foes: ['hound', 'hound-swift'],
+      light: 'dark',
+      note: 'first fast enemy — teaches that rolling is not only for big swings',
+    },
+    {
+      key: 'broken-stair',
+      kind: 'stair',
+      name: { en: 'The Broken Stair', vi: 'Cầu Thang Gãy' },
+      line: {
+        en: 'Half the steps are gone. What is left is narrow enough to hold.',
+        vi: 'Mất nửa số bậc. Chỗ còn lại hẹp vừa đủ để cầm chân chúng nó.',
+      },
+      foes: ['husk-spear'],
+      light: 'dim',
+      note: 'a spear in a chokepoint — the first room that rewards positioning',
+    },
+    {
+      key: 'lamplighters-rest',
+      kind: 'hall',
+      name: { en: "The Lamplighter's Rest", vi: 'Chỗ Nghỉ Người Thắp Đèn' },
+      line: {
+        en: 'Someone sat here with a lantern and did not get up again.',
+        vi: 'Ai đó từng ngồi đây với cây đèn, và không đứng dậy nữa.',
+      },
+      foes: ['husk'],
+      light: 'warm',
+    },
+    {
+      key: 'undergate',
+      kind: 'hall',
+      name: { en: 'The Undergate', vi: 'Cổng Ngầm' },
+      line: {
+        en: 'Two ways out. Both of them are worse than here.',
+        vi: 'Hai lối ra. Cả hai đều tệ hơn chỗ này.',
+      },
+      foes: ['husk', 'husk'],
+      light: 'dim',
+    },
+  ],
+};
+
 // --- growing the rooms ----------------------------------------------------
 
 function seeded(seed) {
@@ -161,6 +256,10 @@ const push = (a, b, extra = {}) => LINKS.push({ a, b, ...extra });
 for (const spot of AREAS) {
   const rng = seeded(hash(spot.id));
   const ids = [];
+  // A hand-written area brings its own rooms; the generator only fills the
+  // parts of the world nobody has got to yet.
+  const written = HANDMADE[spot.id];
+  if (written) spot.size = written.length;
 
   for (let i = 0; i < spot.size; i++) {
     const id = `${spot.id}:${i}`;
@@ -176,13 +275,25 @@ for (const spot of AREAS) {
     const foes = [];
     for (let f = 0; f < count; f++) foes.push(pool[Math.floor(rng() * pool.length)]);
 
+    const hand = written && written[i];
     ROOMS.push({
       id,
       area: spot.id,
       tier: spot.tier,
-      kind: isBoss ? 'fog' : isFire ? 'bonfire' : ['hall', 'stair', 'bridge', 'cave', 'yard'][Math.floor(rng() * 5)],
+      kind: isBoss
+        ? 'fog'
+        : hand
+          ? (hand.fire ? 'bonfire' : hand.kind)
+          : isFire
+            ? 'bonfire'
+            : ['hall', 'stair', 'bridge', 'cave', 'yard'][Math.floor(rng() * 5)],
       boss: isBoss ? spot.boss : undefined,
-      foes,
+      foes: hand ? [...hand.foes] : foes,
+      name: hand ? hand.name : undefined,
+      line: hand ? hand.line : undefined,
+      light: hand ? hand.light : undefined,
+      note: hand ? hand.note : undefined,
+      handmade: !!hand,
     });
     ids.push(id);
   }

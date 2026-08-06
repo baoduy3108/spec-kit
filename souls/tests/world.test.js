@@ -177,3 +177,21 @@ test('reachability grows as you open the world, never shrinks', () => {
     previous = now;
   }
 });
+
+test('a hand-written area brings its own rooms, named and described', () => {
+  const written = ROOMS.filter((r) => r.handmade);
+  assert.ok(written.length >= 7, 'the first area is written by hand');
+  for (const room of written) {
+    assert.ok(room.name && room.name.en && room.name.vi, `${room.id} needs a name`);
+    assert.ok(room.line && room.line.en && room.line.vi, `${room.id} needs a line`);
+    assert.ok(['hall', 'stair', 'bridge', 'cave', 'yard', 'bonfire'].includes(room.kind));
+    for (const kind of room.foes) assert.ok(FOES[kind], `${kind} is not a real foe`);
+  }
+  assert.ok(
+    written.some((r) => r.kind === 'bonfire'),
+    'and it still has somewhere to rest',
+  );
+  // the generator must not have overwritten any of it
+  const rest = ROOMS.filter((r) => !r.handmade);
+  assert.ok(rest.length > 300, 'the rest of the world is still there to be written');
+});
