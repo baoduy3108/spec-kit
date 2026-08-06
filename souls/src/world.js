@@ -142,6 +142,138 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // The other half of the fork, and deliberately the opposite of the wall.
+  // The ramparts kill you with the edge; the chapelyard has no edges at all
+  // and kills you with arithmetic — enclosed rooms, more of them than you,
+  // and nowhere to back into. It is also where the singing starts.
+  chapelyard: [
+    {
+      key: 'the-lychgate',
+      kind: 'stair',
+      name: { en: 'The Lychgate', vi: 'Cổng Đưa Tang' },
+      line: {
+        en: 'A roofed gate for setting a body down under. The roof is the only part still standing.',
+        vi: 'Cái cổng có mái, dùng để đặt quan tài xuống nghỉ. Giờ chỉ còn cái mái là còn đứng.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-porch',
+      kind: 'hall',
+      name: { en: 'The Porch', vi: 'Hiên Nhà Nguyện' },
+      line: {
+        en: 'Out of the rain at last, and there is a fire somebody keeps feeding.',
+        vi: 'Cuối cùng cũng khuất mưa, và có một ngọn lửa ai đó vẫn tiếp củi.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-nave',
+      kind: 'hall',
+      name: { en: 'The Nave', vi: 'Gian Giữa' },
+      line: {
+        en: 'Long, and full of benches, and four of them are between you and the far end.',
+        vi: 'Dài, đầy những băng ghế, và bốn đứa nó nằm giữa bạn và đầu bên kia.',
+      },
+      foes: ['husk', 'husk', 'acolyte', 'acolyte'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'the benches are cover, not decoration — four in the open would be too many',
+    },
+    {
+      key: 'the-side-chapel',
+      kind: 'cave',
+      name: { en: 'The Side Chapel', vi: 'Nguyện Đường Phụ' },
+      line: {
+        en: 'A room off the room. Small enough that whatever is in it is already close.',
+        vi: 'Một căn phòng nhỏ nép bên phòng lớn. Nhỏ đến mức thứ trong đó đã ở ngay sát bạn.',
+      },
+      foes: ['ghoul'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-choir',
+      kind: 'hall',
+      name: { en: 'The Choir', vi: 'Ca Đoàn' },
+      line: {
+        en: 'Three rows facing each other, singing, and they close the aisle behind you.',
+        vi: 'Ba hàng ghế đối mặt nhau, đang hát, và chúng khép lối đi lại sau lưng bạn.',
+      },
+      foes: ['acolyte', 'acolyte', 'acolyte'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the first ring made of one enemy type — it is about the count, not the mix',
+    },
+    {
+      key: 'the-crypt-stair',
+      kind: 'stair',
+      name: { en: 'The Crypt Stair', vi: 'Cầu Thang Hầm Mộ' },
+      line: {
+        en: 'Down, and the singing gets quieter, which is not the same as safer.',
+        vi: 'Đi xuống, tiếng hát nhỏ dần — điều đó không đồng nghĩa với an toàn hơn.',
+      },
+      foes: ['husk-torch'],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-charnel',
+      kind: 'cave',
+      name: { en: 'The Charnel', vi: 'Nhà Chứa Xương' },
+      line: {
+        en: 'Stacked to the ceiling and sorted by length. Someone was very calm about this.',
+        vi: 'Xếp lên tận trần và phân loại theo chiều dài. Ai đó đã làm việc này rất bình thản.',
+      },
+      foes: ['crawler', 'crawler', 'ghoul'],
+      layout: 'pack',
+      light: 'dark',
+      note: 'no cover, no edges, three of them — the arithmetic room',
+    },
+    {
+      key: 'the-bell-rope',
+      kind: 'stair',
+      name: { en: 'The Bell Rope', vi: 'Dây Chuông' },
+      line: {
+        en: 'A rope going up into the dark. Pulling it would be a decision.',
+        vi: 'Một sợi dây chạy hút lên bóng tối. Kéo nó sẽ là một quyết định.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dim',
+      note: 'empty and quiet on purpose — the room before the stonemask',
+    },
+    {
+      key: 'the-vestry',
+      kind: 'hall',
+      name: { en: 'The Vestry', vi: 'Phòng Áo Lễ' },
+      line: {
+        en: 'It has been standing in the corner long enough to be part of the wall.',
+        vi: 'Nó đứng ở góc phòng lâu đến mức đã thành một phần của bức tường.',
+      },
+      foes: ['stonemask'],
+      layout: 'ambush',
+      light: 'dark',
+      note: 'first stonemask — poise so high that trading is simply not available',
+    },
+    {
+      key: 'the-ossuary-door',
+      kind: 'hall',
+      name: { en: 'The Ossuary Door', vi: 'Cửa Nhà Xương' },
+      line: {
+        en: 'Carved with a choir. The carving is a plan of what is on the other side.',
+        vi: 'Chạm hình một dàn hợp xướng. Bức chạm là sơ đồ của thứ nằm bên kia cửa.',
+      },
+      foes: ['knightling'],
+      layout: 'single',
+      light: 'dim',
+    },
+  ],
   // Eleven rooms on top of a wall, and every one of them has an edge. The
   // Watchman's shove does twelve damage and wants the drop behind you — so
   // the area spends ten rooms teaching that the fall is worse than the hit,
