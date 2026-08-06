@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<meta name="theme-color" content="#0a0806"/>
+<meta name="description" content="TÍN HIỆU — tìm một người trong bầu trời toàn máy."/>
+<title>TÍN HIỆU</title>
+<link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+<div id="set">
+  <header>
+    <div class="title">
+      <h1 id="h-title">TÍN HIỆU</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <div class="corner">
+      <div class="tools">
+        <button id="sound" title="tiếng / sound">♪</button>
+        <button id="lang" title="Tiếng Việt / English">EN</button>
+      </div>
+      <div class="ledger">
+        <div><b id="thread">0</b><span id="l-thread">LIỀN MẠCH</span></div>
+        <div><b id="found">0</b><span id="l-found">BẮT ĐƯỢC</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="readout">
+    <span id="l-dial">VẠCH</span>
+    <b id="mark">50.00</b>
+    <span class="meter"><i id="bar"></i></span>
+  </div>
+
+  <canvas id="scale" width="620" height="86"></canvas>
+  <canvas id="roll" width="620" height="230"></canvas>
+
+  <div id="notes"></div>
+
+  <div id="book"></div>
+
+  <div id="entry">
+    <b id="slots">— —</b>
+    <div id="pad">
+      <button data-d="1">1</button><button data-d="2">2</button><button data-d="3">3</button>
+      <button data-d="4">4</button><button data-d="5">5</button><button data-d="6">6</button>
+      <button data-d="7">7</button><button data-d="8">8</button><button data-d="9">9</button>
+    </div>
+    <div class="row">
+      <button id="clear">XOÁ</button>
+      <button id="commit" class="go">GHI SỔ</button>
+    </div>
+  </div>
+  <p class="legend" id="legend"></p>
+</div>
+
+<div id="modal" class="hidden">
+  <div class="card">
+    <p class="kicker" id="m-kicker"></p>
+    <h2 id="m-title"></h2>
+    <p class="body" id="m-body"></p>
+    <p class="said" id="m-story"></p>
+    <button class="go" id="again">ĐÊM SAU</button>
+  </div>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
