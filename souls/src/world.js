@@ -142,6 +142,139 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // The first fork. Everything before this was a corridor with the illusion
+  // of choice; the gatehouse ends in two doors and does not tell you which is
+  // easier, because neither is. It also introduces the acolyte, the first
+  // thing here that fights on purpose rather than out of habit.
+  gatehouse: [
+    {
+      key: 'the-portcullis',
+      kind: 'stair',
+      name: { en: 'The Portcullis', vi: 'Cửa Lưới Sắt' },
+      line: {
+        en: 'Down, and the teeth of it are still up. Somebody won an argument here.',
+        vi: 'Lưới sắt đã hạ, mà răng của nó vẫn giơ lên. Ai đó từng thắng một cuộc cãi vã ở đây.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-guardroom',
+      kind: 'hall',
+      name: { en: 'The Guardroom', vi: 'Phòng Trực' },
+      line: {
+        en: 'Dry, and warm, and the chairs are still facing the fire.',
+        vi: 'Khô ráo, ấm áp, và những chiếc ghế vẫn quay mặt về phía lửa.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-murder-hole',
+      kind: 'hall',
+      name: { en: 'The Murder Hole', vi: 'Lỗ Giết Người' },
+      line: {
+        en: 'The ceiling is open in a neat square. The spear comes down, not across.',
+        vi: 'Trần nhà mở một ô vuông ngay ngắn. Cây giáo thọc từ trên xuống, không phải từ ngang.',
+      },
+      foes: ['husk-spear'],
+      layout: 'ambush',
+      light: 'dim',
+      note: 'the first attack from a direction the game has not used yet',
+    },
+    {
+      key: 'the-barracks',
+      kind: 'hall',
+      name: { en: 'The Barracks', vi: 'Trại Lính' },
+      line: {
+        en: 'Three bunks, three of them, and none of them have got up in a long while.',
+        vi: 'Ba cái giường, ba đứa nó, và đã lâu rồi không đứa nào ngồi dậy.',
+      },
+      foes: ['husk', 'husk', 'husk-heavy'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'they wake one at a time — the room rewards a quiet approach',
+    },
+    {
+      key: 'the-armoury',
+      kind: 'hall',
+      name: { en: 'The Armoury', vi: 'Kho Vũ Khí' },
+      line: {
+        en: 'Racks, mostly empty. What is missing from them is standing in front of you.',
+        vi: 'Những giá vũ khí, phần lớn đã trống. Thứ thiếu trên giá đang đứng trước mặt bạn.',
+      },
+      foes: ['husk-heavy', 'husk-spear'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'heavy plus reach — the first pair that punishes one bad roll',
+    },
+    {
+      key: 'the-winch',
+      kind: 'cave',
+      name: { en: 'The Winch', vi: 'Buồng Tời' },
+      line: {
+        en: 'A drum of chain thicker than your arm. Something has been sleeping in the slack.',
+        vi: 'Cuộn xích to hơn cánh tay bạn. Có thứ gì đó vẫn ngủ trong đám xích chùng.',
+      },
+      foes: ['crawler'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-lantern-keeper',
+      kind: 'hall',
+      name: { en: 'The Lantern Keeper', vi: 'Người Giữ Đèn' },
+      line: {
+        en: 'It is not fighting you because you are here. It is fighting you because it is awake.',
+        vi: 'Nó đánh bạn không phải vì bạn ở đây. Nó đánh bạn vì nó đang tỉnh.',
+      },
+      foes: ['acolyte'],
+      layout: 'single',
+      light: 'warm',
+      note: 'first acolyte — the first enemy with intent rather than habit',
+    },
+    {
+      key: 'the-long-hall',
+      kind: 'hall',
+      name: { en: 'The Long Hall', vi: 'Hành Lang Dài' },
+      line: {
+        en: 'Pillars, evenly spaced, and four of them using the pillars better than you are.',
+        vi: 'Những cây cột cách đều, và bốn đứa nó dùng cột giỏi hơn bạn.',
+      },
+      foes: ['husk', 'husk-spear', 'acolyte', 'hound'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the hardest room before the fork — the pillars are the answer',
+    },
+    {
+      key: 'the-wall-walk',
+      kind: 'bridge',
+      name: { en: 'The Wall Walk', vi: 'Đường Trên Tường' },
+      line: {
+        en: 'Open on both sides, and they come along it fast. There is nowhere to stand but forward.',
+        vi: 'Hai bên trống hoác, và chúng lao tới rất nhanh. Không có chỗ nào để đứng ngoài phía trước.',
+      },
+      foes: ['hound', 'hound-swift'],
+      layout: 'pack',
+      light: 'grey',
+    },
+    {
+      key: 'the-two-doors',
+      kind: 'hall',
+      name: { en: 'The Two Doors', vi: 'Hai Cánh Cửa' },
+      line: {
+        en: 'One goes up to the wall. One goes down towards the bells. Nothing here tells you which.',
+        vi: 'Một cửa dẫn lên tường thành. Một cửa dẫn xuống phía chuông. Chẳng có gì mách bạn nên đi cửa nào.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+      note: 'the first real fork — deliberately unsignposted, both are tier 2',
+    },
+  ],
   // Everything the city does not want ends up here, and so does the first
   // boss. Eight rooms of moving water: the area teaches footing, then takes
   // the floor away from you at the end of it.
