@@ -196,9 +196,13 @@ test('a hand-written area brings its own rooms, named and described', () => {
     written.some((r) => r.kind === 'bonfire'),
     'and it still has somewhere to rest',
   );
-  // the generator must not have overwritten any of it
+  // The two sets partition the world: everything is either written or grown,
+  // never both and never neither. This replaces an earlier check that the
+  // generated remainder was over 300 rooms — a number the hand-writing was
+  // always going to walk past, which made the test rot rather than hold.
   const rest = ROOMS.filter((r) => !r.handmade);
-  assert.ok(rest.length > 300, 'the rest of the world is still there to be written');
+  assert.equal(rest.length + written.length, ROOMS.length, 'no room is in neither set');
+  assert.ok(rest.length > 0, 'the generator still covers everything unwritten');
 });
 
 test('hand-written rooms say how their foes are arranged', () => {

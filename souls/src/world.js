@@ -142,6 +142,114 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // A tower, so the area is read vertically: eight rooms stacked, each one
+  // narrower than the last, and a rope down the middle of all of them. The
+  // second fold is at the top — you cut the rope and it drops all the way to
+  // the courtyard, which is the first time the world folds *downward*.
+  bellfry: [
+    {
+      key: 'the-bell-stair',
+      kind: 'stair',
+      name: { en: 'The Bell Stair', vi: 'Cầu Thang Chuông' },
+      line: {
+        en: 'It spirals, and it is worn deepest on the outside edge. People came down it fast.',
+        vi: 'Cầu thang xoắn, mòn sâu nhất ở mép ngoài. Người ta từng chạy xuống rất vội.',
+      },
+      foes: ['husk-spear'],
+      layout: 'single',
+      light: 'dim',
+      note: 'a spear on a spiral — the wall does half its work for it',
+    },
+    {
+      key: 'the-ringing-floor',
+      kind: 'hall',
+      name: { en: 'The Ringing Floor', vi: 'Sàn Kéo Chuông' },
+      line: {
+        en: 'Eight ropes through eight holes. Someone has tied seven of them off.',
+        vi: 'Tám sợi dây xuyên qua tám cái lỗ. Ai đó đã buộc gọn bảy sợi.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-first-bell',
+      kind: 'hall',
+      name: { en: 'The First Bell', vi: 'Quả Chuông Đầu' },
+      line: {
+        en: 'Small, low, and still warm from being struck. Nothing here struck it.',
+        vi: 'Nhỏ, treo thấp, và vẫn còn ấm vì vừa bị gõ. Chẳng có gì ở đây gõ nó cả.',
+      },
+      foes: ['acolyte', 'ghoul'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-frame',
+      kind: 'bridge',
+      name: { en: 'The Frame', vi: 'Khung Gỗ' },
+      line: {
+        en: 'Beams the width of your two feet, and a long way down between them.',
+        vi: 'Những thanh dầm rộng bằng hai bàn chân, và giữa chúng là một khoảng rơi rất dài.',
+      },
+      foes: ['moth'],
+      layout: 'ambush',
+      light: 'dark',
+      note: 'first moth — fastest thing in the game so far, on the narrowest floor',
+    },
+    {
+      key: 'the-cracked-bell',
+      kind: 'hall',
+      name: { en: 'The Cracked Bell', vi: 'Chuông Nứt' },
+      line: {
+        en: 'Split from lip to crown. It still rings; it just rings wrong.',
+        vi: 'Nứt từ vành lên đỉnh. Nó vẫn kêu; chỉ là kêu sai.',
+      },
+      foes: ['knightling', 'husk-heavy'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'two armoured things in a room with no room — the poise wall',
+    },
+    {
+      key: 'the-roost',
+      kind: 'cave',
+      name: { en: 'The Roost', vi: 'Ổ' },
+      line: {
+        en: 'Above the bells, where nothing has been disturbed. Three of them lift at once.',
+        vi: 'Phía trên đám chuông, nơi chưa gì bị quấy động. Ba con bay lên cùng một lúc.',
+      },
+      foes: ['moth', 'moth', 'moth-swift'],
+      layout: 'pack',
+      light: 'dark',
+      note: 'the hardest room here: three fast fragile things, all at once',
+    },
+    {
+      key: 'the-long-drop',
+      kind: 'hall',
+      name: { en: 'The Long Drop', vi: 'Khoảng Rơi Dài' },
+      line: {
+        en: 'The last rope, uncut, running all the way down to the yard you crossed on the first day.',
+        vi: 'Sợi dây cuối cùng, chưa cắt, chạy suốt xuống cái sân bạn băng qua ngày đầu tiên.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+      note: 'the second fold, and the first that goes downward — empty, like the hatch',
+    },
+    {
+      key: 'the-upper-door',
+      kind: 'stair',
+      name: { en: 'The Upper Door', vi: 'Cửa Trên' },
+      line: {
+        en: 'Out onto the roofs. From here you can see how much of this place there is.',
+        vi: 'Ra thẳng mái nhà. Từ đây nhìn được nơi này rộng đến chừng nào.',
+      },
+      foes: ['knightling'],
+      layout: 'single',
+      light: 'grey',
+    },
+  ],
   // The other half of the fork, and deliberately the opposite of the wall.
   // The ramparts kill you with the edge; the chapelyard has no edges at all
   // and kills you with arithmetic — enclosed rooms, more of them than you,
