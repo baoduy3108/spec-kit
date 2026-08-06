@@ -2423,6 +2423,22 @@ def test_skills_library_has_at_least_1100():
     assert len(skills._SKILLS) >= 1100
 
 
+def test_skills_library_has_at_least_1103():
+    from app import skills
+    assert len(skills._SKILLS) >= 1103
+
+
+def test_skills_game_engine_coding_topics_match():
+    from app import skills
+    for text, expected in [
+        ("viết game bằng godot dùng gdscript node scene signal", "godot-engine-and-gdscript"),
+        ("viết game unity dùng monobehaviour prefab coroutine rigidbody", "unity-engine-gameplay-scripting"),
+        ("viết game bằng raylib tự viết game loop immediate mode", "raylib-and-immediate-mode-games"),
+    ]:
+        s = skills.find_matching_skill(text)
+        assert s and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_recent_digest_detection_and_window():
     """'N ngày qua có gì mới' được nhận diện + rút đúng số ngày cửa sổ; câu số liệu
     quốc gia thường KHÔNG bị nhận nhầm là bản tin."""
