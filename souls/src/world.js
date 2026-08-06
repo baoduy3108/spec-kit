@@ -142,6 +142,128 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // The first air you breathe. Open ground after seven rooms of drain, which
+  // is why every fight here is about *space* rather than corridors — this is
+  // where the game teaches that being surrounded is a thing that can happen.
+  courtyard: [
+    {
+      key: 'gate-mouth',
+      kind: 'stair',
+      name: { en: 'The Gate Mouth', vi: 'Miệng Cổng' },
+      line: {
+        en: 'Daylight, of a sort. It has been raining for a long time.',
+        vi: 'Có thứ gọi là ánh sáng ban ngày. Trời mưa đã lâu lắm rồi.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-yard',
+      kind: 'yard',
+      name: { en: 'The Yard', vi: 'Khoảnh Sân' },
+      line: {
+        en: 'Three of them, well apart. You cannot fight all three at once, so do not.',
+        vi: 'Ba đứa, đứng cách xa nhau. Bạn không đánh cùng lúc cả ba được, nên đừng.',
+      },
+      foes: ['husk', 'husk', 'husk-torch'],
+      layout: 'spread',
+      light: 'grey',
+      note: 'first open ground — teaches pulling one at a time',
+    },
+    {
+      key: 'the-well',
+      kind: 'cave',
+      name: { en: 'The Well', vi: 'Cái Giếng' },
+      line: {
+        en: 'Something came up out of it once. The lid is on the ground beside it.',
+        vi: 'Có thứ gì đó từng bò lên từ đây. Nắp giếng nằm lăn bên cạnh.',
+      },
+      foes: ['hound-swift'],
+      layout: 'ambush',
+      light: 'dim',
+      note: 'ambush — the one fast enemy the kennel already introduced',
+    },
+    {
+      key: 'broken-cart',
+      kind: 'hall',
+      name: { en: 'The Broken Cart', vi: 'Chiếc Xe Gãy' },
+      line: {
+        en: 'Two spears behind a cart. The cart is the only reason this is fair.',
+        vi: 'Hai cây giáo nấp sau chiếc xe. Chính chiếc xe làm chỗ này còn công bằng.',
+      },
+      foes: ['husk-spear', 'husk-spear'],
+      layout: 'spread',
+      light: 'grey',
+      note: 'cover matters — two spears in the open would be unfair',
+    },
+    {
+      key: 'the-shrine',
+      kind: 'hall',
+      name: { en: 'The Shrine', vi: 'Miếu Nhỏ' },
+      line: {
+        en: 'Nothing lives here. Someone left something, a long time ago.',
+        vi: 'Không có gì sống ở đây. Ai đó để lại một thứ, từ rất lâu.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+      note: 'a breath between two hard rooms — pacing, not filler',
+    },
+    {
+      key: 'north-walk',
+      kind: 'bridge',
+      name: { en: 'The North Walk', vi: 'Lối Đi Bắc' },
+      line: {
+        en: 'Narrow, with a drop on one side. They come at you in single file.',
+        vi: 'Hẹp, một bên là vực. Chúng nó phải đi hàng một mà tới.',
+      },
+      foes: ['husk-torch', 'husk'],
+      layout: 'single',
+      light: 'grey',
+      note: 'the reward room for anyone who learned the broken stair',
+    },
+    {
+      key: 'the-thicket',
+      kind: 'cave',
+      name: { en: 'The Thicket', vi: 'Bụi Rậm' },
+      line: {
+        en: 'You hear the pack before you see it. That is the only warning you get.',
+        vi: 'Bạn nghe thấy bầy chó trước khi thấy chúng. Chỉ được cảnh báo bấy nhiêu.',
+      },
+      foes: ['hound', 'hound', 'hound-swift'],
+      layout: 'pack',
+      light: 'dark',
+      note: 'first pack — three fast things at once, deliberately near a way out',
+    },
+    {
+      key: 'the-arch',
+      kind: 'stair',
+      name: { en: 'The Arch', vi: 'Vòm Cuốn' },
+      line: {
+        en: 'Up, at last. Whatever is above has been watching you cross the yard.',
+        vi: 'Cuối cùng cũng lên cao. Thứ ở trên đã nhìn bạn băng qua sân từ nãy.',
+      },
+      foes: ['husk-heavy'],
+      layout: 'single',
+      light: 'dim',
+      note: 'first heavy variant — same creature, twice the poise',
+    },
+    {
+      key: 'the-outer-door',
+      kind: 'hall',
+      name: { en: 'The Outer Door', vi: 'Cửa Ngoài' },
+      line: {
+        en: 'They close around you here. Get your back to the door.',
+        vi: 'Chúng khép vòng quanh bạn ở đây. Dựa lưng vào cửa mà đánh.',
+      },
+      foes: ['husk', 'husk', 'hound'],
+      layout: 'ring',
+      light: 'grey',
+      note: 'first ring — the whole area was teaching you to avoid exactly this',
+    },
+  ],
+
   undercroft: [
     {
       key: 'cell',
@@ -168,6 +290,7 @@ export const HANDMADE = {
     },
     {
       key: 'long-drain',
+      layout: 'spread',
       kind: 'bridge',
       name: { en: 'The Long Drain', vi: 'Rãnh Dài' },
       line: {
@@ -179,6 +302,7 @@ export const HANDMADE = {
     },
     {
       key: 'kennel',
+      layout: 'pack',
       kind: 'cave',
       name: { en: 'The Kennel', vi: 'Chuồng Chó' },
       line: {
@@ -191,6 +315,7 @@ export const HANDMADE = {
     },
     {
       key: 'broken-stair',
+      layout: 'single',
       kind: 'stair',
       name: { en: 'The Broken Stair', vi: 'Cầu Thang Gãy' },
       line: {
@@ -203,6 +328,7 @@ export const HANDMADE = {
     },
     {
       key: 'lamplighters-rest',
+      layout: 'single',
       kind: 'hall',
       name: { en: "The Lamplighter's Rest", vi: 'Chỗ Nghỉ Người Thắp Đèn' },
       line: {
@@ -214,6 +340,7 @@ export const HANDMADE = {
     },
     {
       key: 'undergate',
+      layout: 'spread',
       kind: 'hall',
       name: { en: 'The Undergate', vi: 'Cổng Ngầm' },
       line: {
@@ -293,6 +420,7 @@ for (const spot of AREAS) {
       line: hand ? hand.line : undefined,
       light: hand ? hand.light : undefined,
       note: hand ? hand.note : undefined,
+      layout: hand ? hand.layout || (hand.foes.length ? 'spread' : 'single') : undefined,
       handmade: !!hand,
     });
     ids.push(id);

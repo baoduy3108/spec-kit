@@ -195,3 +195,20 @@ test('a hand-written area brings its own rooms, named and described', () => {
   const rest = ROOMS.filter((r) => !r.handmade);
   assert.ok(rest.length > 300, 'the rest of the world is still there to be written');
 });
+
+test('hand-written rooms say how their foes are arranged', () => {
+  const written = ROOMS.filter((r) => r.handmade);
+  const kinds = new Set(['single', 'spread', 'pack', 'ring', 'ambush']);
+  for (const room of written) {
+    assert.ok(kinds.has(room.layout), `${room.id} has no sensible layout (${room.layout})`);
+    if (room.layout === 'ring') {
+      assert.ok(room.foes.length >= 3, `a ring needs enough foes to be a ring (${room.id})`);
+    }
+    if (!room.foes.length) {
+      assert.equal(room.layout, 'single', `an empty room cannot have a crowd (${room.id})`);
+    }
+  }
+  const areas = new Set(written.map((r) => r.area));
+  assert.ok(areas.size >= 2, `more than one area is written by hand (${areas.size})`);
+  assert.ok(written.length >= 16, `and it is growing (${written.length} rooms)`);
+});
