@@ -116,8 +116,8 @@ export const BESTIARY = {
     },
     moves: [
       move('tide-pull', 0.9, 0.3, 0.65, 17, [-200, 200], 'the water leans towards him first'),
-      move('sceptre', 0.7, 0.14, 0.6, 24, [30, 180], 'the sceptre lifts one beat early'),
-      move('court-call', 1.15, 0.2, 0.9, 22, [-140, 140], 'he calls, and three of them stand up'),
+      move('sceptre', 0.7, 0.14, 0.6, 21, [30, 180], 'the sceptre lifts one beat early'),
+      move('court-call', 1.15, 0.2, 0.9, 29, [-140, 140], 'he calls, and three of them stand up'),
     ],
     phase2: {
       at: 0.5,
@@ -221,8 +221,8 @@ export const BESTIARY = {
     },
     moves: [
       move('crook', 0.68, 0.14, 0.58, 22, [30, 185], 'the crook hooks before it swings'),
-      move('whistle', 0.9, 0.18, 0.72, 16, [-200, 200], 'two notes. The trees answer the second'),
-      move('drive', 0.78, 0.32, 0.7, 26, [0, 230], 'he walks you backwards into the flock'),
+      move('whistle', 0.95, 0.18, 0.85, 31, [-200, 200], 'two notes. The trees answer the second'),
+      move('drive', 0.78, 0.32, 0.7, 23, [0, 230], 'he walks you backwards into the flock'),
     ],
     phase2: {
       at: 0.5,
