@@ -142,6 +142,114 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Everything the city does not want ends up here, and so does the first
+  // boss. Eight rooms of moving water: the area teaches footing, then takes
+  // the floor away from you at the end of it.
+  drainage: [
+    {
+      key: 'sluice-gate',
+      kind: 'stair',
+      name: { en: 'The Sluice Gate', vi: 'Cửa Cống' },
+      line: {
+        en: 'The wheel that shuts it rusted open. Nobody was ever coming back to close it.',
+        vi: 'Bánh xe đóng cống rỉ cứng ở vị trí mở. Chẳng ai định quay lại đóng nó cả.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dim',
+    },
+    {
+      key: 'the-overflow',
+      kind: 'bridge',
+      name: { en: 'The Overflow', vi: 'Máng Tràn' },
+      line: {
+        en: 'Fast water under a narrow plank. They do not mind falling in. You will.',
+        vi: 'Nước chảy xiết dưới tấm ván hẹp. Chúng nó rơi xuống cũng chẳng sao. Bạn thì có.',
+      },
+      foes: ['husk', 'husk-torch'],
+      layout: 'single',
+      light: 'dark',
+      note: 'the torch is the only light — killing it makes the room harder to read',
+    },
+    {
+      key: 'silt-bank',
+      kind: 'yard',
+      name: { en: 'The Silt Bank', vi: 'Bãi Bùn' },
+      line: {
+        en: 'Soft ground. Something under it has been waiting for footsteps.',
+        vi: 'Đất mềm. Thứ nằm dưới đã chờ tiếng bước chân từ lâu.',
+      },
+      foes: ['crawler'],
+      layout: 'ambush',
+      light: 'grey',
+      note: 'first crawler — slow, heavy poise, punishes panic-rolling into it',
+    },
+    {
+      key: 'the-weir',
+      kind: 'bridge',
+      name: { en: 'The Weir', vi: 'Đập Tràn' },
+      line: {
+        en: 'Two spears on the far side, and one way across. They know that.',
+        vi: 'Hai cây giáo ở bờ bên kia, mà chỉ có một lối qua. Chúng nó biết điều đó.',
+      },
+      foes: ['husk-spear', 'husk-spear'],
+      layout: 'spread',
+      light: 'grey',
+      note: 'the first room that is genuinely unfair if you rush it',
+    },
+    {
+      key: 'drowned-cells',
+      kind: 'cave',
+      name: { en: 'The Drowned Cells', vi: 'Xà Lim Ngập' },
+      line: {
+        en: 'Cells with the water at chest height. Some of the doors are still locked.',
+        vi: 'Những xà lim ngập nước ngang ngực. Vài cánh cửa vẫn còn khoá.',
+      },
+      foes: ['crawler', 'husk-torch'],
+      layout: 'spread',
+      light: 'dark',
+    },
+    {
+      key: 'the-grate',
+      kind: 'hall',
+      name: { en: 'The Grate', vi: 'Song Chắn' },
+      line: {
+        en: 'A dead end with a grate you cannot lift, and three of them behind you.',
+        vi: 'Ngõ cụt với tấm song bạn không nhấc nổi, và ba đứa nó phía sau lưng.',
+      },
+      foes: ['husk', 'husk-spear', 'crawler'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the courtyard taught you to fear the ring; this one has no way out',
+    },
+    {
+      key: 'the-keepers-step',
+      kind: 'hall',
+      name: { en: "The Keeper's Step", vi: 'Bậc Người Coi Cống' },
+      line: {
+        en: 'Dry stone, above the waterline. Somebody used to sit here and listen.',
+        vi: 'Bậc đá khô, trên mực nước. Ai đó từng ngồi đây và lắng nghe.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'the fire before the first boss — close enough that dying is cheap',
+    },
+    {
+      key: 'the-drain-head',
+      kind: 'fog',
+      name: { en: 'The Drain Head', vi: 'Đầu Cống' },
+      line: {
+        en: 'The room is a bowl and the bowl is full. It has been drinking here for years.',
+        vi: 'Căn phòng là một cái lòng chảo, và lòng chảo thì đầy. Nó đã uống ở đây nhiều năm.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+      note: 'the bloated — the floor floods at half health and it swims, you wade',
+    },
+  ],
   // The first air you breathe. Open ground after seven rooms of drain, which
   // is why every fight here is about *space* rather than corridors — this is
   // where the game teaches that being surrounded is a thing that can happen.

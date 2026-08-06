@@ -184,7 +184,12 @@ test('a hand-written area brings its own rooms, named and described', () => {
   for (const room of written) {
     assert.ok(room.name && room.name.en && room.name.vi, `${room.id} needs a name`);
     assert.ok(room.line && room.line.en && room.line.vi, `${room.id} needs a line`);
-    assert.ok(['hall', 'stair', 'bridge', 'cave', 'yard', 'bonfire'].includes(room.kind));
+    // a boss room is fog, and that is set by the map, not by the author
+    assert.ok(
+      ['hall', 'stair', 'bridge', 'cave', 'yard', 'bonfire', 'fog'].includes(room.kind),
+      `${room.id} has an unknown kind (${room.kind})`,
+    );
+    if (room.boss) assert.equal(room.kind, 'fog', `${room.id} holds a boss but is not fog`);
     for (const kind of room.foes) assert.ok(FOES[kind], `${kind} is not a real foe`);
   }
   assert.ok(
