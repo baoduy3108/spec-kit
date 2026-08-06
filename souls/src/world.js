@@ -142,6 +142,163 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Twelve rooms of stacked bone, and the Chanter is keeping time for all of
+  // it. Her verse is a ring of sound you get *outside* rather than behind, so
+  // the area is built to teach the difference: rooms where backing away works
+  // and rooms where only leaving the circle does.
+  ossuary: [
+    {
+      key: 'the-bone-door',
+      kind: 'stair',
+      name: { en: 'The Bone Door', vi: 'Cửa Xương' },
+      line: {
+        en: 'Not carved to look like bone. Made of it, and fitted well.',
+        vi: 'Không phải chạm cho giống xương. Làm bằng xương thật, và ghép rất khít.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-antechamber',
+      kind: 'hall',
+      name: { en: 'The Antechamber', vi: 'Tiền Sảnh' },
+      line: {
+        en: 'A bench, a fire, and a place to leave your boots. Somebody was expected.',
+        vi: 'Một băng ghế, một ngọn lửa, và chỗ để cởi giày. Ai đó từng được mong đợi.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-sorting-floor',
+      kind: 'hall',
+      name: { en: 'The Sorting Floor', vi: 'Sàn Phân Loại' },
+      line: {
+        en: 'Long tables, and the work is half done. The half that is done is very neat.',
+        vi: 'Những chiếc bàn dài, công việc mới xong một nửa. Nửa đã xong thì rất ngăn nắp.',
+      },
+      foes: ['acolyte', 'acolyte', 'ghoul'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-femur-walk',
+      kind: 'bridge',
+      name: { en: 'The Femur Walk', vi: 'Lối Xương Đùi' },
+      line: {
+        en: 'A causeway built of the long bones, laid the same way, all of them.',
+        vi: 'Một con đường đắp bằng xương dài, xếp cùng một chiều, không sót cái nào.',
+      },
+      foes: ['knightling'],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-skull-wall',
+      kind: 'yard',
+      name: { en: 'The Skull Wall', vi: 'Tường Sọ' },
+      line: {
+        en: 'They face outward. Whoever stacked them wanted them to be looking at something.',
+        vi: 'Tất cả đều quay mặt ra ngoài. Người xếp chúng muốn chúng nhìn vào một thứ gì đó.',
+      },
+      foes: ['stonemask', 'ghoul'],
+      layout: 'ambush',
+      light: 'dim',
+      note: 'a stonemask against a wall of faces — you cannot tell which one moved',
+    },
+    {
+      key: 'the-echo',
+      kind: 'cave',
+      name: { en: 'The Echo', vi: 'Vọng Âm' },
+      line: {
+        en: 'Whatever you do here happens twice. The second time is behind you.',
+        vi: 'Bạn làm gì ở đây cũng xảy ra hai lần. Lần thứ hai ở phía sau lưng.',
+      },
+      foes: ['moth', 'moth'],
+      layout: 'ambush',
+      light: 'dark',
+      note: 'the sound cue lies here — the room teaches you to stop trusting your ears',
+    },
+    {
+      key: 'the-lower-choir',
+      kind: 'hall',
+      name: { en: 'The Lower Choir', vi: 'Ca Đoàn Dưới' },
+      line: {
+        en: 'Rows of them, still in their places, and they have started keeping time.',
+        vi: 'Từng hàng, vẫn đứng đúng chỗ, và chúng đã bắt đầu giữ nhịp.',
+      },
+      foes: ['acolyte', 'acolyte', 'acolyte', 'knightling'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'a rehearsal for the verse — the ring closes on a beat you can hear',
+    },
+    {
+      key: 'the-reliquary',
+      kind: 'hall',
+      name: { en: 'The Reliquary', vi: 'Phòng Thánh Tích' },
+      line: {
+        en: 'Cases, mostly emptied, and one that has been opened from the inside.',
+        vi: 'Những tủ kính, phần lớn đã trống, và một cái bị mở từ bên trong.',
+      },
+      foes: ['stonemask-heavy'],
+      layout: 'single',
+      light: 'warm',
+    },
+    {
+      key: 'the-tallow-room',
+      kind: 'cave',
+      name: { en: 'The Tallow Room', vi: 'Phòng Nến Mỡ' },
+      line: {
+        en: 'They render something here to make the candles. There is a lot of candlelight.',
+        vi: 'Người ta nấu thứ gì đó ở đây để làm nến. Và nến thì rất nhiều.',
+      },
+      foes: ['husk-torch', 'husk-torch', 'crawler-heavy'],
+      layout: 'pack',
+      light: 'warm',
+    },
+    {
+      key: 'the-descant',
+      kind: 'hall',
+      name: { en: 'The Descant', vi: 'Bè Cao' },
+      line: {
+        en: 'A gallery above the nave, narrow, and four of them singing on it.',
+        vi: 'Ban công hẹp phía trên gian giữa, và bốn đứa nó đang hát trên đó.',
+      },
+      foes: ['knightling', 'knightling', 'moth-swift', 'ghoul'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the hardest room in the area, and the last one before the fire',
+    },
+    {
+      key: 'the-cantors-step',
+      kind: 'hall',
+      name: { en: "The Cantor's Step", vi: 'Bậc Người Xướng' },
+      line: {
+        en: 'One step, worn in the middle, facing the loft. This is where she stood to begin.',
+        vi: 'Một bậc đá, mòn lõm ở giữa, quay về phía gác. Đây là chỗ bà ta đứng để bắt nhịp.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-choir-loft',
+      kind: 'fog',
+      name: { en: 'The Choir Loft', vi: 'Gác Ca Đoàn' },
+      line: {
+        en: 'The bones are stacked in the shape of a choir, and the choir is facing her.',
+        vi: 'Xương được xếp thành hình một dàn hợp xướng, và dàn hợp xướng đang hướng về bà ta.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dim',
+      note: 'the chanter — her verse is a ring: leave the circle, do not go behind her',
+    },
+  ],
   // A tower, so the area is read vertically: eight rooms stacked, each one
   // narrower than the last, and a rope down the middle of all of them. The
   // second fold is at the top — you cut the rope and it drops all the way to
