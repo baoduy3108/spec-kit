@@ -2433,6 +2433,22 @@ def test_skills_library_has_at_least_1106():
     assert len(skills._SKILLS) >= 1106
 
 
+def test_skills_library_has_at_least_1109():
+    from app import skills
+    assert len(skills._SKILLS) >= 1109
+
+
+def test_skills_unreal_pixi_gamemaker_topics_match():
+    from app import skills
+    for text, expected in [
+        ("viết game unreal engine bằng c++ actor component gamemode pawn", "unreal-engine-cpp-gameplay"),
+        ("render 2d webgl bằng pixijs stage sprite ticker batching", "pixijs-webgl-2d-rendering"),
+        ("làm game 2d bằng gamemaker gml object event step draw alarm", "gamemaker-studio-and-gml"),
+    ]:
+        s = skills.find_matching_skill(text)
+        assert s and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_bevy_phaser_cocos_topics_match():
     from app import skills
     for text, expected in [
