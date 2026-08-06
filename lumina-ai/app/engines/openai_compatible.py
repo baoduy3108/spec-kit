@@ -1,0 +1,279 @@
+"""✦ LUMINA AI — Engine chung cho mọi API tương thích OpenAI.
+
+DeepSeek, Groq, Ollama và OpenAI đều dùng chung chuẩn `/chat/completions`,
+nên một lớp duy nhất phục vụ được cả bốn — chỉ khác base_url + model + key.
+Đây là các bộ não MIỄN PHÍ / RẺ mà LUMINA tụt xuống khi hết lượt cao cấp.
+
+Có streaming thật (SSE). Không có web search riêng → khi cần tìm kiếm sẽ chèn
+kết quả Tavily/DuckDuckGo vào ngữ cảnh (giống khung mẫu PHẦN 10).
+"""
+
+import json
+import logging
+from typing import AsyncIterator
+
+import httpx
+
+from .. import keyring
+from ..config import CONFIG
+from ..schemas import RouteDecision
+from ..search.engines import web_search
+from .base import BaseEngine, EngineError
+
+logger = logging.getLogger("lumina.oai")
+
+
+class OpenAICompatibleEngine(BaseEngine):
+    """Cấu hình qua thuộc tính lớp con: name, base_url, model, api_key, is_local.
+
+    XOAY VÒNG ĐA KEY: lớp con điền `api_keys` (danh sách) — thường từ
+    CONFIG["<X>_API_KEYS"] (gộp hạn mức free nhiều tài khoản). Nếu chỉ có 1 key
+    thì `api_keys` có 1 phần tử. `stream_chat` thử lần lượt các key theo thứ tự
+    round-robin và nhảy sang key kế khi gặp 429/401/403 — MIỄN LÀ chưa phát chữ
+    nào ra (không thể retry giữa chừng dòng stream)."""
+
+    base_url = ""
+    model = ""
+    api_key = ""
+    api_keys: list[str] = []  # danh sách key để xoay vòng (nếu rỗng → dùng [api_key])
+    is_local = False  # Ollama chạy nội bộ — không cần key
+    extra_headers: dict = {}  # header phụ (ví dụ OpenRouter khuyến nghị Referer/Title)
+
+    def _keys(self) -> list[str]:
+        """Danh sách key khả dụng (đã loại rỗng), fallback về api_key đơn."""
+        keys = [k for k in (self.api_keys or []) if k]
+        if not keys and self.api_key:
+            keys = [self.api_key]
+        return keys
+
+    def available(self) -> bool:
+        if self.is_local:
+            return bool(self.base_url)
+        return bool(self._keys() and self.base_url)
+
+    async def stream_chat(
+        self, messages: list[dict], route: RouteDecision, system: str
+    ) -> AsyncIterator[dict]:
+        chat_messages = [{"role": "system", "content": system}]
+        chat_messages += [{"role": m["role"], "content": m["content"]} for m in messages]
+
+        citations: list[dict] = []
+        if route.use_web_search and messages:
+            results = await web_search(messages[-1]["content"][:300])
+            if results:
+                context = "\n".join(f"- {r.title} ({r.url}): {r.snippet}" for r in results)
+                chat_messages.insert(1, {
+                    "role": "system",
+                    "content": f"Kết quả tìm kiếm web (dùng để trả lời, trích nguồn khi phù hợp):\n{context}",
+                })
+                citations = [{"title": r.title, "url": r.url} for r in results if r.url]
+                yield {"type": "search_status", "tool": "web_search", "query": messages[-1]["content"][:80]}
+
+        # Code/phân tích/nghiên cứu cần output dài hơn để không bị cắt cụt giữa chừng.
+        max_out = 16384 if route.mode in ("deep", "apex", "search", "research", "agent", "critique") else 8192
+        payload = {
+            "model": self.model,
+            "messages": chat_messages,
+            "max_tokens": max_out,
+            "stream": True,
+        }
+
+        # ── Xoay vòng key: thử lần lượt cho tới khi có key trả lời ──────────
+        if self.is_local:
+            keys: list[str] = [""]  # Ollama không cần key nhưng vẫn chạy 1 lượt
+        else:
+            keys = self._keys()
+            if not keys:
+                raise EngineError(f"Bộ não '{self.name}' chưa có API key.", retryable=False)
+        order = keyring.rotation_order(self.name, len(keys)) or [0]
+
+        last_err: EngineError | None = None
+        for pos, idx in enumerate(order):
+            key = keys[idx]
+            got_text = False
+            try:
+                async for ev in self._stream_once(payload, key):
+                    if ev.get("type") == "text":
+                        got_text = True
+                    yield ev
+            except EngineError as exc:
+                # Chỉ xoay sang key KHÁC khi: lỗi do key (429/401/403), CHƯA phát
+                # chữ nào (không thể retry giữa dòng), và còn key để thử.
+                if exc.rotate and not got_text and pos < len(order) - 1:
+                    last_err = exc
+                    logger.info("%s key #%d lỗi (%s) → thử key kế", self.name, idx, exc.friendly_message)
+                    continue
+                raise
+            # Thành công với key này.
+            if citations:
+                yield {"type": "citations", "items": citations}
+            yield {"type": "final", "usage": {}, "stop_reason": "end_turn"}
+            return
+
+        # Hết key mà vẫn lỗi.
+        raise last_err or EngineError(f"Mọi API key của bộ não '{self.name}' đều lỗi.")
+
+    async def _stream_once(self, payload: dict, key: str) -> AsyncIterator[dict]:
+        """Gọi API MỘT LẦN với MỘT key. Chỉ phát event 'text'; raise EngineError
+        khi thất bại (đánh dấu rotate=True cho lỗi do key để lớp trên xoay key)."""
+        headers = dict(self.extra_headers)
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
+
+        got_text = False
+        try:
+            async with httpx.AsyncClient(timeout=120) as client:
+                async with client.stream(
+                    "POST", f"{self.base_url}/chat/completions", headers=headers, json=payload
+                ) as resp:
+                    if resp.status_code in (401, 403):
+                        raise EngineError(
+                            f"Khóa API của bộ não '{self.name}' không hợp lệ.",
+                            retryable=False, rotate=True,
+                        )
+                    if resp.status_code == 429:
+                        raise EngineError(
+                            f"Bộ não '{self.name}' đang bị giới hạn tốc độ (429).",
+                            rotate=True,
+                        )
+                    if resp.status_code >= 400:
+                        body = (await resp.aread()).decode(errors="ignore")[:200]
+                        logger.error("%s HTTP %s: %s", self.name, resp.status_code, body)
+                        raise EngineError(f"Bộ não '{self.name}' gặp lỗi ({resp.status_code}).")
+                    async for line in resp.aiter_lines():
+                        if not line.startswith("data:"):
+                            continue
+                        data_str = line[5:].strip()
+                        if data_str == "[DONE]":
+                            break
+                        try:
+                            chunk = json.loads(data_str)
+                        except json.JSONDecodeError:
+                            continue
+                        delta = (chunk.get("choices") or [{}])[0].get("delta", {})
+                        piece = delta.get("content")
+                        if piece:
+                            got_text = True
+                            yield {"type": "text", "text": piece}
+        except EngineError:
+            raise
+        except httpx.HTTPError:
+            raise EngineError(f"Không kết nối được tới bộ não '{self.name}'.")
+
+        if not got_text:
+            raise EngineError(f"Bộ não '{self.name}' trả về nội dung rỗng.")
+
+
+class DeepSeekEngine(OpenAICompatibleEngine):
+    name = "deepseek"
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = CONFIG["DEEPSEEK_BASE_URL"]
+        self.model = CONFIG["DEEPSEEK_MODEL"]
+        self.api_keys = CONFIG["DEEPSEEK_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["DEEPSEEK_API_KEY"]
+
+
+class GroqEngine(OpenAICompatibleEngine):
+    name = "groq"
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = CONFIG["GROQ_BASE_URL"]
+        self.model = CONFIG["GROQ_MODEL"]
+        self.api_keys = CONFIG["GROQ_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["GROQ_API_KEY"]
+
+
+class MistralEngine(OpenAICompatibleEngine):
+    """Mistral API (cloud, OpenAI-compatible) — nơi dùng các model Mistral lớn
+    (Mistral Large 3 / Small 3.1) mà máy local không chạy nổi. Có free tier."""
+
+    name = "mistral"
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = CONFIG["MISTRAL_BASE_URL"].rstrip("/")
+        self.model = CONFIG["MISTRAL_MODEL"]
+        self.api_keys = CONFIG["MISTRAL_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["MISTRAL_API_KEY"]
+
+
+class KimiEngine(OpenAICompatibleEngine):
+    """Kimi (Moonshot AI) API tương thích OpenAI — model Kimi K3 (MoE 2.8T, 104B
+    active/token, ngữ cảnh ~1M). App CHỈ gọi API của họ (không host trọng số);
+    key + base URL lấy tại platform.kimi.ai."""
+
+    name = "kimi"
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = CONFIG["KIMI_BASE_URL"].rstrip("/")
+        self.model = CONFIG["KIMI_MODEL"]
+        self.api_keys = CONFIG["KIMI_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["KIMI_API_KEY"]
+
+
+class GitHubModelsEngine(OpenAICompatibleEngine):
+    """GitHub Models — free (có hạn mức) qua endpoint OpenAI-compatible.
+    Xác thực bằng GitHub token miễn phí (dùng như api_key). Model dạng 'publisher/name'."""
+    name = "github"
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = CONFIG["GITHUB_MODELS_BASE_URL"].rstrip("/")
+        self.model = CONFIG["GITHUB_MODELS_MODEL"]
+        self.api_keys = CONFIG["GITHUB_MODELS_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["GITHUB_MODELS_API_KEY"]
+
+
+class OllamaEngine(OpenAICompatibleEngine):
+    """Bộ não chạy NỘI BỘ qua Ollama (máy tự host). Một endpoint Ollama phục vụ
+    được nhiều model local — nên có thể tạo nhiều instance, mỗi cái một model,
+    làm lớp dự phòng khi hết token API. `name`/`model` cho phép ghi đè để đăng ký
+    nhiều model local (ollama, ollama-2, ...)."""
+
+    name = "ollama"
+    is_local = True
+
+    def __init__(self, model: str | None = None, name: str | None = None):
+        super().__init__()
+        self.base_url = CONFIG["OLLAMA_BASE_URL"].rstrip("/")
+        self.model = model or CONFIG["OLLAMA_MODEL"]
+        self.api_key = ""
+        if name:
+            self.name = name
+
+
+class OpenRouterEngine(OpenAICompatibleEngine):
+    """OpenRouter phục vụ HÀNG TRĂM model qua MỘT key — nên (giống Ollama) có thể
+    tạo nhiều instance, mỗi cái một model, để có thêm nhiều "bộ não phụ" miễn phí.
+    `model`/`name` cho phép đăng ký openrouter, openrouter-2, ... (xem OPENROUTER_MODELS)."""
+
+    name = "openrouter"
+
+    def __init__(self, model: str | None = None, name: str | None = None):
+        super().__init__()
+        self.base_url = CONFIG["OPENROUTER_BASE_URL"]
+        self.model = model or CONFIG["OPENROUTER_MODEL"]
+        self.api_keys = CONFIG["OPENROUTER_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["OPENROUTER_API_KEY"]
+        if name:
+            self.name = name
+        # OpenRouter khuyến nghị (không bắt buộc) gửi 2 header này
+        self.extra_headers = {
+            "HTTP-Referer": "https://lumina-ai.app",
+            "X-Title": CONFIG["APP_NAME"],
+        }
+
+
+class OpenAIEngine(OpenAICompatibleEngine):
+    name = "openai"
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = CONFIG["OPENAI_BASE_URL"]
+        self.model = CONFIG["OPENAI_MODEL"]
+        self.api_keys = CONFIG["OPENAI_API_KEYS"]
+        self.api_key = self.api_keys[0] if self.api_keys else CONFIG["OPENAI_API_KEY"]

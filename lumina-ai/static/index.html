@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LUMINA AI — Tư duy sâu, tri thức rộng</title>
   <link rel="stylesheet" href="/static/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+  <link rel="icon" type="image/png" href="/static/images/favicon.png">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <!-- ── Màn hình đăng nhập ─────────────────────────────── -->
   <div id="login-screen" class="login-screen hidden">
     <div class="login-card">
-      <div class="logo-big">✦</div>
+      <img class="logo-big" src="/static/images/logo-128.png" alt="LUMINA">
       <h1 class="brand">LUMINA <span>AI</span></h1>
       <p class="tagline">Tư duy sâu, tri thức rộng</p>
       <p class="login-desc">Một AI hợp nhất — tự chọn bộ não tốt nhất cho từng câu hỏi:<br>
@@ -27,29 +27,56 @@
   <div id="app" class="app hidden">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <span class="logo-small">✦</span>
+        <img class="logo-small" src="/static/images/logo-128.png" alt="LUMINA">
         <span class="brand-small">LUMINA AI</span>
       </div>
-      <button id="new-chat" class="new-chat-btn">＋ Cuộc trò chuyện mới</button>
+      <button id="new-chat" class="new-chat-btn" data-i18n="newChat">＋ Cuộc trò chuyện mới</button>
+
+      <nav id="agent-list" class="project-list"></nav>
+
+      <div class="proj-head">
+        <span data-i18n="projects">◧ Mặt bàn (Project)</span>
+        <button id="new-project" class="proj-add" data-i18n-title="newProject" title="Tạo project mới">＋</button>
+      </div>
+      <nav id="project-list" class="project-list"></nav>
+
+      <div class="conv-head" data-i18n="chats">Trò chuyện</div>
       <nav id="conv-list" class="conv-list"></nav>
+
+      <div class="plan-box">
+        <div class="plan-info">
+          <span id="plan-label" class="plan-label">Gói Miễn phí</span>
+          <span id="plan-usage" class="plan-usage"></span>
+        </div>
+        <button id="upgrade-btn" class="upgrade-btn" data-i18n="upgrade">✦ Nâng cấp</button>
+      </div>
+      <button id="goals-btn" class="admin-btn">🎯 Mục tiêu</button>
+      <button id="journal-btn" class="admin-btn">🕰 Nhật ký tiến hoá</button>
+      <button id="dub-btn" class="admin-btn" data-i18n="dub">🗣 Lồng tiếng phim</button>
+      <a id="learn-btn" class="admin-btn" href="/static/learn.html" target="_blank" rel="noopener" data-i18n="learn" style="display:block;text-decoration:none;text-align:left">✦ Bộ não LUMINA: Attention & MoE</a>
+      <button id="apikey-btn" class="admin-btn">🔑 API của tôi</button>
+      <button id="admin-btn" class="admin-btn hidden" data-i18n="orders">🛠 Đơn hàng</button>
+
       <div class="sidebar-footer">
         <img id="user-avatar" class="avatar" src="" alt="">
         <span id="user-name" class="user-name"></span>
-        <button id="logout" class="logout-btn" title="Đăng xuất">⎋</button>
+        <button id="logout" class="logout-btn" data-i18n-title="logout" title="Đăng xuất">⎋</button>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
         <button id="toggle-sidebar" class="icon-btn">☰</button>
-        <span id="topbar-title" class="topbar-title">Cuộc trò chuyện mới</span>
+        <span id="topbar-title" class="topbar-title" data-i18n="topNew">Cuộc trò chuyện mới</span>
       </header>
+
+      <div id="dashboard" class="dashboard hidden"></div>
 
       <div id="messages" class="messages">
         <div id="welcome" class="welcome">
-          <div class="logo-big">✦</div>
-          <h2>Xin chào! Mình là LUMINA</h2>
-          <p>Hỏi bất cứ điều gì — mình tự chọn chế độ phù hợp nhất, không cần bạn chỉnh gì cả.</p>
+          <img class="logo-big" src="/static/images/logo-128.png" alt="LUMINA">
+          <h2 data-i18n="hi">Xin chào! Mình là LUMINA</h2>
+          <p data-i18n="desc">Hỏi bất cứ điều gì — mình tự chọn chế độ phù hợp nhất, không cần bạn chỉnh gì cả.</p>
           <div class="suggestions">
             <button class="suggestion">Tin tức AI mới nhất hôm nay?</button>
             <button class="suggestion">Viết hàm Python kiểm tra số nguyên tố</button>
@@ -60,13 +87,180 @@
       </div>
 
       <div class="composer-wrap">
-        <div class="composer">
-          <textarea id="input" rows="1" placeholder="Nhắn tin cho LUMINA…"></textarea>
-          <button id="send" class="send-btn" title="Gửi">➤</button>
+        <div id="agent-active-bar" class="agent-active-bar hidden">
+          <span class="agent-active-name"></span>
+          <button id="agent-off" class="agent-off" title="Tắt agent">✕</button>
         </div>
-        <p class="composer-hint">LUMINA tự chọn: ⚡ nhanh · ✨ cân bằng · 🧠 tư duy sâu · 🔍 tìm kiếm web</p>
+        <div id="attach-preview" class="attach-preview hidden"></div>
+        <div class="composer">
+          <button id="attach-btn" class="composer-icon" data-i18n-title="attach" title="Đính kèm ảnh / video / tệp để LUMINA xem">📎</button>
+          <textarea id="input" rows="1" data-i18n-ph="inputPh" placeholder="Nhắn tin cho LUMINA…"></textarea>
+          <button id="mic-btn" class="composer-icon" data-i18n-title="mic" title="Nói bằng giọng">🎤</button>
+          <button id="send" class="send-btn" data-i18n-title="send" title="Gửi">➤</button>
+        </div>
+        <div class="composer-tools">
+          <button class="mode-toggle" data-mode="image" data-i18n="mImage" title="Bảo LUMINA vẽ ảnh">🎨 Vẽ ảnh</button>
+          <button class="mode-toggle" data-mode="research" data-i18n="mResearch" title="Tìm nhiều nguồn, viết báo cáo">🔬 Nghiên cứu sâu</button>
+          <button class="mode-toggle" data-mode="subtitle" data-i18n="mSubtitle" title="Đính kèm video trước, LUMINA xuất transcript SRT">📝 Phụ đề</button>
+          <button class="mode-toggle" data-mode="agent" data-i18n="mAgent" title="Bắt LUMINA trả lời ở mức kỹ sư cấp cao — gọn cho việc nhỏ, đủ quy trình 6 giai đoạn cho việc lớn">⚙️ Lumina Forge</button>
+          <button class="mode-toggle" data-mode="critique" title="LUMINA tự đóng vai đề xuất + phản biện, bắt lỗ hổng rồi sửa trước khi trả lời">🔎 Phản biện</button>
+          <span class="composer-hint" data-i18n="hint">LUMINA tự chọn: ⚡ nhanh · 🧠 sâu · 🔍 tìm kiếm · 🖼 xem ảnh · 🎬 video</span>
+        </div>
+        <input type="file" id="file-input"
+               accept="image/*,video/mp4,video/webm,video/quicktime,.pdf,.docx,.xlsx,.pptx,.html,.epub,.txt,.md,.csv,.json"
+               multiple hidden>
       </div>
     </main>
+  </div>
+
+  <!-- ── Modal Phiên bản (version hóa suy nghĩ) ─────────── -->
+  <div id="versions-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:640px">
+      <button class="modal-close" data-close="versions-modal">✕</button>
+      <h2 class="modal-title">🕑 Phiên bản</h2>
+      <p class="payment-desc">Các bản đã lưu của hội thoại này — bấm “Xem” để đọc lại, “Khôi phục” để đưa nội dung vào ô nhập.</p>
+      <div id="versions-list"></div>
+      <div id="version-view-wrap" class="hidden" style="margin-top:14px">
+        <textarea id="version-view" class="agent-instructions" rows="10" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="version-restore" class="upgrade-btn" style="flex:1">↩ Khôi phục vào ô nhập</button>
+          <button class="dash-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('version-view').value)">📋 Sao chép</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── Modal Tạo/Sửa Agent ────────────────────────────── -->
+  <div id="agent-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:560px">
+      <button class="modal-close" data-close="agent-modal">✕</button>
+      <h2 class="modal-title">🤖 Agent của bạn</h2>
+      <p class="payment-desc">Tạo một trợ lý riêng: đặt tên, biểu tượng và “tính cách/hướng dẫn” (persona). Bật <b>Chia sẻ</b> để đưa lên 🌐 Chợ cho người khác cài.</p>
+      <div style="display:flex;gap:8px;margin:10px 0">
+        <input id="agent-emoji" maxlength="4" placeholder="🤖" style="width:64px;text-align:center;font-size:22px">
+        <input id="agent-name" maxlength="60" placeholder="Tên agent (vd: Gia sư Toán)" style="flex:1">
+      </div>
+      <textarea id="agent-instr" class="agent-instructions" rows="7" placeholder="Hướng dẫn/persona: 'Bạn là gia sư Toán THPT, giải thích từng bước, luôn kiểm tra lại đáp án…'"></textarea>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px">
+        <input type="checkbox" id="agent-share-chk"> 🌐 Chia sẻ lên Chợ Agent (công khai)
+      </label>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button id="agent-save" class="upgrade-btn" style="flex:1">Lưu agent</button>
+        <button id="agent-del" class="dash-btn hidden" style="color:#e66">🗑 Xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal Chợ Agent (cộng đồng) ─────────────────────── -->
+  <div id="market-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:680px">
+      <button class="modal-close" data-close="market-modal">✕</button>
+      <h2 class="modal-title">🌐 Chợ Agent</h2>
+      <p class="payment-desc">Khám phá agent do cộng đồng chia sẻ — bấm <b>Cài</b> để thêm vào “Agent của tôi”.</p>
+      <input id="market-search" placeholder="🔍 Tìm agent (tên hoặc mô tả)…" style="width:100%;margin-bottom:10px">
+      <div id="market-list" class="market-list"></div>
+    </div>
+  </div>
+
+  <!-- ── Modal API riêng ─────────────────────────────────── -->
+  <div id="apikey-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:620px">
+      <button class="modal-close" data-close="apikey-modal">✕</button>
+      <h2 class="modal-title">🔑 API riêng của LUMINA</h2>
+      <p class="payment-desc">Dùng LUMINA như một API (tương thích OpenAI) trong app/script của bạn. Trỏ SDK OpenAI vào <b><span id="api-base"></span>/v1</b>, model để <b>"lumina"</b>. Bộ não tự chọn (Claude→free→local), không lộ tên model thật.</p>
+      <div style="display:flex;gap:8px;margin:8px 0">
+        <input id="apikey-name" maxlength="60" placeholder="Tên key (vd: app của tôi)" style="flex:1">
+        <button id="apikey-new" class="upgrade-btn" style="width:auto;padding:8px 16px">＋ Tạo key</button>
+      </div>
+      <div id="apikey-fresh" class="hidden" style="margin:10px 0;padding:10px 12px;background:var(--bg-3);border:1px solid var(--accent);border-radius:10px">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">⚠️ Chỉ hiện MỘT LẦN — sao chép ngay:</div>
+        <code id="apikey-fresh-val" style="word-break:break-all;font-size:12.5px"></code>
+        <button class="dash-btn" style="margin-top:6px" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('apikey-fresh-val').textContent)">📋 Sao chép</button>
+      </div>
+      <div id="apikey-list" style="margin:10px 0"></div>
+      <details style="margin-top:10px">
+        <summary style="cursor:pointer;color:var(--text-dim);font-size:13px">📖 Ví dụ gọi (curl)</summary>
+        <pre id="api-example" style="background:var(--bg-3);border-radius:8px;padding:12px;overflow-x:auto;font-size:11.5px;margin-top:8px"></pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- ── Modal Nâng cấp gói ─────────────────────────────── -->
+  <div id="upgrade-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="upgrade-modal">✕</button>
+      <h2 class="modal-title">✦ Nâng cấp gói LUMINA</h2>
+      <div id="plan-cards" class="plan-cards"></div>
+      <p id="no-provider-note" class="admin-hint hidden">Chủ web chưa bật cổng thanh toán nào — liên hệ trực tiếp để nâng cấp.</p>
+    </div>
+  </div>
+
+  <!-- ── Modal QR chuyển khoản VN ──────────────────────────── -->
+  <div id="qr-modal" class="modal-overlay hidden">
+    <div class="modal qr-modal">
+      <button class="modal-close" data-close="qr-modal">✕</button>
+      <h2 class="modal-title">Quét mã để chuyển khoản</h2>
+      <img id="qr-img" class="qr-img" alt="Mã QR chuyển khoản">
+      <div id="qr-info" class="qr-info"></div>
+      <p class="qr-hint">Mở app ngân hàng → quét QR → chuyển đúng số tiền và nội dung. Gói tự kích hoạt trong vài giây sau khi tiền vào.</p>
+      <p id="qr-status" class="qr-status">⏳ Đang chờ thanh toán…</p>
+    </div>
+  </div>
+
+  <!-- ── Modal PayPal ──────────────────────────────────────── -->
+  <div id="paypal-modal" class="modal-overlay hidden">
+    <div class="modal paypal-modal">
+      <button class="modal-close" data-close="paypal-modal">✕</button>
+      <h2 class="modal-title">Thanh toán bằng thẻ / PayPal</h2>
+      <div id="paypal-buttons"></div>
+      <p id="paypal-status" class="qr-status"></p>
+    </div>
+  </div>
+
+  <!-- ── Modal 🗣 Lồng tiếng + gắn phụ đề video ─────────────── -->
+  <div id="dub-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="dub-modal">✕</button>
+      <h2 class="modal-title">🗣 Lồng tiếng &amp; gắn phụ đề video</h2>
+      <p class="admin-hint">LUMINA nghe video, dịch lời thoại, tạo giọng đọc mới và gắn phụ đề — tự động
+        hoàn toàn. Video tối đa ~3 phút, ~18MB. Có thể mất 1-3 phút xử lý.</p>
+
+      <div id="dub-form">
+        <label class="dub-field">
+          <span>Chọn video</span>
+          <input type="file" id="dub-file-input" accept="video/mp4,video/webm,video/quicktime">
+        </label>
+        <label class="dub-field">
+          <span>Lồng tiếng sang</span>
+          <select id="dub-lang">
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="en">🇬🇧 Tiếng Anh</option>
+          </select>
+        </label>
+        <label class="dub-field dub-checkbox">
+          <input type="checkbox" id="dub-subs" checked>
+          <span>Gắn cứng phụ đề vào video</span>
+        </label>
+        <button id="dub-submit" class="upgrade-btn" style="width:100%">Bắt đầu xử lý</button>
+      </div>
+
+      <div id="dub-progress" class="hidden">
+        <div class="dub-progress-bar"><div id="dub-progress-fill" class="dub-progress-fill"></div></div>
+        <p id="dub-progress-text" class="qr-status">Đang chuẩn bị…</p>
+        <a id="dub-download" class="upgrade-btn hidden" style="width:100%;text-align:center;display:block">⬇ Tải video đã lồng tiếng</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal Quản trị đơn hàng (chỉ ADMIN_EMAILS) ────────── -->
+  <div id="admin-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="admin-modal">✕</button>
+      <h2 class="modal-title">🛠 Đơn hàng</h2>
+      <p class="admin-hint">Đơn tự kích hoạt khi tiền vào. Nếu khách đã trả mà webhook lỗi, bấm "Xác nhận" để kích hoạt tay đơn đó.</p>
+      <div id="admin-orders" class="admin-codes"></div>
+    </div>
   </div>
 
   <script src="/static/app.js"></script>

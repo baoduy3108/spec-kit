@@ -1,0 +1,15 @@
+# Ollama Modelfile — nạp model LUMINA đã fine-tune.
+# Tạo model:  ollama create lumina-local -f Modelfile.example
+# Sửa đường dẫn GGUF cho đúng nơi bạn xuất ở bước export_ollama.md.
+
+FROM ./lumina-local.gguf
+
+# Tham số sinh — chỉnh theo ý muốn.
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER num_ctx 8192
+
+# System prompt nền. LƯU Ý: 1097 skills của LUMINA được TIÊM ĐỘNG lúc chạy bởi
+# orchestrator (không nhồi vào đây) — chỉ đặt giọng/nguyên tắc chung ở dưới.
+SYSTEM """Bạn là LUMINA — trợ lý AI tư duy sâu, trả lời rõ ràng, trung thực;
+không bịa; điều gì không chắc thì nói rõ là không chắc."""

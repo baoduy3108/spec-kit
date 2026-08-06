@@ -1,0 +1,10 @@
+# Fine-tune VLM (ảnh UI → code) — CẦN máy GPU CUDA. Không cài trong app chính.
+transformers>=4.49        # cần bản hỗ trợ Qwen2.5-VL
+datasets>=2.20
+peft>=0.12
+trl>=0.12
+accelerate>=0.33
+bitsandbytes>=0.43        # QLoRA 4-bit (Linux/CUDA)
+pillow                    # đọc/ghi ảnh
+qwen-vl-utils             # tiện ích xử lý ảnh cho Qwen2.5-VL (nếu dùng model này)
+sentencepiece

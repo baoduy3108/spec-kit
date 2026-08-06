@@ -6,9 +6,37 @@ Kiến trúc kế thừa khung mẫu "Unified AI Core" (PHẦN 1), model ID cậ
 
 import os
 
+# Tự động nạp file .env (nếu có) ở thư mục lumina-ai — người dùng chỉ cần tạo .env
+# và chạy, KHỎI phải gõ lệnh export. Trên Render thì dùng biến môi trường của Render.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+except ImportError:
+    pass  # chưa cài python-dotenv cũng không sao — vẫn đọc biến môi trường bình thường
+
 
 def _bool(name: str, default: bool = False) -> bool:
     return os.getenv(name, str(default)).strip().lower() in ("1", "true", "yes", "on")
+
+
+def _multikey(prefix: str) -> list[str]:
+    """Đọc NHIỀU API key (phân tách bằng dấu phẩy) từ biến {PREFIX}_API_KEYS,
+    fallback về {PREFIX}_API_KEY (một key). Loại rỗng + trùng lặp, giữ thứ tự.
+
+    Mục đích: chủ web MUỐN gộp hạn mức FREE của nhiều tài khoản — ví dụ
+    GROQ_API_KEYS=key1,key2,...,key15 — để phục vụ đông người dùng (app Android
+    công khai) mà không đụng trần free của một key. LUMINA xoay vòng qua các key
+    này (round-robin) và tự nhảy sang key kế khi gặp 429 (hết lượt) / key hỏng.
+    """
+    raw = os.getenv(f"{prefix}_API_KEYS", "") or os.getenv(f"{prefix}_API_KEY", "")
+    keys: list[str] = []
+    seen: set[str] = set()
+    for k in raw.split(","):
+        k = k.strip()
+        if k and k not in seen:
+            seen.add(k)
+            keys.append(k)
+    return keys
 
 
 CONFIG = {
@@ -26,13 +54,118 @@ CONFIG = {
     "CLAUDE_MODEL_FAST": "claude-haiku-4-5",     # nhanh, tiết kiệm
     "ENABLE_FABLE": _bool("ENABLE_FABLE", False),
 
-    # ── Gemini / OpenAI (engine phụ — TÙY CHỌN, tự bật khi có key)
-    "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY", ""),
-    "GEMINI_MODEL": os.getenv("GEMINI_MODEL", "gemini-2.5-pro"),
+    # ── Engine MIỄN PHÍ / RẺ (tự bật khi có key) ────────────────
+    # Khi người dùng hết lượt cao cấp (Claude), LUMINA tự tụt xuống các engine
+    # này để vẫn trả lời được mà không tốn tiền — tất cả giấu dưới tên "LUMINA".
+    "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY", ""),   # gói FREE tại aistudio.google.com
+    "GEMINI_MODEL": os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+    "GROQ_API_KEY": os.getenv("GROQ_API_KEY", ""),       # FREE tại console.groq.com
+    "GROQ_MODEL": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+    # ── XOAY VÒNG NHIỀU KEY (gộp hạn mức free của nhiều tài khoản) ──
+    # Điền {NHÀ_CUNG_CẤP}_API_KEYS=key1,key2,... (nhiều key phẩy) để nhân trần
+    # hạn mức free lên — LUMINA xoay vòng qua các key và tự nhảy key khi 429/hỏng.
+    # Nếu chỉ có 1 key thì cứ để {NHÀ_CUNG_CẤP}_API_KEY như cũ (tự gộp vào danh sách).
+    "GEMINI_API_KEYS": _multikey("GEMINI"),
+    "GROQ_API_KEYS": _multikey("GROQ"),
+    "OPENROUTER_API_KEYS": _multikey("OPENROUTER"),
+    "DEEPSEEK_API_KEYS": _multikey("DEEPSEEK"),
+    "MISTRAL_API_KEYS": _multikey("MISTRAL"),
+    "KIMI_API_KEYS": _multikey("KIMI"),
+    "GITHUB_MODELS_API_KEYS": _multikey("GITHUB_MODELS"),
+    "OPENAI_API_KEYS": _multikey("OPENAI"),
+    "GROQ_BASE_URL": "https://api.groq.com/openai/v1",
+    # 🎧 Whisper (chép lời video/âm thanh) — qua Groq (miễn phí) hoặc OpenAI.
+    "GROQ_WHISPER_MODEL": os.getenv("GROQ_WHISPER_MODEL", "whisper-large-v3-turbo"),
+    "OPENAI_WHISPER_MODEL": os.getenv("OPENAI_WHISPER_MODEL", "whisper-1"),
+    # 🔎 Embeddings cho RAG thật (tìm theo ngữ nghĩa) — Gemini (free) hoặc OpenAI.
+    "GEMINI_EMBED_MODEL": os.getenv("GEMINI_EMBED_MODEL", "text-embedding-004"),
+    "OPENAI_EMBED_MODEL": os.getenv("OPENAI_EMBED_MODEL", "text-embedding-3-small"),
+    # 🔗 Xem video qua LINK (yt-dlp): giới hạn để không tốn tài nguyên / lạm dụng.
+    "VIDEO_LINK_MAX_DURATION": int(os.getenv("VIDEO_LINK_MAX_DURATION", "1200")),   # giây (20 phút)
+    "VIDEO_LINK_MAX_FILESIZE_MB": int(os.getenv("VIDEO_LINK_MAX_FILESIZE_MB", "80")),
+    "OPENROUTER_API_KEY": os.getenv("OPENROUTER_API_KEY", ""),  # FREE (nhiều model) tại openrouter.ai/keys
+    "OPENROUTER_MODEL": os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free"),
+    "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
+    # ~30 model FREE trên OpenRouter → mỗi cái thành 1 "bộ não phụ" (đăng ký như
+    # LOCAL_MODELS). Chỉ hoạt động khi có OPENROUTER_API_KEY; danh sách sửa qua biến
+    # OPENROUTER_MODELS. Model free trên OpenRouter thay đổi theo thời gian — engine
+    # nào chết thì fallback tự nhảy sang cái kế, nên để dư nhiều cái là an toàn.
+    "OPENROUTER_MODELS": [
+        m.strip() for m in os.getenv(
+            "OPENROUTER_MODELS",
+            "meta-llama/llama-3.3-70b-instruct:free,meta-llama/llama-3.1-8b-instruct:free,"
+            "meta-llama/llama-3.2-3b-instruct:free,meta-llama/llama-3.2-11b-vision-instruct:free,"
+            "google/gemma-2-9b-it:free,google/gemma-3-27b-it:free,google/gemma-3-12b-it:free,"
+            "google/gemma-3-4b-it:free,mistralai/mistral-7b-instruct:free,"
+            "mistralai/mistral-nemo:free,mistralai/mistral-small-3.1-24b-instruct:free,"
+            "mistralai/mistral-small-3.2-24b-instruct:free,qwen/qwen-2.5-72b-instruct:free,"
+            "qwen/qwen-2.5-7b-instruct:free,qwen/qwen-2.5-coder-32b-instruct:free,"
+            "qwen/qwq-32b:free,qwen/qwen3-235b-a22b:free,qwen/qwen3-32b:free,"
+            "qwen/qwen3-14b:free,qwen/qwen3-8b:free,qwen/qwen3-4b:free,"
+            "deepseek/deepseek-r1:free,deepseek/deepseek-chat:free,"
+            "deepseek/deepseek-r1-distill-llama-70b:free,deepseek/deepseek-r1-distill-qwen-32b:free,"
+            "deepseek/deepseek-r1-0528:free,nousresearch/deephermes-3-llama-3-8b-preview:free,"
+            "microsoft/phi-3-medium-128k-instruct:free,microsoft/phi-3-mini-128k-instruct:free,"
+            "thudm/glm-4-9b:free,tngtech/deepseek-r1t-chimera:free,"
+            "moonshotai/kimi-vl-a3b-thinking:free",
+        ).split(",") if m.strip()
+    ],
+    "DEEPSEEK_API_KEY": os.getenv("DEEPSEEK_API_KEY", ""),  # cực rẻ tại platform.deepseek.com
+    "DEEPSEEK_MODEL": os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
+    "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",
+    # Mistral API (cloud) — có free/experimental tier tại console.mistral.ai. Đây là NƠI dùng các
+    # model Mistral lớn (Mistral Large 3, Mistral Small 3.1) mà máy local không chạy nổi.
+    "MISTRAL_API_KEY": os.getenv("MISTRAL_API_KEY", ""),
+    "MISTRAL_MODEL": os.getenv("MISTRAL_MODEL", "mistral-small-latest"),
+    "MISTRAL_BASE_URL": os.getenv("MISTRAL_BASE_URL", "https://api.mistral.ai/v1"),
+    # Kimi (Moonshot AI) — model Kimi K3 MoE 2.8T (104B active/token, ngữ cảnh ~1M).
+    # KHÔNG tự host trọng số (cần cụm GPU nhiều TB VRAM); dùng API tương thích OpenAI
+    # tại platform.kimi.ai. Lấy key + xác nhận base URL đúng ở trang đó rồi điền KIMI_BASE_URL
+    # nếu khác (một số vùng dùng https://api.moonshot.ai/v1 hoặc https://api.moonshot.cn/v1).
+    "KIMI_API_KEY": os.getenv("KIMI_API_KEY", ""),
+    "KIMI_MODEL": os.getenv("KIMI_MODEL", "kimi-k3"),
+    "KIMI_BASE_URL": os.getenv("KIMI_BASE_URL", "https://api.kimi.ai/v1"),
+    "OLLAMA_BASE_URL": os.getenv("OLLAMA_BASE_URL", ""),  # ví dụ http://localhost:11434/v1 (model chạy trên máy bạn)
+    "OLLAMA_MODEL": os.getenv("OLLAMA_MODEL", "llama3.1"),
+    # CHẾ ĐỘ 100% LOCAL (LOCAL_ONLY=true): LUMINA CHỈ dùng model chạy trên máy bạn
+    # (Ollama), KHÔNG bao giờ gọi bất kỳ API bên ngoài nào (Claude/Gemini/Groq/Kimi…).
+    # → 0đ token, không cần API key nào, không phụ thuộc ai — "bộ não riêng của bạn"
+    # = LUMINA (router + skills) + model local. Đánh đổi: chất lượng ở mức model local
+    # (7B–70B chạy nổi trên máy cá nhân), yếu hơn model frontier trên cloud.
+    "LOCAL_ONLY": os.getenv("LOCAL_ONLY", "false").lower() in ("1", "true", "yes", "on"),
+    # LỚP DỰ PHÒNG LOCAL: khi hết token API (cho nhiều người dùng toàn cầu),
+    # LUMINA vẫn trả lời được bằng các model chạy NỘI BỘ qua Ollama. Một endpoint
+    # Ollama phục vụ được nhiều model — liệt kê ở đây, LUMINA sẽ lần lượt thử.
+    # KHÔNG làm nặng app (Ollama là tiến trình riêng, app chỉ gọi HTTP); "nặng" là
+    # ở RAM MÁY TỰ HOST. Chỉ hoạt động khi bạn tự host + đã `ollama pull` các model.
+    # NHIỀU model local ĐỜI MỚI, đủ dòng & đủ cỡ (app KHÔNG nặng thêm — chỉ là tên; weights
+    # nằm trên máy Ollama tự host, và chỉ tốn đĩa khi bác thực sự `ollama pull` từng cái).
+    # LUMINA lần lượt thử cái nào đã pull; chưa pull/chưa host thì tự bỏ qua.
+    # Cỡ nhẹ (máy 8–16GB): qwen3:4b (~2.6GB) · llama3.2:3b (~2GB) · gemma3:4b (~3.3GB)
+    #                       · deepseek-r1:7b (distill CÓ suy luận, ~4.7GB) · mistral:7b (~4GB)
+    #                       · phi4 (~9GB) · mistral-nemo (~7GB) · qwen2.5-coder:7b (chuyên code)
+    # Cỡ nặng (máy 24GB+):  qwen3:8b · deepseek-r1:14b · gemma3:12b (đổi/thêm qua biến LOCAL_MODELS)
+    # LƯU Ý THẬT: các bản KHỔNG LỒ (Llama 4 ~109B, DeepSeek-R1/V3.2 full ~671B, Mistral Large ~123B)
+    # KHÔNG chạy local nổi (cần ~60–400GB VRAM) — chúng thuộc TẦNG API (Groq/OpenRouter/DeepSeek/
+    # Mistral đã có ở trên), không phải local.
+    "LOCAL_MODELS": [
+        m.strip() for m in os.getenv(
+            "LOCAL_MODELS",
+            "qwen3:4b,qwen3:8b,deepseek-r1:7b,deepseek-r1:14b,llama3.2:3b,"
+            "gemma3:4b,gemma3:12b,phi4,mistral:7b,mistral-nemo,qwen2.5-coder:7b",
+        ).split(",") if m.strip()
+    ],
+    # GitHub Models — FREE (có hạn mức) tại github.com/marketplace/models.
+    # Chỉ cần 1 GitHub token miễn phí (Personal Access Token, không cần scope đặc biệt cho public models).
+    # Lấy token: github.com/settings/tokens → Generate new token (classic) → không cần tick scope nào.
+    "GITHUB_MODELS_API_KEY": os.getenv("GITHUB_MODELS_API_KEY", ""),
+    "GITHUB_MODELS_MODEL": os.getenv("GITHUB_MODELS_MODEL", "openai/gpt-4o-mini"),
+    "GITHUB_MODELS_BASE_URL": os.getenv("GITHUB_MODELS_BASE_URL", "https://models.github.ai/inference"),
     "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY", ""),
     "OPENAI_MODEL": os.getenv("OPENAI_MODEL", "gpt-4o"),
+    "OPENAI_BASE_URL": "https://api.openai.com/v1",
 
-    # ── Tìm kiếm cho engine phụ (Claude có web search tích hợp sẵn)
+    # ── Tìm kiếm cho engine phụ (Claude/Gemini có web search tích hợp sẵn)
     "TAVILY_API_KEY": os.getenv("TAVILY_API_KEY", ""),
 
     # ── Đăng nhập Google (BẮT BUỘC khi chạy công khai) ──────────
@@ -44,7 +177,9 @@ CONFIG = {
     "DEV_MODE": _bool("DEV_MODE", False),
 
     # ── Độ bền / hiệu năng (kế thừa khung mẫu) ──────────────────
-    "FALLBACK_CHAIN": ["claude", "gemini", "openai"],
+    # Chuỗi engine MIỄN PHÍ/RẺ — dùng khi hết lượt cao cấp hoặc khi engine chính lỗi.
+    # Thứ tự ưu tiên: Gemini free → Groq free → GitHub Models free → OpenRouter → DeepSeek rẻ → Mistral → Ollama (máy bạn) → OpenAI.
+    "FREE_FALLBACK_CHAIN": ["gemini", "groq", "github", "openrouter", "deepseek", "mistral", "kimi", "ollama", "openai"],
     "CIRCUIT_BREAKER_THRESHOLD": int(os.getenv("CIRCUIT_BREAKER_THRESHOLD", "5")),
     "CIRCUIT_BREAKER_TIMEOUT": int(os.getenv("CIRCUIT_BREAKER_TIMEOUT", "60")),
     "CACHE_TTL": int(os.getenv("CACHE_TTL", "3600")),
@@ -52,6 +187,7 @@ CONFIG = {
     "MAX_PAUSE_TURN_CONTINUATIONS": 5,
 
     # Giới hạn lượt theo người dùng (token bucket) — bảo vệ API key
+    # (đây là giới hạn của gói MIỄN PHÍ; gói trả phí dùng PLANS["monthly"/"yearly"] bên dưới)
     "RATE_LIMIT_REQUESTS_PER_MINUTE": int(os.getenv("RATE_LIMIT_RPM", "10")),
     "RATE_LIMIT_BURST": int(os.getenv("RATE_LIMIT_BURST", "15")),
 
@@ -59,14 +195,131 @@ CONFIG = {
     "DB_PATH": os.getenv("DB_PATH", os.path.join(os.path.dirname(__file__), "..", "data", "lumina.db")),
 
     "LOG_LEVEL": os.getenv("LOG_LEVEL", "INFO"),
+
+    # ── Quản trị (tạo mã kích hoạt gói trả phí) ──────────────────
+    # Danh sách email được quyền vào trang quản trị, cách nhau bởi dấu phẩy
+    "ADMIN_EMAILS": [e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()],
+
+    # ── Thanh toán TỰ ĐỘNG ──────────────────────────────────────
+    # (A) SePay — khách VN quét VietQR chuyển khoản, tiền về thẳng tài khoản bạn.
+    #     Đăng ký free tại sepay.vn → nối ngân hàng → lấy API key (dùng xác thực webhook).
+    "SEPAY_API_KEY": os.getenv("SEPAY_API_KEY", ""),
+    "PAYMENT_BANK_BIN": os.getenv("PAYMENT_BANK_BIN", ""),      # mã BIN ngân hàng cho VietQR (vd 970436 = Vietcombank)
+    "PAYMENT_BANK_ACCOUNT": os.getenv("PAYMENT_BANK_ACCOUNT", ""),
+    "PAYMENT_BANK_OWNER": os.getenv("PAYMENT_BANK_OWNER", ""),  # tên chủ TK, IN HOA không dấu
+    "PAYMENT_BANK_NAME": os.getenv("PAYMENT_BANK_NAME", ""),    # tên ngân hàng hiển thị
+
+    # (B) PayPal — khách quốc tế trả thẻ/PayPal, tiền về thẳng PayPal của bạn.
+    #     Tạo REST App tại developer.paypal.com → lấy Client ID + Secret.
+    "PAYPAL_CLIENT_ID": os.getenv("PAYPAL_CLIENT_ID", ""),
+    "PAYPAL_SECRET": os.getenv("PAYPAL_SECRET", ""),
+    "PAYPAL_MODE": os.getenv("PAYPAL_MODE", "live"),           # "live" hoặc "sandbox" (test)
+
+    # Đơn hàng hết hạn sau (phút) nếu chưa thanh toán
+    "ORDER_TTL_MINUTES": int(os.getenv("ORDER_TTL_MINUTES", "30")),
 }
+
+# ── Định nghĩa các gói ───────────────────────────────────────────
+# CÁCH HOẠT ĐỘNG (giấu model dưới thương hiệu LUMINA — người dùng không thấy tên model):
+#   • premium_daily_cap  = số lượt "cao cấp" mỗi ngày dùng bộ não mạnh nhất (Claude).
+#   • Hết lượt cao cấp → LUMINA TỰ tụt xuống chuỗi engine MIỄN PHÍ (Gemini/Groq/
+#     DeepSeek/Ollama) — người dùng vẫn chat tiếp được, không bị chặn cứng.
+#   • total_daily_cap    = tổng số tin nhắn/ngày (kể cả engine free) — chặn lạm dụng.
+#   • Gói trả phí = NHIỀU lượt cao cấp hơn + tổng lượt cao hơn (chỉ là "thêm token").
+# Sửa giá/giới hạn tại đây hoặc qua biến môi trường.
+PLANS: dict[str, dict] = {
+    "free": {
+        "key": "free",
+        "label": "Miễn phí",
+        "price_vnd": 0,
+        "price_usd": 0.0,
+        "duration_days": 0,          # 0 = không hết hạn (mặc định của mọi tài khoản)
+        "rpm": CONFIG["RATE_LIMIT_REQUESTS_PER_MINUTE"],
+        "burst": CONFIG["RATE_LIMIT_BURST"],
+        # Lượt cao cấp (Claude) rất thấp có chủ đích — bảo vệ ngân sách API nhỏ.
+        # Hết lượt này thì chuyển sang engine free, vẫn chat được.
+        "premium_daily_cap": int(os.getenv("FREE_PREMIUM_CAP", "3")),
+        "total_daily_cap": int(os.getenv("FREE_TOTAL_CAP", "120")),
+        "apex_allowed": False,
+        # KHÔNG hiển thị con số giới hạn cho gói Miễn phí (tránh làm người dùng ngại).
+        "features": [
+            "Trò chuyện thoải mái mỗi ngày với LUMINA",
+            "Tự động chọn bộ não tốt nhất cho từng câu hỏi",
+            "Xem ảnh · vẽ ảnh · tìm kiếm web · nghiên cứu sâu",
+        ],
+    },
+    "monthly": {
+        "key": "monthly",
+        "label": "Gói Tháng",
+        "price_vnd": int(os.getenv("PRICE_MONTHLY_VND", "500000")),
+        "price_usd": float(os.getenv("PRICE_MONTHLY_USD", "20")),
+        "duration_days": 30,
+        "rpm": int(os.getenv("PAID_RPM", "30")),
+        "burst": int(os.getenv("PAID_BURST", "50")),
+        "premium_daily_cap": int(os.getenv("PAID_PREMIUM_CAP", "200")),
+        "total_daily_cap": int(os.getenv("PAID_TOTAL_CAP", "1000")),
+        "apex_allowed": True,
+        "features": [
+            f"{os.getenv('PAID_PREMIUM_CAP', '200')} lượt bộ não cao cấp / ngày (gấp nhiều lần gói Miễn phí)",
+            f"Tối đa {os.getenv('PAID_TOTAL_CAP', '1000')} tin nhắn / ngày",
+            "Mở khóa chế độ 🌌 Đỉnh cao cho tác vụ khó nhất",
+            "Ưu tiên xử lý, phản hồi nhanh hơn",
+        ],
+    },
+    "yearly": {
+        "key": "yearly",
+        "label": "Gói Năm",
+        "price_vnd": int(os.getenv("PRICE_YEARLY_VND", "5000000")),
+        "price_usd": float(os.getenv("PRICE_YEARLY_USD", "200")),
+        "duration_days": 365,
+        "rpm": int(os.getenv("PAID_RPM", "30")),
+        "burst": int(os.getenv("PAID_BURST", "50")),
+        "premium_daily_cap": int(os.getenv("PAID_PREMIUM_CAP", "200")),
+        "total_daily_cap": int(os.getenv("PAID_TOTAL_CAP", "2000")),
+        "apex_allowed": True,
+        "features": [
+            "Mọi tính năng gói Tháng",
+            "Tổng lượt/ngày cao gấp đôi",
+            "Tiết kiệm ~27% so với đóng theo tháng",
+        ],
+    },
+}
+
+
+def has_any_engine() -> bool:
+    """Có ít nhất một bộ não được cấu hình không (cao cấp hoặc free)."""
+    return bool(
+        CONFIG["ANTHROPIC_API_KEY"] or CONFIG["GEMINI_API_KEY"] or CONFIG["GROQ_API_KEY"]
+        or CONFIG["OPENROUTER_API_KEY"] or CONFIG["DEEPSEEK_API_KEY"]
+        or CONFIG["MISTRAL_API_KEY"] or CONFIG["KIMI_API_KEY"]
+        or CONFIG["OLLAMA_BASE_URL"] or CONFIG["GITHUB_MODELS_API_KEY"]
+        or CONFIG["OPENAI_API_KEY"]
+    )
+
+
+def sepay_enabled() -> bool:
+    """SePay (chuyển khoản VN) đã cấu hình đủ để nhận thanh toán chưa."""
+    return bool(CONFIG["SEPAY_API_KEY"] and CONFIG["PAYMENT_BANK_BIN"] and CONFIG["PAYMENT_BANK_ACCOUNT"])
+
+
+def paypal_enabled() -> bool:
+    """PayPal (thẻ quốc tế) đã cấu hình chưa."""
+    return bool(CONFIG["PAYPAL_CLIENT_ID"] and CONFIG["PAYPAL_SECRET"])
+
+
+def paypal_api_base() -> str:
+    return "https://api-m.paypal.com" if CONFIG["PAYPAL_MODE"] == "live" else "https://api-m.sandbox.paypal.com"
 
 
 def validate_config() -> list[str]:
     """Trả về danh sách cảnh báo cấu hình (không chặn khởi động)."""
     warnings = []
-    if not CONFIG["ANTHROPIC_API_KEY"]:
-        warnings.append("Thiếu ANTHROPIC_API_KEY — LUMINA chưa thể trả lời. Lấy key tại https://console.anthropic.com")
+    if not has_any_engine():
+        warnings.append("Chưa có bộ não nào — điền ít nhất một key: ANTHROPIC_API_KEY (cao cấp) "
+                        "hoặc GEMINI_API_KEY / GROQ_API_KEY (miễn phí). Xem README.")
+    elif not CONFIG["ANTHROPIC_API_KEY"]:
+        warnings.append("Chưa có ANTHROPIC_API_KEY — LUMINA sẽ chạy hoàn toàn bằng bộ não miễn phí "
+                        "(Gemini/Groq/DeepSeek/Ollama). Thêm Claude nếu muốn chất lượng cao nhất.")
     if not CONFIG["GOOGLE_CLIENT_ID"] and not CONFIG["DEV_MODE"]:
         warnings.append("Thiếu GOOGLE_CLIENT_ID — không ai đăng nhập được. Tạo tại https://console.cloud.google.com (hoặc đặt DEV_MODE=true khi chạy thử).")
     if not CONFIG["SECRET_KEY"]:

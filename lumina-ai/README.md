@@ -10,29 +10,109 @@
 
 ---
 
-LUMINA là web chatbot AI "bù trừ": bạn chỉ cần gõ câu hỏi, hệ thống tự phân tích và chọn chế độ tối ưu — **không cần chọn model, không cần mua gói**:
+LUMINA là web chatbot AI "bù trừ": bạn chỉ cần gõ câu hỏi, hệ thống tự phân tích và chọn chế độ tối ưu — **không cần chọn model**:
 
-| Chế độ | Khi nào | Bộ não |
+**Bộ não NHIỀU TẦNG (điểm mấu chốt để chạy gần như miễn phí):**
+
+1. 🥇 **Tầng cao cấp — Claude** (chất lượng cao nhất): dùng cho N lượt đầu mỗi ngày của mỗi người (gói Miễn phí = 2 lượt). Router tự chọn Haiku / Sonnet / Opus / Fable theo độ khó câu hỏi.
+2. 🆓 **Tầng thường — miễn phí**: hết lượt cao cấp, LUMINA **tự tụt xuống** Gemini (free) → Groq (free, phục vụ **Llama 4**) → GitHub Models (free) → OpenRouter (free, phục vụ **Qwen/Llama**) → **OpenRouter (~30 model FREE: Llama/Qwen/Gemma/DeepSeek/Mistral… mỗi model là 1 bộ não phụ)** → DeepSeek (rẻ) → **Mistral** (free tier) → **Kimi K3** (Moonshot — MoE 2.8T, ngữ cảnh ~1M, qua API tương thích OpenAI) → **Ollama local (nhiều model)** → OpenAI. Người dùng vẫn chat tiếp bình thường, **không hề biết đã đổi bộ não**.
+3. 🖥️ **Lớp dự phòng LOCAL (khi hết cả token API)**: LUMINA đăng ký sẵn **11 model chạy nội bộ** qua Ollama — `qwen3:4b/8b`, `deepseek-r1:7b/14b` (bản distill có **suy luận**), `llama3.2:3b`, `gemma3:4b/12b`, `phi4`, `mistral:7b`, `mistral-nemo`, `qwen2.5-coder:7b` (cấu hình qua `LOCAL_MODELS`, chọn theo RAM máy). Thêm nhiều tên model **không làm app nặng thêm** (app vẫn ~5MB, weights nằm trên máy Ollama, chỉ tốn đĩa khi bác thực sự `ollama pull`). Khi token API cạn cho lượng người dùng lớn, LUMINA lần lượt thử các model local để **vẫn có câu trả lời**. **Không làm nặng app** — Ollama là tiến trình riêng, app chỉ gọi HTTP; "nặng" là ở RAM máy tự host. **Chỉ hoạt động khi bạn TỰ HOST** trên máy đủ RAM + đã `ollama pull` các model (Render free không chạy được). Thư viện Kỹ năng nội bộ tự tiêm vào ngữ cảnh giúp cả model local này trả lời có phương pháp hơn — nhưng lưu ý model local **yếu hơn** model cao cấp, đây là lớp "vẫn có đáp án khi cạn token", không phải lớp mạnh nhất.
+
+> **Vì sao không nhét Llama 4 / DeepSeek-R1 full / Mistral Large vào "local"?** Vì chúng **quá lớn** (≈60–400GB VRAM, cần cụm GPU) — không chạy nổi trên máy tự host thường, sẽ làm "quá nặng". Đúng chỗ của chúng là **tầng API** (cloud): Llama 4 & Qwen qua Groq/OpenRouter (đã có), DeepSeek qua DeepSeek API (đã có), Mistral Large/Small qua **Mistral API** (mới thêm — có free tier, điền `MISTRAL_API_KEY`). Local chỉ giữ các bản nhỏ chạy nổi của đúng các dòng đó.
+
+→ Bạn chỉ tốn tiền Claude cho vài lượt cao cấp; phần còn lại chạy bằng API miễn phí. **Không có Claude cũng được** — LUMINA chạy 100% bằng bộ não free.
+
+> **🔒 Chế độ 100% LOCAL (`LOCAL_ONLY=true`) — "API riêng của bạn, 0đ token, không phụ thuộc ai":**
+> LUMINA **KHÔNG phải một model** (không có trọng số riêng) — nó là **router + thư viện skills**, luôn cần MỘT bộ não sinh câu trả lời. Bật `LOCAL_ONLY=true` để bộ não đó **chỉ là model chạy trên máy bạn** (Ollama): LUMINA **không bao giờ gọi bất kỳ API ngoài nào** (Claude/Gemini/Groq/Kimi…). Kết quả: **0đ token, không cần API key nào, chạy hoàn toàn trên phần cứng của bạn** = LUMINA (router + 1097 skills) + model local của bạn. Đánh đổi **duy nhất**: chất lượng ở mức model local chạy nổi trên máy cá nhân (7B–70B), **yếu hơn** model frontier trên cloud (Kimi 2.8T / Claude — những model đó cần cụm GPU triệu đô nên KHÔNG thể tự host). Đây là hiện thực đúng nghĩa của "chỉ LUMINA, không route ra ngoài".
+
+Router tự chọn chế độ theo câu hỏi (⚡ nhanh · ✨ cân bằng · 🧠 tư duy sâu · 🔍 tìm kiếm web · 🌌 đỉnh cao) — nhưng **người dùng chỉ thấy tên "LUMINA"**, không thấy tên model.
+
+**Độ bền kiểu ChatGPT:** bộ não nào lỗi → tự nhảy sang cái kế tiếp (circuit breaker + fallback), người dùng không thấy gì.
+
+**Bảo mật:** bắt buộc đăng nhập Google; API key nằm ở server (không lộ ra trình duyệt); giới hạn lượt/người để bảo vệ chi phí; hệ thống **không bao giờ lộ tên model** ra người dùng.
+
+**Gói Miễn phí / Tháng / Năm:** gói trả phí = **nhiều lượt cao cấp hơn + tổng lượt/ngày cao hơn** (chỉ là "thêm token", không phải model khác) + mở khóa 🌌 Đỉnh cao. **Thanh toán tự động** — khách VN quét QR chuyển khoản (SePay), khách quốc tế trả thẻ/PayPal; tiền vào là gói tự lên (mục 6).
+
+Kiến trúc kế thừa khung "Unified AI Core" (Router · Circuit Breaker · Cache · Memory · Rate limiter · Metrics), viết lại theo Claude API hiện hành + tầng engine miễn phí.
+
+**Đa phương thức (không chỉ chat chữ) — tất cả chạy được trên web miễn phí:**
+
+| Tính năng | Cách dùng | Cần gì |
 |---|---|---|
-| ⚡ Phản hồi nhanh | Câu ngắn, chào hỏi | Claude Haiku 4.5 |
-| ✨ Cân bằng | Trò chuyện thông thường | Claude Sonnet 5 |
-| 🧠 Tư duy sâu | Code, toán, phân tích | Claude Opus 4.8 (effort cao) |
-| 🔍 Tìm kiếm web | Tin tức, giá cả, thông tin mới | Claude Opus 4.8 + Web Search (có trích nguồn) |
-| 🌌 Đỉnh cao | Tác vụ khó nhất (tùy chọn) | Claude Fable 5 |
+| 🖼 **Xem / hiểu ảnh** | Bấm 📎 đính kèm ảnh → hỏi "ảnh này là gì?" | Gemini (free) hoặc Claude — có sẵn |
+| 🎬 **Xem / hiểu video (upload)** | Bấm 📎 đính kèm video (≤~18MB) → hỏi về nội dung, hoặc "vẽ sơ đồ các bước trong video" | **Gemini** xem trực tiếp (cả âm thanh/chuyển động); ngoài ra LUMINA tự **tách 6 khung hình** rải đều → **Claude** (và mọi bộ não nhìn ảnh) cũng phân tích video & dựng sơ đồ được. Dùng ffmpeg tĩnh nhúng sẵn (imageio-ffmpeg), không cần cài đặt |
+| 🔗 **Xem video qua LINK** | Dán link YouTube/Vimeo/TikTok… vào chat → hỏi/tóm tắt/"vẽ sơ đồ" | `yt-dlp` lấy **phụ đề gốc** (miễn phí) — không có thì trích audio → **Whisper** (cần `GROQ_API_KEY` miễn phí, hoặc OpenAI) — **cộng** khung hình tách từ video. Giới hạn video ≤ 20 phút / ≤ 80MB. *Tuân thủ ToS/bản quyền nền tảng nguồn.* |
+| 📄 **Đọc tệp** | Bấm 📎 đính kèm PDF/Word/Excel/txt (và .pptx/.html/.epub nếu bật markitdown) → hỏi về nội dung | Bộ đọc 2 tầng: mặc định **nhẹ** (pypdf/python-docx/openpyxl). Cài thêm **markitdown** (`pip install "markitdown[all]"`) → đọc XỊN hơn (Markdown sạch giữ bảng/tiêu đề + .pptx/.html/.epub); `files.py` tự dùng nếu có, không thì lùi về bộ nhẹ. Tắt bằng `MARKITDOWN_DISABLE=1` |
+| 📚 **Tổng hợp tệp → file mới** | Đính kèm ≥1 tệp (vd 2 bản PDF Đạo Đức Kinh) → bấm **📚 Tổng hợp thành file** → LUMINA đọc tất cả, nghĩ, tổng hợp kiến thức thành **một tài liệu/sách mới** rồi cho tải về (**docx** / **pdf** / **html**) | `docgen.py` + `POST /api/compose`. docx (python-docx) hợp mọi ngôn ngữ & sửa được; pdf (fpdf2) hợp Latin/Việt; html mở trên điện thoại rồi "Lưu thành PDF". Khi tổng hợp, **GraphRAG** tự dựng đồ thị tri thức từ các tệp và chèn "bức tranh toàn cục" (thực thể trung tâm + liên kết) để bộ não **nối kiến thức giữa các tệp** |
+| 📊 **GraphRAG (đồ thị tri thức)** | `POST /api/graph/ingest` nạp tài liệu → `GET /api/graph/query?q=…&scope=local\|global` hỏi | `graph_rag.py`: trích thực thể + quan hệ (đồng xuất hiện, bản nhẹ không tốn token; cắm LLM-extractor để tăng chất lượng) → sqlite. **local** = bám thực thể trong câu hỏi + hàng xóm; **global** = hub/chủ đề toàn cục (trả lời câu hỏi tổng thể mà RAG vector khó). Xem skill `how-graphrag-works` |
+| 🌍 **Worldmonitor (số liệu thật)** | Hỏi "dân số Việt Nam", "thủ đô Pháp"… → số liệu **cập nhật** (không phải trọng số cũ). Hoặc `GET /api/world?country=` | `worldmonitor.py` lấy REST Countries API (free, không key), cache 6h, lưu vào kho → "trọng số" thế giới dày lên theo thời gian; tự kích hoạt trong `knowledge.gather` |
+| 🌐 **Chợ Agent (cộng đồng)** | Sidebar → **＋ Tạo agent** (đặt persona) → tick **Chia sẻ** → lên **🌐 Chợ**; người khác bấm **Cài** để thêm vào "Agent của tôi" | `db.agents` (+cột shared/installs/author/origin_id) + `POST /api/agents/{id}/share`, `GET /api/marketplace`, `POST /api/marketplace/{id}/install`. Vòng cộng đồng: user **tạo → chia sẻ → khám phá → cài** agent của nhau (xếp theo lượt cài) |
+| 🔑 **API riêng (OpenAI-compatible)** | Sidebar → **🔑 API của tôi** → tạo key `lum_…` → trỏ SDK OpenAI vào `<host>/v1`, model `"lumina"`. Dùng LUMINA như một API trong app/script của bạn | `POST /v1/chat/completions` (auth bằng `Authorization: Bearer lum_…`) định tuyến qua bộ não nhiều tầng — **không lộ model thật**. Quản lý key: `POST/GET/DELETE /api/keys` (lưu **hash** sha256, key gốc chỉ hiện 1 lần). Hỗ trợ stream & non-stream, tôn trọng hạn mức gói |
+| 🌐 **Đọc link dán trong chat** | Dán bất kỳ link http(s) nào vào câu hỏi → LUMINA tự tải và đọc nội dung trang | **Mọi bộ não** (server tự tải trang, không phụ thuộc Claude/chế độ tìm kiếm) |
+| 🔬 **Nghiên cứu sâu** | Bấm nút **🔬 Nghiên cứu sâu** hoặc gõ "nghiên cứu sâu về…" → LUMINA tìm nhiều nguồn, viết báo cáo có trích dẫn | Bộ não có tìm kiếm (Gemini/Claude) |
+| 🎨 **Vẽ ảnh** | Bấm nút **🎨 Vẽ ảnh** hoặc gõ "vẽ con mèo…" → ra ảnh | **Miễn phí, không cần key** (Pollinations); tự dùng DALL-E nếu có `OPENAI_API_KEY` |
+| 📝 **Tạo phụ đề video** | Đính kèm video + bấm nút **📝 Phụ đề** → LUMINA xuất transcript chuẩn SRT (kèm mốc thời gian) | Gemini (nghe video) |
+| ⚙️ **Lumina Forge** | Bấm nút **⚙️ Lumina Forge** → LUMINA trả lời ở mức kỹ sư cấp cao, TỰ CO GIÃN theo quy mô: việc nhỏ (1 hàm, sửa lỗi) trả lời gọn (chọn ngôn ngữ phù hợp, kiến trúc ngắn gọn, bảo mật, test, Dockerfile/CI-CD nếu liên quan — hỗ trợ Python/TypeScript/JavaScript/Rust/Go/Java/C#/C++/SQL/Bash); việc lớn (kiến trúc hệ thống, nhiều bước) tự dùng đủ quy trình 6 giai đoạn nghiêm ngặt (SPEC → Design Review → Implementation → Validation → Review → Handover). Tự động áp dụng thêm kỹ năng chuyên môn phù hợp từ thư viện nội bộ khi khớp (xem bên dưới). Nếu chưa có code/tài liệu trong hội thoại, LUMINA sẽ hỏi bạn dán vào hoặc dùng 📎/dán link trước khi phân tích | Bộ não có tìm kiếm (Gemini/Claude) |
+| 🗣 **Lồng tiếng tự động** | Nút **🗣 Lồng tiếng phim** ở sidebar → chọn video, chọn ngôn ngữ → chờ 1-3 phút → tải video đã lồng tiếng + gắn phụ đề | Chỉ gói **Tháng/Năm** (tốn nhiều tài nguyên xử lý) — xem chi tiết bên dưới |
+| 🎤 **Nói bằng giọng** | Bấm 🎤 → nói → ra chữ | Chạy ngay trong trình duyệt (Chrome/Edge/Android), không cần server |
+| 🌍 **Đa ngôn ngữ** | **Không cần chọn** — giao diện tự theo ngôn ngữ thiết bị (Việt/English/中文), và bộ não tự trả lời đúng ngôn ngữ bạn gõ | Giao diện i18n tự nhận; khớp kỹ năng hoạt động cho cả truy vấn tiếng Anh |
+| 📊 **Sơ đồ động (Mermaid)** | Hỏi "vẽ sơ đồ kiến trúc/luồng/tuần tự…" (hoặc mô tả ý, gửi kèm ảnh) → LUMINA xuất khối `mermaid`, giao diện tự render thành **sơ đồ tương tác** (bấm ⤢ để phóng to, cuộn để zoom, kéo để di chuyển) | **Mọi bộ não**; thư viện Mermaid nhúng sẵn (`static/vendor/`), nạp lười chỉ khi có sơ đồ |
+| ▶ **Bản chạy thử (live preview)** | Hỏi "làm game 2D / demo web / visualization chạy được" → LUMINA xuất khối `lumina-run` (HTML tự chứa), giao diện **chạy ngay trong iframe sandbox** (↺ chạy lại · `</>` xem mã · ⤢ toàn màn hình) | **Mọi bộ não**; iframe `sandbox="allow-scripts"` (KHÔNG same-origin → cách ly, không đọc được dữ liệu LUMINA) |
+| 🔮 **Sandbox mô phỏng (what-if)** | Hỏi "nếu Bitcoin giảm 30%?", "mở quán cafe doanh thu 3 năm?" → LUMINA dựng **mô phỏng tương tác** (thanh trượt giả định + biểu đồ canvas) chạy trong sandbox, để bạn tự thử nhiều kịch bản | Tái dùng live-preview; ghi rõ là mô hình minh họa theo giả định |
+| 🎯 **Goal Engine (giao mục tiêu)** | Sidebar → **🎯 Mục tiêu** → tạo mục tiêu (+ hạn) → **✨ AI chia nhỏ** thành các bước → tick từng bước, **thanh tiến độ %** tự cập nhật | Lưu theo tài khoản; AI chia bước qua bộ não (không có engine → thêm bước tay) |
+| 🗺 **Bản đồ quyết định** | Hỏi "nên chọn A hay B?", "phương án nào?" → LUMINA xuất khối `lumina-decision`, giao diện render **cây lựa chọn bấm mở từng nhánh**: mỗi hướng có hệ quả / được / mất-rủi ro / tối ưu cho ai (có nhánh con) | **Mọi bộ não** |
+| 🧠 **Brain Map (bản đồ tri thức)** | Hỏi "bản đồ Crypto", "map kiến thức AI", "sơ đồ tư duy X" → Mermaid `mindmap` phân cấp, **zoom/kéo như bản đồ** | Tái dùng Mermaid + overlay zoom |
+| 🧩 **Quy trình sống (workflow thiết kế)** | Mô tả một quy trình bằng lời ("mỗi sáng lấy tin AI → lọc trùng → tóm tắt → gửi email") → LUMINA xuất khối `lumina-workflow`, giao diện render **luồng các bước nối bằng mũi tên** (📥 nguồn · 🔍 lọc · ⚙️ biến đổi · ⏰ lịch · ❓ điều kiện · ▶️ hành động · 📤 kết quả), bấm mở từng bước xem chi tiết. Chỉnh bằng cách nhắn tiếp | **Mọi bộ não** — đây là **bản THIẾT KẾ**, LUMINA **không tự chạy/tự lập lịch/tự gửi** (chat thuần, không có runtime tự động) |
+| 📌 **Trí nhớ dự án** | Trong Dashboard project → ô **📌 Trí nhớ dự án** (kiến trúc, quyết định đã chốt, file quan trọng, lý do đã bỏ phương án) → mọi chat trong project dùng bối cảnh này, **tách khỏi chuyện cá nhân** | Lưu theo project; chèn ngầm vào system prompt khi chat trong project |
+| 👍 **Feedback độ hữu dụng** | 👍/👎 dưới mỗi câu trả lời (👎 hỏi thêm "phần nào chưa tốt") → LUMINA ghi nhận để tiến hoá theo hành vi thật | Lưu theo tài khoản |
+| 🔎 **Phản biện nội bộ** | Bấm nút **🔎 Phản biện** → LUMINA tự đóng vai **đề xuất + phản biện**, bắt lỗ hổng/thiếu sót rồi **sửa** trước khi trả lời; cuối bài có mục "🔎 Đã tự phản biện & sửa" | Bộ não có tìm kiếm (Gemini/Claude); tốn ~2x token |
+| 🕑 **Version hóa suy nghĩ** | Dưới mỗi câu trả lời: **📌 Lưu bản** (v1, v2…) + **🕑 Phiên bản** → xem lại/khôi phục bất kỳ bản nào vào ô nhập. Mạnh cho code/game/tài liệu/design | Lưu theo hội thoại |
+| 🕰 **AI Time Capsule (nhật ký tiến hoá)** | Sidebar → **🕰 Nhật ký tiến hoá** → ghi **ý tưởng / quyết định / cái đã bỏ (+ lý do) / cột mốc** thành **dòng thời gian** để xem lại "tại sao quyết vậy, đã thử gì, sai gì". Kèm **✨ LUMINA tự đánh giá** — phân tích feedback thật → đề xuất cải tiến | Lưu theo tài khoản; report cần 1 bộ não |
+| ◉ **Widget sống trong chat** | Hỏi "tạo widget tin tức về X cập nhật liên tục", "đồng hồ đếm ngược tới…" → LUMINA xuất khối `lumina-widget`, giao diện render **thẻ sống tự làm mới** (⏸ tạm dừng / ⟳ làm mới). Nối **data local thật**: tin tức (Google News), tri thức đã học, đồng hồ/đếm ngược | **Mọi bộ não**; poll `/api/widget/*`, không bịa nguồn ngoài |
+| ⚙️ **Lumina Forge (Agent)** | Sidebar → **⚙️ Lumina Forge** (một agent duy nhất, như Claude Code) → mở workspace: xem/tạo các **session** riêng. Mỗi session là kỹ sư cấp cao **và tự áp dụng thư viện kỹ năng nội bộ** (ngầm, không lộ ra người dùng) | Lưu theo tài khoản; kỹ năng khớp chèn ngầm vào system prompt |
+| ◧ **Mặt bàn theo Project** | Sidebar → **＋ Mặt bàn (Project)** → đặt tên → mở **Dashboard riêng**: ghim widget sống (tin tức/đồng hồ/tri thức) + gom các cuộc trò chuyện của project. Chat mới trong project tự gắn vào project đó | Lưu theo tài khoản; xóa project KHÔNG xóa hội thoại (chỉ gỡ khỏi project) |
+| ✦ **Bộ não LUMINA (học)** | Link ở sidebar → trang giải thích động **Self-Attention & Mixture-of-Experts**, xem chạy từng bước | Trang tĩnh `static/learn.html`, không cần key |
 
-**Độ bền kiểu ChatGPT:** circuit breaker + fallback chain — Claude gặp sự cố sẽ tự chuyển sang Gemini rồi OpenAI (nếu bạn điền key), người dùng không phải làm gì.
+> Router tự nhận ra ý định ("vẽ…", "nghiên cứu sâu…") nên thường **không cần bấm nút**; các nút chỉ để ép chế độ khi muốn.
 
-**Bảo mật:** bắt buộc đăng nhập Google; API key nằm ở server (không lộ ra trình duyệt); giới hạn lượt mỗi người dùng để bảo vệ chi phí.
+**🌐 Đọc link dán trong chat:** trước đây chỉ Claude ở chế độ 🔍 tìm kiếm mới đọc được link người dùng dán vào — Gemini/Groq/DeepSeek/OpenAI thì không. Giờ máy chủ **tự tải link** (httpx, không cần key) và tách nội dung đọc được (bỏ menu/quảng cáo/script bằng BeautifulSoup) trước khi đưa cho bộ não — hoạt động với **mọi bộ não, mọi chế độ**. Giới hạn 2 link/tin nhắn, trang nặng hơn 3MB hoặc không phải HTML thì báo lỗi thân thiện thay vì treo.
 
-Kiến trúc kế thừa khung "Unified AI Core" (Router thông minh · Circuit Breaker · Cache · Context Memory · Rate limiter · Metrics), viết lại theo Claude API hiện hành: adaptive thinking, web search server-side, streaming SSE thật.
+**🧩 Thư viện Kỹ năng nội bộ:** LUMINA đã tích hợp sẵn 1097 kỹ năng chuyên môn (tuyển chọn từ các bộ Claude Skills mã nguồn mở + LUMINA tự biên soạn theo thông lệ ngành cho các năng lực lõi) (kỹ thuật phần mềm: TDD, code review, bảo mật (IDOR/XSS/SQLi/SSRF, OWASP Top 10, security header/CSP, threat modeling, mã hóa dữ liệu at rest, Tor/onion routing), CI/CD, spec-driven development, domain modeling, chẩn đoán bug, giải quyết merge conflict, OAuth, TypeScript nâng cao, Rust ownership, Go concurrency, Next.js/Svelte, Node.js/Express API, prompt engineering, SQL/query optimization, regex, Docker, Kubernetes, Linux CLI, thiết kế schema DB (SQL & NoSQL), system design, đa luồng, mạng, xác thực/phân quyền, caching, message queue, GraphQL, microservices, Git nâng cao, quản lý dependency, feature flag, memory/leak, websocket realtime, i18n, ứng phó sự cố, testing strategy, chỉ số SaaS, phân tích cohort/funnel, viết tài liệu kỹ thuật... + gu thiết kế UI/UX: banner, brand, design system, phong cách brutalist/minimalist, sơ đồ kỹ thuật động, chuẩn accessibility WCAG 2.2, trạng thái nút bấm, modal/overlay, tab navigation, vùng cuộn, sticky header, mật độ giao diện, semantic HTML/SEO, phân cấp thị giác, luồng người dùng nhiều bước, tính nhất quán layout/component, ẩn dụ giao diện, bảng màu thuật toán, ngôn ngữ hình ảnh thương hiệu, Core Web Vitals, chuyển động kể chuyện, dashboard nhiều view đồng bộ, Material Design 3 Android, Nielsen heuristics, information architecture, color science (OKLCH) + kiến trúc AI agent: multi-agent, memory system, tool design, context degradation, chọn model theo chi phí + nội bộ LLM/ML nâng cao: RLHF, mixture-of-experts, LoRA/QLoRA, knowledge distillation, beam search, sampling (temperature/top-p/top-k), speculative decoding, word embeddings, positional encoding (RoPE), batch/layer norm, activation functions, KV cache, multimodal, MCP, vision transformer...). Khi bấm ⚙️ Lumina Forge và nội dung khớp một kỹ năng, LUMINA tự động áp dụng — không cần thao tác gì thêm, không có nút riêng. Chỉ đưa vào các kỹ năng THUẦN VĂN BẢN/PHƯƠNG PHÁP LUẬN (không cần tool/MCP/browser thật, vì LUMINA là chatbot API không có hạ tầng chạy công cụ như một coding agent thật). Xem `data/skills/ATTRIBUTION.md` để biết nguồn + giấy phép từng repo.
+
+**🧠 Workflow tự tiến hoá (học theo thời gian):** LUMINA **không đứng yên** — mỗi lượt chat, nó (1) tra **kho tri thức nội bộ** trước (0 token), thiếu thì **tự học** từ Wikipedia rồi **lưu lại** để lần sau dùng ngay; (2) với câu **thời sự** thì học **tin tức thời gian thực** (Google News RSS — miễn phí, không cần key; tinh thần *worldmonitor*); (3) áp dụng **kỹ năng chuyên môn** khớp từ thư viện 1097 skill; (4) **nhớ hội thoại cũ** của bạn. Kho tri thức **lớn dần theo thời gian sử dụng**. **Dạy LUMINA:** gõ mệnh lệnh như *"ghi nhớ rằng dự án X của tôi dùng cổng 8842"* → LUMINA **tiếp thu** vào kho (chip "🧠 Đã tiếp thu & ghi nhớ") và **tra lại được ở các lượt sau** — workflow tiến hoá theo đúng kiến thức **bạn** cung cấp. *(Lưu ý thật: đây là học ở tầng HỆ THỐNG — kho tri thức + trí nhớ + skills lớn dần; KHÔNG phải fine-tune đổi trọng số model.)*
+
+**🛡️ Hệ thống 3 TẦNG CHỐNG BỊP:** vì LUMINA học từ nguồn mở (Wikipedia **ai cũng sửa được**) + tin tức thời gian thực (**giật tít/thiên lệch/chưa xác nhận**), mọi tri thức "học" được đều đi kèm cơ chế kiểm chứng, KHÔNG tin mù quáng:
+- **Tầng 1 — Nhãn nguồn & độ tin:** mỗi mẩu gắn mức tin (⚠️ THẤP → ● CAO): tin tức & điều người dùng dạy = độ tin thấp, Wikipedia = vừa (có thể bị phá hoại), nguồn chính thống = cao.
+- **Tầng 2 — Đối chiếu chéo:** chỉ khẳng định khi có **≥2 nguồn độc lập**; đơn nguồn hoặc mâu thuẫn → nói rõ "chưa chắc chắn"; tin chưa xác nhận phải gắn nhãn **"chưa kiểm chứng"**.
+- **Tầng 3 — Phán đoán độc lập:** đối chiếu với kiến thức đã huấn luyện + tìm kiếm trực tiếp; **tuyệt đối không** trình bày điều chưa kiểm chứng như sự thật; thấy nghi ngờ/lỗi thời phải nói thẳng cho người dùng.
+
+**🧠 Trí nhớ dài hạn (nhớ chat cũ):** mỗi hội thoại trong sidebar vốn tách biệt — nhưng khi bạn **mở hội thoại MỚI**, LUMINA tự tìm trong các hội thoại CŨ của **chính bạn** xem có liên quan không, rồi âm thầm đưa vào ngữ cảnh (không hiện ra dạng thô, chỉ là chip nhỏ "🧠 Nhớ lại cuộc trò chuyện"). Không cần bạn nhắc lại từ đầu mỗi lần mở chat mới. Tìm kiếm bằng SQL nội bộ (không gọi API ngoài, gần như không tốn gì) và **luôn lọc theo tài khoản** — tuyệt đối không trộn dữ liệu giữa hai người dùng khác nhau.
+
+### 🗣 Về tính năng Lồng tiếng & Phụ đề tự động (nặng nhất hệ thống)
+
+Đây là pipeline xử lý video THẬT (không phải giả lập): LUMINA **nghe** video (Gemini) → **dịch** lời thoại → **sinh giọng đọc mới** bằng [edge-tts](https://github.com/rany2/edge-tts) (giọng Microsoft, MIỄN PHÍ, không cần key) → **ghép** giọng mới vào đúng mốc thời gian và **gắn cứng phụ đề** bằng ffmpeg (qua gói `imageio-ffmpeg` — mang sẵn binary tĩnh, **không cần cài đặt gì thêm** trên máy chủ, chạy được cả trên Render free).
+
+Giới hạn có chủ đích: video tối đa **~3 phút, ~18MB**; xử lý mất **1-3 phút** (chạy nền, không giữ kết nối HTTP); chỉ mở cho gói **Tháng/Năm** vì đây là tính năng tốn tài nguyên máy chủ nhất trong toàn bộ LUMINA.
+
+> ⚠️ **Lưu ý khi tự deploy:** dịch vụ giọng đọc edge-tts gọi ra máy chủ Microsoft — hoạt động bình thường trên Render/máy cá nhân, nhưng có thể bị chặn bởi một số mạng doanh nghiệp/proxy hạn chế. Hãy thử tính năng này ngay sau khi deploy để chắc chắn mạng máy chủ của bạn kết nối được.
+
+**📚 Kho tri thức tự học (giảm token):** câu hỏi cần tra cứu → LUMINA đọc **kho nội bộ** trong thư mục `data/knowledge.db` trước (0 token, 0 mạng); chưa có thì "học" từ **Wikipedia API miễn phí** (tiếng Việt → tiếng Anh) rồi **lưu vào kho** — càng nhiều người hỏi, kho càng lớn, càng ít tốn lượt tìm kiếm.
+
+**🔎 RAG thật (tìm theo NGỮ NGHĨA):** ngoài tra khớp từ khóa, nếu có `GEMINI_API_KEY` (hoặc OpenAI), LUMINA **nhúng embeddings** cho tri thức + câu hỏi và tìm theo **cosine** (`app/embeddings.py` + `knowledge.semantic_lookup`) — tìm được mẩu *liên quan về nghĩa* dù không trùng chữ. Vector lưu ngay trong SQLite (không cần vector-DB riêng), nhúng dần (backfill) khi dùng. Không có key → tự lùi về tra từ khóa, không đổi hành vi. *(Skill `graphrag`/`rag-fundamentals` là tài liệu phương pháp; đây mới là RAG đang chạy thật.)* Vì nguồn mở ai cũng sửa được, tư liệu luôn kèm **link nguồn** và bộ não bị bắt **đối chiếu chéo** với hiểu biết + kết quả tìm kiếm, mâu thuẫn thì phải nói rõ. (Không thể tải cả Wikipedia/CommonCrawl về — hàng TB đến PB — nên "học dần theo câu hỏi thật" là bản khả thi và hiệu quả nhất của ý tưởng này.)
 
 ---
 
 ## 1. Chuẩn bị (một lần, ~10 phút)
 
-### a) Lấy API key Claude (bắt buộc)
-1. Vào <https://console.anthropic.com> → đăng ký/đăng nhập → nạp credit (vài đô là chạy được).
-2. **Settings → API Keys → Create Key** → sao chép chuỗi `sk-ant-...`.
+### a) Lấy ÍT NHẤT MỘT key bộ não
+Cần tối thiểu một trong số này (khuyến nghị điền **Gemini free** trước, thêm Claude sau nếu muốn chất lượng cao):
+- 🆓 **Gemini (miễn phí)** — <https://aistudio.google.com/apikey> → tạo key. Đây là bộ não free chính.
+- 🆓 **Groq (miễn phí, rất nhanh)** — <https://console.groq.com/keys>.
+- 🆓 **OpenRouter (miễn phí, 1 key nhiều model)** — <https://openrouter.ai/keys>.
+- 🥇 **Claude (cao cấp, có phí)** — <https://console.anthropic.com/settings/keys>, nạp vài đô. Chỉ dùng cho các lượt "cao cấp"; không bắt buộc.
+- 💰 **DeepSeek (cực rẻ)** — <https://platform.deepseek.com>; **Ollama (free, tự host)** — <https://ollama.com>.
+
+Điền key nào có vào `.env` (mục 2) — LUMINA tự dùng cái nào sẵn có.
 
 ### b) Tạo Google Client ID (bắt buộc — cho nút đăng nhập Google)
 1. Vào <https://console.cloud.google.com/apis/credentials> → tạo Project mới.
@@ -43,9 +123,19 @@ Kiến trúc kế thừa khung "Unified AI Core" (Router thông minh · Circuit 
    - Domain web thật sau khi deploy, ví dụ `https://lumina-ai.onrender.com`
 5. Sao chép **Client ID** dạng `xxxxx.apps.googleusercontent.com`.
 
-### c) (Tùy chọn) Key dự phòng
-- Gemini: <https://aistudio.google.com/apikey> — Claude sự cố sẽ tự chuyển sang.
-- OpenAI: <https://platform.openai.com/api-keys> — lớp dự phòng cuối.
+### c) (Tùy chọn) Thêm bộ não dự phòng
+Điền càng nhiều key thì càng bền (bộ não này lỗi/hết hạn mức thì nhảy sang cái khác): `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, hoặc `OLLAMA_BASE_URL` (tự host model trên máy riêng).
+
+**🔁 Gộp nhiều key free để phục vụ ĐÔNG người (vd đưa app lên Android).** Mỗi tài khoản free có trần lượt/phút. Muốn nhiều người dùng cùng lúc mà không đụng trần, tạo nhiều tài khoản free rồi điền các key cách nhau bằng **dấu phẩy** vào biến `*_API_KEYS` — LUMINA **xoay vòng** qua chúng và tự nhảy sang key kế khi một key hết lượt (429) hoặc hỏng:
+```
+GROQ_API_KEYS=gsk_key1,gsk_key2,gsk_key3,...
+GEMINI_API_KEYS=AIza_key1,AIza_key2,...
+OPENROUTER_API_KEYS=sk-or-key1,sk-or-key2,...
+```
+Cũng dùng được với `DEEPSEEK_API_KEYS`, `MISTRAL_API_KEYS`, `KIMI_API_KEYS`, `GITHUB_MODELS_API_KEYS`, `OPENAI_API_KEYS`. Chỉ có 1 key thì cứ để `*_API_KEY` như cũ. *(Lưu ý: tạo hàng loạt tài khoản free có thể vi phạm điều khoản của nhà cung cấp — tự cân nhắc.)*
+
+### d) Cấu hình gói trả phí (tùy chọn)
+Bán gói thì cần cổng thanh toán — xem **mục 6** (SePay cho khách VN, PayPal cho khách quốc tế). Đặt `ADMIN_EMAILS=email-cua-ban@gmail.com` để mở mục **🛠 Đơn hàng** trên web. Không bán gói cũng được — web vẫn chạy free bình thường.
 
 ## 2. Chạy thử trên máy
 
@@ -89,25 +179,66 @@ Có Docker? `docker build -t lumina-ai . && docker run -p 8000:8000 --env-file .
 ```
 lumina-ai/
 ├── app/
-│   ├── main.py             # FastAPI: auth, hội thoại, /api/chat/stream (SSE), health, metrics
-│   ├── router.py           # ✦ Auto-Router "bù trừ" — trái tim của LUMINA
-│   ├── orchestrator.py     # Điều phối engine + fallback chain + system prompt
-│   ├── engines/claude.py   # Bộ não chính: adaptive thinking, web search, streaming
-│   ├── engines/gemini.py   # Dự phòng 1 (tùy chọn)
-│   ├── engines/openai_engine.py # Dự phòng 2 (tùy chọn)
-│   ├── auth.py             # Đăng nhập Google → JWT cookie
-│   ├── db.py               # SQLite: users, hội thoại, tin nhắn
+│   ├── main.py             # FastAPI: auth, hội thoại, /api/chat/stream (SSE), gói, đơn hàng/webhook, health
+│   ├── payments.py         # SePay (VietQR + webhook) + PayPal (tạo đơn/capture)
+│   ├── router.py           # ✦ Auto-Router "bù trừ" — trái tim của LUMINA (gate 🌌 Đỉnh cao theo gói)
+│   ├── orchestrator.py     # Điều phối 2 tầng bộ não + fallback + chế độ vẽ ảnh/nghiên cứu + giấu tên model
+│   ├── imagegen.py         # 🎨 Vẽ ảnh (Pollinations free, hoặc DALL-E nếu có OpenAI key)
+│   ├── knowledge.py        # 📚 Kho tri thức tự học (data/knowledge.db + Wikipedia free) + RAG ngữ nghĩa
+│   ├── embeddings.py       # 🔎 Nhúng embeddings (Gemini/OpenAI) + cosine cho RAG thật
+│   ├── recall.py           # 🧠 Trí nhớ dài hạn — nhớ hội thoại CŨ khi mở hội thoại MỚI (cách ly theo user)
+│   ├── webpage.py          # 🌐 Đọc link dán trong chat (httpx + BeautifulSoup) — mọi bộ não dùng được
+│   ├── media.py            # 🖼🎬 Xử lý ảnh/video đính kèm (data URL) + tách khung hình video (ffmpeg)
+│   ├── video_link.py       # 🔗 Xem video qua LINK (yt-dlp): phụ đề gốc + khung hình + Whisper
+│   ├── transcribe.py       # 🎧 Chép lời audio/video bằng Whisper (Groq/OpenAI)
+│   ├── files.py            # 📄 Đọc PDF/Word/Excel/txt đính kèm → tách chữ đưa vào ngữ cảnh
+│   ├── docgen.py           # 📚 Sinh FILE tổng hợp (Markdown → docx/pdf/html) cho /api/compose
+│   ├── graph_rag.py        # 📊 GraphRAG-lite: đồ thị tri thức (thực thể+quan hệ) → local/global search
+│   ├── worldmonitor.py     # 🌍 Số liệu quốc gia cập nhật thật (REST Countries, free) → kho tri thức
+│   ├── video_dub.py        # 🗣 Pipeline lồng tiếng + gắn phụ đề video (Gemini + edge-tts + ffmpeg)
+│   ├── engines/claude.py   # Tầng cao cấp: adaptive thinking, web search, xem ảnh, streaming
+│   ├── engines/gemini.py   # Tầng free: Gemini + search grounding + xem ảnh/video
+│   ├── engines/openai_compatible.py # Tầng free: Groq / DeepSeek / Ollama / OpenAI (chung 1 lớp)
+│   ├── auth.py             # Đăng nhập Google → JWT cookie, kiểm tra quyền quản trị
+│   ├── db.py               # SQLite: users (+ gói), hội thoại, tin nhắn, đơn hàng, lượt cao cấp/tổng/ngày
 │   ├── memory.py / cache.py / circuit_breaker.py / ratelimit.py / monitor.py
-│   └── search/             # Tavily/DuckDuckGo cho engine dự phòng
-├── static/                 # Giao diện chat (HTML/CSS/JS thuần, không cần build)
+│   └── search/             # Tavily/DuckDuckGo cho engine free khi cần tìm kiếm
+├── static/                 # Giao diện chat + modal Nâng cấp/Quản trị (HTML/CSS/JS thuần, không cần build)
 ├── tests/test_core.py
 ├── render.yaml / Dockerfile / requirements.txt / .env.example
 ```
 
 ## 5. Câu hỏi thường gặp
 
-**Tốn bao nhiêu tiền?** Chỉ tốn phí API theo lượng dùng (Claude tính theo token). Router đã tối ưu: câu ngắn dùng Haiku rẻ, chỉ câu khó mới dùng Opus. `RATE_LIMIT_RPM` trong `.env` giới hạn lượt mỗi người để kiểm soát chi phí.
+**Tốn bao nhiêu tiền?** Nếu chỉ điền key **Gemini/Groq free** (không điền Claude) → **gần như $0**, người dùng chat thoải mái trong hạn mức free của Google/Groq. Điền thêm Claude thì chỉ tốn tiền cho các lượt "cao cấp" (mặc định 2 lượt/người/ngày với gói Miễn phí).
+
+**Ngân sách chỉ vài chục đô thì sao?** Đúng bài toán này: `FREE_PREMIUM_CAP=2` — mỗi người chỉ được 2 lượt Claude/ngày, hết thì tự tụt xuống bộ não free (không tốn tiền), tối đa `FREE_TOTAL_CAP=30` tin nhắn/ngày. Muốn nhiều lượt cao cấp hơn → mua gói Tháng/Năm (mục 6), tiền đó bạn dùng nạp thêm token Claude. Khi ngân sách rộng hơn, tăng các con số này trong `.env`.
+
+**Model nào đang trả lời?** Người dùng không biết và không cần biết — mọi câu trả lời đều dưới tên "LUMINA". Bạn (chủ web) xem log server sẽ thấy engine thực tế.
 
 **Bật Fable 5 thế nào?** Đặt `ENABLE_FABLE=true` trong env. Lưu ý Fable 5 giá cao hơn Opus và yêu cầu tổ chức có chế độ lưu dữ liệu 30 ngày; nếu bị từ chối vì an toàn, hệ thống tự chuyển câu trả lời sang Opus 4.8.
 
 **Đổi tên/giao diện?** Sửa `APP_NAME` trong `app/config.py` và màu sắc trong `static/style.css` (biến `--accent`, `--gradient`).
+
+## 6. Bán gói — thanh toán TỰ ĐỘNG (tiền về thẳng tài khoản bạn)
+
+Người dùng bấm **"✦ Nâng cấp"** → chọn gói → chọn cách trả. Tiền vào là gói **tự kích hoạt**, bạn không phải làm gì. Hai cổng (điền cổng nào thì hiện cổng đó):
+
+### 🇻🇳 Khách VN — SePay (quét QR chuyển khoản)
+1. Đăng ký miễn phí tại <https://sepay.vn> → **nối tài khoản ngân hàng** của bạn (chỉ đọc biến động số dư).
+2. Trong SePay, đặt **Webhook URL** = `https://<web-cua-ban>/api/webhook/sepay`, lấy **API key**.
+3. Điền vào `.env`: `SEPAY_API_KEY`, `PAYMENT_BANK_BIN` (mã BIN ngân hàng, tra tại vietqr.io), `PAYMENT_BANK_ACCOUNT`, `PAYMENT_BANK_OWNER` (IN HOA không dấu), `PAYMENT_BANK_NAME`.
+4. Khách bấm "Chuyển khoản VN" → hệ thống **tự sinh mã QR** đúng số tiền + nội dung (mã đơn) → khách quét chuyển → tiền về **thẳng tài khoản bạn** → SePay báo webhook → gói tự lên. Xong.
+
+### 🌍 Khách quốc tế — PayPal (thẻ Visa/MC hoặc PayPal)
+1. Có **tài khoản PayPal Business** → vào <https://developer.paypal.com/dashboard> tạo **REST App** → lấy **Client ID + Secret**.
+2. Điền vào `.env`: `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `PAYPAL_MODE=live` (dùng `sandbox` để test trước).
+3. Khách bấm "Thẻ quốc tế" → trả qua nút PayPal → tiền về **thẳng ví PayPal của bạn** → gói tự lên.
+
+### Vận hành
+- Giá gói: `PRICE_MONTHLY_VND`/`PRICE_MONTHLY_USD`/`PRICE_YEARLY_VND`/`PRICE_YEARLY_USD` trong `.env`.
+- Gói trả phí tự tăng lượt cao cấp + tổng lượt/ngày (`PAID_PREMIUM_CAP`, `PAID_TOTAL_CAP`) + mở 🌌 Đỉnh cao. **Hết hạn tự hạ về Miễn phí.**
+- **Vẫn chỉ 1 key Claude của bạn** — tiền khách trả để bạn nạp token cho key đó. Không có Claude thì gói trả phí vẫn chạy bằng bộ não free (chỉ là không có tầng "cao cấp").
+- **Trang quản trị đơn hàng:** đăng nhập bằng email trong `ADMIN_EMAILS` → nút **🛠 Đơn hàng** ở sidebar → xem mọi đơn; nếu khách đã trả mà webhook lỗi, bấm **"Xác nhận"** để kích hoạt tay đơn đó (lưới an toàn).
+
+> ⚠️ **Bảo mật:** mọi khóa (`SEPAY_API_KEY`, `PAYPAL_SECRET`…) chỉ nằm trong `.env`/dashboard Render, **không** đưa lên GitHub. Webhook SePay được xác thực bằng API key; thanh toán PayPal được xác nhận lại phía server (chống giả mạo).

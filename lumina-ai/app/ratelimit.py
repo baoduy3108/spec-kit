@@ -36,13 +36,26 @@ class UserRateLimiter:
         self._buckets: dict[str, TokenBucket] = {}
         self._lock = threading.RLock()
 
-    def check(self, user_id: str) -> tuple[bool, int]:
-        """Trả về (được phép, số giây cần chờ nếu bị chặn)."""
+    def check(self, user_id: str, rate_per_minute: int | None = None, burst: int | None = None) -> tuple[bool, int]:
+        """Trả về (được phép, số giây cần chờ nếu bị chặn).
+
+        Truyền rate_per_minute/burst để áp giới hạn theo gói của người dùng
+        (gói trả phí có hạn mức cao hơn mặc định). Nếu hạn mức gói thay đổi
+        (vừa nâng cấp), bucket được cấp lại dung lượng mới ngay lập tức.
+        """
+        rpm = rate_per_minute if rate_per_minute is not None else self.rate_per_minute
+        cap = burst if burst is not None else self.burst
         with self._lock:
             bucket = self._buckets.get(user_id)
             if bucket is None:
-                bucket = TokenBucket(self.rate_per_minute, self.burst)
+                bucket = TokenBucket(rpm, cap)
                 self._buckets[user_id] = bucket
+            elif bucket.capacity != cap:
+                extra = cap - bucket.capacity
+                bucket.capacity = cap
+                bucket.rate = rpm / 60.0
+                if extra > 0:
+                    bucket.tokens += extra
             if bucket.try_consume():
                 return True, 0
             return False, bucket.seconds_until_available()

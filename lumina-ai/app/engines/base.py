@@ -11,10 +11,13 @@ from ..schemas import RouteDecision
 class EngineError(Exception):
     """Lỗi engine kèm thông báo thân thiện cho người dùng."""
 
-    def __init__(self, friendly_message: str, retryable: bool = True):
+    def __init__(self, friendly_message: str, retryable: bool = True, rotate: bool = False):
         super().__init__(friendly_message)
         self.friendly_message = friendly_message
         self.retryable = retryable
+        # rotate=True: lỗi do KEY (429 hết lượt / 401-403 hỏng) → nên thử KEY KHÁC
+        # của cùng nhà cung cấp trước khi bỏ cuộc (xem xoay vòng đa key).
+        self.rotate = rotate
 
 
 class BaseEngine(ABC):

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>LuminaCraft</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: sans-serif; }
+        canvas { display: block; }
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 2em;
+            text-align: center;
+            cursor: pointer;
+            z-index: 100;
+        }
+        #instructions {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+        }
+        #instructions p {
+            margin: 10px 0;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <div id="instructions">
+            <p>Click để bắt đầu!</p>
+            <p>Di chuyển: W, A, S, D</p>
+            <p>Nhảy: Space</p>
+            <p>Phá khối: Chuột trái</p>
+            <p>Đặt khối: Chuột phải</p>
+            <p>Thoát: ESC</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Three.js và PointerLockControls từ CDN unpkg
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
+
+        let camera, scene, renderer, controls;
+        let raycaster; // Để tương tác với các khối
+        let moveForward = false;
+        let moveBackward = false;
+        let moveLeft = false;
+        let moveRight = false;
+        let canJump = false;
+
+        let prevTime = performance.now();
+        const velocity = new THREE.Vector3(); // Tốc độ di chuyển và rơi
+        const direction = new THREE.Vector3(); // Hướng di chuyển
+
+        const blockSize = 1; // Kích thước mỗi khối
+        const worldSize = 32; // Kích thước thế giới (worldSize x worldSize x chiều cao)
+        const blockGeometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
+        const worldBlocks = new Map(); // Lưu trữ các khối: 'x,y,z' -> { mesh, type }
+
+        // Bảng màu tông trầm
+        const materials = {
+            grass: new THREE.MeshStandardMaterial({ color: 0x6B8E23 }), // Xanh ô liu
+            dirt: new THREE.MeshStandardMaterial({ color: 0x8B4513 }),  // Nâu yên ngựa
+            stone: new THREE.MeshStandardMaterial({ color: 0x708090 }), // Xám đá phiến
+            wood: new THREE.MeshStandardMaterial({ color: 0xA0522D }),  // Nâu đất
+            sand: new THREE.MeshStandardMaterial({ color: 0xC2B280 }),  // Vàng cát
+            playerBlock: new THREE.MeshStandardMaterial({ color: 0x4A6A80 }) // Khối mặc định người chơi đặt
+        };
+
+        const overlay = document.getElementById('overlay');
+        const instructions = document.getElementById('instructions');
+
+        init();
+        animate();
+
+        function init() {
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(worldSize / 2, 2, worldSize / 2); // Vị trí bắt đầu của người chơi
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB); // Nền trời xanh
+            scene.fog = new THREE.Fog(0x87CEEB, 0.1, worldSize * 1.5); // Hiệu ứng sương mù
+
+            // Ánh sáng
+            const ambientLight = new THREE.AmbientLight(0x606060); // Ánh sáng môi trường mềm
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(worldSize, worldSize * 1.5, worldSize); // Hướng ánh sáng mặt trời
+            directionalLight.castShadow = true; // Bật đổ bóng
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = worldSize * 3;
+            directionalLight.shadow.camera.left = -worldSize * 1.5;
+            directionalLight.shadow.camera.right = worldSize * 1.5;
+            directionalLight.shadow.camera.top = worldSize * 1.5;
+            directionalLight.shadow.camera.bottom = -worldSize * 1.5;
+            scene.add(directionalLight);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true; // Bật bản đồ đổ bóng
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Loại đổ bóng mềm
+            document.body.appendChild(renderer.domElement);
+
+            // Điều khiển góc nhìn PointerLockControls
+            controls = new PointerLockControls(camera, document.body);
+            instructions.addEventListener('click', () => {
+                controls.lock(); // Khóa con trỏ chuột khi click
+            });
+
+            controls.addEventListener('lock', () => {
+                overlay.style.display = 'none';
+                canJump = true;
+            });
+
+            controls.addEventListener('unlock', () => {
+                overlay.style.display = 'flex';
+                canJump = false;
+            });
+
+            scene.add(controls.getObject());
+
+            // Raycaster để phát hiện khối khi tương tác chuột
+            raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 8); // Tầm tương tác tối đa 8 khối
+
+            // Lắng nghe sự kiện bàn phím và chuột
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+            document.addEventListener('mousedown', onMouseDown);
+            document.addEventListener('contextmenu', (event) => event.preventDefault()); // Ngăn chuột phải hiện menu trình duyệt
+            window.addEventListener('resize', onWindowResize);
+
+            // Tạo thế giới ban đầu
+            generateWorld();
+        }
+
+        // Tạo địa hình ngẫu nhiên đơn giản
+        function generateWorld() {
+            for (let x = 0; x < worldSize; x++) {
+                for (let z = 0; z < worldSize; z++) {
+                    // Tạo độ cao lượn sóng
+                    const height = Math.floor(Math.sin(x * 0.1) * Math.cos(z * 0.1) * 2) + 3;
+                    for (let y = 0; y < height; y++) {
+                        let type = 'dirt';
+                        if (y === height - 1) {
+                            type = 'grass'; // Lớp trên cùng là cỏ
+                        } else if (y < height - 2) {
+                            type = 'stone'; // Các lớp dưới là đá
+                        }
+                        addBlock(x, y, z, type);
+                    }
+                }
+            }
+        }
+
+        // Thêm một khối vào thế giới
+        function addBlock(x, y, z, type) {
+            const key = `${x},${y},${z}`;
+            if (worldBlocks.has(key)) return;
+
+            const material = materials[type];
+            const mesh = new THREE.Mesh(blockGeometry, material);
+            mesh.position.set(x + blockSize / 2, y + blockSize / 2, z + blockSize / 2);
+            mesh.castShadow = true;    // Khối đổ bóng
+            mesh.receiveShadow = true; // Khối nhận bóng
+            scene.add(mesh);
+            worldBlocks.set(key, { mesh, type });
+        }
+
+        // Xóa một khối khỏi thế giới
+        function removeBlock(x, y, z) {
+            const key = `${x},${y},${z}`;
+            const blockData = worldBlocks.get(key);
+            if (blockData) {
+                scene.remove(blockData.mesh);
+                blockData.mesh.geometry.dispose();
+                blockData.mesh.material.dispose();
+                worldBlocks.delete(key);
+                return true;
+            }
+            return false;
+        }
+
+        // Lấy khối tại vị trí cụ thể
+        function getBlockAt(x, y, z) {
+            const key = `${Math.floor(x)},${Math.floor(y)},${Math.floor(z)}`;
+            return worldBlocks.get(key);
+        }
+
+        // Xử lý thay đổi kích thước cửa sổ
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Xử lý nhấn phím
+        function onKeyDown(event) {
+            switch (event.code) {
+                case 'KeyW': moveForward = true; break;
+                case 'KeyA': moveLeft = true; break;
+                case 'KeyS': moveBackward = true; break;
+                case 'KeyD': moveRight = true; break;
+                case 'Space':
+                    if (canJump) velocity.y += 10; // Lực nhảy
+                    canJump = false;
+                    break;
+            }
+        }
+
+        // Xử lý nhả phím
+        function onKeyUp(event) {
+            switch (event.code) {
+                case 'KeyW': moveForward = false; break;
+                case 'KeyA': moveLeft = false; break;
+                case 'KeyS': moveBackward = false; break;
+                case 'KeyD': moveRight = false; break;
+            }
+        }
+
+        // Xử lý click chuột (phá/đặt khối)
+        function onMouseDown(event) {
+            if (!controls.isLocked) return; // Chỉ tương tác khi con trỏ bị khóa
+
+            raycaster.setFromCamera({ x: 0, y: 0 }, camera); // Phát tia từ giữa màn hình
+            // Lấy tất cả các mesh khối hiện có để kiểm tra va chạm
+            const intersects = raycaster.intersectObjects(Array.from(worldBlocks.values()).map(b => b.mesh), false);
+
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+                const blockMeshPosition = intersect.object.position;
+                // Chuyển vị trí mesh (giữa khối) về tọa độ lưới (góc dưới trái trước)
+                const x = Math.floor(blockMeshPosition.x - blockSize / 2);
+                const y = Math.floor(blockMeshPosition.y - blockSize / 2);
+                const z = Math.floor(blockMeshPosition.z - blockSize / 2);
+
+                if (event.button === 0) { // Chuột trái để phá khối
+                    removeBlock(x, y, z);
+                } else if (event.button === 2) { // Chuột phải để đặt khối
+                    // Tính toán vị trí cho khối mới dựa trên mặt bị hit
+                    const normal = intersect.face.normal;
+                    const newX = x + Math.round(normal.x);
+                    const newY = y + Math.round(normal.y);
+                    const newZ = z + Math.round(normal.z);
+
+                    // Ngăn đặt khối bên trong người chơi
+                    const playerX = Math.floor(camera.position.x - blockSize / 2);
+                    const playerYFeet = Math.floor(camera.position.y - blockSize / 2);
+                    const playerYHead = Math.floor(camera.position.y - blockSize / 2 + 1); // Người chơi chiếm 2 khối chiều cao
+                    const playerZ = Math.floor(camera.position.z - blockSize / 2);
+
+                    if (!((newX === playerX && newY === playerYFeet && newZ === playerZ) ||
+                          (newX === playerX && newY === playerYHead && newZ === playerZ))) {
+                        addBlock(newX, newY, newZ, 'playerBlock'); // Đặt khối mặc định
+                    }
+                }
+            }
+        }
+
+        // Vòng lặp animation chính
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = performance.now();
+            const delta = (time - prevTime) / 1000; // Thời gian từ khung hình trước
+
+            if (controls.isLocked) {
+                velocity.x -= velocity.x * 10.0 * delta; // Giảm tốc độ ngang
+                velocity.z -= velocity.z * 10.0 * delta;
+                velocity.y -= 9.8 * 2.0 * delta; // Lực hấp dẫn
+
+                direction.z = Number(moveForward) - Number(moveBackward);
+                direction.x = Number(moveRight) - Number(moveLeft);
+                direction.normalize(); // Đảm bảo tốc độ không đổi khi đi chéo
+
+                if (moveForward || moveBackward) velocity.z -= direction.z * 40.0 * delta;
+                if (moveLeft || moveRight) velocity.x -= direction.x * 40.0 * delta;
+
+                // Di chuyển camera dựa trên vận tốc
+                controls.moveRight(-velocity.x * delta);
+                controls.moveForward(-velocity.z * delta);
+                controls.getObject().position.y += (velocity.y * delta); // Áp dụng vận tốc dọc
+
+                // Kiểm tra va chạm đơn giản với khối bên dưới (mặt đất)
+                const playerX = Math.floor(camera.position.x);
+                const playerZ = Math.floor(camera.position.z);
+                const playerFootY = Math.floor(camera.position.y - 1.6); // Chân người chơi cách camera khoảng 1.6 đơn vị
+                
+                const blockBelow = getBlockAt(playerX, playerFootY, playerZ); // Khối ngay dưới chân
+                const blockBelowBelow = getBlockAt(playerX, playerFootY - 1, playerZ); // Khối dưới chân 1 đơn vị
+
+                if (controls.getObject().position.y < 0.5) { // Nếu rơi quá thấp (dưới giới hạn thế giới)
+                    velocity.y = 0;
+                    controls.getObject().position.y = 0.5; // Đặt lại trên mặt đất
+                    canJump = true;
+                } else if (blockBelow || blockBelowBelow) {
+                    const blockY = blockBelow ? Math.floor(blockBelow.mesh.position.y - blockSize/2) : 
+                                  (blockBelowBelow ? Math.floor(blockBelowBelow.mesh.position.y - blockSize/2) : -Infinity);
+                    
+                    // Nếu chân người chơi chạm hoặc lọt vào khối
+                    if (camera.position.y <= blockY + blockSize + 0.1) {
+                        velocity.y = 0;
+                        controls.getObject().position.y = blockY + blockSize + 1.8; // Đứng trên mặt khối + chiều cao người chơi
+                        canJump = true;
+                    }
+                }
+            }
+
+            renderer.render(scene, camera);
+            prevTime = time;
+        }
+    </script>
+</body>
+</html>
