@@ -2438,6 +2438,24 @@ def test_skills_library_has_at_least_1109():
     assert len(skills._SKILLS) >= 1109
 
 
+def test_skills_library_has_at_least_1114():
+    from app import skills
+    assert len(skills._SKILLS) >= 1114
+
+
+def test_skills_advanced_gamedev_topics_match():
+    from app import skills
+    for text, expected in [
+        ("tích hợp fmod wwise event bank rtpc âm thanh game", "audio-middleware-fmod-wwise"),
+        ("sinh dungeon bằng bsp cellular automata nối phòng mst", "procedural-dungeon-and-level-generation"),
+        ("tạo shader bằng node shader graph fresnel dissolve", "shader-graphs-and-node-based-materials"),
+        ("game ai htn hierarchical task network compound task", "htn-hierarchical-task-network-planning"),
+        ("tối ưu hiệu năng game giảm draw call gc spike profiling", "game-performance-optimization-and-profiling"),
+    ]:
+        s = skills.find_matching_skill(text)
+        assert s and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_unreal_pixi_gamemaker_topics_match():
     from app import skills
     for text, expected in [
