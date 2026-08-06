@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<meta name="theme-color" content="#0d1016"/>
+<meta name="description" content="NGƯỜI GÁC ĐÈN — chết bao nhiêu lần cũng được, mỗi lần lại mạnh hơn."/>
+<title>NGƯỜI GÁC ĐÈN</title>
+<link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+<div id="hall">
+  <canvas id="stage" width="960" height="540"></canvas>
+
+  <div id="hud">
+    <div class="bars">
+      <div class="bar hp"><i id="hp"></i><b id="hp-text"></b></div>
+      <div class="bar st"><i id="st"></i></div>
+      <div class="flasks" id="flasks"></div>
+    </div>
+    <div class="right">
+      <div class="count"><b id="essence">0</b><span id="l-essence">TINH CHẤT</span></div>
+    </div>
+  </div>
+
+  <div id="bossbar" class="hidden">
+    <b id="boss-name"></b>
+    <div class="bar boss"><i id="boss-hp"></i></div>
+  </div>
+
+  <p id="toast"></p>
+
+  <div id="pad">
+    <button data-k="left">◀</button>
+    <button data-k="right">▶</button>
+    <button data-k="roll" class="wide">↻</button>
+    <button data-k="block">◧</button>
+    <button data-k="attack" class="big">⚔</button>
+    <button data-k="drink">♡</button>
+  </div>
+</div>
+
+<button id="lang">EN</button>
+
+<div id="veil" class="hidden">
+  <div class="card">
+    <p class="kicker" id="v-kicker"></p>
+    <h2 id="v-title"></h2>
+    <p class="body" id="v-body"></p>
+    <ul id="hints"></ul>
+    <div id="shop"></div>
+    <div class="stats"><span id="v-stats"></span></div>
+    <button class="go" id="v-go"></button>
+  </div>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+/* Đá lạnh, đèn hổ phách. Chữ serif cho phần nghi lễ, còn lại là sans hẹp. */
+:root{
+  --ink:#e8e4da; --dim:#7c8598; --stone:#0d1016; --panel:#141922;
+  --hp:#b8433c; --st:#c8b26a; --boss:#8a4a4a; --gold:#ffb347; --line:rgba(232,228,218,.14);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#05070a;color:var(--ink);overflow:hidden;user-select:none;
+  font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,"Noto Sans",sans-serif;overscroll-behavior:none}
+#hall{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+/* contain, never cover: on a portrait phone `cover` crops a 960-wide arena
+   down to its middle quarter and the fight happens off-screen. */
+canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+
+#hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;
+  gap:12px;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 0}
+.bars{display:flex;flex-direction:column;gap:5px;flex:1;max-width:340px}
+.bar{position:relative;height:13px;border:1px solid var(--line);background:rgba(0,0,0,.5);overflow:hidden}
+.bar i{display:block;height:100%;width:100%;transition:width .12s linear}
+.bar.hp i{background:linear-gradient(180deg,#d4564d,#8e2f2a)}
+.bar.st{height:8px}
+.bar.st i{background:linear-gradient(180deg,#d8c37c,#8d7938)}
+.bar b{position:absolute;inset:0;display:grid;place-items:center;font-size:9px;letter-spacing:.1em;
+  color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums}
+.flasks{display:flex;gap:4px;margin-top:2px}
+.flasks span{width:9px;height:13px;border:1px solid var(--line);background:var(--gold);opacity:.9}
+.flasks span.spent{background:transparent;opacity:.35}
+
+.right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:26px}
+/* Deliberately not inside the HUD: a fixed-position parent makes its own
+   stacking context, so a button in there can never rise above the veil — and
+   the veil is exactly where most of the words to translate are. */
+#lang{position:fixed;z-index:11;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;
+  padding:4px 9px;border:1px solid var(--line);background:rgba(0,0,0,.6);color:var(--dim);
+  font:inherit;font-size:10px;letter-spacing:.14em;cursor:pointer}
+#lang:active{color:var(--ink)}
+.count{text-align:right}
+.count b{display:block;font-size:19px;font-variant-numeric:tabular-nums;color:var(--gold)}
+.count span{font-size:8px;letter-spacing:.16em;color:var(--dim)}
+
+#bossbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 76px);width:min(560px,84vw);text-align:center}
+#bossbar b{display:block;font-size:11px;letter-spacing:.34em;color:var(--dim);margin-bottom:5px}
+.bar.boss{height:9px;border-color:rgba(232,228,218,.25)}
+.bar.boss i{background:linear-gradient(180deg,#b8524a,#6d2a26)}
+
+#toast{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 126px);margin:0;padding:7px 14px;
+  max-width:88vw;text-align:center;font-size:12.5px;line-height:1.5;color:var(--ink);
+  background:rgba(5,7,10,.72);border-left:2px solid var(--gold);opacity:0;transition:opacity .3s}
+#toast.on{opacity:1}
+
+/* Seven columns because the attack button spans two — at six it wrapped onto
+   a second row and swallowed the floor the fight stands on. */
+#pad{position:absolute;left:0;right:0;bottom:0;display:grid;gap:6px;padding:0 12px calc(env(safe-area-inset-bottom,0px) + 10px);
+  grid-template-columns:repeat(7,1fr);max-width:600px;margin:0 auto;width:100%}
+#pad button{padding:12px 0;border:1px solid var(--line);background:rgba(5,7,10,.6);color:var(--ink);
+  font:inherit;font-size:17px;cursor:pointer;touch-action:none}
+#pad button:active,#pad button.held{background:rgba(232,228,218,.2)}
+#pad .big{grid-column:span 2;color:var(--gold);border-color:rgba(255,179,71,.4)}
+#pad .wide{grid-column:span 1}
+.hidden{display:none!important}
+
+#veil{position:fixed;inset:0;z-index:9;display:grid;place-items:center;padding:20px;
+  background:rgba(3,4,6,.93);backdrop-filter:blur(2px)}
+.card{width:min(440px,100%);max-height:92vh;overflow:auto;border:1px solid var(--line);background:var(--panel);padding:24px}
+.kicker{margin:0;font-size:10px;letter-spacing:.34em;color:var(--hp)}
+h2{margin:8px 0 12px;font-family:ui-serif,Georgia,"Times New Roman",serif;font-size:clamp(26px,7vw,38px);
+  letter-spacing:.06em;font-weight:400}
+.body{margin:0;font-size:12.5px;line-height:1.75;color:var(--dim)}
+#hints{margin:16px 0 0;padding:0 0 0 16px;font-size:11.5px;line-height:1.9;color:var(--ink);opacity:.8}
+#hints:empty{display:none}
+#hints li::marker{color:var(--gold)}
+#shop{margin:18px 0 0;display:flex;flex-direction:column;gap:6px}
+#shop button{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 13px;
+  border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:12px;cursor:pointer}
+#shop button:disabled{color:var(--dim);cursor:default;opacity:.55}
+#shop button:not(:disabled):active{background:rgba(255,179,71,.16)}
+#shop .pips{letter-spacing:.22em;color:var(--gold);font-size:11px}
+#shop .price{color:var(--gold);font-variant-numeric:tabular-nums}
+.stats{margin-top:14px;font-size:10px;letter-spacing:.14em;color:var(--dim);text-align:center}
+.go{width:100%;margin-top:16px;padding:13px;border:1px solid var(--ink);background:transparent;color:var(--ink);
+  font:inherit;font-size:12px;letter-spacing:.24em;cursor:pointer}
+.go:active{background:rgba(232,228,218,.14)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}

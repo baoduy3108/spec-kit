@@ -1,4 +1,4 @@
-// Bundles the game into one self-contained HTML file (dist/signal.html)
+// Bundles the game into one self-contained HTML file (dist/souls.html)
 // that runs straight off the filesystem — no server, no build chain, no deps.
 //
 // The source is plain ES modules with no circular imports, so bundling is
@@ -136,7 +136,7 @@ const bundled = html
   .replace(/<title>/, '<!-- built by tools/build.js — do not edit -->\n    <title>');
 
 mkdirSync(join(root, 'dist'), { recursive: true });
-const out = join(root, 'dist/signal.html');
+const out = join(root, 'dist/souls.html');
 writeFileSync(out, bundled);
 
 const kb = (Buffer.byteLength(bundled) / 1024).toFixed(1);
