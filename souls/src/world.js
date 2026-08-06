@@ -142,6 +142,126 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Where the first fold lives. Eight rooms of standing water and then a
+  // hatch in the floor that drops you into the undercroft — the room you
+  // started in, four areas ago. That moment is the whole reason this world is
+  // a graph and not a list, so the room it happens in is built for it: quiet,
+  // lit, and with nothing in it to interrupt you noticing.
+  cistern: [
+    {
+      key: 'the-inflow',
+      kind: 'cave',
+      name: { en: 'The Inflow', vi: 'Miệng Nước Vào' },
+      line: {
+        en: 'The drain empties here. So does everything the drain was carrying.',
+        vi: 'Cống đổ ra ở đây. Và mọi thứ cống mang theo cũng vậy.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-dry-shelf',
+      kind: 'hall',
+      name: { en: 'The Dry Shelf', vi: 'Gờ Khô' },
+      line: {
+        en: 'A ledge the water never reached, and somebody made the most of it.',
+        vi: 'Một cái gờ nước không bao giờ với tới, và ai đó đã tận dụng nó rất tốt.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-pillar-field',
+      kind: 'hall',
+      name: { en: 'The Pillar Field', vi: 'Rừng Cột' },
+      line: {
+        en: 'A hundred pillars holding up a ceiling nobody has seen. Sound goes a long way here.',
+        vi: 'Trăm cây cột đỡ một cái trần chẳng ai từng thấy. Tiếng động ở đây đi rất xa.',
+      },
+      foes: ['husk', 'husk-torch', 'crawler'],
+      layout: 'spread',
+      light: 'dark',
+      note: 'they hear you before they see you — the pillars cut both ways',
+    },
+    {
+      key: 'the-wading',
+      kind: 'yard',
+      name: { en: 'The Wading', vi: 'Chỗ Lội' },
+      line: {
+        en: 'Knee-deep, and your roll is slower in it. Theirs is not.',
+        vi: 'Nước ngang gối, cú lăn của bạn chậm hẳn đi. Của chúng nó thì không.',
+      },
+      foes: ['ghoul', 'ghoul'],
+      layout: 'pack',
+      light: 'dim',
+      note: 'first ghouls, in the one place your best defence is worst',
+    },
+    {
+      key: 'the-sunken-arch',
+      kind: 'bridge',
+      name: { en: 'The Sunken Arch', vi: 'Vòm Chìm' },
+      line: {
+        en: 'The top of an arch, which means the rest of the arch is under your feet.',
+        vi: 'Đỉnh một vòm cuốn — nghĩa là phần còn lại của cái vòm nằm dưới chân bạn.',
+      },
+      foes: ['husk-spear'],
+      layout: 'single',
+      light: 'dim',
+    },
+    {
+      key: 'the-deep-end',
+      kind: 'cave',
+      name: { en: 'The Deep End', vi: 'Đáy Sâu' },
+      line: {
+        en: 'It gets over your head here. Whatever is down there has never needed to come up.',
+        vi: 'Chỗ này ngập quá đầu. Thứ ở dưới đó chưa bao giờ cần phải trồi lên.',
+      },
+      foes: ['crawler', 'crawler-heavy'],
+      layout: 'ambush',
+      light: 'dark',
+      note: 'two crawlers where footing is worst — the hardest room in the area',
+    },
+    {
+      key: 'the-overspill',
+      kind: 'stair',
+      name: { en: 'The Overspill', vi: 'Miệng Tràn' },
+      line: {
+        en: 'Up, out of the water, and your legs are glad of it.',
+        vi: 'Đi lên, ra khỏi nước, và đôi chân bạn mừng vì điều đó.',
+      },
+      foes: ['acolyte', 'husk'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-hatch',
+      kind: 'hall',
+      name: { en: 'The Hatch', vi: 'Nắp Hầm' },
+      line: {
+        en: 'A hatch, bolted from this side. Under it is the room you woke up in.',
+        vi: 'Một nắp hầm, chốt từ phía này. Dưới nó là căn phòng bạn tỉnh dậy.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+      note: 'the first fold. Nothing in the room, on purpose — the realisation is the event',
+    },
+    {
+      key: 'the-chapel-stair',
+      kind: 'stair',
+      name: { en: 'The Chapel Stair', vi: 'Cầu Thang Nhà Nguyện' },
+      line: {
+        en: 'Dry stone, and singing somewhere above it.',
+        vi: 'Đá khô, và tiếng hát ở đâu đó phía trên.',
+      },
+      foes: ['acolyte'],
+      layout: 'single',
+      light: 'grey',
+    },
+  ],
   // The first fork. Everything before this was a corridor with the illusion
   // of choice; the gatehouse ends in two doors and does not tell you which is
   // easier, because neither is. It also introduces the acolyte, the first
