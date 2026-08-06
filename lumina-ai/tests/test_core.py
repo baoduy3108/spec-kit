@@ -2428,6 +2428,22 @@ def test_skills_library_has_at_least_1103():
     assert len(skills._SKILLS) >= 1103
 
 
+def test_skills_library_has_at_least_1106():
+    from app import skills
+    assert len(skills._SKILLS) >= 1106
+
+
+def test_skills_bevy_phaser_cocos_topics_match():
+    from app import skills
+    for text, expected in [
+        ("làm game bằng rust bevy dùng system query commands spawn", "bevy-and-rust-game-development"),
+        ("làm game web bằng phaser 3 preload create update arcade physics", "phaser-web-game-development"),
+        ("làm game bằng cocos creator node component prefab typescript", "cocos-creator-game-development"),
+    ]:
+        s = skills.find_matching_skill(text)
+        assert s and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_game_engine_coding_topics_match():
     from app import skills
     for text, expected in [
