@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<meta name="theme-color" content="#0b1c30"/>
+<meta name="description" content="KẺ TRỘM MỘT MÌNH — căn nhà học thói quen của bạn."/>
+<title>KẺ TRỘM MỘT MÌNH</title>
+<link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+<div id="sheet">
+  <header>
+    <div class="title">
+      <h1 id="h-title">KẺ TRỘM MỘT MÌNH</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <div class="corner">
+      <button id="lang" title="Tiếng Việt / English">EN</button>
+      <div class="ledger">
+        <div><b id="loot">0</b><span id="l-loot">ĐÃ TRỘM</span></div>
+        <div><b id="caught">0</b><span id="l-caught">BỊ BẮT</span></div>
+        <div><b id="pred">0%</b><span id="l-pred">DỄ ĐOÁN</span></div>
+      </div>
+    </div>
+  </header>
+
+  <canvas id="plan" width="620" height="620"></canvas>
+
+  <div id="notes"></div>
+
+  <div id="pad">
+    <button data-move="north">▲</button>
+    <button data-move="west">◀</button>
+    <button data-move="wait">◦</button>
+    <button data-move="east">▶</button>
+    <button data-move="south">▼</button>
+  </div>
+  <p class="legend" id="legend"></p>
+</div>
+
+<div id="modal" class="hidden">
+  <div class="card">
+    <p class="kicker" id="m-kicker"></p>
+    <h2 id="m-title"></h2>
+    <p class="body" id="m-body"></p>
+    <ul id="m-notes"></ul>
+    <button class="go" data-act="again" id="again">ĐÊM SAU</button>
+  </div>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
