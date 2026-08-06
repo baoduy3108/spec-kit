@@ -142,6 +142,124 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Everything until now was a place people worked. This is where they lived,
+  // and it is the first area whose rooms had a use that was not defence — a
+  // kitchen, a stable, a hall for eating in. The horror here is domestic, and
+  // it is the last quiet before the gold.
+  'upper-ward': [
+    {
+      key: 'the-inner-gate',
+      kind: 'stair',
+      name: { en: 'The Inner Gate', vi: 'Cổng Trong' },
+      line: {
+        en: 'Smaller than the outer one, and much better made. This was the door that mattered.',
+        vi: 'Nhỏ hơn cổng ngoài, mà làm kỹ hơn nhiều. Đây mới là cánh cửa quan trọng.',
+      },
+      foes: ['knightling'],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-well-court',
+      kind: 'yard',
+      name: { en: 'The Well Court', vi: 'Sân Giếng' },
+      line: {
+        en: 'A well, a bucket, a rope, and a fire someone lit beside it out of habit.',
+        vi: 'Một cái giếng, một cái gàu, một sợi dây, và ngọn lửa ai đó nhóm bên cạnh theo thói quen.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-stables',
+      kind: 'hall',
+      name: { en: 'The Stables', vi: 'Chuồng Ngựa' },
+      line: {
+        en: 'Twelve stalls. The doors are all open and they were opened from the inside.',
+        vi: 'Mười hai ô chuồng. Cửa mở toang hết, và mở từ phía bên trong.',
+      },
+      foes: ['hound', 'hound', 'hound-swift'],
+      layout: 'pack',
+      light: 'dim',
+      note: 'a pack in a room built to hold animals — the stalls are the cover',
+    },
+    {
+      key: 'the-kitchens',
+      kind: 'hall',
+      name: { en: 'The Kitchens', vi: 'Nhà Bếp' },
+      line: {
+        en: 'A fire out, a pot on, and something in the pot that has been on a long time.',
+        vi: 'Bếp đã tắt, nồi vẫn bắc, và thứ trong nồi đã ở đó rất lâu.',
+      },
+      foes: ['ghoul', 'ghoul', 'husk-heavy'],
+      layout: 'spread',
+      light: 'dark',
+    },
+    {
+      key: 'the-servants-stair',
+      kind: 'stair',
+      name: { en: "The Servants' Stair", vi: 'Cầu Thang Gia Nhân' },
+      line: {
+        en: 'Narrow, unlit, and it goes everywhere. It is how the whole place worked.',
+        vi: 'Hẹp, không đèn, và nó dẫn đi khắp nơi. Cả toà nhà này vận hành nhờ nó.',
+      },
+      foes: ['moth', 'acolyte'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-hall-of-arms',
+      kind: 'hall',
+      name: { en: 'The Hall of Arms', vi: 'Sảnh Vũ Khí' },
+      line: {
+        en: 'Shields on the wall in a family order, and one of them is standing under its own.',
+        vi: 'Những chiếc khiên treo tường theo thứ tự dòng họ, và một đứa đang đứng ngay dưới cái khiên của nó.',
+      },
+      foes: ['warder'],
+      layout: 'single',
+      light: 'dim',
+      note: 'first warder — the poise wall proper, and the first thing that punishes greed twice',
+    },
+    {
+      key: 'the-gallery-walk',
+      kind: 'bridge',
+      name: { en: 'The Gallery Walk', vi: 'Hành Lang Tranh' },
+      line: {
+        en: 'Portraits down one side, all facing the same way, all facing the far door.',
+        vi: 'Chân dung treo dọc một bên, tất cả quay cùng một hướng, tất cả nhìn về cánh cửa cuối.',
+      },
+      foes: ['knightling', 'knightling'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-solar-stair',
+      kind: 'stair',
+      name: { en: 'The Solar Stair', vi: 'Cầu Thang Phòng Sáng' },
+      line: {
+        en: 'It gets warmer going up, and brighter, and neither of those is good news.',
+        vi: 'Càng lên càng ấm, càng sáng, và cả hai đều không phải tin tốt.',
+      },
+      foes: ['stonemask'],
+      layout: 'ambush',
+      light: 'warm',
+    },
+    {
+      key: 'the-gilded-door',
+      kind: 'hall',
+      name: { en: 'The Gilded Door', vi: 'Cửa Mạ Vàng' },
+      line: {
+        en: 'Gold leaf over oak, and the leaf is worn through where a hand goes.',
+        vi: 'Lá vàng dát trên gỗ sồi, và chỗ đặt tay thì vàng đã mòn hết.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+      note: 'the worn patch is the only sign anyone still opens it',
+    },
+  ],
   // Twelve rooms of stacked bone, and the Chanter is keeping time for all of
   // it. Her verse is a ring of sound you get *outside* rather than behind, so
   // the area is built to teach the difference: rooms where backing away works
