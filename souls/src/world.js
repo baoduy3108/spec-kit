@@ -142,6 +142,153 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Eleven rooms on top of a wall, and every one of them has an edge. The
+  // Watchman's shove does twelve damage and wants the drop behind you — so
+  // the area spends ten rooms teaching that the fall is worse than the hit,
+  // and then hands you a boss whose cheapest move is a push.
+  ramparts: [
+    {
+      key: 'the-tower-stair',
+      kind: 'stair',
+      name: { en: 'The Tower Stair', vi: 'Cầu Thang Tháp' },
+      line: {
+        en: 'Up and out into the weather. It has not stopped raining in some time.',
+        vi: 'Đi lên, ra ngoài trời. Mưa đã không ngớt từ lâu.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-roof-fire',
+      kind: 'hall',
+      name: { en: 'The Roof Fire', vi: 'Bếp Lửa Trên Mái' },
+      line: {
+        en: 'Under an awning, out of the rain, still burning. Someone was thorough.',
+        vi: 'Dưới mái hiên, khuất mưa, vẫn cháy. Ai đó đã rất chu đáo.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-first-span',
+      kind: 'bridge',
+      name: { en: 'The First Span', vi: 'Nhịp Thứ Nhất' },
+      line: {
+        en: 'No rail on the left. It has been like that longer than the rail was there.',
+        vi: 'Bên trái không có lan can. Nó thiếu lan can lâu hơn cả thời gian từng có.',
+      },
+      foes: ['husk-spear'],
+      layout: 'single',
+      light: 'grey',
+      note: 'first edge — one spear, wide reach, and a drop to back into',
+    },
+    {
+      key: 'the-arrow-slits',
+      kind: 'hall',
+      name: { en: 'The Arrow Slits', vi: 'Lỗ Châu Mai' },
+      line: {
+        en: 'Narrow windows and things behind them that can reach you through.',
+        vi: 'Những khe cửa hẹp, và phía sau chúng là thứ có thể với tới bạn.',
+      },
+      foes: ['husk-spear', 'husk-spear'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'reach from cover — the room wants you to walk past, not clear it',
+    },
+    {
+      key: 'the-broken-merlon',
+      kind: 'yard',
+      name: { en: 'The Broken Merlon', vi: 'Ụ Tường Vỡ' },
+      line: {
+        en: 'A gap in the battlement wide enough for two. The wind comes through it.',
+        vi: 'Một khoảng tường vỡ đủ rộng cho hai người. Gió lùa qua đó.',
+      },
+      foes: ['ghoul', 'ghoul', 'hound'],
+      layout: 'pack',
+      light: 'grey',
+      note: 'fast things beside a hole — the first room that kills by geometry',
+    },
+    {
+      key: 'the-siege-ladder',
+      kind: 'stair',
+      name: { en: 'The Siege Ladder', vi: 'Thang Công Thành' },
+      line: {
+        en: 'Still leaning where they left it. They are still coming up it.',
+        vi: 'Vẫn dựng nguyên chỗ chúng bỏ lại. Và chúng vẫn đang leo lên.',
+      },
+      foes: ['husk', 'husk', 'husk-heavy'],
+      layout: 'ambush',
+      light: 'dim',
+      note: 'they arrive one at a time from below — hold the top and it is free',
+    },
+    {
+      key: 'the-brazier-walk',
+      kind: 'bridge',
+      name: { en: 'The Brazier Walk', vi: 'Lối Lửa Hiệu' },
+      line: {
+        en: 'A line of iron baskets, all cold but one. Something keeps that one lit.',
+        vi: 'Một hàng giỏ sắt, lạnh hết, trừ một cái. Có thứ gì đó vẫn giữ cái đó cháy.',
+      },
+      foes: ['acolyte', 'husk-torch'],
+      layout: 'spread',
+      light: 'warm',
+    },
+    {
+      key: 'the-collapsed-span',
+      kind: 'bridge',
+      name: { en: 'The Collapsed Span', vi: 'Nhịp Sập' },
+      line: {
+        en: 'The middle is gone. There is a plank across it and it is not wide.',
+        vi: 'Khúc giữa mất rồi. Có một tấm ván bắc qua, và nó không rộng.',
+      },
+      foes: ['hound-swift', 'hound-swift'],
+      layout: 'pack',
+      light: 'grey',
+      note: 'fast, narrow, and a real gap — the hardest room before the fire',
+    },
+    {
+      key: 'the-old-signal',
+      kind: 'hall',
+      name: { en: 'The Old Signal', vi: 'Trạm Hiệu Cũ' },
+      line: {
+        en: 'A shuttered lamp for talking to the next wall. Nobody has answered in years.',
+        vi: 'Ngọn đèn có cánh chắn, dùng để ra hiệu sang tường bên. Nhiều năm rồi không ai đáp.',
+      },
+      foes: ['knightling'],
+      layout: 'single',
+      light: 'dim',
+      note: 'first knightling — armour, poise, and it does not stagger from one hit',
+    },
+    {
+      key: 'the-watchpost',
+      kind: 'hall',
+      name: { en: 'The Watchpost', vi: 'Chòi Canh' },
+      line: {
+        en: 'His chair, his brazier, his view of the road. He is not in it.',
+        vi: 'Ghế của ông ta, lò lửa của ông ta, tầm nhìn ra con đường. Ông ta không có ở đó.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-north-tower',
+      kind: 'fog',
+      name: { en: 'The North Tower', vi: 'Tháp Bắc' },
+      line: {
+        en: 'The top of the wall, and the only thing up here still doing its job.',
+        vi: 'Đỉnh tường thành, và thứ duy nhất trên này vẫn còn làm phận sự.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+      note: 'the watchman — his shove is cheap and the drop behind you is not',
+    },
+  ],
   // Where the first fold lives. Eight rooms of standing water and then a
   // hatch in the floor that drops you into the undercroft — the room you
   // started in, four areas ago. That moment is the whole reason this world is
