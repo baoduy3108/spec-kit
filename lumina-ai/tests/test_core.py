@@ -2443,6 +2443,21 @@ def test_skills_library_has_at_least_1114():
     assert len(skills._SKILLS) >= 1114
 
 
+def test_skills_library_has_at_least_1116():
+    from app import skills
+    assert len(skills._SKILLS) >= 1116
+
+
+def test_skills_voice_and_streaming_ux_topics_match():
+    from app import skills
+    for text, expected in [
+        ("làm trợ lý giọng nói voice ai pipeline stt llm tts barge-in", "voice-ai-agents-and-realtime-speech"),
+        ("streaming ux chat ai token streaming sse stop regenerate", "streaming-ux-for-ai-chat"),
+    ]:
+        s = skills.find_matching_skill(text)
+        assert s and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_advanced_gamedev_topics_match():
     from app import skills
     for text, expected in [
