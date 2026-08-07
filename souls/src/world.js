@@ -142,6 +142,152 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // A pilgrim road that went under. Eleven rooms following it anyway, because
+  // the road is the only straight line left in the marshes and everything
+  // still walks it. The fold at the end is a culvert that comes up inside the
+  // chapelyard — the road always did end at the chapel; it just stopped being
+  // above ground.
+  'sunken-road': [
+    {
+      key: 'the-milestone',
+      kind: 'yard',
+      name: { en: 'The Milestone', vi: 'Cột Cây Số' },
+      line: {
+        en: 'Cut with a distance and a name, both under the waterline now.',
+        vi: 'Khắc một khoảng cách và một cái tên, giờ cả hai đều nằm dưới mực nước.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-way-house',
+      kind: 'hall',
+      name: { en: 'The Way House', vi: 'Nhà Trạm' },
+      line: {
+        en: 'Built for travellers to sleep in, one storey up, and the ground floor is a pond.',
+        vi: 'Xây cho khách bộ hành ngủ nhờ, lên một tầng, còn tầng trệt giờ là cái ao.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-first-ford',
+      kind: 'bridge',
+      name: { en: 'The First Ford', vi: 'Bến Lội Đầu' },
+      line: {
+        en: 'Stones laid to cross on, still in place, still exactly one stride apart.',
+        vi: 'Những phiến đá đặt để bước qua, vẫn nguyên chỗ, vẫn cách nhau đúng một sải chân.',
+      },
+      foes: ['drowned-spear', 'drowned'],
+      layout: 'single',
+      light: 'grey',
+      note: 'one stride apart means your roll lands on a stone or it does not',
+    },
+    {
+      key: 'the-toll-arch',
+      kind: 'hall',
+      name: { en: 'The Toll Arch', vi: 'Vòm Thu Phí' },
+      line: {
+        en: 'A gate across a road with no wall on either side of it. Somebody still collects.',
+        vi: 'Một cánh cổng chắn ngang con đường mà hai bên chẳng có tường nào. Vẫn có kẻ đứng thu.',
+      },
+      foes: ['warder-heavy'],
+      layout: 'single',
+      light: 'dim',
+    },
+    {
+      key: 'the-pilgrim-line',
+      kind: 'bridge',
+      name: { en: 'The Pilgrim Line', vi: 'Hàng Hành Hương' },
+      line: {
+        en: 'Still walking it, in single file, in the direction they were going.',
+        vi: 'Vẫn đang đi trên đường, xếp hàng một, theo đúng hướng họ từng đi.',
+      },
+      foes: ['acolyte', 'acolyte-spear', 'chorister'],
+      layout: 'single',
+      light: 'dim',
+      note: 'they come in file because the road is a file — take the front one and hold',
+    },
+    {
+      key: 'the-sunk-inn',
+      kind: 'cave',
+      name: { en: 'The Sunk Inn', vi: 'Quán Trọ Chìm' },
+      line: {
+        en: 'A roof at knee height with a room under it. The sign is still legible.',
+        vi: 'Một mái nhà ngang đầu gối, dưới đó là cả một căn phòng. Tấm biển vẫn còn đọc được.',
+      },
+      foes: ['drowned-heavy', 'crawler'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-broken-causeway',
+      kind: 'bridge',
+      name: { en: 'The Broken Causeway', vi: 'Đê Gãy' },
+      line: {
+        en: 'Raised above the water for a hundred paces and then not raised at all.',
+        vi: 'Đắp cao trên mặt nước được trăm bước, rồi thì chẳng cao gì nữa.',
+      },
+      foes: ['ghoul-swift', 'ghoul-swift', 'moth-swift'],
+      layout: 'pack',
+      light: 'grey',
+      note: 'fast things on a narrow raised road — the same lesson as the ramparts, wetter',
+    },
+    {
+      key: 'the-ferry-post',
+      kind: 'yard',
+      name: { en: 'The Ferry Post', vi: 'Bến Đò' },
+      line: {
+        en: 'A post, a rope, and no boat. The rope goes out into the water and stays taut.',
+        vi: 'Một cây cọc, một sợi dây, và không có đò. Sợi dây chạy ra mặt nước và vẫn căng.',
+      },
+      foes: ['drowned', 'drowned-heavy', 'warder'],
+      layout: 'ring',
+      light: 'grey',
+      note: 'the hardest room, and the taut rope is never explained',
+    },
+    {
+      key: 'the-shrine-of-the-road',
+      kind: 'hall',
+      name: { en: 'The Shrine of the Road', vi: 'Miếu Đường' },
+      line: {
+        en: 'For safe passage. Coins in the bowl, and the bowl is above the water.',
+        vi: 'Cầu đi đường bình an. Tiền xu trong bát, và cái bát thì cao hơn mặt nước.',
+      },
+      foes: ['chorister', 'acolyte-swift'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-chapel-culvert',
+      kind: 'cave',
+      name: { en: 'The Chapel Culvert', vi: 'Cống Nhà Nguyện' },
+      line: {
+        en: 'A drain wide enough to walk up. The road always ended at the chapel; it just went under.',
+        vi: 'Một cái cống rộng đủ để đi bộ ngược lên. Con đường vẫn luôn kết thúc ở nhà nguyện; chỉ là nó chui xuống dưới.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'fire and fold together again — and this one explains the road rather than shortening it',
+    },
+    {
+      key: 'the-wood-edge',
+      kind: 'yard',
+      name: { en: 'The Wood Edge', vi: 'Bìa Rừng' },
+      line: {
+        en: 'The water stops at a line of trees, and it stops too suddenly to be natural.',
+        vi: 'Nước dừng lại ở một hàng cây, và dừng đột ngột đến mức không thể là tự nhiên.',
+      },
+      foes: ['ironclad'],
+      layout: 'single',
+      light: 'grey',
+    },
+  ],
   // The Smith made most of what you are carrying and would like it back, so
   // ten rooms of his work stand between you and him: the billets before they
   // were anything, the blades that came out wrong, and the rack of the ones
