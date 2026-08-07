@@ -142,6 +142,175 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Thirteen rooms of a country that already burned. Nothing here is on fire
+  // any more — that is the point. It is the aftermath, walked through, and
+  // the only heat left is underfoot. The first colossus stands in it, because
+  // this is where the world stops being built by people.
+  ashlands: [
+    {
+      key: 'the-cinder-fall',
+      kind: 'stair',
+      name: { en: 'The Cinder Fall', vi: 'Dốc Than' },
+      line: {
+        en: 'Down a slope of loose cinder that moves when you do, and keeps moving after.',
+        vi: 'Đổ xuống một triền than vụn, trôi theo bước chân bạn, và còn trôi tiếp sau đó.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-ash-camp',
+      kind: 'hall',
+      name: { en: 'The Ash Camp', vi: 'Trại Tro' },
+      line: {
+        en: 'A windbreak of stacked slate and a fire behind it, banked for the night.',
+        vi: 'Một bức chắn gió xếp bằng đá phiến, sau nó là ngọn lửa ủ lại chờ đêm.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-standing-stacks',
+      kind: 'yard',
+      name: { en: 'The Standing Stacks', vi: 'Những Ống Khói Đứng' },
+      line: {
+        en: 'Chimneys with no houses under them any more, in the pattern of a street.',
+        vi: 'Những ống khói không còn ngôi nhà nào bên dưới, đứng theo hình một con phố.',
+      },
+      foes: ['kiln', 'kiln-heavy', 'ghoul'],
+      layout: 'spread',
+      light: 'grey',
+      note: 'the chimneys are the only cover, and they are exactly one street apart',
+    },
+    {
+      key: 'the-glass-field',
+      kind: 'yard',
+      name: { en: 'The Glass Field', vi: 'Cánh Đồng Thuỷ Tinh' },
+      line: {
+        en: 'The sand went to glass and set in ripples. It takes your weight, mostly.',
+        vi: 'Cát đã hoá thành thuỷ tinh và đông lại thành từng gợn. Nó chịu được sức nặng của bạn, phần lớn.',
+      },
+      foes: ['wisp', 'wisp'],
+      layout: 'pack',
+      light: 'grey',
+    },
+    {
+      key: 'the-charcoal-rows',
+      kind: 'hall',
+      name: { en: 'The Charcoal Rows', vi: 'Luống Than' },
+      line: {
+        en: 'A plantation burned standing. Every trunk is still in its row and still black.',
+        vi: 'Một rừng trồng bị cháy khi còn đứng. Mọi thân cây vẫn ở đúng hàng của nó, và vẫn đen.',
+      },
+      foes: ['ironclad', 'kiln-swift'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-smoke-line',
+      kind: 'bridge',
+      name: { en: 'The Smoke Line', vi: 'Vệt Khói' },
+      line: {
+        en: 'Smoke coming out of a crack in the ground in a straight line for half a mile.',
+        vi: 'Khói bốc lên từ một khe nứt dưới đất, thành một đường thẳng dài nửa dặm.',
+      },
+      foes: ['chorister', 'warder-heavy'],
+      layout: 'single',
+      light: 'dim',
+      note: 'the crack is a wall you cannot cross, so the fight is always frontal',
+    },
+    {
+      key: 'the-buried-village',
+      kind: 'cave',
+      name: { en: 'The Buried Village', vi: 'Làng Bị Vùi' },
+      line: {
+        en: 'Roofs at ankle height. You are walking on the second storey of somewhere.',
+        vi: 'Những mái nhà ngang mắt cá chân. Bạn đang đi trên tầng hai của một nơi nào đó.',
+      },
+      foes: ['crawler-heavy', 'stonemask-heavy', 'ghoul-swift'],
+      layout: 'ring',
+      light: 'dark',
+    },
+    {
+      key: 'the-kiln-yard',
+      kind: 'yard',
+      name: { en: 'The Kiln Yard', vi: 'Sân Lò Nung' },
+      line: {
+        en: 'Brick domes in rows, each with a door, and one of the doors is warm.',
+        vi: 'Những vòm gạch xếp hàng, mỗi vòm một cửa, và một trong những cánh cửa đó còn ấm.',
+      },
+      foes: ['kiln', 'kiln', 'kiln-heavy'],
+      layout: 'pack',
+      light: 'warm',
+    },
+    {
+      key: 'the-white-ash',
+      kind: 'yard',
+      name: { en: 'The White Ash', vi: 'Tro Trắng' },
+      line: {
+        en: 'It goes white when it has burned completely. This is the part that burned longest.',
+        vi: 'Tro chuyển sang trắng khi đã cháy hết. Đây là chỗ cháy lâu nhất.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'grey',
+      note: 'first colossus — enormous, slow, and it does not stagger at all',
+    },
+    {
+      key: 'the-ember-drift',
+      kind: 'cave',
+      name: { en: 'The Ember Drift', vi: 'Bãi Than Hồng' },
+      line: {
+        en: 'Live coals under a skin of grey, banked up against a wall by the wind.',
+        vi: 'Than hồng dưới một lớp xám, bị gió dồn lại thành đống bên vách.',
+      },
+      foes: ['kiln-swift', 'wisp', 'moth-swift'],
+      layout: 'pack',
+      light: 'warm',
+      note: 'the floor hurts here, so the room is about where you stand, not who you fight',
+    },
+    {
+      key: 'the-long-burn',
+      kind: 'bridge',
+      name: { en: 'The Long Burn', vi: 'Đường Cháy Dài' },
+      line: {
+        en: 'A seam of coal alight underground, and the road above it has been hot for years.',
+        vi: 'Một vỉa than cháy âm ỉ dưới lòng đất, và con đường bên trên đã nóng suốt nhiều năm.',
+      },
+      foes: ['ironclad', 'colossus'],
+      layout: 'spread',
+      light: 'warm',
+      note: 'the hardest room in the area: two things that will not stagger, on hot ground',
+    },
+    {
+      key: 'the-second-camp',
+      kind: 'hall',
+      name: { en: 'The Second Camp', vi: 'Trại Thứ Hai' },
+      line: {
+        en: 'Same slate windbreak, same banked fire. Somebody walks this road both ways.',
+        vi: 'Cũng bức chắn đá phiến ấy, cũng ngọn lửa ủ ấy. Có ai đó đi con đường này cả hai chiều.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-gate-road',
+      kind: 'stair',
+      name: { en: 'The Gate Road', vi: 'Đường Lên Cổng' },
+      line: {
+        en: 'Up, out of the ash, towards something that is still burning properly.',
+        vi: 'Đi lên, ra khỏi tro, hướng về một thứ vẫn đang cháy thật sự.',
+      },
+      foes: ['warder-heavy'],
+      layout: 'single',
+      light: 'warm',
+    },
+  ],
   // The Keeper keeps the stair. Not from anything — she simply keeps it. So
   // the area is the stair: eight rooms that are all the same stair, getting
   // narrower, and the only thing that changes is how much room you have to
