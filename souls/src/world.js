@@ -142,6 +142,151 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // A treasury, which means every room was built to be hard to get into and
+  // nobody thought about getting out. Eleven rooms of doors that only open
+  // one way, and the last two are already warm — the forge is close, and the
+  // area lets you feel it before it tells you.
+  'deep-vault': [
+    {
+      key: 'the-vault-door',
+      kind: 'hall',
+      name: { en: 'The Vault Door', vi: 'Cửa Kho' },
+      line: {
+        en: 'A foot of iron on a pivot, standing open. Whatever opened it had a key.',
+        vi: 'Một tấc sắt xoay trên trục, đang mở toang. Thứ mở nó có chìa khoá.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-clerks-room',
+      kind: 'hall',
+      name: { en: "The Clerk's Room", vi: 'Phòng Thư Lại' },
+      line: {
+        en: 'A desk, a ledger, a lamp, and a chair pushed back in a hurry.',
+        vi: 'Một cái bàn, một cuốn sổ, một ngọn đèn, và chiếc ghế bị đẩy ra vội vã.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-counting-hall',
+      kind: 'hall',
+      name: { en: 'The Counting Hall', vi: 'Sảnh Kiểm Đếm' },
+      line: {
+        en: 'Long benches with grooves worn in them by coin. Four of them are at work.',
+        vi: 'Những băng ghế dài, mặt ghế mòn thành rãnh vì tiền xu. Bốn đứa nó vẫn đang làm việc.',
+      },
+      foes: ['acolyte', 'acolyte-spear', 'knightling', 'ghoul'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-strong-boxes',
+      kind: 'cave',
+      name: { en: 'The Strong Boxes', vi: 'Két Sắt' },
+      line: {
+        en: 'Cages within the room, and one of them is shut from the inside.',
+        vi: 'Những lồng sắt dựng ngay trong phòng, và một cái bị khoá từ bên trong.',
+      },
+      foes: ['stonemask-heavy'],
+      layout: 'ambush',
+      light: 'dark',
+      note: 'the shut cage is the ambush — it opens when you walk past it',
+    },
+    {
+      key: 'the-lead-room',
+      kind: 'hall',
+      name: { en: 'The Lead Room', vi: 'Phòng Chì' },
+      line: {
+        en: 'Lined in lead, floor to ceiling, and dead quiet. Nothing carries in here.',
+        vi: 'Bọc chì từ sàn lên trần, và im phăng phắc. Không tiếng nào truyền được trong đây.',
+      },
+      foes: ['moth', 'moth-swift'],
+      layout: 'pack',
+      light: 'dark',
+      note: 'no sound cue at all — the moths arrive with no warning but sight',
+    },
+    {
+      key: 'the-assay',
+      kind: 'hall',
+      name: { en: 'The Assay', vi: 'Phòng Thử Vàng' },
+      line: {
+        en: 'Small furnaces in a row for testing metal. One of them has been relit.',
+        vi: 'Một dãy lò nhỏ dùng để thử kim loại. Một cái đã được nhóm lại.',
+      },
+      foes: ['warder'],
+      layout: 'single',
+      light: 'warm',
+    },
+    {
+      key: 'the-deep-shelf',
+      kind: 'bridge',
+      name: { en: 'The Deep Shelf', vi: 'Gờ Sâu' },
+      line: {
+        en: 'A ledge around a shaft with no bottom you can see. The shelf is wide enough. Just.',
+        vi: 'Một gờ đá chạy quanh cái giếng không nhìn thấy đáy. Gờ đủ rộng. Vừa đủ.',
+      },
+      foes: ['ghoul-swift', 'ghoul-swift'],
+      layout: 'pack',
+      light: 'dark',
+      note: 'fast things on a ledge, and the drop does the killing',
+    },
+    {
+      key: 'the-collapsed-scale',
+      kind: 'cave',
+      name: { en: 'The Collapsed Scale', vi: 'Cân Sập' },
+      line: {
+        en: 'A weighing machine the size of a room, fallen through its own floor.',
+        vi: 'Một cái cân to bằng cả căn phòng, đã sập xuyên qua chính cái nền của nó.',
+      },
+      foes: ['crawler-heavy', 'drowned'],
+      layout: 'spread',
+      light: 'dark',
+    },
+    {
+      key: 'the-tally-wall',
+      kind: 'hall',
+      name: { en: 'The Tally Wall', vi: 'Tường Ghi Số' },
+      line: {
+        en: 'Marks cut into the stone in fives. They keep going after the light stops.',
+        vi: 'Những vạch khắc vào đá theo nhóm năm. Chúng còn chạy tiếp sau khi ánh sáng đã hết.',
+      },
+      foes: ['warder-heavy', 'stonemask', 'knightling-spear'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the hardest room, and the tally is the only thing that ever counted the dead here',
+    },
+    {
+      key: 'the-second-door',
+      kind: 'hall',
+      name: { en: 'The Second Door', vi: 'Cửa Thứ Hai' },
+      line: {
+        en: 'Identical to the first, on the far side, and it only opens outward.',
+        vi: 'Giống hệt cửa thứ nhất, ở phía bên kia, và nó chỉ mở được ra ngoài.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-forge-stair',
+      kind: 'stair',
+      name: { en: 'The Forge Stair', vi: 'Cầu Thang Lò Rèn' },
+      line: {
+        en: 'The handrail is warm. It has been warm the whole way down and you only just noticed.',
+        vi: 'Tay vịn ấm. Nó ấm suốt cả đoạn xuống, chỉ là giờ bạn mới để ý.',
+      },
+      foes: ['kiln'],
+      layout: 'single',
+      light: 'warm',
+      note: 'first kiln — the forge announces itself one area early',
+    },
+  ],
   // Eight rooms of light, which after eleven areas underground is its own
   // kind of threat. The Gilded's tell is light running down the blade — so
   // the area is lit brightly enough that a gleam is hard to pick out, and
