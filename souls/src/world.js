@@ -142,6 +142,165 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // The thing the forge was feeding. Twelve rooms inside a furnace that is
+  // still lit, which means the area has no dark: every room is legible and
+  // every room hurts, and the danger is heat management rather than sight.
+  // The fold goes back up to the forge, because the ore always went the
+  // other way down this same shaft.
+  furnace: [
+    {
+      key: 'the-charging-floor',
+      kind: 'hall',
+      name: { en: 'The Charging Floor', vi: 'Sàn Nạp Liệu' },
+      line: {
+        en: 'Where they tipped it in from. The barrows are still lined up and still loaded.',
+        vi: 'Chỗ người ta đổ nguyên liệu vào. Những chiếc xe cút kít vẫn xếp hàng và vẫn đầy.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+    },
+    {
+      key: 'the-stokers-rest',
+      kind: 'hall',
+      name: { en: "The Stoker's Rest", vi: 'Chỗ Nghỉ Thợ Đốt' },
+      line: {
+        en: 'A bench in the one draught in the building, and a fire that is colder than the room.',
+        vi: 'Một băng ghế đặt ở luồng gió duy nhất trong toà nhà, và ngọn lửa còn mát hơn cả căn phòng.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-tuyere-walk',
+      kind: 'bridge',
+      name: { en: 'The Tuyere Walk', vi: 'Lối Ống Gió' },
+      line: {
+        en: 'Pipes into the wall at intervals, all blowing, and you cross in front of each one.',
+        vi: 'Những ống dẫn cắm vào vách cách quãng đều, ống nào cũng đang thổi, và bạn phải đi ngang qua từng cái.',
+      },
+      foes: ['kiln-heavy', 'kiln-swift'],
+      layout: 'spread',
+      light: 'warm',
+      note: 'the blast is a metronome — safe between beats, and the pipes are evenly spaced',
+    },
+    {
+      key: 'the-inner-lining',
+      kind: 'cave',
+      name: { en: 'The Inner Lining', vi: 'Lớp Lót Trong' },
+      line: {
+        en: 'Firebrick, replaced in patches over centuries, and the newest patch is small.',
+        vi: 'Gạch chịu lửa, vá chắp qua nhiều thế kỷ, và miếng vá mới nhất thì nhỏ.',
+      },
+      foes: ['ironclad', 'ironclad-heavy'],
+      layout: 'ambush',
+      light: 'warm',
+    },
+    {
+      key: 'the-slag-notch',
+      kind: 'hall',
+      name: { en: 'The Slag Notch', vi: 'Rãnh Xỉ' },
+      line: {
+        en: 'A gutter cut in the wall for what floats. It has been running a long time.',
+        vi: 'Một cái rãnh đục trong vách để tháo thứ nổi lên trên. Nó chảy đã rất lâu rồi.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'warm',
+    },
+    {
+      key: 'the-blast-run',
+      kind: 'bridge',
+      name: { en: 'The Blast Run', vi: 'Đường Gió Nóng' },
+      line: {
+        en: 'The hot air goes along here on its way somewhere, and so do you, and it is faster.',
+        vi: 'Luồng khí nóng chạy dọc theo đây để đi đâu đó, bạn cũng vậy, và nó nhanh hơn bạn.',
+      },
+      foes: ['wisp', 'wisp', 'kiln-swift'],
+      layout: 'pack',
+      light: 'warm',
+      note: 'everything here moves with the draught, including your roll',
+    },
+    {
+      key: 'the-tapping-floor',
+      kind: 'yard',
+      name: { en: 'The Tapping Floor', vi: 'Sàn Rót' },
+      line: {
+        en: 'Channels cut in sand for the iron to run down. The sand has not been raked in years.',
+        vi: 'Những rãnh đào trong cát cho sắt chảy xuống. Cát thì nhiều năm rồi không được cào lại.',
+      },
+      foes: ['shade', 'ironclad', 'kiln'],
+      layout: 'ring',
+      light: 'warm',
+      note: 'the channels are the ring: they decide where you can and cannot stand',
+    },
+    {
+      key: 'the-clinker-hall',
+      kind: 'cave',
+      name: { en: 'The Clinker Hall', vi: 'Sảnh Xỉ Cứng' },
+      line: {
+        en: 'What would not melt, fused into shapes, and some of the shapes are standing up.',
+        vi: 'Thứ không chịu chảy, kết lại thành hình khối, và vài khối trong đó thì đang đứng dậy.',
+      },
+      foes: ['stonemask-heavy', 'colossus'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-cold-blast',
+      kind: 'hall',
+      name: { en: 'The Cold Blast', vi: 'Gió Lạnh' },
+      line: {
+        en: 'One pipe carries air that was never heated. Standing in front of it is the only relief here.',
+        vi: 'Có một ống dẫn luồng khí chưa từng được nung. Đứng trước nó là chỗ dễ chịu duy nhất trong khu.',
+      },
+      foes: ['shade', 'wisp'],
+      layout: 'ambush',
+      light: 'dim',
+      note: 'the safe spot is a fixed point, so the fight happens around it rather than across it',
+    },
+    {
+      key: 'the-chimney-base',
+      kind: 'cave',
+      name: { en: 'The Chimney Base', vi: 'Chân Ống Khói' },
+      line: {
+        en: 'Straight up, further than the spire went, and the light at the top is daylight.',
+        vi: 'Thẳng đứng lên trên, cao hơn cả tháp nhọn, và ánh sáng trên đỉnh là ánh ban ngày.',
+      },
+      foes: ['ironclad-heavy', 'chorister', 'shade'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the hardest room here, at the bottom of the longest drop in the world',
+    },
+    {
+      key: 'the-ore-lift',
+      kind: 'hall',
+      name: { en: 'The Ore Lift', vi: 'Thang Quặng' },
+      line: {
+        en: 'A cage on a chain that used to bring the ore down. It still works, and it goes up.',
+        vi: 'Một cái lồng treo xích, xưa dùng để đưa quặng xuống. Nó vẫn chạy, và nó đi lên.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'the fold to the forge — the ore always went the other way down this shaft',
+    },
+    {
+      key: 'the-slag-door',
+      kind: 'stair',
+      name: { en: 'The Slag Door', vi: 'Cửa Xỉ' },
+      line: {
+        en: 'Not a door. A hole where the waste goes out, and it is walkable if you stoop.',
+        vi: 'Không phải cửa. Là cái lỗ tháo phế thải, và có thể đi qua nếu bạn cúi người.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'warm',
+    },
+  ],
   // He went down the well to see the sky better, and he was right. Eight
   // rooms descending a shaft, and the further down you go the more sky there
   // is. His parallax move puts him a beat away from where he looks, so the
