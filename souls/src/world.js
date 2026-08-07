@@ -142,6 +142,177 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // One of them is the fire and one of them is the vessel, and they will not
+  // say which. So the area comes in pairs: two channels, two furnaces, two
+  // moulds, and in every pair one member is doing the work and the other is
+  // holding it. By their door you should have stopped trying to tell which is
+  // which, because the fight punishes exactly that.
+  crucible: [
+    {
+      key: 'the-pouring-lip',
+      kind: 'hall',
+      name: { en: 'The Pouring Lip', vi: 'Miệng Rót' },
+      line: {
+        en: 'Shaped so the stream lands in one place. Everything below it was built after.',
+        vi: 'Tạo hình để dòng chảy rơi đúng một chỗ. Mọi thứ bên dưới nó đều được xây sau.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+    },
+    {
+      key: 'the-first-mould',
+      kind: 'hall',
+      name: { en: 'The First Mould', vi: 'Khuôn Thứ Nhất' },
+      line: {
+        en: 'Empty, swept, and warm, with a fire in the hollow where something used to set.',
+        vi: 'Trống, đã quét sạch, và ấm, với ngọn lửa nhóm trong lòng khuôn nơi từng có thứ đông lại.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-twin-channels',
+      kind: 'bridge',
+      name: { en: 'The Twin Channels', vi: 'Đôi Rãnh' },
+      line: {
+        en: 'Two gutters running side by side the whole length, and only one of them is hot.',
+        vi: 'Hai cái rãnh chạy song song suốt chiều dài, và chỉ một trong hai là còn nóng.',
+      },
+      foes: ['kiln-heavy', 'kiln-heavy'],
+      layout: 'spread',
+      light: 'warm',
+      note: 'the same enemy twice, and the room asks which channel you are standing over',
+    },
+    {
+      key: 'the-mixing-floor',
+      kind: 'yard',
+      name: { en: 'The Mixing Floor', vi: 'Sàn Pha' },
+      line: {
+        en: 'Where two metals are brought together and stop being either of them.',
+        vi: 'Nơi hai thứ kim loại được đưa lại với nhau, và thôi không còn là thứ nào trong hai.',
+      },
+      foes: ['shade', 'colossus'],
+      layout: 'spread',
+      light: 'warm',
+    },
+    {
+      key: 'the-two-furnaces',
+      kind: 'hall',
+      name: { en: 'The Two Furnaces', vi: 'Hai Cái Lò' },
+      line: {
+        en: 'Identical, side by side, and one has been lit continuously for longer than the other.',
+        vi: 'Giống hệt nhau, đặt cạnh nhau, và một cái đã cháy liên tục lâu hơn cái kia.',
+      },
+      foes: ['ironclad-heavy', 'ironclad-heavy'],
+      layout: 'ambush',
+      light: 'warm',
+      note: 'the pair opens from both sides at once — the fight is about facing, not damage',
+    },
+    {
+      key: 'the-sand-beds',
+      kind: 'cave',
+      name: { en: 'The Sand Beds', vi: 'Bãi Cát Đúc' },
+      line: {
+        en: 'Impressions of things pressed into sand and lifted out. Two of the shapes match.',
+        vi: 'Những vết in của các vật ấn xuống cát rồi nhấc lên. Hai trong số các hình thì trùng nhau.',
+      },
+      foes: ['crawler-heavy', 'stonemask-heavy'],
+      layout: 'ambush',
+      light: 'dim',
+    },
+    {
+      key: 'the-skimmer',
+      kind: 'hall',
+      name: { en: 'The Skimmer', vi: 'Vớt Bọt' },
+      line: {
+        en: 'A long rake for taking off what floats. What floats is the part that failed.',
+        vi: 'Một cái cào dài để hớt đi thứ nổi lên trên. Thứ nổi lên là phần đã hỏng.',
+      },
+      foes: ['shade', 'wisp', 'kiln-swift'],
+      layout: 'pack',
+      light: 'warm',
+    },
+    {
+      key: 'the-second-mould',
+      kind: 'hall',
+      name: { en: 'The Second Mould', vi: 'Khuôn Thứ Hai' },
+      line: {
+        en: 'The same hollow as the first, at the same angle, and this one is not empty.',
+        vi: 'Cũng lòng khuôn ấy, cũng góc nghiêng ấy, và cái này thì không trống.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'dim',
+      note: 'the first mould had the fire in it. This is the same room with something in the hollow',
+    },
+    {
+      key: 'the-alloy-hall',
+      kind: 'hall',
+      name: { en: 'The Alloy Hall', vi: 'Sảnh Hợp Kim' },
+      line: {
+        en: 'Bars of the mixture, tested and stamped, and no two of them behave alike.',
+        vi: 'Những thỏi hợp kim đã thử và đóng dấu, và không thỏi nào cư xử giống thỏi nào.',
+      },
+      foes: ['ironclad-heavy', 'shade', 'chorister'],
+      layout: 'ring',
+      light: 'dim',
+    },
+    {
+      key: 'the-parting-line',
+      kind: 'bridge',
+      name: { en: 'The Parting Line', vi: 'Đường Ráp Khuôn' },
+      line: {
+        en: 'The seam where the two halves of a mould meet. Everything cast here has this scar.',
+        vi: 'Đường nối nơi hai nửa khuôn khép lại. Mọi thứ đúc ở đây đều mang cái sẹo này.',
+      },
+      foes: ['wisp', 'wisp', 'moth-swift'],
+      layout: 'pack',
+      light: 'warm',
+      note: 'their seal move rehearsed: two halves closing on one line, and you are on the line',
+    },
+    {
+      key: 'the-cold-shut',
+      kind: 'cave',
+      name: { en: 'The Cold Shut', vi: 'Mối Nguội' },
+      line: {
+        en: 'Where two streams met and did not join. It looks whole and it is two things.',
+        vi: 'Chỗ hai dòng chảy gặp nhau mà không hoà làm một. Nhìn thì liền khối, mà thực ra là hai thứ.',
+      },
+      foes: ['colossus', 'shade', 'ironclad-heavy'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the hardest room, and its name is the answer to the boss',
+    },
+    {
+      key: 'the-crucible-step',
+      kind: 'hall',
+      name: { en: 'The Crucible Step', vi: 'Bậc Lò Luyện' },
+      line: {
+        en: 'Two stools at the fire, both used, and worn the same amount.',
+        vi: 'Hai chiếc ghế đẩu bên lửa, cả hai đều đã dùng, và mòn như nhau.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-vessel',
+      kind: 'fog',
+      name: { en: 'The Vessel', vi: 'Cái Lò' },
+      line: {
+        en: 'A bowl of stone big enough to stand in, with fire in it, and the fire is standing too.',
+        vi: 'Một cái lòng chảo bằng đá đủ rộng để đứng vào, trong đó có lửa, và ngọn lửa cũng đang đứng.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+      note: 'the twins — kill one and the other takes both movesets, so pick carefully or do not pick',
+    },
+  ],
   // Inside the clock that decides when the lanterns are lit, and it has been
   // wrong for years. Twelve rooms, one per hour, and every one of them keeps
   // a beat you can move on. The vault of hours taught counting; this is where
