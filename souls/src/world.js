@@ -142,6 +142,177 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Everything above ground in this world is one plant, and this is under it.
+  // Thirteen rooms proving the claim before the boss makes it: grafts joining
+  // things that grew in different areas, a root that runs towards the marsh,
+  // scars where somebody cut a limb off. By his door the sentence should
+  // already be obvious rather than surprising.
+  'root-deep': [
+    {
+      key: 'the-root-gate',
+      kind: 'cave',
+      name: { en: 'The Root Gate', vi: 'Cổng Rễ' },
+      line: {
+        en: 'Two roots crossed over the way, grown that way, and worn smooth in the middle.',
+        vi: 'Hai cái rễ bắt chéo chắn lối, mọc thành thế đó, và chỗ giữa thì mòn nhẵn.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-dry-node',
+      kind: 'hall',
+      name: { en: 'The Dry Node', vi: 'Mấu Khô' },
+      line: {
+        en: 'A swelling in the root with a hollow in it, dry as a cupboard, and a fire inside.',
+        vi: 'Một chỗ phình trên rễ, bên trong rỗng, khô như cái tủ, và có ngọn lửa trong đó.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-first-branching',
+      kind: 'cave',
+      name: { en: 'The First Branching', vi: 'Chỗ Chia Nhánh Đầu' },
+      line: {
+        en: 'Three ways on, all of them root, and all three come back together further down.',
+        vi: 'Ba lối đi tiếp, cả ba đều là rễ, và cả ba nhập lại với nhau ở phía dưới.',
+      },
+      foes: ['shade', 'ghoul-swift'],
+      layout: 'ambush',
+      light: 'dark',
+      note: 'a fork that is not a fork — the area is one thing pretending to branch',
+    },
+    {
+      key: 'the-drinking-floor',
+      kind: 'yard',
+      name: { en: 'The Drinking Floor', vi: 'Sàn Hút Nước' },
+      line: {
+        en: 'Hair roots in a mat you sink into, all of them moving slightly, all towards the marsh.',
+        vi: 'Rễ tơ đan thành thảm, bạn lún xuống, tất cả đều khẽ động, và đều hướng về phía đầm lầy.',
+      },
+      foes: ['drowned-heavy', 'crawler-heavy'],
+      layout: 'spread',
+      light: 'dark',
+      note: 'the direction is the point: this root drinks the marsh you walked through',
+    },
+    {
+      key: 'the-knot',
+      kind: 'hall',
+      name: { en: 'The Knot', vi: 'Mắt Gỗ' },
+      line: {
+        en: 'Grain turning in a circle around nothing, and the room turns with it.',
+        vi: 'Thớ gỗ xoáy thành vòng quanh một khoảng không, và căn phòng cũng xoáy theo.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-old-grafts',
+      kind: 'cave',
+      name: { en: 'The Old Grafts', vi: 'Những Mối Ghép Cũ' },
+      line: {
+        en: 'Two kinds of wood joined and healed. One of them is the pale wood; one is not.',
+        vi: 'Hai loại gỗ được ghép lại và đã liền. Một loại là gỗ rừng nhợt; loại kia thì không.',
+      },
+      foes: ['ironclad-heavy', 'shade'],
+      layout: 'spread',
+      light: 'dark',
+      note: 'the second wood is never identified, and that is deliberate',
+    },
+    {
+      key: 'the-severed-limb',
+      kind: 'cave',
+      name: { en: 'The Severed Limb', vi: 'Nhánh Bị Chặt' },
+      line: {
+        en: 'Cut through, cleanly, by something with a very large blade and a lot of patience.',
+        vi: 'Bị chặt đứt, rất ngọt, bởi thứ gì đó có lưỡi rất lớn và rất nhiều kiên nhẫn.',
+      },
+      foes: ['colossus', 'wisp'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-mycelium',
+      kind: 'yard',
+      name: { en: 'The Mycelium', vi: 'Thảm Nấm' },
+      line: {
+        en: 'White threads across everything, joining root to root, and they carry light.',
+        vi: 'Những sợi trắng phủ khắp, nối rễ này sang rễ kia, và chúng dẫn được ánh sáng.',
+      },
+      foes: ['wisp', 'wisp', 'moth-swift'],
+      layout: 'pack',
+      light: 'dim',
+      note: 'the threads light up along the path something took, one beat after it took it',
+    },
+    {
+      key: 'the-sounding-root',
+      kind: 'bridge',
+      name: { en: 'The Sounding Root', vi: 'Rễ Truyền Âm' },
+      line: {
+        en: 'Hollow, and long, and anything that touches it anywhere is audible here.',
+        vi: 'Rỗng, dài, và bất cứ thứ gì chạm vào nó ở bất kỳ đâu cũng nghe được từ đây.',
+      },
+      foes: ['chorister', 'shade'],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-graft-scars',
+      kind: 'hall',
+      name: { en: 'The Graft Scars', vi: 'Sẹo Ghép' },
+      line: {
+        en: 'Rings of scar tissue at intervals, going down, each one a place it was joined to something.',
+        vi: 'Những vòng sẹo cách quãng, chạy xuống dưới, mỗi vòng là một chỗ nó từng được ghép vào thứ khác.',
+      },
+      foes: ['ironclad-heavy', 'stonemask-heavy', 'shade'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the hardest room, and the scar count is larger than the number of areas',
+    },
+    {
+      key: 'the-deep-knot',
+      kind: 'cave',
+      name: { en: 'The Deep Knot', vi: 'Mắt Sâu' },
+      line: {
+        en: 'The same knot as before, further down, turning the other way.',
+        vi: 'Vẫn cái mắt gỗ lúc nãy, ở sâu hơn, và xoáy theo chiều ngược lại.',
+      },
+      foes: ['colossus', 'colossus'],
+      layout: 'spread',
+      light: 'dark',
+    },
+    {
+      key: 'the-last-node',
+      kind: 'hall',
+      name: { en: 'The Last Node', vi: 'Mấu Cuối' },
+      line: {
+        en: 'Dry, hollow, warm, and identical to the first one you sat in, twelve rooms ago.',
+        vi: 'Khô, rỗng, ấm, và giống hệt cái mấu bạn ngồi lúc đầu, mười hai phòng trước.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-thinking-part',
+      kind: 'fog',
+      name: { en: 'The Thinking Part', vi: 'Phần Biết Nghĩ' },
+      line: {
+        en: 'A chamber the size of a cathedral with one root in the middle of it, going nowhere.',
+        vi: 'Một khoang rộng bằng nhà thờ lớn, chính giữa là một cái rễ duy nhất, chẳng dẫn đi đâu cả.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+      note: 'the old root — the only root here that is not on its way somewhere',
+    },
+  ],
   // The thing the forge was feeding. Twelve rooms inside a furnace that is
   // still lit, which means the area has no dark: every room is legible and
   // every room hurts, and the danger is heat management rather than sight.
