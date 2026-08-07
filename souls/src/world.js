@@ -142,6 +142,138 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Heartwood is the part of a tree that has already died, and it is the part
+  // holding everything up. Ten rooms of that idea: nothing in here grows, and
+  // it is the strongest place in the world. The fold climbs the inside of the
+  // trunk and comes out in the pale wood, which is the same tree, above.
+  heartwood: [
+    {
+      key: 'the-inner-face',
+      kind: 'cave',
+      name: { en: 'The Inner Face', vi: 'Mặt Trong' },
+      line: {
+        en: 'Darker than the wood around it, and harder, and it rings when you knock.',
+        vi: 'Sẫm hơn phần gỗ quanh nó, cứng hơn, và gõ vào thì kêu.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-dead-centre',
+      kind: 'hall',
+      name: { en: 'The Dead Centre', vi: 'Tâm Chết' },
+      line: {
+        en: 'Nothing grows here and nothing rots. It is the only clean room in the world.',
+        vi: 'Ở đây không gì mọc và cũng không gì mục. Đó là căn phòng sạch duy nhất trên đời này.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-compression',
+      kind: 'hall',
+      name: { en: 'The Compression', vi: 'Chỗ Nén' },
+      line: {
+        en: 'Everything above is standing on this. You can hear it holding, very quietly.',
+        vi: 'Mọi thứ bên trên đang đứng trên chỗ này. Bạn nghe được tiếng nó gồng, rất khẽ.',
+      },
+      foes: ['colossus', 'shade'],
+      layout: 'spread',
+      light: 'dark',
+    },
+    {
+      key: 'the-resin-seam',
+      kind: 'bridge',
+      name: { en: 'The Resin Seam', vi: 'Vỉa Nhựa' },
+      line: {
+        en: 'Amber running through the grain with things caught in it, and one of them is armoured.',
+        vi: 'Hổ phách chảy dọc thớ gỗ, bên trong kẹt đủ thứ, và một trong số đó thì mặc giáp.',
+      },
+      foes: ['wisp', 'moth-swift', 'wisp'],
+      layout: 'pack',
+      light: 'dim',
+      note: 'the armoured thing in the amber is never explained and is not a foe',
+    },
+    {
+      key: 'the-year-without',
+      kind: 'hall',
+      name: { en: 'The Year Without', vi: 'Năm Không Có' },
+      line: {
+        en: 'One ring missing entirely. Not thin — absent, as though the year did not happen.',
+        vi: 'Một vòng năm mất hẳn. Không phải mỏng — mà không hề có, như thể năm đó đã không xảy ra.',
+      },
+      foes: ['shade', 'shade'],
+      layout: 'ambush',
+      light: 'dark',
+      note: 'the vault of hours had a jar that was never made — same year, never said',
+    },
+    {
+      key: 'the-fused-grain',
+      kind: 'cave',
+      name: { en: 'The Fused Grain', vi: 'Thớ Hàn Liền' },
+      line: {
+        en: 'Two trunks that grew into one so long ago that the join is stronger than either.',
+        vi: 'Hai thân cây mọc dính thành một từ lâu đến mức chỗ nối còn khoẻ hơn cả hai.',
+      },
+      foes: ['ironclad-heavy', 'colossus'],
+      layout: 'spread',
+      light: 'dark',
+    },
+    {
+      key: 'the-standing-column',
+      kind: 'hall',
+      name: { en: 'The Standing Column', vi: 'Cột Đứng' },
+      line: {
+        en: 'A pillar of heartwood with the living tree grown around it, not touching.',
+        vi: 'Một cây cột bằng lõi gỗ, cây sống mọc bao quanh nó mà không chạm vào.',
+      },
+      foes: ['chorister', 'shade', 'ironclad-heavy'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the hardest room, and the gap around the column is the only safe ground',
+    },
+    {
+      key: 'the-old-wound',
+      kind: 'cave',
+      name: { en: 'The Old Wound', vi: 'Vết Thương Cũ' },
+      line: {
+        en: 'Something went in here once and the tree grew round it rather than push it out.',
+        vi: 'Có thứ gì đó từng đâm vào đây, và cái cây chọn mọc trùm lấy nó thay vì đẩy nó ra.',
+      },
+      foes: ['colossus', 'wisp'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-canopy-shaft',
+      kind: 'stair',
+      name: { en: 'The Canopy Shaft', vi: 'Giếng Trời Tán Lá' },
+      line: {
+        en: 'A hollow going straight up the inside of the trunk, with light at the far end.',
+        vi: 'Một khoảng rỗng chạy thẳng lên trong lòng thân cây, đầu kia có ánh sáng.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'the fold: it comes out in the pale wood, because that is the same tree, above',
+    },
+    {
+      key: 'the-crucible-road',
+      kind: 'cave',
+      name: { en: 'The Crucible Road', vi: 'Đường Tới Lò Luyện' },
+      line: {
+        en: 'The grain runs out and stone starts, and the stone has been cut to fit the wood.',
+        vi: 'Thớ gỗ hết, đá bắt đầu, và đá thì được đẽo cho khớp với gỗ.',
+      },
+      foes: ['shade', 'ironclad-heavy'],
+      layout: 'spread',
+      light: 'dim',
+    },
+  ],
   // A waste heap a hundred years deep. The Slagborn is what the forge threw
   // away, given a century to cool into a shape with intent — so the area is
   // arranged as strata: the newest waste on top, and the further down you go
