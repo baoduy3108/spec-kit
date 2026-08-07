@@ -142,6 +142,164 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // The Shepherd is not protecting the wood from you. Twelve rooms of working
+  // that out: trees in rows because somebody planted them, trees with marks
+  // cut in because somebody counted them, and trees missing because somebody
+  // took them. By the hut you know what the flock is, and the fight is only
+  // the confirmation.
+  'pale-wood': [
+    {
+      key: 'the-treeline',
+      kind: 'yard',
+      name: { en: 'The Treeline', vi: 'Bìa Rừng Nhợt' },
+      line: {
+        en: 'It starts all at once, in a straight edge, the way a field starts.',
+        vi: 'Rừng bắt đầu đột ngột, thành một đường thẳng, theo cái cách một thửa ruộng bắt đầu.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-sheepfold',
+      kind: 'hall',
+      name: { en: 'The Fold', vi: 'Bãi Nhốt' },
+      line: {
+        en: 'A wall of stacked stone in a circle, with a gate, and a fire inside it.',
+        vi: 'Một vòng tường đá xếp, có cổng, và bên trong là ngọn lửa.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-first-stand',
+      kind: 'hall',
+      name: { en: 'The First Stand', vi: 'Đám Cây Đầu' },
+      line: {
+        en: 'Planted in rows. You can see down every row and there is nothing in any of them.',
+        vi: 'Trồng thành hàng. Bạn nhìn suốt được từng hàng, và hàng nào cũng chẳng có gì.',
+      },
+      foes: ['shade'],
+      layout: 'ambush',
+      light: 'dim',
+      note: 'first shade — fast, heavy, and it arrives from the one row you were not down',
+    },
+    {
+      key: 'the-thinning',
+      kind: 'yard',
+      name: { en: 'The Thinning', vi: 'Chỗ Tỉa Thưa' },
+      line: {
+        en: 'Every third tree gone, and the stumps are cut clean. This is husbandry.',
+        vi: 'Cứ ba cây thì mất một, và những gốc chặt đều rất ngọt. Đây là chăn nuôi.',
+      },
+      foes: ['ironclad', 'wisp'],
+      layout: 'spread',
+      light: 'grey',
+    },
+    {
+      key: 'the-crook-marks',
+      kind: 'hall',
+      name: { en: 'The Crook Marks', vi: 'Vết Gậy Móc' },
+      line: {
+        en: 'A notch in the bark at shoulder height, on every trunk, all the same height.',
+        vi: 'Một vết khía trên vỏ cây ngang vai, trên mọi thân, và đều cùng một độ cao.',
+      },
+      foes: ['chorister', 'warder-heavy'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'the notches are his reach, marked on the world a room before you meet it',
+    },
+    {
+      key: 'the-white-bark',
+      kind: 'cave',
+      name: { en: 'The White Bark', vi: 'Vỏ Trắng' },
+      line: {
+        en: 'Pale enough to see by. Whatever is coming, you will see it, and it knows.',
+        vi: 'Trắng đến mức đủ soi đường. Thứ nào tới bạn cũng thấy, và nó biết điều đó.',
+      },
+      foes: ['moth-swift', 'moth-swift', 'wisp'],
+      layout: 'pack',
+      light: 'grey',
+    },
+    {
+      key: 'the-grazing',
+      kind: 'yard',
+      name: { en: 'The Grazing', vi: 'Bãi Ăn' },
+      line: {
+        en: 'Bare ground under the trees, cropped short. Something feeds here and keeps it neat.',
+        vi: 'Nền đất trống dưới tán, gặm trụi lủi. Có thứ ăn ở đây và giữ cho nó gọn gàng.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'dim',
+    },
+    {
+      key: 'the-cull',
+      kind: 'hall',
+      name: { en: 'The Cull', vi: 'Chỗ Loại Thải' },
+      line: {
+        en: 'Trunks dragged into a heap and left. He took these ones out for a reason.',
+        vi: 'Những thân cây bị kéo dồn thành đống rồi bỏ đó. Ông ta loại chúng ra vì một lý do.',
+      },
+      foes: ['shade', 'ironclad', 'wisp'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the heap is cover and the only thing keeping the ring from closing',
+    },
+    {
+      key: 'the-lambing-ground',
+      kind: 'cave',
+      name: { en: 'The Lambing Ground', vi: 'Bãi Đẻ' },
+      line: {
+        en: 'Saplings, close together, none of them old. This part of the flock is new.',
+        vi: 'Cây non mọc sít nhau, chẳng cây nào già. Phần này của đàn là mới.',
+      },
+      foes: ['wisp', 'wisp', 'moth-swift'],
+      layout: 'pack',
+      light: 'dark',
+    },
+    {
+      key: 'the-deep-stand',
+      kind: 'hall',
+      name: { en: 'The Deep Stand', vi: 'Rừng Sâu' },
+      line: {
+        en: 'The oldest of them, too big to have been planted by anyone still remembered.',
+        vi: 'Những cây già nhất, to đến mức không thể do bất kỳ ai còn được nhớ tên trồng nên.',
+      },
+      foes: ['colossus', 'chorister'],
+      layout: 'spread',
+      light: 'dark',
+      note: 'the hardest room, and the trees here are the ones he calls first',
+    },
+    {
+      key: 'the-shepherds-hut',
+      kind: 'hall',
+      name: { en: "The Shepherd's Hut", vi: 'Chòi Người Chăn' },
+      line: {
+        en: 'One room, one bed, one window facing the clearing, and a fire he laid this morning.',
+        vi: 'Một phòng, một cái giường, một ô cửa sổ nhìn ra khoảng trống, và ngọn lửa ông ta nhóm sáng nay.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-clearing',
+      kind: 'fog',
+      name: { en: 'The Clearing', vi: 'Khoảng Trống' },
+      line: {
+        en: 'Round, and open, and the trees stand all the way around the edge of it, facing in.',
+        vi: 'Tròn, trống, và cây đứng vòng kín quanh mép, tất cả đều quay vào trong.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+      note: 'the shepherd — the flock is already in the arena and it is the arena',
+    },
+  ],
   // Thirteen rooms of a country that already burned. Nothing here is on fire
   // any more — that is the point. It is the aftermath, walked through, and
   // the only heat left is underfoot. The first colossus stands in it, because
