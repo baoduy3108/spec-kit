@@ -142,6 +142,151 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // One tree. Eleven rooms inside it, going down, and the whole area is a
+  // single organism you are travelling through rather than a place anyone
+  // built. Nothing here has corners, which after twenty-one areas of masonry
+  // is disorienting on its own.
+  'hollow-tree': [
+    {
+      key: 'the-split',
+      kind: 'cave',
+      name: { en: 'The Split', vi: 'Vết Nứt' },
+      line: {
+        en: 'A crack in the trunk you can walk into upright, and it closes behind you slowly.',
+        vi: 'Một vết nứt trên thân đủ để đi thẳng lưng vào, và nó khép lại sau bạn rất chậm.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dim',
+    },
+    {
+      key: 'the-first-chamber',
+      kind: 'hall',
+      name: { en: 'The First Chamber', vi: 'Buồng Thứ Nhất' },
+      line: {
+        en: 'Dry, and round, and warm, and someone has been living in it for a while.',
+        vi: 'Khô, tròn, ấm, và có ai đó đã sống trong này một thời gian.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-heartwood-stair',
+      kind: 'stair',
+      name: { en: 'The Heartwood Stair', vi: 'Cầu Thang Lõi Gỗ' },
+      line: {
+        en: 'Steps cut into the grain, spiralling down, and the grain is still growing around them.',
+        vi: 'Những bậc đục vào thớ gỗ, xoắn xuống, và thớ gỗ vẫn đang mọc trùm lấy chúng.',
+      },
+      foes: ['shade'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-sap-fall',
+      kind: 'bridge',
+      name: { en: 'The Sap Fall', vi: 'Thác Nhựa' },
+      line: {
+        en: 'A sheet of it coming down one wall, slow, and it holds whatever walks into it.',
+        vi: 'Một màn nhựa chảy dọc vách, chậm rãi, và nó giữ lại bất cứ thứ gì bước vào.',
+      },
+      foes: ['wisp', 'moth-swift'],
+      layout: 'pack',
+      light: 'dim',
+      note: 'the sap is a trap for both of you — the fast things are worth less here',
+    },
+    {
+      key: 'the-beetle-galleries',
+      kind: 'cave',
+      name: { en: 'The Beetle Galleries', vi: 'Hang Mọt' },
+      line: {
+        en: 'Tunnels bored through the wood in a pattern, and the pattern is a script.',
+        vi: 'Những đường hầm đục xuyên gỗ theo một hoa văn, và hoa văn đó là một loại chữ viết.',
+      },
+      foes: ['crawler-heavy', 'crawler-heavy', 'ghoul-swift'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'they come out of the tunnels, so the ring closes from the walls, not the floor',
+    },
+    {
+      key: 'the-nest',
+      kind: 'hall',
+      name: { en: 'The Nest', vi: 'Tổ' },
+      line: {
+        en: 'Woven out of the bones of things that came in here. Woven, not piled.',
+        vi: 'Đan bằng xương của những thứ từng vào đây. Đan, chứ không phải chất đống.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-rot-hollow',
+      kind: 'cave',
+      name: { en: 'The Rot Hollow', vi: 'Hốc Mục' },
+      line: {
+        en: 'Soft underfoot, and it gives, and there is another floor two feet below this one.',
+        vi: 'Nền mềm, lún xuống, và cách đó hai gang nữa còn một cái nền khác.',
+      },
+      foes: ['drowned-heavy', 'stonemask-heavy'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-ring-count',
+      kind: 'hall',
+      name: { en: 'The Ring Count', vi: 'Đếm Vòng Năm' },
+      line: {
+        en: 'A cut face of the trunk, and the rings run out long before the middle does.',
+        vi: 'Một mặt cắt của thân cây, và các vòng năm hết sạch từ lâu trước khi tới lõi.',
+      },
+      foes: ['ironclad-heavy', 'chorister'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'the tree is older than it can account for, which is the only lore in the area',
+    },
+    {
+      key: 'the-taproot-head',
+      kind: 'cave',
+      name: { en: 'The Taproot Head', vi: 'Đầu Rễ Cọc' },
+      line: {
+        en: 'Where the whole thing narrows to one root going straight down out of sight.',
+        vi: 'Chỗ cả cái cây thu lại thành một cái rễ duy nhất, cắm thẳng xuống hút tầm mắt.',
+      },
+      foes: ['shade', 'wisp', 'colossus'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the hardest room here, in the narrowest part of it',
+    },
+    {
+      key: 'the-second-chamber',
+      kind: 'hall',
+      name: { en: 'The Second Chamber', vi: 'Buồng Thứ Hai' },
+      line: {
+        en: 'Dry and round and warm, exactly like the first one, and lived in exactly as long.',
+        vi: 'Khô, tròn, ấm, giống hệt buồng thứ nhất, và cũng có người ở lâu đúng như vậy.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'identical to the first on purpose — you have not been going in circles, but it asks',
+    },
+    {
+      key: 'the-descent',
+      kind: 'stair',
+      name: { en: 'The Descent', vi: 'Đường Xuống' },
+      line: {
+        en: 'Inside the root now, and it is wider than the tree was.',
+        vi: 'Giờ thì ở bên trong cái rễ, và nó rộng hơn cả cái cây.',
+      },
+      foes: ['shade'],
+      layout: 'single',
+      light: 'dark',
+    },
+  ],
   // The armour is the only thing holding the fire in the shape of a person.
   // So the area is about armour as a container rather than a defence: ten
   // rooms of empty suits, suits being riveted shut, and suits that failed.
