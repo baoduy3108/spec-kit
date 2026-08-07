@@ -142,6 +142,125 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Nine rooms where hours are kept, which is exactly as literal as it
+  // sounds. The Hourwright next door fights on a count you have to keep
+  // yourself, so this is where counting becomes the thing you do: rooms that
+  // repeat, rooms that hold a beat, and one room that is missing.
+  'vault-of-hours': [
+    {
+      key: 'the-hour-door',
+      kind: 'hall',
+      name: { en: 'The Hour Door', vi: 'Cửa Giờ' },
+      line: {
+        en: 'It opens on the hour. You can wait for it or you can find out how long an hour is here.',
+        vi: 'Nó mở vào đầu giờ. Bạn có thể đứng chờ, hoặc tìm hiểu xem một giờ ở đây dài bao nhiêu.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dim',
+    },
+    {
+      key: 'the-waiting-room',
+      kind: 'hall',
+      name: { en: 'The Waiting Room', vi: 'Phòng Chờ' },
+      line: {
+        en: 'Chairs facing the door, a fire, and a floor worn in a strip in front of the seats.',
+        vi: 'Những chiếc ghế quay về phía cửa, một ngọn lửa, và nền nhà mòn thành vệt ngay trước dãy ghế.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-shelved-hours',
+      kind: 'hall',
+      name: { en: 'The Shelved Hours', vi: 'Những Giờ Xếp Kệ' },
+      line: {
+        en: 'Jars on racks, dated, and the sealed ones are heavier than the empty ones by exactly an hour.',
+        vi: 'Những cái lọ trên giá, có ghi ngày, và lọ còn niêm nặng hơn lọ rỗng đúng một giờ.',
+      },
+      foes: ['shade', 'wisp'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-long-minute',
+      kind: 'bridge',
+      name: { en: 'The Long Minute', vi: 'Phút Dài' },
+      line: {
+        en: 'A corridor that takes a minute to cross at any speed, and it is not very long.',
+        vi: 'Một hành lang mà đi nhanh hay chậm cũng mất đúng một phút để qua, và nó không dài lắm.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'dark',
+      note: 'a slow enemy in a room where hurrying is not available — the fight sets its own tempo',
+    },
+    {
+      key: 'the-repeating-room',
+      kind: 'hall',
+      name: { en: 'The Repeating Room', vi: 'Phòng Lặp' },
+      line: {
+        en: 'You have been in this room. Not this one — this one, three rooms ago, exactly.',
+        vi: 'Bạn đã vào căn phòng này rồi. Không phải phòng giống nó — chính nó, ba phòng trước, y hệt.',
+      },
+      foes: ['shade', 'shade', 'wisp'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the hollow tree asked the same question; here the answer is yes',
+    },
+    {
+      key: 'the-lost-hour',
+      kind: 'cave',
+      name: { en: 'The Lost Hour', vi: 'Giờ Bị Mất' },
+      line: {
+        en: 'A gap in the racks, dusted, labelled, and the jar for it was never made.',
+        vi: 'Một chỗ trống trên giá, sạch bụi, có nhãn, và cái lọ cho nó thì chưa từng được làm.',
+      },
+      foes: ['ironclad-heavy', 'chorister'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-count-floor',
+      kind: 'yard',
+      name: { en: 'The Count Floor', vi: 'Sàn Đếm' },
+      line: {
+        en: 'Numbers inlaid from one to twelve around the edge, and you are standing on none of them.',
+        vi: 'Những con số khảm từ một đến mười hai chạy quanh mép, và bạn thì không đứng trên số nào cả.',
+      },
+      foes: ['colossus', 'shade', 'wisp'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'his strike-twelve, rehearsed: the room is a clock face and you are the hand',
+    },
+    {
+      key: 'the-antechamber-of-noon',
+      kind: 'hall',
+      name: { en: 'The Antechamber of Noon', vi: 'Tiền Sảnh Chính Ngọ' },
+      line: {
+        en: 'Brightest at a fixed moment every day, and nobody in here has seen the sun.',
+        vi: 'Sáng nhất vào một thời khắc cố định mỗi ngày, và chẳng ai trong này từng thấy mặt trời.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-clockwork-stair',
+      kind: 'stair',
+      name: { en: 'The Clockwork Stair', vi: 'Cầu Thang Đồng Hồ' },
+      line: {
+        en: 'Every step drops a fraction under your weight and comes back up behind you. It is counting.',
+        vi: 'Mỗi bậc lún xuống một chút dưới sức nặng của bạn rồi trồi lại sau lưng. Nó đang đếm.',
+      },
+      foes: ['shade'],
+      layout: 'single',
+      light: 'dim',
+    },
+  ],
   // Everything above ground in this world is one plant, and this is under it.
   // Thirteen rooms proving the claim before the boss makes it: grafts joining
   // things that grew in different areas, a root that runs towards the marsh,
