@@ -142,6 +142,127 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Nine rooms that all measure something, and the Astronomer two areas later
+  // fights by not being where he appears for one beat. So the observatory is
+  // built on that: instruments that show you a thing slightly after it
+  // happened, and a floor that turns under you while you are reading them.
+  observatory: [
+    {
+      key: 'the-dome-door',
+      kind: 'stair',
+      name: { en: 'The Dome Door', vi: 'Cửa Vòm' },
+      line: {
+        en: 'A slot in the roof you can see sky through, and it is not the sky you remember.',
+        vi: 'Một khe hở trên mái nhìn thấy trời, và đó không phải bầu trời bạn còn nhớ.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dim',
+    },
+    {
+      key: 'the-clerk-of-nights',
+      kind: 'hall',
+      name: { en: 'The Clerk of Nights', vi: 'Người Chép Đêm' },
+      line: {
+        en: 'A desk with a ledger of every clear night for two hundred years, kept up to date.',
+        vi: 'Một cái bàn với cuốn sổ ghi mọi đêm quang mây suốt hai trăm năm, vẫn được cập nhật.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-chart-room',
+      kind: 'hall',
+      name: { en: 'The Chart Room', vi: 'Phòng Hải Đồ' },
+      line: {
+        en: 'Star charts on every surface, and the newest one has this room marked on it.',
+        vi: 'Bản đồ sao phủ kín mọi mặt phẳng, và tấm mới nhất có đánh dấu chính căn phòng này.',
+      },
+      foes: ['shade', 'wisp'],
+      layout: 'ambush',
+      light: 'dim',
+    },
+    {
+      key: 'the-great-lens',
+      kind: 'cave',
+      name: { en: 'The Great Lens', vi: 'Thấu Kính Lớn' },
+      line: {
+        en: 'Glass the width of the room, and what it shows you is a half-second old.',
+        vi: 'Tấm kính rộng bằng cả căn phòng, và thứ nó cho bạn thấy đã cũ hơn nửa giây.',
+      },
+      foes: ['ironclad', 'wisp'],
+      layout: 'spread',
+      light: 'dark',
+      note: 'the reflection lags — the one room where watching the mirror gets you hit',
+    },
+    {
+      key: 'the-meridian-line',
+      kind: 'bridge',
+      name: { en: 'The Meridian Line', vi: 'Đường Kinh Tuyến' },
+      line: {
+        en: 'A brass strip set into the floor, dead straight, and things cross it on a schedule.',
+        vi: 'Một dải đồng gắn chìm trong nền, thẳng tắp, và có thứ băng qua nó theo lịch.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'dim',
+      note: 'his transit rehearsed — the line tells you when, a long time before it matters',
+    },
+    {
+      key: 'the-plate-store',
+      kind: 'hall',
+      name: { en: 'The Plate Store', vi: 'Kho Tấm Kính' },
+      line: {
+        en: 'Thousands of glass plates in racks, each one a night, each one still.',
+        vi: 'Hàng nghìn tấm kính xếp trên giá, mỗi tấm là một đêm, và tấm nào cũng bất động.',
+      },
+      foes: ['shade', 'chorister', 'wisp'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the hardest room: no cover that survives being hit, and everything here is glass',
+    },
+    {
+      key: 'the-drum-floor',
+      kind: 'yard',
+      name: { en: 'The Drum Floor', vi: 'Sàn Xoay' },
+      line: {
+        en: 'The whole floor turns, very slowly, to follow something. You do not feel it until you stop.',
+        vi: 'Cả cái sàn xoay, rất chậm, để bám theo một thứ gì đó. Bạn không cảm thấy gì cho tới khi đứng lại.',
+      },
+      foes: ['warder-heavy', 'moth-swift', 'moth-swift'],
+      layout: 'pack',
+      light: 'dim',
+      note: 'the room is moving, so the exit is not where you left it',
+    },
+    {
+      key: 'the-counterweight',
+      kind: 'hall',
+      name: { en: 'The Counterweight', vi: 'Đối Trọng' },
+      line: {
+        en: 'A block of lead on a chain that runs down the whole building. Riding it is a choice.',
+        vi: 'Một khối chì treo trên sợi xích chạy suốt toà nhà. Bám vào nó là một lựa chọn.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'the fold: it drops to the upper ward, which is where the lens is pointed anyway',
+    },
+    {
+      key: 'the-well-mouth',
+      kind: 'stair',
+      name: { en: 'The Well Mouth', vi: 'Miệng Giếng' },
+      line: {
+        en: 'A shaft going down, lined with steps, and the sky is at the bottom of it.',
+        vi: 'Một cái giếng ăn xuống, có bậc lát quanh, và bầu trời thì nằm dưới đáy.',
+      },
+      foes: ['shade'],
+      layout: 'single',
+      light: 'dark',
+    },
+  ],
   // The Shepherd is not protecting the wood from you. Twelve rooms of working
   // that out: trees in rows because somebody planted them, trees with marks
   // cut in because somebody counted them, and trees missing because somebody
