@@ -142,6 +142,117 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Eight rooms of light, which after eleven areas underground is its own
+  // kind of threat. The Gilded's tell is light running down the blade — so
+  // the area is lit brightly enough that a gleam is hard to pick out, and
+  // teaches you to watch the arm instead. The fire and the fold share a room,
+  // deliberately: the lift head is the safest place in the area and the
+  // reason to have walked all the way here.
+  solarium: [
+    {
+      key: 'the-gilded-stair',
+      kind: 'stair',
+      name: { en: 'The Gilded Stair', vi: 'Cầu Thang Mạ Vàng' },
+      line: {
+        en: 'Every tread edged in gold. It was never for walking on; it was for being seen on.',
+        vi: 'Mỗi bậc viền vàng. Nó chưa bao giờ để bước lên; nó để người ta nhìn mình bước lên.',
+      },
+      foes: ['knightling-heavy'],
+      layout: 'single',
+      light: 'warm',
+    },
+    {
+      key: 'the-antechamber-of-light',
+      kind: 'hall',
+      name: { en: 'The Antechamber of Light', vi: 'Tiền Sảnh Ánh Sáng' },
+      line: {
+        en: 'Windows on three sides and a fire in the middle that nobody needs.',
+        vi: 'Cửa sổ ba mặt, và giữa phòng là ngọn lửa chẳng ai cần đến.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-long-window',
+      kind: 'bridge',
+      name: { en: 'The Long Window', vi: 'Cửa Sổ Dài' },
+      line: {
+        en: 'A gallery of glass, and the light off it comes in strips. So do the shadows.',
+        vi: 'Một hành lang toàn kính, ánh sáng hắt vào thành từng vệt. Bóng tối cũng vậy.',
+      },
+      foes: ['warder-spear', 'moth'],
+      layout: 'spread',
+      light: 'warm',
+      note: 'strips of light and dark — the room where reading a tell gets harder',
+    },
+    {
+      key: 'the-leaf-room',
+      kind: 'hall',
+      name: { en: 'The Leaf Room', vi: 'Phòng Dát Vàng' },
+      line: {
+        en: 'Gold beaten thinner than paper, in stacks, and the air moves it when you do.',
+        vi: 'Vàng dát mỏng hơn giấy, xếp thành chồng, và bạn động là không khí làm nó bay.',
+      },
+      foes: ['acolyte-swift', 'acolyte-swift', 'ghoul'],
+      layout: 'pack',
+      light: 'warm',
+      note: 'the leaf moves before they do — the only honest warning in the area',
+    },
+    {
+      key: 'the-mirror-walk',
+      kind: 'hall',
+      name: { en: 'The Mirror Walk', vi: 'Lối Gương' },
+      line: {
+        en: 'Polished bronze down both walls. Four of you, and only one is a problem.',
+        vi: 'Đồng đánh bóng dọc cả hai bên tường. Có bốn cái bạn, và chỉ một cái là vấn đề.',
+      },
+      foes: ['stonemask', 'warder'],
+      layout: 'ambush',
+      light: 'warm',
+    },
+    {
+      key: 'the-throne-approach',
+      kind: 'hall',
+      name: { en: 'The Throne Approach', vi: 'Đường Lên Ngai' },
+      line: {
+        en: 'A carpet, still red, running the length of it. Nothing has walked on it in years.',
+        vi: 'Một tấm thảm, vẫn còn đỏ, trải suốt chiều dài. Nhiều năm rồi không ai bước lên.',
+      },
+      foes: ['warder', 'knightling', 'knightling'],
+      layout: 'ring',
+      light: 'warm',
+      note: 'the hardest room here, and the last thing between you and the lift',
+    },
+    {
+      key: 'the-lift-head',
+      kind: 'hall',
+      name: { en: 'The Lift Head', vi: 'Đầu Thang Máy' },
+      line: {
+        en: 'A counterweighted platform and a lever. It goes down to the gatehouse, in one drop.',
+        vi: 'Một sàn nâng có đối trọng và một cái cần gạt. Nó xuống thẳng cổng gác, một mạch.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'fire and fold in one room — the safest place here, and the reward for the walk',
+    },
+    {
+      key: 'the-solar',
+      kind: 'fog',
+      name: { en: 'The Solar', vi: 'Phòng Nắng' },
+      line: {
+        en: 'The brightest room in the world, and he has been standing in it, facing the window.',
+        vi: 'Căn phòng sáng nhất thế gian, và ông ta vẫn đứng trong đó, quay mặt về phía cửa sổ.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+      note: 'the gilded — his tell is light on the blade, in a room already full of it',
+    },
+  ],
   // Thirteen rooms, the largest area yet, and it ends in three doors instead
   // of two. Everything here is corridors cut through the dead, so the area is
   // about *file order*: who reaches you first, and whether you chose that.
