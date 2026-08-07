@@ -142,6 +142,116 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // The Keeper keeps the stair. Not from anything — she simply keeps it. So
+  // the area is the stair: eight rooms that are all the same stair, getting
+  // narrower, and the only thing that changes is how much room you have to
+  // roll in. By the last landing there is almost none, which is the argument
+  // the fight makes.
+  spire: [
+    {
+      key: 'the-lowest-step',
+      kind: 'stair',
+      name: { en: 'The Lowest Step', vi: 'Bậc Thấp Nhất' },
+      line: {
+        en: 'Worn into a bowl by feet. Nothing has come down it in a very long time.',
+        vi: 'Mòn lõm thành hình cái chén vì bước chân. Đã rất lâu không có gì đi xuống nó.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dim',
+    },
+    {
+      key: 'the-first-landing',
+      kind: 'hall',
+      name: { en: 'The First Landing', vi: 'Chiếu Nghỉ Đầu' },
+      line: {
+        en: 'Wide enough to turn around on, and that is the last time that is true.',
+        vi: 'Rộng vừa đủ để quay người, và đó là lần cuối cùng điều đó còn đúng.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-turning',
+      kind: 'stair',
+      name: { en: 'The Turning', vi: 'Khúc Xoay' },
+      line: {
+        en: 'It goes round a pillar, so you never see more than a quarter of it at once.',
+        vi: 'Cầu thang xoay quanh một cây cột, nên bạn không bao giờ nhìn được quá một phần tư.',
+      },
+      foes: ['wisp'],
+      layout: 'ambush',
+      light: 'dark',
+      note: 'first wisp — the fastest thing alive, on a stair with no sightline',
+    },
+    {
+      key: 'the-narrowing',
+      kind: 'stair',
+      name: { en: 'The Narrowing', vi: 'Chỗ Hẹp Dần' },
+      line: {
+        en: 'Each flight is a hand narrower than the one below. Nobody built it by accident.',
+        vi: 'Mỗi đoạn hẹp hơn đoạn dưới một gang tay. Không ai xây thế một cách tình cờ.',
+      },
+      foes: ['ironclad'],
+      layout: 'single',
+      light: 'dark',
+      note: 'the widest enemy in the game, in the room that is running out of width',
+    },
+    {
+      key: 'the-window-step',
+      kind: 'bridge',
+      name: { en: 'The Window Step', vi: 'Bậc Cửa Sổ' },
+      line: {
+        en: 'One opening, at one height, and everything you have walked is under it.',
+        vi: 'Một ô cửa duy nhất, ở đúng một độ cao, và mọi thứ bạn đã đi qua nằm dưới đó.',
+      },
+      foes: ['wisp', 'wisp', 'moth-swift'],
+      layout: 'pack',
+      light: 'grey',
+      note: 'the one room with a view, and no space at all to enjoy it',
+    },
+    {
+      key: 'the-bell-below',
+      kind: 'hall',
+      name: { en: 'The Bell Below', vi: 'Chuông Dưới' },
+      line: {
+        en: 'Hung under the floor above, so it rings down at you rather than out.',
+        vi: 'Treo dưới cái sàn phía trên, nên nó ngân xuống phía bạn chứ không toả ra ngoài.',
+      },
+      foes: ['chorister', 'warder-spear'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'her toll rehearsed: the sound arrives from above, one beat before the hit',
+    },
+    {
+      key: 'the-last-landing',
+      kind: 'hall',
+      name: { en: 'The Last Landing', vi: 'Chiếu Nghỉ Cuối' },
+      line: {
+        en: 'Two paces across. The fire is in the middle and you step around it.',
+        vi: 'Rộng hai bước chân. Ngọn lửa nằm giữa và bạn phải lách quanh nó.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-stairhead',
+      kind: 'fog',
+      name: { en: 'The Stairhead', vi: 'Đỉnh Thang' },
+      line: {
+        en: 'The top, and it is not a room. It is the last flight, and she is standing on it.',
+        vi: 'Đỉnh thang, và nó không phải một căn phòng. Nó là đoạn cầu thang cuối, và bà ta đang đứng trên đó.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dim',
+      note: 'the keeper — a boss arena with no arena, which is the whole idea of her',
+    },
+  ],
   // A pilgrim road that went under. Eleven rooms following it anyway, because
   // the road is the only straight line left in the marshes and everything
   // still walks it. The fold at the end is a culvert that comes up inside the
