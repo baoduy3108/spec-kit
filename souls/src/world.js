@@ -142,6 +142,140 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // The armour is the only thing holding the fire in the shape of a person.
+  // So the area is about armour as a container rather than a defence: ten
+  // rooms of empty suits, suits being riveted shut, and suits that failed.
+  // By his door you should already be reading a breastplate as a lid.
+  'cinder-gate': [
+    {
+      key: 'the-outer-arch',
+      kind: 'stair',
+      name: { en: 'The Outer Arch', vi: 'Vòm Ngoài' },
+      line: {
+        en: 'Stone gone glassy on the inside face. Whatever passes through here does it hot.',
+        vi: 'Mặt trong của đá đã hoá thuỷ tinh. Thứ đi qua đây thì đi qua trong lửa.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+    },
+    {
+      key: 'the-guard-fire',
+      kind: 'hall',
+      name: { en: 'The Guard Fire', vi: 'Lửa Trạm Gác' },
+      line: {
+        en: 'A brazier at a gate, which is the most ordinary thing you have seen in ten areas.',
+        vi: 'Một lò than bên cổng — thứ bình thường nhất bạn thấy suốt mười khu vừa rồi.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-plate-yard',
+      kind: 'yard',
+      name: { en: 'The Plate Yard', vi: 'Sân Giáp' },
+      line: {
+        en: 'Breastplates stacked like roof tiles, sorted by size, none of them dented.',
+        vi: 'Những tấm giáp ngực xếp như ngói lợp, phân theo cỡ, và không tấm nào móp.',
+      },
+      foes: ['ironclad', 'kiln-heavy'],
+      layout: 'spread',
+      light: 'warm',
+      note: 'undented armour in a war zone is the first thing here that is wrong',
+    },
+    {
+      key: 'the-riveting-hall',
+      kind: 'hall',
+      name: { en: 'The Riveting Hall', vi: 'Sảnh Tán Đinh' },
+      line: {
+        en: 'Benches, hammers, and hot rivets. The suits on the benches are being closed, not opened.',
+        vi: 'Bàn thợ, búa, và đinh tán nóng. Những bộ giáp trên bàn đang được đóng lại, chứ không phải mở ra.',
+      },
+      foes: ['ironclad', 'ironclad-swift'],
+      layout: 'ambush',
+      light: 'warm',
+      note: 'the sentence that explains the whole area, and it is only furniture',
+    },
+    {
+      key: 'the-hollow-suits',
+      kind: 'hall',
+      name: { en: 'The Hollow Suits', vi: 'Những Bộ Giáp Rỗng' },
+      line: {
+        en: 'Standing in ranks, visors down, empty. Four of them are not empty.',
+        vi: 'Đứng thành hàng ngũ, che mặt hạ xuống, rỗng không. Bốn bộ trong đó thì không rỗng.',
+      },
+      foes: ['shade', 'ironclad', 'kiln', 'wisp'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the marsh trick again, in iron: most are scenery, four are not',
+    },
+    {
+      key: 'the-sally-port',
+      kind: 'cave',
+      name: { en: 'The Sally Port', vi: 'Cửa Đột Kích' },
+      line: {
+        en: 'A small door for going out fast. The bar is on the far side, so it was for coming in.',
+        vi: 'Một cánh cửa nhỏ để xông ra thật nhanh. Then cài lại nằm ở phía bên kia — vậy nó dùng để đi vào.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-heat-shimmer',
+      kind: 'bridge',
+      name: { en: 'The Heat Shimmer', vi: 'Sóng Nhiệt' },
+      line: {
+        en: 'The air over the causeway bends. Everything on the far side is a guess.',
+        vi: 'Không khí trên mặt đê bị bẻ cong. Mọi thứ ở đầu bên kia đều chỉ là phỏng đoán.',
+      },
+      foes: ['kiln-swift', 'kiln-swift', 'wisp'],
+      layout: 'pack',
+      light: 'warm',
+      note: 'his sear is a brightening blade, and this is the room that ruins your eyes for it',
+    },
+    {
+      key: 'the-cooling-line',
+      kind: 'hall',
+      name: { en: 'The Cooling Line', vi: 'Dây Chuyền Nguội' },
+      line: {
+        en: 'Suits hung on a chain to cool, moving past at walking pace, still glowing.',
+        vi: 'Những bộ giáp treo trên xích cho nguội, trôi ngang với tốc độ đi bộ, và vẫn còn hồng.',
+      },
+      foes: ['ironclad-heavy', 'shade'],
+      layout: 'spread',
+      light: 'warm',
+      note: 'moving cover — the only cover in the game that leaves while you are using it',
+    },
+    {
+      key: 'the-squires-step',
+      kind: 'hall',
+      name: { en: "The Squire's Step", vi: 'Bậc Cận Vệ' },
+      line: {
+        en: 'Where you would be dressed before going through. Two stools, one used.',
+        vi: 'Chỗ người ta mặc giáp cho bạn trước khi đi qua. Hai chiếc ghế đẩu, một chiếc đã dùng.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-inner-gate',
+      kind: 'fog',
+      name: { en: 'The Inner Gate', vi: 'Cổng Trong Cùng' },
+      line: {
+        en: 'He is standing in the gateway, which is his job, and he has not moved off it in years.',
+        vi: 'Ông ta đứng ngay lối cổng — đó là phận sự — và nhiều năm rồi không rời khỏi chỗ đó.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+      note: 'the ember knight — by now a breastplate should read as a lid, and his opens',
+    },
+  ],
   // Nine rooms that all measure something, and the Astronomer two areas later
   // fights by not being where he appears for one beat. So the observatory is
   // built on that: instruments that show you a thing slightly after it

@@ -184,6 +184,12 @@ test('a hand-written area brings its own rooms, named and described', () => {
   for (const room of written) {
     assert.ok(room.name && room.name.en && room.name.vi, `${room.id} needs a name`);
     assert.ok(room.line && room.line.en && room.line.vi, `${room.id} needs a line`);
+    // These strings are drawn straight onto a canvas, so markup in them shows
+    // up as literal asterisks in front of the player. One slipped in while
+    // writing the cinder gate.
+    for (const text of [room.name.en, room.name.vi, room.line.en, room.line.vi]) {
+      assert.ok(!/[*_`]|<[a-z/]/i.test(text), `${room.id} has markup in a player-facing string`);
+    }
     // a boss room is fog, and that is set by the map, not by the author
     assert.ok(
       ['hall', 'stair', 'bridge', 'cave', 'yard', 'bonfire', 'fog'].includes(room.kind),
