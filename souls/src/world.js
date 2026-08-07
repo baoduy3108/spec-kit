@@ -142,6 +142,151 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // A waste heap a hundred years deep. The Slagborn is what the forge threw
+  // away, given a century to cool into a shape with intent — so the area is
+  // arranged as strata: the newest waste on top, and the further down you go
+  // the older and the more deliberate it looks. The last stratum is shaped.
+  slag: [
+    {
+      key: 'the-tipping-edge',
+      kind: 'yard',
+      name: { en: 'The Tipping Edge', vi: 'Mép Đổ' },
+      line: {
+        en: 'Where the barrows came out and turned over. The heap starts here and goes down forever.',
+        vi: 'Chỗ những chiếc xe cút kít đẩy ra rồi lật. Đống xỉ bắt đầu từ đây và đổ xuống mãi.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-cold-face',
+      kind: 'hall',
+      name: { en: 'The Cold Face', vi: 'Mặt Nguội' },
+      line: {
+        en: 'A cut into the heap where it has gone cold all the way through. Shelter, of a kind.',
+        vi: 'Một vết cắt vào đống xỉ, chỗ đã nguội hẳn từ ngoài vào trong. Cũng coi như chỗ trú.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-first-heap',
+      kind: 'yard',
+      name: { en: 'The First Heap', vi: 'Đống Thứ Nhất' },
+      line: {
+        en: 'This year, and last year, and the year before. It moves when you walk on it.',
+        vi: 'Năm nay, năm ngoái, và năm trước nữa. Nó trôi khi bạn giẫm lên.',
+      },
+      foes: ['kiln-heavy', 'kiln-swift'],
+      layout: 'spread',
+      light: 'grey',
+    },
+    {
+      key: 'the-glass-run',
+      kind: 'bridge',
+      name: { en: 'The Glass Run', vi: 'Máng Thuỷ Tinh' },
+      line: {
+        en: 'A tongue of it poured out and set, smooth as a road, and it has no grip at all.',
+        vi: 'Một lưỡi xỉ chảy tràn ra rồi đông lại, nhẵn như mặt đường, và hoàn toàn không bám chân.',
+      },
+      foes: ['wisp', 'wisp'],
+      layout: 'pack',
+      light: 'grey',
+      note: 'no grip means your roll goes further than you meant, every time',
+    },
+    {
+      key: 'the-scab-field',
+      kind: 'yard',
+      name: { en: 'The Scab Field', vi: 'Cánh Đồng Vảy' },
+      line: {
+        en: 'Crust over liquid. It holds until it does not, and it looks the same either way.',
+        vi: 'Lớp vỏ cứng phủ trên thứ còn lỏng. Nó chịu được cho tới khi không chịu nữa, và nhìn thì y hệt nhau.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'warm',
+      note: 'his scab move rehearsed — the crust comes off first and the crust was the floor',
+    },
+    {
+      key: 'the-buried-tools',
+      kind: 'cave',
+      name: { en: 'The Buried Tools', vi: 'Đồ Nghề Bị Vùi' },
+      line: {
+        en: 'Tongs and hammers in the heap, thrown out with everything else, some of them new.',
+        vi: 'Kìm và búa nằm trong đống xỉ, bị vứt đi cùng mọi thứ khác, và vài cái còn mới.',
+      },
+      foes: ['ironclad-heavy', 'shade'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-warm-seam',
+      kind: 'cave',
+      name: { en: 'The Warm Seam', vi: 'Vỉa Ấm' },
+      line: {
+        en: 'A layer that never finished cooling, running through the middle of everything.',
+        vi: 'Một lớp chưa bao giờ nguội xong, chạy xuyên qua giữa mọi thứ.',
+      },
+      foes: ['kiln', 'kiln-heavy', 'wisp'],
+      layout: 'pack',
+      light: 'warm',
+    },
+    {
+      key: 'the-sorted-waste',
+      kind: 'hall',
+      name: { en: 'The Sorted Waste', vi: 'Rác Đã Phân Loại' },
+      line: {
+        en: 'Deeper down it stops being a heap. It is in piles, by kind, and nobody sorted it.',
+        vi: 'Xuống sâu hơn thì nó thôi là một đống. Nó nằm thành từng ụ, phân theo loại, và chẳng ai phân cả.',
+      },
+      foes: ['shade', 'colossus'],
+      layout: 'spread',
+      light: 'dark',
+      note: 'the first evidence of intent, and it is only tidiness',
+    },
+    {
+      key: 'the-slow-cool',
+      kind: 'hall',
+      name: { en: 'The Slow Cool', vi: 'Chỗ Nguội Chậm' },
+      line: {
+        en: 'Crystals the size of a hand, grown over decades. Something wanted it to cool slowly.',
+        vi: 'Những tinh thể to bằng bàn tay, mọc suốt nhiều thập kỷ. Có thứ gì đó muốn nó nguội thật chậm.',
+      },
+      foes: ['ironclad-heavy', 'chorister', 'shade'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the hardest room, and the growth pattern is the first thing here that is deliberate',
+    },
+    {
+      key: 'the-tip-head',
+      kind: 'hall',
+      name: { en: 'The Tip Head', vi: 'Đầu Bãi Đổ' },
+      line: {
+        en: 'The oldest part, at the bottom, and somebody has swept it.',
+        vi: 'Phần cổ nhất, dưới đáy, và có kẻ đã quét dọn nó.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-hundred-years',
+      kind: 'fog',
+      name: { en: 'The Hundred Years', vi: 'Trăm Năm' },
+      line: {
+        en: 'The bottom stratum, and it is not a stratum. It has a front and a back.',
+        vi: 'Tầng dưới cùng, và nó không phải một tầng địa chất. Nó có mặt trước và mặt sau.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+      note: 'the slagborn — ten rooms of waste, and the last layer is facing you',
+    },
+  ],
   // Nine rooms where hours are kept, which is exactly as literal as it
   // sounds. The Hourwright next door fights on a count you have to keep
   // yourself, so this is where counting becomes the thing you do: rooms that
