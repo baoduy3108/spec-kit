@@ -142,6 +142,164 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // The Drowned King's third move calls three of his court up out of the
+  // water. So the area is his court: twelve rooms of them standing in it,
+  // most not moving, and the game never says which ones are only scenery.
+  // Learning to tell is the area, and getting it wrong is how it kills you.
+  marsh: [
+    {
+      key: 'the-reed-gate',
+      kind: 'yard',
+      name: { en: 'The Reed Gate', vi: 'Cổng Lau' },
+      line: {
+        en: 'Reeds taller than a man, in rows, and the rows were planted.',
+        vi: 'Lau cao hơn đầu người, mọc thành hàng, và những hàng đó là do người trồng.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-dry-hummock',
+      kind: 'hall',
+      name: { en: 'The Dry Hummock', vi: 'Gò Khô' },
+      line: {
+        en: 'A hand of dry ground in all of it, and somebody found it before you.',
+        vi: 'Một mẩu đất khô giữa mênh mông, và ai đó đã tìm ra nó trước bạn.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-standing-court',
+      kind: 'yard',
+      name: { en: 'The Standing Court', vi: 'Triều Đình Đứng' },
+      line: {
+        en: 'Forty of them, waist deep, facing the same way. Two of them turn.',
+        vi: 'Bốn mươi kẻ, ngập tới thắt lưng, cùng quay về một hướng. Hai kẻ quay lại.',
+      },
+      foes: ['drowned', 'drowned'],
+      layout: 'ambush',
+      light: 'grey',
+      note: 'the whole design of the area in one room: most are scenery, two are not',
+    },
+    {
+      key: 'the-sunk-road',
+      kind: 'bridge',
+      name: { en: 'The Sunk Road', vi: 'Con Đường Chìm' },
+      line: {
+        en: 'Paving stones under a foot of water, running straight out and straight under.',
+        vi: 'Đá lát dưới một gang nước, chạy thẳng ra rồi thẳng xuống.',
+      },
+      foes: ['drowned-spear', 'ghoul'],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-eel-run',
+      kind: 'cave',
+      name: { en: 'The Eel Run', vi: 'Lạch Lươn' },
+      line: {
+        en: 'A channel between banks, narrow and fast. Things use it to get past you.',
+        vi: 'Một lạch nước giữa hai bờ, hẹp và xiết. Có thứ dùng nó để vòng qua sau lưng bạn.',
+      },
+      foes: ['moth-swift', 'ghoul-swift', 'ghoul-swift'],
+      layout: 'pack',
+      light: 'dark',
+      note: 'the channel is a flank route — the room punishes fighting with your back open',
+    },
+    {
+      key: 'the-lantern-poles',
+      kind: 'yard',
+      name: { en: 'The Lantern Poles', vi: 'Cột Đèn' },
+      line: {
+        en: 'Poles in the water at even spacing, each with a lamp, and every lamp is out.',
+        vi: 'Những cột cắm dưới nước cách đều, mỗi cột một ngọn đèn, và ngọn nào cũng tắt.',
+      },
+      foes: ['drowned-heavy'],
+      layout: 'single',
+      light: 'dark',
+      note: 'evenly spaced poles are the only landmark in an area with no walls',
+    },
+    {
+      key: 'the-flooded-shrine',
+      kind: 'hall',
+      name: { en: 'The Flooded Shrine', vi: 'Miếu Ngập' },
+      line: {
+        en: 'Roof above the water, everything else below it. You can stand on the altar.',
+        vi: 'Mái nhô trên mặt nước, phần còn lại chìm hết. Bạn có thể đứng lên bàn thờ.',
+      },
+      foes: ['acolyte-spear', 'acolyte-spear', 'drowned'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the altar is high ground and the only place the ring cannot close',
+    },
+    {
+      key: 'the-mud-flat',
+      kind: 'yard',
+      name: { en: 'The Mud Flat', vi: 'Bãi Lầy' },
+      line: {
+        en: 'Open, shallow, and slow underfoot. Nothing to hide behind and nothing hiding.',
+        vi: 'Trống trải, nước nông, và bước chân thì nặng. Không có gì để nấp, và cũng chẳng có gì đang nấp.',
+      },
+      foes: ['drowned', 'drowned-spear', 'warder'],
+      layout: 'spread',
+      light: 'grey',
+    },
+    {
+      key: 'the-willow-line',
+      kind: 'bridge',
+      name: { en: 'The Willow Line', vi: 'Hàng Liễu' },
+      line: {
+        en: 'Trees along what used to be a bank. They are still in a line, and still alive.',
+        vi: 'Những cây liễu dọc theo cái từng là bờ. Chúng vẫn thẳng hàng, và vẫn còn sống.',
+      },
+      foes: ['crawler-heavy', 'ghoul'],
+      layout: 'ambush',
+      light: 'dim',
+    },
+    {
+      key: 'the-kings-boat',
+      kind: 'hall',
+      name: { en: "The King's Boat", vi: 'Thuyền Của Vua' },
+      line: {
+        en: 'Beached, upright, and empty. He got out of it and walked the rest of the way.',
+        vi: 'Mắc cạn, vẫn đứng thẳng, và trống không. Ông ta bước xuống và lội nốt quãng còn lại.',
+      },
+      foes: ['drowned-heavy', 'drowned-spear', 'warder-heavy'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the hardest room here, and the first that says out loud where he went',
+    },
+    {
+      key: 'the-last-dry-stone',
+      kind: 'hall',
+      name: { en: 'The Last Dry Stone', vi: 'Phiến Đá Khô Cuối' },
+      line: {
+        en: 'One flat rock, above the water by a hand. After this there is no more standing.',
+        vi: 'Một phiến đá phẳng, cao hơn mặt nước một gang. Sau đây thì không còn chỗ đứng nữa.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-open-water',
+      kind: 'fog',
+      name: { en: 'The Open Water', vi: 'Vùng Nước Rộng' },
+      line: {
+        en: 'No bank, no bottom you can feel, and the court is standing all the way around it.',
+        vi: 'Không bờ, không chạm được đáy, và triều đình đứng vây kín xung quanh.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+      note: 'the drowned king — his court is already in the room before he calls it',
+    },
+  ],
   // A treasury, which means every room was built to be hard to get into and
   // nobody thought about getting out. Eleven rooms of doors that only open
   // one way, and the last two are already warm — the forge is close, and the
