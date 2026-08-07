@@ -142,6 +142,176 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Thirteen rooms, the largest area yet, and it ends in three doors instead
+  // of two. Everything here is corridors cut through the dead, so the area is
+  // about *file order*: who reaches you first, and whether you chose that.
+  // No fold leaves the catacombs — it is the one place the world does not
+  // shrink, which is why getting lost in it means something.
+  catacombs: [
+    {
+      key: 'the-way-down',
+      kind: 'stair',
+      name: { en: 'The Way Down', vi: 'Lối Xuống' },
+      line: {
+        en: 'Cut, not built. Whoever made this was going somewhere specific.',
+        vi: 'Đục ra, không phải xây lên. Kẻ làm ra nó đang nhắm tới một chỗ cụ thể.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-lamp-niche',
+      kind: 'hall',
+      name: { en: 'The Lamp Niche', vi: 'Hốc Đèn' },
+      line: {
+        en: 'A shelf cut for one lamp, at the height of a hand. It is still lit.',
+        vi: 'Một cái hốc đục vừa một ngọn đèn, ngang tầm tay. Đèn vẫn còn cháy.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-first-gallery',
+      kind: 'hall',
+      name: { en: 'The First Gallery', vi: 'Dãy Hầm Đầu' },
+      line: {
+        en: 'Shelves in the walls, four high, and the top ones are empty.',
+        vi: 'Những ngăn đục trong tường, xếp bốn tầng, và tầng trên cùng thì trống.',
+      },
+      foes: ['ghoul', 'ghoul', 'acolyte'],
+      layout: 'spread',
+      light: 'dark',
+      note: 'the empty top shelves are where the ghouls come from, one beat later',
+    },
+    {
+      key: 'the-narrow-file',
+      kind: 'bridge',
+      name: { en: 'The Narrow File', vi: 'Hàng Một' },
+      line: {
+        en: 'One wide. Whatever is at the front is the only thing you have to solve.',
+        vi: 'Rộng đúng một người. Thứ đứng đầu hàng là vấn đề duy nhất bạn phải giải.',
+      },
+      foes: ['knightling', 'knightling', 'knightling'],
+      layout: 'single',
+      light: 'dark',
+      note: 'three armoured things and a corridor that only lets one work',
+    },
+    {
+      key: 'the-collapsed-vault',
+      kind: 'cave',
+      name: { en: 'The Collapsed Vault', vi: 'Hầm Sập' },
+      line: {
+        en: 'The ceiling came down and took two galleries with it. You can climb the rubble.',
+        vi: 'Trần sập kéo theo hai dãy hầm. Bạn có thể trèo lên đống đổ nát.',
+      },
+      foes: ['crawler-heavy', 'crawler'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-water-table',
+      kind: 'yard',
+      name: { en: 'The Water Table', vi: 'Mạch Nước' },
+      line: {
+        en: 'The floor is wet and it did not used to be. Something upstairs is broken.',
+        vi: 'Nền ướt, mà trước kia thì không. Có thứ gì đó phía trên đã hỏng.',
+      },
+      foes: ['drowned'],
+      layout: 'single',
+      light: 'dark',
+      note: 'first drowned, a long way from any marsh — the water arrived before you did',
+    },
+    {
+      key: 'the-lost-count',
+      kind: 'hall',
+      name: { en: 'The Lost Count', vi: 'Đếm Sai' },
+      line: {
+        en: 'The numbers on the shelves stop agreeing here. Two rooms are numbered the same.',
+        vi: 'Số ghi trên các ngăn bắt đầu lệch nhau ở đây. Hai căn phòng cùng mang một số.',
+      },
+      foes: ['moth', 'moth', 'ghoul-swift'],
+      layout: 'pack',
+      light: 'dark',
+    },
+    {
+      key: 'the-masons-mark',
+      kind: 'hall',
+      name: { en: "The Mason's Mark", vi: 'Dấu Thợ Đá' },
+      line: {
+        en: 'The same mark on every stone, and on one of them it is upside down.',
+        vi: 'Cùng một dấu khắc trên mọi phiến đá, và trên một phiến thì nó bị lộn ngược.',
+      },
+      foes: ['stonemask', 'stonemask'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'the upside-down stone is the door; the two of them are the reason to find it',
+    },
+    {
+      key: 'the-deep-gallery',
+      kind: 'hall',
+      name: { en: 'The Deep Gallery', vi: 'Dãy Hầm Sâu' },
+      line: {
+        en: 'Older work, better work, and the shelves down here are all still full.',
+        vi: 'Công trình cũ hơn, khéo hơn, và các ngăn dưới này vẫn còn đầy.',
+      },
+      foes: ['warder', 'acolyte-spear'],
+      layout: 'spread',
+      light: 'dark',
+    },
+    {
+      key: 'the-black-stair',
+      kind: 'stair',
+      name: { en: 'The Black Stair', vi: 'Cầu Thang Đen' },
+      line: {
+        en: 'No lamp niches on this one. Nobody who cut it expected to come back up.',
+        vi: 'Cầu thang này không có hốc đèn nào. Kẻ đục nó không định quay lên.',
+      },
+      foes: ['ghoul-swift', 'ghoul-swift'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-wet-descent',
+      kind: 'cave',
+      name: { en: 'The Wet Descent', vi: 'Dốc Ướt' },
+      line: {
+        en: 'Down, and the wet gets worse, and you can hear it moving somewhere below.',
+        vi: 'Đi xuống, càng lúc càng ướt, và nghe được tiếng nó chuyển động đâu đó phía dưới.',
+      },
+      foes: ['drowned', 'crawler'],
+      layout: 'spread',
+      light: 'dark',
+    },
+    {
+      key: 'the-last-lamp',
+      kind: 'hall',
+      name: { en: 'The Last Lamp', vi: 'Ngọn Đèn Cuối' },
+      line: {
+        en: 'Someone carried a lamp this far and set it down. They did not pick it up again.',
+        vi: 'Ai đó mang ngọn đèn tới tận đây rồi đặt xuống. Và không nhặt lên nữa.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-three-mouths',
+      kind: 'cave',
+      name: { en: 'The Three Mouths', vi: 'Ba Cửa Miệng' },
+      line: {
+        en: 'Three openings, all cut by different hands, none of them by the mason.',
+        vi: 'Ba lối mở, do ba bàn tay khác nhau đục ra, và không tay nào là của người thợ đá.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+      note: 'the three-way fork: the vault, the marsh, and the stair nobody signposted',
+    },
+  ],
   // Everything until now was a place people worked. This is where they lived,
   // and it is the first area whose rooms had a use that was not defence — a
   // kitchen, a stable, a hall for eating in. The horror here is domestic, and
