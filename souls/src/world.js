@@ -142,6 +142,187 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // The largest area in the world, and the only one that was a city. The Tide
+  // is not a person — it wears the street it came down — so the area is
+  // fourteen rooms of that street, in order, from the harbour up. You meet
+  // the boss last and you have already walked all of it.
+  'drowned-city': [
+    {
+      key: 'the-harbour-steps',
+      kind: 'stair',
+      name: { en: 'The Harbour Steps', vi: 'Bậc Cảng' },
+      line: {
+        en: 'Cut for boats to tie at. The waterline on them is four storeys above the top step.',
+        vi: 'Đục ra để thuyền buộc dây. Ngấn nước trên đó cao hơn bậc trên cùng bốn tầng nhà.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-customs-house',
+      kind: 'hall',
+      name: { en: 'The Customs House', vi: 'Nhà Thuế Quan' },
+      line: {
+        en: 'A ledger, a scale, a stove, and a list of what may not come into the city.',
+        vi: 'Một cuốn sổ, một cái cân, một cái bếp lò, và bảng liệt kê những thứ không được vào thành.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-first-street',
+      kind: 'bridge',
+      name: { en: 'The First Street', vi: 'Con Phố Đầu' },
+      line: {
+        en: 'Cobbles under a foot of water, and the water is going one way at walking pace.',
+        vi: 'Đá lát dưới một gang nước, và nước thì chảy một chiều với tốc độ đi bộ.',
+      },
+      foes: ['drowned', 'drowned-spear'],
+      layout: 'single',
+      light: 'grey',
+      note: 'the current has a direction, and it is the direction the boss came from',
+    },
+    {
+      key: 'the-market-square',
+      kind: 'yard',
+      name: { en: 'The Market Square', vi: 'Quảng Trường Chợ' },
+      line: {
+        en: 'Stalls still standing, still pegged down, and the awnings float above them.',
+        vi: 'Những sạp hàng vẫn đứng, vẫn đóng cọc, và mái vải thì nổi lềnh bềnh bên trên.',
+      },
+      foes: ['drowned', 'drowned-heavy', 'ghoul-swift'],
+      layout: 'spread',
+      light: 'grey',
+    },
+    {
+      key: 'the-counting-house',
+      kind: 'hall',
+      name: { en: 'The Counting House', vi: 'Nhà Đếm Bạc' },
+      line: {
+        en: 'Coin still in the drawers. Nobody in this city left in a hurry; they left in order.',
+        vi: 'Tiền vẫn còn trong ngăn kéo. Không ai trong thành này đi vội; họ đi có trật tự.',
+      },
+      foes: ['warder-heavy', 'shade'],
+      layout: 'ambush',
+      light: 'dim',
+      note: 'they left in order, which is worse than fleeing and is never explained',
+    },
+    {
+      key: 'the-narrow-lanes',
+      kind: 'cave',
+      name: { en: 'The Narrow Lanes', vi: 'Những Ngõ Hẹp' },
+      line: {
+        en: 'Shoulder width, roofed by the buildings leaning together, and full to the chest.',
+        vi: 'Rộng bằng vai người, mái là những ngôi nhà nghiêng vào nhau, và nước ngập tới ngực.',
+      },
+      foes: ['crawler-heavy', 'drowned'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-guildhall',
+      kind: 'hall',
+      name: { en: 'The Guildhall', vi: 'Hội Quán' },
+      line: {
+        en: 'Portraits of masters round the walls, above the water, all facing the door.',
+        vi: 'Chân dung các bậc thầy treo quanh tường, trên mực nước, tất cả đều quay ra cửa.',
+      },
+      foes: ['ironclad', 'chorister', 'drowned-heavy'],
+      layout: 'ring',
+      light: 'dim',
+    },
+    {
+      key: 'the-flooded-theatre',
+      kind: 'yard',
+      name: { en: 'The Flooded Theatre', vi: 'Nhà Hát Ngập' },
+      line: {
+        en: 'The stage is under. The seats go up out of the water in rows, and the front rows are full.',
+        vi: 'Sân khấu chìm dưới nước. Ghế ngồi nhô lên thành từng hàng, và các hàng đầu thì kín chỗ.',
+      },
+      foes: ['chorister', 'chorister', 'shade'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the audience is the ring, and it is seated: the fight comes from above you',
+    },
+    {
+      key: 'the-cistern-square',
+      kind: 'yard',
+      name: { en: 'The Cistern Square', vi: 'Quảng Trường Bể Nước' },
+      line: {
+        en: 'A public cistern in the middle of a drowned city, with a lid on, still sealed.',
+        vi: 'Một bể nước công cộng giữa lòng thành phố ngập, vẫn đậy nắp, vẫn còn niêm.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-bell-tower-top',
+      kind: 'hall',
+      name: { en: 'The Bell Tower Top', vi: 'Đỉnh Tháp Chuông' },
+      line: {
+        en: 'You come in at the belfry, because that is the only floor of it above the line.',
+        vi: 'Bạn bước vào ngay tầng chuông, vì đó là tầng duy nhất của tháp còn nhô trên mặt nước.',
+      },
+      foes: ['wisp', 'moth-swift', 'wisp'],
+      layout: 'pack',
+      light: 'grey',
+    },
+    {
+      key: 'the-rich-quarter',
+      kind: 'hall',
+      name: { en: 'The Rich Quarter', vi: 'Khu Nhà Giàu' },
+      line: {
+        en: 'Built high, on the good ground, which bought them about a week.',
+        vi: 'Xây cao, trên nền đất tốt, và điều đó mua cho họ được chừng một tuần.',
+      },
+      foes: ['ironclad-heavy', 'shade', 'drowned-heavy'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-sea-gate',
+      kind: 'bridge',
+      name: { en: 'The Sea Gate', vi: 'Cổng Biển' },
+      line: {
+        en: 'Shut, barred, and holding. It was shut from the inside and it did not help.',
+        vi: 'Đóng chặt, cài then, và vẫn giữ được. Nó được đóng từ bên trong, và điều đó chẳng ích gì.',
+      },
+      foes: ['colossus', 'shade'],
+      layout: 'spread',
+      light: 'dark',
+      note: 'the hardest room, at the gate that proves the water did not come from the sea',
+    },
+    {
+      key: 'the-last-roof',
+      kind: 'hall',
+      name: { en: 'The Last Roof', vi: 'Mái Nhà Cuối' },
+      line: {
+        en: 'The highest dry floor in the city, with a fire on it, and room for one person.',
+        vi: 'Sàn khô cao nhất thành phố, có ngọn lửa trên đó, và chỗ đủ cho một người.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-high-street',
+      kind: 'fog',
+      name: { en: 'The High Street', vi: 'Phố Lớn' },
+      line: {
+        en: 'The widest street, running downhill to the harbour, and it is coming back up it.',
+        vi: 'Con phố rộng nhất, đổ dốc xuống cảng, và nó thì đang dâng ngược lên.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+      note: 'the tide — you have walked this street already, in the other direction',
+    },
+  ],
   // One of them is the fire and one of them is the vessel, and they will not
   // say which. So the area comes in pairs: two channels, two furnaces, two
   // moulds, and in every pair one member is doing the work and the other is
