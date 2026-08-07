@@ -142,6 +142,116 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // He went down the well to see the sky better, and he was right. Eight
+  // rooms descending a shaft, and the further down you go the more sky there
+  // is. His parallax move puts him a beat away from where he looks, so the
+  // area spends its whole length teaching you not to trust a position — only
+  // a schedule.
+  'star-well': [
+    {
+      key: 'the-rim',
+      kind: 'yard',
+      name: { en: 'The Rim', vi: 'Miệng Giếng Trên' },
+      line: {
+        en: 'A circle of cut stone with nothing built around it. Somebody dug here on purpose.',
+        vi: 'Một vòng đá đẽo, xung quanh chẳng có công trình nào. Ai đó đã đào ở đây có chủ đích.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dim',
+    },
+    {
+      key: 'the-first-stage',
+      kind: 'hall',
+      name: { en: 'The First Stage', vi: 'Tầng Thứ Nhất' },
+      line: {
+        en: 'A platform bolted to the wall, with a fire on it, and eleven more below.',
+        vi: 'Một sàn bắt vít vào vách, trên đó có ngọn lửa, và bên dưới còn mười một sàn nữa.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-hanging-stair',
+      kind: 'stair',
+      name: { en: 'The Hanging Stair', vi: 'Cầu Thang Treo' },
+      line: {
+        en: 'Bolted to nothing at the bottom. It swings, very slightly, on its own schedule.',
+        vi: 'Đầu dưới không bắt vào đâu cả. Nó đung đưa, rất khẽ, theo nhịp riêng của nó.',
+      },
+      foes: ['wisp', 'wisp'],
+      layout: 'pack',
+      light: 'dark',
+      note: 'a floor that moves on a cycle — the first thing here you can time but not trust',
+    },
+    {
+      key: 'the-false-floor',
+      kind: 'hall',
+      name: { en: 'The False Floor', vi: 'Sàn Giả' },
+      line: {
+        en: 'Black water across the whole shaft, an inch deep, and it shows you the sky under your boots.',
+        vi: 'Nước đen phủ kín lòng giếng, sâu một đốt tay, và nó cho bạn thấy bầu trời ngay dưới ủng.',
+      },
+      foes: ['shade', 'shade'],
+      layout: 'ambush',
+      light: 'dark',
+      note: 'his parallax, rehearsed: what you can see is a reflection and it is behind by a beat',
+    },
+    {
+      key: 'the-slow-light',
+      kind: 'cave',
+      name: { en: 'The Slow Light', vi: 'Ánh Sáng Chậm' },
+      line: {
+        en: 'Light arrives here late enough to matter. You watch your own hand a moment after.',
+        vi: 'Ánh sáng tới đây trễ đủ để thành vấn đề. Bạn nhìn thấy bàn tay mình chậm hơn một nhịp.',
+      },
+      foes: ['colossus', 'wisp'],
+      layout: 'spread',
+      light: 'dark',
+      note: 'a slow enemy and a fast one, in the room where your eyes are wrong about both',
+    },
+    {
+      key: 'the-dark-stage',
+      kind: 'hall',
+      name: { en: 'The Dark Stage', vi: 'Tầng Tối' },
+      line: {
+        en: 'The lamp on this one went out and nobody relit it. There are marks where they tried.',
+        vi: 'Ngọn đèn ở tầng này đã tắt và không ai thắp lại. Còn những vết cho thấy đã có người thử.',
+      },
+      foes: ['shade', 'ironclad-heavy', 'wisp'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the hardest room, unlit, and the only warning is the schedule you have learned',
+    },
+    {
+      key: 'the-last-stage',
+      kind: 'hall',
+      name: { en: 'The Last Stage', vi: 'Tầng Cuối' },
+      line: {
+        en: 'The bottom platform. From here the opening overhead is one star among the others.',
+        vi: 'Sàn dưới cùng. Từ đây, miệng giếng trên đầu chỉ còn là một ngôi sao giữa những ngôi sao khác.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-bottom-of-the-well',
+      kind: 'fog',
+      name: { en: 'The Bottom of the Well', vi: 'Đáy Giếng' },
+      line: {
+        en: 'No floor, no water, and sky in every direction including down. He was right.',
+        vi: 'Không nền, không nước, và bầu trời ở mọi hướng, kể cả bên dưới. Ông ta đã đúng.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+      note: 'the astronomer — nothing in the room is a landmark, so only his schedule is',
+    },
+  ],
   // One tree. Eleven rooms inside it, going down, and the whole area is a
   // single organism you are travelling through rather than a place anyone
   // built. Nothing here has corners, which after twenty-one areas of masonry
