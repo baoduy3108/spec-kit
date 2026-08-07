@@ -142,6 +142,125 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Nine rooms of cages, which is a strange thing to find above a throne
+  // room. Everything here was kept for its voice, and the voices are still
+  // going — this is where the chorister first appears, and where the game
+  // stops using sound as a warning and starts using it as a lie.
+  aviary: [
+    {
+      key: 'the-cage-door',
+      kind: 'stair',
+      name: { en: 'The Cage Door', vi: 'Cửa Lồng' },
+      line: {
+        en: 'Man-height, hinged, and barred on the outside. This whole floor is the cage.',
+        vi: 'Cao bằng người, có bản lề, và song chắn ở phía ngoài. Cả tầng này mới là cái lồng.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-keepers-loft',
+      kind: 'hall',
+      name: { en: "The Keeper's Loft", vi: 'Gác Người Nuôi' },
+      line: {
+        en: 'Seed in jars, water in a dish, a fire, and all of it recently topped up.',
+        vi: 'Hạt trong lọ, nước trong đĩa, một ngọn lửa — và tất cả vừa mới được châm thêm.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-great-cage',
+      kind: 'yard',
+      name: { en: 'The Great Cage', vi: 'Lồng Lớn' },
+      line: {
+        en: 'Wire from floor to roof with a tree growing inside it, and the tree is dead.',
+        vi: 'Lưới sắt từ sàn lên mái, bên trong có một cái cây, và cái cây đã chết.',
+      },
+      foes: ['moth', 'moth', 'moth-swift'],
+      layout: 'pack',
+      light: 'grey',
+      note: 'a room with a roof, for the first time against things that fly',
+    },
+    {
+      key: 'the-perch-walk',
+      kind: 'bridge',
+      name: { en: 'The Perch Walk', vi: 'Lối Đậu' },
+      line: {
+        en: 'A rail across the middle at head height. You duck under it; they do not.',
+        vi: 'Một thanh ngang chắn giữa phòng, ngang tầm đầu. Bạn phải cúi xuống; chúng thì không.',
+      },
+      foes: ['moth-swift', 'ghoul-swift'],
+      layout: 'ambush',
+      light: 'dim',
+      note: 'the rail breaks your line of sight and none of theirs',
+    },
+    {
+      key: 'the-moulting-room',
+      kind: 'cave',
+      name: { en: 'The Moulting Room', vi: 'Phòng Thay Lông' },
+      line: {
+        en: 'Ankle deep in feathers that are not from any bird. Something sheds in here.',
+        vi: 'Lông ngập tới mắt cá, mà không phải lông chim. Có thứ gì đó lột xác ở đây.',
+      },
+      foes: ['crawler-heavy', 'stonemask'],
+      layout: 'spread',
+      light: 'dark',
+    },
+    {
+      key: 'the-song-room',
+      kind: 'hall',
+      name: { en: 'The Song Room', vi: 'Phòng Hót' },
+      line: {
+        en: 'Built round, for the sound. She is standing in the middle of it, where it works best.',
+        vi: 'Xây tròn, để lấy tiếng vang. Bà ta đứng chính giữa, chỗ tiếng vang tốt nhất.',
+      },
+      foes: ['chorister'],
+      layout: 'single',
+      light: 'dim',
+      note: 'first chorister — the long wind-up, and a room shaped to make it louder than it is',
+    },
+    {
+      key: 'the-open-roof',
+      kind: 'yard',
+      name: { en: 'The Open Roof', vi: 'Mái Trống' },
+      line: {
+        en: 'The wire is torn open from the inside. Whatever left did not come back.',
+        vi: 'Lưới bị xé toạc từ bên trong. Thứ bay đi đã không quay lại.',
+      },
+      foes: ['warder-spear', 'moth', 'moth'],
+      layout: 'ring',
+      light: 'grey',
+      note: 'the hardest room: reach in the middle, speed circling it',
+    },
+    {
+      key: 'the-empty-cages',
+      kind: 'hall',
+      name: { en: 'The Empty Cages', vi: 'Những Lồng Trống' },
+      line: {
+        en: 'Two hundred of them, all open, all clean. Somebody let everything out on purpose.',
+        vi: 'Hai trăm cái lồng, mở hết, sạch sẽ hết. Ai đó đã cố ý thả tất cả ra.',
+      },
+      foes: ['chorister', 'acolyte-swift'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-spire-stair',
+      kind: 'stair',
+      name: { en: 'The Spire Stair', vi: 'Cầu Thang Tháp Nhọn' },
+      line: {
+        en: 'It goes up outside the building, and there is no rail at all on this one.',
+        vi: 'Cầu thang chạy vòng bên ngoài toà nhà, và cái này thì không có lan can nào cả.',
+      },
+      foes: ['knightling-heavy'],
+      layout: 'single',
+      light: 'grey',
+    },
+  ],
   // The Drowned King's third move calls three of his court up out of the
   // water. So the area is his court: twelve rooms of them standing in it,
   // most not moving, and the game never says which ones are only scenery.
