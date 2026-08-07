@@ -142,6 +142,165 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Inside the clock that decides when the lanterns are lit, and it has been
+  // wrong for years. Twelve rooms, one per hour, and every one of them keeps
+  // a beat you can move on. The vault of hours taught counting; this is where
+  // the count is load-bearing, because her whole moveset lands between beats.
+  clockwork: [
+    {
+      key: 'the-dial-face',
+      kind: 'yard',
+      name: { en: 'The Dial Face', vi: 'Mặt Số' },
+      line: {
+        en: 'From behind, so the numbers are backwards and the hands go the other way.',
+        vi: 'Nhìn từ mặt sau, nên các con số ngược, và kim thì chạy theo chiều ngược lại.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+    },
+    {
+      key: 'the-winding-room',
+      kind: 'hall',
+      name: { en: 'The Winding Room', vi: 'Phòng Lên Dây' },
+      line: {
+        en: 'A key the size of an oar in a slot, and a fire beside it for whoever turns it.',
+        vi: 'Một cái chìa to bằng mái chèo cắm trong lỗ, và bên cạnh là ngọn lửa cho kẻ nào vặn nó.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-escapement',
+      kind: 'hall',
+      name: { en: 'The Escapement', vi: 'Bộ Hồi' },
+      line: {
+        en: 'The part that lets one tooth past at a time. Everything in the building waits for it.',
+        vi: 'Bộ phận chỉ cho một răng bánh xe đi qua mỗi lần. Cả toà nhà chờ nó.',
+      },
+      foes: ['shade', 'wisp'],
+      layout: 'ambush',
+      light: 'dim',
+      note: 'her escapement move rehearsed: the same beat, every time, forever',
+    },
+    {
+      key: 'the-gear-train',
+      kind: 'bridge',
+      name: { en: 'The Gear Train', vi: 'Dãy Bánh Răng' },
+      line: {
+        en: 'Wheels bigger than doors, meshing slowly, and you cross between two of them.',
+        vi: 'Những bánh xe to hơn cánh cửa, ăn khớp chậm rãi, và bạn phải đi lọt giữa hai cái.',
+      },
+      foes: ['ironclad-heavy', 'kiln-swift'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'the gap between teeth is the safe window, and it is on a schedule',
+    },
+    {
+      key: 'the-pendulum-pit',
+      kind: 'cave',
+      name: { en: 'The Pendulum Pit', vi: 'Hố Quả Lắc' },
+      line: {
+        en: 'A weight the size of a cart on a rod four floors long, and it comes back.',
+        vi: 'Một quả nặng to bằng cỗ xe treo trên thanh dài bốn tầng nhà, và nó luôn quay lại.',
+      },
+      foes: ['colossus'],
+      layout: 'single',
+      light: 'dark',
+      note: 'the arena is swept twice a beat, so the fight is fought in the corners',
+    },
+    {
+      key: 'the-fusee',
+      kind: 'hall',
+      name: { en: 'The Fusee', vi: 'Trục Côn' },
+      line: {
+        en: 'A cone wound with chain that evens out the pull as the spring runs down. It is nearly down.',
+        vi: 'Một khối côn quấn xích để san đều lực kéo khi dây cót yếu dần. Và nó gần yếu hẳn rồi.',
+      },
+      foes: ['shade', 'shade', 'wisp'],
+      layout: 'pack',
+      light: 'dim',
+    },
+    {
+      key: 'the-strike-train',
+      kind: 'hall',
+      name: { en: 'The Strike Train', vi: 'Bộ Điểm Chuông' },
+      line: {
+        en: 'A second machine that does nothing but count to twelve and hit something.',
+        vi: 'Một cỗ máy thứ hai, chẳng làm gì ngoài đếm tới mười hai rồi nện xuống một thứ gì đó.',
+      },
+      foes: ['ironclad-heavy', 'chorister'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'her strike-twelve, in the room that exists to do exactly that',
+    },
+    {
+      key: 'the-remontoire',
+      kind: 'cave',
+      name: { en: 'The Remontoire', vi: 'Bộ Nạp Lại' },
+      line: {
+        en: 'A little spring rewound by the big one every minute, so the beat never weakens.',
+        vi: 'Một dây cót nhỏ được dây cót lớn lên lại mỗi phút, để nhịp không bao giờ yếu đi.',
+      },
+      foes: ['colossus', 'shade'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-hands',
+      kind: 'bridge',
+      name: { en: 'The Hands', vi: 'Kim Đồng Hồ' },
+      line: {
+        en: 'You walk out along the minute hand. It is a bridge that is going somewhere slowly.',
+        vi: 'Bạn đi dọc theo cây kim phút. Nó là một cây cầu đang chậm rãi đi đâu đó.',
+      },
+      foes: ['wisp', 'wisp', 'moth-swift'],
+      layout: 'pack',
+      light: 'warm',
+      note: 'the bridge rotates, so the far end is not where it was when you stepped on',
+    },
+    {
+      key: 'the-bell-chamber',
+      kind: 'hall',
+      name: { en: 'The Bell Chamber', vi: 'Buồng Chuông' },
+      line: {
+        en: 'Twelve bells, one cracked, and it is the one that rings for the hour the lanterns light.',
+        vi: 'Mười hai quả chuông, một quả nứt, và đó đúng là quả điểm giờ thắp đèn.',
+      },
+      foes: ['chorister', 'chorister', 'ironclad-heavy'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the hardest room, and the cracked bell is the reason the whole world is late',
+    },
+    {
+      key: 'the-workshop',
+      kind: 'hall',
+      name: { en: 'The Workshop', vi: 'Xưởng' },
+      line: {
+        en: 'Files, a lathe, a lamp, and a part on the bench that has been half-made for years.',
+        vi: 'Giũa, máy tiện, một ngọn đèn, và trên bàn là một chi tiết làm dở suốt nhiều năm.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-movement',
+      kind: 'fog',
+      name: { en: 'The Movement', vi: 'Bộ Máy' },
+      line: {
+        en: 'The whole mechanism at once, running, wrong, and she is standing inside it working.',
+        vi: 'Toàn bộ cỗ máy cùng lúc, đang chạy, đang sai, và bà ta đứng bên trong nó mà làm việc.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+      note: 'the hourwright — every beat in her fight has been played in a room already',
+    },
+  ],
   // Heartwood is the part of a tree that has already died, and it is the part
   // holding everything up. Ten rooms of that idea: nothing in here grows, and
   // it is the strongest place in the world. The fold climbs the inside of the
