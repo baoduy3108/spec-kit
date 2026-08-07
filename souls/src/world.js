@@ -142,6 +142,141 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // The Smith made most of what you are carrying and would like it back, so
+  // ten rooms of his work stand between you and him: the billets before they
+  // were anything, the blades that came out wrong, and the rack of the ones
+  // that came out right. It is the loudest area in the world, which is why
+  // the room before his door is the quietest.
+  forge: [
+    {
+      key: 'the-slack-tub',
+      kind: 'cave',
+      name: { en: 'The Slack Tub', vi: 'Thùng Tôi' },
+      line: {
+        en: 'Water black with scale, and warm. Somebody quenched something here today.',
+        vi: 'Nước đen kịt vảy sắt, và còn ấm. Hôm nay có kẻ vừa tôi thứ gì đó ở đây.',
+      },
+      foes: ['kiln'],
+      layout: 'ambush',
+      light: 'warm',
+    },
+    {
+      key: 'the-bellows-room',
+      kind: 'hall',
+      name: { en: 'The Bellows Room', vi: 'Phòng Bễ' },
+      line: {
+        en: 'Two leather lungs the size of carts, breathing on their own.',
+        vi: 'Hai lá phổi da to bằng cỗ xe, vẫn tự thở.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-billet-yard',
+      kind: 'yard',
+      name: { en: 'The Billet Yard', vi: 'Sân Phôi' },
+      line: {
+        en: 'Bars of iron stacked by weight, none of them yet anything in particular.',
+        vi: 'Những thanh sắt xếp theo trọng lượng, chưa thanh nào là cái gì cụ thể cả.',
+      },
+      foes: ['kiln', 'kiln-heavy'],
+      layout: 'spread',
+      light: 'warm',
+    },
+    {
+      key: 'the-hammer-line',
+      kind: 'hall',
+      name: { en: 'The Hammer Line', vi: 'Dãy Búa' },
+      line: {
+        en: 'Six trip hammers on one shaft, still running, still striking nothing.',
+        vi: 'Sáu cái búa máy chung một trục, vẫn chạy, vẫn nện xuống khoảng không.',
+      },
+      foes: ['ironclad'],
+      layout: 'single',
+      light: 'warm',
+      note: 'first ironclad, and the hammers keep a beat you can hide your own in',
+    },
+    {
+      key: 'the-quench-trough',
+      kind: 'bridge',
+      name: { en: 'The Quench Trough', vi: 'Máng Tôi' },
+      line: {
+        en: 'A channel of water down the middle of the room, and steam standing over it.',
+        vi: 'Một máng nước chạy dọc giữa phòng, và hơi nước dựng đứng bên trên.',
+      },
+      foes: ['kiln', 'warder-heavy'],
+      layout: 'spread',
+      light: 'warm',
+      note: 'the steam hides the far half — his quench move is rehearsed here',
+    },
+    {
+      key: 'the-scale-pit',
+      kind: 'cave',
+      name: { en: 'The Scale Pit', vi: 'Hố Vảy Sắt' },
+      line: {
+        en: 'Years of hammer scale, knee deep, and it moves under you like sand.',
+        vi: 'Vảy sắt tích tụ hàng năm, ngập tới gối, và nó trôi dưới chân như cát.',
+      },
+      foes: ['crawler-heavy', 'crawler-heavy'],
+      layout: 'ambush',
+      light: 'dark',
+    },
+    {
+      key: 'the-blade-rack',
+      kind: 'hall',
+      name: { en: 'The Blade Rack', vi: 'Giá Đao Kiếm' },
+      line: {
+        en: 'Everything he ever got right, in order, and there is a gap the shape of yours.',
+        vi: 'Tất cả những gì ông ta từng rèn thành công, xếp theo thứ tự — và có một chỗ trống đúng hình cái của bạn.',
+      },
+      foes: ['ironclad', 'knightling-heavy'],
+      layout: 'spread',
+      light: 'warm',
+      note: 'the gap in the rack is the whole reason he is coming for you',
+    },
+    {
+      key: 'the-unfinished',
+      kind: 'hall',
+      name: { en: 'The Unfinished', vi: 'Những Thứ Dở Dang' },
+      line: {
+        en: 'Everything he got wrong, in a heap, and some of it is still moving.',
+        vi: 'Tất cả những gì ông ta rèn hỏng, chất thành đống, và vài thứ trong đó vẫn còn cựa quậy.',
+      },
+      foes: ['stonemask-heavy', 'kiln', 'kiln-swift'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the hardest room here — his failures fight better than most things that work',
+    },
+    {
+      key: 'the-anvil-step',
+      kind: 'hall',
+      name: { en: 'The Anvil Step', vi: 'Bậc Đe' },
+      line: {
+        en: 'One anvil, cold, and a stool beside it. The only quiet room in the forge.',
+        vi: 'Một cái đe, đã nguội, và chiếc ghế đẩu bên cạnh. Căn phòng yên tĩnh duy nhất trong lò rèn.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'silence, on purpose, so his hammer going up lands in it',
+    },
+    {
+      key: 'the-great-hearth',
+      kind: 'fog',
+      name: { en: 'The Great Hearth', vi: 'Lò Cả' },
+      line: {
+        en: 'Wide enough to lie down in, hot enough that you will not. He is still working.',
+        vi: 'Rộng đủ để nằm vào, và nóng đến mức bạn sẽ không nằm. Ông ta vẫn đang làm việc.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'warm',
+      note: 'the smith — the room has rehearsed his quench and his hammer already',
+    },
+  ],
   // Nine rooms of cages, which is a strange thing to find above a throne
   // room. Everything here was kept for its voice, and the voices are still
   // going — this is where the chorister first appears, and where the game
