@@ -1317,6 +1317,10 @@ function clearLines(){
     if(mode==='level') lvLines+=cleared;
     combo++; unlockAch('firstclear'); comboGlow=Math.min(1,combo/5);
     let pts=cleared*10+Math.max(0,cleared-1)*8;
+    // Multi-row bonus (2-3+ hàng cùng lúc)
+    if(rows.length>=2) pts+=150;
+    // Cross-clear bonus (ngang + dọc cùng lúc trong 1 move)
+    if(rows.length>0&&cols.length>0) pts+=200;
     if(combo>=2){ pts=Math.round(pts*(1+(combo-1)*0.3)); pop(t('combo')+combo,true,24+Math.min(combo,10)*3,combo>=7?'#ffe14d':(combo>=4?'#ffd54d':'#fff0b0')); sndCombo(combo);
       // Chuỗi combo bonuses (chain rewards)
       if(combo===2) pts+=180;
