@@ -983,8 +983,8 @@ function placePiece(idx,row,col){
     if(lvGoalMet()){ levelWin(); return; }
     if(lvMoves<=0){ gameOver(); return; } }
   if(tray.every(x=>!x)){
-    // 70% chance from start: generate smart piece (fits + can clear lines)
-    if(Math.random()<0.7){
+    // 95% chance from start: generate smart piece (fits + can clear lines)
+    if(Math.random()<0.95){
       const smartPiece=findFittingPiece();
       tray=[smartPiece||makePiece(), makePiece(), makePiece()];
     } else {
@@ -1453,6 +1453,12 @@ function detonate(cr,cc){
   else if(isSuper){ dragMeter++; saveJourney();                        // Siêu Tân Tinh thường: tiến 1 nấc tới Rồng
     if(dragMeter>=DRAG_EVERY-1) setTimeout(()=>toast(lang==='vi'?'🐉 Siêu Tân Tinh kế tiếp sẽ triệu HẮC LONG!':'🐉 Next Supernova summons the BLACK DRAGON!'),700); }
   saveAch();
+  // Black Hole score bonus: 100% = 360pts, 200% = 1000pts, Dragon = 3600pts
+  let bhBonus=0;
+  if(dragon) bhBonus=3600;
+  else if(isSuper) bhBonus=1000;
+  else if(n>0) bhBonus=360;
+  if(bhBonus>0){ score+=bhBonus; flyScore(ctr.x,ctr.y,'+'+bhBonus); }
   startBlackhole(ctr,cells,isSuper,n,dragon);
   if(lv>=2) clearLines(); // sau cú hút nam châm có thể tự thành hàng
   if(mode==='level'&&state==='play'&&lvGoalMet()) levelWin(); // mục tiêu "nuốt/điểm" có thể đạt ngay bằng Hố Đen
