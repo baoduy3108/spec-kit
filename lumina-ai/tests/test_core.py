@@ -2448,6 +2448,21 @@ def test_skills_library_has_at_least_1116():
     assert len(skills._SKILLS) >= 1116
 
 
+def test_skills_library_has_at_least_1118():
+    from app import skills
+    assert len(skills._SKILLS) >= 1118
+
+
+def test_skills_sciml_and_rule_reasoning_topics_match():
+    from app import skills
+    for text, expected in [
+        ("neural surrogate model neural operator fno pinn mô phỏng vật lý bằng ml", "scientific-machine-learning-and-neural-surrogates"),
+        ("rule engine forward chaining rete datalog suy luận theo luật", "rule-engines-and-logic-reasoning"),
+    ]:
+        s = skills.find_matching_skill(text)
+        assert s and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_voice_and_streaming_ux_topics_match():
     from app import skills
     for text, expected in [
