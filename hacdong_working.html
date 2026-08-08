@@ -842,24 +842,33 @@ function pickShape(){ let tries=0;
     const w=Math.max(1,9-s.length);
     if(rnd()*9<w || ++tries>6) return s; } }
 function makePiece(){ const s=pickShape(), d=shapeDim(s); return {cells:s, w:d.w, h:d.h, color:TH.blocks[(rnd()*TH.blocks.length)|0]}; }
-// Smart piece: find shape fitting empty spaces on board (40% chance when board near-full)
+// Smart piece: find shape that fits empty spaces AND can potentially clear lines
 function findFittingPiece(){
-  const emptySpaces=[];
-  for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(!grid[r][c]) emptySpaces.push({r,c});
-  if(emptySpaces.length<3) return null; // board nearly full
   const candidates=SHAPES.slice().sort((a,b)=>a.length-b.length);
   for(const shape of candidates){
     const d=shapeDim(shape);
-    for(const {r:er,c:ec} of emptySpaces){
-      for(let r=0;r<=N-d.h;r++){
-        for(let c=0;c<=N-d.w;c++){
-          let fits=true;
-          for(let dy=0;dy<d.h&&fits;dy++){
-            for(let dx=0;dx<d.w&&fits;dx++){
-              if(shape[dy*d.w+dx]&&grid[r+dy][c+dx]) fits=false;
+    for(let r=0;r<=N-d.h;r++){
+      for(let c=0;c<=N-d.w;c++){
+        let fits=true;
+        for(let dy=0;dy<d.h&&fits;dy++){
+          for(let dx=0;dx<d.w&&fits;dx++){
+            if(shape[dy*d.w+dx]&&grid[r+dy][c+dx]) fits=false;
+          }
+        }
+        if(fits){
+          // Check if this piece can make a line (at least 6/8 cells filled in a row/col after placement)
+          const testGrid=grid.map(row=>[...row]);
+          for(let dy=0;dy<d.h;dy++){
+            for(let dx=0;dx<d.w;dx++){
+              if(shape[dy*d.w+dx]) testGrid[r+dy][c+dx]=true;
             }
           }
-          if(fits) return {cells:shape, w:d.w, h:d.h, color:TH.blocks[(rnd()*TH.blocks.length)|0]};
+          let canClear=false;
+          for(let i=0;i<N;i++){
+            if(testGrid[i].filter(x=>x).length>=6) canClear=true;
+            if(testGrid.every(row=>row[i]||!row[i])) canClear=true;
+          }
+          if(canClear) return {cells:shape, w:d.w, h:d.h, color:TH.blocks[(rnd()*TH.blocks.length)|0]};
         }
       }
     }
@@ -974,9 +983,8 @@ function placePiece(idx,row,col){
     if(lvGoalMet()){ levelWin(); return; }
     if(lvMoves<=0){ gameOver(); return; } }
   if(tray.every(x=>!x)){
-    // 40% chance to generate smart piece (fitting empty spaces) when board near-full
-    const boardFillPct=boardFill();
-    if(boardFillPct>0.6 && Math.random()<0.4){
+    // 40% chance from start: generate smart piece (fits + can clear lines)
+    if(Math.random()<0.4){
       const smartPiece=findFittingPiece();
       tray=[smartPiece||makePiece(), makePiece(), makePiece()];
     } else {
