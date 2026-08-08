@@ -402,6 +402,125 @@ export const HANDMADE = {
       note: 'the join to the bone orchard — you climb out of a grave into a garden',
     },
   ],
+  // THE LANTERN. Every torch in the world was lit from one flame, and this
+  // is the room it is in. That is why half the roster carries fire: not
+  // decoration, supply. Which means the approach is not a dungeon, it is a
+  // works — glass yard, wick store, mirror bank, all of it built to keep
+  // one light burning and throw it as far down the mountain as it will go.
+  //
+  // The area is written to be read twice. First time through it is the
+  // final climb. Second time you notice the wick store is nearly empty, the
+  // mirror bank has been re-aimed by hand, and the step outside the door is
+  // worn hollow in exactly one spot — and the fight downstairs stops being
+  // about a monster guarding a treasure.
+  'the-lantern': [
+    {
+      key: 'the-open-air',
+      kind: 'yard',
+      name: { en: 'The Open Air', vi: 'Khoảng Trời Mở' },
+      line: {
+        en: 'Above the weather. You can see the whole world from here, and all of it is lit.',
+        vi: 'Trên cả thời tiết. Từ đây nhìn thấy cả thế giới, và chỗ nào cũng có ánh sáng.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'gold',
+      note: 'the first room that is quiet on purpose — everything below has been loud',
+    },
+    {
+      key: 'the-lamplighters-rest',
+      kind: 'hall',
+      name: { en: "The Lamplighter's Rest", vi: 'Chỗ Nghỉ Của Người Thắp Đèn' },
+      line: {
+        en: 'A small fire, lit from the big one. Every torch you have ever fought was lit here first.',
+        vi: 'Một bếp lửa nhỏ, mồi từ ngọn lớn. Mọi bó đuốc bạn từng đối mặt đều nhóm từ đây.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'this is the sentence that explains the torch variants: supply, not decoration',
+    },
+    {
+      key: 'the-glass-yard',
+      kind: 'yard',
+      name: { en: 'The Glass Yard', vi: 'Sân Kính' },
+      line: {
+        en: 'Panes stacked by size, and a hill of the broken ones, and the hill is the taller thing.',
+        vi: 'Kính xếp theo cỡ, và một đồi kính vỡ, và cái đồi mới là thứ cao hơn.',
+      },
+      foes: ['ironclad', 'ironclad-torch', 'wisp'],
+      layout: 'spread',
+      light: 'pale',
+      note: 'they fight badly here on purpose — nobody wants to put a foot down',
+    },
+    {
+      key: 'the-drift',
+      kind: 'cave',
+      name: { en: 'The Drift', vi: 'Lớp Bướm Dạt' },
+      line: {
+        en: 'Ankle deep in the ones that got this far. They are all pointed the same way.',
+        vi: 'Ngập đến mắt cá chân những con bay được tới đây. Tất cả đều quay về một hướng.',
+      },
+      foes: ['wisp-swift', 'wisp-torch', 'wisp'],
+      layout: 'ring',
+      light: 'dim',
+      note: 'the moths from the winding stair, four areas and a whole climb later',
+    },
+    {
+      key: 'the-wick-store',
+      kind: 'hall',
+      name: { en: 'The Wick Store', vi: 'Kho Bấc' },
+      line: {
+        en: 'Shelved for miles of it. The world burns as long as this room lasts. Four shelves are full.',
+        vi: 'Kệ chứa hàng dặm bấc. Thế giới cháy chừng nào phòng này còn. Bốn kệ còn đầy.',
+      },
+      foes: ['colossus', 'shade-swift'],
+      layout: 'ambush',
+      light: 'dark',
+      note: 'four shelves out of how many is the question, and the room does not answer it',
+    },
+    {
+      key: 'the-mirror-bank',
+      kind: 'bridge',
+      name: { en: 'The Mirror Bank', vi: 'Dàn Gương' },
+      line: {
+        en: 'Angled to throw the light down the mountain. Someone has been re-aiming them by hand.',
+        vi: 'Nghiêng để hắt ánh sáng xuống núi. Có người vẫn chỉnh lại từng cái bằng tay.',
+      },
+      foes: ['shade', 'shade-heavy', 'ironclad-heavy'],
+      layout: 'spread',
+      light: 'gold',
+      note: 'this is why anywhere in the world has light at all, and it is a manual job',
+    },
+    {
+      key: 'the-wardens-step',
+      kind: 'stair',
+      name: { en: "The Warden's Step", vi: 'Bậc Của Người Gác' },
+      line: {
+        en: 'One step outside the door, worn hollow in a single spot, the width of two feet.',
+        vi: 'Một bậc ngoài cửa, mòn lõm đúng một chỗ, rộng bằng hai bàn chân.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'the last fire in the world, and it is where the warden stands when it is not walking',
+    },
+    {
+      key: 'the-lantern-itself',
+      kind: 'fog',
+      name: { en: 'The Lantern', vi: 'Cây Đèn' },
+      line: {
+        en: 'It is not on a hook. It never was. Somebody is holding it, and has been the whole time.',
+        vi: 'Nó không treo trên móc. Chưa bao giờ. Có người đang cầm nó, và cầm suốt từ đầu.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'gold',
+      note: 'the lantern warden — it fights one-handed all fight, because the other hand is busy',
+    },
+  ],
   // The largest area in the world, and the only one that was a city. The Tide
   // is not a person — it wears the street it came down — so the area is
   // fourteen rooms of that street, in order, from the harbour up. You meet
