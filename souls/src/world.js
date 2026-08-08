@@ -142,6 +142,140 @@ AREAS.find((a) => a.id === 'crucible').to.push('kiln');
 // The undercroft is the template. Seven rooms, each one authored.
 
 export const HANDMADE = {
+  // Somebody plants them in rows. Ten rooms of horticulture done to the dead:
+  // a nursery, a compost heap, a grafting bench, a shed with the tools hung
+  // up in order of size. Nothing here is violent. It is all maintenance, and
+  // that is the horror the area is going for.
+  'bone-orchard': [
+    {
+      key: 'the-gate-in-the-hedge',
+      kind: 'yard',
+      name: { en: 'The Gate in the Hedge', vi: 'Cổng Trong Hàng Rào' },
+      line: {
+        en: 'A hedge clipped square, with a gate in it, and the gate has a latch on this side.',
+        vi: 'Hàng rào xén vuông vức, có một cánh cổng, và cổng thì có chốt ở phía bên này.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+    },
+    {
+      key: 'the-potting-shed',
+      kind: 'hall',
+      name: { en: 'The Potting Shed', vi: 'Nhà Ươm' },
+      line: {
+        en: 'Trays, labels, a watering can, and a stove someone keeps going through the cold.',
+        vi: 'Khay ươm, nhãn ghi, một cái bình tưới, và cái lò ai đó vẫn giữ cháy qua mùa lạnh.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-first-row',
+      kind: 'yard',
+      name: { en: 'The First Row', vi: 'Hàng Thứ Nhất' },
+      line: {
+        en: 'Planted at even spacing, upright, and at the same depth. Two are further along.',
+        vi: 'Trồng cách đều, dựng thẳng, và cùng một độ sâu. Hai cái thì lớn hơn phần còn lại.',
+      },
+      foes: ['stonemask', 'ghoul'],
+      layout: 'ambush',
+      light: 'grey',
+      note: 'the two that are further along are the two that move',
+    },
+    {
+      key: 'the-nursery',
+      kind: 'hall',
+      name: { en: 'The Nursery', vi: 'Vườn Ươm' },
+      line: {
+        en: 'Small ones under glass, kept warm, and turned towards the light every few days.',
+        vi: 'Những cái nhỏ nằm dưới lồng kính, được giữ ấm, và cứ vài ngày lại xoay về phía sáng.',
+      },
+      foes: ['acolyte-swift', 'acolyte-swift', 'ghoul-swift'],
+      layout: 'pack',
+      light: 'dim',
+    },
+    {
+      key: 'the-espalier',
+      kind: 'bridge',
+      name: { en: 'The Espalier', vi: 'Giàn Ép' },
+      line: {
+        en: 'Trained flat against a wall with wire, to save space, and it worked.',
+        vi: 'Được uốn ép sát vào tường bằng dây thép cho đỡ tốn chỗ, và cách đó có hiệu quả.',
+      },
+      foes: ['knightling-heavy', 'warder'],
+      layout: 'spread',
+      light: 'dim',
+    },
+    {
+      key: 'the-compost',
+      kind: 'cave',
+      name: { en: 'The Compost', vi: 'Hố Ủ' },
+      line: {
+        en: 'What did not take, turned regularly, and warm in the middle from working.',
+        vi: 'Những cái không sống được, đảo đều đặn, và giữa đống thì ấm vì đang phân huỷ.',
+      },
+      foes: ['crawler-heavy', 'crawler-heavy', 'ghoul'],
+      layout: 'ring',
+      light: 'dark',
+      note: 'the heap is doing something, slowly, and the room lets you hear it',
+    },
+    {
+      key: 'the-grafting-bench',
+      kind: 'hall',
+      name: { en: 'The Grafting Bench', vi: 'Bàn Ghép' },
+      line: {
+        en: 'Knife, wax, twine, and a piece of one joined to a piece of another, healing.',
+        vi: 'Dao, sáp, dây buộc, và một mẩu của cái này ghép vào một mẩu của cái kia, đang lành lại.',
+      },
+      foes: ['stonemask-heavy', 'warder-spear'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'root-deep will show you the same join, three areas and a hundred years later',
+    },
+    {
+      key: 'the-windfall',
+      kind: 'yard',
+      name: { en: 'The Windfall', vi: 'Chỗ Rụng' },
+      line: {
+        en: 'What came down on its own, gathered into a pile, and not thrown away.',
+        vi: 'Những cái tự rụng xuống, gom lại thành đống, và không bị vứt đi.',
+      },
+      foes: ['warder-heavy', 'chorister', 'ghoul-swift'],
+      layout: 'ring',
+      light: 'grey',
+      note: 'the hardest room, and the pile is sorted by size like everything else here',
+    },
+    {
+      key: 'the-tool-store',
+      kind: 'hall',
+      name: { en: 'The Tool Store', vi: 'Kho Đồ Làm Vườn' },
+      line: {
+        en: 'Everything hung on its own peg, in order of size, and one peg is empty.',
+        vi: 'Mọi thứ treo trên móc riêng, xếp theo cỡ, và có một cái móc trống.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'the empty peg is the shears, and she is holding them',
+    },
+    {
+      key: 'the-standing-rows',
+      kind: 'fog',
+      name: { en: 'The Standing Rows', vi: 'Những Hàng Đứng' },
+      line: {
+        en: 'The oldest planting, fully grown, in rows, and she is working her way along one.',
+        vi: 'Lứa trồng cổ nhất, đã lớn hẳn, xếp thành hàng, và bà ta đang lần theo một hàng mà làm việc.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'grey',
+      note: 'the gardener — she does not stop gardening when the fight starts',
+    },
+  ],
   // The largest area in the world, and the only one that was a city. The Tide
   // is not a person — it wears the street it came down — so the area is
   // fourteen rooms of that street, in order, from the harbour up. You meet
