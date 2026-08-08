@@ -983,8 +983,8 @@ function placePiece(idx,row,col){
     if(lvGoalMet()){ levelWin(); return; }
     if(lvMoves<=0){ gameOver(); return; } }
   if(tray.every(x=>!x)){
-    // 40% chance from start: generate smart piece (fits + can clear lines)
-    if(Math.random()<0.4){
+    // 70% chance from start: generate smart piece (fits + can clear lines)
+    if(Math.random()<0.7){
       const smartPiece=findFittingPiece();
       tray=[smartPiece||makePiece(), makePiece(), makePiece()];
     } else {
