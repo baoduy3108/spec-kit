@@ -276,6 +276,132 @@ export const HANDMADE = {
       note: 'the gardener — she does not stop gardening when the fight starts',
     },
   ],
+  // THE WINDING STAIR. A stair is not a place, normally — it is the bit
+  // between places. This one outlived every room it served. The building
+  // fell, the shaft did not, so what is left is nine landings of a house
+  // that no longer exists, stacked in the open air with doors that open
+  // onto weather. It is the only vertical area in the world, and it is
+  // built to punish the one habit the rest of the map teaches you: rolling
+  // sideways. There is no sideways on a stair. There is only up, and down,
+  // and the moths that come up the middle of the spiral towards the light.
+  'winding-stair': [
+    {
+      key: 'the-lower-door',
+      kind: 'stair',
+      name: { en: 'The Lower Door', vi: 'Cửa Dưới' },
+      line: {
+        en: 'Held open with a wedge, and the wedge is a thighbone, and it fits.',
+        vi: 'Cửa được chèn mở, và cái chèn là một khúc xương đùi, và nó vừa khít.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'dark',
+    },
+    {
+      key: 'the-first-landing',
+      kind: 'hall',
+      name: { en: 'The First Landing', vi: 'Chiếu Nghỉ Thứ Nhất' },
+      line: {
+        en: 'Wide enough to sit. The stone here is worn into a dish, from sitting.',
+        vi: 'Đủ rộng để ngồi. Đá ở đây lõm thành cái đĩa, vì có người ngồi mãi.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'the worn dish is the argument for the fire — somebody stopped here every time',
+    },
+    {
+      key: 'the-narrow-turn',
+      kind: 'stair',
+      name: { en: 'The Narrow Turn', vi: 'Khúc Quanh Hẹp' },
+      line: {
+        en: 'The tread runs out to nothing at the inside. Two people cannot pass.',
+        vi: 'Mặt bậc thu về không ở phía trong. Hai người không lách qua nhau được.',
+      },
+      foes: ['knightling-spear'],
+      layout: 'single',
+      light: 'dim',
+      note: 'a spear on a stair where you cannot go around it — the whole area in one room',
+    },
+    {
+      key: 'the-door-to-nothing',
+      kind: 'stair',
+      name: { en: 'The Door to Nothing', vi: 'Cửa Mở Ra Không Gì Cả' },
+      line: {
+        en: 'A landing with a good door on it. Behind the door: air, and a long way down.',
+        vi: 'Một chiếu nghỉ với cánh cửa còn tốt. Sau cửa: không khí, và một quãng rơi rất dài.',
+      },
+      foes: ['ghoul', 'ghoul-swift'],
+      layout: 'ambush',
+      light: 'grey',
+      note: 'the room the building used to be in is the missing thing here',
+    },
+    {
+      key: 'the-moth-shaft',
+      kind: 'cave',
+      name: { en: 'The Moth Shaft', vi: 'Giếng Bướm' },
+      line: {
+        en: 'The open middle of the spiral. They come up it, all of them, towards the top.',
+        vi: 'Khoảng trống giữa lòng xoắn ốc. Chúng bay lên theo đó, tất cả, hướng lên đỉnh.',
+      },
+      foes: ['moth', 'moth-swift', 'moth-torch'],
+      layout: 'ring',
+      light: 'pale',
+      note: 'they are going somewhere, and the lantern is what they are going to',
+    },
+    {
+      key: 'the-counting-marks',
+      kind: 'stair',
+      name: { en: 'The Counting Marks', vi: 'Vạch Đếm' },
+      line: {
+        en: 'Someone scored the wall once per step. Past four hundred the marks stop agreeing.',
+        vi: 'Có người khắc lên tường mỗi bậc một vạch. Qua bốn trăm thì các vạch thôi khớp nhau.',
+      },
+      foes: ['stonemask', 'stonemask-spear'],
+      layout: 'spread',
+      light: 'dim',
+      note: 'the count is wrong because the stair is longer than it is tall',
+    },
+    {
+      key: 'the-broken-flight',
+      kind: 'bridge',
+      name: { en: 'The Broken Flight', vi: 'Nhịp Gãy' },
+      line: {
+        en: 'Nine treads are gone. A plank lies across, and it has been walked before.',
+        vi: 'Chín bậc đã mất. Một tấm ván bắc ngang, và đã có người đi qua nó trước đây.',
+      },
+      foes: ['warder', 'knightling-heavy'],
+      layout: 'spread',
+      light: 'grey',
+    },
+    {
+      key: 'the-ossuary-door',
+      kind: 'hall',
+      name: { en: 'The Ossuary Door', vi: 'Cửa Nhà Xương' },
+      line: {
+        en: 'Barred on this side, in three places, by someone who was on this side.',
+        vi: 'Chốt từ phía này, ba chỗ, bởi một người đang đứng ở phía này.',
+      },
+      foes: ['stonemask-heavy'],
+      layout: 'single',
+      light: 'dark',
+      note: 'the fold to the ossuary — the bars are on our side, so it was never about keeping us out',
+    },
+    {
+      key: 'the-top-of-the-stair',
+      kind: 'yard',
+      name: { en: 'The Top of the Stair', vi: 'Đỉnh Cầu Thang' },
+      line: {
+        en: 'It comes out level with a hedge, clipped square, in daylight, in a garden.',
+        vi: 'Nó trổ lên ngang với một hàng rào xén vuông, giữa ban ngày, trong một khu vườn.',
+      },
+      foes: ['ghoul-heavy'],
+      layout: 'single',
+      light: 'pale',
+      note: 'the join to the bone orchard — you climb out of a grave into a garden',
+    },
+  ],
   // The largest area in the world, and the only one that was a city. The Tide
   // is not a person — it wears the street it came down — so the area is
   // fourteen rooms of that street, in order, from the harbour up. You meet
