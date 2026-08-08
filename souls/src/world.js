@@ -521,6 +521,143 @@ export const HANDMADE = {
       note: 'the lantern warden — it fights one-handed all fight, because the other hand is busy',
     },
   ],
+  // THE KILN. Last area written, and the one that has to hold the other
+  // thirty-five up. Three claims land here.
+  //
+  // One: the kiln-family foes you have been killing since tier four were
+  // made in this room. The mould racks are the proof and they are not
+  // subtle about it — you have fought every shape on those shelves.
+  //
+  // Two: fire in this world has a chain of custody. First flame, then the
+  // lantern lit from it, then every torch in the world lit from that. The
+  // kiln comes before the lantern on the map for exactly that reason.
+  //
+  // Three: the fold drops to the undercroft, which is the second area in
+  // the game. Ash falls. It always fell, and it fell all the way down, and
+  // the floor you crawled across in the first hour was made of this.
+  //
+  // The boss line does the rest: it is not defending itself, it is trying
+  // to go out. So the last approach is not a fortress. It is a workplace
+  // being kept running by somebody who cannot stop.
+  kiln: [
+    {
+      key: 'the-clay-pits',
+      kind: 'yard',
+      name: { en: 'The Clay Pits', vi: 'Hố Đất Sét' },
+      line: {
+        en: 'Cut in benches, worked from the top down, and the newest cut is old.',
+        vi: 'Xẻ thành từng bậc, đào từ trên xuống, và nhát cắt mới nhất cũng đã cũ.',
+      },
+      foes: ['ironclad', 'colossus-spear'],
+      layout: 'spread',
+      light: 'grey',
+      note: 'nobody has dug here in a long time, which is a problem for whoever needs more',
+    },
+    {
+      key: 'the-drying-shed',
+      kind: 'hall',
+      name: { en: 'The Drying Shed', vi: 'Nhà Hong' },
+      line: {
+        en: 'Racks in the warm draught off the flue. Free heat. Somebody thought about this.',
+        vi: 'Giá phơi đặt trong luồng ấm thổi ra từ ống khói. Nhiệt không mất tiền. Có người đã tính.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+    },
+    {
+      key: 'the-wedging-floor',
+      kind: 'hall',
+      name: { en: 'The Wedging Floor', vi: 'Sàn Nhồi Đất' },
+      line: {
+        en: 'A slab worn into a bowl. Clay is beaten here until the air is out of it, or it bursts.',
+        vi: 'Phiến đá mòn thành lòng chảo. Đất bị nhồi ở đây cho hết khí, không thì nó nổ trong lò.',
+      },
+      foes: ['shade', 'shade-swift'],
+      layout: 'ambush',
+      light: 'dim',
+      note: 'the air left in a body is what breaks it in the fire — true of the clay, true of you',
+    },
+    {
+      key: 'the-mould-racks',
+      kind: 'hall',
+      name: { en: 'The Mould Racks', vi: 'Giá Khuôn' },
+      line: {
+        en: 'Shelved by shape and labelled. You have fought every shape on these shelves.',
+        vi: 'Xếp theo hình dáng và có dán nhãn. Bạn đã đánh nhau với mọi hình dáng trên các giá này.',
+      },
+      foes: ['ironclad-heavy', 'wisp', 'ironclad-swift'],
+      layout: 'ring',
+      light: 'pale',
+      note: 'the kiln family, tier four, made here — this is the room that says where they came from',
+    },
+    {
+      key: 'the-saggar-stacks',
+      kind: 'cave',
+      name: { en: 'The Saggar Stacks', vi: 'Chồng Bao Nung' },
+      line: {
+        en: 'Boxes of fireclay, each one holding something too delicate to face the flame directly.',
+        vi: 'Những hộp đất chịu lửa, mỗi hộp ôm một thứ quá mỏng manh để chịu lửa trực tiếp.',
+      },
+      foes: ['colossus-heavy'],
+      layout: 'single',
+      light: 'dark',
+      note: 'protecting the fragile thing from the fire is the whole job, and the lantern is the same job',
+    },
+    {
+      key: 'the-flue',
+      kind: 'stair',
+      name: { en: 'The Flue', vi: 'Ống Khói' },
+      line: {
+        en: 'You climb inside the draught. It pulls upward past you the entire way.',
+        vi: 'Bạn leo bên trong luồng gió. Suốt quãng đường nó cứ hút ngược lên qua người bạn.',
+      },
+      foes: ['wisp-torch', 'wisp-swift', 'shade-torch'],
+      layout: 'ring',
+      light: 'gold',
+    },
+    {
+      key: 'the-cone-room',
+      kind: 'hall',
+      name: { en: 'The Cone Room', vi: 'Phòng Nón Đo' },
+      line: {
+        en: 'Little cones set in rows to bend when it is hot enough. Every row has bent.',
+        vi: 'Những nón nhỏ xếp hàng, đủ nóng thì cong xuống. Hàng nào cũng đã cong.',
+      },
+      foes: ['shade-heavy', 'colossus'],
+      layout: 'spread',
+      light: 'gold',
+      note: 'the cones are how you know the temperature without opening the door, and they are all down',
+    },
+    {
+      key: 'the-ash-door',
+      kind: 'stair',
+      name: { en: 'The Ash Door', vi: 'Cửa Tro' },
+      line: {
+        en: 'Raked out through here, and it falls, and it has been falling the whole time.',
+        vi: 'Tro được cào ra lối này, rồi nó rơi, và nó đã rơi như thế suốt từ đầu.',
+      },
+      foes: [],
+      layout: 'single',
+      fire: true,
+      light: 'warm',
+      note: 'the fold to the undercroft — the floor you crawled across in the first hour is this ash',
+    },
+    {
+      key: 'the-firing-chamber',
+      kind: 'fog',
+      name: { en: 'The Firing Chamber', vi: 'Buồng Nung' },
+      line: {
+        en: 'The door is bricked shut from the outside every firing, and unbricked after. It is bricked.',
+        vi: 'Cửa bị xây bít từ bên ngoài mỗi mẻ nung, xong mới phá ra. Bây giờ nó đang bít.',
+      },
+      foes: [],
+      layout: 'single',
+      light: 'gold',
+      note: 'the first flame — you have to break in, and it has been shut in there since the beginning',
+    },
+  ],
   // The largest area in the world, and the only one that was a city. The Tide
   // is not a person — it wears the street it came down — so the area is
   // fourteen rooms of that street, in order, from the harbour up. You meet

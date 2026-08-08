@@ -208,7 +208,13 @@ test('a hand-written area brings its own rooms, named and described', () => {
   // always going to walk past, which made the test rot rather than hold.
   const rest = ROOMS.filter((r) => !r.handmade);
   assert.equal(rest.length + written.length, ROOMS.length, 'no room is in neither set');
-  assert.ok(rest.length > 0, 'the generator still covers everything unwritten');
+  // And as of the kiln there is no remainder: every room in every area is
+  // written by hand. The guard here used to be `rest.length > 0` — the
+  // generator still has something left to cover — which stopped being true
+  // the moment the last area landed. It asserts the finished state now.
+  assert.equal(rest.length, 0, `${rest.length} rooms are still generated`);
+  const areas = new Set(written.map((r) => r.area));
+  assert.equal(areas.size, AREAS.length, `every area is written (${areas.size}/${AREAS.length})`);
 });
 
 test('hand-written rooms say how their foes are arranged', () => {
