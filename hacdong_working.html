@@ -853,20 +853,13 @@ function findFittingPiece(){
 
   const debugLog=`[SMART] Fill:${(fill*100).toFixed(0)}% Score:${score} Bias:${sizeBias}`;
 
-  // Prioritize by size based on bias
+  // Filter candidates by size bias FIRST (strict mode, not just preference)
   let candidates=SHAPES.slice();
-  if(sizeBias==='tiny') candidates.sort((a,b)=>{
-    // Prioritize ≤2 blocks
-    if(a.length<=2&&b.length>2) return -1;
-    if(a.length>2&&b.length<=2) return 1;
-    return 0;
-  });
-  else if(sizeBias==='small') candidates.sort((a,b)=>{
-    // Prioritize ≤3 blocks
-    if(a.length<=3&&b.length>3) return -1;
-    if(a.length>3&&b.length<=3) return 1;
-    return 0;
-  });
+  if(sizeBias==='tiny'){
+    candidates=candidates.filter(s=>s.length<=2); // ONLY 1-2 blocks
+  } else if(sizeBias==='small'){
+    candidates=candidates.filter(s=>s.length<=3); // ONLY 1-3 blocks
+  }
 
   const validPieces=[];
   for(const shape of candidates){
