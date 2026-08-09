@@ -842,12 +842,31 @@ function pickShape(){ let tries=0;
     const w=Math.max(1,9-s.length);
     if(rnd()*9<w || ++tries>6) return s; } }
 function makePiece(){ const s=pickShape(), d=shapeDim(s); return {cells:s, w:d.w, h:d.h, color:TH.blocks[(rnd()*TH.blocks.length)|0]}; }
-// Smart piece: find shape that fits empty spaces AND can potentially clear lines (random from valid options, not first match)
+// Smart piece: find shape that fits empty spaces AND can clear lines, respecting size bias
 function findFittingPiece(){
+  // Calculate size bias based on board fill (same as pickShape logic)
+  const fill=boardFill();
+  const lowScore=typeof score==='number'&&score<1000;
+  let sizeBias='none';
+  if(lowScore) sizeBias=(fill>0.70?'tiny':(fill>0.45?'small':'none'));
+  else sizeBias=(fill>0.66?'tiny':(fill>0.48?'small':'none'));
+
+  // Prioritize by size based on bias
+  let candidates=SHAPES.slice();
+  if(sizeBias==='tiny') candidates.sort((a,b)=>{
+    // Prioritize ≤2 blocks
+    if(a.length<=2&&b.length>2) return -1;
+    if(a.length>2&&b.length<=2) return 1;
+    return 0;
+  });
+  else if(sizeBias==='small') candidates.sort((a,b)=>{
+    // Prioritize ≤3 blocks
+    if(a.length<=3&&b.length>3) return -1;
+    if(a.length>3&&b.length<=3) return 1;
+    return 0;
+  });
+
   const validPieces=[];
-  const twoBlocks=SHAPES.filter(s=>s.length===2);
-  const others=SHAPES.filter(s=>s.length>2).sort((a,b)=>a.length-b.length);
-  const candidates=[...twoBlocks,...others];
   for(const shape of candidates){
     const d=shapeDim(shape);
     for(let r=0;r<=N-d.h;r++){
@@ -859,7 +878,7 @@ function findFittingPiece(){
           }
         }
         if(fits){
-          // Check if this piece can make a line (at least 6/8 cells filled in a row/col after placement)
+          // Check if this piece can make a line
           const testGrid=grid.map(row=>[...row]);
           for(let dy=0;dy<d.h;dy++){
             for(let dx=0;dx<d.w;dx++){
@@ -876,7 +895,7 @@ function findFittingPiece(){
       }
     }
   }
-  // Random pick from valid pieces instead of returning first
+  // Random pick from valid pieces, respecting size bias
   if(validPieces.length>0){
     const chosen=validPieces[(rnd()*validPieces.length)|0];
     return {cells:chosen.cells, w:chosen.w, h:chosen.h, color:TH.blocks[(rnd()*TH.blocks.length)|0]};
