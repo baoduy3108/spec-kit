@@ -37,6 +37,10 @@ const FAMILIES = [
   { id: 'shade', hp: 120, damage: 35, speed: 130, poise: 34, windup: 0.42, tier: 7 },
 ];
 
+/** The sixteen families, unbent by any carry. `lore.js` checks its adjectives
+ *  against these numbers, so they have to be reachable from outside. */
+export const FAMILY_STATS = FAMILIES;
+
 /** What a family can be carrying. The numbers bend, the creature does not. */
 const VARIANTS = [
   { suffix: '', hp: 1, damage: 1, speed: 1, windup: 1 },
@@ -587,10 +591,10 @@ export const HANDMADE = {
         en: 'Shelved by shape and labelled. You have fought every shape on these shelves.',
         vi: 'Xếp theo hình dáng và có dán nhãn. Bạn đã đánh nhau với mọi hình dáng trên các giá này.',
       },
-      foes: ['ironclad-heavy', 'wisp', 'ironclad-swift'],
+      foes: ['ironclad-heavy', 'wisp', 'ironclad-swift', 'kiln'],
       layout: 'ring',
       light: 'pale',
-      note: 'the kiln family, tier four, made here — this is the room that says where they came from',
+      note: 'the bare kiln-fired one is fresh out of a mould, four tiers below everything guarding it',
     },
     {
       key: 'the-saggar-stacks',
