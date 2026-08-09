@@ -390,7 +390,10 @@ export const BESTIARY = {
     },
     moves: [
       move('sweep', 0.62, 0.14, 0.52, 26, [26, 200], 'the lantern arm goes back'),
-      move('slam', 1.0, 0.1, 0.9, 40, [10, 160], 'both hands overhead, the longest punish in the fight'),
+      // Not "both hands overhead". It never lets go of the lantern — that is
+      // the whole ending — so the sword arm goes up alone and the lantern
+      // stays down at its side, lighting the floor it is about to hit.
+      move('slam', 1.0, 0.1, 0.9, 40, [10, 160], 'the sword arm goes straight up alone, the longest punish in the fight'),
       move('lunge', 0.72, 0.34, 0.72, 32, [0, 260], 'it crosses the room — roll into it, never away'),
     ],
     phase2: {

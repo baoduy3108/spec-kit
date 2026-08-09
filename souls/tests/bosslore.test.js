@@ -93,3 +93,18 @@ test('the difficulty curve the write-ups assume is the curve the numbers draw', 
   assert.ok(mean(late, 'hp') > mean(early, 'hp') * 1.5, 'the late ones take much more killing');
   assert.ok(mean(late, 'poise') > mean(early, 'poise') * 1.5, 'and much more moving');
 });
+
+test('the warden never uses the hand that is holding the lantern', () => {
+  // Caught by reading a generated art prompt out loud: the slam tell said
+  // "both hands overhead" while the write-up said it fights one-handed the
+  // entire fight and never considers letting go. The one-handed line is the
+  // ending of the game, so the tell was the thing that was wrong.
+  const warden = BESTIARY['the-lantern-warden'];
+  assert.match(BOSS_LORE['the-lantern-warden'].look.en, /one-handed/);
+  for (const move of warden.moves) {
+    assert.ok(
+      !/both hands|two hands|overhead with both/i.test(move.tell),
+      `${move.id} uses a hand the warden does not have free`,
+    );
+  }
+});
