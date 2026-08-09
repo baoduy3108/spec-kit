@@ -834,6 +834,8 @@ function pickShape(){ let tries=0;
   else if(normal) bias=(fill>0.66?'tiny':(fill>0.48?'small':'none'));
   const soften=normal&&!lowScore&&bias==='none'&&fill>0.36; // chớm nguy hiểm (36-48%): mềm hoá khối to
   while(true){ const s=SHAPES[(rnd()*SHAPES.length)|0];
+    // Skip 1-block pieces 30% of the time (reduce spam)
+    if(s.length===1 && rnd()<0.3 && ++tries<=9) continue;
     if(bias==='big'){ if(s.length>=4||++tries>6) return s; continue; }
     if(bias==='tiny'){ if(s.length<=2||++tries>9) return s; continue; }
     if(bias==='small'){ if(s.length<=3||++tries>6) return s; continue; }
@@ -842,9 +844,9 @@ function pickShape(){ let tries=0;
     const w=Math.max(1,9-s.length);
     if(rnd()*9<w || ++tries>6) return s; } }
 function makePiece(){ const s=pickShape(), d=shapeDim(s); return {cells:s, w:d.w, h:d.h, color:TH.blocks[(rnd()*TH.blocks.length)|0]}; }
-// Smart piece: find shape that fits empty spaces AND can potentially clear lines
+// Smart piece: find shape that fits empty spaces AND can potentially clear lines (2+ blocks only)
 function findFittingPiece(){
-  const candidates=SHAPES.slice().sort((a,b)=>a.length-b.length);
+  const candidates=SHAPES.slice().filter(s=>s.length>=2).sort((a,b)=>a.length-b.length);
   for(const shape of candidates){
     const d=shapeDim(shape);
     for(let r=0;r<=N-d.h;r++){
