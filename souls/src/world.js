@@ -5127,6 +5127,7 @@ for (const spot of AREAS) {
             : ['hall', 'stair', 'bridge', 'cave', 'yard'][Math.floor(rng() * 5)],
       boss: isBoss ? spot.boss : undefined,
       foes: hand ? [...hand.foes] : foes,
+      key: hand ? hand.key : undefined,
       name: hand ? hand.name : undefined,
       line: hand ? hand.line : undefined,
       light: hand ? hand.light : undefined,

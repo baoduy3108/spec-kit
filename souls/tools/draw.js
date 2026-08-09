@@ -1,0 +1,704 @@
+// Draws one area as a sheet of room panels: architecture, light, and the
+// things standing in it, posed from the same data the game reads.
+//
+// Nothing here is generic. Each room kind gets its own architecture, each
+// light level its own palette, and each of the sixteen families its own
+// silhouette built from the `look` field in `lore.js` — the drawing brief was
+// written first on purpose, so this is a build rather than an invention.
+//
+//   node tools/draw.js undercroft   ->  dist/area-undercroft.svg
+//
+// One SVG element gets one `opacity` attribute and never two. Two aborts the
+// parse and silently loses every label on the sheet, which is how the world
+// map lost its legend the first time.
+
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { AREAS, FOES, ROOMS } from '../src/world.js';
+import { LORE } from '../src/lore.js';
+import { BESTIARY } from '../src/bosses.js';
+
+const W = 1240;
+const PANEL = 430;
+const HEAD = 150;
+
+// --- palettes -------------------------------------------------------------
+// Six light levels, each a full scene palette rather than a tint. `far` is the
+// wall behind everything, `air` the haze between, `floor` what you stand on,
+// `edge` the line work, `glow` whatever is burning.
+const LIGHT = {
+  dark: { far: '#0b0f14', mid: '#121820', air: '#0d1219', floor: '#171d26', edge: '#2c3a4a', ink: '#7d8fa3', glow: '#3a6ea8' },
+  dim: { far: '#141a22', mid: '#1d2530', air: '#161d26', floor: '#232c38', edge: '#3b4c60', ink: '#93a6bb', glow: '#5b86b8' },
+  grey: { far: '#232a33', mid: '#2f3843', air: '#28303a', floor: '#39434f', edge: '#55636f', ink: '#b3bfca', glow: '#8aa2b8' },
+  pale: { far: '#2a3038', mid: '#3a424c', air: '#333b45', floor: '#454e59', edge: '#6d7b88', ink: '#ccd6df', glow: '#a8c4d8' },
+  warm: { far: '#1a1310', mid: '#2a1d16', air: '#22160f', floor: '#33241a', edge: '#5e4025', ink: '#e0c49a', glow: '#ffab4a' },
+  gold: { far: '#2b2110', mid: '#3d2e15', air: '#33260f', floor: '#4a3819', edge: '#7d5c22', ink: '#f4dfa8', glow: '#ffd166' },
+};
+
+const FIRE = { core: '#fff3c4', mid: '#ffb24a', low: '#ff7a2f', deep: '#c03c14' };
+
+// --- helpers --------------------------------------------------------------
+const esc = (s) =>
+  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/** Seeded noise so a room's texture is the same every time it is drawn. */
+function rngFor(seed) {
+  let h = 2166136261;
+  for (const ch of seed) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  return () => {
+    h += 0x6d2b79f5;
+    let t = h;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const parts = [];
+const put = (s) => parts.push(s);
+
+// --- architecture ---------------------------------------------------------
+
+/** Layered stone: a far wall, blocks picked out, and a floor line. */
+function backdrop(x, y, w, h, p, rng) {
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${p.far}"/>`);
+  // block courses on the far wall, irregular so it reads as cut by hand
+  const floorY = y + h * 0.72;
+  for (let row = 0; row < 7; row++) {
+    const by = y + 14 + row * ((floorY - y - 14) / 7);
+    let bx = x + (row % 2 ? -22 : 0);
+    while (bx < x + w) {
+      const bw = 58 + rng() * 46;
+      put(
+        `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${((floorY - y - 14) / 7 - 3).toFixed(1)}" fill="${p.mid}" fill-opacity="${(0.25 + rng() * 0.4).toFixed(2)}"/>`,
+      );
+      bx += bw + 3;
+    }
+  }
+  // haze between you and the wall
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${h * 0.72}" fill="${p.air}" fill-opacity="0.45"/>`);
+  // floor
+  put(`<rect x="${x}" y="${floorY}" width="${w}" height="${y + h - floorY}" fill="${p.floor}"/>`);
+  put(`<line x1="${x}" y1="${floorY}" x2="${x + w}" y2="${floorY}" stroke="${p.edge}" stroke-width="2"/>`);
+  // flagstones running away from you
+  for (let i = 0; i < 16; i++) {
+    const fx = x + (i / 16) * w + rng() * 20;
+    put(
+      `<line x1="${fx.toFixed(1)}" y1="${floorY}" x2="${(x + w / 2 + (fx - x - w / 2) * 2.1).toFixed(1)}" y2="${y + h}" stroke="${p.edge}" stroke-width="1" stroke-opacity="0.35"/>`,
+    );
+  }
+  return floorY;
+}
+
+/** A barrel vault with columns — the default indoor room. */
+function hall(x, y, w, h, p, rng) {
+  const floorY = backdrop(x, y, w, h, p, rng);
+  const top = y + 10;
+  put(
+    `<path d="M ${x} ${top + 90} Q ${x + w / 2} ${top - 46} ${x + w} ${top + 90} L ${x + w} ${top} L ${x} ${top} Z" fill="${p.far}"/>`,
+  );
+  put(
+    `<path d="M ${x} ${top + 90} Q ${x + w / 2} ${top - 46} ${x + w} ${top + 90}" fill="none" stroke="${p.edge}" stroke-width="2.5"/>`,
+  );
+  for (const cx of [x + w * 0.16, x + w * 0.52, x + w * 0.86]) {
+    put(`<rect x="${cx - 17}" y="${top + 52}" width="34" height="${floorY - top - 52}" fill="${p.mid}"/>`);
+    put(`<rect x="${cx - 23}" y="${top + 44}" width="46" height="12" fill="${p.mid}"/>`);
+    put(`<rect x="${cx - 21}" y="${floorY - 14}" width="42" height="14" fill="${p.mid}"/>`);
+    put(
+      `<line x1="${cx - 17}" y1="${top + 56}" x2="${cx - 17}" y2="${floorY - 14}" stroke="${p.edge}" stroke-width="1.5" stroke-opacity="0.7"/>`,
+    );
+  }
+  return floorY;
+}
+
+/** A channel of water crossed by a walkway. */
+function bridge(x, y, w, h, p, rng) {
+  const floorY = backdrop(x, y, w, h, p, rng);
+  const wy = floorY + 34;
+  put(`<rect x="${x}" y="${wy}" width="${w}" height="${y + h - wy}" fill="${p.far}"/>`);
+  put(`<rect x="${x}" y="${wy}" width="${w}" height="${y + h - wy}" fill="${p.glow}" fill-opacity="0.13"/>`);
+  for (let i = 0; i < 26; i++) {
+    const ly = wy + 8 + rng() * (y + h - wy - 14);
+    const lx = x + rng() * w * 0.8;
+    put(
+      `<line x1="${lx.toFixed(1)}" y1="${ly.toFixed(1)}" x2="${(lx + 30 + rng() * 90).toFixed(1)}" y2="${ly.toFixed(1)}" stroke="${p.glow}" stroke-width="1.6" stroke-opacity="${(0.15 + rng() * 0.4).toFixed(2)}"/>`,
+    );
+  }
+  put(`<rect x="${x}" y="${floorY}" width="${w}" height="34" fill="${p.floor}"/>`);
+  put(`<line x1="${x}" y1="${floorY + 34}" x2="${x + w}" y2="${floorY + 34}" stroke="${p.edge}" stroke-width="2"/>`);
+  return floorY;
+}
+
+/** Rough rock: no courses, a ragged ceiling, teeth. */
+function cave(x, y, w, h, p, rng) {
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${p.far}"/>`);
+  const floorY = y + h * 0.72;
+  let d = `M ${x} ${y}`;
+  for (let i = 0; i <= 18; i++) {
+    d += ` L ${(x + (i / 18) * w).toFixed(1)} ${(y + 40 + Math.sin(i * 1.7) * 22 + rng() * 26).toFixed(1)}`;
+  }
+  d += ` L ${x + w} ${y} Z`;
+  put(`<path d="${d}" fill="${p.mid}"/>`);
+  for (let i = 0; i < 13; i++) {
+    const tx = x + 30 + rng() * (w - 60);
+    const ty = y + 52 + rng() * 26;
+    const len = 18 + rng() * 46;
+    put(`<path d="M ${tx - 9} ${ty} L ${tx + 9} ${ty} L ${tx} ${ty + len} Z" fill="${p.mid}"/>`);
+  }
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${floorY - y}" fill="${p.air}" fill-opacity="0.4"/>`);
+  let f = `M ${x} ${y + h} L ${x} ${floorY}`;
+  for (let i = 0; i <= 16; i++) {
+    f += ` L ${(x + (i / 16) * w).toFixed(1)} ${(floorY + Math.sin(i * 2.3) * 7 + rng() * 9).toFixed(1)}`;
+  }
+  f += ` L ${x + w} ${y + h} Z`;
+  put(`<path d="${f}" fill="${p.floor}" stroke="${p.edge}" stroke-width="2"/>`);
+  return floorY + 6;
+}
+
+/** Steps climbing away, with the middle of the flight missing. */
+function stair(x, y, w, h, p, rng) {
+  const floorY = backdrop(x, y, w, h, p, rng);
+  const steps = 11;
+  for (let i = 0; i < steps; i++) {
+    const sw = w * 0.62 - i * 22;
+    const sx = x + w * 0.2 + i * 11;
+    const sy = floorY - i * 21;
+    if (i > 3 && i < 7) continue; // the missing treads
+    put(`<rect x="${sx.toFixed(1)}" y="${(sy - 16).toFixed(1)}" width="${sw.toFixed(1)}" height="16" fill="${p.mid}"/>`);
+    put(
+      `<line x1="${sx.toFixed(1)}" y1="${(sy - 16).toFixed(1)}" x2="${(sx + sw).toFixed(1)}" y2="${(sy - 16).toFixed(1)}" stroke="${p.edge}" stroke-width="1.6"/>`,
+    );
+  }
+  // the gap, with rubble at the bottom of it
+  for (let i = 0; i < 9; i++) {
+    const rx = x + w * 0.3 + rng() * w * 0.3;
+    put(
+      `<rect x="${rx.toFixed(1)}" y="${(floorY - 6 - rng() * 10).toFixed(1)}" width="${(8 + rng() * 16).toFixed(1)}" height="${(5 + rng() * 8).toFixed(1)}" fill="${p.mid}" transform="rotate(${(rng() * 40 - 20).toFixed(1)} ${rx.toFixed(1)} ${floorY.toFixed(1)})"/>`,
+    );
+  }
+  return floorY;
+}
+
+/** Open to weather: sky instead of a vault. */
+function yard(x, y, w, h, p, rng) {
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${p.air}"/>`);
+  for (let i = 0; i < 5; i++) {
+    put(
+      `<ellipse cx="${(x + rng() * w).toFixed(1)}" cy="${(y + 40 + rng() * 60).toFixed(1)}" rx="${(90 + rng() * 130).toFixed(1)}" ry="${(18 + rng() * 16).toFixed(1)}" fill="${p.mid}" fill-opacity="0.5"/>`,
+    );
+  }
+  const floorY = y + h * 0.72;
+  put(`<rect x="${x}" y="${floorY - 60}" width="${w}" height="62" fill="${p.far}"/>`);
+  put(`<rect x="${x}" y="${floorY}" width="${w}" height="${y + h - floorY}" fill="${p.floor}"/>`);
+  put(`<line x1="${x}" y1="${floorY}" x2="${x + w}" y2="${floorY}" stroke="${p.edge}" stroke-width="2"/>`);
+  return floorY;
+}
+
+/** A fog gate: a doorway you can see nothing through. */
+function fogRoom(x, y, w, h, p, rng) {
+  const floorY = hall(x, y, w, h, p, rng);
+  const gx = x + w / 2;
+  put(`<rect x="${gx - 92}" y="${floorY - 250}" width="184" height="250" fill="#0a0d12"/>`);
+  put(
+    `<path d="M ${gx - 92} ${floorY - 250} Q ${gx} ${floorY - 330} ${gx + 92} ${floorY - 250}" fill="#0a0d12" stroke="${p.edge}" stroke-width="3"/>`,
+  );
+  for (let i = 0; i < 22; i++) {
+    put(
+      `<ellipse cx="${(gx - 80 + rng() * 160).toFixed(1)}" cy="${(floorY - 20 - rng() * 220).toFixed(1)}" rx="${(30 + rng() * 54).toFixed(1)}" ry="${(14 + rng() * 26).toFixed(1)}" fill="#cfe0ee" fill-opacity="${(0.05 + rng() * 0.09).toFixed(3)}"/>`,
+    );
+  }
+  return floorY;
+}
+
+const ARCH = { hall, bridge, cave, stair, yard, fog: fogRoom, bonfire: hall };
+
+/**
+ * Hand-placed things, keyed off the key the room's author gave it — not off
+ * an index, which shifts the moment an area changes length. A room's line
+ * promises straw, a drain and an open door, so the picture owes you all three.
+ */
+const PROPS = {
+  cell(x, w, floorY, p, rng) {
+    // straw
+    for (let i = 0; i < 90; i++) {
+      const sx = x + w * 0.55 + (rng() - 0.5) * w * 0.42;
+      const sy = floorY + 4 + rng() * 44;
+      const a = rng() * Math.PI;
+      put(`<line x1="${sx.toFixed(1)}" y1="${sy.toFixed(1)}" x2="${(sx + Math.cos(a) * 16).toFixed(1)}" y2="${(sy + Math.sin(a) * 4).toFixed(1)}" stroke="#7a6a45" stroke-width="1.3" stroke-opacity="${(0.25 + rng() * 0.45).toFixed(2)}"/>`);
+    }
+    // the drain
+    put(`<ellipse cx="${x + w * 0.22}" cy="${floorY + 40}" rx="34" ry="11" fill="#05080b"/>`);
+    for (let i = -2; i <= 2; i++)
+      put(`<line x1="${x + w * 0.22 + i * 11}" y1="${floorY + 31}" x2="${x + w * 0.22 + i * 11}" y2="${floorY + 49}" stroke="${p.edge}" stroke-width="2.4"/>`);
+    // the door somebody left open a long time ago
+    put(`<rect x="${x + w * 0.79}" y="${floorY - 150}" width="86" height="150" fill="#05070a"/>`);
+    put(`<path d="M ${x + w * 0.79} ${floorY - 150} l 86 0" stroke="${p.edge}" stroke-width="2.5"/>`);
+    put(`<path d="M ${x + w * 0.79 - 60} ${floorY - 146} l 54 -10 l 0 148 l -54 -14 Z" fill="${p.mid}" stroke="${p.edge}" stroke-width="2"/>`);
+    for (let i = 0; i < 3; i++)
+      put(`<rect x="${x + w * 0.79 - 58}" y="${floorY - 128 + i * 46}" width="50" height="7" fill="${p.edge}" fill-opacity="0.6"/>`);
+  },
+  kennel(x, w, floorY, p, rng) {
+    for (let i = 0; i < 26; i++) {
+      const bx = x + w * 0.2 + rng() * w * 0.66;
+      const by = floorY + 6 + rng() * 46;
+      const len = 10 + rng() * 24;
+      const a = rng() * 0.8 - 0.4;
+      put(`<g transform="rotate(${(a * 57).toFixed(1)} ${bx.toFixed(1)} ${by.toFixed(1)})"><rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${len.toFixed(1)}" height="3" rx="1.5" fill="#8d8672" fill-opacity="0.5"/><circle cx="${bx.toFixed(1)}" cy="${(by + 1.5).toFixed(1)}" r="3" fill="#8d8672" fill-opacity="0.5"/><circle cx="${(bx + len).toFixed(1)}" cy="${(by + 1.5).toFixed(1)}" r="3" fill="#8d8672" fill-opacity="0.5"/></g>`);
+    }
+  },
+  'long-drain'(x, w, floorY, p) {
+    // the water runs the wrong way, so the arrows disagree with the slope
+    for (let i = 0; i < 5; i++) {
+      const ax = x + w * (0.16 + i * 0.16);
+      put(`<path d="M ${ax} ${floorY + 62} l 26 7 l -26 7" fill="none" stroke="${p.glow}" stroke-width="2" stroke-opacity="0.5"/>`);
+    }
+  },
+  'lamplighters-rest'(x, w, floorY, p) {
+    // somebody sat here with a lantern and did not get up
+    const lx = x + w * 0.26;
+    put(`<rect x="${lx - 15}" y="${floorY - 34}" width="30" height="30" rx="3" fill="${p.mid}" stroke="${p.edge}" stroke-width="2"/>`);
+    put(`<rect x="${lx - 9}" y="${floorY - 28}" width="18" height="19" fill="#1a120a"/>`);
+    put(`<path d="M ${lx - 15} ${floorY - 34} l 15 -12 l 15 12 Z" fill="${p.mid}" stroke="${p.edge}" stroke-width="2"/>`);
+    put(`<ellipse cx="${lx}" cy="${floorY - 2}" rx="42" ry="10" fill="#000" fill-opacity="0.35"/>`);
+  },
+  undergate(x, w, floorY, p) {
+    for (const cx of [x + w * 0.2, x + w * 0.8]) {
+      put(`<path d="M ${cx - 52} ${floorY} l 0 -104 q 52 -46 104 0 l 0 104 Z" fill="#05070a"/>`);
+      put(`<path d="M ${cx - 52} ${floorY - 104} q 52 -46 104 0" fill="none" stroke="${p.edge}" stroke-width="3"/>`);
+    }
+  },
+};
+
+// --- the fire -------------------------------------------------------------
+function bonfire(x, floorY, scale, rng) {
+  const s = scale;
+  put(`<ellipse cx="${x}" cy="${floorY + 2}" rx="${74 * s}" ry="${16 * s}" fill="${FIRE.deep}" fill-opacity="0.28"/>`);
+  // a ring of blades stuck in the ash, which is what a bonfire is here
+  for (let i = -3; i <= 3; i++) {
+    const bx = x + i * 15 * s;
+    const lean = i * 3;
+    put(
+      `<path d="M ${bx} ${floorY} l ${lean} ${-40 * s} l ${3 * s} ${-6 * s} l ${3 * s} ${6 * s} Z" fill="#5a6472"/>`,
+    );
+  }
+  for (let i = 0; i < 16; i++) {
+    const ax = x - 44 * s + rng() * 88 * s;
+    put(`<ellipse cx="${ax.toFixed(1)}" cy="${(floorY - 2 - rng() * 6).toFixed(1)}" rx="${(6 + rng() * 12).toFixed(1)}" ry="${(3 + rng() * 4).toFixed(1)}" fill="#3a3128"/>`);
+  }
+  const tongue = (spread, tall, lean, fill, op) => {
+    const t = floorY - tall;
+    put(
+      `<path d="M ${(x - spread).toFixed(1)} ${floorY}
+        C ${(x - spread * 0.75).toFixed(1)} ${(floorY - tall * 0.45).toFixed(1)}
+          ${(x + lean - spread * 0.5).toFixed(1)} ${(floorY - tall * 0.62).toFixed(1)}
+          ${(x + lean).toFixed(1)} ${t.toFixed(1)}
+        C ${(x + lean + spread * 0.55).toFixed(1)} ${(floorY - tall * 0.6).toFixed(1)}
+          ${(x + spread * 0.7).toFixed(1)} ${(floorY - tall * 0.4).toFixed(1)}
+          ${(x + spread).toFixed(1)} ${floorY} Z"
+       fill="${fill}" fill-opacity="${op}"/>`,
+    );
+  };
+  tongue(38 * s, 104 * s, -7 * s, FIRE.deep, 0.8);
+  tongue(27 * s, 84 * s, 9 * s, FIRE.low, 0.95);
+  tongue(17 * s, 62 * s, -4 * s, FIRE.mid, 1);
+  tongue(8 * s, 38 * s, 3 * s, FIRE.core, 1);
+  // a torn-off tongue riding above the rest, which is what makes it read as
+  // burning rather than as a shape
+  tongue(6 * s, 22 * s, 12 * s, FIRE.mid, 0.7);
+  for (let i = 0; i < 14; i++) {
+    put(
+      `<circle cx="${(x - 30 * s + rng() * 60 * s).toFixed(1)}" cy="${(floorY - 40 * s - rng() * 110 * s).toFixed(1)}" r="${(1 + rng() * 2.4).toFixed(1)}" fill="${FIRE.mid}" fill-opacity="${(0.3 + rng() * 0.6).toFixed(2)}"/>`,
+    );
+  }
+}
+
+/** Light thrown onto the floor by anything burning. */
+function pool(x, floorY, r, colour, strength) {
+  put(
+    `<ellipse cx="${x}" cy="${floorY + 4}" rx="${r}" ry="${r * 0.26}" fill="${colour}" fill-opacity="${strength}"/>`,
+  );
+}
+
+// --- the sixteen ----------------------------------------------------------
+// Each of these is built from the `look` field in `lore.js`. The husk's arms
+// swing from the elbow and never the shoulder, so its elbows are the only
+// joint that moves. The hound runs on three good legs out of four, so one is
+// short. Nothing here is a generic humanoid with a hat on.
+
+// A silhouette has to separate from the floor it is standing on. In a lit
+// hall that means going darker than the stone; in a dark cave the stone is
+// already almost black, so the figure has to come up to meet it instead.
+// Drawing the kennel with a flat dark body produced two hounds nobody could
+// see, which is how this ended up being computed per room.
+const BODY = { dark: '#0e1319', mid: '#1b232d', rim: '#4a5b6d', wet: '#2a3b46' };
+
+function bodyFor(light) {
+  if (light === 'dark' || light === 'dim') {
+    return { dark: '#2f3d4c', mid: '#3d4d5e', rim: '#93a6bb', wet: '#35505e', halo: '#7fa6c8', up: true };
+  }
+  return { dark: '#0e1319', mid: '#1b232d', rim: '#4a5b6d', wet: '#2a3b46', halo: '#000000', up: false };
+}
+
+/** Lift a figure off the wall behind it: a soft halo, the other way round in
+ *  a lit room, where the figure is darker than everything and needs shadow. */
+function halo(x, floorY, s, up) {
+  put(`<ellipse cx="${x}" cy="${(floorY - 46 * s).toFixed(1)}" rx="${(64 * s).toFixed(1)}" ry="${(74 * s).toFixed(1)}" fill="url(#${up ? 'haloD' : 'haloL'})"/>`);
+}
+
+const limb = (x1, y1, x2, y2, wdt, col) =>
+  put(`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" stroke-width="${wdt.toFixed(1)}" stroke-linecap="round"/>`);
+
+function torch(x, y, s, f) {
+  const t = x + 14 * s * f;
+  limb(x, y + 6 * s, t, y - 30 * s, 3.4 * s, '#4a3a24');
+  put(`<path d="M ${t - 9 * s} ${y - 28 * s} q ${-4 * s} ${-22 * s} ${9 * s} ${-40 * s} q ${13 * s} ${19 * s} ${9 * s} ${40 * s} Z" fill="${FIRE.deep}" fill-opacity="0.8"/>`);
+  put(`<path d="M ${t - 6 * s} ${y - 30 * s} q ${-2 * s} ${-16 * s} ${6 * s} ${-30 * s} q ${9 * s} ${14 * s} ${6 * s} ${30 * s} Z" fill="${FIRE.mid}"/>`);
+  put(`<circle cx="${t}" cy="${y - 46 * s}" r="${5.5 * s}" fill="${FIRE.core}" fill-opacity="0.9"/>`);
+}
+
+function spear(x, y, s, f) {
+  const hand = x + 20 * s * f;
+  limb(hand - 26 * s * f, y + 34 * s, hand + 54 * s * f, y - 16 * s, 3.2 * s, '#4a3a24');
+  put(`<path d="M ${hand + 54 * s * f} ${y - 16 * s} l ${15 * s * f} ${-7 * s} l ${-12 * s * f} ${-8 * s} Z" fill="#8a97a5"/>`);
+}
+
+function shield(x, y, s, f) {
+  put(`<path d="M ${x + 20 * s * f} ${y - 8 * s} q ${16 * s * f} ${4 * s} ${15 * s * f} ${22 * s} q ${-1 * s * f} ${20 * s} ${-15 * s * f} ${28 * s} q ${-14 * s * f} ${-8 * s} ${-15 * s * f} ${-28 * s} q ${1 * s * f} ${-18 * s} ${15 * s * f} ${-22 * s} Z" fill="${BODY.mid}" stroke="${BODY.rim}" stroke-width="${1.6 * s}"/>`);
+}
+
+const CREATURE = {
+  husk(x, g, s, f) {
+    const hip = g - 44 * s;
+    const sh = g - 82 * s;
+    // stance: weight back, knees never quite straight
+    limb(x - 2 * s, hip, x - 10 * s, g - 3 * s, 7 * s, BODY.mid);
+    limb(x - 10 * s, g - 3 * s, x - 13 * s, g, 6 * s, BODY.mid);
+    limb(x + 3 * s, hip, x + 9 * s, g - 4 * s, 7 * s, BODY.mid);
+    limb(x + 9 * s, g - 4 * s, x + 13 * s, g, 6 * s, BODY.mid);
+    // torso, tapered, with the chest cavity cut out of the silhouette itself
+    put(`<path d="M ${x - 13 * s} ${sh + 2 * s}
+      q ${5 * s} ${-5 * s} ${11 * s} ${-4 * s}
+      q ${3 * s} ${9 * s} ${1 * s} ${16 * s}
+      q ${-4 * s} ${6 * s} ${1 * s} ${13 * s}
+      q ${4 * s} ${5 * s} ${10 * s} ${3 * s}
+      l ${-2 * s} ${18 * s}
+      q ${-9 * s} ${5 * s} ${-19 * s} ${1 * s} Z" fill="${BODY.dark}"/>`);
+    put(`<path d="M ${x + 12 * s} ${sh - 2 * s}
+      q ${4 * s} ${16 * s} ${1 * s} ${30 * s}
+      l ${-2 * s} ${16 * s}
+      q ${-6 * s} ${3 * s} ${-12 * s} ${2 * s}
+      l ${2 * s} ${-46 * s} Z" fill="${BODY.mid}"/>`);
+    // arms: the shoulder never moves, the elbow does all of it
+    limb(x - 12 * s, sh + 4 * s, x - 15 * s, sh + 30 * s, 5 * s, BODY.mid);
+    limb(x - 15 * s, sh + 30 * s, x - 19 * s + 4 * s * f, sh + 50 * s, 4.2 * s, BODY.mid);
+    limb(x + 12 * s, sh + 3 * s, x + 16 * s, sh + 30 * s, 5 * s, BODY.mid);
+    limb(x + 16 * s, sh + 30 * s, x + 21 * s + 5 * s * f, sh + 48 * s, 4.2 * s, BODY.mid);
+    // neck and head, hung forward of the shoulders
+    limb(x + 2 * s, sh + 2 * s, x + 7 * s * f, sh - 6 * s, 5 * s, BODY.mid);
+    put(`<path d="M ${x + 2 * s * f} ${sh - 6 * s}
+      q ${9 * s * f} ${-4 * s} ${13 * s * f} ${4 * s}
+      q ${2 * s * f} ${9 * s} ${-6 * s * f} ${11 * s}
+      q ${-9 * s * f} ${0} ${-11 * s * f} ${-7 * s} Z" fill="${BODY.dark}"/>`);
+    put(`<line x1="${x - 13 * s}" y1="${sh + 2 * s}" x2="${x + 13 * s}" y2="${sh}" stroke="${BODY.rim}" stroke-width="${1.3 * s}" stroke-opacity="0.75"/>`);
+  },
+  hound(x, g, s, f) {
+    const back = g - 40 * s;
+    // deep chest at the front, nothing behind the ribs
+    put(`<path d="M ${x + 30 * s * f} ${back - 4 * s}
+      q ${-14 * s * f} ${-9 * s} ${-30 * s * f} ${-3 * s}
+      q ${-18 * s * f} ${7 * s} ${-30 * s * f} ${4 * s}
+      q ${4 * s * f} ${10 * s} ${6 * s * f} ${17 * s}
+      q ${20 * s * f} ${7 * s} ${44 * s * f} ${2 * s}
+      q ${8 * s * f} ${-6 * s} ${10 * s * f} ${-20 * s} Z" fill="${BODY.dark}"/>`);
+    // front legs long, back legs short and staggered — one is no good
+    limb(x + 20 * s * f, back + 8 * s, x + 24 * s * f, g, 4.6 * s, BODY.mid);
+    limb(x + 12 * s * f, back + 11 * s, x + 8 * s * f, g, 4.2 * s, BODY.mid);
+    limb(x - 22 * s * f, back + 12 * s, x - 28 * s * f, g, 4.4 * s, BODY.mid);
+    limb(x - 13 * s * f, back + 14 * s, x - 11 * s * f, g - 9 * s, 3.4 * s, BODY.mid);
+    // head low and forward, snout, ear laid back
+    limb(x + 28 * s * f, back - 2 * s, x + 40 * s * f, back + 6 * s, 6 * s, BODY.dark);
+    put(`<path d="M ${x + 38 * s * f} ${back + 1 * s}
+      q ${10 * s * f} ${-2 * s} ${16 * s * f} ${4 * s}
+      q ${-5 * s * f} ${6 * s} ${-16 * s * f} ${5 * s} Z" fill="${BODY.dark}"/>`);
+    put(`<path d="M ${x + 34 * s * f} ${back - 1 * s} l ${-7 * s * f} ${-9 * s} l ${9 * s * f} ${2 * s} Z" fill="${BODY.dark}"/>`);
+    // tail down
+    put(`<path d="M ${x - 30 * s * f} ${back + 8 * s} q ${-12 * s * f} ${4 * s} ${-14 * s * f} ${16 * s}" fill="none" stroke="${BODY.mid}" stroke-width="${3 * s}" stroke-linecap="round"/>`);
+  },
+  crawler(x, g, s, f) {
+    put(`<path d="M ${x - 30 * s * f} ${g - 4 * s} q ${18 * s * f} ${-8 * s} ${40 * s * f} ${-16 * s} l ${8 * s * f} ${14 * s} q ${-24 * s * f} ${10 * s} ${-48 * s * f} ${8 * s} Z" fill="${BODY.dark}"/>`);
+    limb(x + 22 * s * f, g - 22 * s, x + 34 * s * f, g, 7 * s, BODY.mid);
+    limb(x + 10 * s * f, g - 20 * s, x + 22 * s * f, g, 7 * s, BODY.mid);
+    limb(x - 26 * s * f, g - 4 * s, x - 52 * s * f, g, 4.5 * s, BODY.mid);
+    limb(x - 26 * s * f, g - 2 * s, x - 48 * s * f, g + 2 * s, 4 * s, BODY.mid);
+    put(`<ellipse cx="${x + 34 * s * f}" cy="${g - 26 * s}" rx="${9 * s}" ry="${8 * s}" fill="${BODY.dark}"/>`);
+  },
+  acolyte(x, g, s) {
+    put(`<path d="M ${x - 20 * s} ${g} q ${4 * s} ${-52 * s} ${20 * s} ${-64 * s} q ${16 * s} ${12 * s} ${20 * s} ${64 * s} Z" fill="${BODY.dark}"/>`);
+    put(`<path d="M ${x - 12 * s} ${g - 66 * s} q ${12 * s} ${-16 * s} ${24 * s} 0 q ${-12 * s} ${8 * s} ${-24 * s} 0 Z" fill="${BODY.mid}"/>`);
+    put(`<ellipse cx="${x}" cy="${g - 74 * s}" rx="${11 * s}" ry="${13 * s}" fill="${BODY.dark}"/>`);
+    put(`<ellipse cx="${x}" cy="${g - 72 * s}" rx="${6 * s}" ry="${8 * s}" fill="#000" fill-opacity="0.7"/>`);
+    limb(x - 3 * s, g - 52 * s, x + 3 * s, g - 52 * s, 7 * s, BODY.mid); // hands together
+  },
+  knightling(x, g, s, f) {
+    const sh = g - 60 * s;
+    limb(x - 5 * s, g - 30 * s, x - 8 * s, g, 6 * s, BODY.mid);
+    limb(x + 5 * s, g - 30 * s, x + 8 * s, g, 6 * s, BODY.mid);
+    put(`<path d="M ${x - 13 * s} ${sh} q ${13 * s} ${7 * s} ${26 * s} 0 l ${-3 * s} ${32 * s} q ${-10 * s} ${5 * s} ${-20 * s} 0 Z" fill="${BODY.mid}"/>`);
+    for (let i = 0; i < 4; i++)
+      put(`<line x1="${x - 12 * s}" y1="${sh + 6 * s + i * 7 * s}" x2="${x + 12 * s}" y2="${sh + 6 * s + i * 7 * s}" stroke="${BODY.rim}" stroke-width="${1 * s}" stroke-opacity="0.6"/>`);
+    put(`<ellipse cx="${x}" cy="${sh - 10 * s}" rx="${9 * s}" ry="${10 * s}" fill="${BODY.dark}"/>`);
+    limb(x - 13 * s * f, sh + 6 * s, x - 26 * s * f, sh + 24 * s, 4.5 * s, BODY.mid);
+    shield(x, sh + 4 * s, s, -f);
+  },
+  ghoul(x, g, s, f) {
+    limb(x - 6 * s, g - 34 * s, x - 12 * s, g, 5 * s, BODY.mid);
+    limb(x + 6 * s, g - 34 * s, x + 11 * s, g, 5 * s, BODY.mid);
+    put(`<path d="M ${x - 10 * s} ${g - 60 * s} q ${10 * s} ${6 * s} ${20 * s} 0 l ${-5 * s} ${28 * s} q ${-5 * s} ${4 * s} ${-10 * s} 0 Z" fill="${BODY.dark}"/>`);
+    limb(x - 10 * s, g - 58 * s, x - 30 * s * f, g - 34 * s, 4 * s, BODY.mid);
+    limb(x - 30 * s * f, g - 34 * s, x - 30 * s * f - 15 * s, g - 46 * s, 3.4 * s, BODY.mid);
+    limb(x + 10 * s, g - 58 * s, x + 30 * s * f, g - 40 * s, 4 * s, BODY.mid);
+    limb(x + 30 * s * f, g - 40 * s, x + 46 * s * f, g - 30 * s, 3.4 * s, BODY.mid);
+    put(`<ellipse cx="${x + 3 * s * f}" cy="${g - 68 * s}" rx="${8 * s}" ry="${8 * s}" fill="${BODY.dark}"/>`);
+  },
+  stonemask(x, g, s, f) {
+    limb(x - 7 * s, g - 40 * s, x - 12 * s, g, 8 * s, BODY.mid);
+    limb(x + 7 * s, g - 40 * s, x + 12 * s, g, 8 * s, BODY.mid);
+    put(`<path d="M ${x - 15 * s} ${g - 68 * s} q ${15 * s} ${8 * s} ${30 * s} 0 l ${-6 * s} ${34 * s} q ${-9 * s} ${5 * s} ${-18 * s} 0 Z" fill="${BODY.dark}"/>`);
+    limb(x - 15 * s, g - 62 * s, x - 24 * s * f, g - 34 * s, 5 * s, BODY.mid);
+    limb(x + 15 * s, g - 62 * s, x + 24 * s * f, g - 34 * s, 5 * s, BODY.mid);
+    // heavy at the head: the mask is the biggest thing on it
+    put(`<path d="M ${x - 16 * s} ${g - 74 * s} q ${16 * s} ${-16 * s} ${32 * s} 0 q ${-2 * s} ${26 * s} ${-16 * s} ${28 * s} q ${-14 * s} ${-2 * s} ${-16 * s} ${-28 * s} Z" fill="#6b6152" stroke="${BODY.rim}" stroke-width="${1.4 * s}"/>`);
+    put(`<circle cx="${x - 6 * s}" cy="${g - 74 * s}" r="${2.6 * s}" fill="#000"/>`);
+    put(`<circle cx="${x + 6 * s}" cy="${g - 74 * s}" r="${2.6 * s}" fill="#000"/>`);
+  },
+  moth(x, g, s, f) {
+    const y = g - 74 * s;
+    put(`<path d="M ${x} ${y} q ${-40 * s * f} ${-34 * s} ${-52 * s * f} ${-4 * s} q ${8 * s * f} ${24 * s} ${52 * s * f} ${16 * s} Z" fill="${BODY.mid}" fill-opacity="0.85"/>`);
+    put(`<path d="M ${x} ${y} q ${34 * s * f} ${-38 * s} ${50 * s * f} ${-8 * s} q ${-10 * s * f} ${26 * s} ${-50 * s * f} ${18 * s} Z" fill="${BODY.mid}" fill-opacity="0.85"/>`);
+    put(`<ellipse cx="${x}" cy="${y + 6 * s}" rx="${5 * s}" ry="${15 * s}" fill="${BODY.dark}"/>`);
+    limb(x, y - 10 * s, x - 8 * s * f, y - 22 * s, 1.6 * s, BODY.rim);
+    limb(x, y - 10 * s, x + 6 * s * f, y - 23 * s, 1.6 * s, BODY.rim);
+  },
+  warder(x, g, s, f) {
+    limb(x - 12 * s, g - 44 * s, x - 20 * s, g, 9 * s, BODY.mid);
+    limb(x + 12 * s, g - 44 * s, x + 20 * s, g, 9 * s, BODY.mid);
+    put(`<path d="M ${x - 22 * s} ${g - 74 * s} l ${44 * s} 0 l ${-5 * s} ${36 * s} l ${-34 * s} 0 Z" fill="${BODY.mid}"/>`);
+    for (let i = 0; i < 5; i++)
+      put(`<rect x="${x - 20 * s}" y="${g - 70 * s + i * 7 * s}" width="${40 * s}" height="${4.5 * s}" fill="${BODY.dark}" fill-opacity="0.7"/>`);
+    put(`<rect x="${x - 9 * s}" y="${g - 90 * s}" width="${18 * s}" height="${17 * s}" rx="${3 * s}" fill="${BODY.dark}"/>`);
+    put(`<rect x="${x - 7 * s}" y="${g - 84 * s}" width="${14 * s}" height="${2.4 * s}" fill="#000"/>`);
+    limb(x + 22 * s * f, g - 68 * s, x + 34 * s * f, g - 36 * s, 5.5 * s, BODY.mid);
+  },
+  kiln(x, g, s, f) {
+    limb(x - 7 * s, g - 40 * s, x - 12 * s, g, 8 * s, '#5a3a2a');
+    limb(x + 7 * s, g - 40 * s, x + 12 * s, g, 8 * s, '#5a3a2a');
+    put(`<path d="M ${x - 15 * s} ${g - 70 * s} q ${15 * s} ${8 * s} ${30 * s} 0 l ${-5 * s} ${32 * s} q ${-10 * s} ${5 * s} ${-20 * s} 0 Z" fill="#6b4230"/>`);
+    put(`<ellipse cx="${x}" cy="${g - 80 * s}" rx="${10 * s}" ry="${11 * s}" fill="#6b4230"/>`);
+    for (const [a, b, c, d] of [[-8, -60, 4, -44], [6, -66, -2, -50], [0, -44, 9, -30], [-10, -76, -3, -66]])
+      limb(x + a * s, g + b * s, x + c * s, g + d * s, 2.2 * s, FIRE.low);
+    limb(x + 15 * s * f, g - 62 * s, x + 30 * s * f, g - 40 * s, 5 * s, '#6b4230');
+    pool(x, g, 40 * s, FIRE.low, 0.16);
+  },
+  drowned(x, g, s, f) {
+    limb(x - 9 * s, g - 44 * s, x - 15 * s, g, 10 * s, BODY.wet);
+    limb(x + 9 * s, g - 44 * s, x + 15 * s, g, 10 * s, BODY.wet);
+    put(`<path d="M ${x - 19 * s} ${g - 74 * s} q ${19 * s} ${10 * s} ${38 * s} 0 l ${-6 * s} ${36 * s} q ${-13 * s} ${6 * s} ${-26 * s} 0 Z" fill="${BODY.wet}"/>`);
+    // arms drifting as if still buoyed
+    limb(x - 19 * s, g - 68 * s, x - 38 * s, g - 76 * s, 5 * s, BODY.wet);
+    limb(x + 19 * s, g - 68 * s, x + 38 * s, g - 78 * s, 5 * s, BODY.wet);
+    put(`<ellipse cx="${x}" cy="${g - 84 * s}" rx="${11 * s}" ry="${11 * s}" fill="${BODY.wet}"/>`);
+    for (let i = -3; i <= 3; i++)
+      limb(x + i * 3 * s, g - 92 * s, x + i * 5 * s, g - 106 * s - Math.abs(i) * 2 * s, 1.6 * s, BODY.rim);
+  },
+  chorister(x, g, s) {
+    put(`<path d="M ${x - 18 * s} ${g} q ${5 * s} ${-54 * s} ${18 * s} ${-64 * s} q ${13 * s} ${10 * s} ${18 * s} ${64 * s} Z" fill="${BODY.dark}"/>`);
+    put(`<ellipse cx="${x + 2 * s}" cy="${g - 74 * s}" rx="${10 * s}" ry="${12 * s}" fill="${BODY.mid}" transform="rotate(-24 ${x} ${g - 74 * s})"/>`);
+    put(`<ellipse cx="${x + 5 * s}" cy="${g - 70 * s}" rx="${4 * s}" ry="${6 * s}" fill="#000" fill-opacity="0.75" transform="rotate(-24 ${x} ${g - 74 * s})"/>`);
+    limb(x - 14 * s, g - 56 * s, x - 20 * s, g - 26 * s, 4.5 * s, BODY.mid);
+    limb(x + 14 * s, g - 56 * s, x + 20 * s, g - 26 * s, 4.5 * s, BODY.mid);
+    for (let i = 1; i <= 3; i++)
+      put(`<path d="M ${x + 10 * s} ${g - 78 * s} q ${i * 16 * s} ${-i * 6 * s} ${i * 30 * s} ${-i * 2 * s}" fill="none" stroke="${BODY.rim}" stroke-width="${1.2 * s}" stroke-opacity="${0.5 / i}"/>`);
+  },
+  ironclad(x, g, s, f) {
+    limb(x - 12 * s, g - 46 * s, x - 18 * s, g, 12 * s, '#39434f');
+    limb(x + 12 * s, g - 46 * s, x + 18 * s, g, 12 * s, '#39434f');
+    put(`<path d="M ${x - 24 * s} ${g - 80 * s} q ${24 * s} ${-8 * s} ${48 * s} 0 l ${-7 * s} ${42 * s} q ${-17 * s} ${7 * s} ${-34 * s} 0 Z" fill="#39434f"/>`);
+    put(`<path d="M ${x - 24 * s} ${g - 80 * s} q ${24 * s} ${-8 * s} ${48 * s} 0" fill="none" stroke="${BODY.rim}" stroke-width="${2 * s}"/>`);
+    put(`<path d="M ${x - 11 * s} ${g - 96 * s} q ${11 * s} ${-9 * s} ${22 * s} 0 l ${-2 * s} ${17 * s} l ${-18 * s} 0 Z" fill="#2b333d"/>`);
+    limb(x + 24 * s * f, g - 74 * s, x + 40 * s * f, g - 40 * s, 7 * s, '#39434f');
+  },
+  wisp(x, g, s, f) {
+    const y = g - 80 * s;
+    for (let i = 6; i >= 1; i--)
+      put(`<circle cx="${x - i * 13 * s * f}" cy="${y + i * 3 * s}" r="${(9 - i) * s}" fill="${FIRE.mid}" fill-opacity="${(0.1 * i).toFixed(2)}"/>`);
+    put(`<circle cx="${x}" cy="${y}" r="${13 * s}" fill="${FIRE.low}" fill-opacity="0.35"/>`);
+    put(`<circle cx="${x}" cy="${y}" r="${7 * s}" fill="${FIRE.mid}"/>`);
+    put(`<circle cx="${x}" cy="${y}" r="${3.4 * s}" fill="#fff"/>`);
+    pool(x, g, 46 * s, FIRE.mid, 0.13);
+  },
+  colossus(x, g, s, f) {
+    const k = s * 1.7;
+    limb(x - 18 * k, g - 60 * k, x - 26 * k, g, 15 * k, BODY.mid);
+    limb(x + 18 * k, g - 60 * k, x + 26 * k, g, 15 * k, BODY.mid);
+    put(`<path d="M ${x - 32 * k} ${g - 104 * k} q ${32 * k} ${-10 * k} ${64 * k} 0 l ${-9 * k} ${52 * k} q ${-23 * k} ${9 * k} ${-46 * k} 0 Z" fill="${BODY.dark}"/>`);
+    put(`<ellipse cx="${x}" cy="${g - 112 * k}" rx="${10 * k}" ry="${9 * k}" fill="${BODY.dark}"/>`);
+    limb(x + 32 * k * f, g - 96 * k, x + 52 * k * f, g - 40 * k, 10 * k, BODY.mid);
+    limb(x - 32 * k * f, g - 96 * k, x - 46 * k * f, g - 44 * k, 10 * k, BODY.mid);
+  },
+  shade(x, g, s, f) {
+    // Never re-coloured by the room. Nothing about a shade catches light.
+    const sh = g - 74 * s;
+    limb(x - 7 * s, g - 40 * s, x - 12 * s, g, 7 * s, '#0a0c10');
+    limb(x + 7 * s, g - 40 * s, x + 12 * s, g, 7 * s, '#0a0c10');
+    put(`<path d="M ${x - 15 * s} ${sh} q ${15 * s} ${8 * s} ${30 * s} 0 l ${-5 * s} ${36 * s} q ${-10 * s} ${5 * s} ${-20 * s} 0 Z" fill="#0a0c10"/>`);
+    put(`<ellipse cx="${x}" cy="${sh - 11 * s}" rx="${9 * s}" ry="${11 * s}" fill="#0a0c10"/>`);
+    limb(x + 15 * s * f, sh + 6 * s, x + 30 * s * f, sh + 20 * s, 5 * s, '#0a0c10');
+    limb(x + 30 * s * f, sh + 20 * s, x + 58 * s * f, sh - 4 * s, 3 * s, '#39434f'); // your sword
+    put(`<ellipse cx="${x}" cy="${g + 2 * s}" rx="${26 * s}" ry="${6 * s}" fill="#000" fill-opacity="0.5"/>`);
+  },
+};
+
+/** Draw one concrete foe: family shape, then whatever it is carrying. */
+function creature(id, x, floorY, scale, facing) {
+  const foe = FOES[id];
+  const draw = CREATURE[foe.family];
+  if (!draw) return;
+  const s = scale * (foe.family === 'colossus' ? 0.85 : 1);
+  draw(x, floorY, s, facing);
+  const carry = id.slice(foe.family.length);
+  const sh = floorY - 60 * s;
+  if (carry === '-torch') {
+    torch(x + 16 * s * facing, sh + 20 * s, s, facing);
+    pool(x, floorY, 78 * s, FIRE.mid, 0.14);
+  }
+  if (carry === '-spear') spear(x, sh + 14 * s, s, facing);
+  if (carry === '-heavy') shield(x, sh + 8 * s, s, facing);
+}
+
+// --- staging --------------------------------------------------------------
+// Where things stand is `layout`, which the writing already decided. A ring
+// surrounds you, an ambush puts one in front and the rest behind you, a pack
+// arrives together. Reading it off the data means the picture cannot disagree
+// with the room.
+function positions(layout, n, x, w) {
+  const out = [];
+  if (layout === 'single' || n === 1) {
+    out.push({ x: x + w * 0.63, s: 1, f: -1 });
+  } else if (layout === 'spread') {
+    for (let i = 0; i < n; i++) out.push({ x: x + w * (0.3 + (i * 0.5) / Math.max(1, n - 1)), s: 1 - i * 0.06, f: -1 });
+  } else if (layout === 'pack') {
+    for (let i = 0; i < n; i++) out.push({ x: x + w * 0.58 + (i - (n - 1) / 2) * 132, s: 0.94 + (i % 2) * 0.12, f: -1 });
+  } else if (layout === 'ring') {
+    for (let i = 0; i < n; i++) {
+      const a = -0.5 + (i / Math.max(1, n - 1)) * 1.0;
+      out.push({ x: x + w * 0.58 + Math.sin(a) * w * 0.3, s: 1 - Math.abs(a) * 0.18, f: Math.sin(a) > 0 ? -1 : 1 });
+    }
+  } else {
+    // ambush: one in the open, the rest waiting behind the entrance
+    out.push({ x: x + w * 0.55, s: 1, f: -1 });
+    for (let i = 1; i < n; i++) out.push({ x: x + w * (0.12 + i * 0.06), s: 0.82, f: 1 });
+  }
+  return out;
+}
+
+// --- one panel ------------------------------------------------------------
+function panel(room, y) {
+  const p = LIGHT[room.light] || LIGHT.dim;
+  const rng = rngFor(room.id);
+  const x = 40;
+  const w = W - 80;
+  const h = PANEL - 66;
+
+  put(`<g>`);
+  put(`<clipPath id="clip-${room.id.replace(':', '-')}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4"/></clipPath>`);
+  put(`<g clip-path="url(#clip-${room.id.replace(':', '-')})">`);
+
+  const arch = ARCH[room.kind] || hall;
+  const floorY = arch(x, y, w, h, p, rng);
+
+  const prop = PROPS[room.key];
+  if (prop) prop(x, w, floorY, p, rngFor(`${room.id}-props`));
+
+  if (room.kind === 'bonfire') {
+    bonfire(x + w * 0.34, floorY, 1.25, rng);
+    pool(x + w * 0.34, floorY, 210, FIRE.mid, 0.16);
+    pool(x + w * 0.34, floorY, 120, FIRE.core, 0.1);
+  }
+
+  const skin = bodyFor(room.light);
+  Object.assign(BODY, skin);
+  const spots = positions(room.layout, room.foes.length, x, w);
+  room.foes.forEach((id, i) => {
+    const at = spots[i] || spots[spots.length - 1];
+    halo(at.x, floorY, at.s * 2.05, skin.up);
+    creature(id, at.x, floorY, at.s * 2.05, at.f);
+  });
+
+  if (room.boss) {
+    const b = BESTIARY[room.boss];
+    put(`<text x="${x + w / 2}" y="${floorY - 128}" text-anchor="middle" font-family="Georgia,serif" font-size="21" fill="#cfe0ee" fill-opacity="0.5" letter-spacing="5">${esc(b.name.vi.toUpperCase())}</text>`);
+  }
+
+  // vignette, so the eye lands in the middle of the room
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#vig)"/>`);
+  put(`</g>`);
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="none" stroke="${p.edge}" stroke-width="1.5" stroke-opacity="0.8"/>`);
+
+  // --- the label block, outside the picture
+  const ty = y + h + 24;
+  put(`<text x="${x}" y="${ty}" font-family="Georgia,serif" font-size="21" fill="#e8dcc8">${esc(room.name.vi)}</text>`);
+  const vw = room.name.vi.length * 11 + 16;
+  put(`<text x="${x + vw}" y="${ty}" font-family="Georgia,serif" font-size="14" fill="#8b98a6">${esc(room.name.en)}</text>`);
+  put(`<text x="${x + w}" y="${ty}" text-anchor="end" font-family="ui-monospace,monospace" font-size="12" fill="#5f6b78">${esc(room.id)} · ${esc(room.kind)} · ${esc(room.light)} · ${esc(room.layout)}</text>`);
+  put(`<text x="${x}" y="${ty + 21}" font-family="Georgia,serif" font-size="14.5" fill="#a9b6c4">${esc(room.line.vi)}</text>`);
+  if (room.note) {
+    put(`<text x="${x + w}" y="${ty + 21}" text-anchor="end" font-family="Georgia,serif" font-size="12" fill="#6a7684" font-style="italic">${esc(room.note)}</text>`);
+  }
+  put(`</g>`);
+}
+
+// --- the sheet ------------------------------------------------------------
+export function drawArea(areaId) {
+  const spot = AREAS.find((a) => a.id === areaId);
+  if (!spot) throw new Error(`no area called ${areaId}`);
+  const rooms = ROOMS.filter((r) => r.area === areaId);
+  const H = HEAD + rooms.length * PANEL + 40;
+
+  parts.length = 0;
+  put(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="Georgia,serif">`);
+  put(`<defs>
+    <radialGradient id="haloD" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#05080c" stop-opacity="0.8"/>
+      <stop offset="55%" stop-color="#05080c" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#05080c" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="haloL" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.34"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vig" cx="50%" cy="52%" r="72%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.62"/>
+    </radialGradient>
+  </defs>`);
+  put(`<rect width="${W}" height="${H}" fill="#0a0c10"/>`);
+
+  put(`<text x="40" y="62" font-family="Georgia,serif" font-size="34" fill="#e8dcc8" letter-spacing="2">${esc(areaId.toUpperCase())}</text>`);
+  put(`<text x="40" y="92" font-family="Georgia,serif" font-size="15" fill="#8b98a6">${rooms.length} phòng · tier ${spot.tier}${spot.boss ? ` · boss: ${esc(BESTIARY[spot.boss].name.vi)}` : ''}${spot.fold ? ` · lối tắt về ${esc(spot.fold)}` : ''}</text>`);
+  const kinds = [...new Set(rooms.flatMap((r) => r.foes))].map((id) => LORE[FOES[id].family].name.vi);
+  put(`<text x="40" y="116" font-family="Georgia,serif" font-size="13" fill="#6a7684">${esc([...new Set(kinds)].join(' · '))}</text>`);
+  put(`<line x1="40" y1="132" x2="${W - 40}" y2="132" stroke="#2c3a4a" stroke-width="1"/>`);
+
+  rooms.forEach((room, i) => panel(room, HEAD + i * PANEL));
+  put(`</svg>`);
+
+  mkdirSync(new URL('../dist/', import.meta.url), { recursive: true });
+  const out = new URL(`../dist/area-${areaId}.svg`, import.meta.url);
+  writeFileSync(out, parts.join('\n'));
+  return { file: out.pathname, rooms: rooms.length, height: H };
+}
+
+const asked = process.argv[2];
+if (asked) {
+  const r = drawArea(asked);
+  console.log(`${asked}: ${r.rooms} rooms -> ${r.file} (${W}x${r.height})`);
+}
