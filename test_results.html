@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+body { margin: 0; font-family: monospace; background: #1a1a1a; color: #0f0; padding: 20px; }
+h1 { color: #ff0; border-bottom: 3px solid #0f0; padding-bottom: 10px; }
+.test-box { 
+  background: rgba(0,0,0,0.5); padding: 20px; margin: 15px 0; 
+  border: 2px solid #0f0; border-radius: 5px;
+}
+.score-display { font-size: 32px; color: #ff0; font-weight: bold; margin: 20px 0; }
+.stats { font-size: 18px; line-height: 1.8; }
+.label { color: #0f0; }
+.running { color: #ff8800; }
+.complete { color: #00ff00; }
+</style>
+</head>
+<body>
+<h1>🤖 Block Blast Bot Test Results</h1>
+
+<div class="test-box">
+  <div class="label">Test Status:</div>
+  <div id="status" class="running">INITIALIZING GAME...</div>
+</div>
+
+<div class="test-box">
+  <div class="label">Current Test: <span id="testNum">1</span>/3</div>
+  <div class="label">Elapsed: <span id="elapsed">0</span>s</div>
+  <div class="score-display" id="currentScore">0</div>
+</div>
+
+<div class="test-box">
+  <div class="label">Results:</div>
+  <div id="results" class="stats"></div>
+</div>
+
+<script>
+const NUM_TESTS = 3;
+let testNum = 0;
+let scores = [];
+let gameLoaded = false;
+
+// Load game
+fetch('hacdong_working.html')
+  .then(r => r.text())
+  .then(html => {
+    // Get body content
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/);
+    if(bodyMatch) {
+      const container = document.createElement('div');
+      container.style.display = 'none';
+      container.innerHTML = bodyMatch[1];
+      document.body.appendChild(container);
+    }
+    
+    // Get and eval scripts
+    const scriptMatches = html.match(/<script>([\s\S]*?)<\/script>/g);
+    if(scriptMatches) {
+      scriptMatches.forEach(scriptTag => {
+        const scriptCode = scriptTag.replace(/<\/?script>/g, '');
+        try { eval(scriptCode); } catch(e) {}
+      });
+    }
+    
+    gameLoaded = true;
+    setTimeout(runTests, 1000);
+  })
+  .catch(err => {
+    document.getElementById('status').innerHTML = '❌ Failed to load game: ' + err;
+  });
+
+async function runTests() {
+  if(!gameLoaded) {
+    document.getElementById('status').innerHTML = '❌ Game failed to load';
+    return;
+  }
+  
+  for(testNum = 1; testNum <= NUM_TESTS; testNum++) {
+    document.getElementById('testNum').innerHTML = testNum;
+    await runOneTest();
+  }
+  
+  showFinalResults();
+}
+
+async function runOneTest() {
+  return new Promise(resolve => {
+    document.getElementById('status').innerHTML = `<span class="running">Running Test ${testNum}/${NUM_TESTS}...</span>`;
+    document.getElementById('currentScore').innerHTML = '0';
+    
+    // Reset game state
+    if(typeof newGame === 'function') {
+      newGame();
+    }
+    
+    const startTime = Date.now();
+    let finalScore = 0;
+    
+    // Start bot
+    botPlayFunction();
+    
+    const monitor = setInterval(() => {
+      if(typeof score !== 'undefined') {
+        finalScore = score;
+        document.getElementById('currentScore').innerHTML = finalScore;
+      }
+      
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      document.getElementById('elapsed').innerHTML = elapsed;
+      
+      if(typeof state !== 'undefined' && state !== 'play') {
+        clearInterval(monitor);
+        scores.push(finalScore);
+        updateResults();
+        document.getElementById('status').innerHTML = `<span class="complete">✅ Test ${testNum} Complete: ${finalScore}</span>`;
+        setTimeout(resolve, 1000);
+      }
+    }, 100);
+    
+    // Timeout
+    setTimeout(() => {
+      clearInterval(monitor);
+      if(!scores.some((_, i) => i === testNum - 1)) {
+        scores.push(finalScore);
+        updateResults();
+      }
+      resolve();
+    }, 120000);
+  });
+}
+
+function updateResults() {
+  let html = '<div style="color: #0f0;">';
+  scores.forEach((s, i) => {
+    html += `Test ${i+1}: ${s} points<br>`;
+  });
+  if(scores.length > 0) {
+    const avg = Math.round(scores.reduce((a,b) => a+b) / scores.length);
+    const max = Math.max(...scores);
+    const min = Math.min(...scores);
+    html += `<br><span style="color: #ff0;">Average: ${avg}</span><br>`;
+    html += `Max: ${max} | Min: ${min}`;
+  }
+  html += '</div>';
+  document.getElementById('results').innerHTML = html;
+}
+
+function showFinalResults() {
+  const avg = Math.round(scores.reduce((a,b) => a+b) / scores.length);
+  const max = Math.max(...scores);
+  const min = Math.min(...scores);
+  
+  document.getElementById('status').innerHTML = `<span class="complete">✅ ALL TESTS COMPLETE</span>`;
+  document.getElementById('currentScore').innerHTML = avg + ' (avg)';
+  
+  let html = '<div style="font-size: 20px; color: #0f0;">';
+  scores.forEach((s, i) => {
+    html += `<div>Test ${i+1}: <span style="color: #ff0;">${s}</span> points</div>`;
+  });
+  html += '<div style="margin-top: 20px; border-top: 2px solid #0f0; padding-top: 10px;">';
+  html += `<div>Average: <span style="color: #ff0; font-size: 24px;">${avg}</span></div>`;
+  html += `<div>Max: ${max} | Min: ${min}</div>`;
+  html += '</div></div>';
+  
+  document.getElementById('results').innerHTML = html;
+  
+  console.log('BOT TEST RESULTS:');
+  console.log('Scores: ' + scores.join(', '));
+  console.log('Average: ' + avg);
+}
+</script>
+</body>
+</html>

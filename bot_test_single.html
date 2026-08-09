@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+body { margin: 0; padding: 0; font-family: 'Courier New', monospace; background: #000; color: #0f0; }
+#container { display: flex; }
+#game { flex: 1; }
+#display { 
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.98); padding: 20px; font-size: 20px;
+  border: 3px solid #0f0; z-index: 99999; line-height: 1.8;
+}
+.label { color: #ff0; }
+.value { color: #0f0; font-weight: bold; }
+</style>
+</head>
+<body>
+<div id="display">
+  <div><span class="label">Status:</span> <span class="value">INITIALIZING</span></div>
+  <div><span class="label">Test:</span> <span class="value" id="testNum">0</span></div>
+  <div><span class="label">Time:</span> <span class="value" id="time">0s</span></div>
+  <div><span class="label">Score:</span> <span class="value" id="score">0</span></div>
+  <div><span class="label">Board:</span> <span class="value" id="board">0%</span></div>
+</div>
+<div id="game"></div>
+
+<script>
+let gameLoaded = false;
+
+fetch('hacdong_working.html')
+  .then(r => r.text())
+  .then(html => {
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/);
+    const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
+    
+    if(bodyMatch) {
+      document.getElementById('game').innerHTML = bodyMatch[1];
+    }
+    
+    if(scriptMatch) {
+      eval(scriptMatch[1]);
+    }
+    
+    gameLoaded = true;
+    setTimeout(startTest, 2000);
+  });
+
+function startTest() {
+  if(!gameLoaded) {
+    document.getElementById('testNum').innerHTML = 'FAILED';
+    return;
+  }
+  
+  document.getElementById('testNum').innerHTML = '1';
+  const startTime = Date.now();
+  let finalScore = 0;
+  
+  // Start bot
+  console.log('[BOT TEST] Starting bot...');
+  botPlayFunction();
+  
+  const monitor = setInterval(() => {
+    if(typeof score !== 'undefined') {
+      finalScore = score;
+      document.getElementById('score').innerHTML = finalScore;
+    }
+    
+    const elapsed = Math.round((Date.now() - startTime) / 1000);
+    document.getElementById('time').innerHTML = elapsed + 's';
+    
+    if(typeof boardFill === 'function') {
+      const fill = Math.round(boardFill() * 100);
+      document.getElementById('board').innerHTML = fill + '%';
+    }
+    
+    if(typeof state !== 'undefined' && state !== 'play') {
+      clearInterval(monitor);
+      document.getElementById('testNum').innerHTML = '✅ COMPLETE';
+      console.log('[BOT TEST] FINAL SCORE: ' + finalScore);
+      console.log('[BOT TEST] Time: ' + elapsed + 's');
+    }
+  }, 100);
+  
+  setTimeout(() => {
+    clearInterval(monitor);
+    if(typeof state !== 'undefined' && state === 'play') {
+      console.log('[BOT TEST] TIMEOUT at score: ' + finalScore);
+    }
+  }, 120000);
+}
+</script>
+</body>
+</html>

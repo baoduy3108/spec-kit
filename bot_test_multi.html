@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+body { margin: 0; font-family: monospace; background: #000; color: #0f0; overflow: hidden; }
+#info { 
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.95); padding: 15px; border-bottom: 2px solid #0f0;
+  font-size: 16px; z-index: 99999;
+}
+#stats { position: fixed; top: 0; right: 20px; color: #ff0; font-size: 14px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div id="info">MULTI-TEST: Loading game...</div>
+<div id="stats"></div>
+
+<script>
+const TESTS = 3; // Run 3 tests
+let testNum = 0;
+let scores = [];
+
+fetch('hacdong_working.html')
+  .then(r => r.text())
+  .then(html => {
+    const match = html.match(/<body[^>]*>([\s\S]*)<\/body>/);
+    if(match) {
+      document.body.innerHTML = match[1] + document.body.innerHTML;
+      setTimeout(runNextTest, 2000);
+    }
+  });
+
+function runNextTest() {
+  if(testNum >= TESTS) {
+    showResults();
+    return;
+  }
+  
+  testNum++;
+  const info = document.getElementById('info');
+  const stats = document.getElementById('stats');
+  
+  info.innerHTML = `🤖 Running Test ${testNum}/${TESTS}...`;
+  
+  // Reset game
+  if(typeof resetGame === 'function') {
+    resetGame();
+  } else if(typeof newGame === 'function') {
+    newGame();
+  } else {
+    grid = Array(8).fill().map(() => Array(8).fill(null));
+    score = 0;
+    tray = [null, null, null];
+    state = 'play';
+  }
+  
+  let startTime = Date.now();
+  let finalScore = 0;
+  
+  // Start bot
+  if(typeof botPlayFunction === 'function') {
+    botPlayFunction();
+    
+    // Monitor
+    const monitor = setInterval(() => {
+      if(typeof score === 'number') {
+        finalScore = score;
+      }
+      
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      info.innerHTML = `🤖 Test ${testNum}/${TESTS} | Time: ${elapsed}s | Score: ${finalScore}`;
+      
+      if(typeof state !== 'undefined' && state !== 'play') {
+        clearInterval(monitor);
+        scores.push(finalScore);
+        
+        stats.innerHTML = `Scores: ${scores.join(', ')}`;
+        
+        info.innerHTML = `✅ Test ${testNum} Complete: ${finalScore}`;
+        setTimeout(runNextTest, 1000);
+      }
+    }, 100);
+    
+    setTimeout(() => {
+      clearInterval(monitor);
+      scores.push(finalScore);
+      info.innerHTML = `Test ${testNum} Timeout: ${finalScore}`;
+      setTimeout(runNextTest, 1000);
+    }, 120000);
+  }
+}
+
+function showResults() {
+  const info = document.getElementById('info');
+  const avg = Math.round(scores.reduce((a,b) => a+b, 0) / scores.length);
+  const max = Math.max(...scores);
+  const min = Math.min(...scores);
+  
+  info.innerHTML = `
+    <strong>BOT TEST RESULTS (${TESTS} games)</strong><br>
+    Scores: ${scores.join(', ')}<br>
+    Average: ${avg} | Max: ${max} | Min: ${min}
+  `;
+}
+</script>
+</body>
+</html>
