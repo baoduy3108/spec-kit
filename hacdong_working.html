@@ -851,6 +851,8 @@ function findFittingPiece(){
   if(lowScore) sizeBias=(fill>0.70?'tiny':(fill>0.45?'small':'none'));
   else sizeBias=(fill>0.66?'tiny':(fill>0.48?'small':'none'));
 
+  const debugLog=`[SMART] Fill:${(fill*100).toFixed(0)}% Score:${score} Bias:${sizeBias}`;
+
   // Prioritize by size based on bias
   let candidates=SHAPES.slice();
   if(sizeBias==='tiny') candidates.sort((a,b)=>{
@@ -898,8 +900,11 @@ function findFittingPiece(){
   // Random pick from valid pieces, respecting size bias
   if(validPieces.length>0){
     const chosen=validPieces[(rnd()*validPieces.length)|0];
+    const sizeDistro=validPieces.map(p=>p.cells.length).reduce((a,b)=>{a[b]=(a[b]||0)+1;return a},{});
+    console.log(debugLog+` Found:${validPieces.length} sizes:${JSON.stringify(sizeDistro)} picked:${chosen.cells.length}`);
     return {cells:chosen.cells, w:chosen.w, h:chosen.h, color:TH.blocks[(rnd()*TH.blocks.length)|0]};
   }
+  console.log(debugLog+` NONE FOUND - fallback to random`);
   return null;
 }
 
@@ -1011,11 +1016,17 @@ function placePiece(idx,row,col){
     if(lvMoves<=0){ gameOver(); return; } }
   if(tray.every(x=>!x)){
     // 95% chance from start: generate smart piece (fits + can clear lines)
-    if(Math.random()<0.95){
+    const bf=boardFill();
+    const useSmartPiece=Math.random()<0.95;
+    if(useSmartPiece){
       const smartPiece=findFittingPiece();
       tray=[smartPiece||makePiece(), makePiece(), makePiece()];
+      const sizes=[tray[0]?.cells.length||0, tray[1]?.cells.length||0, tray[2]?.cells.length||0];
+      console.log(`[TRAY] Fill:${(bf*100).toFixed(0)}% Smart:${!!smartPiece} Sizes:${sizes.join(',')} Score:${score}`);
     } else {
       tray=[makePiece(),makePiece(),makePiece()];
+      const sizes=[tray[0]?.cells.length||0, tray[1]?.cells.length||0, tray[2]?.cells.length||0];
+      console.log(`[TRAY] Fill:${(bf*100).toFixed(0)}% Random Sizes:${sizes.join(',')} Score:${score}`);
     }
     lastAction='refill khay';
     // VÙNG AN TOÀN <1000 điểm (không áp daily seed-công-bằng & campaign độ-khó-thiết-kế): đảm bảo MỌI khối trong khay
