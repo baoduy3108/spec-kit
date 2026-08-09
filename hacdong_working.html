@@ -834,6 +834,8 @@ function pickShape(){ let tries=0;
   else if(normal) bias=(fill>0.66?'tiny':(fill>0.48?'small':'none'));
   const soften=normal&&!lowScore&&bias==='none'&&fill>0.36; // chớm nguy hiểm (36-48%): mềm hoá khối to
   while(true){ const s=SHAPES[(rnd()*SHAPES.length)|0];
+    // Skip 1-block 70% (only 30% chance to get it)
+    if(s.length===1 && rnd()<0.7 && ++tries<=9) continue;
     if(bias==='big'){ if(s.length>=4||++tries>6) return s; continue; }
     if(bias==='tiny'){ if(s.length===2||++tries>12) return s; continue; } // Prioritize 2-blocks when board full
     if(bias==='small'){ if(s.length<=3||++tries>6) return s; continue; }
