@@ -23,6 +23,20 @@ export const KNIGHT = {
     { windup: 0.13, active: 0.1, recover: 0.42, damage: 16, reach: [18, 104], cost: 26 },
   ],
   block: { soak: 0.22, stamPerDamage: 1.7, regen: 9 },
+  /**
+   * The one thing worth taking from the four souls-like repositories that got
+   * read: Cat's Godot 4 template exports `parry_window = .3` and makes the
+   * first moments of a guard turn a block into a parry. That is a better idea
+   * than a separate parry button, because it costs the player a decision
+   * rather than a key.
+   *
+   * `lock` is mine, and it is the part that makes it a decision. Without it,
+   * holding block down and re-tapping gives a window that is effectively
+   * always open, and a parry that is always available is just a block that
+   * does more. After a window closes you cannot open another for half a
+   * second, so mashing is strictly worse than one press at the right moment.
+   */
+  parry: { window: 0.3, lock: 0.5, stagger: 1.1 },
   drink: { time: 0.95, heal: 46 },
   hurt: 0.34,
   stagger: 0.85,
@@ -121,6 +135,8 @@ export function newFight(run, seed = 1) {
       lastId: null,
       landed: false,
       poise: 0,
+      parry: 0,
+      parryLock: 0,
       phase: 1,
     },
   };
@@ -175,6 +191,8 @@ function stepKnight(fight, input, dt) {
   k.time += dt;
   k.sinceSpend += dt;
 
+  k.parry = Math.max(0, k.parry - dt);
+  k.parryLock = Math.max(0, k.parryLock - dt);
   const regen = k.state === 'block' ? KNIGHT.block.regen : KNIGHT.regen;
   if (k.sinceSpend > KNIGHT.regenDelay && k.state !== 'roll') {
     k.stamina = Math.min(maxStamina(run), k.stamina + regen * dt);
@@ -253,7 +271,14 @@ function stepKnight(fight, input, dt) {
       }
       const walking = (input.left ? -1 : 0) + (input.right ? 1 : 0);
       if (input.block) {
-        if (k.state !== 'block') enter(k, 'block');
+        if (k.state !== 'block') {
+          enter(k, 'block');
+          // A fresh guard opens a parry window, unless one just closed.
+          if (k.parryLock <= 0) {
+            k.parry = KNIGHT.parry.window;
+            k.parryLock = KNIGHT.parry.window + KNIGHT.parry.lock;
+          }
+        }
         k.x = clamp(k.x + walking * KNIGHT.speed * 0.42 * dt, ARENA.lo, ARENA.hi);
       } else {
         if (k.state === 'block') enter(k, 'idle');
@@ -292,7 +317,7 @@ function stepWarden(fight, dt) {
       if (w.time >= WARDEN.roarTime) enter(w, 'idle');
       break;
     case 'stagger':
-      if (w.time >= WARDEN.staggerTime) enter(w, 'idle');
+      if (w.time >= (w.staggerFor || WARDEN.staggerTime)) enter(w, 'idle');
       break;
     case 'attack': {
       const m = w.move;
@@ -365,6 +390,7 @@ function resolve(fight) {
         fight.events.push({ type: 'hit', on: 'warden', x: w.x, damage });
         if (w.poise >= WARDEN.poise && w.state !== 'roar') {
           w.poise = 0;
+          w.staggerFor = WARDEN.staggerTime;
           enter(w, 'stagger');
           fight.events.push({ type: 'stagger' });
         }
@@ -380,6 +406,16 @@ function resolve(fight) {
       w.landed = true;
       if (isInvulnerable(k)) {
         fight.events.push({ type: 'dodge' });
+      } else if (k.state === 'block' && facingIt(k, w) && k.parry > 0) {
+        // Caught it on the way in: no damage, no stamina, and the Warden is
+        // open. This is the only way to take a hit for free, and it is worth
+        // that because you have to commit to it before the blow is thrown.
+        k.parry = 0;
+        w.poise = 0;
+        enter(w, 'stagger');
+        w.staggerFor = KNIGHT.parry.stagger;
+        fight.shake = Math.max(fight.shake, 10);
+        fight.events.push({ type: 'parry', x: k.x });
       } else if (k.state === 'block' && facingIt(k, w)) {
         const cost = m.damage * KNIGHT.block.stamPerDamage;
         if (k.stamina >= cost) {

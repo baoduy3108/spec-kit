@@ -331,3 +331,56 @@ test('every move has a punish window longer than the swing itself', () => {
     assert.ok(totalOf(move) < 2.6, `${move.id} must not outstay its welcome`);
   }
 });
+
+test('a guard opened on the way in is a parry, and it is free', () => {
+  const run = newRun();
+  const fight = newFight(run);
+  const k = fight.knight;
+  const w = fight.warden;
+  // stand the Warden in a swing that is about to land
+  w.state = 'attack';
+  w.move = w.move || null;
+  const before = { hp: k.hp, stamina: k.stamina };
+  k.state = 'block';
+  k.parry = KNIGHT.parry.window;
+  k.facing = 1;
+  w.x = k.x + 60;
+  w.facing = -1;
+  w.move = { windup: 0.4, active: 0.2, recover: 0.6, damage: 30, reach: [10, 200], id: 'test' };
+  w.time = w.move.windup + 0.01;
+  w.landed = false;
+  step(fight, { block: true }, STEP);
+  assert.equal(k.hp, before.hp, 'a parry takes no damage at all');
+  assert.ok(k.stamina >= before.stamina - 1, 'and costs no stamina');
+  assert.equal(w.state, 'stagger', 'and it opens the Warden up');
+  assert.ok(fight.events.some((e) => e.type === 'parry'));
+});
+
+test('a parried stagger really is longer than a poise-break stagger', () => {
+  // The first version of this subtracted from the Warden's clock and hit a
+  // Math.max(0, ...) clamp, so the constant claimed 1.1s and the fight gave
+  // 0.7s. The number has to be reachable from the outside.
+  assert.ok(KNIGHT.parry.stagger > WARDEN.staggerTime, 'otherwise the constant is decoration');
+  const fight = newFight(newRun());
+  const w = fight.warden;
+  w.staggerFor = KNIGHT.parry.stagger;
+  w.state = 'stagger';
+  w.time = WARDEN.staggerTime + 0.02;
+  step(fight, {}, STEP);
+  assert.equal(w.state, 'stagger', 'still down after an ordinary stagger would have ended');
+});
+
+test('mashing the guard does not hold a parry window open', () => {
+  const fight = newFight(newRun());
+  const k = fight.knight;
+  let open = 0;
+  let frames = 0;
+  // tap block on and off as fast as the loop allows for two seconds
+  for (let t = 0; t < 2; t += STEP) {
+    frames++;
+    step(fight, { block: frames % 2 === 1 }, STEP);
+    if (k.parry > 0) open++;
+  }
+  const share = open / frames;
+  assert.ok(share < 0.4, `a masher should not live inside the window (${Math.round(share * 100)}%)`);
+});
