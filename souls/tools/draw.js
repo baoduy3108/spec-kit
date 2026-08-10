@@ -18,7 +18,7 @@ import { LORE } from '../src/lore.js';
 import { BESTIARY } from '../src/bosses.js';
 
 const W = 1240;
-const PANEL = 430;
+const PANEL = 780;
 const HEAD = 150;
 
 // --- palettes -------------------------------------------------------------
@@ -196,12 +196,12 @@ export const marks = [];
 function backdrop(x, y, w, h, p, rng) {
   put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${p.far}"/>`);
   // block courses on the far wall, irregular so it reads as cut by hand
-  const floorY = y + h * 0.72;
-  for (let row = 0; row < 7; row++) {
-    const by = y + 14 + row * ((floorY - y - 14) / 7);
+  const floorY = y + h * 0.8;
+  for (let row = 0; row < 12; row++) {
+    const by = y + 14 + row * ((floorY - y - 14) / 12);
     let bx = x + (row % 2 ? -22 : 0);
     while (bx < x + w) {
-      const bw = 58 + rng() * 46;
+      const bw = 64 + rng() * 54;
       put(
         `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${((floorY - y - 14) / 7 - 3).toFixed(1)}" fill="${p.mid}" fill-opacity="${(0.25 + rng() * 0.4).toFixed(2)}"/>`,
       );
@@ -209,10 +209,15 @@ function backdrop(x, y, w, h, p, rng) {
     }
   }
   // haze between you and the wall
-  put(`<rect x="${x}" y="${y}" width="${w}" height="${h * 0.72}" fill="${p.air}" fill-opacity="0.45"/>`);
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${h * 0.8}" fill="${p.air}" fill-opacity="0.45"/>`);
   // floor
   put(`<rect x="${x}" y="${floorY}" width="${w}" height="${y + h - floorY}" fill="${p.floor}"/>`);
   put(`<line x1="${x}" y1="${floorY}" x2="${x + w}" y2="${floorY}" stroke="${p.edge}" stroke-width="2"/>`);
+  // a level below this one, seen over the edge — the frame now has height to
+  // spend and a floor that is simply the bottom of the picture wastes it
+  put(`<rect x="${x}" y="${floorY + (y + h - floorY) * 0.55}" width="${w}" height="${((y + h - floorY) * 0.45).toFixed(1)}" fill="${p.far}"/>`);
+  put(`<line x1="${x}" y1="${(floorY + (y + h - floorY) * 0.55).toFixed(1)}" x2="${x + w}" y2="${(floorY + (y + h - floorY) * 0.55).toFixed(1)}" stroke="${p.edge}" stroke-width="2" stroke-opacity="0.6"/>`);
+
   // flagstones running away from you
   for (let i = 0; i < 16; i++) {
     const fx = x + (i / 16) * w + rng() * 20;
@@ -577,7 +582,7 @@ function bridge(x, y, w, h, p, rng) {
 /** Rough rock: no courses, a ragged ceiling, teeth. */
 function cave(x, y, w, h, p, rng) {
   put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${p.far}"/>`);
-  const floorY = y + h * 0.72;
+  const floorY = y + h * 0.8;
   let d = `M ${x} ${y}`;
   for (let i = 0; i <= 18; i++) {
     d += ` L ${(x + (i / 18) * w).toFixed(1)} ${(y + 40 + Math.sin(i * 1.7) * 22 + rng() * 26).toFixed(1)}`;
@@ -632,7 +637,7 @@ function yard(x, y, w, h, p, rng) {
       `<ellipse cx="${(x + rng() * w).toFixed(1)}" cy="${(y + 40 + rng() * 60).toFixed(1)}" rx="${(90 + rng() * 130).toFixed(1)}" ry="${(18 + rng() * 16).toFixed(1)}" fill="${p.mid}" fill-opacity="0.5"/>`,
     );
   }
-  const floorY = y + h * 0.72;
+  const floorY = y + h * 0.8;
   put(`<rect x="${x}" y="${floorY - 60}" width="${w}" height="62" fill="${p.far}"/>`);
   put(`<rect x="${x}" y="${floorY}" width="${w}" height="${y + h - floorY}" fill="${p.floor}"/>`);
   put(`<line x1="${x}" y1="${floorY}" x2="${x + w}" y2="${floorY}" stroke="${p.edge}" stroke-width="2"/>`);
@@ -1134,10 +1139,10 @@ function creature(id, x, floorY, scale, facing, room, lightX, roomLight) {
     foe: id,
     family: foe.family,
     box: {
-      x: Math.round(x - 56 * s),
-      y: Math.round(floorY - 116 * s),
-      w: Math.round(112 * s),
-      h: Math.round(118 * s),
+      x: Math.round(x - 60 * s),
+      y: Math.round(floorY - 120 * s),
+      w: Math.round(120 * s),
+      h: Math.round(124 * s),
     },
   });
   draw(x, floorY, s, facing);
@@ -1212,8 +1217,8 @@ function panel(room, y) {
   const spots = positions(room.layout, room.foes.length, x, w);
   room.foes.forEach((id, i) => {
     const at = spots[i] || spots[spots.length - 1];
-    halo(at.x, floorY, at.s * 2.05, skin.up);
-    creature(id, at.x, floorY, at.s * 2.05, at.f, room, lightX, room.light);
+    halo(at.x, floorY, at.s * 1.12, skin.up);
+    creature(id, at.x, floorY, at.s * 1.12, at.f, room, lightX, room.light);
   });
 
   if (room.boss) {
