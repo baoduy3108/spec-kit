@@ -400,6 +400,48 @@ function grain(x, y, w, h, rng) {
   }
 }
 
+/**
+ * Value blocking, which is the step this file had been skipping.
+ *
+ * Measured before: value standard deviation 0.090, three of ten bins carrying
+ * any area. Everything sat in one narrow band, so nothing read at a glance and
+ * every pass of surface detail was decoration on a picture with no structure.
+ *
+ * Four groups, in the order the workflow puts them: the distance goes light,
+ * the middle stays in a narrow band, the near ground goes almost black, and
+ * exactly one thing is allowed to be brighter than all of it. These are washes
+ * over the drawing rather than colours inside it, so the blocking is a
+ * separate, visible, adjustable step and not something smuggled into every
+ * shape.
+ */
+function blockValues(x, y, w, h, floorY, room, p) {
+  const id = room.id.replace(':', '-');
+  // distance: lift it towards the light so the far plane is the light group
+  put(`<linearGradient id="lift-${id}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${p.ink}" stop-opacity="0.3"/>
+    <stop offset="45%" stop-color="${p.ink}" stop-opacity="0.1"/>
+    <stop offset="100%" stop-color="${p.ink}" stop-opacity="0"/>
+  </linearGradient>`);
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${((floorY - y) * 0.55).toFixed(1)}" fill="url(#lift-${id})"/>`);
+
+  // near ground: the dark group. Everything below the figures drops away.
+  put(`<linearGradient id="sink-${id}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#03050a" stop-opacity="0"/>
+    <stop offset="45%" stop-color="#03050a" stop-opacity="0.55"/>
+    <stop offset="100%" stop-color="#03050a" stop-opacity="0.94"/>
+  </linearGradient>`);
+  put(`<rect x="${x}" y="${(floorY - 20).toFixed(1)}" width="${w}" height="${(y + h - floorY + 20).toFixed(1)}" fill="url(#sink-${id})"/>`);
+
+  // and the sides, so the frame closes and the eye is pushed to the middle
+  put(`<linearGradient id="edge-${id}" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#03050a" stop-opacity="0.8"/>
+    <stop offset="18%" stop-color="#03050a" stop-opacity="0"/>
+    <stop offset="82%" stop-color="#03050a" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#03050a" stop-opacity="0.8"/>
+  </linearGradient>`);
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#edge-${id})"/>`);
+}
+
 /** Dust in the air, lit by whatever is burning. Cheap, and it sells depth. */
 function motes(x, y, w, h, rng, colour) {
   for (let i = 0; i < 22; i++) {
@@ -1323,6 +1365,7 @@ function panel(room, y) {
     put(`<text x="${x + w / 2}" y="${floorY - 128}" text-anchor="middle" font-family="Georgia,serif" font-size="21" fill="#cfe0ee" fill-opacity="0.5" letter-spacing="5">${esc(b.name.vi.toUpperCase())}</text>`);
   }
 
+  blockValues(x, y, w, h, floorY, room, p);
   shaft(room, x, y, w, floorY, RIM[room.light] || '#8ab4e0', rngFor(`${room.id}-shaft`));
   motes(x, y, w, h, rngFor(`${room.id}-air`), RIM[room.light] || '#8ab4e0');
   grain(x, y, w, h, rngFor(`${room.id}-grain`));
