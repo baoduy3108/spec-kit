@@ -40,6 +40,21 @@ const FIRE = { core: '#fff3c4', mid: '#ffb24a', low: '#ff7a2f', deep: '#c03c14' 
 // one, and it is what makes a Dead Cells silhouette read at a glance: a bright
 // edge on the side facing the light, and nothing else on the body. Each light
 // level gets the colour its rim should be.
+// The colour the distance dissolves into. Atmospheric perspective is the
+// whole trick the hand-painted souls-likes use for depth — Hollow Knight,
+// Nine Sols, Ender Lilies all do it — and it is not a filter: far layers lose
+// contrast, lose saturation, and shift towards this colour, while near layers
+// keep theirs. The sheet was doing the opposite, with a dark far wall and
+// bright figures in front of it, which flattens everything.
+const AIRCOL = {
+  dark: '#16283a',
+  dim: '#1d3348',
+  grey: '#3a4a5c',
+  pale: '#54697e',
+  warm: '#3a2214',
+  gold: '#4a3316',
+};
+
 const RIM = {
   dark: '#6f9fd0',
   dim: '#8ab4e0',
@@ -79,9 +94,15 @@ function rngFor(seed) {
 // drawn at 240 and shown at 60, which is why the ribs, the moss and the hairline
 // cracks all turned into speckle: they were sub-pixel detail at the size that
 // ships. Everything now lands on the grid it will be seen on.
+// Two modes, because they want opposite things. The pixel mode snaps
+// everything to the grid the output will be seen on; the painted mode wants
+// curves and round joints. Drawing on the grid and then rendering smooth is
+// what turned the moss into green bricks and the arms into planks.
+const PIXEL = process.env.PIXEL === '1';
 const PX = 4;
-const q = (v) => Math.round(v / PX) * PX;
-const thick = (w) => Math.max(PX, Math.round(w / PX) * PX);
+const q = PIXEL ? (v) => Math.round(v / PX) * PX : (v) => Number(v.toFixed(1));
+const thick = PIXEL ? (w) => Math.max(PX, Math.round(w / PX) * PX) : (w) => Number(w.toFixed(1));
+const CAP = PIXEL ? 'butt' : 'round';
 
 const parts = [];
 const put = (s) => parts.push(s);
@@ -146,20 +167,80 @@ function texture(x, y, w, h, p, rng, floorY) {
       `<rect x="${q(x + rng() * w)}" y="${q(y + 30)}" width="${q(16 + rng() * 28)}" height="${q(60 + rng() * 130)}" fill="#000" fill-opacity="${(0.07 + rng() * 0.08).toFixed(2)}"/>`,
     );
   }
-  // moss in patches you can see, four pixels at a time
-  for (let i = 0; i < 16; i++) {
+  // moss along the waterline
+  for (let i = 0; i < (PIXEL ? 16 : 34); i++) {
     const mx = q(x + rng() * w);
-    const my = q(floorY - PX * (1 + Math.floor(rng() * 3)));
+    const my = q(floorY - (PIXEL ? PX * (1 + Math.floor(rng() * 3)) : rng() * 12));
     const bw = q(12 + rng() * 30);
-    put(`<rect x="${mx}" y="${my}" width="${bw}" height="${PX * 2}" fill="#3d5a34" fill-opacity="${(0.22 + rng() * 0.3).toFixed(2)}"/>`);
-    if (rng() < 0.6) {
-      put(`<rect x="${mx + PX}" y="${my - PX * 2}" width="${q(bw * 0.5)}" height="${PX * 2}" fill="#3d5a34" fill-opacity="0.2"/>`);
+    if (PIXEL) {
+      put(`<rect x="${mx}" y="${my}" width="${bw}" height="${PX * 2}" fill="#3d5a34" fill-opacity="${(0.22 + rng() * 0.3).toFixed(2)}"/>`);
+      if (rng() < 0.6) put(`<rect x="${mx + PX}" y="${my - PX * 2}" width="${q(bw * 0.5)}" height="${PX * 2}" fill="#3d5a34" fill-opacity="0.2"/>`);
+    } else {
+      put(
+        `<ellipse cx="${mx}" cy="${my}" rx="${(bw * 0.5).toFixed(1)}" ry="${(2 + rng() * 5).toFixed(1)}" fill="#3d5a34" fill-opacity="${(0.14 + rng() * 0.24).toFixed(2)}"/>`,
+      );
     }
   }
-  // rubble on the floor, as blocks
-  for (let i = 0; i < 14; i++) {
+  // what has fallen off the ceiling over the years
+  for (let i = 0; i < (PIXEL ? 14 : 40); i++) {
+    const rx = q(x + rng() * w);
+    const ry = q(floorY + 8 + rng() * (y + h - floorY - 20));
+    if (PIXEL) {
+      put(`<rect x="${rx}" y="${ry}" width="${q(8 + rng() * 14)}" height="${PX * 2}" fill="#000" fill-opacity="${(0.2 + rng() * 0.25).toFixed(2)}"/>`);
+    } else {
+      put(
+        `<ellipse cx="${rx}" cy="${ry}" rx="${(3 + rng() * 9).toFixed(1)}" ry="${(1.4 + rng() * 3).toFixed(1)}" fill="#000" fill-opacity="${(0.16 + rng() * 0.3).toFixed(2)}"/>`,
+      );
+    }
+  }
+}
+
+/**
+ * Haze. Everything behind the figures loses contrast and drifts towards the
+ * room's ambient colour, strongest at the back of the shot and gone by the
+ * floor. One rectangle, and it does more for depth than any amount of detail.
+ */
+function haze(x, y, w, h, room, floorY) {
+  const id = `haze-${room.id.replace(':', '-')}`;
+  const col = AIRCOL[room.light] || AIRCOL.dim;
+  put(`<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${col}" stop-opacity="0.62"/>
+    <stop offset="62%" stop-color="${col}" stop-opacity="0.34"/>
+    <stop offset="100%" stop-color="${col}" stop-opacity="0.06"/>
+  </linearGradient>`);
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${floorY - y}" fill="url(#${id})"/>`);
+}
+
+/**
+ * Light coming through the room in beams. A shaft is the difference between a
+ * lit room and a room with a bright object in it.
+ */
+function shaft(x, y, w, floorY, lightX, colour, rng) {
+  if (lightX === null || lightX === undefined) return;
+  for (let i = 0; i < 5; i++) {
+    const spread = 40 + i * 42 + rng() * 30;
+    const lean = (i - 2) * 46;
     put(
-      `<rect x="${q(x + rng() * w)}" y="${q(floorY + 8 + rng() * (y + h - floorY - 20))}" width="${q(8 + rng() * 14)}" height="${PX * 2}" fill="#000" fill-opacity="${(0.2 + rng() * 0.25).toFixed(2)}"/>`,
+      `<path d="M ${(lightX - 14).toFixed(1)} ${(floorY - 90).toFixed(1)}
+        L ${(lightX + lean - spread).toFixed(1)} ${y}
+        L ${(lightX + lean - spread + 54).toFixed(1)} ${y}
+        L ${(lightX + 14).toFixed(1)} ${(floorY - 90).toFixed(1)} Z"
+        fill="${colour}" fill-opacity="${(0.035 + rng() * 0.045).toFixed(3)}"/>`,
+    );
+  }
+}
+
+/**
+ * Paint grain. Flat vector fills are the thing that most reads as "made by a
+ * program"; a little tooth across the whole panel is what a painted layer has
+ * and a fill does not.
+ */
+function grain(x, y, w, h, rng) {
+  for (let i = 0; i < 320; i++) {
+    const gx = x + rng() * w;
+    const gy = y + rng() * h;
+    put(
+      `<rect x="${gx.toFixed(1)}" y="${gy.toFixed(1)}" width="${(2 + rng() * 7).toFixed(1)}" height="${(1 + rng() * 2).toFixed(1)}" fill="${rng() < 0.5 ? '#ffffff' : '#000000'}" fill-opacity="${(0.012 + rng() * 0.03).toFixed(3)}"/>`,
     );
   }
 }
@@ -457,7 +538,7 @@ function halo(x, floorY, s, up) {
 
 const limb = (x1, y1, x2, y2, wdt, col) =>
   put(
-    `<line x1="${q(x1)}" y1="${q(y1)}" x2="${q(x2)}" y2="${q(y2)}" stroke="${col}" stroke-width="${thick(wdt)}" stroke-linecap="butt"/>`,
+    `<line x1="${q(x1)}" y1="${q(y1)}" x2="${q(x2)}" y2="${q(y2)}" stroke="${col}" stroke-width="${thick(wdt)}" stroke-linecap="${CAP}"/>`,
   );
 
 function torch(x, y, s, f) {
@@ -487,6 +568,8 @@ const CREATURE = {
     limb(x - 10 * s, g - 3 * s, x - 13 * s, g, 6 * s, BODY.mid);
     limb(x + 3 * s, hip, x + 9 * s, g - 4 * s, 7 * s, BODY.mid);
     limb(x + 9 * s, g - 4 * s, x + 13 * s, g, 6 * s, BODY.mid);
+    put(`<ellipse cx="${(x - 14 * s).toFixed(1)}" cy="${(g - 1 * s).toFixed(1)}" rx="${(7 * s).toFixed(1)}" ry="${(3 * s).toFixed(1)}" fill="${BODY.dark}"/>`);
+    put(`<ellipse cx="${(x + 15 * s).toFixed(1)}" cy="${(g - 1 * s).toFixed(1)}" rx="${(7.5 * s).toFixed(1)}" ry="${(3 * s).toFixed(1)}" fill="${BODY.mid}"/>`);
     // torso, tapered, with the chest cavity cut out of the silhouette itself
     put(`<path d="M ${x - 13 * s} ${sh + 2 * s}
       q ${5 * s} ${-5 * s} ${11 * s} ${-4 * s}
@@ -512,11 +595,16 @@ const CREATURE = {
       q ${2 * s * f} ${9 * s} ${-6 * s * f} ${11 * s}
       q ${-9 * s * f} ${0} ${-11 * s * f} ${-7 * s} Z" fill="${BODY.dark}"/>`);
     put(`<line x1="${x - 13 * s}" y1="${sh + 2 * s}" x2="${x + 13 * s}" y2="${sh}" stroke="${BODY.rim}" stroke-width="${1.3 * s}" stroke-opacity="0.75"/>`);
-    // ribs as bars, because a curve one unit thick is not in the output
     for (let i = 0; i < 3; i++) {
-      put(
-        `<rect x="${q(x - 9 * s)}" y="${q(sh + 12 * s + i * 8 * s)}" width="${q(18 * s)}" height="${PX}" fill="${BODY.rim}" fill-opacity="0.45"/>`,
-      );
+      if (PIXEL) {
+        put(
+          `<rect x="${q(x - 9 * s)}" y="${q(sh + 12 * s + i * 8 * s)}" width="${q(18 * s)}" height="${PX}" fill="${BODY.rim}" fill-opacity="0.45"/>`,
+        );
+      } else {
+        put(
+          `<path d="M ${(x - 9 * s).toFixed(1)} ${(sh + 13 * s + i * 8 * s).toFixed(1)} q ${(9 * s).toFixed(1)} ${(4 * s).toFixed(1)} ${(18 * s).toFixed(1)} 0" fill="none" stroke="${BODY.rim}" stroke-width="${(2 * s).toFixed(1)}" stroke-opacity="0.4"/>`,
+        );
+      }
     }
     // a rag still wrapped over one shoulder, and a torn hem
     put(
@@ -701,7 +789,7 @@ const CREATURE = {
  * detail, and they are the thing this sheet was most obviously missing.
  */
 const EYES = {
-  husk: { dy: -88, dx: 7, r: 1.9, colour: '#ffd27a' },
+  husk: { dy: -84, dx: 8, r: 1.9, colour: '#ffd27a' },
   hound: { dy: -39, dx: 40, r: 1.7, colour: '#ff8a5c' },
   crawler: { dy: -26, dx: 34, r: 1.8, colour: '#ffd27a' },
   acolyte: { dy: -72, dx: 0, r: 2.0, colour: '#9fe0ff' },
@@ -724,6 +812,10 @@ function eyes(family, x, floorY, s, f) {
   if (!e) return;
   const ex = x + e.dx * s * (f < 0 ? 1 : -1);
   const ey = floorY + e.dy * s;
+  // the recess they sit in, so they read as inside a face and not stuck on it
+  put(
+    `<ellipse cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" rx="${(9 * s).toFixed(1)}" ry="${(5 * s).toFixed(1)}" fill="#05070a" fill-opacity="0.85"/>`,
+  );
   for (const off of [-3.2, 3.2]) {
     put(`<circle cx="${(ex + off * s).toFixed(1)}" cy="${ey.toFixed(1)}" r="${(e.r * s * 2.2).toFixed(1)}" fill="${e.colour}" fill-opacity="0.22"/>`);
     put(`<circle cx="${(ex + off * s).toFixed(1)}" cy="${ey.toFixed(1)}" r="${(e.r * s).toFixed(1)}" fill="${e.colour}"/>`);
@@ -823,6 +915,8 @@ function panel(room, y) {
   const arch = ARCH[room.kind] || hall;
   const floorY = arch(x, y, w, h, p, rng);
   texture(x, y, w, h, p, rng, floorY);
+  // everything above is distance, and distance is hazy
+  haze(x, y, w, h, room, floorY);
 
   const prop = PROPS[room.key];
   if (prop) prop(x, w, floorY, p, rngFor(`${room.id}-props`));
@@ -848,7 +942,9 @@ function panel(room, y) {
     put(`<text x="${x + w / 2}" y="${floorY - 128}" text-anchor="middle" font-family="Georgia,serif" font-size="21" fill="#cfe0ee" fill-opacity="0.5" letter-spacing="5">${esc(b.name.vi.toUpperCase())}</text>`);
   }
 
+  shaft(x, y, w, floorY, lightX, RIM[room.light] || '#8ab4e0', rngFor(`${room.id}-shaft`));
   motes(x, y, w, h, rngFor(`${room.id}-air`), RIM[room.light] || '#8ab4e0');
+  grain(x, y, w, h, rngFor(`${room.id}-grain`));
   foreground(x, y, w, h, rngFor(`${room.id}-fg`));
   // vignette, so the eye lands in the middle of the room
   put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#vig)"/>`);
