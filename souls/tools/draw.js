@@ -25,13 +25,21 @@ const HEAD = 150;
 // Six light levels, each a full scene palette rather than a tint. `far` is the
 // wall behind everything, `air` the haze between, `floor` what you stand on,
 // `edge` the line work, `glow` whatever is burning.
+// Rebuilt after measuring the sheet against eight indie screens it was being
+// compared to. The old palettes topped out around 0.29 value at the 95th
+// percentile — 95% of every picture sat in the darkest third of the range —
+// and carried one or two hue families. Dark is a mood; near-black is an
+// absence of information, and no amount of linework survives it.
+//
+// Each level now has a lit range and a hue that is not the hue of the light,
+// so a room can have two colours in it before anything is placed.
 const LIGHT = {
-  dark: { far: '#0b0f14', mid: '#121820', air: '#0d1219', floor: '#171d26', edge: '#2c3a4a', ink: '#7d8fa3', glow: '#3a6ea8' },
-  dim: { far: '#141a22', mid: '#1d2530', air: '#161d26', floor: '#232c38', edge: '#3b4c60', ink: '#93a6bb', glow: '#5b86b8' },
-  grey: { far: '#232a33', mid: '#2f3843', air: '#28303a', floor: '#39434f', edge: '#55636f', ink: '#b3bfca', glow: '#8aa2b8' },
-  pale: { far: '#2a3038', mid: '#3a424c', air: '#333b45', floor: '#454e59', edge: '#6d7b88', ink: '#ccd6df', glow: '#a8c4d8' },
-  warm: { far: '#1a1310', mid: '#2a1d16', air: '#22160f', floor: '#33241a', edge: '#5e4025', ink: '#e0c49a', glow: '#ffab4a' },
-  gold: { far: '#2b2110', mid: '#3d2e15', air: '#33260f', floor: '#4a3819', edge: '#7d5c22', ink: '#f4dfa8', glow: '#ffd166' },
+  dark: { far: '#1b2a3a', mid: '#27394c', air: '#1d2f42', floor: '#2c3f52', edge: '#5b7a99', ink: '#a9bccd', glow: '#4d8ec8' },
+  dim: { far: '#25384c', mid: '#324a63', air: '#283d54', floor: '#3a5169', edge: '#6d8aa6', ink: '#bccddd', glow: '#5f9ed4' },
+  grey: { far: '#3b4a5a', mid: '#4c5f72', air: '#42525f', floor: '#57697b', edge: '#8ba0b3', ink: '#d3dde6', glow: '#9dbdd4' },
+  pale: { far: '#4d5b68', mid: '#65778a', air: '#586878', floor: '#728699', edge: '#a7bccd', ink: '#e6eef5', glow: '#c2dcee' },
+  warm: { far: '#33201a', mid: '#4c3122', air: '#3b2318', floor: '#5b3c26', edge: '#a06a34', ink: '#f2d6ab', glow: '#ffab4a' },
+  gold: { far: '#4a361a', mid: '#6a4c22', air: '#553d18', floor: '#7a5827', edge: '#c08f32', ink: '#ffefc4', glow: '#ffd166' },
 };
 
 const FIRE = { core: '#fff3c4', mid: '#ffb24a', low: '#ff7a2f', deep: '#c03c14' };
@@ -47,12 +55,29 @@ const FIRE = { core: '#fff3c4', mid: '#ffb24a', low: '#ff7a2f', deep: '#c03c14' 
 // keep theirs. The sheet was doing the opposite, with a dark far wall and
 // bright figures in front of it, which flattens everything.
 const AIRCOL = {
-  dark: '#16283a',
-  dim: '#1d3348',
-  grey: '#3a4a5c',
-  pale: '#54697e',
-  warm: '#3a2214',
-  gold: '#4a3316',
+  dark: '#2f5c86',
+  dim: '#3a6d9c',
+  grey: '#6d8ba6',
+  pale: '#9db8cc',
+  warm: '#8a4a1e',
+  gold: '#b07a24',
+};
+
+/**
+ * The complement. Measured against the eight indie screens this was compared
+ * to, the difference was not linework: 95% of this sheet sat in the darkest
+ * 30% of the value range and carried one or two hue families, where theirs
+ * carry three to five and have real bright areas. A palette needs an opposed
+ * hue to put on the ornament, or every room is one colour with the lights
+ * turned down.
+ */
+const ACCENT = {
+  dark: '#3fbfa8',
+  dim: '#54c9a2',
+  grey: '#7ad0b0',
+  pale: '#9fe0c8',
+  warm: '#5fb6d6',
+  gold: '#7fd0e8',
 };
 
 const RIM = {
@@ -220,9 +245,9 @@ function haze(x, y, w, h, room, floorY) {
   const id = `haze-${room.id.replace(':', '-')}`;
   const col = AIRCOL[room.light] || AIRCOL.dim;
   put(`<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="${col}" stop-opacity="0.62"/>
-    <stop offset="62%" stop-color="${col}" stop-opacity="0.34"/>
-    <stop offset="100%" stop-color="${col}" stop-opacity="0.06"/>
+    <stop offset="0%" stop-color="${col}" stop-opacity="0.5"/>
+    <stop offset="55%" stop-color="${col}" stop-opacity="0.26"/>
+    <stop offset="100%" stop-color="${col}" stop-opacity="0.04"/>
   </linearGradient>`);
   put(`<rect x="${x}" y="${y}" width="${w}" height="${floorY - y}" fill="url(#${id})"/>`);
 }
@@ -320,7 +345,7 @@ function foreground(x, y, w, h, rng) {
 }
 
 /** A barrel vault with columns — the default indoor room. */
-function hall(x, y, w, h, p, rng) {
+function hall(x, y, w, h, p, rng, a = '#54c9a2') {
   const floorY = backdrop(x, y, w, h, p, rng);
   const top = y + 10;
 
@@ -366,6 +391,54 @@ function hall(x, y, w, h, p, rng) {
       `<line x1="${(cx - 18).toFixed(1)}" y1="${(headY + 6).toFixed(1)}" x2="${(cx - 18).toFixed(1)}" y2="${(floorY - 15).toFixed(1)}" stroke="${p.edge}" stroke-width="1.5" stroke-opacity="0.7"/>`,
     );
   });
+
+  // Corbels under the springing of the arch. Their screens are dense: pipes,
+  // brackets, banners, hanging lamps. Three columns in an empty box is not a
+  // style, it is an unfinished room.
+  for (const f of [0.16, 0.5, 0.84]) {
+    const bx = x + w * f;
+    // a bracket that grows out of the wall and curls under the arch — the
+    // first version was a trapezoid with a triangle on it and read as a UI
+    // marker pointing at the floor
+    put(
+      `<path d="M ${(bx - 30).toFixed(1)} ${(top + 70).toFixed(1)} l 60 0 l 0 10 q ${-16} 2 ${-22} 14 q ${-4} 9 ${-8} 9 q ${-4} 0 ${-8} ${-9} q ${-6} ${-12} ${-22} ${-14} Z" fill="${p.mid}"/>`,
+    );
+    put(`<rect x="${(bx - 34).toFixed(1)}" y="${(top + 64).toFixed(1)}" width="68" height="8" fill="${p.mid}"/>`);
+    put(
+      `<rect x="${(bx - 34).toFixed(1)}" y="${(top + 64).toFixed(1)}" width="68" height="3" fill="${a}" fill-opacity="0.45"/>`,
+    );
+  }
+
+  // a lamp hanging off one of them, long dead
+  if (rng() < 0.7) {
+    const lx = x + w * (rng() < 0.5 ? 0.5 : 0.84);
+    const ly = top + 104;
+    const drop = 40 + rng() * 70;
+    for (let i = 0; i < Math.floor(drop / 14); i++) {
+      put(`<ellipse cx="${lx.toFixed(1)}" cy="${(ly + i * 14).toFixed(1)}" rx="4" ry="7" fill="none" stroke="${p.edge}" stroke-width="2.6"/>`);
+    }
+    const by2 = ly + drop;
+    put(`<path d="M ${(lx - 13).toFixed(1)} ${by2.toFixed(1)} l 26 0 l 4 30 l -34 0 Z" fill="#05070a" stroke="${p.edge}" stroke-width="2.4"/>`);
+    put(`<path d="M ${(lx - 16).toFixed(1)} ${by2.toFixed(1)} l 32 0 l -5 -7 l -22 0 Z" fill="${p.edge}"/>`);
+    put(`<ellipse cx="${lx.toFixed(1)}" cy="${(by2 + 15).toFixed(1)}" rx="7" ry="9" fill="${a}" fill-opacity="0.28"/>`);
+  }
+
+  // torn banners on the wall, in the accent, because a room needs one thing
+  // in it that is not the colour of stone
+  for (let i = 0; i < 2; i++) {
+    if (rng() > 0.55) continue;
+    const bx = x + w * (0.2 + rng() * 0.6);
+    const bh = 90 + rng() * 90;
+    // a long narrow banner, torn along the bottom, in the accent so the room
+    // has one thing in it that is not the colour of stone
+    put(
+      `<path d="M ${(bx - 15).toFixed(1)} ${(top + 100).toFixed(1)} l 30 0 l -2 ${bh.toFixed(1)} l -7 ${(-13 - rng() * 10).toFixed(1)} l -6 ${(11 + rng() * 9).toFixed(1)} l -8 ${(-14 - rng() * 8).toFixed(1)} Z" fill="${a}" fill-opacity="0.4"/>`,
+    );
+    put(
+      `<path d="M ${(bx - 15).toFixed(1)} ${(top + 100).toFixed(1)} l 8 0 l -1 ${(bh * 0.9).toFixed(1)} l -6 ${(-12).toFixed(1)} Z" fill="#000" fill-opacity="0.25"/>`,
+    );
+    put(`<rect x="${(bx - 20).toFixed(1)}" y="${(top + 94).toFixed(1)}" width="40" height="8" fill="${p.mid}"/>`);
+  }
 
   // one side of the floor a step higher, so the ground is not a single line
   if (rng() < 0.55) {
@@ -1017,7 +1090,7 @@ function panel(room, y) {
   put(`<g clip-path="url(#clip-${room.id.replace(':', '-')})">`);
 
   const arch = ARCH[room.kind] || hall;
-  const floorY = arch(x, y, w, h, p, rng);
+  const floorY = arch(x, y, w, h, p, rng, ACCENT[room.light] || ACCENT.dim);
   texture(x, y, w, h, p, rng, floorY);
   // everything above is distance, and distance is hazy
   haze(x, y, w, h, room, floorY);
@@ -1090,8 +1163,8 @@ export function drawArea(areaId) {
       <stop offset="100%" stop-color="#ff7a2f" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="haloD" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#05080c" stop-opacity="0.8"/>
-      <stop offset="55%" stop-color="#05080c" stop-opacity="0.5"/>
+      <stop offset="0%" stop-color="#05080c" stop-opacity="0.34"/>
+      <stop offset="55%" stop-color="#05080c" stop-opacity="0.18"/>
       <stop offset="100%" stop-color="#05080c" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="haloL" cx="50%" cy="50%" r="50%">
