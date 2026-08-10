@@ -149,22 +149,38 @@ function backdrop(x, y, w, h, p, rng) {
  * matter how good the palette is.
  */
 function texture(x, y, w, h, p, rng, floorY) {
-  // Cracks as steps, not hairlines: a crack a pixel wide is gone after the
-  // resolve, and the first attempt put fourteen of them in every room.
+  // A crack a pixel wide is gone after a resolve, so in pixel mode it is a
+  // stack of four-wide blocks. Rendered smooth, that stack is a black post
+  // standing in the room — which is exactly what the courtyard came out with.
+  // Painted mode gets a line that wanders instead.
   for (let i = 0; i < 6; i++) {
     let cx = q(x + rng() * w);
     let cy = q(y + 40 + rng() * (floorY - y - 70));
-    for (let k = 0; k < 4; k++) {
-      const len = q(20 + rng() * 40);
-      put(`<rect x="${cx}" y="${cy}" width="${PX}" height="${len}" fill="#000" fill-opacity="0.3"/>`);
-      cy += len;
-      cx += q((rng() - 0.5) * 24);
+    if (PIXEL) {
+      for (let k = 0; k < 4; k++) {
+        const len = q(20 + rng() * 40);
+        put(`<rect x="${cx}" y="${cy}" width="${PX}" height="${len}" fill="#000" fill-opacity="0.3"/>`);
+        cy += len;
+        cx += q((rng() - 0.5) * 24);
+      }
+    } else {
+      let d = `M ${cx} ${cy}`;
+      for (let k = 0; k < 5; k++) {
+        cx += (rng() - 0.5) * 30;
+        cy += 16 + rng() * 26;
+        d += ` L ${cx.toFixed(1)} ${cy.toFixed(1)}`;
+      }
+      put(
+        `<path d="${d}" fill="none" stroke="#000" stroke-width="${(1 + rng() * 1.6).toFixed(1)}" stroke-opacity="${(0.16 + rng() * 0.22).toFixed(2)}" stroke-linecap="round"/>`,
+      );
     }
   }
-  // damp as slabs down the wall
+  // damp as stains down the wall, stopping where the wall does
+  const wall = Math.max(0, floorY - y - 30);
   for (let i = 0; i < 5; i++) {
+    const dh = Math.min(wall, 70 + rng() * 150);
     put(
-      `<rect x="${q(x + rng() * w)}" y="${q(y + 30)}" width="${q(16 + rng() * 28)}" height="${q(60 + rng() * 130)}" fill="#000" fill-opacity="${(0.07 + rng() * 0.08).toFixed(2)}"/>`,
+      `<rect x="${q(x + rng() * w)}" y="${q(y + 30)}" width="${q(34 + rng() * 60)}" height="${q(dh)}" fill="#000" fill-opacity="${(0.04 + rng() * 0.05).toFixed(2)}"/>`,
     );
   }
   // moss along the waterline
@@ -215,17 +231,39 @@ function haze(x, y, w, h, room, floorY) {
  * Light coming through the room in beams. A shaft is the difference between a
  * lit room and a room with a bright object in it.
  */
-function shaft(x, y, w, floorY, lightX, colour, rng) {
-  if (lightX === null || lightX === undefined) return;
-  for (let i = 0; i < 5; i++) {
-    const spread = 40 + i * 42 + rng() * 30;
-    const lean = (i - 2) * 46;
+function shaft(room, x, y, w, floorY, colour, rng) {
+  // only a real source throws a beam
+  const lit =
+    room.kind === 'bonfire' ? x + w * 0.34 : room.foes.some((f) => f.endsWith('-torch')) ? null : null;
+  const sky = room.kind === 'yard' || room.kind === 'stair';
+  if (lit === null && !sky) return;
+
+  const id = `shaft-${room.id.replace(':', '-')}`;
+  put(`<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${colour}" stop-opacity="0.14"/>
+    <stop offset="70%" stop-color="${colour}" stop-opacity="0.05"/>
+    <stop offset="100%" stop-color="${colour}" stop-opacity="0"/>
+  </linearGradient>`);
+
+  if (sky) {
+    // daylight coming in from above, wide and soft, landing on the floor
+    for (let i = 0; i < 3; i++) {
+      const top = x + w * (0.24 + i * 0.2) + rng() * 40;
+      const wide = 90 + rng() * 90;
+      put(
+        `<path d="M ${top.toFixed(1)} ${y} L ${(top + wide).toFixed(1)} ${y} L ${(top + wide + 130).toFixed(1)} ${floorY.toFixed(1)} L ${(top + 96).toFixed(1)} ${floorY.toFixed(1)} Z" fill="url(#${id})"/>`,
+      );
+    }
+    return;
+  }
+  for (let i = 0; i < 4; i++) {
+    const spread = 60 + i * 50 + rng() * 30;
+    const lean = (i - 1.5) * 54;
     put(
-      `<path d="M ${(lightX - 14).toFixed(1)} ${(floorY - 90).toFixed(1)}
-        L ${(lightX + lean - spread).toFixed(1)} ${y}
-        L ${(lightX + lean - spread + 54).toFixed(1)} ${y}
-        L ${(lightX + 14).toFixed(1)} ${(floorY - 90).toFixed(1)} Z"
-        fill="${colour}" fill-opacity="${(0.035 + rng() * 0.045).toFixed(3)}"/>`,
+      `<path d="M ${(lit - 16).toFixed(1)} ${(floorY - 90).toFixed(1)}
+        L ${(lit + lean - spread).toFixed(1)} ${y}
+        L ${(lit + lean - spread + 70).toFixed(1)} ${y}
+        L ${(lit + 16).toFixed(1)} ${(floorY - 90).toFixed(1)} Z" fill="url(#${id})"/>`,
     );
   }
 }
@@ -637,11 +675,18 @@ const CREATURE = {
       q ${10 * s * f} ${-2 * s} ${16 * s * f} ${4 * s}
       q ${-5 * s * f} ${6 * s} ${-16 * s * f} ${5 * s} Z" fill="${BODY.dark}"/>`);
     put(`<path d="M ${x + 34 * s * f} ${back - 1 * s} l ${-7 * s * f} ${-9 * s} l ${9 * s * f} ${2 * s} Z" fill="${BODY.dark}"/>`);
-    // ribs under the hide, as bars
+    // ribs under the hide — bars in pixel mode, and a line that follows the
+    // barrel of the chest when painted. Left as bars, they read as three white
+    // sticks laid on a dog.
     for (let i = 0; i < 3; i++) {
-      put(
-        `<rect x="${q(x + (2 - i * 10) * s * f)}" y="${q(back + 4 * s)}" width="${PX}" height="${q(14 * s)}" fill="${BODY.rim}" fill-opacity="0.4"/>`,
-      );
+      const rx = x + (2 - i * 10) * s * f;
+      if (PIXEL) {
+        put(`<rect x="${q(rx)}" y="${q(back + 4 * s)}" width="${PX}" height="${q(14 * s)}" fill="${BODY.rim}" fill-opacity="0.4"/>`);
+      } else {
+        put(
+          `<path d="M ${rx.toFixed(1)} ${(back + 3 * s).toFixed(1)} q ${(3 * s * f).toFixed(1)} ${(7 * s).toFixed(1)} ${(-1 * s * f).toFixed(1)} ${(14 * s).toFixed(1)}" fill="none" stroke="${BODY.rim}" stroke-width="${(1.8 * s).toFixed(1)}" stroke-opacity="0.28"/>`,
+        );
+      }
     }
     put(
       `<path d="M ${(x + 24 * s * f).toFixed(1)} ${(back - 4 * s).toFixed(1)} q ${(3 * s * f).toFixed(1)} ${(11 * s).toFixed(1)} ${(-2 * s * f).toFixed(1)} ${(19 * s).toFixed(1)}" fill="none" stroke="#4a3a2e" stroke-width="${(4 * s).toFixed(1)}" stroke-opacity="0.8"/>`,
@@ -942,7 +987,7 @@ function panel(room, y) {
     put(`<text x="${x + w / 2}" y="${floorY - 128}" text-anchor="middle" font-family="Georgia,serif" font-size="21" fill="#cfe0ee" fill-opacity="0.5" letter-spacing="5">${esc(b.name.vi.toUpperCase())}</text>`);
   }
 
-  shaft(x, y, w, floorY, lightX, RIM[room.light] || '#8ab4e0', rngFor(`${room.id}-shaft`));
+  shaft(room, x, y, w, floorY, RIM[room.light] || '#8ab4e0', rngFor(`${room.id}-shaft`));
   motes(x, y, w, h, rngFor(`${room.id}-air`), RIM[room.light] || '#8ab4e0');
   grain(x, y, w, h, rngFor(`${room.id}-grain`));
   foreground(x, y, w, h, rngFor(`${room.id}-fg`));
