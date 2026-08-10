@@ -452,23 +452,56 @@ function hall(x, y, w, h, p, rng, a = '#54c9a2', cold = '#3a6d9c') {
     );
   });
 
+  // PLANE 1 — distance. An arcade receding behind the wall, hazier and
+  // lighter the further back it goes, so the room opens instead of stopping.
+  for (let d = 3; d >= 1; d--) {
+    const inset = d * 46;
+    const top2 = top + 40 + d * 26;
+    const base = floorY - d * 16;
+    put(
+      `<rect x="${(x + inset).toFixed(1)}" y="${top2.toFixed(1)}" width="${(w - inset * 2).toFixed(1)}" height="${(base - top2).toFixed(1)}" fill="${p.far}" fill-opacity="${(0.5 - d * 0.1).toFixed(2)}"/>`,
+    );
+    for (let i = 0; i < 4; i++) {
+      const ax = x + inset + 60 + i * ((w - inset * 2 - 120) / 3);
+      put(
+        `<path d="M ${(ax - 34).toFixed(1)} ${base.toFixed(1)} L ${(ax - 34).toFixed(1)} ${(top2 + 70).toFixed(1)} q ${34} ${-46} ${68} 0 L ${(ax + 34).toFixed(1)} ${base.toFixed(1)} Z" fill="#05070a" fill-opacity="${(0.4 - d * 0.08).toFixed(2)}"/>`,
+      );
+    }
+  }
+
+  // PLANE 2 — an upper gallery, so the height has something standing in it
+  {
+    const gy = top + 150 + rng() * 70;
+    put(`<rect x="${x}" y="${gy.toFixed(1)}" width="${w}" height="18" fill="${p.mid}"/>`);
+    put(`<rect x="${x}" y="${(gy + 18).toFixed(1)}" width="${w}" height="7" fill="#05070a" fill-opacity="0.45"/>`);
+    for (let i = 0; i < 9; i++) {
+      const bx2 = x + 40 + i * ((w - 80) / 8);
+      put(`<rect x="${bx2.toFixed(1)}" y="${(gy - 42).toFixed(1)}" width="9" height="42" fill="${p.mid}"/>`);
+    }
+    put(`<rect x="${x}" y="${(gy - 48).toFixed(1)}" width="${w}" height="8" fill="${p.mid}"/>`);
+    // and a stretch of it fallen away
+    const brk = x + w * (0.3 + rng() * 0.35);
+    put(`<rect x="${brk.toFixed(1)}" y="${(gy - 50).toFixed(1)}" width="${(90 + rng() * 70).toFixed(1)}" height="80" fill="${p.far}"/>`);
+  }
+
   // A passage at the back, lit by something the other temperature. This is
   // the room's second hue and it arrives as one shape, because that is how
   // the eye counts colour.
   {
     const dx = x + w * (0.56 + rng() * 0.22);
-    const dw = 96 + rng() * 60;
-    const dh2 = floorY - (top + 120);
-    put(`<rect x="${(dx - dw / 2).toFixed(1)}" y="${(top + 120).toFixed(1)}" width="${dw.toFixed(1)}" height="${dh2.toFixed(1)}" fill="#05070a"/>`);
+    const dw = 74 + rng() * 34;
+    const dh2 = Math.min(210, floorY - (top + 120));
+    const dy = floorY - dh2;
+    put(`<rect x="${(dx - dw / 2).toFixed(1)}" y="${dy.toFixed(1)}" width="${dw.toFixed(1)}" height="${dh2.toFixed(1)}" fill="#05070a"/>`);
     put(
-      `<path d="M ${(dx - dw / 2).toFixed(1)} ${(top + 120).toFixed(1)} q ${(dw / 2).toFixed(1)} ${-52} ${dw.toFixed(1)} 0 Z" fill="#05070a"/>`,
+      `<path d="M ${(dx - dw / 2).toFixed(1)} ${dy.toFixed(1)} q ${(dw / 2).toFixed(1)} ${-46} ${dw.toFixed(1)} 0 Z" fill="#05070a"/>`,
     );
     put(`<linearGradient id="pass-${Math.round(dx)}" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0%" stop-color="${cold}" stop-opacity="0.85"/>
       <stop offset="100%" stop-color="${cold}" stop-opacity="0.15"/>
     </linearGradient>`);
     put(
-      `<rect x="${(dx - dw / 2 + 10).toFixed(1)}" y="${(top + 130).toFixed(1)}" width="${(dw - 20).toFixed(1)}" height="${(dh2 - 10).toFixed(1)}" fill="url(#pass-${Math.round(dx)})"/>`,
+      `<rect x="${(dx - dw / 2 + 8).toFixed(1)}" y="${(dy + 8).toFixed(1)}" width="${(dw - 16).toFixed(1)}" height="${(dh2 - 10).toFixed(1)}" fill="url(#pass-${Math.round(dx)})"/>`,
     );
     // light spilling out of it onto the floor
     put(
@@ -1229,6 +1262,14 @@ function panel(room, y) {
   shaft(room, x, y, w, floorY, RIM[room.light] || '#8ab4e0', rngFor(`${room.id}-shaft`));
   motes(x, y, w, h, rngFor(`${room.id}-air`), RIM[room.light] || '#8ab4e0');
   grain(x, y, w, h, rngFor(`${room.id}-grain`));
+  {
+    // the soffit of an arch we are standing under, cropped by the frame
+    const fr = rngFor(`${room.id}-soffit`);
+    const dip = 40 + fr() * 40;
+    put(
+      `<path d="M ${x} ${y} L ${x + w} ${y} L ${x + w} ${(y + dip * 0.5).toFixed(1)} Q ${(x + w / 2).toFixed(1)} ${(y + dip * 1.9).toFixed(1)} ${x} ${(y + dip * 0.5).toFixed(1)} Z" fill="#05070a" fill-opacity="0.95"/>`,
+    );
+  }
   foreground(x, y, w, h, rngFor(`${room.id}-fg`));
   // vignette, so the eye lands in the middle of the room
   put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#vig)"/>`);
