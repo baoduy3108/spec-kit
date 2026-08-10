@@ -323,18 +323,62 @@ function foreground(x, y, w, h, rng) {
 function hall(x, y, w, h, p, rng) {
   const floorY = backdrop(x, y, w, h, p, rng);
   const top = y + 10;
+
+  // The vault, sprung off-centre and broken open on one side. Three columns at
+  // even spacing under a symmetrical arch is the composition a program picks;
+  // it is also the reason every room looked like the last one.
+  const crown = x + w * (0.34 + rng() * 0.3);
+  const gap = rng() < 0.45; // a section that has come down
   put(
-    `<path d="M ${x} ${top + 90} Q ${x + w / 2} ${top - 46} ${x + w} ${top + 90} L ${x + w} ${top} L ${x} ${top} Z" fill="${p.far}"/>`,
+    `<path d="M ${x} ${top + 96} Q ${crown.toFixed(1)} ${top - 54} ${x + w} ${top + 84} L ${x + w} ${top} L ${x} ${top} Z" fill="${p.far}"/>`,
   );
   put(
-    `<path d="M ${x} ${top + 90} Q ${x + w / 2} ${top - 46} ${x + w} ${top + 90}" fill="none" stroke="${p.edge}" stroke-width="2.5"/>`,
+    `<path d="M ${x} ${top + 96} Q ${crown.toFixed(1)} ${top - 54} ${x + w} ${top + 84}" fill="none" stroke="${p.edge}" stroke-width="2.5"/>`,
   );
-  for (const cx of [x + w * 0.16, x + w * 0.52, x + w * 0.86]) {
-    put(`<rect x="${cx - 17}" y="${top + 52}" width="34" height="${floorY - top - 52}" fill="${p.mid}"/>`);
-    put(`<rect x="${cx - 23}" y="${top + 44}" width="46" height="12" fill="${p.mid}"/>`);
-    put(`<rect x="${cx - 21}" y="${floorY - 14}" width="42" height="14" fill="${p.mid}"/>`);
+  if (gap) {
+    // a hole through to whatever is above, with the ends of the broken ribs
+    const hx = x + w * (0.2 + rng() * 0.55);
+    put(`<path d="M ${(hx - 70).toFixed(1)} ${top + 40} q ${70} ${-46} ${140} ${-8} l ${-14} ${44} q ${-58} ${-26} ${-112} ${6} Z" fill="#05070a"/>`);
+    for (let i = 0; i < 5; i++) {
+      const bx = hx - 60 + i * 30 + rng() * 12;
+      put(`<path d="M ${bx.toFixed(1)} ${(top + 34).toFixed(1)} l ${(4 + rng() * 7).toFixed(1)} ${(10 + rng() * 16).toFixed(1)} l ${-6} ${-2} Z" fill="${p.mid}"/>`);
+    }
+  }
+
+  // columns at irregular spacing, one of them broken off short
+  const stumps = rng() < 0.5 ? 1 : 2;
+  const cols = [0.1 + rng() * 0.1, 0.42 + rng() * 0.14, 0.78 + rng() * 0.12];
+  cols.forEach((f, i) => {
+    const cx = x + w * f;
+    const broken = i === stumps;
+    const headY = broken ? floorY - 60 - rng() * 90 : top + 56;
+    put(`<rect x="${(cx - 18).toFixed(1)}" y="${headY.toFixed(1)}" width="36" height="${(floorY - headY).toFixed(1)}" fill="${p.mid}"/>`);
+    if (broken) {
+      // a snapped top, not a flat one
+      put(
+        `<path d="M ${(cx - 18).toFixed(1)} ${headY.toFixed(1)} l 9 ${-9 - rng() * 10} l 10 ${8 + rng() * 8} l 9 ${-12 - rng() * 8} l 8 ${13} Z" fill="${p.mid}"/>`,
+      );
+    } else {
+      put(`<rect x="${(cx - 24).toFixed(1)}" y="${(top + 46).toFixed(1)}" width="48" height="13" fill="${p.mid}"/>`);
+    }
+    put(`<rect x="${(cx - 22).toFixed(1)}" y="${(floorY - 15).toFixed(1)}" width="44" height="15" fill="${p.mid}"/>`);
     put(
-      `<line x1="${cx - 17}" y1="${top + 56}" x2="${cx - 17}" y2="${floorY - 14}" stroke="${p.edge}" stroke-width="1.5" stroke-opacity="0.7"/>`,
+      `<line x1="${(cx - 18).toFixed(1)}" y1="${(headY + 6).toFixed(1)}" x2="${(cx - 18).toFixed(1)}" y2="${(floorY - 15).toFixed(1)}" stroke="${p.edge}" stroke-width="1.5" stroke-opacity="0.7"/>`,
+    );
+  });
+
+  // one side of the floor a step higher, so the ground is not a single line
+  if (rng() < 0.55) {
+    const side = rng() < 0.5;
+    const lw = w * (0.24 + rng() * 0.2);
+    const lx = side ? x : x + w - lw;
+    const rise = 20 + rng() * 22;
+    put(`<rect x="${lx.toFixed(1)}" y="${(floorY - rise).toFixed(1)}" width="${lw.toFixed(1)}" height="${(y + h - floorY + rise).toFixed(1)}" fill="${p.floor}"/>`);
+    put(
+      `<line x1="${lx.toFixed(1)}" y1="${(floorY - rise).toFixed(1)}" x2="${(lx + lw).toFixed(1)}" y2="${(floorY - rise).toFixed(1)}" stroke="${p.edge}" stroke-width="2"/>`,
+    );
+    put(
+      `<line x1="${side ? (lx + lw).toFixed(1) : lx.toFixed(1)}" y1="${(floorY - rise).toFixed(1)}" x2="${side ? (lx + lw).toFixed(1) : lx.toFixed(1)}" y2="${(y + h).toFixed(1)}" stroke="${p.edge}" stroke-width="2"/>`,
     );
   }
   return floorY;
@@ -621,6 +665,13 @@ const CREATURE = {
       l ${-2 * s} ${16 * s}
       q ${-6 * s} ${3 * s} ${-12 * s} ${2 * s}
       l ${2 * s} ${-46 * s} Z" fill="${BODY.mid}"/>`);
+    // The ember it was lit from, still burning in the hole where its chest
+    // used to be. Every torch in this world came off one flame, and a husk is
+    // what is left of somebody who carried one — so it keeps the fire, and in
+    // a dark room the ember is what you see before the body.
+    put(`<ellipse cx="${(x + 1 * s).toFixed(1)}" cy="${(sh + 22 * s).toFixed(1)}" rx="${(22 * s).toFixed(1)}" ry="${(24 * s).toFixed(1)}" fill="url(#ember)"/>`);
+    put(`<ellipse cx="${(x + 1 * s).toFixed(1)}" cy="${(sh + 22 * s).toFixed(1)}" rx="${(6 * s).toFixed(1)}" ry="${(8 * s).toFixed(1)}" fill="${FIRE.low}" fill-opacity="0.9"/>`);
+    put(`<ellipse cx="${(x + 1 * s).toFixed(1)}" cy="${(sh + 21 * s).toFixed(1)}" rx="${(2.6 * s).toFixed(1)}" ry="${(4 * s).toFixed(1)}" fill="${FIRE.core}"/>`);
     // arms: the shoulder never moves, the elbow does all of it
     limb(x - 12 * s, sh + 4 * s, x - 15 * s, sh + 30 * s, 5 * s, BODY.mid);
     limb(x - 15 * s, sh + 30 * s, x - 19 * s + 4 * s * f, sh + 50 * s, 4.2 * s, BODY.mid);
@@ -675,6 +726,14 @@ const CREATURE = {
       q ${10 * s * f} ${-2 * s} ${16 * s * f} ${4 * s}
       q ${-5 * s * f} ${6 * s} ${-16 * s * f} ${5 * s} Z" fill="${BODY.dark}"/>`);
     put(`<path d="M ${x + 34 * s * f} ${back - 1 * s} l ${-7 * s * f} ${-9 * s} l ${9 * s * f} ${2 * s} Z" fill="${BODY.dark}"/>`);
+    // it came out of the same kiln, and the seams never closed
+    for (let i = 0; i < 4; i++) {
+      const gx = x + (18 - i * 13) * s * f;
+      put(
+        `<path d="M ${gx.toFixed(1)} ${(back - 5 * s).toFixed(1)} l ${(3 * s * f).toFixed(1)} ${(7 * s).toFixed(1)}" fill="none" stroke="${FIRE.low}" stroke-width="${(2.2 * s).toFixed(1)}" stroke-opacity="0.75"/>`,
+      );
+    }
+    put(`<ellipse cx="${(x + 4 * s * f).toFixed(1)}" cy="${(back + 1 * s).toFixed(1)}" rx="${(30 * s).toFixed(1)}" ry="${(15 * s).toFixed(1)}" fill="url(#ember)"/>`);
     // ribs under the hide — bars in pixel mode, and a line that follows the
     // barrel of the chest when painted. Left as bars, they read as three white
     // sticks laid on a dog.
@@ -834,8 +893,8 @@ const CREATURE = {
  * detail, and they are the thing this sheet was most obviously missing.
  */
 const EYES = {
-  husk: { dy: -84, dx: 8, r: 1.9, colour: '#ffd27a' },
-  hound: { dy: -39, dx: 40, r: 1.7, colour: '#ff8a5c' },
+  husk: { dy: -86, dx: 8, r: 1.4, colour: '#ffb24a' },
+  hound: { dy: -41, dx: 42, r: 1.5, colour: '#ff7a2f' },
   crawler: { dy: -26, dx: 34, r: 1.8, colour: '#ffd27a' },
   acolyte: { dy: -72, dx: 0, r: 2.0, colour: '#9fe0ff' },
   knightling: { dy: -70, dx: 2, r: 1.7, colour: '#ffd27a' },
@@ -1020,6 +1079,11 @@ export function drawArea(areaId) {
   marks.length = 0;
   put(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="Georgia,serif">`);
   put(`<defs>
+    <radialGradient id="ember" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffb24a" stop-opacity="0.55"/>
+      <stop offset="45%" stop-color="#ff7a2f" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#c03c14" stop-opacity="0"/>
+    </radialGradient>
     <radialGradient id="glow" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#ffb24a" stop-opacity="0.34"/>
       <stop offset="60%" stop-color="#ff7a2f" stop-opacity="0.1"/>

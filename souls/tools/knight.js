@@ -27,17 +27,28 @@ const P = {
   bg: '#0a0c10',
   cell: '#12171e',
   edge: '#2c3a4a',
-  plate: '#4d5a68',
-  plateDark: '#333e4a',
-  cloth: '#5a3f34',
-  clothDark: '#3d2b24',
+  // fired clay, not plate. "The sword was fired, not forged. So were you."
+  clay: '#6b4a38',
+  clayDark: '#412a20',
+  clayLit: '#8a5f45',
+  cloth: '#2f3b46',
+  clothDark: '#1e262e',
   steel: '#9aa8b6',
   steelDim: '#6b7885',
   ink: '#c7d2dd',
   dim: '#7b8794',
   gold: '#d8a34a',
+  ember: '#ff7a2f',
+  emberCore: '#ffd39a',
   blood: '#8d3b34',
 };
+
+// A generic knight in grey plate is every game's knight. This one has two
+// things nothing else has, and both were already written down: it is a fired
+// body with the kiln still showing through its cracks, and it carries an
+// unlit lantern it has come all this way to light. The lantern is also the
+// guard — it never goes down, which is the whole ending in one prop.
+const P_plate = P.clay;
 
 const out = [];
 const put = (s) => out.push(s);
@@ -64,7 +75,7 @@ function knight(cx, ground, pose, cell) {
     shield = true,
     head = 0, // head tilt
     fade = 1,
-    flask = false, // an estus-style flask in the off hand
+    flaskMain = false, // a flask in the sword hand, so the lantern arm is free
     dropped = false, // the sword on the floor instead of in the hand
   } = pose;
 
@@ -79,13 +90,13 @@ function knight(cx, ground, pose, cell) {
   put(`<ellipse cx="${N(cx)}" cy="${N(ground + 3)}" rx="${N(34 - crouch * 0.2)}" ry="7" fill="#000" fill-opacity="0.45"/>`);
 
   // back leg then front leg, so the front reads nearer
-  bone(hipX - 4, hipY, hipX - 10 - stride, ground - 22, 13, P.plateDark);
-  bone(hipX - 10 - stride, ground - 22, hipX - 13 - stride, ground, 11, P.plateDark);
-  bone(hipX + 4, hipY, hipX + 8 + stride, ground - 22, 14, P.plate);
-  bone(hipX + 8 + stride, ground - 22, hipX + 12 + stride, ground, 12, P.plate);
+  bone(hipX - 4, hipY, hipX - 10 - stride, ground - 22, 13, P.clayDark);
+  bone(hipX - 10 - stride, ground - 22, hipX - 13 - stride, ground, 11, P.clayDark);
+  bone(hipX + 4, hipY, hipX + 8 + stride, ground - 22, 14, P.clay);
+  bone(hipX + 8 + stride, ground - 22, hipX + 12 + stride, ground, 12, P.clay);
   // sabatons
-  put(`<path d="M ${N(hipX + 6 + stride)} ${N(ground)} l 26 0 l -3 -7 l -21 0 Z" fill="${P.plate}"/>`);
-  put(`<path d="M ${N(hipX - 19 - stride)} ${N(ground)} l 24 0 l -2 -6 l -20 0 Z" fill="${P.plateDark}"/>`);
+  put(`<path d="M ${N(hipX + 6 + stride)} ${N(ground)} l 26 0 l -3 -7 l -21 0 Z" fill="${P.clay}"/>`);
+  put(`<path d="M ${N(hipX - 19 - stride)} ${N(ground)} l 24 0 l -2 -6 l -20 0 Z" fill="${P.clayDark}"/>`);
 
   // surcoat, hanging from the hip, tilted with the torso
   put(
@@ -97,28 +108,38 @@ function knight(cx, ground, pose, cell) {
 
   // torso: a cuirass, narrower at the waist
   put(
-    `<path d="M ${N(shX - 20)} ${N(shY + 2)} q ${N(20)} ${N(-9)} ${N(40)} 0 l ${N(-5)} ${N(30)} q ${N(-2)} ${N(9)} ${N(-15)} ${N(12)} q ${N(-13)} ${N(-3)} ${N(-15)} ${N(-12)} Z" fill="${P.plate}"/>`,
+    `<path d="M ${N(shX - 20)} ${N(shY + 2)} q ${N(20)} ${N(-9)} ${N(40)} 0 l ${N(-5)} ${N(30)} q ${N(-2)} ${N(9)} ${N(-15)} ${N(12)} q ${N(-13)} ${N(-3)} ${N(-15)} ${N(-12)} Z" fill="${P.clay}"/>`,
   );
   put(
-    `<path d="M ${N(shX + 6)} ${N(shY - 2)} q ${N(10)} ${N(2)} ${N(14)} ${N(4)} l ${N(-5)} ${N(30)} q ${N(-2)} ${N(9)} ${N(-13)} ${N(12)} Z" fill="${P.plateDark}"/>`,
+    `<path d="M ${N(shX + 6)} ${N(shY - 2)} q ${N(10)} ${N(2)} ${N(14)} ${N(4)} l ${N(-5)} ${N(30)} q ${N(-2)} ${N(9)} ${N(-13)} ${N(12)} Z" fill="${P.clayDark}"/>`,
   );
-  bone(shX - 18, shY + 16, shX + 18, shY + 14, 2, P.steelDim);
+  // the kiln still showing through
+  for (const [ax, ay, bx2, by2] of [
+    [-10, 6, -3, 20],
+    [-3, 20, 6, 28],
+    [8, 4, 3, 16],
+    [4, 30, 12, 40],
+  ]) {
+    bone(shX + ax, shY + ay, shX + bx2, shY + by2, 2.2, P.ember);
+  }
+  put(`<ellipse cx="${N(shX + 1)}" cy="${N(shY + 22)}" rx="22" ry="26" fill="${P.ember}" fill-opacity="0.1"/>`);
 
   // shield arm
   const ba = rad(backArm + lean);
   const bx = shX - 17 + Math.sin(ba) * 22;
   const by = shY + 10 + Math.cos(ba) * 22;
-  bone(shX - 17, shY + 8, bx, by, 11, P.plateDark);
+  bone(shX - 17, shY + 8, bx, by, 11, P.clayDark);
   if (shield) {
-    const sx = bx - 13;
-    put(
-      `<ellipse cx="${N(sx)}" cy="${N(by + 2)}" rx="12" ry="21" fill="${P.plateDark}" stroke="${P.steelDim}" stroke-width="2.2"/>`,
-    );
-    put(`<circle cx="${N(sx)}" cy="${N(by + 2)}" r="4.5" fill="${P.steelDim}"/>`);
-  }
-  if (flask) {
-    put(`<path d="M ${N(bx - 6)} ${N(by - 4)} l 12 0 l 3 16 q -9 5 -18 0 Z" fill="${P.clothDark}" stroke="${P.gold}" stroke-width="1.8"/>`);
-    put(`<rect x="${N(bx - 2.5)}" y="${N(by - 12)}" width="5" height="9" fill="${P.steelDim}"/>`);
+    // the lantern. It is not lit — lighting it is the entire journey — and it
+    // is what you guard with, because the carrier never puts it down.
+    const sx = bx - 11;
+    const sy = by + 6;
+    bone(bx, by, sx, sy - 22, 8, P.clay); // the hand on the ring
+    put(`<path d="M ${N(sx)} ${N(sy - 26)} q 9 4 9 11" fill="none" stroke="${P.steelDim}" stroke-width="2.4"/>`);
+    put(`<path d="M ${N(sx - 11)} ${N(sy - 15)} l 22 0 l 3 26 l -28 0 Z" fill="#0a0d12" stroke="${P.steelDim}" stroke-width="2.4"/>`);
+    put(`<path d="M ${N(sx - 13)} ${N(sy - 15)} l 26 0 l -4 -6 l -18 0 Z" fill="${P.steelDim}"/>`);
+    put(`<rect x="${N(sx - 12)}" y="${N(sy + 11)}" width="26" height="5" fill="${P.steelDim}"/>`);
+    put(`<line x1="${N(sx)}" y1="${N(sy - 15)}" x2="${N(sx + 1)}" y2="${N(sy + 11)}" stroke="${P.steelDim}" stroke-width="1.6"/>`);
   }
 
   // sword arm: shoulder, elbow, then the blade
@@ -128,13 +149,19 @@ function knight(cx, ground, pose, cell) {
   const ha = rad(frontArm + elbow + lean);
   const hx = ex + Math.sin(ha) * 24;
   const hy = ey + Math.cos(ha) * 24;
-  bone(shX + 16, shY + 6, ex, ey, 12, P.plate);
-  bone(ex, ey, hx, hy, 10, P.plate);
+  bone(shX + 16, shY + 6, ex, ey, 12, P.clay);
+  bone(ex, ey, hx, hy, 10, P.clay);
 
   if (dropped) {
     // fallen, point away, where the essence stays
     put(`<path d="M ${N(cx + 6)} ${N(ground - 5)} L ${N(cx + 74)} ${N(ground - 11)} L ${N(cx + 80)} ${N(ground - 8)} L ${N(cx + 74)} ${N(ground - 4)} L ${N(cx + 6)} ${N(ground - 1)} Z" fill="${P.steel}"/>`);
     put(`<rect x="${N(cx + 2)}" y="${N(ground - 11)}" width="5" height="13" fill="${P.steelDim}"/>`);
+    put(`</g>`);
+    return;
+  }
+  if (flaskMain) {
+    put(`<path d="M ${N(hx - 7)} ${N(hy - 5)} l 14 0 l 4 18 q -11 6 -21 0 Z" fill="${P.clothDark}" stroke="${P.gold}" stroke-width="2"/>`);
+    put(`<rect x="${N(hx - 3)}" y="${N(hy - 14)}" width="6" height="10" fill="${P.steelDim}"/>`);
     put(`</g>`);
     return;
   }
@@ -174,11 +201,17 @@ function knight(cx, ground, pose, cell) {
   // head: a bucket helm, hung slightly forward, with a sight slit
   const hdx = shX + Math.sin(rad(lean + head)) * 12;
   const hdy = shY - 16;
-  put(`<path d="M ${N(hdx - 12)} ${N(hdy - 10)} q ${N(12)} ${N(-11)} ${N(24)} 0 l ${N(-1)} ${N(24)} q ${N(-11)} ${N(5)} ${N(-22)} 0 Z" fill="${P.plate}"/>`);
-  put(`<rect x="${N(hdx - 10)}" y="${N(hdy + 1)}" width="20" height="3.4" fill="#0a0d12"/>`);
-  put(`<path d="M ${N(hdx - 12)} ${N(hdy - 10)} q ${N(12)} ${N(-11)} ${N(24)} 0 l ${N(-4)} ${N(3)} q ${N(-8)} ${N(-7)} ${N(-16)} 0 Z" fill="${P.steelDim}"/>`);
-  // hood over the back of the helm
-  put(`<path d="M ${N(hdx - 13)} ${N(hdy - 4)} q ${N(-9)} ${N(14)} ${N(2)} ${N(20)} l ${N(9)} ${N(-4)} Z" fill="${P.cloth}"/>`);
+  // a deep hood with nothing in it but two coals
+  put(
+    `<path d="M ${N(hdx - 16)} ${N(hdy + 15)} q ${N(-5)} ${N(-30)} ${N(16)} ${N(-33)} q ${N(21)} ${N(3)} ${N(16)} ${N(33)} q ${N(-16)} ${N(7)} ${N(-32)} 0 Z" fill="${P.cloth}"/>`,
+  );
+  put(`<path d="M ${N(hdx - 11)} ${N(hdy + 8)} q ${N(-2)} ${N(-19)} ${N(11)} ${N(-21)} q ${N(13)} ${N(2)} ${N(11)} ${N(21)} q ${N(-11)} ${N(5)} ${N(-22)} 0 Z" fill="#05070a"/>`);
+  for (const off of [-4.5, 4.5]) {
+    put(`<circle cx="${N(hdx + off)}" cy="${N(hdy - 1)}" r="4.6" fill="${P.ember}" fill-opacity="0.3"/>`);
+    put(`<circle cx="${N(hdx + off)}" cy="${N(hdy - 1)}" r="1.9" fill="${P.emberCore}"/>`);
+  }
+  // the hood falls to the shoulders behind
+  put(`<path d="M ${N(hdx - 15)} ${N(hdy + 6)} q ${N(-12)} ${N(18)} ${N(1)} ${N(26)} l ${N(12)} ${N(-6)} Z" fill="${P.clothDark}"/>`);
   put(`</g>`);
 }
 
@@ -256,7 +289,7 @@ const POSES = [
     note: `${KNIGHT.drink.time}s · +${KNIGHT.drink.heal} hp`,
     frames: frames(KNIGHT.drink.time),
     detail: 'nearly a second standing still, which is the whole cost of healing',
-    pose: { frontArm: -12, elbow: 40, backArm: -150, stride: 6, head: -12, lean: -4, flask: true },
+    pose: { frontArm: -150, elbow: 60, backArm: 20, stride: 6, head: -12, lean: -4, flaskMain: true },
   },
   {
     id: 'hurt',
@@ -280,7 +313,9 @@ const POSES = [
     note: 'and the essence stays where you fell',
     frames: 16,
     detail: 'the longest animation in the sheet, because you will see it most',
-    pose: { lean: -46, crouch: 66, frontArm: 118, elbow: 46, backArm: -86, stride: 26, head: -44, fade: 0.8, shield: false, dropped: true },
+    // The sword falls. The lantern does not — still in the off hand, unlit,
+    // the one thing this figure has never let go of.
+    pose: { lean: -46, crouch: 66, frontArm: 118, elbow: 46, backArm: -50, stride: 26, head: -44, fade: 0.85, dropped: true },
   },
 ];
 
