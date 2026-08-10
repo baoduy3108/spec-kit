@@ -66,13 +66,22 @@ function ramp(baseHue, lightHue, lo, hi, t) {
 
 /** base hue, the hue of the light in the room, and the room's brightness band. */
 const MOOD = {
-  dark: { base: 218, light: 190, lo: 0.1, hi: 0.5 },
-  dim: { base: 224, light: 200, lo: 0.13, hi: 0.56 },
-  grey: { base: 205, light: 186, lo: 0.2, hi: 0.66 },
-  pale: { base: 196, light: 176, lo: 0.28, hi: 0.76 },
-  warm: { base: 20, light: 38, lo: 0.12, hi: 0.58 },
-  gold: { base: 34, light: 46, lo: 0.18, hi: 0.68 },
+  dark: { base: 218, light: 190, shadow: 268, lo: 0.1, hi: 0.5 },
+  dim: { base: 224, light: 200, shadow: 274, lo: 0.13, hi: 0.56 },
+  grey: { base: 205, light: 186, shadow: 250, lo: 0.2, hi: 0.66 },
+  pale: { base: 196, light: 176, shadow: 236, lo: 0.28, hi: 0.76 },
+  // warm rooms get a cold shadow, which is the whole reason a fire reads as a
+  // fire: the eye needs the other temperature to measure it against
+  warm: { base: 20, light: 38, shadow: 214, lo: 0.12, hi: 0.58 },
+  gold: { base: 34, light: 46, shadow: 222, lo: 0.18, hi: 0.68 },
 };
+
+/** The cool end of the shadow zone, and the saturated complement. Three named
+ *  hues per room instead of one, which is what the colour scripts do. */
+const SHADOW = {};
+for (const [key, r] of Object.entries(MOOD)) {
+  SHADOW[key] = hsl(r.shadow, 0.55, Math.max(0.34, r.lo + 0.26));
+}
 
 const LIGHT = {};
 for (const [key, r] of Object.entries(MOOD)) {
@@ -219,7 +228,7 @@ function backdrop(x, y, w, h, p, rng) {
  * bottom, and moss where the damp is. Flat blocks read as a placeholder no
  * matter how good the palette is.
  */
-function texture(x, y, w, h, p, rng, floorY) {
+function texture(x, y, w, h, p, rng, floorY, moss = '#3d5a34', cold = '#2a3b52') {
   // A crack a pixel wide is gone after a resolve, so in pixel mode it is a
   // stack of four-wide blocks. Rendered smooth, that stack is a black post
   // standing in the room — which is exactly what the courtyard came out with.
@@ -251,7 +260,7 @@ function texture(x, y, w, h, p, rng, floorY) {
   for (let i = 0; i < 5; i++) {
     const dh = Math.min(wall, 70 + rng() * 150);
     put(
-      `<rect x="${q(x + rng() * w)}" y="${q(y + 30)}" width="${q(34 + rng() * 60)}" height="${q(dh)}" fill="#000" fill-opacity="${(0.04 + rng() * 0.05).toFixed(2)}"/>`,
+      `<rect x="${q(x + rng() * w)}" y="${q(y + 30)}" width="${q(34 + rng() * 60)}" height="${q(dh)}" fill="${cold}" fill-opacity="${(0.16 + rng() * 0.14).toFixed(2)}"/>`,
     );
   }
   // moss along the waterline
@@ -264,7 +273,7 @@ function texture(x, y, w, h, p, rng, floorY) {
       if (rng() < 0.6) put(`<rect x="${mx + PX}" y="${my - PX * 2}" width="${q(bw * 0.5)}" height="${PX * 2}" fill="#3d5a34" fill-opacity="0.2"/>`);
     } else {
       put(
-        `<ellipse cx="${mx}" cy="${my}" rx="${(bw * 0.5).toFixed(1)}" ry="${(2 + rng() * 5).toFixed(1)}" fill="#3d5a34" fill-opacity="${(0.14 + rng() * 0.24).toFixed(2)}"/>`,
+        `<ellipse cx="${mx}" cy="${my}" rx="${(bw * 0.5).toFixed(1)}" ry="${(2 + rng() * 5).toFixed(1)}" fill="#3d5a34" fill-opacity="${(0.16 + rng() * 0.26).toFixed(2)}"/>`,
       );
     }
   }
@@ -391,7 +400,7 @@ function foreground(x, y, w, h, rng) {
 }
 
 /** A barrel vault with columns — the default indoor room. */
-function hall(x, y, w, h, p, rng, a = '#54c9a2') {
+function hall(x, y, w, h, p, rng, a = '#54c9a2', cold = '#3a6d9c') {
   const floorY = backdrop(x, y, w, h, p, rng);
   const top = y + 10;
 
@@ -437,6 +446,30 @@ function hall(x, y, w, h, p, rng, a = '#54c9a2') {
       `<line x1="${(cx - 18).toFixed(1)}" y1="${(headY + 6).toFixed(1)}" x2="${(cx - 18).toFixed(1)}" y2="${(floorY - 15).toFixed(1)}" stroke="${p.edge}" stroke-width="1.5" stroke-opacity="0.7"/>`,
     );
   });
+
+  // A passage at the back, lit by something the other temperature. This is
+  // the room's second hue and it arrives as one shape, because that is how
+  // the eye counts colour.
+  {
+    const dx = x + w * (0.56 + rng() * 0.22);
+    const dw = 96 + rng() * 60;
+    const dh2 = floorY - (top + 120);
+    put(`<rect x="${(dx - dw / 2).toFixed(1)}" y="${(top + 120).toFixed(1)}" width="${dw.toFixed(1)}" height="${dh2.toFixed(1)}" fill="#05070a"/>`);
+    put(
+      `<path d="M ${(dx - dw / 2).toFixed(1)} ${(top + 120).toFixed(1)} q ${(dw / 2).toFixed(1)} ${-52} ${dw.toFixed(1)} 0 Z" fill="#05070a"/>`,
+    );
+    put(`<linearGradient id="pass-${Math.round(dx)}" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="${cold}" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="${cold}" stop-opacity="0.15"/>
+    </linearGradient>`);
+    put(
+      `<rect x="${(dx - dw / 2 + 10).toFixed(1)}" y="${(top + 130).toFixed(1)}" width="${(dw - 20).toFixed(1)}" height="${(dh2 - 10).toFixed(1)}" fill="url(#pass-${Math.round(dx)})"/>`,
+    );
+    // light spilling out of it onto the floor
+    put(
+      `<ellipse cx="${dx.toFixed(1)}" cy="${(floorY + 6).toFixed(1)}" rx="${(dw * 0.8).toFixed(1)}" ry="16" fill="${cold}" fill-opacity="0.3"/>`,
+    );
+  }
 
   // Corbels under the springing of the arch. Their screens are dense: pipes,
   // brackets, banners, hanging lamps. Three columns in an empty box is not a
@@ -1077,7 +1110,10 @@ function creature(id, x, floorY, scale, facing, room, lightX, roomLight) {
   if (lightX !== null && lightX !== undefined) {
     const toward = Math.sign(lightX - x) || -1;
     const keep = { ...BODY };
-    const rimCol = RIM[roomLight] || '#8ab4e0';
+    // In a warm room the rim runs cold and in a cold room it runs warm. A rim
+    // the same temperature as the room does not separate anything.
+    const warmRoom = roomLight === 'warm' || roomLight === 'gold';
+    const rimCol = warmRoom ? SHADOW[roomLight] : RIM[roomLight] || '#8ab4e0';
     Object.assign(BODY, { dark: rimCol, mid: rimCol, rim: rimCol, wet: rimCol });
     put(`<g opacity="0.34">`);
     draw(x + toward * PX / 2, floorY, s, facing);
@@ -1156,8 +1192,8 @@ function panel(room, y) {
   put(`<g clip-path="url(#clip-${room.id.replace(':', '-')})">`);
 
   const arch = ARCH[room.kind] || hall;
-  const floorY = arch(x, y, w, h, p, rng, ACCENT[room.light] || ACCENT.dim);
-  texture(x, y, w, h, p, rng, floorY);
+  const floorY = arch(x, y, w, h, p, rng, ACCENT[room.light] || ACCENT.dim, SHADOW[room.light] || SHADOW.dim);
+  texture(x, y, w, h, p, rng, floorY, ACCENT[room.light] || ACCENT.dim, SHADOW[room.light] || SHADOW.dim);
   // everything above is distance, and distance is hazy
   haze(x, y, w, h, room, floorY);
 

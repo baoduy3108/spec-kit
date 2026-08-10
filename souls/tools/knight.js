@@ -28,11 +28,14 @@ const P = {
   cell: '#12171e',
   edge: '#2c3a4a',
   // fired clay, not plate. "The sword was fired, not forged. So were you."
-  clay: '#6b4a38',
-  clayDark: '#412a20',
-  clayLit: '#8a5f45',
-  cloth: '#2f3b46',
-  clothDark: '#1e262e',
+  // Warm clay against cold cloth. A character painted at one temperature
+  // disappears into any room that shares it, which is what happened to this
+  // one the moment the ash pit turned terracotta.
+  clay: '#8a5334',
+  clayDark: '#4a2a17',
+  clayLit: '#b0713f',
+  cloth: '#22394a',
+  clothDark: '#152531',
   steel: '#9aa8b6',
   steelDim: '#6b7885',
   ink: '#c7d2dd',
