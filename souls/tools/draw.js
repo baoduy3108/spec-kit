@@ -36,6 +36,27 @@ const LIGHT = {
 
 const FIRE = { core: '#fff3c4', mid: '#ffb24a', low: '#ff7a2f', deep: '#c03c14' };
 
+// Rim light is the single biggest thing separating a flat scene from a lit
+// one, and it is what makes a Dead Cells silhouette read at a glance: a bright
+// edge on the side facing the light, and nothing else on the body. Each light
+// level gets the colour its rim should be.
+const RIM = {
+  dark: '#6f9fd0',
+  dim: '#8ab4e0',
+  grey: '#c3d6e8',
+  pale: '#e2eef8',
+  warm: '#ffb765',
+  gold: '#ffd98a',
+};
+
+/** Where the light in this room is coming from, in panel coordinates. */
+function lightAt(room, x, w) {
+  if (room.kind === 'bonfire') return x + w * 0.34;
+  const torch = room.foes.findIndex((id) => id.endsWith('-torch'));
+  if (torch >= 0) return null; // the torch carrier lights itself, handled per figure
+  return x + w * (room.light === 'warm' || room.light === 'gold' ? 0.2 : 0.5);
+}
+
 // --- helpers --------------------------------------------------------------
 const esc = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -90,6 +111,77 @@ function backdrop(x, y, w, h, p, rng) {
     );
   }
   return floorY;
+}
+
+/**
+ * What makes stone look like stone: cracks that run, damp that pools at the
+ * bottom, and moss where the damp is. Flat blocks read as a placeholder no
+ * matter how good the palette is.
+ */
+function texture(x, y, w, h, p, rng, floorY) {
+  // cracks
+  for (let i = 0; i < 14; i++) {
+    let cx = x + rng() * w;
+    let cy = y + 20 + rng() * (floorY - y - 30);
+    let d = `M ${cx.toFixed(1)} ${cy.toFixed(1)}`;
+    const steps = 3 + Math.floor(rng() * 4);
+    for (let k = 0; k < steps; k++) {
+      cx += (rng() - 0.5) * 34;
+      cy += rng() * 22;
+      d += ` L ${cx.toFixed(1)} ${cy.toFixed(1)}`;
+    }
+    put(`<path d="${d}" fill="none" stroke="#000" stroke-width="${(0.8 + rng()).toFixed(1)}" stroke-opacity="${(0.18 + rng() * 0.3).toFixed(2)}"/>`);
+  }
+  // damp running down from the vault
+  for (let i = 0; i < 9; i++) {
+    const dx = x + rng() * w;
+    const len = 40 + rng() * 130;
+    put(`<rect x="${dx.toFixed(1)}" y="${(y + 30).toFixed(1)}" width="${(6 + rng() * 16).toFixed(1)}" height="${len.toFixed(1)}" fill="#000" fill-opacity="${(0.06 + rng() * 0.1).toFixed(2)}"/>`);
+  }
+  // moss along the floor line, which is where the water sits
+  for (let i = 0; i < 40; i++) {
+    const mx = x + rng() * w;
+    const my = floorY - rng() * 14;
+    put(`<ellipse cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" rx="${(4 + rng() * 13).toFixed(1)}" ry="${(2 + rng() * 4).toFixed(1)}" fill="#3d5a34" fill-opacity="${(0.1 + rng() * 0.22).toFixed(2)}"/>`);
+  }
+  // grit on the floor
+  for (let i = 0; i < 70; i++) {
+    put(`<circle cx="${(x + rng() * w).toFixed(1)}" cy="${(floorY + 4 + rng() * (y + h - floorY - 6)).toFixed(1)}" r="${(0.6 + rng() * 1.9).toFixed(1)}" fill="#000" fill-opacity="${(0.12 + rng() * 0.3).toFixed(2)}"/>`);
+  }
+}
+
+/** Dust in the air, lit by whatever is burning. Cheap, and it sells depth. */
+function motes(x, y, w, h, rng, colour) {
+  for (let i = 0; i < 34; i++) {
+    put(`<circle cx="${(x + rng() * w).toFixed(1)}" cy="${(y + rng() * h * 0.8).toFixed(1)}" r="${(0.7 + rng() * 1.8).toFixed(1)}" fill="${colour}" fill-opacity="${(0.06 + rng() * 0.2).toFixed(2)}"/>`);
+  }
+}
+
+/**
+ * A near-black slab of architecture across the front of the shot. Depth in a
+ * flat scene comes from having something between the camera and the room, and
+ * it costs one shape.
+ */
+function foreground(x, y, w, h, rng) {
+  if (rng() < 0.42) return; // not every shot needs one
+  const side = rng() < 0.5 ? -1 : 1;
+  const edge = side < 0 ? x : x + w;
+  const wide = 58 + rng() * 34;
+  const inner = edge + side * -wide;
+  // a pier flush to the frame, wider at the base, with the arch springing off
+  // it — we are looking past a piece of the building, not at a bar
+  put(
+    `<path d="M ${edge} ${y} L ${inner} ${y} L ${(inner - side * 10).toFixed(1)} ${(y + h * 0.34).toFixed(1)} L ${inner} ${y + h} L ${edge} ${y + h} Z" fill="#05070a" fill-opacity="0.94"/>`,
+  );
+  put(
+    `<path d="M ${inner} ${(y + h * 0.2).toFixed(1)} q ${(side * 74).toFixed(1)} ${(-h * 0.1).toFixed(1)} ${(side * 150).toFixed(1)} ${(h * 0.06).toFixed(1)}" fill="none" stroke="#05070a" stroke-width="22" stroke-linecap="round"/>`,
+  );
+  if (rng() < 0.6) {
+    const hx = inner - side * (18 + rng() * 40);
+    for (let i = 0; i < 14; i++) {
+      put(`<ellipse cx="${(hx + Math.sin(i * 0.8) * 3).toFixed(1)}" cy="${(y + 8 + i * 16).toFixed(1)}" rx="4.5" ry="7.5" fill="none" stroke="#05070a" stroke-width="3.6"/>`);
+    }
+  }
 }
 
 /** A barrel vault with columns — the default indoor room. */
@@ -402,6 +494,19 @@ const CREATURE = {
       q ${2 * s * f} ${9 * s} ${-6 * s * f} ${11 * s}
       q ${-9 * s * f} ${0} ${-11 * s * f} ${-7 * s} Z" fill="${BODY.dark}"/>`);
     put(`<line x1="${x - 13 * s}" y1="${sh + 2 * s}" x2="${x + 13 * s}" y2="${sh}" stroke="${BODY.rim}" stroke-width="${1.3 * s}" stroke-opacity="0.75"/>`);
+    // ribs, showing through where the chest has gone
+    for (let i = 0; i < 3; i++) {
+      put(
+        `<path d="M ${(x - 9 * s).toFixed(1)} ${(sh + 12 * s + i * 6 * s).toFixed(1)} q ${(6 * s).toFixed(1)} ${(3 * s).toFixed(1)} ${(12 * s).toFixed(1)} 0" fill="none" stroke="${BODY.rim}" stroke-width="${(1.1 * s).toFixed(1)}" stroke-opacity="0.4"/>`,
+      );
+    }
+    // a rag still wrapped over one shoulder, and a torn hem
+    put(
+      `<path d="M ${(x - 14 * s).toFixed(1)} ${(sh + 3 * s).toFixed(1)} q ${(14 * s).toFixed(1)} ${(9 * s).toFixed(1)} ${(27 * s).toFixed(1)} ${(2 * s).toFixed(1)} l ${(-3 * s).toFixed(1)} ${(9 * s).toFixed(1)} q ${(-13 * s).toFixed(1)} ${(6 * s).toFixed(1)} ${(-25 * s).toFixed(1)} ${(-1 * s).toFixed(1)} Z" fill="#4a3a2e" fill-opacity="0.55"/>`,
+    );
+    put(
+      `<path d="M ${(x - 12 * s).toFixed(1)} ${(sh + 44 * s).toFixed(1)} l ${(4 * s).toFixed(1)} ${(7 * s).toFixed(1)} l ${(4 * s).toFixed(1)} ${(-5 * s).toFixed(1)} l ${(5 * s).toFixed(1)} ${(8 * s).toFixed(1)} l ${(5 * s).toFixed(1)} ${(-6 * s).toFixed(1)} l ${(4 * s).toFixed(1)} ${(6 * s).toFixed(1)} l ${(2 * s).toFixed(1)} ${(-9 * s).toFixed(1)} Z" fill="#4a3a2e" fill-opacity="0.5"/>`,
+    );
   },
   hound(x, g, s, f) {
     const back = g - 40 * s;
@@ -423,6 +528,15 @@ const CREATURE = {
       q ${10 * s * f} ${-2 * s} ${16 * s * f} ${4 * s}
       q ${-5 * s * f} ${6 * s} ${-16 * s * f} ${5 * s} Z" fill="${BODY.dark}"/>`);
     put(`<path d="M ${x + 34 * s * f} ${back - 1 * s} l ${-7 * s * f} ${-9 * s} l ${9 * s * f} ${2 * s} Z" fill="${BODY.dark}"/>`);
+    // ribs under the hide, and the collar somebody buckled on it
+    for (let i = 0; i < 4; i++) {
+      put(
+        `<path d="M ${(x + (2 - i * 8) * s * f).toFixed(1)} ${(back + 2 * s).toFixed(1)} q ${(2 * s * f).toFixed(1)} ${(8 * s).toFixed(1)} ${(-1 * s * f).toFixed(1)} ${(15 * s).toFixed(1)}" fill="none" stroke="${BODY.rim}" stroke-width="${(1.1 * s).toFixed(1)}" stroke-opacity="0.35"/>`,
+      );
+    }
+    put(
+      `<path d="M ${(x + 24 * s * f).toFixed(1)} ${(back - 4 * s).toFixed(1)} q ${(3 * s * f).toFixed(1)} ${(11 * s).toFixed(1)} ${(-2 * s * f).toFixed(1)} ${(19 * s).toFixed(1)}" fill="none" stroke="#4a3a2e" stroke-width="${(4 * s).toFixed(1)}" stroke-opacity="0.8"/>`,
+    );
     // tail down
     put(`<path d="M ${x - 30 * s * f} ${back + 8 * s} q ${-12 * s * f} ${4 * s} ${-14 * s * f} ${16 * s}" fill="none" stroke="${BODY.mid}" stroke-width="${3 * s}" stroke-linecap="round"/>`);
   },
@@ -560,12 +674,60 @@ const CREATURE = {
   },
 };
 
+/**
+ * Where a family's eyes sit, in body units above the floor. Two lit points in
+ * a dark silhouette do more for reading a creature than any amount of surface
+ * detail, and they are the thing this sheet was most obviously missing.
+ */
+const EYES = {
+  husk: { dy: -88, dx: 7, r: 1.9, colour: '#ffd27a' },
+  hound: { dy: -39, dx: 40, r: 1.7, colour: '#ff8a5c' },
+  crawler: { dy: -26, dx: 34, r: 1.8, colour: '#ffd27a' },
+  acolyte: { dy: -72, dx: 0, r: 2.0, colour: '#9fe0ff' },
+  knightling: { dy: -70, dx: 2, r: 1.7, colour: '#ffd27a' },
+  ghoul: { dy: -68, dx: 3, r: 1.9, colour: '#b8ff9a' },
+  stonemask: { dy: -74, dx: 0, r: 2.2, colour: '#ff6b52' },
+  moth: { dy: -84, dx: 0, r: 1.6, colour: '#e6d5ff' },
+  warder: { dy: -82, dx: 0, r: 1.8, colour: '#ffd27a' },
+  kiln: { dy: -80, dx: 0, r: 2.3, colour: '#ffb24a' },
+  drowned: { dy: -84, dx: 0, r: 2.0, colour: '#7fe0d0' },
+  chorister: { dy: -74, dx: 4, r: 1.9, colour: '#ffe9a8' },
+  ironclad: { dy: -90, dx: 0, r: 1.8, colour: '#ff6b52' },
+  wisp: null,
+  colossus: { dy: -112, dx: 0, r: 2.6, colour: '#ff8a5c' },
+  shade: { dy: -85, dx: 0, r: 2.0, colour: '#cfe0ee' },
+};
+
+function eyes(family, x, floorY, s, f) {
+  const e = EYES[family];
+  if (!e) return;
+  const ex = x + e.dx * s * (f < 0 ? 1 : -1);
+  const ey = floorY + e.dy * s;
+  for (const off of [-3.2, 3.2]) {
+    put(`<circle cx="${(ex + off * s).toFixed(1)}" cy="${ey.toFixed(1)}" r="${(e.r * s * 2.2).toFixed(1)}" fill="${e.colour}" fill-opacity="0.22"/>`);
+    put(`<circle cx="${(ex + off * s).toFixed(1)}" cy="${ey.toFixed(1)}" r="${(e.r * s).toFixed(1)}" fill="${e.colour}"/>`);
+  }
+}
+
 /** Draw one concrete foe: family shape, then whatever it is carrying. */
-function creature(id, x, floorY, scale, facing, room) {
+function creature(id, x, floorY, scale, facing, room, lightX, roomLight) {
   const foe = FOES[id];
   const draw = CREATURE[foe.family];
   if (!draw) return;
   const s = scale * (foe.family === 'colossus' ? 0.85 : 1);
+  // Rim light, done the cheap way that actually works: draw the whole
+  // silhouette once in the light's colour, shifted two pixels towards the
+  // light, then draw the real one on top. What is left showing is an edge.
+  if (lightX !== null && lightX !== undefined) {
+    const toward = Math.sign(lightX - x) || -1;
+    const keep = { ...BODY };
+    const rimCol = RIM[roomLight] || '#8ab4e0';
+    Object.assign(BODY, { dark: rimCol, mid: rimCol, rim: rimCol, wet: rimCol });
+    put(`<g opacity="0.34">`);
+    draw(x + toward * 1.7 * s, floorY, s, facing);
+    put(`</g>`);
+    Object.assign(BODY, keep);
+  }
   // A generous box around the silhouette: tall families reach ~110 units up,
   // low ones spread ~50 wide either side. The gate measures inside this and
   // in a ring just outside it.
@@ -585,8 +747,10 @@ function creature(id, x, floorY, scale, facing, room) {
   const sh = floorY - 60 * s;
   if (carry === '-torch') {
     torch(x + 16 * s * facing, sh + 20 * s, s, facing);
+    put(`<ellipse cx="${(x + 16 * s * facing).toFixed(1)}" cy="${(sh - 20 * s).toFixed(1)}" rx="${(90 * s).toFixed(1)}" ry="${(80 * s).toFixed(1)}" fill="url(#glow)"/>`);
     pool(x, floorY, 78 * s, FIRE.mid, 0.14);
   }
+  eyes(foe.family, x, floorY, s, facing);
   if (carry === '-spear') spear(x, sh + 14 * s, s, facing);
   if (carry === '-heavy') shield(x, sh + 8 * s, s, facing);
 }
@@ -631,6 +795,7 @@ function panel(room, y) {
 
   const arch = ARCH[room.kind] || hall;
   const floorY = arch(x, y, w, h, p, rng);
+  texture(x, y, w, h, p, rng, floorY);
 
   const prop = PROPS[room.key];
   if (prop) prop(x, w, floorY, p, rngFor(`${room.id}-props`));
@@ -643,11 +808,12 @@ function panel(room, y) {
 
   const skin = bodyFor(room.light);
   Object.assign(BODY, skin);
+  const lightX = lightAt(room, x, w);
   const spots = positions(room.layout, room.foes.length, x, w);
   room.foes.forEach((id, i) => {
     const at = spots[i] || spots[spots.length - 1];
     halo(at.x, floorY, at.s * 2.05, skin.up);
-    creature(id, at.x, floorY, at.s * 2.05, at.f, room);
+    creature(id, at.x, floorY, at.s * 2.05, at.f, room, lightX, room.light);
   });
 
   if (room.boss) {
@@ -655,6 +821,8 @@ function panel(room, y) {
     put(`<text x="${x + w / 2}" y="${floorY - 128}" text-anchor="middle" font-family="Georgia,serif" font-size="21" fill="#cfe0ee" fill-opacity="0.5" letter-spacing="5">${esc(b.name.vi.toUpperCase())}</text>`);
   }
 
+  motes(x, y, w, h, rngFor(`${room.id}-air`), RIM[room.light] || '#8ab4e0');
+  foreground(x, y, w, h, rngFor(`${room.id}-fg`));
   // vignette, so the eye lands in the middle of the room
   put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#vig)"/>`);
   put(`</g>`);
@@ -684,6 +852,11 @@ export function drawArea(areaId) {
   marks.length = 0;
   put(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="Georgia,serif">`);
   put(`<defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffb24a" stop-opacity="0.34"/>
+      <stop offset="60%" stop-color="#ff7a2f" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#ff7a2f" stop-opacity="0"/>
+    </radialGradient>
     <radialGradient id="haloD" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#05080c" stop-opacity="0.8"/>
       <stop offset="55%" stop-color="#05080c" stop-opacity="0.5"/>
