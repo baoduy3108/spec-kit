@@ -56,6 +56,9 @@ function rngFor(seed) {
 const parts = [];
 const put = (s) => parts.push(s);
 
+/** Where each figure was actually drawn, for tools/eye.js to look at. */
+export const marks = [];
+
 // --- architecture ---------------------------------------------------------
 
 /** Layered stone: a far wall, blocks picked out, and a floor line. */
@@ -558,11 +561,25 @@ const CREATURE = {
 };
 
 /** Draw one concrete foe: family shape, then whatever it is carrying. */
-function creature(id, x, floorY, scale, facing) {
+function creature(id, x, floorY, scale, facing, room) {
   const foe = FOES[id];
   const draw = CREATURE[foe.family];
   if (!draw) return;
   const s = scale * (foe.family === 'colossus' ? 0.85 : 1);
+  // A generous box around the silhouette: tall families reach ~110 units up,
+  // low ones spread ~50 wide either side. The gate measures inside this and
+  // in a ring just outside it.
+  marks.push({
+    room: room.id,
+    foe: id,
+    family: foe.family,
+    box: {
+      x: Math.round(x - 56 * s),
+      y: Math.round(floorY - 116 * s),
+      w: Math.round(112 * s),
+      h: Math.round(118 * s),
+    },
+  });
   draw(x, floorY, s, facing);
   const carry = id.slice(foe.family.length);
   const sh = floorY - 60 * s;
@@ -630,7 +647,7 @@ function panel(room, y) {
   room.foes.forEach((id, i) => {
     const at = spots[i] || spots[spots.length - 1];
     halo(at.x, floorY, at.s * 2.05, skin.up);
-    creature(id, at.x, floorY, at.s * 2.05, at.f);
+    creature(id, at.x, floorY, at.s * 2.05, at.f, room);
   });
 
   if (room.boss) {
@@ -664,6 +681,7 @@ export function drawArea(areaId) {
   const H = HEAD + rooms.length * PANEL + 40;
 
   parts.length = 0;
+  marks.length = 0;
   put(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="Georgia,serif">`);
   put(`<defs>
     <radialGradient id="haloD" cx="50%" cy="50%" r="50%">
@@ -694,7 +712,11 @@ export function drawArea(areaId) {
   mkdirSync(new URL('../dist/', import.meta.url), { recursive: true });
   const out = new URL(`../dist/area-${areaId}.svg`, import.meta.url);
   writeFileSync(out, parts.join('\n'));
-  return { file: out.pathname, rooms: rooms.length, height: H };
+  writeFileSync(
+    new URL(`../dist/area-${areaId}.marks.json`, import.meta.url),
+    JSON.stringify(marks, null, 2),
+  );
+  return { file: out.pathname, rooms: rooms.length, height: H, figures: marks.length };
 }
 
 const asked = process.argv[2];
