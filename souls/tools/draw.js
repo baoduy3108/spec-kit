@@ -210,9 +210,41 @@ function backdrop(x, y, w, h, p, rng) {
   }
   // haze between you and the wall
   put(`<rect x="${x}" y="${y}" width="${w}" height="${h * 0.8}" fill="${p.air}" fill-opacity="0.45"/>`);
-  // floor
-  put(`<rect x="${x}" y="${floorY}" width="${w}" height="${y + h - floorY}" fill="${p.floor}"/>`);
-  put(`<line x1="${x}" y1="${floorY}" x2="${x + w}" y2="${floorY}" stroke="${p.edge}" stroke-width="2"/>`);
+  // The floor, broken. A straight line across the frame is the single most
+  // programmer-art thing in the picture, and it was the first thing the eye
+  // hit in every room.
+  {
+    let d = `M ${x} ${y + h} L ${x} ${floorY.toFixed(1)}`;
+    let fy = floorY;
+    for (let i = 0; i <= 26; i++) {
+      const fx = x + (i / 26) * w;
+      fy = floorY + Math.sin(i * 1.9) * 3 + (rng() - 0.5) * 7;
+      d += ` L ${fx.toFixed(1)} ${fy.toFixed(1)}`;
+      // a slab that has dropped or lifted
+      if (rng() < 0.16) {
+        const step = (rng() - 0.5) * 22;
+        d += ` L ${(fx + 6).toFixed(1)} ${(fy + step).toFixed(1)} L ${(fx + 26).toFixed(1)} ${(fy + step).toFixed(1)}`;
+      }
+    }
+    d += ` L ${x + w} ${y + h} Z`;
+    put(`<path d="${d}" fill="${p.floor}" stroke="${p.edge}" stroke-width="2.2"/>`);
+  }
+
+  // things growing out of the join between floor and wall, which is where
+  // anything alive in a ruin actually lives
+  for (let i = 0; i < 26; i++) {
+    const gx = x + rng() * w;
+    const gh = 8 + rng() * 26;
+    let d = `M ${gx.toFixed(1)} ${floorY.toFixed(1)}`;
+    let px2 = gx;
+    let py2 = floorY;
+    for (let k = 0; k < 3; k++) {
+      px2 += (rng() - 0.5) * 14;
+      py2 -= gh / 3;
+      d += ` Q ${(px2 + (rng() - 0.5) * 10).toFixed(1)} ${(py2 + gh / 6).toFixed(1)} ${px2.toFixed(1)} ${py2.toFixed(1)}`;
+    }
+    put(`<path d="${d}" fill="none" stroke="#3d5a34" stroke-width="${(1.4 + rng() * 2).toFixed(1)}" stroke-opacity="${(0.3 + rng() * 0.4).toFixed(2)}" stroke-linecap="round"/>`);
+  }
   // a level below this one, seen over the edge — the frame now has height to
   // spend and a floor that is simply the bottom of the picture wastes it
   put(`<rect x="${x}" y="${floorY + (y + h - floorY) * 0.55}" width="${w}" height="${((y + h - floorY) * 0.45).toFixed(1)}" fill="${p.far}"/>`);
