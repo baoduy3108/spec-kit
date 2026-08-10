@@ -7,6 +7,7 @@
     "build": "node tools/build.js",
     "draw": "node tools/draw.js",
     "assets": "node tools/assets.js",
-    "eye": "node tools/eye.js"
+    "eye": "node tools/eye.js",
+    "knight": "node tools/knight.js"
   }
 }
