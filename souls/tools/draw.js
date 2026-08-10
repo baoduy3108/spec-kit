@@ -25,23 +25,69 @@ const HEAD = 150;
 // Six light levels, each a full scene palette rather than a tint. `far` is the
 // wall behind everything, `air` the haze between, `floor` what you stand on,
 // `edge` the line work, `glow` whatever is burning.
-// Rebuilt after measuring the sheet against eight indie screens it was being
-// compared to. The old palettes topped out around 0.29 value at the 95th
-// percentile — 95% of every picture sat in the darkest third of the range —
-// and carried one or two hue families. Dark is a mood; near-black is an
-// absence of information, and no amount of linework survives it.
+// Palettes are generated from a rule now, not picked by hand.
 //
-// Each level now has a lit range and a hue that is not the hue of the light,
-// so a room can have two colours in it before anything is placed.
-const LIGHT = {
-  dark: { far: '#1b2a3a', mid: '#27394c', air: '#1d2f42', floor: '#2c3f52', edge: '#5b7a99', ink: '#a9bccd', glow: '#4d8ec8' },
-  dim: { far: '#25384c', mid: '#324a63', air: '#283d54', floor: '#3a5169', edge: '#6d8aa6', ink: '#bccddd', glow: '#5f9ed4' },
-  grey: { far: '#3b4a5a', mid: '#4c5f72', air: '#42525f', floor: '#57697b', edge: '#8ba0b3', ink: '#d3dde6', glow: '#9dbdd4' },
-  pale: { far: '#4d5b68', mid: '#65778a', air: '#586878', floor: '#728699', edge: '#a7bccd', ink: '#e6eef5', glow: '#c2dcee' },
-  warm: { far: '#33201a', mid: '#4c3122', air: '#3b2318', floor: '#5b3c26', edge: '#a06a34', ink: '#f2d6ab', glow: '#ffab4a' },
-  gold: { far: '#4a361a', mid: '#6a4c22', air: '#553d18', floor: '#7a5827', edge: '#c08f32', ink: '#ffefc4', glow: '#ffd166' },
+// The rule is hue shifting, and it is the thing every hand-picked palette here
+// was missing: a ramp does not darken one hue, it moves. Shadows shift *away*
+// from the light source, towards blue and purple; midtones carry the base hue
+// and hold the most saturation; highlights shift *towards* the light. Taking
+// one colour and multiplying it down is what makes a scene read as flat and
+// muddy no matter how much detail goes on top of it.
+//
+// So each light level is now declared as what it actually is — a base hue, the
+// hue of whatever is lighting it, and how bright the room gets — and the six
+// scene colours are derived. Changing a room's mood is two numbers.
+
+const hsl = (h, s2, l) => {
+  h = ((h % 360) + 360) % 360;
+  const a = s2 * Math.min(l, 1 - l);
+  const f = (n) => {
+    const k = (n + h / 30) % 12;
+    const c = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return Math.round(255 * c)
+      .toString(16)
+      .padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
 };
 
+/**
+ * One step of a hue-shifted ramp. `t` runs 0 (deepest shadow) to 1 (highlight).
+ * Saturation peaks in the midtones and falls off at both ends, which is what
+ * keeps the darks from turning into flat black and the lights from turning
+ * into paper.
+ */
+function ramp(baseHue, lightHue, lo, hi, t) {
+  const away = baseHue + (baseHue < lightHue ? -46 : 46); // shadows run from the light
+  const hue = t < 0.5 ? away + (baseHue - away) * (t / 0.5) : baseHue + (lightHue - baseHue) * ((t - 0.5) / 0.5) * 0.75;
+  const sat = 0.2 + 0.42 * Math.sin(Math.PI * Math.min(1, Math.max(0, t)));
+  return hsl(hue, sat, lo + (hi - lo) * t);
+}
+
+/** base hue, the hue of the light in the room, and the room's brightness band. */
+const MOOD = {
+  dark: { base: 218, light: 190, lo: 0.1, hi: 0.5 },
+  dim: { base: 224, light: 200, lo: 0.13, hi: 0.56 },
+  grey: { base: 205, light: 186, lo: 0.2, hi: 0.66 },
+  pale: { base: 196, light: 176, lo: 0.28, hi: 0.76 },
+  warm: { base: 20, light: 38, lo: 0.12, hi: 0.58 },
+  gold: { base: 34, light: 46, lo: 0.18, hi: 0.68 },
+};
+
+const LIGHT = {};
+for (const [key, r] of Object.entries(MOOD)) {
+  LIGHT[key] = {
+    far: ramp(r.base, r.light, r.lo, r.hi, 0.16),
+    mid: ramp(r.base, r.light, r.lo, r.hi, 0.36),
+    air: ramp(r.base, r.light, r.lo, r.hi, 0.26),
+    floor: ramp(r.base, r.light, r.lo, r.hi, 0.46),
+    edge: ramp(r.base, r.light, r.lo, r.hi, 0.74),
+    ink: ramp(r.base, r.light, r.lo, r.hi, 0.94),
+    glow: ramp(r.light, r.light, r.lo, r.hi, 0.86),
+  };
+}
+
+// The distance dissolves into the light, not into black.
 const FIRE = { core: '#fff3c4', mid: '#ffb24a', low: '#ff7a2f', deep: '#c03c14' };
 
 // Rim light is the single biggest thing separating a flat scene from a lit
