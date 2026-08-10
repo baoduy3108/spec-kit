@@ -74,6 +74,15 @@ function rngFor(seed) {
   };
 }
 
+// The sheet is resolved down by four before anybody sees it, so anything
+// thinner than four units in this space does not exist in the output. It was
+// drawn at 240 and shown at 60, which is why the ribs, the moss and the hairline
+// cracks all turned into speckle: they were sub-pixel detail at the size that
+// ships. Everything now lands on the grid it will be seen on.
+const PX = 4;
+const q = (v) => Math.round(v / PX) * PX;
+const thick = (w) => Math.max(PX, Math.round(w / PX) * PX);
+
 const parts = [];
 const put = (s) => parts.push(s);
 
@@ -119,41 +128,48 @@ function backdrop(x, y, w, h, p, rng) {
  * matter how good the palette is.
  */
 function texture(x, y, w, h, p, rng, floorY) {
-  // cracks
-  for (let i = 0; i < 14; i++) {
-    let cx = x + rng() * w;
-    let cy = y + 20 + rng() * (floorY - y - 30);
-    let d = `M ${cx.toFixed(1)} ${cy.toFixed(1)}`;
-    const steps = 3 + Math.floor(rng() * 4);
-    for (let k = 0; k < steps; k++) {
-      cx += (rng() - 0.5) * 34;
-      cy += rng() * 22;
-      d += ` L ${cx.toFixed(1)} ${cy.toFixed(1)}`;
+  // Cracks as steps, not hairlines: a crack a pixel wide is gone after the
+  // resolve, and the first attempt put fourteen of them in every room.
+  for (let i = 0; i < 6; i++) {
+    let cx = q(x + rng() * w);
+    let cy = q(y + 40 + rng() * (floorY - y - 70));
+    for (let k = 0; k < 4; k++) {
+      const len = q(20 + rng() * 40);
+      put(`<rect x="${cx}" y="${cy}" width="${PX}" height="${len}" fill="#000" fill-opacity="0.3"/>`);
+      cy += len;
+      cx += q((rng() - 0.5) * 24);
     }
-    put(`<path d="${d}" fill="none" stroke="#000" stroke-width="${(0.8 + rng()).toFixed(1)}" stroke-opacity="${(0.18 + rng() * 0.3).toFixed(2)}"/>`);
   }
-  // damp running down from the vault
-  for (let i = 0; i < 9; i++) {
-    const dx = x + rng() * w;
-    const len = 40 + rng() * 130;
-    put(`<rect x="${dx.toFixed(1)}" y="${(y + 30).toFixed(1)}" width="${(6 + rng() * 16).toFixed(1)}" height="${len.toFixed(1)}" fill="#000" fill-opacity="${(0.06 + rng() * 0.1).toFixed(2)}"/>`);
+  // damp as slabs down the wall
+  for (let i = 0; i < 5; i++) {
+    put(
+      `<rect x="${q(x + rng() * w)}" y="${q(y + 30)}" width="${q(16 + rng() * 28)}" height="${q(60 + rng() * 130)}" fill="#000" fill-opacity="${(0.07 + rng() * 0.08).toFixed(2)}"/>`,
+    );
   }
-  // moss along the floor line, which is where the water sits
-  for (let i = 0; i < 40; i++) {
-    const mx = x + rng() * w;
-    const my = floorY - rng() * 14;
-    put(`<ellipse cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" rx="${(4 + rng() * 13).toFixed(1)}" ry="${(2 + rng() * 4).toFixed(1)}" fill="#3d5a34" fill-opacity="${(0.1 + rng() * 0.22).toFixed(2)}"/>`);
+  // moss in patches you can see, four pixels at a time
+  for (let i = 0; i < 16; i++) {
+    const mx = q(x + rng() * w);
+    const my = q(floorY - PX * (1 + Math.floor(rng() * 3)));
+    const bw = q(12 + rng() * 30);
+    put(`<rect x="${mx}" y="${my}" width="${bw}" height="${PX * 2}" fill="#3d5a34" fill-opacity="${(0.22 + rng() * 0.3).toFixed(2)}"/>`);
+    if (rng() < 0.6) {
+      put(`<rect x="${mx + PX}" y="${my - PX * 2}" width="${q(bw * 0.5)}" height="${PX * 2}" fill="#3d5a34" fill-opacity="0.2"/>`);
+    }
   }
-  // grit on the floor
-  for (let i = 0; i < 70; i++) {
-    put(`<circle cx="${(x + rng() * w).toFixed(1)}" cy="${(floorY + 4 + rng() * (y + h - floorY - 6)).toFixed(1)}" r="${(0.6 + rng() * 1.9).toFixed(1)}" fill="#000" fill-opacity="${(0.12 + rng() * 0.3).toFixed(2)}"/>`);
+  // rubble on the floor, as blocks
+  for (let i = 0; i < 14; i++) {
+    put(
+      `<rect x="${q(x + rng() * w)}" y="${q(floorY + 8 + rng() * (y + h - floorY - 20))}" width="${q(8 + rng() * 14)}" height="${PX * 2}" fill="#000" fill-opacity="${(0.2 + rng() * 0.25).toFixed(2)}"/>`,
+    );
   }
 }
 
 /** Dust in the air, lit by whatever is burning. Cheap, and it sells depth. */
 function motes(x, y, w, h, rng, colour) {
-  for (let i = 0; i < 34; i++) {
-    put(`<circle cx="${(x + rng() * w).toFixed(1)}" cy="${(y + rng() * h * 0.8).toFixed(1)}" r="${(0.7 + rng() * 1.8).toFixed(1)}" fill="${colour}" fill-opacity="${(0.06 + rng() * 0.2).toFixed(2)}"/>`);
+  for (let i = 0; i < 22; i++) {
+    put(
+      `<rect x="${q(x + rng() * w)}" y="${q(y + rng() * h * 0.8)}" width="${PX}" height="${PX}" fill="${colour}" fill-opacity="${(0.1 + rng() * 0.25).toFixed(2)}"/>`,
+    );
   }
 }
 
@@ -440,7 +456,9 @@ function halo(x, floorY, s, up) {
 }
 
 const limb = (x1, y1, x2, y2, wdt, col) =>
-  put(`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" stroke-width="${wdt.toFixed(1)}" stroke-linecap="round"/>`);
+  put(
+    `<line x1="${q(x1)}" y1="${q(y1)}" x2="${q(x2)}" y2="${q(y2)}" stroke="${col}" stroke-width="${thick(wdt)}" stroke-linecap="butt"/>`,
+  );
 
 function torch(x, y, s, f) {
   const t = x + 14 * s * f;
@@ -494,19 +512,22 @@ const CREATURE = {
       q ${2 * s * f} ${9 * s} ${-6 * s * f} ${11 * s}
       q ${-9 * s * f} ${0} ${-11 * s * f} ${-7 * s} Z" fill="${BODY.dark}"/>`);
     put(`<line x1="${x - 13 * s}" y1="${sh + 2 * s}" x2="${x + 13 * s}" y2="${sh}" stroke="${BODY.rim}" stroke-width="${1.3 * s}" stroke-opacity="0.75"/>`);
-    // ribs, showing through where the chest has gone
+    // ribs as bars, because a curve one unit thick is not in the output
     for (let i = 0; i < 3; i++) {
       put(
-        `<path d="M ${(x - 9 * s).toFixed(1)} ${(sh + 12 * s + i * 6 * s).toFixed(1)} q ${(6 * s).toFixed(1)} ${(3 * s).toFixed(1)} ${(12 * s).toFixed(1)} 0" fill="none" stroke="${BODY.rim}" stroke-width="${(1.1 * s).toFixed(1)}" stroke-opacity="0.4"/>`,
+        `<rect x="${q(x - 9 * s)}" y="${q(sh + 12 * s + i * 8 * s)}" width="${q(18 * s)}" height="${PX}" fill="${BODY.rim}" fill-opacity="0.45"/>`,
       );
     }
     // a rag still wrapped over one shoulder, and a torn hem
     put(
       `<path d="M ${(x - 14 * s).toFixed(1)} ${(sh + 3 * s).toFixed(1)} q ${(14 * s).toFixed(1)} ${(9 * s).toFixed(1)} ${(27 * s).toFixed(1)} ${(2 * s).toFixed(1)} l ${(-3 * s).toFixed(1)} ${(9 * s).toFixed(1)} q ${(-13 * s).toFixed(1)} ${(6 * s).toFixed(1)} ${(-25 * s).toFixed(1)} ${(-1 * s).toFixed(1)} Z" fill="#4a3a2e" fill-opacity="0.55"/>`,
     );
-    put(
-      `<path d="M ${(x - 12 * s).toFixed(1)} ${(sh + 44 * s).toFixed(1)} l ${(4 * s).toFixed(1)} ${(7 * s).toFixed(1)} l ${(4 * s).toFixed(1)} ${(-5 * s).toFixed(1)} l ${(5 * s).toFixed(1)} ${(8 * s).toFixed(1)} l ${(5 * s).toFixed(1)} ${(-6 * s).toFixed(1)} l ${(4 * s).toFixed(1)} ${(6 * s).toFixed(1)} l ${(2 * s).toFixed(1)} ${(-9 * s).toFixed(1)} Z" fill="#4a3a2e" fill-opacity="0.5"/>`,
-    );
+    // a torn hem, stepped rather than jagged
+    for (let i = 0; i < 5; i++) {
+      put(
+        `<rect x="${q(x - 12 * s + i * 6 * s)}" y="${q(sh + 44 * s)}" width="${q(6 * s)}" height="${q((3 + (i % 3) * 3) * s)}" fill="#4a3a2e" fill-opacity="0.55"/>`,
+      );
+    }
   },
   hound(x, g, s, f) {
     const back = g - 40 * s;
@@ -528,10 +549,10 @@ const CREATURE = {
       q ${10 * s * f} ${-2 * s} ${16 * s * f} ${4 * s}
       q ${-5 * s * f} ${6 * s} ${-16 * s * f} ${5 * s} Z" fill="${BODY.dark}"/>`);
     put(`<path d="M ${x + 34 * s * f} ${back - 1 * s} l ${-7 * s * f} ${-9 * s} l ${9 * s * f} ${2 * s} Z" fill="${BODY.dark}"/>`);
-    // ribs under the hide, and the collar somebody buckled on it
-    for (let i = 0; i < 4; i++) {
+    // ribs under the hide, as bars
+    for (let i = 0; i < 3; i++) {
       put(
-        `<path d="M ${(x + (2 - i * 8) * s * f).toFixed(1)} ${(back + 2 * s).toFixed(1)} q ${(2 * s * f).toFixed(1)} ${(8 * s).toFixed(1)} ${(-1 * s * f).toFixed(1)} ${(15 * s).toFixed(1)}" fill="none" stroke="${BODY.rim}" stroke-width="${(1.1 * s).toFixed(1)}" stroke-opacity="0.35"/>`,
+        `<rect x="${q(x + (2 - i * 10) * s * f)}" y="${q(back + 4 * s)}" width="${PX}" height="${q(14 * s)}" fill="${BODY.rim}" fill-opacity="0.4"/>`,
       );
     }
     put(
@@ -724,7 +745,13 @@ function creature(id, x, floorY, scale, facing, room, lightX, roomLight) {
     const rimCol = RIM[roomLight] || '#8ab4e0';
     Object.assign(BODY, { dark: rimCol, mid: rimCol, rim: rimCol, wet: rimCol });
     put(`<g opacity="0.34">`);
-    draw(x + toward * 1.7 * s, floorY, s, facing);
+    draw(x + toward * PX / 2, floorY, s, facing);
+    put(`</g>`);
+    Object.assign(BODY, keep);
+    // and the side that turns away from it
+    Object.assign(BODY, { dark: '#05070a', mid: '#05070a', rim: '#05070a', wet: '#05070a' });
+    put(`<g opacity="0.3">`);
+    draw(x - toward * PX / 2, floorY, s, facing);
     put(`</g>`);
     Object.assign(BODY, keep);
   }
