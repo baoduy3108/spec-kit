@@ -446,12 +446,22 @@ function hall(x, y, w, h, p, rng, a = '#54c9a2', cold = '#3a6d9c') {
   // it is also the reason every room looked like the last one.
   const crown = x + w * (0.34 + rng() * 0.3);
   const gap = rng() < 0.45; // a section that has come down
-  put(
-    `<path d="M ${x} ${top + 96} Q ${crown.toFixed(1)} ${top - 54} ${x + w} ${top + 84} L ${x + w} ${top} L ${x} ${top} Z" fill="${p.far}"/>`,
-  );
-  put(
-    `<path d="M ${x} ${top + 96} Q ${crown.toFixed(1)} ${top - 54} ${x + w} ${top + 84}" fill="none" stroke="${p.edge}" stroke-width="2.5"/>`,
-  );
+  {
+    // sagged, chipped, and never the same twice
+    let d = `M ${x} ${top + 96}`;
+    let line = `M ${x} ${top + 96}`;
+    for (let i = 1; i <= 22; i++) {
+      const t = i / 22;
+      const ax = x + t * w;
+      const arc = top + 96 - Math.sin(t * Math.PI) * 150 + (t - 0.5) * 12;
+      const ay = arc + (rng() - 0.5) * 13 + Math.sin(i * 2.7) * 4;
+      d += ` L ${ax.toFixed(1)} ${ay.toFixed(1)}`;
+      line += ` L ${ax.toFixed(1)} ${ay.toFixed(1)}`;
+    }
+    d += ` L ${x + w} ${top} L ${x} ${top} Z`;
+    put(`<path d="${d}" fill="${p.far}"/>`);
+    put(`<path d="${line}" fill="none" stroke="${p.edge}" stroke-width="2.6"/>`);
+  }
   if (gap) {
     // a hole through to whatever is above, with the ends of the broken ribs
     const hx = x + w * (0.2 + rng() * 0.55);
@@ -469,7 +479,21 @@ function hall(x, y, w, h, p, rng, a = '#54c9a2', cold = '#3a6d9c') {
     const cx = x + w * f;
     const broken = i === stumps;
     const headY = broken ? floorY - 60 - rng() * 90 : top + 56;
-    put(`<rect x="${(cx - 18).toFixed(1)}" y="${headY.toFixed(1)}" width="36" height="${(floorY - headY).toFixed(1)}" fill="${p.mid}"/>`);
+    {
+      // a shaft that swells, leans and has lost pieces off both sides
+      const lean = (rng() - 0.5) * 14;
+      let L = `M ${(cx - 18).toFixed(1)} ${headY.toFixed(1)}`;
+      let R = '';
+      const steps = 9;
+      for (let k = 1; k <= steps; k++) {
+        const t = k / steps;
+        const yy = headY + (floorY - headY) * t;
+        const swell = Math.sin(t * Math.PI) * 4;
+        L += ` L ${(cx - 18 - swell + lean * t + (rng() - 0.5) * 5).toFixed(1)} ${yy.toFixed(1)}`;
+        R = ` L ${(cx + 18 + swell + lean * t + (rng() - 0.5) * 5).toFixed(1)} ${yy.toFixed(1)}` + R;
+      }
+      put(`<path d="${L}${R} L ${(cx + 18).toFixed(1)} ${headY.toFixed(1)} Z" fill="${p.mid}"/>`);
+    }
     if (broken) {
       // a snapped top, not a flat one
       put(
@@ -504,7 +528,15 @@ function hall(x, y, w, h, p, rng, a = '#54c9a2', cold = '#3a6d9c') {
   // PLANE 2 — an upper gallery, so the height has something standing in it
   {
     const gy = top + 150 + rng() * 70;
-    put(`<rect x="${x}" y="${gy.toFixed(1)}" width="${w}" height="18" fill="${p.mid}"/>`);
+    {
+      let g = `M ${x} ${(gy + 18).toFixed(1)}`;
+      for (let k = 0; k <= 20; k++) {
+        const gx2 = x + (k / 20) * w;
+        g += ` L ${gx2.toFixed(1)} ${(gy + (rng() - 0.5) * 6 + Math.sin(k * 2.1) * 2).toFixed(1)}`;
+      }
+      g += ` L ${x + w} ${(gy + 18).toFixed(1)} Z`;
+      put(`<path d="${g}" fill="${p.mid}"/>`);
+    }
     put(`<rect x="${x}" y="${(gy + 18).toFixed(1)}" width="${w}" height="7" fill="#05070a" fill-opacity="0.45"/>`);
     for (let i = 0; i < 9; i++) {
       const bx2 = x + 40 + i * ((w - 80) / 8);
