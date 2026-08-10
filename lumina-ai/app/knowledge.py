@@ -438,6 +438,18 @@ async def gather(query: str, max_items: int = 3) -> list[dict]:
     except Exception:  # noqa: BLE001 — nguồn phụ, hỏng thì bỏ qua
         pass
 
+    # 📚 Open Library: câu hỏi về SÁCH/TÁC GIẢ → metadata thật (miễn phí, không key),
+    # lưu vào kho. Best-effort.
+    try:
+        from . import openlibrary
+        if openlibrary.is_book_query(query):
+            bk = await openlibrary.gather(query, "vi")
+            if bk:
+                remember(**bk)
+                return [bk] + lookup_local(query, limit=max(0, max_items - 1))
+    except Exception:  # noqa: BLE001 — nguồn phụ, hỏng thì bỏ qua
+        pass
+
     # 📅 "N NGÀY QUA CÓ GÌ MỚI" → bản tin cửa sổ thời gian (lọc đúng ngày qua
     # Google News `when:Nd`). Cụ thể hơn câu thời sự chung nên xét TRƯỚC.
     if is_recent_digest_query(query):

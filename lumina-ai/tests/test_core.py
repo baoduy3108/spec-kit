@@ -4483,3 +4483,29 @@ def test_multikey_non_rotate_error_does_not_rotate():
         pass
     assert EmptyEngine.tries == 1       # dừng ngay, không xoay
     keyring.reset()
+
+
+def test_openlibrary_book_detection_and_parse():
+    """Open Library: nhận diện câu hỏi về sách/tác giả, parse metadata, KHÔNG nhận
+    nhầm câu có 'chính sách'/'sách lược'."""
+    from app import openlibrary as ol
+    assert ol.is_book_query("sách Đắc Nhân Tâm của ai")
+    assert ol.is_book_query("tác giả cuốn Nhà Giả Kim")
+    assert ol.is_book_query("tiểu thuyết 1984 ai viết")
+    assert not ol.is_book_query("dân số việt nam bao nhiêu")
+    assert not ol.is_book_query("chính sách tiền tệ là gì")   # 'sách' trong 'chính sách' → bỏ
+    doc = {"title": "Sapiens", "author_name": ["Yuval Noah Harari"],
+           "first_publish_year": 2011, "edition_count": 120,
+           "subject": ["History"], "key": "/works/OL1W"}
+    fact = ol._parse_book(doc)
+    assert fact["source"] == "openlibrary"
+    assert "Sapiens" in fact["summary"] and "Harari" in fact["summary"]
+    assert fact["url"].startswith("https://openlibrary.org")
+
+
+def test_openlibrary_gather_offline_never_raises():
+    """gather() với câu hỏi sách KHÔNG raise khi offline (nguồn phụ, best-effort)."""
+    import asyncio
+    from app import knowledge
+    out = asyncio.run(knowledge.gather("tác giả cuốn Nhà Giả Kim là ai"))
+    assert isinstance(out, list)
