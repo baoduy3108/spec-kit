@@ -97,6 +97,10 @@ function knight(cx, ground, pose, cell) {
   // sabatons
   put(`<path d="M ${N(hipX + 6 + stride)} ${N(ground)} l 26 0 l -3 -7 l -21 0 Z" fill="${P.clay}"/>`);
   put(`<path d="M ${N(hipX - 19 - stride)} ${N(ground)} l 24 0 l -2 -6 l -20 0 Z" fill="${P.clayDark}"/>`);
+  // ash, from the floor it woke up on — soft, pale, and it goes down further
+  // than you want to check
+  put(`<ellipse cx="${N(hipX + 2)}" cy="${N(ground - 2)}" rx="34" ry="5" fill="#9aa39c" fill-opacity="0.22"/>`);
+  put(`<ellipse cx="${N(hipX + 14 + stride)}" cy="${N(ground - 3)}" rx="13" ry="4" fill="#9aa39c" fill-opacity="0.3"/>`);
 
   // surcoat, hanging from the hip, tilted with the torso
   put(
@@ -113,6 +117,26 @@ function knight(cx, ground, pose, cell) {
   put(
     `<path d="M ${N(shX + 6)} ${N(shY - 2)} q ${N(10)} ${N(2)} ${N(14)} ${N(4)} l ${N(-5)} ${N(30)} q ${N(-2)} ${N(9)} ${N(-13)} ${N(12)} Z" fill="${P.clayDark}"/>`,
   );
+  // The mould seam. A body cast in two halves has a line down the side where
+  // they met, and it was never dressed off. chronicle.js says the racks are
+  // shelved by shape and labelled, third shelf near the end; this is what
+  // coming off a rack looks like, and no other game's knight has one.
+  bone(shX + 12, shY - 2, hipX + 9, hipY + 4, 1.6, P.clayLit);
+  bone(hipX + 9, hipY + 4, hipX + 11, ground - 20, 1.4, P.clayLit);
+
+  // The label plate. Nothing in this world asks your name — not because it is
+  // being polite, but because nobody wrote one on the label. So the plate is
+  // there, riveted on, and it is blank.
+  put(`<rect x="${N(shX - 9)}" y="${N(shY + 30)}" width="19" height="9" rx="1" fill="${P.steelDim}"/>`);
+  put(`<rect x="${N(shX - 7)}" y="${N(shY + 32)}" width="15" height="5" fill="#0d1116"/>`);
+  put(`<circle cx="${N(shX - 7)}" cy="${N(shY + 34.5)}" r="1.1" fill="${P.steel}"/>`);
+  put(`<circle cx="${N(shX + 8)}" cy="${N(shY + 34.5)}" r="1.1" fill="${P.steel}"/>`);
+
+  // chipped where fired clay chips: the edges that take the knocks
+  for (const [ex2, ey2] of [[-19, 14], [17, 26], [-16, 38]]) {
+    put(`<path d="M ${N(shX + ex2)} ${N(shY + ey2)} l 5 3 l -4 4 Z" fill="#05070a" fill-opacity="0.7"/>`);
+  }
+
   // the kiln still showing through
   for (const [ax, ay, bx2, by2] of [
     [-10, 6, -3, 20],

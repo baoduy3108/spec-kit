@@ -397,16 +397,20 @@ function hall(x, y, w, h, p, rng, a = '#54c9a2') {
   // style, it is an unfinished room.
   for (const f of [0.16, 0.5, 0.84]) {
     const bx = x + w * f;
-    // a bracket that grows out of the wall and curls under the arch — the
-    // first version was a trapezoid with a triangle on it and read as a UI
-    // marker pointing at the floor
+    // A stepped bracket with a shadow where it meets the wall. The first two
+    // attempts read as a UI marker and then as a hanging blade, both for the
+    // same reason: nothing showed it was attached to anything.
+    put(`<rect x="${(bx - 36).toFixed(1)}" y="${(top + 62).toFixed(1)}" width="72" height="10" fill="${p.mid}"/>`);
+    put(`<rect x="${(bx - 30).toFixed(1)}" y="${(top + 72).toFixed(1)}" width="60" height="9" fill="${p.mid}"/>`);
+    put(`<rect x="${(bx - 23).toFixed(1)}" y="${(top + 81).toFixed(1)}" width="46" height="9" fill="${p.mid}"/>`);
+    // the scroll that carries the load down onto the wall
     put(
-      `<path d="M ${(bx - 30).toFixed(1)} ${(top + 70).toFixed(1)} l 60 0 l 0 10 q ${-16} 2 ${-22} 14 q ${-4} 9 ${-8} 9 q ${-4} 0 ${-8} ${-9} q ${-6} ${-12} ${-22} ${-14} Z" fill="${p.mid}"/>`,
+      `<path d="M ${(bx - 16).toFixed(1)} ${(top + 90).toFixed(1)} l 32 0 q ${-4} ${16} ${-16} ${22} q ${-12} ${-6} ${-16} ${-22} Z" fill="${p.mid}"/>`,
     );
-    put(`<rect x="${(bx - 34).toFixed(1)}" y="${(top + 64).toFixed(1)}" width="68" height="8" fill="${p.mid}"/>`);
-    put(
-      `<rect x="${(bx - 34).toFixed(1)}" y="${(top + 64).toFixed(1)}" width="68" height="3" fill="${a}" fill-opacity="0.45"/>`,
-    );
+    // contact shadow — the thing that says "fixed to the wall" rather than
+    // "floating in front of it"
+    put(`<rect x="${(bx - 36).toFixed(1)}" y="${(top + 72).toFixed(1)}" width="72" height="6" fill="#000" fill-opacity="0.32"/>`);
+    put(`<rect x="${(bx - 36).toFixed(1)}" y="${(top + 62).toFixed(1)}" width="72" height="3" fill="${a}" fill-opacity="0.4"/>`);
   }
 
   // a lamp hanging off one of them, long dead
@@ -429,15 +433,31 @@ function hall(x, y, w, h, p, rng, a = '#54c9a2') {
     if (rng() > 0.55) continue;
     const bx = x + w * (0.2 + rng() * 0.6);
     const bh = 90 + rng() * 90;
-    // a long narrow banner, torn along the bottom, in the accent so the room
-    // has one thing in it that is not the colour of stone
+    // Cloth: a pole across the top with finials, drape shading down the folds,
+    // and a torn bottom with two tails. As a plain tapered slab the eye had no
+    // idea what it was looking at.
+    const bw = 46;
+    put(`<rect x="${(bx - bw / 2 - 10).toFixed(1)}" y="${(top + 92).toFixed(1)}" width="${bw + 20}" height="7" fill="${p.mid}"/>`);
+    put(`<circle cx="${(bx - bw / 2 - 10).toFixed(1)}" cy="${(top + 95).toFixed(1)}" r="5" fill="${p.mid}"/>`);
+    put(`<circle cx="${(bx + bw / 2 + 10).toFixed(1)}" cy="${(top + 95).toFixed(1)}" r="5" fill="${p.mid}"/>`);
+    const tear = 22 + rng() * 16;
     put(
-      `<path d="M ${(bx - 15).toFixed(1)} ${(top + 100).toFixed(1)} l 30 0 l -2 ${bh.toFixed(1)} l -7 ${(-13 - rng() * 10).toFixed(1)} l -6 ${(11 + rng() * 9).toFixed(1)} l -8 ${(-14 - rng() * 8).toFixed(1)} Z" fill="${a}" fill-opacity="0.4"/>`,
+      `<path d="M ${(bx - bw / 2).toFixed(1)} ${(top + 99).toFixed(1)}
+        l ${bw} 0
+        l 0 ${bh.toFixed(1)}
+        l ${(-bw * 0.28).toFixed(1)} ${(-tear).toFixed(1)}
+        l ${(-bw * 0.2).toFixed(1)} ${(tear * 0.7).toFixed(1)}
+        l ${(-bw * 0.24).toFixed(1)} ${(-tear * 0.85).toFixed(1)}
+        l ${(-bw * 0.28).toFixed(1)} ${(tear * 0.5).toFixed(1)} Z"
+        fill="${a}" fill-opacity="0.42"/>`,
     );
-    put(
-      `<path d="M ${(bx - 15).toFixed(1)} ${(top + 100).toFixed(1)} l 8 0 l -1 ${(bh * 0.9).toFixed(1)} l -6 ${(-12).toFixed(1)} Z" fill="#000" fill-opacity="0.25"/>`,
-    );
-    put(`<rect x="${(bx - 20).toFixed(1)}" y="${(top + 94).toFixed(1)}" width="40" height="8" fill="${p.mid}"/>`);
+    // folds: the light does not hit a hanging cloth evenly
+    for (let f2 = 0; f2 < 3; f2++) {
+      put(
+        `<rect x="${(bx - bw / 2 + 6 + f2 * 14).toFixed(1)}" y="${(top + 99).toFixed(1)}" width="5" height="${(bh - tear).toFixed(1)}" fill="#000" fill-opacity="${(0.1 + (f2 % 2) * 0.09).toFixed(2)}"/>`,
+      );
+    }
+    put(`<rect x="${(bx - bw / 2).toFixed(1)}" y="${(top + 99).toFixed(1)}" width="${bw}" height="5" fill="#000" fill-opacity="0.3"/>`);
   }
 
   // one side of the floor a step higher, so the ground is not a single line
