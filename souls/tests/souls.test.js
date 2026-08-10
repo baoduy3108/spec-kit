@@ -384,3 +384,66 @@ test('mashing the guard does not hold a parry window open', () => {
   const share = open / frames;
   assert.ok(share < 0.4, `a masher should not live inside the window (${Math.round(share * 100)}%)`);
 });
+
+test('kindling costs health, burns out, and cannot be relit without a rest', () => {
+  const fight = newFight(newRun());
+  const k = fight.knight;
+  const before = k.hp;
+  step(fight, { kindle: true }, STEP);
+  assert.ok(k.lit > 0, 'the lantern is lit');
+  assert.equal(k.hp, before - KNIGHT.skills.kindle.hpCost, 'and you paid for it in health');
+  assert.ok(k.spent, 'and it is spent');
+  // burn it down
+  for (let t = 0; t < KNIGHT.skills.kindle.burn + 0.2; t += STEP) step(fight, {}, STEP);
+  assert.equal(k.lit, 0, 'it goes out on its own');
+  const hp = k.hp;
+  step(fight, { kindle: true }, STEP);
+  assert.equal(k.lit, 0, 'and it cannot be lit again');
+  assert.equal(k.hp, hp, 'so it costs nothing to try');
+});
+
+test('a lit lantern is the only damage scaling you do not have to buy', () => {
+  const dark = newFight(newRun());
+  const lit = newFight(newRun());
+  lit.knight.lit = 5;
+  const hit = (fight) => {
+    const w = fight.warden;
+    const before = w.hp;
+    fight.knight.x = w.x - 60;
+    fight.knight.facing = 1;
+    for (let t = 0; t < 0.6; t += STEP) step(fight, { attack: t < STEP }, STEP);
+    return before - w.hp;
+  };
+  const plain = hit(dark);
+  const burning = hit(lit);
+  assert.ok(burning > plain, `a lit swing has to hurt more (${plain} vs ${burning})`);
+});
+
+test('sealing the cracks soaks damage and takes your recovery away', () => {
+  const fight = newFight(newRun());
+  const k = fight.knight;
+  k.stamina = 60;
+  const before = k.stamina;
+  for (let t = 0; t < 0.5; t += STEP) step(fight, { seal: true }, STEP);
+  assert.ok(k.sealed, 'the cracks are shut');
+  assert.ok(k.stamina < before, 'and nothing is coming back');
+  assert.ok(KNIGHT.skills.seal.soak > KNIGHT.block.soak, 'it has to beat simply blocking');
+});
+
+test('drawing the ember is only possible in the window a parry opens', () => {
+  const fight = newFight(newRun());
+  const k = fight.knight;
+  const w = fight.warden;
+  const before = w.hp;
+  step(fight, { draw: true }, STEP);
+  assert.equal(w.hp, before, 'no window, no reward');
+
+  k.opening = KNIGHT.skills.draw.window;
+  w.state = 'stagger';
+  w.staggerFor = 1.4;
+  w.time = 0;
+  k.flasks = 0;
+  step(fight, { draw: true }, STEP);
+  assert.ok(w.hp < before - 40, 'inside the window it takes a real piece out of it');
+  assert.equal(k.flasks, 1, 'and a parry is the only route to a free flask');
+});

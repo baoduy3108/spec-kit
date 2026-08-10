@@ -37,6 +37,32 @@ export const KNIGHT = {
    * second, so mashing is strictly worse than one press at the right moment.
    */
   parry: { window: 0.3, lock: 0.5, stagger: 1.1 },
+
+  /**
+   * Three skills, and each one is the fiction doing something rather than a
+   * button that was needed. You carry an unlit lantern, and your body is fired
+   * clay with the kiln still burning in its cracks — so every skill spends one
+   * of those two things.
+   *
+   * KINDLE. Open the cracks and light the lantern off your own chest. While it
+   * burns, everything you land hits harder. It goes out on its own, and it
+   * cannot be lit again until you sit at a fire, because there is only so much
+   * of you to burn. Costs health, not stamina — you are the fuel.
+   *
+   * SEAL. Close the cracks. Damage taken drops hard while they are shut, but
+   * nothing is feeding the fire, so stamina stops coming back and the lantern
+   * cannot be kindled. A defensive stance that takes away your recovery is a
+   * real decision; one that only protects is not.
+   *
+   * DRAW. Only inside the window a parry opens. Reach into a staggered thing
+   * and take the ember out of it. Huge damage, and it refills a flask, which
+   * makes the parry the only route to a free heal in the game.
+   */
+  skills: {
+    kindle: { hpCost: 12, burn: 9, bonus: 1.45, oncePerRest: true },
+    seal: { soak: 0.45, drain: 22, regenOff: true },
+    draw: { damage: 62, window: 1.0, flask: 1 },
+  },
   drink: { time: 0.95, heal: 46 },
   hurt: 0.34,
   stagger: 0.85,
@@ -137,6 +163,10 @@ export function newFight(run, seed = 1) {
       poise: 0,
       parry: 0,
       parryLock: 0,
+      lit: 0,        // seconds the lantern has left
+      spent: false,  // kindled since the last rest
+      sealed: false,
+      opening: 0,    // seconds left to reach into something you just parried
       phase: 1,
     },
   };
@@ -193,7 +223,11 @@ function stepKnight(fight, input, dt) {
 
   k.parry = Math.max(0, k.parry - dt);
   k.parryLock = Math.max(0, k.parryLock - dt);
-  const regen = k.state === 'block' ? KNIGHT.block.regen : KNIGHT.regen;
+  k.lit = Math.max(0, k.lit - dt);
+  k.opening = Math.max(0, k.opening - dt);
+  k.sealed = !!input.seal && canAct(k);
+  if (k.sealed) spend(k, KNIGHT.skills.seal.drain * dt);
+  const regen = k.sealed ? 0 : k.state === 'block' ? KNIGHT.block.regen : KNIGHT.regen;
   if (k.sinceSpend > KNIGHT.regenDelay && k.state !== 'roll') {
     k.stamina = Math.min(maxStamina(run), k.stamina + regen * dt);
   }
@@ -261,6 +295,23 @@ function stepKnight(fight, input, dt) {
         spend(k, KNIGHT.swings[0].cost);
         enter(k, 'attack');
         fight.events.push({ type: 'swing', n: 0 });
+        break;
+      }
+      if (input.kindle && !k.spent && !k.sealed && k.hp > KNIGHT.skills.kindle.hpCost + 1) {
+        // you are the fuel
+        k.hp -= KNIGHT.skills.kindle.hpCost;
+        k.lit = KNIGHT.skills.kindle.burn;
+        k.spent = true;
+        fight.events.push({ type: 'kindle', x: k.x });
+        break;
+      }
+      if (input.draw && k.opening > 0 && fight.warden.state === 'stagger') {
+        const w = fight.warden;
+        k.opening = 0;
+        w.hp = Math.max(0, w.hp - KNIGHT.skills.draw.damage);
+        k.flasks = Math.min(flaskCount(fight.run), k.flasks + KNIGHT.skills.draw.flask);
+        fight.shake = Math.max(fight.shake, 14);
+        fight.events.push({ type: 'draw', x: w.x });
         break;
       }
       if (input.drink && k.flasks > 0) {
@@ -382,7 +433,9 @@ function resolve(fight) {
       const [a, b] = hitSpan(k.x, k.facing, s.reach);
       if (w.x + WARDEN.bodyR >= a && w.x - WARDEN.bodyR <= b) {
         k.landed = true;
-        const damage = swingDamage(fight.run, s.damage);
+        // a lit lantern is the only thing in the game that scales your damage
+        // without being bought
+        const damage = swingDamage(fight.run, s.damage) * (k.lit > 0 ? KNIGHT.skills.kindle.bonus : 1);
         w.hp = Math.max(0, w.hp - damage);
         w.poise += damage;
         fight.earned += Math.round(damage);
@@ -415,6 +468,7 @@ function resolve(fight) {
         enter(w, 'stagger');
         w.staggerFor = KNIGHT.parry.stagger;
         fight.shake = Math.max(fight.shake, 10);
+        k.opening = KNIGHT.skills.draw.window;
         fight.events.push({ type: 'parry', x: k.x });
       } else if (k.state === 'block' && facingIt(k, w)) {
         const cost = m.damage * KNIGHT.block.stamPerDamage;
@@ -432,7 +486,7 @@ function resolve(fight) {
           fight.events.push({ type: 'guardbreak', x: k.x });
         }
       } else {
-        k.hp = Math.max(0, k.hp - m.damage);
+        k.hp = Math.max(0, k.hp - m.damage * (k.sealed ? 1 - KNIGHT.skills.seal.soak : 1));
         enter(k, 'hurt');
         fight.shake = Math.max(fight.shake, m.shake || 9);
         fight.events.push({ type: 'hit', on: 'knight', x: k.x, damage: m.damage });
