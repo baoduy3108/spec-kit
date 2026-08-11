@@ -105,18 +105,27 @@ const hsl = (hh, s2, l) => {
   };
   return `#${f(0)}${f(8)}${f(4)}`;
 };
+/** Hue lerp the short way round. Going 246 to 30 the long way passes through
+ *  150, which is green, and that is exactly what turned the ash pit's walls
+ *  teal the moment the warm rooms were given a cool base. */
+const lerpHue = (a, b, t) => {
+  let d = ((b - a + 540) % 360) - 180;
+  return a + d * t;
+};
 const ramp = (base, light, lo, hi, t) => {
   const away = base + (base < light ? -46 : 46);
-  const hue = t < 0.5 ? away + (base - away) * (t / 0.5) : base + (light - base) * ((t - 0.5) / 0.5) * 0.75;
+  const hue =
+    t < 0.5 ? lerpHue(away, base, t / 0.5) : lerpHue(base, light, ((t - 0.5) / 0.5) * 0.75);
   return hsl(hue, 0.22 + 0.44 * Math.sin(Math.PI * Math.min(1, Math.max(0, t))), lo + (hi - lo) * t);
 };
 const MOOD = {
-  dark: { base: 218, light: 190, lo: 0.08, hi: 0.62 },
-  dim: { base: 224, light: 200, lo: 0.1, hi: 0.66 },
-  grey: { base: 205, light: 186, lo: 0.14, hi: 0.74 },
-  pale: { base: 196, light: 176, lo: 0.2, hi: 0.82 },
-  warm: { base: 18, light: 38, lo: 0.09, hi: 0.68 },
-  gold: { base: 34, light: 46, lo: 0.13, hi: 0.78 },
+  dark: { base: 218, light: 190, lo: 0.05, hi: 0.44 },
+  dim: { base: 224, light: 200, lo: 0.06, hi: 0.48 },
+  grey: { base: 205, light: 186, lo: 0.1, hi: 0.58 },
+  pale: { base: 196, light: 176, lo: 0.15, hi: 0.68 },
+  // dark and cool even here — the fire is the accent, not the room
+  warm: { base: 246, light: 30, lo: 0.06, hi: 0.4 },
+  gold: { base: 238, light: 40, lo: 0.08, hi: 0.46 },
 };
 const P = {};
 for (const [k, m] of Object.entries(MOOD)) {
@@ -354,7 +363,146 @@ function positions(layout, count, x, w) {
   return out2;
 }
 
-// --- one panel ------------------------------------------------------------
+// --- one panel: six layers, in order ---------------------------------------
+//
+// The brief this follows, and it is the most useful one this file has had:
+//
+//   BACKGROUND   far walls, distant architecture, silhouettes
+//   MIDGROUND    columns, chains, doors, machinery
+//   GAMEPLAY     the floor you stand on, and what stands on it
+//   FOREGROUND   stone, chain, rubble crossing the camera
+//   LIGHTING     source -> lit -> falloff -> dark, in that order
+//   VFX          dust, embers, shafts
+//
+// And the rule that goes with it: do not try to fill the frame. A small set of
+// parts repeated with control, layered, and lit beats drawing every square
+// inch. What was missing was never quantity — it was layers, a landmark, dirt
+// on the floor, light that eats into the room, and a room that says what
+// happened in it.
+
+// --- the kit -------------------------------------------------------------
+// Three wall textures, two column types, three lamps, chains, doors, cracks,
+// decals. A small set repeated with control makes a richer room than drawing
+// every square inch, which is the note the template ends on.
+
+/** BACKGROUND: an arched window, the deep kind you can see nothing through. */
+function bgWindow(cx, cy, r, p, rng) {
+  mass(
+    [[cx - r, cy + r * 0.9], [cx - r, cy - r * 0.2], [cx - r * 0.6, cy - r], [cx, cy - r * 1.15],
+     [cx + r * 0.6, cy - r], [cx + r, cy - r * 0.2], [cx + r, cy + r * 0.9]],
+    p.ink, p.ink, rng, { opacity: 0.85, contour: false },
+  );
+  // tracery: two mullions and a wheel, at background contrast
+  for (const o of [-r * 0.34, r * 0.34])
+    put(`<path d="${through([[cx + o, cy + r * 0.85], [cx + o, cy - r * 0.75]], false)}" fill="none" stroke="${p.mid}" stroke-width="4" stroke-opacity="0.5"/>`);
+  put(`<circle cx="${n(cx)}" cy="${n(cy - r * 0.35)}" r="${n(r * 0.3)}" fill="none" stroke="${p.mid}" stroke-width="4" stroke-opacity="0.5"/>`);
+}
+
+/** MIDGROUND: a hanging cage, empty, still swinging as far as anyone knows. */
+function cage(cx, topY, p, rng) {
+  const drop = 90 + rng() * 110;
+  for (let i = 0; i < Math.floor(drop / 16); i++)
+    put(`<ellipse cx="${n(cx + Math.sin(i) * 3)}" cy="${n(topY + i * 16)}" rx="4.5" ry="7.5" fill="none" stroke="${p.ink}" stroke-width="3"/>`);
+  const cy = topY + drop;
+  mass([[cx - 22, cy], [cx - 26, cy + 46], [cx, cy + 58], [cx + 26, cy + 46], [cx + 22, cy]], p.dark, p.ink, rng, { inkWidth: 3 });
+  for (const o of [-12, 0, 12])
+    put(`<path d="${through([[cx + o, cy + 2], [cx + o * 1.2, cy + 50]], false)}" fill="none" stroke="${p.ink}" stroke-width="3.4"/>`);
+}
+
+/** MIDGROUND: a torn banner. One warm accent in a dark room, per the sheet. */
+function banner(cx, topY, p, rng) {
+  const len = 130 + rng() * 130;
+  mass([[cx - 20, topY], [cx + 20, topY], [cx + 16, topY + len],
+        [cx + 4, topY + len - 26], [cx - 6, topY + len - 6], [cx - 16, topY + len - 30]],
+       p.accent, p.ink, rng, { opacity: 0.55, inkWidth: 2.4 });
+  put(`<path d="${through([[cx - 26, topY - 4], [cx + 26, topY - 2]], false)}" fill="none" stroke="${p.ink}" stroke-width="6"/>`);
+}
+
+/** GAMEPLAY: a standing lamp, unlit. The list in the coat is full of these. */
+function lamp(cx, floorY, p, rng) {
+  mass([[cx - 5, floorY], [cx - 3, floorY - 96], [cx + 3, floorY - 96], [cx + 5, floorY]], p.ink, p.ink, rng, { contour: false });
+  mass([[cx - 15, floorY - 96], [cx - 12, floorY - 132], [cx, floorY - 144], [cx + 12, floorY - 132], [cx + 15, floorY - 96]], p.dark, p.ink, rng, { inkWidth: 2.6 });
+  put(`<ellipse cx="${n(cx)}" cy="${n(floorY - 118)}" r="0" rx="7" ry="10" fill="${FIRE.deep}" fill-opacity="0.5"/>`);
+}
+
+/** FOREGROUND: bones, a broken column, grass. Small, dark, close. */
+function nearProps(x, w, floorY, bottom, p, rng) {
+  for (let i = 0; i < 9; i++) {
+    const bx = x + rng() * w;
+    const by = floorY + 24 + rng() * (bottom - floorY - 30);
+    if (rng() < 0.5)
+      mass([[bx, by], [bx + 26 + rng() * 20, by - 5], [bx + 28, by + 4], [bx + 2, by + 6]], p.ink, p.ink, rng, { contour: false });
+    else
+      for (let k = 0; k < 4; k++)
+        mass([[bx + k * 5, by], [bx + k * 5 - 3, by - 14 - rng() * 16], [bx + k * 5 + 3, by - 10]], p.ink, p.ink, rng, { contour: false });
+  }
+}
+
+/** Something the eye can remember. A room without one is a corridor. */
+function landmark(room, x, w, floorY, p, rng) {
+  const cx = x + w * (0.52 + (rng() - 0.5) * 0.16);
+  if (room.kind === 'bonfire') {
+    // a chained statue behind the fire: now the room has a story in it
+    const th = 300 + rng() * 90;
+    mass(
+      [[cx - 54, floorY], [cx - 46, floorY - th * 0.5], [cx - 30, floorY - th * 0.82],
+       [cx - 34, floorY - th], [cx + 30, floorY - th * 0.98], [cx + 26, floorY - th * 0.8],
+       [cx + 44, floorY - th * 0.45], [cx + 52, floorY]],
+      p.dark, p.ink, rng, { inkWidth: 4 },
+    );
+    // the head is gone, and the neck is a break
+    mass([[cx - 30, floorY - th], [cx - 12, floorY - th - 26], [cx + 14, floorY - th - 14], [cx + 28, floorY - th]], p.mid, p.ink, rng, { inkWidth: 3 });
+    // chains, from the ceiling into its shoulders
+    for (const ax of [cx - 40, cx + 38]) {
+      for (let i = 0; i < 16; i++) {
+        const yy = floorY - th * 0.85 - i * 17;
+        put(`<ellipse cx="${n(ax + Math.sin(i * 0.9) * 4)}" cy="${n(yy)}" rx="5" ry="8.5" fill="none" stroke="${p.ink}" stroke-width="3.4" stroke-opacity="0.9"/>`);
+      }
+    }
+    hatch(cx - 60, floorY - th, 120, th, p.ink, rng, 26, 1.4);
+    return;
+  }
+  if (room.kind === 'cave') {
+    for (let i = 0; i < 7; i++) {
+      const bx = cx - 110 + rng() * 220;
+      mass([[bx, floorY], [bx - 8, floorY - 16 - rng() * 30], [bx + 5, floorY - 40 - rng() * 40], [bx + 14, floorY - 12]], p.mid, p.ink, rng, { inkWidth: 2.4, opacity: 0.9 });
+    }
+    return;
+  }
+  // a great door, shut
+  const dh = 250 + rng() * 90;
+  mass([[cx - 66, floorY], [cx - 70, floorY - dh * 0.7], [cx - 34, floorY - dh], [cx + 34, floorY - dh], [cx + 70, floorY - dh * 0.68], [cx + 66, floorY]], p.ink, p.ink, rng, { contour: false });
+  mass([[cx - 54, floorY], [cx - 58, floorY - dh * 0.68], [cx - 28, floorY - dh * 0.92], [cx + 28, floorY - dh * 0.92], [cx + 58, floorY - dh * 0.66], [cx + 54, floorY]], p.mid, p.ink, rng, { inkWidth: 3.6 });
+  for (let i = 0; i < 4; i++)
+    put(`<path d="${through([[cx - 50, floorY - 40 - i * dh * 0.2], [cx + 50, floorY - 44 - i * dh * 0.2]], false)}" fill="none" stroke="${p.ink}" stroke-width="5" stroke-opacity="0.75"/>`);
+}
+
+/** Dirt. A clean floor is what makes a room read as a prototype. */
+function decals(x, w, floorY, bottom, p, rng) {
+  for (let i = 0; i < 16; i++) {
+    const dx = x + rng() * w;
+    const dy = floorY + 10 + rng() * (bottom - floorY - 20);
+    const kind = rng();
+    if (kind < 0.3) {
+      // rubble
+      mass([[dx, dy], [dx + 9 + rng() * 12, dy - 4 - rng() * 6], [dx + 18 + rng() * 14, dy + 2]], p.ink, p.ink, rng, { opacity: 0.55, contour: false });
+    } else if (kind < 0.55) {
+      // a crack running away
+      let d = `M ${n(dx)} ${n(dy)}`;
+      let px2 = dx;
+      let py2 = dy;
+      for (let k = 0; k < 3; k++) { px2 += (rng() - 0.5) * 50; py2 += rng() * 14; d += ` L ${n(px2)} ${n(py2)}`; }
+      put(`<path d="${d}" fill="none" stroke="${p.ink}" stroke-width="${n(1 + rng() * 1.6)}" stroke-opacity="0.5"/>`);
+    } else if (kind < 0.8) {
+      // ash, or a stain
+      put(`<ellipse cx="${n(dx)}" cy="${n(dy)}" rx="${n(14 + rng() * 34)}" ry="${n(4 + rng() * 7)}" fill="${p.ink}" fill-opacity="${n(0.1 + rng() * 0.16)}"/>`);
+    } else {
+      // something somebody dropped and did not come back for
+      mass([[dx, dy], [dx + 22, dy - 3], [dx + 24, dy + 4], [dx + 2, dy + 5]], p.mid, p.ink, rng, { opacity: 0.7, inkWidth: 2 });
+    }
+  }
+}
+
 function panel(room, top) {
   const p = P[room.light] || P.dim;
   const rng = rngFor(room.id);
@@ -364,28 +512,35 @@ function panel(room, top) {
   const h = ART;
   const floorY = y + h * 0.76;
   const cid = room.id.replace(':', '-');
+  const fire = room.kind === 'bonfire' ? x + w * 0.36 : null;
 
   put(`<clipPath id="c-${cid}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/></clipPath>`);
   put(`<g clip-path="url(#c-${cid})">`);
   put(`<path d="${through([[x, y], [x + w, y], [x + w, y + h], [x, y + h]])}" fill="${p.dark}"/>`);
 
+  // 1 BACKGROUND
   distance(x, y, w, h, p, rng, floorY);
+  bgWindow(x + w * (0.2 + rng() * 0.12), y + h * 0.3, 70 + rng() * 40, p, rng);
+  bgWindow(x + w * (0.72 + rng() * 0.12), y + h * 0.32, 60 + rng() * 40, p, rng);
+  // 2 MIDGROUND
   walls(x, y, w, h, p, rng, floorY);
+  landmark(room, x, w, floorY, p, rng);
+  if (rng() < 0.7) cage(x + w * (0.16 + rng() * 0.1), y + 10, p, rng);
+  if (rng() < 0.6) banner(x + w * (0.76 + rng() * 0.12), y + h * 0.2, p, rng);
+  // 3 GAMEPLAY
   ground(x, y, w, h, p, rng, floorY);
+  decals(x, w, floorY, y + h, p, rng);
+  lamp(x + w * (0.82 + rng() * 0.08), floorY, p, rng);
 
-  if (room.kind === 'bonfire') {
-    const fx = x + w * 0.36;
-    put(`<ellipse cx="${n(fx)}" cy="${n(floorY)}" rx="240" ry="70" fill="url(#glow)"/>`);
+  if (fire !== null) {
     for (const [spread, tall, lean, fill] of [
-      [40, 120, -8, FIRE.deep], [28, 96, 10, FIRE.low], [17, 70, -5, FIRE.mid], [8, 42, 4, FIRE.core],
+      [64, 200, -12, FIRE.deep], [46, 158, 16, FIRE.low], [28, 116, -8, FIRE.mid], [13, 68, 6, FIRE.core],
     ]) {
       mass(
-        [[fx - spread, floorY], [fx - spread * 0.5, floorY - tall * 0.5], [fx + lean, floorY - tall], [fx + spread * 0.6, floorY - tall * 0.45], [fx + spread, floorY]],
+        [[fire - spread, floorY], [fire - spread * 0.5, floorY - tall * 0.5], [fire + lean, floorY - tall], [fire + spread * 0.6, floorY - tall * 0.45], [fire + spread, floorY]],
         fill, fill, rng, { contour: false },
       );
     }
-    for (let i = 0; i < 16; i++)
-      put(`<circle cx="${n(fx - 30 + rng() * 60)}" cy="${n(floorY - 60 - rng() * 130)}" r="${n(1 + rng() * 2.6)}" fill="${FIRE.mid}" fill-opacity="${n(0.3 + rng() * 0.6)}"/>`);
   }
 
   const spots = positions(room.layout, room.foes.length, x, w);
@@ -394,23 +549,38 @@ function panel(room, top) {
     creature(id, at.x, floorY, at.s * 1.15, at.f, p, rngFor(`${room.id}-${i}`), room);
   });
 
+  // 4 FOREGROUND
+  nearProps(x, w, floorY, y + h, p, rng);
   nearMass(x, y, w, h, p, rng);
 
-  // value blocking last, over everything, as its own visible step
-  put(`<linearGradient id="v-${cid}" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="${p.lit}" stop-opacity="0.2"/>
-    <stop offset="46%" stop-color="${p.lit}" stop-opacity="0.04"/>
-    <stop offset="70%" stop-color="${p.ink}" stop-opacity="0.3"/>
-    <stop offset="100%" stop-color="${p.ink}" stop-opacity="0.9"/>
-  </linearGradient>`);
-  put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#v-${cid})"/>`);
-  put(`<linearGradient id="s-${cid}" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0%" stop-color="${p.ink}" stop-opacity="0.85"/>
-    <stop offset="16%" stop-color="${p.ink}" stop-opacity="0"/>
-    <stop offset="84%" stop-color="${p.ink}" stop-opacity="0"/>
-    <stop offset="100%" stop-color="${p.ink}" stop-opacity="0.85"/>
-  </linearGradient>`);
-  put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#s-${cid})"/>`);
+  // 5 LIGHTING: source, lit pool, falloff, dark. In that order and no other.
+  if (fire !== null) {
+    put(`<radialGradient id="l-${cid}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="${FIRE.core}" stop-opacity="0.5"/>
+      <stop offset="26%" stop-color="${FIRE.mid}" stop-opacity="0.26"/>
+      <stop offset="62%" stop-color="${FIRE.low}" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="${FIRE.deep}" stop-opacity="0"/>
+    </radialGradient>`);
+    put(`<ellipse cx="${n(fire)}" cy="${n(floorY - 90)}" rx="${n(w * 0.6)}" ry="${n(h * 0.55)}" fill="url(#l-${cid})"/>`);
+    put(`<ellipse cx="${n(fire)}" cy="${n(floorY + 6)}" rx="300" ry="46" fill="${FIRE.mid}" fill-opacity="0.16"/>`);
+  }
+  put(`<radialGradient id="d-${cid}" cx="${fire !== null ? n(((fire - x) / w) * 100) : 50}%" cy="62%" r="72%">
+    <stop offset="34%" stop-color="${p.ink}" stop-opacity="0"/>
+    <stop offset="100%" stop-color="${p.ink}" stop-opacity="0.92"/>
+  </radialGradient>`);
+  put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#d-${cid})"/>`);
+
+  // 6 VFX
+  const air = rngFor(`${room.id}-air`);
+  for (let i = 0; i < 46; i++) {
+    const ax = x + air() * w;
+    const ay = y + air() * h * 0.92;
+    const near = fire !== null && Math.abs(ax - fire) < 260;
+    put(`<circle cx="${n(ax)}" cy="${n(ay)}" r="${n(0.8 + air() * 2.2)}" fill="${near ? FIRE.mid : p.lit}" fill-opacity="${n(0.08 + air() * 0.3)}"/>`);
+  }
+  if (fire !== null)
+    for (let i = 0; i < 22; i++)
+      put(`<circle cx="${n(fire - 60 + air() * 120)}" cy="${n(floorY - 60 - air() * 260)}" r="${n(1 + air() * 2.4)}" fill="${FIRE.mid}" fill-opacity="${n(0.3 + air() * 0.6)}"/>`);
   put(`</g>`);
 
   const ty = y + h + 26;
