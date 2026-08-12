@@ -2453,6 +2453,21 @@ def test_skills_library_has_at_least_1118():
     assert len(skills._SKILLS) >= 1118
 
 
+def test_skills_library_has_at_least_1120():
+    from app import skills
+    assert len(skills._SKILLS) >= 1120
+
+
+def test_skills_ai_film_and_voice_cloning_topics_match():
+    from app import skills
+    for text, expected in [
+        ("làm phim ai nhiều cảnh giữ nhất quán nhân vật character consistency", "ai-film-production-and-character-consistency"),
+        ("voice cloning nhân bản giọng nói clone giọng zero-shot tts", "voice-cloning-and-synthetic-speech"),
+    ]:
+        s = skills.find_matching_skill(text)
+        assert s and s.slug == expected, (text, s.slug if s else None)
+
+
 def test_skills_sciml_and_rule_reasoning_topics_match():
     from app import skills
     for text, expected in [
