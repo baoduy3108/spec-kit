@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Bot Real Score Test - HẮC ĐỘNG</title>
+<style>
+  body {
+    background: #0a0820;
+    color: #eef0ff;
+    font-family: monospace;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  h1 { color: #3dd6ff; }
+  .log {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(61,214,255,0.3);
+    padding: 15px;
+    border-radius: 8px;
+    height: 400px;
+    overflow-y: auto;
+    font-size: 0.9em;
+    margin: 20px 0;
+  }
+  .log div {
+    margin: 3px 0;
+    padding: 2px 0;
+  }
+  .info { color: #9aa0d0; }
+  .score { color: #ffd54d; font-weight: bold; }
+  .high { color: #61ff99; }
+  .summary {
+    background: rgba(124,107,255,0.15);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+  }
+  button {
+    background: linear-gradient(180deg, #c9b6ff, #7c6bff);
+    color: #1a0a2e;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 10px 5px 10px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>🤖 Bot Real Score Testing</h1>
+<p>This will run the bot 5 times and measure actual scores to determine if 200k is achievable.</p>
+
+<button onclick="runTests()">Run 5 Games (estimate 2-3 minutes)</button>
+<button onclick="clearLog()">Clear Log</button>
+
+<div class="log" id="log"></div>
+
+<div class="summary" id="summary" style="display:none;">
+  <h2>Summary Results</h2>
+  <div id="summaryContent"></div>
+</div>
+
+<script>
+const logEl = document.getElementById('log');
+
+function log(msg, type = 'info') {
+  const div = document.createElement('div');
+  div.className = type;
+  div.textContent = msg;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function clearLog() {
+  logEl.innerHTML = '';
+  document.getElementById('summary').style.display = 'none';
+}
+
+async function runTests() {
+  clearLog();
+  log('Starting bot test runs...');
+  log('Note: Copying hacdong_working.html into iframe for execution');
+  log('---');
+
+  // Create a sandbox iframe
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+
+  const scores = [];
+  const games = 5;
+
+  try {
+    // We need to load the game file and run bot on it
+    const response = await fetch('./hacdong_working.html');
+    const html = await response.text();
+
+    // Inject score tracking into the game
+    const modifiedHtml = html.replace(
+      '</head>',
+      `<script>
+        window.botScores = [];
+        const originalInit = window.init || function(){};
+      </script></head>`
+    );
+
+    iframe.srcdoc = modifiedHtml;
+
+    // Wait for game to load
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    log('Game loaded in sandbox');
+    log('Running 5 bot games...');
+    log('---');
+
+    const iframeWindow = iframe.contentWindow;
+
+    for (let i = 1; i <= games; i++) {
+      log(`[Game ${i}] Starting...`, 'info');
+
+      // Reset game state
+      if (iframeWindow.resetGame) iframeWindow.resetGame();
+      if (iframeWindow.newGame) iframeWindow.newGame();
+
+      // Run bot
+      if (iframeWindow.botPlayAuto) {
+        await iframeWindow.botPlayAuto();
+        const finalScore = iframeWindow.score || 0;
+        scores.push(finalScore);
+        log(`[Game ${i}] Final score: ${finalScore.toLocaleString()}`, 'score');
+      } else {
+        log(`[Game ${i}] ERROR: Bot not found`, 'info');
+        scores.push(0);
+      }
+
+      // Small delay between games
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+  } catch (error) {
+    log(`Error: ${error.message}`);
+  }
+
+  // Calculate statistics
+  document.getElementById('summary').style.display = 'block';
+  showSummary(scores);
+
+  // Cleanup
+  document.body.removeChild(iframe);
+}
+
+function showSummary(scores) {
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+  const max = Math.max(...scores);
+  const min = Math.min(...scores);
+  const median = scores.sort((a, b) => a - b)[Math.floor(scores.length / 2)];
+
+  const summaryEl = document.getElementById('summaryContent');
+  summaryEl.innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+      <div>
+        <span style="color: #9aa0d0;">Average Score:</span><br>
+        <span class="score" style="font-size: 1.3em;">${avg.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+      </div>
+      <div>
+        <span style="color: #9aa0d0;">Best Score:</span><br>
+        <span class="high" style="font-size: 1.3em;">${max.toLocaleString()}</span>
+      </div>
+      <div>
+        <span style="color: #9aa0d0;">Worst Score:</span><br>
+        <span class="score" style="font-size: 1.3em;">${min.toLocaleString()}</span>
+      </div>
+      <div>
+        <span style="color: #9aa0d0;">Median Score:</span><br>
+        <span class="score" style="font-size: 1.3em;">${median.toLocaleString()}</span>
+      </div>
+    </div>
+    <hr style="border: 1px solid rgba(227,107,255,0.2); margin: 20px 0;">
+    <div style="font-size: 0.95em; color: #9aa0d0; line-height: 1.8;">
+      <p><strong>200k Points Achievement:</strong></p>
+      <p>
+        Average: ${(avg / 200000 * 100).toFixed(1)}% of 200k goal<br>
+        Best: ${(max / 200000 * 100).toFixed(1)}% of 200k goal<br>
+      </p>
+      <p style="color: #ff4d6d; margin-top: 15px;">
+        <strong>⚠️ Conclusion:</strong> ${
+          max >= 200000
+            ? "✓ 200k IS achievable!"
+            : max >= 100000
+            ? "△ 200k is very challenging (best only reached ~" + (max/1000).toFixed(0) + "k)"
+            : "✗ 200k appears unrealistic (best ~" + (max/1000).toFixed(0) + "k)"
+        }
+      </p>
+    </div>
+  `;
+}
+</script>
+
+<p style="color: #9aa0d0; margin-top: 30px; font-size: 0.9em;">
+  <strong>Note:</strong> This test requires the game file (hacdong_working.html) to be accessible.
+  If it fails, open the developer console (F12) to see what went wrong.
+</p>
+
+</body>
+</html>
