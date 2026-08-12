@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+body { margin: 0; font-family: monospace; background: #000; color: #0f0; }
+#container { padding: 40px; max-width: 800px; margin: 0 auto; }
+h1 { color: #ff0; font-size: 32px; margin-bottom: 30px; }
+.test-result { 
+  background: rgba(0,0,0,0.5); padding: 20px; margin: 15px 0;
+  border: 2px solid #0f0; border-radius: 5px; font-size: 18px;
+}
+.score { color: #ff0; font-size: 28px; font-weight: bold; }
+.stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 20px; margin-top: 30px;
+}
+.stat-box {
+  background: rgba(0,0,0,0.5); padding: 20px; border: 2px solid #0f0;
+  border-radius: 5px; text-align: center;
+}
+.stat-label { color: #0f0; font-size: 14px; }
+.stat-value { color: #ff0; font-size: 32px; font-weight: bold; }
+.progress { margin: 20px 0; }
+.bar { background: #333; height: 30px; border-radius: 5px; overflow: hidden; }
+.fill { background: linear-gradient(90deg, #0f0, #ff0); height: 100%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; }
+</style>
+</head>
+<body>
+<div id="container">
+  <h1>🤖 Bot Scoring Test</h1>
+  <div id="results"></div>
+  <div class="stats" id="stats" style="display: none;">
+    <div class="stat-box">
+      <div class="stat-label">AVERAGE</div>
+      <div class="stat-value" id="avg">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">MAX</div>
+      <div class="stat-value" id="max">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">MIN</div>
+      <div class="stat-value" id="min">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">TESTS DONE</div>
+      <div class="stat-value" id="count">0</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const resultsDiv = document.getElementById('results');
+const statsDiv = document.getElementById('stats');
+let scores = [];
+let testNum = 0;
+let gameLoaded = false;
+
+function addResult(gameNum, score, time) {
+  scores.push(score);
+  const result = document.createElement('div');
+  result.className = 'test-result';
+  result.innerHTML = `
+    Game ${gameNum}: <span class="score">${score}</span> points 
+    <span style="color: #0ff; margin-left: 20px;">⏱️ ${time}s</span>
+  `;
+  resultsDiv.appendChild(result);
+  
+  updateStats();
+}
+
+function updateStats() {
+  if(scores.length === 0) return;
+  
+  const avg = Math.round(scores.reduce((a,b) => a+b) / scores.length);
+  const max = Math.max(...scores);
+  const min = Math.min(...scores);
+  
+  document.getElementById('avg').textContent = avg.toLocaleString();
+  document.getElementById('max').textContent = max.toLocaleString();
+  document.getElementById('min').textContent = min.toLocaleString();
+  document.getElementById('count').textContent = scores.length;
+  statsDiv.style.display = 'grid';
+}
+
+// Load game
+fetch('hacdong_working.html')
+  .then(r => r.text())
+  .then(html => {
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/);
+    if(bodyMatch) {
+      const container = document.createElement('div');
+      container.style.display = 'none';
+      container.innerHTML = bodyMatch[1];
+      document.body.appendChild(container);
+    }
+    
+    const scriptMatches = html.match(/<script>([\s\S]*?)<\/script>/g);
+    if(scriptMatches) {
+      scriptMatches.forEach(scriptTag => {
+        const scriptCode = scriptTag.replace(/<\/?script>/g, '');
+        try { eval(scriptCode); } catch(e) {}
+      });
+    }
+    
+    gameLoaded = true;
+    runTests();
+  });
+
+async function runTests() {
+  const numTests = 5;
+  
+  resultsDiv.innerHTML = `<div class="test-result">Starting ${numTests} bot games...</div>`;
+  
+  for(let i = 1; i <= numTests; i++) {
+    await runOneGame(i);
+  }
+  
+  resultsDiv.innerHTML = `<div class="test-result" style="border-color: #ff0; font-size: 20px;">
+    ✅ All tests complete!<br><br>
+    Scores: ${scores.join(', ')}
+  </div>` + resultsDiv.innerHTML;
+}
+
+async function runOneGame(gameNum) {
+  return new Promise(resolve => {
+    if(typeof newGame !== 'function') {
+      addResult(gameNum, 0, 0);
+      resolve();
+      return;
+    }
+    
+    newGame();
+    
+    const startTime = Date.now();
+    let finalScore = 0;
+    
+    // Start bot
+    if(typeof botPlayFunction === 'function') {
+      botPlayFunction();
+      
+      const monitor = setInterval(() => {
+        if(typeof score !== 'undefined') {
+          finalScore = score;
+        }
+        
+        if(typeof state !== 'undefined' && state !== 'play') {
+          clearInterval(monitor);
+          const elapsed = Math.round((Date.now() - startTime) / 1000);
+          addResult(gameNum, finalScore, elapsed);
+          setTimeout(resolve, 500);
+        }
+      }, 100);
+      
+      // Timeout
+      setTimeout(() => {
+        clearInterval(monitor);
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+        if(!scores.includes(finalScore)) {
+          addResult(gameNum, finalScore, elapsed);
+        }
+        resolve();
+      }, 120000);
+    } else {
+      resolve();
+    }
+  });
+}
+</script>
+</body>
+</html>
