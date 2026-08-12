@@ -79,6 +79,13 @@ const darker = (hex, k) => {
   const [r, g, b] = rgbOf(hex);
   return hexOf([r * (1 - k), g * (1 - k * 0.9), b * (1 - k * 0.66)]);
 };
+/** Blend two colours. Light does not just brighten a surface, it lends it its
+ *  own colour, and stone beside a fire is warm stone, not pale stone. */
+const mix = (a, b, t) => {
+  const A = rgbOf(a); const B = rgbOf(b);
+  return hexOf([0, 1, 2].map((i) => A[i] + (B[i] - A[i]) * t));
+};
+
 /** Into light: up, and warmer, because the only lamp in this game is a fire. */
 const lighter = (hex, k) => {
   const [r, g, b] = rgbOf(hex);
@@ -251,8 +258,115 @@ function distance(x, y, w, h, p, rng, floorY, kind) {
   }
 }
 
+// --- what the reference has and a flat mass never will ---------------------
+// Four techniques, taken off concept art that is plainly better than anything
+// this file produced before it:
+//
+//   1. Masonry. A wall is not a field with hatching over it. It is several
+//      hundred individual stones, each a slightly different value, and the
+//      variation between them is most of what the eye reads as "stone".
+//   2. A light shaft is an object in the air, not a gradient on a surface.
+//   3. Wet stone has a specular: a hard bright glint and a vertical smear of
+//      the light source under it. Dry stone has neither.
+//   4. The key is far darker than it looks like it should be, and the lit part
+//      is far smaller. Ninety per cent near-black, one bright pool.
+
+/** Courses of individual stones. The single biggest thing that was missing. */
+function masonry(x, y, w, h, p, rng, { course = 22, ruin = 0.12, lit = null, tint = null } = {}) {
+  const rows = Math.ceil(h / course);
+  for (let r = 0; r < rows; r++) {
+    const ry = y + r * course;
+    const stagger = (r % 2) * course * 0.9;
+    let sx = x - stagger - rng() * 20;
+    while (sx < x + w) {
+      const sw = course * (1.2 + rng() * 1.3);
+      // Each stone gets its own value — but the spread between neighbours is
+      // small. A wall of high-contrast rectangles reads as brickwork clip art;
+      // what reads as stone is a great many stones almost the same colour.
+      // Most stones are DARKER than the wall behind them, not lighter. A stone
+      // sits in a recess and the mortar line under it is a shadow; drawing them
+      // brighter than their ground is what made the last pass read as a brick
+      // texture pasted over the room instead of the room being made of stone.
+      const t = rng();
+      let fill = darker(t < 0.5 ? p.dark : t < 0.86 ? p.near : p.mid, 0.1 + rng() * 0.4);
+      let op = 0.4 + rng() * 0.36;
+      // Distance from the room's light decides almost everything. Most of a
+      // wall in a room lit by one lamp is not visible at all, and drawing it
+      // as if it were is the thing that makes a dungeon look like a diagram.
+      if (lit && lit.r) {
+        const d = Math.hypot(sx + sw / 2 - lit.x, ry - lit.y) / lit.r;
+        if (d < 0.8) {
+          const k = (1 - d / 0.8) ** 1.4;
+          fill = lighter(fill, 0.5 * k);
+          if (tint) fill = mix(fill, tint, 0.52 * k);
+        } else op *= Math.max(0.05, 1 - (d - 0.8) * 1.9);
+      }
+      const gap = 2 + rng() * 2.4;
+      if (rng() > ruin) {
+        const block = [
+          [sx + gap, ry + gap],
+          [sx + sw - gap, ry + gap + (rng() - 0.5) * 3],
+          [sx + sw - gap, ry + course - gap],
+          [sx + gap, ry + course - gap + (rng() - 0.5) * 3],
+        ];
+        put(`<path d="${through(block)}" fill="${fill}" fill-opacity="${n(op)}"/>`);
+        // the top edge of a stone catches; the bottom is where the mortar is
+        const near = lit && lit.r ? Math.max(0, 1 - Math.hypot(sx + sw / 2 - lit.x, ry - lit.y) / (lit.r * 1.3)) : 0.25;
+        if (rng() < 0.5 * near)
+          put(`<path d="${through([[sx + gap, ry + gap + 1], [sx + sw - gap, ry + gap + 1]], false)}" fill="none" stroke="${p.lit}" stroke-width="1.2" stroke-opacity="${n((0.1 + rng() * 0.3) * near)}"/>`);
+      }
+      sx += sw;
+    }
+  }
+}
+
+/** A shaft of light, as a thing standing in the air. */
+function shaft(topX, topY, topW, botX, botY, botW, rng, tint = '#9fc4e8') {
+  const id = `sh${gradN++}`;
+  put(`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${n(topX)}" y1="${n(topY)}" x2="${n(botX)}" y2="${n(botY)}">
+    <stop offset="0" stop-color="${tint}" stop-opacity="0.3"/>
+    <stop offset="0.45" stop-color="${tint}" stop-opacity="0.13"/>
+    <stop offset="1" stop-color="${tint}" stop-opacity="0"/>
+  </linearGradient>`);
+  put(`<path d="M ${n(topX - topW / 2)} ${n(topY)} L ${n(topX + topW / 2)} ${n(topY)} L ${n(botX + botW / 2)} ${n(botY)} L ${n(botX - botW / 2)} ${n(botY)} Z" fill="url(#${id})"/>`);
+  // motes, and they only exist where the shaft is
+  for (let i = 0; i < 40; i++) {
+    const t = rng();
+    const cx = topX + (botX - topX) * t + (rng() - 0.5) * (topW + (botW - topW) * t) * 0.9;
+    put(`<circle cx="${n(cx)}" cy="${n(topY + (botY - topY) * t)}" r="${n(0.6 + rng() * 1.6)}" fill="${tint}" fill-opacity="${n(0.12 + rng() * 0.4)}"/>`);
+  }
+  // where it lands
+  put(`<ellipse cx="${n(botX)}" cy="${n(botY)}" rx="${n(botW * 0.6)}" ry="${n(botW * 0.13)}" fill="${tint}" fill-opacity="0.12"/>`);
+}
+
+/** Wet stone: a hard glint and a smear of the source running toward the eye. */
+function wet(x, w, floorY, bottom, p, rng, src, colour = '#ffb04a') {
+  if (src !== null) {
+    // the reflection: a vertical smear directly under the light, broken up
+    const id = `rf${gradN++}`;
+    put(`<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${colour}" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="${colour}" stop-opacity="0"/>
+    </linearGradient>`);
+    put(`<path d="M ${n(src - 16)} ${n(floorY)} L ${n(src + 16)} ${n(floorY)} L ${n(src + 46)} ${n(bottom)} L ${n(src - 46)} ${n(bottom)} Z" fill="url(#${id})"/>`);
+    for (let i = 0; i < 16; i++) {
+      const ry = floorY + rng() * (bottom - floorY);
+      const rw = 10 + rng() * 46;
+      put(`<path d="${through([[src - rw / 2 + (rng() - 0.5) * 40, ry], [src + rw / 2 + (rng() - 0.5) * 40, ry + (rng() - 0.5) * 3]], false)}" fill="none" stroke="${colour}" stroke-width="${n(1 + rng() * 2.4)}" stroke-opacity="${n(0.1 + rng() * 0.4)}" stroke-linecap="round"/>`);
+    }
+  }
+  // specular on the flags themselves, brightest near the light
+  for (let i = 0; i < 60; i++) {
+    const gx = x + rng() * w;
+    const gy = floorY + rng() * (bottom - floorY);
+    const near = src === null ? 0.4 : Math.max(0.06, 1 - Math.abs(gx - src) / (w * 0.45));
+    put(`<path d="${through([[gx, gy], [gx + 6 + rng() * 24, gy + (rng() - 0.5) * 2]], false)}" fill="none" stroke="${src === null ? p.lit : colour}" stroke-width="${n(0.8 + rng() * 1.4)}" stroke-opacity="${n(0.05 + rng() * 0.3 * near)}" stroke-linecap="round"/>`);
+  }
+}
+
 /** MIDGROUND · hall: a vault on piers. A building still trying to be one. */
 function vault(x, y, w, h, p, rng, floorY) {
+  masonry(x, y + h * 0.12, w, floorY - y - h * 0.12 + 20, p, rng, { course: 20, ruin: 0.1, lit: LIGHT, tint: LIGHT.tint });
   // the vault, sagging, drawn as a mass and not as a curve
   const arch = [[x, y + h * 0.02]];
   for (let i = 0; i <= 14; i++) {
@@ -278,12 +392,14 @@ function vault(x, y, w, h, p, rng, floorY) {
       right.unshift([cx + swell + (rng() - 0.5) * 8, yy]);
     }
     mass([...left, ...right], p.mid, p.ink, rng, { inkWidth: 3.4 });
-    hatch(cx - 26, topY, 52, floorY - topY, p.ink, rng, 22, 1.4);
+    // a pier is built out of the same stones as the wall behind it
+    for (let k = 0; (topY + k * 26) < floorY; k++)
+      put(`<path d="${through([[cx - 24, topY + k * 26], [cx + 24, topY + k * 26 + (rng() - 0.5) * 5]], false)}" fill="none" stroke="${p.ink}" stroke-width="2" stroke-opacity="${n(0.3 + rng() * 0.3)}"/>`);
+    hatch(cx - 26, topY, 52, floorY - topY, p.ink, rng, 18, 1.4);
   }
 
-  // the wall behind, hatched rather than tiled
-  hatch(x, y + h * 0.2, w, floorY - y - h * 0.2, p.ink, rng, 90, 1.45);
-  hatch(x, y + h * 0.3, w, floorY - y - h * 0.3, p.near, rng, 40, 0.4);
+  // the wall behind, in courses of individual stones
+  hatch(x, y + h * 0.3, w, floorY - y - h * 0.3, p.near, rng, 30, 0.4);
 }
 
 /** MIDGROUND · bonfire: not a hall. A corner that stayed up, and the rubble
@@ -302,8 +418,8 @@ function shelter(x, y, w, h, p, rng, floorY) {
     top.push([brk + (rng() - 0.5) * 46 + k * 8, fy]);
   }
   top.push([brk + 40, y]);
-  mass(top, p.dark, p.ink, rng, { inkWidth: 4 });
-  hatch(x, y + h * 0.2, brk - x, floorY - y - h * 0.2, p.ink, rng, 54, 1.4);
+  masonry(x, y + h * 0.16, brk - x + 20, floorY - y - h * 0.16 + 20, p, rng, { course: 21, ruin: 0.22, lit: LIGHT, tint: LIGHT.tint });
+  mass(top, p.dark, p.ink, rng, { inkWidth: 4, opacity: 0.9 });
 
   // the bank of fallen stone under the break
   mass(
@@ -329,12 +445,7 @@ function shelter(x, y, w, h, p, rng, floorY) {
  *  down the middle of it, and in one room in this game it runs the wrong way. */
 function channel(x, y, w, h, p, rng, floorY) {
   const cx = x + w * (0.48 + (rng() - 0.5) * 0.1);
-  // the side walls above the mouth, in courses
-  hatch(x, y + h * 0.06, w, floorY - y - h * 0.06, p.ink, rng, 74, 1.45);
-  for (let i = 0; i < 6; i++) {
-    const cy = y + h * 0.1 + i * h * 0.1;
-    put(`<path d="${through([[x, cy], [x + w, cy + (rng() - 0.5) * 12]], false)}" fill="none" stroke="${p.ink}" stroke-width="2.4" stroke-opacity="0.5"/>`);
-  }
+  masonry(x, y + h * 0.04, w, floorY - y + 30, p, rng, { course: 19, ruin: 0.08, lit: LIGHT, tint: LIGHT.tint });
   // the mouth: nested round arches, each one further away and darker
   for (let r = 0; r < 5; r++) {
     const k = 1 - r * 0.15;
@@ -404,7 +515,7 @@ function rock(x, y, w, h, p, rng, floorY) {
 
 /** MIDGROUND · stair: a flight with the middle of it gone. */
 function flight(x, y, w, h, p, rng, floorY) {
-  hatch(x, y + h * 0.08, w, floorY - y, p.ink, rng, 80, 1.45);
+  masonry(x, y + h * 0.06, w, floorY - y + h * 0.2, p, rng, { course: 20, ruin: 0.14, lit: LIGHT, tint: LIGHT.tint });
   // the vault over it, following the slope
   const rake = [[x, y]];
   for (let i = 0; i <= 10; i++) {
@@ -459,7 +570,7 @@ function openYard(x, y, w, h, p, rng, floorY) {
   }
   line.push([x + w, floorY + 20], [x, floorY + 20]);
   mass(line, p.dark, p.ink, rng, { inkWidth: 4 });
-  hatch(x, wallTop, w, floorY - wallTop, p.ink, rng, 70, 1.45);
+  masonry(x, wallTop, w, floorY - wallTop + 20, p, rng, { course: 22, ruin: 0.16, lit: LIGHT, tint: LIGHT.tint });
   for (let i = 0; i < 5; i++) {
     const cy = wallTop + 30 + i * (floorY - wallTop) / 5;
     put(`<path d="${through([[x, cy], [x + w, cy + (rng() - 0.5) * 14]], false)}" fill="none" stroke="${p.ink}" stroke-width="2.2" stroke-opacity="0.45"/>`);
@@ -1136,7 +1247,12 @@ function panel(room, top) {
 
   // Everything in this room is lit by the same thing. In a room with no fire
   // the light is whatever is leaking in from above the frame, up and to the left.
-  LIGHT = fire !== null ? { x: fire, y: floorY - 110 * fireScale } : { x: x + w * 0.3, y: y - h * 0.5 };
+  // Where the shaft comes down, decided here so the masonry can be lit by it.
+  const shaftTop = x + w * (0.16 + rng() * 0.16);
+  const shaftFoot = shaftTop + 150 + rng() * 90;
+  LIGHT = fire !== null
+    ? { x: fire, y: floorY - 110 * fireScale, r: w * (0.2 + 0.2 * fireScale), tint: FIRE.low }
+    : { x: shaftFoot, y: floorY - h * 0.3, r: w * 0.3, tint: p.lit };
 
   put(`<clipPath id="c-${cid}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/></clipPath>`);
   put(`<g clip-path="url(#c-${cid})">`);
@@ -1160,6 +1276,10 @@ function panel(room, top) {
   ground(x, y, w, h, p, rng, floorY, room.kind);
   props(room, x, w, floorY, y + h, p, rng);
   decals(x, w, floorY, y + h, p, rng);
+  // Wet stone under a light. Dry stone gets neither the smear nor the glints,
+  // and a room with no light at all gets only the faintest cold ones.
+  if (room.kind !== 'cave' && room.kind !== 'fog')
+    wet(x, w, floorY, y + h, p, rng, fire, fire !== null ? FIRE.mid : p.lit);
   if (room.kind !== 'cave' && room.kind !== 'bridge') lamp(x + w * (0.82 + rng() * 0.08), floorY, p, rng);
 
   if (fire !== null) {
@@ -1207,6 +1327,14 @@ function panel(room, top) {
   nearProps(x, w, floorY, y + h, p, rng);
   nearMass(x, y, w, h, p, rng);
 
+  // A room with no lamp in it still has to be lit by something, and in a
+  // building this broken the something is a hole. The shaft is an object in the
+  // air, not a gradient laid on a surface — that is the difference between a
+  // light source and a wash.
+  if (fire === null && room.kind !== 'cave' && room.kind !== 'fog') {
+    shaft(shaftTop, y - 10, 40 + rng() * 30, shaftFoot, floorY + 12, 190 + rng() * 90, rng, p.lit);
+  }
+
   // 5 LIGHTING: source, lit pool, falloff, dark. In that order and no other.
   if (fire !== null) {
     put(`<radialGradient id="l-${cid}" cx="50%" cy="50%" r="50%">
@@ -1224,8 +1352,9 @@ function panel(room, top) {
     put(`<ellipse cx="${n(fire)}" cy="${n(floorY + 10)}" rx="${n(200 + 190 * fireScale)}" ry="${n(40 + 34 * fireScale)}" fill="url(#p-${cid})"/>`);
   }
   put(`<radialGradient id="d-${cid}" cx="${fire !== null ? n(((fire - x) / w) * 100) : 50}%" cy="62%" r="72%">
-    <stop offset="42%" stop-color="${p.ink}" stop-opacity="0"/>
-    <stop offset="100%" stop-color="${p.ink}" stop-opacity="0.8"/>
+    <stop offset="18%" stop-color="${p.ink}" stop-opacity="0"/>
+    <stop offset="62%" stop-color="${p.ink}" stop-opacity="0.62"/>
+    <stop offset="100%" stop-color="${p.ink}" stop-opacity="0.95"/>
   </radialGradient>`);
   put(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#d-${cid})"/>`);
 
