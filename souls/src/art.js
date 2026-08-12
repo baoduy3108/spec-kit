@@ -18,9 +18,17 @@ export const PALETTE = {
   glass: '#3a4a63',
   stone: '#0a0c11',
   floor: '#12151c',
-  knight: '#e8e4da',
-  knightDark: '#9aa0ab',
-  cloak: '#8f3b3b',
+  // The Lamplighter. A works hand in a coat, not a figure in plate — so the
+  // body is the dull colour of wet canvas and the only bright thing on it is
+  // the arm the kiln took, which has not gone out.
+  coat: '#4a4b52',
+  coatDark: '#2b2c33',
+  canvas: '#6d6a63',
+  clay: '#8d4a2c',
+  crack: '#ff7a2f',
+  crackHot: '#ffd9a0',
+  brass: '#8a7245',
+  cloak: '#3c3d45',
   warden: '#080a0e',
   wardenRim: '#4a5568',
   lantern: '#ffb347',
@@ -127,9 +135,68 @@ function shadow(g, x, width, strength = 0.5) {
   g.restore();
 }
 
-// --- the knight -----------------------------------------------------------
+// --- the Lamplighter ------------------------------------------------------
+// Five rules, and the figure is wrong the moment it breaks one of them:
+// taller than the frame wants and stooped; the coat reads as a cluster of
+// hanging shapes rather than as cloth; one arm glows at the joints and the
+// other does not; the pole is longer than the figure is tall; and nothing
+// about it is symmetrical.
 
-export function drawKnight(g, k, time) {
+/** The lanterns hung off the coat. They are a backlog, not trophies, and they
+ *  knock together when it walks, which is how a dark room knows it is coming. */
+function lanterns(g, time, swing) {
+  // deliberately uneven: an even row of them reads as a row of icons
+  const hung = [
+    [-13, -40, 5.5, 0.9], [-7, -25, 4, 1.7], [4, -34, 5, 0.4],
+    [11, -22, 3.4, 2.3], [-17, -18, 4.4, 1.2], [9, -44, 3.8, 2.9],
+  ];
+  for (const [ox, oy, r, phase] of hung) {
+    const sway = Math.sin(time * 3.1 + phase) * swing;
+    g.strokeStyle = PALETTE.brass;
+    g.lineWidth = 1.2;
+    g.beginPath();
+    g.moveTo(ox, oy - r * 2.4);
+    g.lineTo(ox + sway, oy - r);
+    g.stroke();
+    g.fillStyle = PALETTE.coatDark;
+    g.fillRect(ox + sway - r, oy - r, r * 2, r * 2.2);
+    g.strokeStyle = PALETTE.brass;
+    g.lineWidth = 1;
+    g.strokeRect(ox + sway - r, oy - r, r * 2, r * 2.2);
+  }
+}
+
+/** The arm the kiln kept. Fired clay from the elbow down, and the cracks in it
+ *  are the only light the figure carries that it cannot put down. */
+function clayArm(g, x1, y1, x2, y2, time, heat) {
+  limb(g, x1, y1, x2, y2, 7, PALETTE.clay);
+  const glow = 0.55 + Math.sin(time * 3.6) * 0.12 + heat * 0.4;
+  g.strokeStyle = PALETTE.crack;
+  g.globalAlpha = Math.min(1, glow);
+  g.lineWidth = 2;
+  g.beginPath();
+  for (let i = 0; i < 4; i++) {
+    const t0 = 0.1 + i * 0.22;
+    const t1 = t0 + 0.14;
+    g.moveTo(x1 + (x2 - x1) * t0, y1 + (y2 - y1) * t0 + (i % 2 ? 2 : -2));
+    g.lineTo(x1 + (x2 - x1) * t1, y1 + (y2 - y1) * t1 + (i % 2 ? -1 : 1));
+  }
+  g.stroke();
+  g.globalAlpha = 1;
+  // the hand, and the heat sitting in the palm
+  g.fillStyle = PALETTE.clay;
+  g.beginPath();
+  g.arc(x2, y2, 4.4, 0, TAU);
+  g.fill();
+  g.fillStyle = PALETTE.crackHot;
+  g.globalAlpha = 0.4 + heat * 0.5;
+  g.beginPath();
+  g.arc(x2, y2, 2.4, 0, TAU);
+  g.fill();
+  g.globalAlpha = 1;
+}
+
+export function drawLamplighter(g, k, time) {
   const f = k.facing;
   const s = k.state;
   shadow(g, k.x, 34, 0.5);
@@ -138,43 +205,34 @@ export function drawKnight(g, k, time) {
   g.translate(k.x, GROUND);
   g.scale(f, 1);
 
-  let lean = 0;
+  // stooped as a resting state, not only when it is doing something
+  let lean = 0.16;
   let crouch = 0;
-  let armAngle = -0.5;
-  let bladeSpin = 0;
-  const breathe = Math.sin(time * 2.4) * 1.4;
+  let poleAngle = -1.15;
+  let arc = 0;
+  let heat = 0;
+  const breathe = Math.sin(time * 2.2) * 1.2;
+  let swing = 1.4;
 
-  if (s === 'walk') {
-    lean = 0.12;
-    crouch = Math.abs(Math.sin(time * 11)) * 3;
-  }
-  if (s === 'hurt') {
-    lean = -0.4;
-    crouch = 6;
-  }
-  if (s === 'stagger') {
-    lean = -0.55;
-    crouch = 10;
-  }
-  if (s === 'block') {
-    crouch = 4;
-    lean = 0.16;
-  }
+  if (s === 'walk') { lean = 0.26; crouch = Math.abs(Math.sin(time * 9)) * 3; swing = 4.5; }
+  if (s === 'hurt') { lean = -0.34; crouch = 6; swing = 6; }
+  if (s === 'stagger') { lean = -0.5; crouch = 10; swing = 8; }
+  if (s === 'block') { crouch = 4; lean = 0.3; poleAngle = -0.1; }
 
   if (s === 'roll') {
-    // A ball: the whole figure tucks and spins, which is why it cannot be hit.
+    // it does not tuck into a ball; it goes down and the coat comes over it
     const p = Math.min(1, k.time / KNIGHT.roll.time);
-    g.translate(0, -22);
-    g.rotate(p * TAU);
+    g.translate(p * 14, -14 - Math.sin(p * Math.PI) * 10);
+    g.rotate(Math.sin(p * Math.PI) * 0.9);
     g.fillStyle = PALETTE.cloak;
     g.beginPath();
-    g.arc(0, 0, 20, 0, TAU);
+    g.ellipse(0, 0, 24, 15, 0, 0, TAU);
     g.fill();
-    g.fillStyle = PALETTE.knight;
+    g.fillStyle = PALETTE.coat;
     g.beginPath();
-    g.arc(0, 0, 14, -0.6, 2.2);
+    g.ellipse(-4, -2, 15, 10, 0, 0, TAU);
     g.fill();
-    limb(g, -16, -6, 18, 8, 4, PALETTE.knightDark);
+    lanterns(g, time, 7);
     g.restore();
     return;
   }
@@ -184,95 +242,109 @@ export function drawKnight(g, k, time) {
     const p = k.time / (sw.windup + sw.active + sw.recover);
     const wind = k.time < sw.windup ? k.time / sw.windup : 1;
     if (k.time < sw.windup) {
-      armAngle = -0.5 - wind * 2.2;
-      lean = -0.18 * wind;
+      // the pole goes back and up, and it takes its time, because it is long
+      poleAngle = -1.15 - wind * 1.5;
+      lean = 0.16 - 0.3 * wind;
+      heat = wind * 0.5;
     } else {
       const after = (k.time - sw.windup) / (sw.active + sw.recover);
-      armAngle = -2.7 + after * 3.6;
-      lean = 0.3 - after * 0.28;
+      poleAngle = -2.65 + after * 3.1;
+      lean = 0.42 - after * 0.24;
       crouch = 3;
+      heat = 1 - after * 0.7;
     }
-    bladeSpin = p;
+    arc = p;
+    swing = 6;
   }
 
-  if (s === 'drink') {
-    armAngle = -2.4;
-    crouch = 5;
-  }
+  if (s === 'drink') { poleAngle = -0.4; crouch = 5; lean = 0.34; }
 
-  const hipY = -30 + crouch;
-  const shoulderY = -54 + crouch;
-  const headY = -66 + crouch + breathe * 0.3;
+  // taller than the knight was: hips and shoulders both sit higher
+  const hipY = -33 + crouch;
+  const shoulderY = -62 + crouch;
+  const headY = -76 + crouch + breathe * 0.3;
 
-  // cloak: a trailing shape, so movement has weight
+  // the coat: one long ragged shape, hanging past the knees
   g.save();
-  g.rotate(lean * 0.5);
+  g.rotate(lean * 0.4);
   g.fillStyle = PALETTE.cloak;
   g.beginPath();
-  g.moveTo(-2, shoulderY);
-  g.quadraticCurveTo(-24 - Math.sin(time * 3) * 4, hipY - 6, -14, -2);
-  g.lineTo(4, -2);
-  g.quadraticCurveTo(8, hipY, 4, shoulderY);
+  g.moveTo(-3, shoulderY);
+  g.quadraticCurveTo(-26 - Math.sin(time * 2.6) * 5, hipY - 4, -17, 1);
+  g.lineTo(-8, -5);
+  g.lineTo(-2, 1);
+  g.lineTo(5, -6);
+  g.lineTo(11, 0);
+  g.quadraticCurveTo(13, hipY, 6, shoulderY);
   g.closePath();
   g.fill();
   g.restore();
 
-  // legs
-  const stride = s === 'walk' ? Math.sin(time * 11) * 9 : 3;
-  limb(g, 0, hipY, -stride, 0, 7, PALETTE.knightDark);
-  limb(g, 0, hipY, stride, 0, 7, PALETTE.knight);
+  // legs — long, and the stride is uneven
+  const stride = s === 'walk' ? Math.sin(time * 9) * 10 : 3;
+  limb(g, 0, hipY, -stride, 0, 6.5, PALETTE.coatDark);
+  limb(g, 1, hipY, stride * 0.86, 0, 6.5, PALETTE.coat);
 
-  // body
   g.save();
   g.rotate(lean);
-  limb(g, 0, hipY, 0, shoulderY, 13, PALETTE.knight);
 
-  // head with a crest
-  g.fillStyle = PALETTE.knight;
+  // body
+  limb(g, 0, hipY, 0, shoulderY, 12, PALETTE.coat);
+  // the list, in the breast of the coat
+  g.fillStyle = PALETTE.canvas;
+  g.fillRect(-6, shoulderY + 10, 7, 9);
+
+  // head: hooded, hung forward of the shoulders, no face given
+  g.fillStyle = PALETTE.coatDark;
   g.beginPath();
-  g.arc(1, headY - hipY + hipY, 8, 0, TAU);
-  g.fill();
-  g.fillStyle = PALETTE.cloak;
-  g.beginPath();
-  g.moveTo(-1, headY - 7);
-  g.quadraticCurveTo(-12, headY - 12, -14, headY + 2);
-  g.quadraticCurveTo(-6, headY - 3, -1, headY - 3);
+  g.moveTo(-6, shoulderY + 2);
+  g.quadraticCurveTo(-10, headY - 4, -1, headY - 9);
+  g.quadraticCurveTo(9, headY - 6, 8, shoulderY + 1);
+  g.closePath();
   g.fill();
   g.fillStyle = PALETTE.stone;
-  g.fillRect(4, headY - 3, 6, 2.5);
+  g.beginPath();
+  g.ellipse(3, headY + 1, 4.6, 5.2, 0.2, 0, TAU);
+  g.fill();
 
-  // shield arm
+  lanterns(g, time, swing);
+
+  // the good hand, and the arm that is not a hand any more
   if (s === 'block') {
-    g.fillStyle = PALETTE.knightDark;
+    g.fillStyle = PALETTE.coatDark;
     g.beginPath();
-    g.moveTo(10, shoulderY - 12);
-    g.quadraticCurveTo(26, shoulderY + 2, 10, shoulderY + 20);
+    g.moveTo(9, shoulderY - 10);
+    g.quadraticCurveTo(24, shoulderY + 4, 9, shoulderY + 20);
     g.closePath();
     g.fill();
-  } else {
-    limb(g, 0, shoulderY + 2, 9, shoulderY + 16, 5, PALETTE.knightDark);
   }
+  clayArm(g, 1, shoulderY + 6, 13, shoulderY + 20, time, heat);
 
-  // sword arm
+  // the pole: longer than the figure is tall, held in the good hand
   g.save();
-  g.translate(2, shoulderY + 3);
-  g.rotate(armAngle);
-  limb(g, 0, 0, 20, 0, 5, PALETTE.knight);
-  g.strokeStyle = PALETTE.knight;
-  g.lineWidth = 3.5;
+  g.translate(-1, shoulderY + 4);
+  g.rotate(poleAngle);
+  limb(g, 0, 0, 14, 0, 5, PALETTE.coat);
+  g.strokeStyle = PALETTE.brass;
+  g.lineWidth = 3;
   g.beginPath();
-  g.moveTo(20, 0);
-  g.lineTo(66, 0);
+  g.moveTo(-34, 0);
+  g.lineTo(92, 0);
   g.stroke();
-  g.lineWidth = 6;
-  g.strokeStyle = PALETTE.knightDark;
+  // the wick hook and the little cage at the far end
+  g.strokeStyle = PALETTE.brass;
+  g.lineWidth = 2;
   g.beginPath();
-  g.moveTo(18, -5);
-  g.lineTo(18, 5);
+  g.arc(96, 0, 5, -1.6, 1.6);
   g.stroke();
+  g.fillStyle = PALETTE.crack;
+  g.globalAlpha = 0.35 + heat * 0.6;
+  g.beginPath();
+  g.arc(96, 0, 2.6, 0, TAU);
+  g.fill();
+  g.globalAlpha = 1;
   g.restore();
 
-  // flask
   if (s === 'drink') {
     g.fillStyle = PALETTE.lantern;
     g.beginPath();
@@ -282,20 +354,23 @@ export function drawKnight(g, k, time) {
   g.restore();
   g.restore();
 
-  // the arc of the blade, drawn in world space so it reads as a slash
-  if (s === 'attack' && bladeSpin > 0.16 && bladeSpin < 0.62) {
-    const a = (bladeSpin - 0.16) / 0.46;
+  // the arc the pole leaves: wide and slow, because the weapon is a long stick
+  if (s === 'attack' && arc > 0.16 && arc < 0.62) {
+    const a = (arc - 0.16) / 0.46;
     g.save();
-    g.translate(k.x, GROUND - 51);
+    g.translate(k.x, GROUND - 58);
     g.scale(f, 1);
-    g.strokeStyle = `rgba(255,255,255,${0.55 * (1 - a)})`;
-    g.lineWidth = 7 * (1 - a) + 1;
+    g.strokeStyle = `rgba(255,180,110,${0.5 * (1 - a)})`;
+    g.lineWidth = 6 * (1 - a) + 1;
     g.beginPath();
-    g.arc(0, 0, 62, -2.3 + a * 2.2, -1.7 + a * 2.6);
+    g.arc(0, 0, 88, -2.4 + a * 2.2, -1.8 + a * 2.6);
     g.stroke();
     g.restore();
   }
 }
+
+/** The sim still calls its player body the knight. It is not one any more. */
+export const drawKnight = drawLamplighter;
 
 // --- the Warden -----------------------------------------------------------
 

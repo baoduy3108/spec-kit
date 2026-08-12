@@ -8,7 +8,7 @@
     "draw": "node tools/draw.js",
     "assets": "node tools/assets.js",
     "eye": "node tools/eye.js",
-    "knight": "node tools/knight.js",
-    "pixel": "python3 tools/pixel.py"
+    "pixel": "python3 tools/pixel.py",
+    "blockout": "node tools/draw.js all"
   }
 }

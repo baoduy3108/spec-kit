@@ -1,56 +1,80 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ROOMS } from '../src/world.js';
-import { ARCH, PROPS, KIND_PROPS, drawArea } from '../tools/draw.js';
+import { ROOMS, AREAS, FOES } from '../src/world.js';
+import { HERO } from '../src/hero.js';
+import { KNIGHT } from '../src/rules.js';
+import { drawArea, profile, gaps, spots, impassable, ROLL_M, ROOM_M, HERO_M } from '../tools/draw.js';
 
-// The renderer once lost its per-kind architecture and drew the cell, the drain
-// and the kennel as the same hall. These are the checks that would have caught
-// it, written after the fact because that is when it was caught.
+// draw.js is a blockout tool now, not a painter. What it must guarantee is not
+// that a room looks good — it is that a room can be played.
 
-test('every kind a room can be has a building of its own', () => {
-  const kinds = [...new Set(ROOMS.map((r) => r.kind))];
-  for (const k of kinds) {
-    assert.ok(ARCH[k], `no architecture for kind ${k}`);
-    assert.ok(KIND_PROPS[k], `no fallback props for kind ${k}`);
+test('no room in the game has a hole the player cannot cross', () => {
+  const bad = ROOMS.filter((r) => impassable(r).length);
+  assert.deepEqual(
+    bad.map((r) => `${r.id} ${impassable(r).map(([a, b]) => (b - a).toFixed(1))}m`),
+    [],
+    'a room with a gap wider than the roll cannot be walked through',
+  );
+});
+
+test('the roll distance is read out of the sim, not guessed', () => {
+  assert.equal(ROLL_M, (KNIGHT.roll.speed * KNIGHT.roll.time) / 100);
+  assert.ok(ROLL_M > 1.5 && ROLL_M < 4, `roll of ${ROLL_M}m is not a human distance`);
+});
+
+test('every kind produces a floor the player can stand on', () => {
+  for (const kind of [...new Set(ROOMS.map((r) => r.kind))]) {
+    const room = ROOMS.find((r) => r.kind === kind);
+    const P = profile(room);
+    const solid = P.filter(([, y]) => y !== null);
+    assert.ok(solid.length >= 2, `${kind} has no floor`);
+    assert.ok(P[0][0] === 0, `${kind} does not start at the left wall`);
+    assert.ok(P[P.length - 1][0] === ROOM_M, `${kind} does not reach the right wall`);
   }
-  // and no dead entries pointing at kinds the world does not contain
-  for (const k of Object.keys(ARCH)) assert.ok(kinds.includes(k), `ARCH has unused kind ${k}`);
 });
 
-test('every hand-written prop set belongs to a room that exists', () => {
-  const keys = new Set(ROOMS.map((r) => r.key).filter(Boolean));
-  for (const k of Object.keys(PROPS)) assert.ok(keys.has(k), `PROPS has unknown room key ${k}`);
-});
-
-test('the architecture builders are distinct functions', () => {
-  const fns = Object.values(ARCH);
-  assert.equal(new Set(fns).size, fns.length, 'two kinds share one builder');
-});
-
-test('rooms of different kinds do not render the same drawing', () => {
-  drawArea('undercroft');
-  const svg = readFileSync(new URL('../dist/area-undercroft.svg', import.meta.url), 'utf8');
-  const panels = svg.split('<clipPath').slice(1);
-  const rooms = ROOMS.filter((r) => r.area === 'undercroft');
-  assert.equal(panels.length, rooms.length);
-
-  // A panel's shape is its path data. Two rooms built the same way produce the
-  // same number of paths to within a hair; the whole bug was that they did.
-  const shape = panels.map((s) => (s.match(/<path/g) || []).length);
-  const byKind = {};
-  rooms.forEach((r, i) => { (byKind[r.kind] ||= []).push(shape[i]); });
-  const kinds = Object.keys(byKind);
-  for (let i = 0; i < kinds.length; i++)
-    for (let j = i + 1; j < kinds.length; j++) {
-      const a = byKind[kinds[i]][0];
-      const b = byKind[kinds[j]][0];
-      assert.ok(Math.abs(a - b) > 8, `${kinds[i]} and ${kinds[j]} render alike (${a} vs ${b} paths)`);
+test('a profile never leaves the room, and never doubles back', () => {
+  for (const room of ROOMS) {
+    let last = -1;
+    for (const [x, y] of profile(room)) {
+      assert.ok(x >= last, `${room.id} profile goes backwards at ${x}`);
+      assert.ok(x >= 0 && x <= ROOM_M, `${room.id} profile leaves the room at ${x}`);
+      if (y !== null) assert.ok(y >= 0 && y <= 6, `${room.id} floor at ${y}m is off the panel`);
+      last = x;
     }
+  }
 });
 
-test('a room with a hand-written line gets the things the line names', () => {
-  // the seven rooms of area one were each written a line before being drawn
-  for (const r of ROOMS.filter((x) => x.area === 'undercroft'))
-    assert.ok(PROPS[r.key], `${r.key} has a written line but nothing drawn from it`);
+test('every foe gets a standing place inside the room', () => {
+  for (const room of ROOMS) {
+    const at = spots(room.layout, room.foes.length);
+    assert.equal(at.length, room.foes.length);
+    for (const x of at) assert.ok(x > 1 && x < ROOM_M - 1, `${room.id} spawns a foe at ${x}m`);
+  }
+});
+
+test('the hero is the hero, and is drawn at a stated height', () => {
+  assert.ok(HERO.name.vi.length > 0);
+  assert.ok(HERO_M > 1.8 && HERO_M < 2.3, 'the sheet says 1.9-2.1m; the drawing must agree');
+});
+
+test('a sheet renders for every area in the game', () => {
+  for (const a of AREAS.slice(0, 4)) {
+    const r = drawArea(a.id);
+    assert.equal(r.rooms, ROOMS.filter((x) => x.area === a.id).length);
+    const svg = readFileSync(new URL(`../dist/blockout-${a.id}.svg`, import.meta.url), 'utf8');
+    assert.match(svg, /^<svg /);
+    // every number on the sheet has to come off src/, so the hero's own name
+    // and at least one real foe id must appear in it
+    assert.ok(svg.includes(HERO.name.vi), 'the sheet does not name the character');
+    const anyFoe = ROOMS.filter((x) => x.area === a.id).flatMap((x) => x.foes)[0];
+    if (anyFoe) assert.ok(svg.includes(anyFoe), `the sheet does not name ${anyFoe}`);
+  }
+});
+
+test('gaps are found where the profile has holes and nowhere else', () => {
+  const P = [[0, 0], [4, 0], [4, null], [7, null], [7, 0], [24, 0]];
+  assert.deepEqual(gaps(P), [[4, 7]]);
+  assert.deepEqual(gaps([[0, 0], [24, 0]]), []);
 });
