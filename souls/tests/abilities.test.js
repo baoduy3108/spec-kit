@@ -17,12 +17,20 @@ import {
   skillsOf,
 } from '../src/abilities.js';
 
-test('there are eight and thirty-one, and no id twice', () => {
-  assert.equal(ABILITY_IDS.length, 8);
+test('eight combat abilities and one traversal, thirty-one skills, no id twice', () => {
+  // Eight was the number asked for and eight it stays — every one of them a
+  // combat verb. `hook` is the ninth and it is deliberately not one of them: it
+  // is the traversal unlock the level design needs, the equivalent of Dead
+  // Cells hanging its vertical shafts behind the Spider Rune. Counting it in
+  // with the eight would quietly turn "8 abilities" into a number that drifts.
+  const TRAVERSAL = ['hook'];
+  const combat = ABILITY_IDS.filter((id) => !TRAVERSAL.includes(id));
+  assert.equal(combat.length, 8, 'the eight combat abilities');
+  assert.equal(ABILITY_IDS.length, 9, 'eight combat plus one traversal');
   assert.equal(SKILLS.length, 31);
   assert.equal(new Set(SKILLS.map((s) => s.id)).size, 31, 'no duplicate skill ids');
-  const order = ABILITY_IDS.map((id) => ABILITIES[id].n).sort((a, b) => a - b);
-  assert.deepEqual(order, [1, 2, 3, 4, 5, 6, 7, 8], 'the abilities are numbered once each');
+  const order = combat.map((id) => ABILITIES[id].n).sort((a, b) => a - b);
+  assert.deepEqual(order, [1, 2, 3, 4, 5, 6, 7, 8], 'the combat abilities are numbered once each');
 });
 
 test('every ability spends something', () => {
@@ -90,6 +98,9 @@ test('the three abilities the fight already has are still wired to it', () => {
   // renamed in the fight, this stops describing something that exists.
   assert.deepEqual(LIVE, ['kindle', 'seal', 'draw']);
   for (const id of LIVE) assert.ok(KNIGHT.skills[id], `${id} is described but not implemented`);
-  const unimplemented = ABILITY_IDS.filter((id) => !KNIGHT.skills[id]);
+  // hook is implemented, but in the movement block rather than in skills — it
+  // is a traversal verb, not something you spend a fight resource on.
+  assert.ok(KNIGHT.hook && KNIGHT.hook.reach > 0, 'the pole is described but does not reach');
+  const unimplemented = ABILITY_IDS.filter((id) => !KNIGHT.skills[id] && id !== 'hook');
   assert.equal(unimplemented.length, 5, `five are still design only: ${unimplemented.join(', ')}`);
 });

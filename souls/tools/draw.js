@@ -32,9 +32,9 @@ const PX = 19;
 const HERO_M = 2.0;
 const m = (v) => v * PX;
 const ROOM_M = 48;
-const ROOM_H_M = 14;
+const ROOM_H_M = 20;
 const W = 1500;
-const PANEL = 372;
+const PANEL = 476;
 const HEAD = 132;
 const PAD = 34;
 const BOX_W = m(ROOM_M);
@@ -149,6 +149,7 @@ export const JUMP_ACROSS = ((2 * KNIGHT.jump.speed) / KNIGHT.gravity) * KNIGHT.s
 /** What a tapped jump clears. The button is variable now, so the geometry has
  *  two heights to ask about instead of one, and a room that only ever uses the
  *  full arc is a room that throws the mechanic away. */
+export const HOOK_UP = KNIGHT.hook.reach;
 export const JUMP_TAP = ((KNIGHT.jump.speed * KNIGHT.jump.cut) ** 2) / (2 * KNIGHT.gravity) / UNITS_PER_METRE;
 
 /**
@@ -196,16 +197,27 @@ function platforms(room) {
   // Tier two grows OUT OF tier one — a jump up and within a jump sideways of a
   // ledge that already exists. Placing it a fixed height above the floor and
   // then checking left 86 rooms with a shelf nobody could ever stand on.
+  const second = [];
   if (tiers > 1) {
     for (let i = 0; i < 2 && first.length; i++) {
       const anchor = first[Math.floor(rng() * first.length)];
       const w = 3 + rng() * 4;
       const side = rng() < 0.5 ? -1 : 1;
-      const x0 = side < 0
-        ? anchor[0] - w - rng() * span
-        : anchor[1] + rng() * span;
-      put2(x0, w, anchor[2] + (rng() < 0.3 ? HOP : FULL));
+      const x0 = side < 0 ? anchor[0] - w - rng() * span : anchor[1] + rng() * span;
+      const rec = put2(x0, w, anchor[2] + (rng() < 0.3 ? HOP : FULL));
+      if (rec) second.push(rec);
     }
+  }
+  // The high shelf: out of reach of a jump, in reach of the pole. The room is
+  // taller than the player currently is, on purpose, from the first time they
+  // walk through it — which is how Dead Cells does its vertical shafts.
+  const anchors = second.length ? second : first;
+  if (anchors.length && rng() < 0.75) {
+    const anchor = anchors[Math.floor(rng() * anchors.length)];
+    const w = 3 + rng() * 3.5;
+    const side = rng() < 0.5 ? -1 : 1;
+    const x0 = side < 0 ? anchor[0] - w - rng() * span * 0.6 : anchor[1] + rng() * span * 0.6;
+    put2(x0, w, anchor[2] + FULL + HOOK_UP * 0.7);
   }
   return out.sort((a, b) => a[2] - b[2] || a[0] - b[0]);
 }
@@ -224,12 +236,41 @@ export function unreachable(room) {
     const below = Math.max(groundAt(x0), groundAt((x0 + x1) / 2), groundAt(x1));
     // either a jump up from the floor beneath it, or a hop across from another
     // ledge no more than a jump below and a jump away
-    const fromFloor = y - below <= JUMP_UP;
-    const fromLedge = plats.some(([a, b, py]) =>
-      py < y && y - py <= JUMP_UP && x0 - b <= JUMP_ACROSS && a - x1 <= JUMP_ACROSS);
-    if (!fromFloor && !fromLedge) bad.push([x0, x1, y]);
+    const reach = (up) => (y - below <= up) || plats.some(([a, b, py]) =>
+      py < y && y - py <= up && x0 - b <= JUMP_ACROSS && a - x1 <= JUMP_ACROSS);
+    if (!reach(JUMP_UP + HOOK_UP)) bad.push([x0, x1, y]);
   }
   return bad;
+}
+
+/**
+ * The ledges you cannot get onto without the pole.
+ *
+ * These are ROUTES, never PROGRESS: a test walks all 368 rooms and fails if a
+ * room's way out is ever behind one. That is the whole discipline of a
+ * traversal unlock — it opens what you walked past, it never stops the run.
+ */
+export function gated(room) {
+  const P = profile(room);
+  const groundAt = (x) => {
+    let last = 0;
+    for (const [px, py] of P) { if (px > x) break; if (py !== null) last = py; }
+    return last;
+  };
+  const plats = platforms(room);
+  const byJump = new Set();
+  // walk up from the floor as far as plain jumping goes, repeatedly
+  for (let pass = 0; pass < 4; pass++) {
+    for (const p of plats) {
+      const [x0, x1, y] = p;
+      if (byJump.has(p)) continue;
+      const below = Math.max(groundAt(x0), groundAt((x0 + x1) / 2), groundAt(x1));
+      if (y - below <= JUMP_UP) { byJump.add(p); continue; }
+      if (plats.some((q) => byJump.has(q) && q[2] < y && y - q[2] <= JUMP_UP
+        && x0 - q[1] <= JUMP_ACROSS && q[0] - x1 <= JUMP_ACROSS)) byJump.add(p);
+    }
+  }
+  return plats.filter((p) => !byJump.has(p));
 }
 
 /** Every hole in the profile, in metres, so the sheet can measure the jumps. */
@@ -419,11 +460,14 @@ function panel(room, top) {
   }
 
   // --- the ledges, and how you get onto them -------------------------------
+  const gate = gated(room);
   for (const [px0, px1, py] of platforms(room)) {
     const a = bx + m(px0);
     const b = bx + m(px1);
     const yy = floor - m(py);
-    put(`<rect x="${n(a)}" y="${n(yy)}" width="${n(b - a)}" height="${n(m(0.4))}" fill="${INK.solid}" stroke="${INK.solidEdge}" stroke-width="1.6"/>`);
+    const needsPole = gate.some((g) => g[0] === px0 && g[2] === py);
+    put(`<rect x="${n(a)}" y="${n(yy)}" width="${n(b - a)}" height="${n(m(0.4))}" fill="${INK.solid}" stroke="${needsPole ? INK.note : INK.solidEdge}" stroke-width="1.6"${needsPole ? ' stroke-dasharray="5 3"' : ''}/>`);
+    if (needsPole) text(a + (b - a) / 2, yy - 14, 'cần sào', { size: 8, fill: INK.note, anchor: 'middle', mono: true });
     put(`<path d="${`M ${n(a)} ${n(yy + m(0.4))} L ${n(b)} ${n(yy + m(0.4))}`}" stroke="${INK.faint}" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="2 4" fill="none"/>`);
     text(a + (b - a) / 2, yy - 4, `${py}m`, { size: 8, fill: INK.faint, anchor: 'middle', mono: true });
   }
@@ -554,7 +598,7 @@ function panel(room, top) {
     ['đòn nặng nhất', dmg ? `${dmg} (${Math.ceil(KNIGHT.hp / dmg)} đòn chết)` : '—'],
     ['báo ngắn nhất', room.foes.length ? `${fastest.toFixed(2)}s` : '—'],
     ['hụt chân', hole.length ? hole.map(([a, b]) => `${(b - a).toFixed(1)}m`).join(', ') : 'không'],
-    ['bệ trên cao', platforms(room).length || '—'],
+    ['bệ trên cao', platforms(room).length ? `${platforms(room).length}${gated(room).length ? ` (${gated(room).length} cần sào)` : ''}` : '—'],
     ['băng qua', `${(ROOM_M * UNITS_PER_METRE / KNIGHT.speed).toFixed(1)}s`],
   ];
   rows.forEach(([k, v], i) => {

@@ -48,6 +48,18 @@
     "vi": "Đất bị nhồi cho hết khí, không thì nó nổ trong lò. Tự nhồi mình: trong lúc đó không gì làm bạn choáng được."
    }
   },
+  "hook": {
+   "n": 9,
+   "name": {
+    "en": "The Pole",
+    "vi": "Cây Sào"
+   },
+   "spends": "stamina",
+   "line": {
+    "en": "It was always long enough to reach a lamp. Nobody said that was all it could reach.",
+    "vi": "Nó vốn dài vừa đủ để với tới một ngọn đèn. Không ai nói nó chỉ với tới được thế."
+   }
+  },
   "ash-step": {
    "n": 5,
    "name": {

@@ -61,6 +61,21 @@ export const KNIGHT = {
     cut: 0.42, coyote: 0.1, buffer: 0.12,
   },
   gravity: 1700,
+  // The traversal unlock, and the reason the tall rooms are tall.
+  //
+  // Dead Cells hangs its vertical shafts behind the Spider Rune: the height is
+  // built into the level from the first run, and it opens later. This game had
+  // no traversal unlock at all — 8 abilities, every one of them a combat verb —
+  // so height could only ever be decoration.
+  //
+  // The tool was already in the character. hero.js gives the Lamplighter a
+  // pole "too long for a room, exactly long enough to reach a lamp". Hook it
+  // over a ledge and pull up: +2.6m of vertical reach on top of the jump, which
+  // is 5.2m in one move. It is slow and it costs, because it is a decision.
+  //
+  // The law it must obey: it opens ROUTES, never PROGRESS. No room's exit may
+  // depend on it, and a test walks all 368 to enforce that.
+  hook: { reach: 2.6, cost: 18, time: 0.5 },
 
   /**
    * Three skills, and each one is the fiction doing something rather than a

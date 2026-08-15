@@ -172,3 +172,40 @@ test('the level uses both heights the variable jump gives it', async () => {
   assert.ok(hops / heights.length > 0.1,
     `only ${((hops / heights.length) * 100).toFixed(0)}% of ledges are a hop — the tap does nothing`);
 });
+
+test('the pole opens routes, and never blocks progress', async () => {
+  const { gated, platforms, JUMP_UP, HOOK_UP } = await import('../tools/draw.js');
+  const { KNIGHT } = await import('../src/rules.js');
+  assert.ok(HOOK_UP > 2, 'the pole adds nothing worth gating anything behind');
+
+  // The discipline of a traversal unlock, and the only thing that makes a
+  // locked ledge content rather than a wall: you can always walk out.
+  for (const r of ROOMS) {
+    const g = gated(r);
+    if (!g.length) continue;
+    // getting from one side of the room to the other never goes over a ledge —
+    // the floor profile is the way through, and it is checked separately
+    assert.deepEqual(impassable(r), [], `${r.id} gates a ledge AND cannot be crossed on foot`);
+  }
+
+  // and gated content has to actually exist, or the unlock is a reward for
+  // nothing at all
+  const total = ROOMS.reduce((a, r) => a + platforms(r).length, 0);
+  const locked = ROOMS.reduce((a, r) => a + gated(r).length, 0);
+  assert.ok(locked / total > 0.08,
+    `only ${((locked / total) * 100).toFixed(0)}% of ledges need the pole — nothing to come back for`);
+  assert.ok(locked / total < 0.4,
+    `${((locked / total) * 100).toFixed(0)}% of ledges need the pole — the game is locked, not gated`);
+
+  // every gated ledge is within one hooked jump of something that is not gated
+  for (const r of ROOMS.slice(0, 80)) {
+    const plats = platforms(r);
+    const g = gated(r);
+    const open = plats.filter((p) => !g.includes(p));
+    for (const [x0, x1, y] of g) {
+      const near = open.some(([a, b, py]) => y - py <= JUMP_UP + HOOK_UP && py < y
+        && x0 - b <= 8 && a - x1 <= 8) || y <= JUMP_UP + HOOK_UP;
+      assert.ok(near, `${r.id}: a pole ledge at ${y}m has nothing under it to hook from`);
+    }
+  }
+});
