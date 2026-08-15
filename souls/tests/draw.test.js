@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { ROOMS, AREAS, FOES } from '../src/world.js';
 import { HERO } from '../src/hero.js';
 import { KNIGHT } from '../src/rules.js';
-import { drawArea, profile, gaps, spots, impassable, ROLL_M, ROOM_M, HERO_M } from '../tools/draw.js';
+import { drawArea, profile, platforms, unreachable, gaps, spots, impassable, ROLL_M, ROOM_M, ROOM_H_M, HERO_M, JUMP_UP, JUMP_ACROSS } from '../tools/draw.js';
 
 // draw.js is a blockout tool now, not a painter. What it must guarantee is not
 // that a room looks good — it is that a room can be played.
@@ -40,7 +40,7 @@ test('a profile never leaves the room, and never doubles back', () => {
     for (const [x, y] of profile(room)) {
       assert.ok(x >= last, `${room.id} profile goes backwards at ${x}`);
       assert.ok(x >= 0 && x <= ROOM_M, `${room.id} profile leaves the room at ${x}`);
-      if (y !== null) assert.ok(y >= 0 && y <= 6, `${room.id} floor at ${y}m is off the panel`);
+      if (y !== null) assert.ok(y >= 0 && y <= ROOM_H_M - 2, `${room.id} floor at ${y}m is off the panel`);
       last = x;
     }
   }
@@ -131,4 +131,25 @@ test('an image prompt is in one language and says each thing once', async () => 
     const items = (p.match(/In the room: ([^.]*)\./) || [, ''])[1].split('; ');
     assert.equal(new Set(items).size, items.length, `${r.id} lists the same object twice`);
   }
+});
+
+
+test('every ledge in the game can be got onto with the jump the game has', () => {
+  // The sim had no jump at all, which is why 368 rooms were one flat floor.
+  // Now that it has one, height is content — and content nobody can reach is
+  // just paint. Reachability is built into how the ledges are placed rather
+  // than checked afterwards, and this is what says so.
+  const bad = ROOMS.filter((r) => unreachable(r).length);
+  assert.deepEqual(bad.map((r) => `${r.id} ${JSON.stringify(unreachable(r))}`), []);
+  const total = ROOMS.reduce((a, r) => a + platforms(r).length, 0);
+  assert.ok(total > 600, `only ${total} ledges in ${ROOMS.length} rooms — the rooms are flat again`);
+});
+
+test('a room takes long enough to cross to be a place', () => {
+  // 24m at 195 units/s was 4.2 seconds end to end, and the whole of area one
+  // was 29 seconds of walking. That is the measurement behind doubling it.
+  const cross = (ROOM_M * 34) / KNIGHT.speed;
+  assert.ok(cross > 7, `a room crosses in ${cross.toFixed(1)}s — it is a corridor, not a room`);
+  assert.ok(ROOM_H_M >= 12, `a ${ROOM_H_M}m ceiling leaves no room above the floor`);
+  assert.ok(JUMP_UP > 2 && JUMP_ACROSS > 3, 'the jump cannot reach anything worth placing');
 });

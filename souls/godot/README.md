@@ -20,10 +20,11 @@ test sẽ fail nếu chúng ngừng làm vậy.
 | Phím | Việc |
 |---|---|
 | A / D · ←→ | đi |
-| Space | lăn (bất tử 0.06–0.31s) |
+| Space | **nhảy** (cao 2.6m, xa 3.7m — không đánh/lăn khi đang bay) |
+| Shift trái | lăn (bất tử 0.06–0.31s) |
 | Chuột trái | đánh nhẹ |
 | Chuột phải | đánh nặng |
-| Shift | đỡ |
+| Ctrl | đỡ |
 | Q | uống bình |
 | R | chơi lại |
 

@@ -17,7 +17,7 @@ import { LORE } from '../src/lore.js';
 import { HERO } from '../src/hero.js';
 import { ABILITIES, SKILLS } from '../src/abilities.js';
 import { KNIGHT, WARDEN, ARENA, UPGRADES } from '../src/rules.js';
-import { profile, spots, ROOM_M } from './draw.js';
+import { profile, platforms, spots, ROOM_M } from './draw.js';
 
 /** How many sim units make a metre. The arena is 820 units and a room is 24
  *  metres, and the hero art has always been drawn about 68 units tall for a
@@ -49,7 +49,7 @@ export function build() {
   // it — the room's own line says the two of them are standing IN it, and the
   // preview showed them standing politely on the kerb.
   const placement_by_kind = {
-    bridge: [10.5, 13.5, 12.0, 14.5],
+    bridge: [21.0, 27.0, 24.0, 29.0],
   };
 
   // Both tables must cover every tag the world actually uses, because the
@@ -70,11 +70,10 @@ export function build() {
     light_levels: LIGHT_LEVELS,
     placement,
     placement_by_kind,
-    // Sim units per second squared. The sim is a flat arena and never needed
-    // this; a room with a stair and a drain in it does. Tuned against the
-    // player's own scale: a 2m fall lands in about 0.4s, which is a step down,
-    // not a plummet.
-    gravity: 1700,
+    // Gravity used to be invented here because rules.js is a flat arena and had
+    // no use for it. It has a jump now, so the physics belongs with the rest of
+    // the physics and this only carries it across.
+    gravity: KNIGHT.gravity,
     // The camera. A souls room is one arena you cannot walk out of the side of
     // — which is what rules.js has always been, an 820-unit arena — so the
     // whole room is on screen and nothing scrolls. The blockout used to claim
@@ -97,6 +96,9 @@ export function build() {
       layout: r.layout, tier: r.tier, foes: r.foes,
       name: r.name ?? null, line: r.line ?? null, note: r.note ?? null,
       terrain: terrain(r),
+      ledges: platforms(r).map(([a, b, y]) => [
+        Math.round(a * UNITS_PER_METRE), Math.round(b * UNITS_PER_METRE), Math.round(-y * UNITS_PER_METRE),
+      ]),
     })),
   };
 

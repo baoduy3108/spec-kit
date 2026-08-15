@@ -37,6 +37,18 @@ export const KNIGHT = {
    * second, so mashing is strictly worse than one press at the right moment.
    */
   parry: { window: 0.3, lock: 0.5, stagger: 1.1 },
+  // There was no jump. Not a small omission: with no way off the ground every
+  // room in the game had to be one flat floor, which is why 368 of them read as
+  // a corridor rather than a place. A souls-like jump is a modest one — it
+  // clears a ledge, it is not a platformer's double-jump — and it is a
+  // commitment: you cannot roll or swing while you are in the air, and you owe
+  // a short landing recovery when you come down.
+  //
+  // 547 up against 1700 of gravity peaks at 88 units — 2.6m — after 0.32s, and
+  // is back down 0.64s after leaving the floor. At walking speed that clears a
+  // 3.7m gap. Both numbers are what the level geometry is checked against.
+  jump: { speed: 547, cost: 12, land: 0.12, control: 0.55 },
+  gravity: 1700,
 
   /**
    * Three skills, and each one is the fiction doing something rather than a

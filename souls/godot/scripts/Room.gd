@@ -14,7 +14,34 @@ func build(r: Dictionary) -> void:
 	var runs := _runs(r.terrain)
 	for run in runs:
 		_solid(run)
+	for l in r.get("ledges", []):
+		_ledge(float(l[0]), float(l[1]), float(l[2]))
 	_walls()
+
+## A ledge: solid, thin, and standing off the wall. The rooms were flat until
+## the sim had a jump, so none of this existed and 14 metres of ceiling was
+## paint nobody could reach.
+func _ledge(x0: float, x1: float, y: float) -> void:
+	var body := StaticBody2D.new()
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(x1 - x0, 14.0)
+	shape.shape = rect
+	shape.position = Vector2((x0 + x1) * 0.5, y + 7.0)
+	body.add_child(shape)
+	add_child(body)
+
+	var draw := ColorRect.new()
+	draw.position = Vector2(x0, y)
+	draw.size = Vector2(x1 - x0, 14.0)
+	draw.color = Color(0.14, 0.17, 0.22)
+	add_child(draw)
+	var edge := Line2D.new()
+	edge.add_point(Vector2(x0, y))
+	edge.add_point(Vector2(x1, y))
+	edge.width = 2.5
+	edge.default_color = Color(0.36, 0.44, 0.55)
+	add_child(edge)
 
 ## Split the profile at its holes: each run is one unbroken piece of floor.
 func _runs(terrain: Array) -> Array:

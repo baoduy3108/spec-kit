@@ -32,11 +32,18 @@ test('what Godot reads is exactly what the sim runs on', () => {
 });
 
 test('the three scales agree on what a metre is', () => {
-  // the arena is 820 sim units and a room is 24 metres; the hero is drawn 68
-  // units for a figure the sheet calls 2.0m. All of that only holds at 34.
-  const fromArena = (ARENA.hi - ARENA.lo) / UNITS_PER_METRE;
-  assert.ok(Math.abs(fromArena - ROOM_M) < 0.5, `arena is ${fromArena.toFixed(2)}m, room is ${ROOM_M}m`);
-  assert.equal(read('rules.json').room_width, Math.round(ROOM_M * UNITS_PER_METRE));
+  build();
+  const rules = read('rules.json');
+  // The arena in rules.js is a BOSS space — a single screen you cannot walk out
+  // of the side of — and a traversal room is twice that and scrolls. Asserting
+  // they were the same width was only true while every room was one flat screen.
+  const arenaM = (ARENA.hi - ARENA.lo) / UNITS_PER_METRE;
+  const windowM = rules.camera.viewport[0] / rules.camera.zoom / UNITS_PER_METRE;
+  assert.ok(arenaM <= windowM,
+    `a boss arena is ${arenaM.toFixed(1)}m and the camera shows ${windowM.toFixed(1)}m — you would fight off screen`);
+  assert.ok(ROOM_M > windowM,
+    `a room is ${ROOM_M}m and the camera shows ${windowM.toFixed(1)}m — nothing would ever scroll`);
+  assert.equal(rules.room_width, Math.round(ROOM_M * UNITS_PER_METRE));
 });
 
 test('every room Godot loads has a floor and reachable foe ids', () => {

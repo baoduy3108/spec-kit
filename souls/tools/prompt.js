@@ -15,7 +15,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { AREAS, ROOMS, FOES } from '../src/world.js';
 import { LORE } from '../src/lore.js';
 import { BESTIARY } from '../src/bosses.js';
-import { profile, gaps, spots, furnitureOf, ROOM_M } from './draw.js';
+import { profile, platforms, gaps, spots, furnitureOf, ROOM_M, ROOM_H_M, JUMP_UP } from './draw.js';
 
 /** The palette a mood resolves to. Duplicating the ramp would be the drift this
  *  file exists to prevent, so it is recomputed from the same constants. */
@@ -66,8 +66,8 @@ export function promptFor(room) {
   const at = spots(room.layout, room.foes.length);
   const props = furnitureOf(room);
   const heights = [...new Set(P.filter(([, y]) => y !== null).map(([, y]) => y))];
-  const lightAt = room.kind === 'bonfire' ? 9 : room.light === 'warm' ? 11 : 6;
-  const lightM = { dark: 0, dim: 3.2, grey: 5, pale: 7, warm: 6.5, gold: 8 }[room.light] ?? 3;
+  const lightAt = room.kind === 'bonfire' ? 18 : room.light === 'warm' ? 22 : 12;
+  const lightM = { dark: 0, dim: 4.5, grey: 7, pale: 10, warm: 9, gold: 11 }[room.light] ?? 4.5;
 
   const lines = [];
   const say = (s) => lines.push(s);
@@ -76,7 +76,7 @@ export function promptFor(room) {
   say('');
   say('```');
   say('2D side-scrolling souls-like game background, hand-painted, single screen.');
-  say(`The room is exactly ${ROOM_M} metres wide and 8 metres tall and the whole of it is on screen at once — nothing scrolls. Draw it flat-on from the side, like a stage set. A 2.0m human figure would stand ${(2 / 8 * 100).toFixed(0)}% of the frame height.`);
+  say(`The room is exactly ${ROOM_M} metres wide and ${ROOM_H_M} metres tall and the whole of it is on screen at once — nothing scrolls. Draw it flat-on from the side, like a stage set. A 2.0m human figure would stand ${(2 / ROOM_H_M * 100).toFixed(0)}% of the frame height. The camera does not show all of it at once — it scrolls sideways, so compose it as a long horizontal strip, not as a single framed picture.`);
   say('');
   say(`WHAT THIS ROOM IS: ${room.line.en}`);
   say('');
@@ -89,6 +89,11 @@ export function promptFor(room) {
       ? `uneven, rising from the left to about ${Math.max(...heights).toFixed(1)}m above the entrance.`
       : 'one level, unbroken, but never clean — cracks, rubble, stains, something somebody dropped and did not come back for.'));
   say('');
+  const ledges = platforms(room);
+  if (ledges.length) {
+    say(`LEDGES — ${ledges.length} walkable stone ledges standing off the wall above the floor, at ${ledges.map(([a, b, y]) => `${a}–${b}m across at ${y}m up`).join('; ')}. Each is reachable by a ${JUMP_UP.toFixed(1)}m jump from what is under it. Draw them as structure that belongs to the room — broken masonry, rock shelves, fallen beams — never as floating slabs.`);
+    say('');
+  }
   if (props.length) {
     say('MUST CONTAIN, at these positions measured from the left wall:');
     for (const [x, w, h, label, en] of props)
@@ -151,6 +156,11 @@ export function imagePromptFor(room) {
   const bits = [];
   bits.push('A dark, hand-painted 2D side-scrolling video game background — a wide stage-set view, seen flat-on from the side, like a theatre set.');
   bits.push(wrap(room.line.en));
+  // The landmark goes near the FRONT. An image model drops what arrives late in
+  // a long prompt, and the first generated ash pit came back without the chained
+  // statue — the one thing that room is about.
+  const focal = [...props].sort((a, b) => b[2] - a[2])[0];
+  if (focal) bits.push(`THE MOST IMPORTANT THING IN THE PICTURE, and it must be there: ${focal[4] || focal[3]}, standing about ${focal[2] < 2 ? 'waist' : focal[2] < 3 ? 'head' : 'twice head'} height, placed where the eye lands first.`);
   bits.push(wrap((ARCHITECTURE[room.kind] || ARCHITECTURE.hall)
     .replace(/^NOT a hall\. /, 'Not a hall — ')
     // instructions about how to draw with strokes are for the vector renderer;
@@ -159,6 +169,8 @@ export function imagePromptFor(room) {
     .replace(/, many small stones of nearly the same value, never a high-contrast brick pattern/, ' of many small stones of nearly the same colour')
     .replace(/ WHICH crossing is in the room's own line above[^]*?The line wins\./, '')));
   if (holes.length) bits.push(`The floor is broken by ${holes.length} real gap${holes.length > 1 ? 's' : ''} you can see down into.`);
+  const ledgeCount = platforms(room).length;
+  if (ledgeCount) bits.push(`${ledgeCount} walkable stone ledges stand off the wall at different heights above the floor — broken masonry, rock shelves and fallen beams, part of the structure and never floating slabs.`);
   if (props.length) {
     // English, and counted rather than repeated: the first version listed the
     // Vietnamese label twice — "xích+vòng cổ, xích+vòng cổ" — to a model that

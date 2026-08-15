@@ -26,6 +26,8 @@ var hit_landed: bool = false
 var flasks: int = 3
 
 var _regen_lock: float = 0.0
+var airborne: bool = false
+var _land: float = 0.0
 
 func _ready() -> void:
 	K = Data.player()
@@ -51,9 +53,25 @@ func _physics_process(delta: float) -> void:
 ## it drew, which is the entire reason that tool exists.
 func _fall(delta: float) -> void:
 	if is_on_floor():
+		if velocity.y > 0.0 and airborne:
+			airborne = false
+			_land = float(K.jump.land)
 		velocity.y = 0.0
 	else:
+		airborne = true
 		velocity.y += float(Data.rules.gravity) * delta
+	_land = maxf(0.0, _land - delta)
+
+## In the air you are committed: no roll, no swing, and reduced steering. That
+## is what keeps a jump a decision rather than a second dodge.
+func jump() -> bool:
+	if airborne or _land > 0.0 or not can_act():
+		return false
+	if not _spend(float(K.jump.cost)):
+		return false
+	velocity.y = -float(K.jump.speed)
+	airborne = true
+	return true
 
 # --- stamina --------------------------------------------------------------
 
@@ -77,6 +95,10 @@ func _spend(cost: float) -> bool:
 
 func can_act() -> bool:
 	return state in [St.IDLE, St.WALK, St.GUARD]
+
+## Committed while off the ground and for the landing frames after it.
+func grounded_action() -> bool:
+	return can_act() and not airborne and _land <= 0.0
 
 func is_invulnerable() -> bool:
 	return state == St.ROLL and t >= float(K.roll.iFrom) and t <= float(K.roll.iTo)
@@ -118,7 +140,7 @@ func _walk(_delta: float) -> void:
 		return
 	if state == St.GUARD:
 		_enter(St.IDLE)
-	velocity.x = dir * float(K.speed)
+	velocity.x = dir * float(K.speed) * (float(K.jump.control) if airborne else 1.0)
 	if dir != 0.0:
 		# not int(dir): a stick at 0.4 truncates to 0 and the figure faces nowhere
 		facing = 1 if dir > 0.0 else -1
@@ -133,7 +155,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	# devices and drops the input entirely on others.
 	if event.is_echo() or not can_act():
 		return
-	if event.is_action_pressed("roll") and _spend(float(K.roll.cost)):
+	if event.is_action_pressed("jump"):
+		jump()
+	elif not grounded_action():
+		return
+	elif event.is_action_pressed("roll") and _spend(float(K.roll.cost)):
 		_enter(St.ROLL)
 	elif event.is_action_pressed("attack_light"):
 		_try_swing(0)

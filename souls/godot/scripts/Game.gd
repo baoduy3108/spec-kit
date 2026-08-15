@@ -16,6 +16,7 @@ var _hud: CanvasLayer
 var _hp_bar: ColorRect
 var _st_bar: ColorRect
 var _caption: Label
+var _cam: Camera2D
 
 func _ready() -> void:
 	rooms = Data.rooms_of(AREA)
@@ -184,9 +185,15 @@ func _build_hud() -> void:
 	_caption.add_theme_color_override("font_color", Color(0.78, 0.82, 0.88))
 	_hud.add_child(_caption)
 
-	var cam := Camera2D.new()
+	# The camera used to sit at the middle of the room because the whole room fit
+	# on screen. A room is twice as wide as the window now, so it follows.
 	var c: Dictionary = Data.rules.camera
-	cam.position = Vector2(Data.room_width() * 0.5, float(c.y))
-	cam.zoom = Vector2(float(c.zoom), float(c.zoom))
-	add_child(cam)
-	cam.make_current()
+	_cam = Camera2D.new()
+	_cam.zoom = Vector2(float(c.zoom), float(c.zoom))
+	_cam.position_smoothing_enabled = true
+	_cam.position_smoothing_speed = 6.0
+	_cam.limit_left = 0
+	_cam.limit_right = int(Data.room_width())
+	player.add_child(_cam)
+	_cam.position = Vector2(0, float(c.y) * 0.4)
+	_cam.make_current()

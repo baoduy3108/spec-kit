@@ -28,13 +28,13 @@ const CAMERA = { viewport: [1280, 720], zoom: 1.35 };
 // --- scale ----------------------------------------------------------------
 // One metre is PX pixels. The hero is HERO_M metres tall, and every other
 // length on the sheet is derived from the game's own numbers through that.
-const PX = 30;
+const PX = 19;
 const HERO_M = 2.0;
 const m = (v) => v * PX;
-const ROOM_M = 24;
-const ROOM_H_M = 8;
-const W = 1180;
-const PANEL = 318;
+const ROOM_M = 48;
+const ROOM_H_M = 14;
+const W = 1500;
+const PANEL = 372;
 const HEAD = 132;
 const PAD = 34;
 const BOX_W = m(ROOM_M);
@@ -90,12 +90,12 @@ function profile(room) {
       // "Half the steps are gone" is several holes, not one chasm. The first
       // version cut three consecutive treads and the blockout measured the
       // result at 4.6m against a 2.2m roll — the room could not be crossed.
-      const steps = 13;
+      const steps = 22;
       const tread = (ROOM_M - 4) / steps;
       // Bounded: an unbounded retry loop hangs outright, because there are
       // reachable states with no legal tread left to remove ({3,6,9} has none).
       const missing = new Set();
-      for (let tries = 0; tries < 60 && missing.size < 4; tries++) {
+      for (let tries = 0; tries < 90 && missing.size < 7; tries++) {
         const k = 2 + Math.floor(rng() * (steps - 4));
         if (!missing.has(k) && !missing.has(k - 1) && !missing.has(k + 1)) missing.add(k);
       }
@@ -105,11 +105,11 @@ function profile(room) {
       const xs = Array.from({ length: steps + 1 }, (_, i) => 2 + i * tread);
       step(0, 0);
       for (let i = 0; i < steps; i++) {
-        const y = (i * 3.4) / steps;
+        const y = (i * 6.5) / steps;
         if (missing.has(i)) { step(xs[i], null); continue; }
         step(xs[i], y); step(xs[i + 1], y);
       }
-      step(ROOM_M, 3.4);
+      step(ROOM_M, 6.5);
       break;
     }
     case 'bridge': {
@@ -117,29 +117,111 @@ function profile(room) {
       // floor. The blockout said 7.2m, uncrossable, and it was right to: the
       // first version made the trough a void, and the room's own line says the
       // two of them are STANDING in it. Water you wade through, not a pit.
-      step(0, 0.9); step(8.4, 0.9); step(8.6, 0); step(15.4, 0);
-      step(15.6, 0.9); step(ROOM_M, 0.9);
+      step(0, 0.9); step(16.8, 0.9); step(17.2, 0); step(30.8, 0);
+      step(31.2, 0.9); step(ROOM_M, 0.9);
       break;
     }
     case 'cave': {
       step(0, 0);
-      for (let i = 1; i <= 10; i++) step((i * ROOM_M) / 10, Math.abs(Math.sin(i * 1.9)) * 0.7 + rng() * 0.3);
+      for (let i = 1; i <= 18; i++) step((i * ROOM_M) / 18, Math.abs(Math.sin(i * 1.9)) * 1.1 + rng() * 0.4);
       break;
     }
     case 'bonfire': {
       // flat, with the bank of fallen stone the collapse left
       step(0, 0); step(ROOM_M * 0.6, 0);
-      step(ROOM_M * 0.72, 1.1); step(ROOM_M * 0.86, 1.4); step(ROOM_M, 1.4);
+      step(ROOM_M * 0.72, 1.1); step(ROOM_M * 0.86, 1.8); step(ROOM_M, 1.8);
       break;
     }
     case 'yard': {
-      step(0, 0); step(9, 0); step(9.4, 1.2); step(15, 1.2); step(15.4, 0); step(ROOM_M, 0);
+      step(0, 0); step(18, 0); step(18.8, 1.4); step(30, 1.4); step(30.8, 0); step(ROOM_M, 0);
       break;
     }
     default:
       step(0, 0); step(ROOM_M, 0);
   }
   return P;
+}
+
+/** What the player can do with the jump the sim gives them, in metres. Read,
+ *  never typed: the geometry is checked against the mechanic, not a guess. */
+export const JUMP_UP = (KNIGHT.jump.speed ** 2) / (2 * KNIGHT.gravity) / UNITS_PER_METRE;
+export const JUMP_ACROSS = ((2 * KNIGHT.jump.speed) / KNIGHT.gravity) * KNIGHT.speed / UNITS_PER_METRE;
+
+/**
+ * Ledges above the floor. A room 14 metres tall with one walkable surface is a
+ * corridor with a lot of wasted paint, and that is what every room in this game
+ * was until the sim got a jump.
+ *
+ * Returns [x0, x1, y] in metres. Every one of them is placed within a jump of
+ * something — the test that walks all 368 rooms fails otherwise.
+ */
+function platforms(room) {
+  const rng = rngFor(`${room.id}-plat`);
+  const P = profile(room);
+  const groundAt = (x) => {
+    let last = 0;
+    for (const [px, py] of P) { if (px > x) break; if (py !== null) last = py; }
+    return last;
+  };
+  const out = [];
+  const rise = JUMP_UP * 0.82;          // leave headroom; a jump at its apex is not a landing
+  const span = JUMP_ACROSS * 0.75;
+
+  const put2 = (x0, w, y) => {
+    if (y > ROOM_H_M - 2.5 || x0 < 3 || x0 + w > ROOM_M - 3) return null;
+    if (out.some((p) => Math.abs(p[2] - y) < 1.4 && x0 < p[1] + 1.5 && x0 + w > p[0] - 1.5)) return null;
+    const rec = [Math.round(x0 * 10) / 10, Math.round((x0 + w) * 10) / 10, Math.round(y * 10) / 10];
+    out.push(rec);
+    return rec;
+  };
+
+  const tiers = { hall: 2, bonfire: 1, bridge: 2, cave: 2, stair: 1, yard: 2, fog: 1 }[room.kind] ?? 1;
+
+  // Tier one hangs a jump above the floor under it.
+  const first = [];
+  for (let i = 0; i < 3; i++) {
+    const w = 3.5 + rng() * 4.5;
+    const x0 = 4 + rng() * (ROOM_M - 10 - w);
+    const rec = put2(x0, w, groundAt(x0 + w / 2) + rise);
+    if (rec) first.push(rec);
+  }
+  // Tier two grows OUT OF tier one — a jump up and within a jump sideways of a
+  // ledge that already exists. Placing it a fixed height above the floor and
+  // then checking left 86 rooms with a shelf nobody could ever stand on.
+  if (tiers > 1) {
+    for (let i = 0; i < 2 && first.length; i++) {
+      const anchor = first[Math.floor(rng() * first.length)];
+      const w = 3 + rng() * 4;
+      const side = rng() < 0.5 ? -1 : 1;
+      const x0 = side < 0
+        ? anchor[0] - w - rng() * span
+        : anchor[1] + rng() * span;
+      put2(x0, w, anchor[2] + rise);
+    }
+  }
+  return out.sort((a, b) => a[2] - b[2] || a[0] - b[0]);
+}
+
+/** A ledge is only content if it can be got onto. */
+export function unreachable(room) {
+  const P = profile(room);
+  const groundAt = (x) => {
+    let last = 0;
+    for (const [px, py] of P) { if (px > x) break; if (py !== null) last = py; }
+    return last;
+  };
+  const bad = [];
+  const plats = platforms(room);
+  for (const [x0, x1, y] of plats) {
+    const below = Math.max(groundAt(x0), groundAt((x0 + x1) / 2), groundAt(x1));
+    // either a jump up from the floor beneath it, or a hop across from another
+    // ledge no more than a jump below and a jump away
+    const fromFloor = y - below <= JUMP_UP;
+    const fromLedge = plats.some(([a, b, py]) =>
+      py < y && y - py <= JUMP_UP && x0 - b <= JUMP_ACROSS && a - x1 <= JUMP_ACROSS);
+    if (!fromFloor && !fromLedge) bad.push([x0, x1, y]);
+  }
+  return bad;
 }
 
 /** Every hole in the profile, in metres, so the sheet can measure the jumps. */
@@ -158,7 +240,7 @@ function gaps(P) {
 
 /** How close two foes of a given layout are allowed to stand, in metres. A
  *  pack is supposed to arrive together; a spread is not. */
-const MIN_APART = { single: 3.0, spread: 4.5, pack: 2.2, ambush: 2.2, ring: 3.0 };
+const MIN_APART = { single: 5.0, spread: 8.0, pack: 3.5, ambush: 3.5, ring: 5.0 };
 
 /**
  * Where a foe stands, in metres, from the room's own layout tag.
@@ -175,11 +257,11 @@ function spots(layout, count) {
     // 7/12/17.5 left 5m between neighbours, which is inside a foe's 7.6m
     // notice radius — so every room written "pull them one at a time" pulled
     // all of them. A spread has to actually spread.
-    spread: [4, 12, 20],
-    pack: [10, 13.5, 16.5, 7.5],
-    ambush: [18.5, 20.5, 15],
-    ring: [9, 15, 12, 18],
-  }[layout] || [13];
+    spread: [8, 12, 20],
+    pack: [20, 13.5, 16.5, 7.5],
+    ambush: [37, 20.5, 15],
+    ring: [18, 15, 12, 18],
+  }[layout] || [26];
   const min = MIN_APART[layout] ?? 2.5;
 
   const placed = [];
@@ -220,21 +302,21 @@ function spots(layout, count) {
 
 /** [metres from the left, width, height, label]. */
 const FURNITURE = {
-  cell: [[3.4, 1.1, 2.1, 'cửa mở', 'a heavy wooden door standing open on one hinge'], [13.5, 1.6, 0.15, 'cống', 'a rusted iron grate set into the floor'], [8, 3.4, 0.1, 'rơm', 'scattered straw']],
-  'ash-pit': [[9, 1.4, 0.9, 'lửa', 'a low campfire'], [10.8, 1.2, 3.2, 'tượng bị xích', 'a tall headless stone statue wrapped in heavy chains hanging from above'], [18.5, 1.6, 1.1, 'thùng', 'a wooden barrel']],
-  'long-drain': [[12, 7.2, 2.6, 'miệng cống', 'a barrel-vaulted drain mouth'], [2.5, 0.8, 0.8, 'lưới', 'an iron grille high on the wall'], [21.5, 0.8, 0.8, 'lưới', 'an iron grille high on the wall']],
-  kennel: [[12, 3.4, 0.5, 'máng ăn', 'a long stone feeding trough'], [4, 0.3, 1.8, 'xích+vòng cổ', 'chains bolted to the wall ending in open empty iron collars'], [20, 0.3, 1.8, 'xích+vòng cổ', 'chains bolted to the wall ending in open empty iron collars']],
-  'broken-stair': [[6, 1.4, 0.4, 'bậc rơi', 'fallen stair treads broken on the ground'], [12, 9, 0.05, 'dây võng', 'a sagging rope where a handrail used to be']],
-  'lamplighters-rest': [[7, 1, 1.1, 'người ngồi', 'a body slumped against the wall, still in its coat'], [8.6, 0.5, 0.4, 'đèn rơi', 'a lantern lying on its side, still lit'], [15, 4.2, 0.6, 'dãy đèn treo', 'a row of unlit lanterns hung on hooks at uneven heights']],
-  undergate: [[5.3, 2.2, 2.4, 'cửa A', 'a dark doorway'], [17.8, 2.2, 2.4, 'cửa B', 'a second dark doorway, identical to the first'], [11.5, 0.6, 0.9, 'vạch đếm', 'tally marks scratched into the wall']],
+  cell: [[6.8, 1.1, 2.1, 'cửa mở', 'a heavy wooden door standing open on one hinge'], [27, 1.6, 0.15, 'cống', 'a rusted iron grate set into the floor'], [16, 3.4, 0.1, 'rơm', 'scattered straw']],
+  'ash-pit': [[18, 1.4, 0.9, 'lửa', 'a low campfire'], [21.6, 1.2, 3.2, 'tượng bị xích', 'a tall headless stone statue wrapped in heavy chains hanging from above'], [37, 1.6, 1.1, 'thùng', 'a wooden barrel']],
+  'long-drain': [[24, 7.2, 2.6, 'miệng cống', 'a barrel-vaulted drain mouth'], [5, 0.8, 0.8, 'lưới', 'an iron grille high on the wall'], [43, 0.8, 0.8, 'lưới', 'an iron grille high on the wall']],
+  kennel: [[24, 3.4, 0.5, 'máng ăn', 'a long stone feeding trough'], [8, 0.3, 1.8, 'xích+vòng cổ', 'chains bolted to the wall ending in open empty iron collars'], [40, 0.3, 1.8, 'xích+vòng cổ', 'chains bolted to the wall ending in open empty iron collars']],
+  'broken-stair': [[12, 1.4, 0.4, 'bậc rơi', 'fallen stair treads broken on the ground'], [24, 9, 0.05, 'dây võng', 'a sagging rope where a handrail used to be']],
+  'lamplighters-rest': [[14, 1, 1.1, 'người ngồi', 'a body slumped against the wall, still in its coat'], [17.2, 0.5, 0.4, 'đèn rơi', 'a lantern lying on its side, still lit'], [30, 4.2, 0.6, 'dãy đèn treo', 'a row of unlit lanterns hung on hooks at uneven heights']],
+  undergate: [[10.6, 2.2, 2.4, 'cửa A', 'a dark doorway'], [35.6, 2.2, 2.4, 'cửa B', 'a second dark doorway, identical to the first'], [23, 0.6, 0.9, 'vạch đếm', 'tally marks scratched into the wall']],
 };
 const FURNITURE_BY_KIND = {
-  hall: [[8, 1.4, 1.1, 'thùng', 'a wooden crate'], [16, 1.2, 1, 'thùng', 'a wooden barrel']],
-  bonfire: [[9, 1.4, 0.9, 'lửa', 'a low campfire'], [17, 1.4, 1.1, 'thùng', 'a wooden barrel']],
-  bridge: [[12, 7.2, 2.6, 'miệng cống', 'a barrel-vaulted drain mouth']],
-  cave: [[12, 2.6, 0.6, 'đá lớn', 'a cluster of large boulders']],
-  stair: [[6, 1.2, 0.4, 'đá rơi', 'fallen rubble']],
-  yard: [[12, 1.4, 1.2, 'cột gãy', 'a fallen tower held up by the wall it came down against']],
+  hall: [[16, 1.4, 1.1, 'thùng', 'a wooden crate'], [32, 1.2, 1, 'thùng', 'a wooden barrel']],
+  bonfire: [[18, 1.4, 0.9, 'lửa', 'a low campfire'], [34, 1.4, 1.1, 'thùng', 'a wooden barrel']],
+  bridge: [[24, 7.2, 2.6, 'miệng cống', 'a barrel-vaulted drain mouth']],
+  cave: [[24, 2.6, 0.6, 'đá lớn', 'a cluster of large boulders']],
+  stair: [[12, 1.2, 0.4, 'đá rơi', 'fallen rubble']],
+  yard: [[24, 1.4, 1.2, 'cột gãy', 'a fallen tower held up by the wall it came down against']],
   fog: [],
 };
 const furnitureOf = (room) => FURNITURE[room.key] || FURNITURE_BY_KIND[room.kind] || [];
@@ -328,6 +410,15 @@ function panel(room, top) {
     text(bx + BOX_W - 6, by + 24, 'no ceiling', { size: 9, fill: INK.faint, anchor: 'end', mono: true });
   }
 
+  // --- the ledges, and how you get onto them -------------------------------
+  for (const [px0, px1, py] of platforms(room)) {
+    const a = bx + m(px0);
+    const b = bx + m(px1);
+    const yy = floor - m(py);
+    put(`<rect x="${n(a)}" y="${n(yy)}" width="${n(b - a)}" height="${n(m(0.4))}" fill="${INK.solid}" stroke="${INK.solidEdge}" stroke-width="1.6"/>`);
+    put(`<path d="${`M ${n(a)} ${n(yy + m(0.4))} L ${n(b)} ${n(yy + m(0.4))}`}" stroke="${INK.faint}" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="2 4" fill="none"/>`);
+    text(a + (b - a) / 2, yy - 4, `${py}m`, { size: 8, fill: INK.faint, anchor: 'middle', mono: true });
+  }
   // --- furniture: footprint and height, because both are collision ---------
   for (const [fx0, fw, fh, label] of furnitureOf(room)) {
     const px0 = bx + m(fx0 - fw / 2);
@@ -353,8 +444,8 @@ function panel(room, top) {
   });
 
   // --- light: where it is and how far it reaches ---------------------------
-  const lightM = { dark: 0, dim: 3.2, grey: 5, pale: 7, warm: 6.5, gold: 8 }[room.light] ?? 3;
-  const lightAt = room.kind === 'bonfire' ? 9 : room.light === 'warm' ? 11 : 6;
+  const lightM = { dark: 0, dim: 4.5, grey: 7, pale: 10, warm: 9, gold: 11 }[room.light] ?? 4.5;
+  const lightAt = room.kind === 'bonfire' ? 18 : room.light === 'warm' ? 22 : 12;
   if (lightM > 0) {
     const lcx = bx + m(lightAt);
     const lcy = yAt(lightAt) - m(0.8);
@@ -375,6 +466,19 @@ function panel(room, top) {
   const reachM = KNIGHT.swings[1].reach[1] / 100;
   line(bx + m(startM), floor - m(1.1), bx + m(startM + reachM), floor - m(1.1), INK.hero, 1, 0.55, '2 3');
   text(bx + m(startM + reachM) + 4, floor - m(1.05), `tầm ${reachM.toFixed(1)}m`, { size: 8.5, fill: INK.hero, mono: true });
+
+  // one jump, drawn to scale, so the sheet shows what the mechanic can actually
+  // reach — every ledge above is placed against these two numbers
+  const jx = bx + m(startM + 2.5);
+  const jy = yAt(startM + 2.5);
+  let arc = `M ${n(jx)} ${n(jy)}`;
+  for (let s = 1; s <= 12; s++) {
+    const t = s / 12;
+    arc += ` L ${n(jx + m(JUMP_ACROSS * t))} ${n(jy - m(4 * JUMP_UP * t * (1 - t)))}`;
+  }
+  put(`<path d="${arc}" fill="none" stroke="${INK.hero}" stroke-width="1.2" stroke-opacity="0.5" stroke-dasharray="3 3"/>`);
+  text(jx + m(JUMP_ACROSS / 2), jy - m(JUMP_UP) - 5, `nhảy ${JUMP_UP.toFixed(1)}m × ${JUMP_ACROSS.toFixed(1)}m`,
+       { size: 8.5, fill: INK.hero, anchor: 'middle', mono: true });
 
   // --- the foes ------------------------------------------------------------
   const at = spots(room.layout, room.foes.length);
@@ -402,10 +506,13 @@ function panel(room, top) {
   // --- what fits on screen at once -----------------------------------------
   // what the camera actually shows, from the viewport and zoom the game uses
   const camM = CAMERA.viewport[0] / CAMERA.zoom / UNITS_PER_METRE;
-  const c0 = ROOM_M / 2 - camM / 2;
+  // The room is wider than the camera now, so this is a window that travels
+  // with the player rather than a frame the whole room sits inside.
+  const c0 = 0;
   line(bx + m(c0), by + 8, bx + m(c0 + camM), by + 8, INK.dim, 1, 0.5, '5 4');
   for (const e of [0, camM]) line(bx + m(c0 + e), by + 4, bx + m(c0 + e), by + 12, INK.dim, 1, 0.5);
-  text(bx + m(ROOM_M / 2), by + 20, `khung hình ${camM.toFixed(1)}m`, { size: 8.5, fill: INK.dim, anchor: 'middle', mono: true });
+  put(`<path d="M ${n(bx + m(camM) + 6)} ${n(by + 8)} l 9 -4 v 8 Z" fill="${INK.dim}" fill-opacity="0.6"/>`);
+  text(bx + m(camM / 2), by + 20, `khung hình ${camM.toFixed(1)}m — cuộn theo người chơi`, { size: 8.5, fill: INK.dim, anchor: 'middle', mono: true });
   put(`</g>`);
 
   // --- the scale bar, outside the box --------------------------------------
@@ -431,6 +538,8 @@ function panel(room, top) {
     ['đòn nặng nhất', dmg ? `${dmg} (${Math.ceil(KNIGHT.hp / dmg)} đòn chết)` : '—'],
     ['báo ngắn nhất', room.foes.length ? `${fastest.toFixed(2)}s` : '—'],
     ['hụt chân', hole.length ? hole.map(([a, b]) => `${(b - a).toFixed(1)}m`).join(', ') : 'không'],
+    ['bệ trên cao', platforms(room).length || '—'],
+    ['băng qua', `${(ROOM_M * UNITS_PER_METRE / KNIGHT.speed).toFixed(1)}s`],
   ];
   rows.forEach(([k, v], i) => {
     text(sx, y + 88 + i * 14, k, { size: 9.5, fill: INK.faint, mono: true });
@@ -439,9 +548,9 @@ function panel(room, top) {
 
   // the line the room was written with, which is what it is all for
   const wrapped = wrap(room.line.vi, 40);
-  wrapped.forEach((ln, i) => text(sx, y + 176 + i * 14, ln, { size: 10.5, fill: INK.note }));
+  wrapped.forEach((ln, i) => text(sx, y + 210 + i * 14, ln, { size: 10.5, fill: INK.note }));
   if (room.note) wrap(`ghi chú: ${room.note}`, 42).forEach((ln, i) =>
-    text(sx, y + 176 + wrapped.length * 14 + 10 + i * 13, ln, { size: 9.5, fill: INK.dim }));
+    text(sx, y + 210 + wrapped.length * 14 + 10 + i * 13, ln, { size: 9.5, fill: INK.dim }));
   put(`</g>`);
 }
 
@@ -514,7 +623,7 @@ export function drawAll() {
   return AREAS.map((a) => ({ id: a.id, ...drawArea(a.id) }));
 }
 
-export { profile, gaps, spots, furnitureOf, PX, HERO_M, ROOM_M };
+export { profile, platforms, gaps, spots, furnitureOf, PX, HERO_M, ROOM_M, ROOM_H_M };
 
 const asked = process.argv[2];
 if (asked) {

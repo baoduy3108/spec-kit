@@ -79,9 +79,12 @@ export function preview(areaId, index) {
   const lit = RULES.light_levels[room.light];
   const bg = lerp([0.04, 0.05, 0.07], [0.10, 0.12, 0.16], lit);
 
-  // Game.gd: cam.position = (room_width * 0.5, -120), cam.zoom = 1.35
-  const camX = W * 0.5;
-  const camY = RULES.camera.y;
+  const px0 = standingX(room.terrain, UPM * 2.2, W);
+  const px = px0;
+  // Game.gd parents the camera to the player and clamps it to the room
+  const half = VW / ZOOM / 2;
+  const camX = Math.min(Math.max(px, half), Math.max(half, W - half));
+  const camY = RULES.camera.y * 0.4;
   const sx = (wx) => (wx - camX) * ZOOM + VW / 2;
   const sy = (wy) => (wy - camY) * ZOOM + VH / 2;
 
@@ -95,6 +98,12 @@ export function preview(areaId, index) {
     put(`<polygon points="${pts.map(([px, py]) => `${n(sx(px))},${n(sy(py))}`).join(' ')}" fill="${col(0.12, 0.15, 0.20)}"/>`);
     put(`<polyline points="${run.map(([px, py]) => `${n(sx(px))},${n(sy(py))}`).join(' ')}" fill="none" stroke="${col(0.33, 0.40, 0.50)}" stroke-width="${n(3 * ZOOM)}"/>`);
   }
+  // --- Room.gd._ledge ------------------------------------------------------
+  for (const [lx0, lx1, ly] of room.ledges || []) {
+    put(`<rect x="${n(sx(lx0))}" y="${n(sy(ly))}" width="${n((lx1 - lx0) * ZOOM)}" height="${n(14 * ZOOM)}" fill="${col(0.14, 0.17, 0.22)}"/>`);
+    put(`<path d="M ${n(sx(lx0))} ${n(sy(ly))} L ${n(sx(lx1))} ${n(sy(ly))}" stroke="${col(0.36, 0.44, 0.55)}" stroke-width="${n(2.5 * ZOOM)}" fill="none"/>`);
+  }
+
   // --- Room.gd._walls ------------------------------------------------------
   for (const wx of [-8, W + 8])
     put(`<rect x="${n(sx(wx - 8))}" y="${n(sy(-320))}" width="${n(16 * ZOOM)}" height="${n(640 * ZOOM)}" fill="${col(0.12, 0.15, 0.20)}" fill-opacity="0.9"/>`);
@@ -112,7 +121,6 @@ export function preview(areaId, index) {
   });
 
   // --- Game.gd._spawn_player ----------------------------------------------
-  const px = standingX(room.terrain, UPM * 2.2, W);
   const py = floorAt(room.terrain, px);
   put(`<rect x="${n(sx(px - 14))}" y="${n(sy(py - 68))}" width="${n(28 * ZOOM)}" height="${n(68 * ZOOM)}" fill="${col(0.49, 0.83, 0.91, 0.9)}"/>`);
   put(`<text x="${n(sx(px))}" y="${n(sy(py) + 18)}" font-size="11" fill="${col(0.49, 0.83, 0.91)}" text-anchor="middle">Người Thắp Đèn</text>`);
