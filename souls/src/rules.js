@@ -47,7 +47,19 @@ export const KNIGHT = {
   // 547 up against 1700 of gravity peaks at 88 units — 2.6m — after 0.32s, and
   // is back down 0.64s after leaving the floor. At walking speed that clears a
   // 3.7m gap. Both numbers are what the level geometry is checked against.
-  jump: { speed: 547, cost: 12, land: 0.12, control: 0.55 },
+  // Variable height, which is what Hollow Knight and Celeste do and what the
+  // first version of this got wrong: a fixed arc means one jump, and one jump
+  // means the level can only ever ask one question. Releasing the button cuts
+  // the rise to `cut` of what is left, so a tap clears about half a metre and a
+  // held press clears 2.6 — two different verbs out of one button.
+  //
+  // coyote: you may still jump for this long after walking off an edge.
+  // buffer: a press this long before landing still fires on touchdown.
+  // Both are invisible when they work and infuriating when they are missing.
+  jump: {
+    speed: 547, cost: 12, land: 0.12, control: 0.55,
+    cut: 0.42, coyote: 0.1, buffer: 0.12,
+  },
   gravity: 1700,
 
   /**

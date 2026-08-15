@@ -153,3 +153,22 @@ test('a room takes long enough to cross to be a place', () => {
   assert.ok(ROOM_H_M >= 12, `a ${ROOM_H_M}m ceiling leaves no room above the floor`);
   assert.ok(JUMP_UP > 2 && JUMP_ACROSS > 3, 'the jump cannot reach anything worth placing');
 });
+
+test('the level uses both heights the variable jump gives it', async () => {
+  const { JUMP_TAP } = await import('../tools/draw.js');
+  assert.ok(JUMP_TAP > 0.3 && JUMP_TAP < JUMP_UP * 0.4,
+    `a tapped jump clears ${JUMP_TAP.toFixed(2)}m — that is not a second verb, it is the same one`);
+  // a game where every ledge sits at the full arc has thrown the mechanic away
+  const heights = ROOMS.flatMap((r) => {
+    const P = profile(r);
+    const groundAt = (x) => {
+      let last = 0;
+      for (const [px, py] of P) { if (px > x) break; if (py !== null) last = py; }
+      return last;
+    };
+    return platforms(r).map(([a, b, y]) => y - groundAt((a + b) / 2));
+  });
+  const hops = heights.filter((h) => h > 0 && h <= JUMP_TAP * 2).length;
+  assert.ok(hops / heights.length > 0.1,
+    `only ${((hops / heights.length) * 100).toFixed(0)}% of ledges are a hop — the tap does nothing`);
+});

@@ -146,6 +146,10 @@ function profile(room) {
  *  never typed: the geometry is checked against the mechanic, not a guess. */
 export const JUMP_UP = (KNIGHT.jump.speed ** 2) / (2 * KNIGHT.gravity) / UNITS_PER_METRE;
 export const JUMP_ACROSS = ((2 * KNIGHT.jump.speed) / KNIGHT.gravity) * KNIGHT.speed / UNITS_PER_METRE;
+/** What a tapped jump clears. The button is variable now, so the geometry has
+ *  two heights to ask about instead of one, and a room that only ever uses the
+ *  full arc is a room that throws the mechanic away. */
+export const JUMP_TAP = ((KNIGHT.jump.speed * KNIGHT.jump.cut) ** 2) / (2 * KNIGHT.gravity) / UNITS_PER_METRE;
 
 /**
  * Ledges above the floor. A room 14 metres tall with one walkable surface is a
@@ -164,8 +168,10 @@ function platforms(room) {
     return last;
   };
   const out = [];
-  const rise = JUMP_UP * 0.82;          // leave headroom; a jump at its apex is not a landing
   const span = JUMP_ACROSS * 0.75;
+  // Two rises, not one. A step you hop onto and a shelf you have to commit to.
+  const HOP = Math.max(0.8, JUMP_TAP * 1.5);
+  const FULL = JUMP_UP * 0.82;          // headroom: a jump at its apex is not a landing
 
   const put2 = (x0, w, y) => {
     if (y > ROOM_H_M - 2.5 || x0 < 3 || x0 + w > ROOM_M - 3) return null;
@@ -179,9 +185,11 @@ function platforms(room) {
 
   // Tier one hangs a jump above the floor under it.
   const first = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     const w = 3.5 + rng() * 4.5;
     const x0 = 4 + rng() * (ROOM_M - 10 - w);
+    // roughly a third of them are a hop, the rest a committed jump
+    const rise = rng() < 0.35 ? HOP : FULL;
     const rec = put2(x0, w, groundAt(x0 + w / 2) + rise);
     if (rec) first.push(rec);
   }
@@ -196,7 +204,7 @@ function platforms(room) {
       const x0 = side < 0
         ? anchor[0] - w - rng() * span
         : anchor[1] + rng() * span;
-      put2(x0, w, anchor[2] + rise);
+      put2(x0, w, anchor[2] + (rng() < 0.3 ? HOP : FULL));
     }
   }
   return out.sort((a, b) => a[2] - b[2] || a[0] - b[0]);
@@ -477,7 +485,15 @@ function panel(room, top) {
     arc += ` L ${n(jx + m(JUMP_ACROSS * t))} ${n(jy - m(4 * JUMP_UP * t * (1 - t)))}`;
   }
   put(`<path d="${arc}" fill="none" stroke="${INK.hero}" stroke-width="1.2" stroke-opacity="0.5" stroke-dasharray="3 3"/>`);
-  text(jx + m(JUMP_ACROSS / 2), jy - m(JUMP_UP) - 5, `nhảy ${JUMP_UP.toFixed(1)}m × ${JUMP_ACROSS.toFixed(1)}m`,
+  // and the tapped arc, because the button is variable and the level uses both
+  let tap = `M ${n(jx)} ${n(jy)}`;
+  const tapAcross = JUMP_ACROSS * 0.55;
+  for (let s = 1; s <= 10; s++) {
+    const t = s / 10;
+    tap += ` L ${n(jx + m(tapAcross * t))} ${n(jy - m(4 * JUMP_TAP * t * (1 - t)))}`;
+  }
+  put(`<path d="${tap}" fill="none" stroke="${INK.hero}" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="2 3"/>`);
+  text(jx + m(JUMP_ACROSS / 2), jy - m(JUMP_UP) - 5, `nhảy ${JUMP_TAP.toFixed(1)}m (chạm) → ${JUMP_UP.toFixed(1)}m (giữ) × ${JUMP_ACROSS.toFixed(1)}m`,
        { size: 8.5, fill: INK.hero, anchor: 'middle', mono: true });
 
   // --- the foes ------------------------------------------------------------

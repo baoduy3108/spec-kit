@@ -55,7 +55,10 @@
    "speed": 547,
    "cost": 12,
    "land": 0.12,
-   "control": 0.55
+   "control": 0.55,
+   "cut": 0.42,
+   "coyote": 0.1,
+   "buffer": 0.12
   },
   "gravity": 1700,
   "skills": {

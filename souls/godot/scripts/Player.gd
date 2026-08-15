@@ -28,6 +28,8 @@ var flasks: int = 3
 var _regen_lock: float = 0.0
 var airborne: bool = false
 var _land: float = 0.0
+var _coyote: float = 0.0
+var _buffer: float = 0.0
 
 func _ready() -> void:
 	K = Data.player()
@@ -45,6 +47,7 @@ func _physics_process(delta: float) -> void:
 	_regen(delta)
 	_advance(delta)
 	_fall(delta)
+	_jump_feel(delta)
 	move_and_slide()
 
 ## There was no gravity in this file at all. velocity.y was never written, so
@@ -64,14 +67,33 @@ func _fall(delta: float) -> void:
 
 ## In the air you are committed: no roll, no swing, and reduced steering. That
 ## is what keeps a jump a decision rather than a second dodge.
+##
+## Height is variable. Holding the button gives the full arc; letting go cuts
+## the rise, so the same button is both a hop onto a knee-high ledge and a full
+## jump to a shelf two and a half metres up.
 func jump() -> bool:
-	if airborne or _land > 0.0 or not can_act():
+	var may := (not airborne) or _coyote > 0.0
+	if not may or _land > 0.0 or not can_act():
 		return false
 	if not _spend(float(K.jump.cost)):
 		return false
 	velocity.y = -float(K.jump.speed)
 	airborne = true
+	_coyote = 0.0
+	_buffer = 0.0
 	return true
+
+## Called every frame: cut the rise the moment the button comes up.
+func _jump_feel(delta: float) -> void:
+	_buffer = maxf(0.0, _buffer - delta)
+	if is_on_floor():
+		_coyote = float(K.jump.coyote)
+		if _buffer > 0.0:
+			jump()
+	else:
+		_coyote = maxf(0.0, _coyote - delta)
+	if velocity.y < 0.0 and not Input.is_action_pressed("jump"):
+		velocity.y *= float(K.jump.cut)
 
 # --- stamina --------------------------------------------------------------
 
@@ -156,7 +178,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo() or not can_act():
 		return
 	if event.is_action_pressed("jump"):
-		jump()
+		if not jump():
+			_buffer = float(K.jump.buffer)
 	elif not grounded_action():
 		return
 	elif event.is_action_pressed("roll") and _spend(float(K.roll.cost)):
