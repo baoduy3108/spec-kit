@@ -160,3 +160,60 @@ test('a drain puts its foes in the water, as the room says it does', () => {
     assert.ok(x >= c0 && x <= c1, `${drain.foes[i]} stands at ${x}, outside the channel ${c0}..${c1}`);
   }
 });
+
+test('a room written to teach pulling actually lets you pull', () => {
+  // world.js carries design notes in prose. A note is a claim about how the
+  // room plays, and a claim nothing checks is a wish. This checks the one the
+  // courtyard makes: if the note says one at a time, the foes have to stand
+  // further apart than a foe can see.
+  build();
+  const rules = read('rules.json');
+  const world = read('world.json');
+  const aggro = rules.aggro;
+
+  // Only where spacing is the mechanism. ramparts:5 is also written "one at a
+  // time" but its note says they *arrive* one at a time from below — that is a
+  // sequenced spawn, which this game does not have yet. It is listed at the
+  // bottom of this test as an unkept promise rather than silently exempted.
+  const claims = world.rooms.filter(
+    (r) => r.layout === 'spread' && r.note && /one at a time|pull/i.test(r.note),
+  );
+  assert.ok(claims.length > 0, 'no room makes this claim any more — has the note been dropped?');
+  for (const r of claims) {
+    const at = rules.placement_by_kind[r.kind] || rules.placement[r.layout];
+    const xs = r.foes.map((_, i) => at[i % at.length] * rules.units_per_metre).sort((a, b) => a - b);
+    // The claim is not about where the player starts — they walk. It is that
+    // baiting the first foe must not bring the second one with it.
+    assert.ok(xs.length >= 2, `${r.id} claims a pull but has one foe`);
+    assert.ok(xs[1] - xs[0] > aggro,
+      `${r.id}: foes are ${Math.round(xs[1] - xs[0])} apart and aggro is ${aggro} — the pull brings both`);
+  }
+
+  // Rooms that promise sequenced arrival, which nothing in the game delivers.
+  // Not a failure — a debt, recorded where it cannot be forgotten.
+  const sequenced = world.rooms.filter(
+    (r) => r.layout !== 'spread' && r.note && /one at a time/i.test(r.note),
+  );
+  assert.deepEqual(sequenced.map((r) => r.id), ['ramparts:5'],
+    'the list of rooms promising a spawn mechanic that does not exist has changed');
+});
+
+test('the foes of a room stand far enough apart to be fought in turn', () => {
+  // Not a law for every room — a pack is supposed to arrive together. But a
+  // room tagged `spread` says in its own tag that it is not a pack.
+  build();
+  const rules = read('rules.json');
+  const world = read('world.json');
+  const tight = [];
+  for (const r of world.rooms) {
+    if (r.layout !== 'spread' || r.foes.length < 2) continue;
+    // a kind that owns its fighting ground has overruled the layout tag, and
+    // the drain is meant to have both of them standing in the same water
+    if (rules.placement_by_kind[r.kind]) continue;
+    const at = rules.placement[r.layout];
+    const xs = r.foes.map((_, i) => at[i % at.length] * rules.units_per_metre).sort((a, b) => a - b);
+    for (let i = 1; i < xs.length; i++)
+      if (xs[i] - xs[i - 1] < rules.aggro * 0.5) tight.push(`${r.id} ${Math.round(xs[i] - xs[i - 1])}u apart`);
+  }
+  assert.deepEqual(tight, [], 'these `spread` rooms are packs wearing a spread tag');
+});

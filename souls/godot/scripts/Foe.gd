@@ -20,8 +20,6 @@ var poise: float
 var home_x: float
 var target: Node2D
 
-const AGGRO := 260.0
-
 func setup(foe_id: String) -> void:
 	id = foe_id
 	F = Data.foes[foe_id]
@@ -69,7 +67,7 @@ func _think(delta: float) -> void:
 			_patrol(to_player)
 
 func _patrol(to_player: float) -> void:
-	if absf(to_player) < AGGRO and is_instance_valid(target):
+	if absf(to_player) < float(Data.rules.aggro) and is_instance_valid(target):
 		facing = signi(int(to_player)) if to_player != 0.0 else facing
 		var strike := float(F.reach) * 46.0
 		if absf(to_player) <= strike:

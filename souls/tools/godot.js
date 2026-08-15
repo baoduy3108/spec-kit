@@ -80,6 +80,11 @@ export function build() {
     // whole room is on screen and nothing scrolls. The blockout used to claim
     // a 14.4m frame; it reads these now instead of asserting its own number.
     camera: { viewport: [1280, 720], zoom: 1.35, y: -180 },
+    // How far a foe notices you. This was a bare constant in Foe.gd, which is
+    // exactly the drift the exporter exists to stop — and it is not a cosmetic
+    // number: courtyard:1 is written "teaches pulling one at a time", and that
+    // is only true if the foes in it stand further apart than this.
+    aggro: 260,
   };
 
   const world = {

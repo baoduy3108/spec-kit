@@ -156,16 +156,61 @@ function gaps(P) {
   return g;
 }
 
-/** Where a foe stands, in metres, from the room's own layout tag. */
+/** How close two foes of a given layout are allowed to stand, in metres. A
+ *  pack is supposed to arrive together; a spread is not. */
+const MIN_APART = { single: 3.0, spread: 4.5, pack: 2.2, ambush: 2.2, ring: 3.0 };
+
+/**
+ * Where a foe stands, in metres, from the room's own layout tag.
+ *
+ * The wrapped indices used to take a flat +1.6m, which meant `single` with
+ * three foes returned 13.0, 14.6, 14.6 — two of them standing inside each
+ * other — and `spread` with four put two 1.6m apart, which is a pack. Positions
+ * are pushed apart to the layout's own minimum now, and the test that says a
+ * spread room is not secretly a pack is what found it.
+ */
 function spots(layout, count) {
   const at = {
     single: [13],
-    spread: [7, 17.5, 12],
+    // 7/12/17.5 left 5m between neighbours, which is inside a foe's 7.6m
+    // notice radius — so every room written "pull them one at a time" pulled
+    // all of them. A spread has to actually spread.
+    spread: [4, 12, 20],
     pack: [10, 13.5, 16.5, 7.5],
     ambush: [18.5, 20.5, 15],
     ring: [9, 15, 12, 18],
   }[layout] || [13];
-  return Array.from({ length: count }, (_, i) => at[i % at.length] + (i >= at.length ? 1.6 : 0));
+  const min = MIN_APART[layout] ?? 2.5;
+
+  const placed = [];
+  const free = (x) => x >= 2 && x <= ROOM_M - 2 && placed.every((p) => Math.abs(p - x) >= min);
+  for (let i = 0; i < count; i++) {
+    const want = at[i % at.length];
+    let x = want;
+    if (!free(x)) {
+      // Scan outward for the nearest free standing place. Pushing off the
+      // nearest neighbour instead oscillates between two of them and lands on
+      // a duplicate, which is what put two foes inside each other.
+      let found = false;
+      for (let d = min; d <= ROOM_M && !found; d += 0.25) {
+        if (free(want - d)) { x = want - d; found = true; }
+        else if (free(want + d)) { x = want + d; found = true; }
+      }
+      // A spread base wide enough to satisfy `min` three times can have no room
+      // left for a fourth. Falling back to `want` there put two foes in the
+      // same place all over again, so instead take the middle of the widest
+      // gap: the most separated place that exists, whatever `min` wanted.
+      if (!found) {
+        const edges = [2, ...placed, ROOM_M - 2].sort((a, b) => a - b);
+        let best = 0;
+        for (let k = 1; k < edges.length; k++)
+          if (edges[k] - edges[k - 1] > edges[best + 1] - edges[best]) best = k - 1;
+        x = (edges[best] + edges[best + 1]) / 2;
+      }
+    }
+    placed.push(Math.round(x * 10) / 10);
+  }
+  return placed;
 }
 
 // --- what is standing in the room -----------------------------------------
