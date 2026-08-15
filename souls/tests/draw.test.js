@@ -104,3 +104,18 @@ test('every room in the game produces a prompt with its own numbers in it', asyn
     for (const id of new Set(r.foes)) assert.ok(p.includes(id), `${r.id} prompt omits ${id}`);
   }
 });
+
+test('the image-model prompt drops what an image model cannot use', async () => {
+  const { imagePromptFor } = await import('../tools/prompt.js');
+  for (const r of ROOMS.slice(0, 60)) {
+    const p = imagePromptFor(r);
+    // no coordinates: an image model ignores "at 9m from the left wall" and the
+    // number ends up rendered as text on the picture often enough to matter
+    assert.ok(!/\d+(\.\d+)?m\b/.test(p), `${r.id} image prompt still carries metre marks`);
+    // no negatives phrased as a list of things — they get drawn
+    assert.ok(!/DO NOT:/.test(p), `${r.id} image prompt carries the DO NOT list`);
+    assert.ok(!/\n/.test(p), `${r.id} image prompt is not one paragraph`);
+    assert.ok(p.includes(r.line.en.replace(/\s+/g, ' ')), `${r.id} image prompt drops the room's line`);
+    assert.ok(/No text, no people/.test(p), `${r.id} image prompt lost its exclusions`);
+  }
+});

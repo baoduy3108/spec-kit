@@ -130,6 +130,41 @@ export function promptFor(room) {
   return lines.join('\n');
 }
 
+/**
+ * The same room, written for an image model instead of a person.
+ *
+ * These are not the same document. A painter reads headings, metre marks and a
+ * DO NOT list and uses all three. An image model drops the coordinates, treats
+ * the negatives as things to draw, and does better with one flowing paragraph
+ * than with a form. This was found by actually running one through Canva's
+ * generator rather than by assuming it would behave like the human brief.
+ */
+export function imagePromptFor(room) {
+  const p = palette(room.light);
+  const P = profile(room);
+  const holes = gaps(P);
+  const props = furnitureOf(room);
+  const at = spots(room.layout, room.foes.length);
+  const carriers = room.foes.map((id, i) => [id, at[i]]).filter(([id]) => FOES[id].burns);
+  const lightM = { dark: 0, dim: 3.2, grey: 5, pale: 7, warm: 6.5, gold: 8 }[room.light] ?? 3;
+
+  const bits = [];
+  bits.push('A dark, hand-painted 2D side-scrolling video game background — a wide stage-set view, seen flat-on from the side, like a theatre set.');
+  bits.push(wrap(room.line.en));
+  bits.push(wrap((ARCHITECTURE[room.kind] || ARCHITECTURE.hall).replace(/^NOT a hall\. /, 'Not a hall — ')));
+  if (holes.length) bits.push(`The floor is broken by ${holes.length} real gap${holes.length > 1 ? 's' : ''} you can see down into.`);
+  if (props.length) bits.push(`In the room: ${props.map(([, , , label]) => label).join(', ')}.`);
+  bits.push(lightM === 0
+    ? (carriers.length
+      ? 'The only light is carried by a figure holding a burning brand — small, low, and moving; everything it touches is warm and everything else is not.'
+      : 'There is no light source at all here — only just enough to read shapes and the wet shine on stone. This is among the darkest pictures in the game; do not brighten it to make it readable.')
+    : 'One light source only, with a small lit pool around it falling off quickly into dark. Ninety per cent of the frame sits in deep shadow, and every shadow points away from that one light.');
+  bits.push(`Colour: dominant cool desaturated slate blue-grey, almost neutral in the shadows (${p.ink}, ${p.dark}, ${p.mid}, ${p.far}), with exactly one warm accent — rust ${p.accent}${lightM > 0 || carriers.length ? ', and firelight #a8300f through #ffb04a to #fff6d8' : ''}. Shadows shift cooler, lit surfaces shift warmer. Never let the walls go purple or green.`);
+  bits.push('Painterly, atmospheric, abandoned, high contrast between the small lit area and the dark, dust in the air. Deliberate empty space — do not fill every corner. Broken, dirty, irregular; no straight lines or clean geometry.');
+  bits.push('No text, no people, no characters, no UI, no logo. Wide horizontal composition.');
+  return bits.join(' ');
+}
+
 export function promptsFor(areaId) {
   const area = AREAS.find((a) => a.id === areaId);
   if (!area) throw new Error(`no such area: ${areaId}`);
@@ -161,7 +196,7 @@ export function promptsFor(areaId) {
   head.push('---');
   head.push('');
 
-  const body = rooms.map(promptFor).join('\n---\n\n');
+  const body = rooms.map((r) => `${promptFor(r)}\n**Dạng cho model ảnh** (Canva / Midjourney / DALL·E — một đoạn liền, không toạ độ):\n\n\`\`\`\n${imagePromptFor(r)}\n\`\`\`\n`).join('\n---\n\n');
   const doc = `${head.join('\n')}${body}`;
   mkdirSync(new URL('../dist/', import.meta.url), { recursive: true });
   writeFileSync(new URL(`../dist/prompt-${areaId}.md`, import.meta.url), doc);
@@ -176,7 +211,8 @@ if (area) {
     console.log(`${AREAS.length} khu · ${total} phòng -> dist/prompt-*.md`);
   } else if (process.argv[3] !== undefined) {
     const rooms = ROOMS.filter((r) => r.area === area);
-    process.stdout.write(promptFor(rooms[Number(process.argv[3])]));
+    const room = rooms[Number(process.argv[3])];
+    process.stdout.write(process.argv[4] === '--image' ? `${imagePromptFor(room)}\n` : promptFor(room));
   } else {
     const r = promptsFor(area);
     console.log(`${area}: ${r.rooms} phòng -> ${r.path}`);
