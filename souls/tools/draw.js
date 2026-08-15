@@ -220,21 +220,21 @@ function spots(layout, count) {
 
 /** [metres from the left, width, height, label]. */
 const FURNITURE = {
-  cell: [[3.4, 1.1, 2.1, 'cửa mở'], [13.5, 1.6, 0.15, 'cống'], [8, 3.4, 0.1, 'rơm']],
-  'ash-pit': [[9, 1.4, 0.9, 'lửa'], [10.8, 1.2, 3.2, 'tượng bị xích'], [18.5, 1.6, 1.1, 'thùng']],
-  'long-drain': [[12, 7.2, 2.6, 'miệng cống'], [2.5, 0.8, 0.8, 'lưới'], [21.5, 0.8, 0.8, 'lưới']],
-  kennel: [[12, 3.4, 0.5, 'máng ăn'], [4, 0.3, 1.8, 'xích+vòng cổ'], [20, 0.3, 1.8, 'xích+vòng cổ']],
-  'broken-stair': [[6, 1.4, 0.4, 'bậc rơi'], [12, 9, 0.05, 'dây võng']],
-  'lamplighters-rest': [[7, 1, 1.1, 'người ngồi'], [8.6, 0.5, 0.4, 'đèn rơi'], [15, 4.2, 0.6, 'dãy đèn treo']],
-  undergate: [[5.3, 2.2, 2.4, 'cửa A'], [17.8, 2.2, 2.4, 'cửa B'], [11.5, 0.6, 0.9, 'vạch đếm']],
+  cell: [[3.4, 1.1, 2.1, 'cửa mở', 'a heavy wooden door standing open on one hinge'], [13.5, 1.6, 0.15, 'cống', 'a rusted iron grate set into the floor'], [8, 3.4, 0.1, 'rơm', 'scattered straw']],
+  'ash-pit': [[9, 1.4, 0.9, 'lửa', 'a low campfire'], [10.8, 1.2, 3.2, 'tượng bị xích', 'a tall headless stone statue wrapped in heavy chains hanging from above'], [18.5, 1.6, 1.1, 'thùng', 'a wooden barrel']],
+  'long-drain': [[12, 7.2, 2.6, 'miệng cống', 'a barrel-vaulted drain mouth'], [2.5, 0.8, 0.8, 'lưới', 'an iron grille high on the wall'], [21.5, 0.8, 0.8, 'lưới', 'an iron grille high on the wall']],
+  kennel: [[12, 3.4, 0.5, 'máng ăn', 'a long stone feeding trough'], [4, 0.3, 1.8, 'xích+vòng cổ', 'chains bolted to the wall ending in open empty iron collars'], [20, 0.3, 1.8, 'xích+vòng cổ', 'chains bolted to the wall ending in open empty iron collars']],
+  'broken-stair': [[6, 1.4, 0.4, 'bậc rơi', 'fallen stair treads broken on the ground'], [12, 9, 0.05, 'dây võng', 'a sagging rope where a handrail used to be']],
+  'lamplighters-rest': [[7, 1, 1.1, 'người ngồi', 'a body slumped against the wall, still in its coat'], [8.6, 0.5, 0.4, 'đèn rơi', 'a lantern lying on its side, still lit'], [15, 4.2, 0.6, 'dãy đèn treo', 'a row of unlit lanterns hung on hooks at uneven heights']],
+  undergate: [[5.3, 2.2, 2.4, 'cửa A', 'a dark doorway'], [17.8, 2.2, 2.4, 'cửa B', 'a second dark doorway, identical to the first'], [11.5, 0.6, 0.9, 'vạch đếm', 'tally marks scratched into the wall']],
 };
 const FURNITURE_BY_KIND = {
-  hall: [[8, 1.4, 1.1, 'thùng'], [16, 1.2, 1, 'thùng']],
-  bonfire: [[9, 1.4, 0.9, 'lửa'], [17, 1.4, 1.1, 'thùng']],
-  bridge: [[12, 7.2, 2.6, 'miệng cống']],
-  cave: [[12, 2.6, 0.6, 'đá lớn']],
-  stair: [[6, 1.2, 0.4, 'đá rơi']],
-  yard: [[12, 1.4, 1.2, 'cột gãy']],
+  hall: [[8, 1.4, 1.1, 'thùng', 'a wooden crate'], [16, 1.2, 1, 'thùng', 'a wooden barrel']],
+  bonfire: [[9, 1.4, 0.9, 'lửa', 'a low campfire'], [17, 1.4, 1.1, 'thùng', 'a wooden barrel']],
+  bridge: [[12, 7.2, 2.6, 'miệng cống', 'a barrel-vaulted drain mouth']],
+  cave: [[12, 2.6, 0.6, 'đá lớn', 'a cluster of large boulders']],
+  stair: [[6, 1.2, 0.4, 'đá rơi', 'fallen rubble']],
+  yard: [[12, 1.4, 1.2, 'cột gãy', 'a fallen tower held up by the wall it came down against']],
   fog: [],
 };
 const furnitureOf = (room) => FURNITURE[room.key] || FURNITURE_BY_KIND[room.kind] || [];

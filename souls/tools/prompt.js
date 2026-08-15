@@ -91,8 +91,8 @@ export function promptFor(room) {
   say('');
   if (props.length) {
     say('MUST CONTAIN, at these positions measured from the left wall:');
-    for (const [x, w, h, label] of props)
-      say(`  - ${label} — at ${x}m, about ${w}m wide and ${h}m tall`);
+    for (const [x, w, h, label, en] of props)
+      say(`  - ${label}${en ? ` (${en})` : ''} — at ${x}m, about ${w}m wide and ${h}m tall`);
     say('');
   }
   if (room.foes.length) {
@@ -151,9 +151,26 @@ export function imagePromptFor(room) {
   const bits = [];
   bits.push('A dark, hand-painted 2D side-scrolling video game background — a wide stage-set view, seen flat-on from the side, like a theatre set.');
   bits.push(wrap(room.line.en));
-  bits.push(wrap((ARCHITECTURE[room.kind] || ARCHITECTURE.hall).replace(/^NOT a hall\. /, 'Not a hall — ')));
+  bits.push(wrap((ARCHITECTURE[room.kind] || ARCHITECTURE.hall)
+    .replace(/^NOT a hall\. /, 'Not a hall — ')
+    // instructions about how to draw with strokes are for the vector renderer;
+    // to an image model they are noise at best
+    .replace(/Hatching follows[^.]*\./, '')
+    .replace(/, many small stones of nearly the same value, never a high-contrast brick pattern/, ' of many small stones of nearly the same colour')
+    .replace(/ WHICH crossing is in the room's own line above[^]*?The line wins\./, '')));
   if (holes.length) bits.push(`The floor is broken by ${holes.length} real gap${holes.length > 1 ? 's' : ''} you can see down into.`);
-  if (props.length) bits.push(`In the room: ${props.map(([, , , label]) => label).join(', ')}.`);
+  if (props.length) {
+    // English, and counted rather than repeated: the first version listed the
+    // Vietnamese label twice — "xích+vòng cổ, xích+vòng cổ" — to a model that
+    // reads neither Vietnamese nor repetition as emphasis.
+    const seen = new Map();
+    for (const [, , , vi, en] of props) {
+      const label = en || vi;
+      seen.set(label, (seen.get(label) || 0) + 1);
+    }
+    const listed = [...seen].map(([label, k]) => (k > 1 ? `${label} (${k} of them)` : label));
+    bits.push(`In the room: ${listed.join('; ')}.`);
+  }
   bits.push(lightM === 0
     ? (carriers.length
       ? 'The only light is carried by a figure holding a burning brand — small, low, and moving; everything it touches is warm and everything else is not.'

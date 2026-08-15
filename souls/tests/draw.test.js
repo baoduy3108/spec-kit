@@ -119,3 +119,16 @@ test('the image-model prompt drops what an image model cannot use', async () => 
     assert.ok(/No text, no people/.test(p), `${r.id} image prompt lost its exclusions`);
   }
 });
+
+test('an image prompt is in one language and says each thing once', async () => {
+  const { imagePromptFor } = await import('../tools/prompt.js');
+  for (const r of ROOMS) {
+    const p = imagePromptFor(r);
+    // Vietnamese diacritics have no business in a prompt written in English
+    assert.ok(!/[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/i.test(p),
+      `${r.id} image prompt contains Vietnamese: ${p.slice(0, 160)}`);
+    // and no phrase repeated back to back, which reads as neither emphasis nor list
+    const items = (p.match(/In the room: ([^.]*)\./) || [, ''])[1].split('; ');
+    assert.equal(new Set(items).size, items.length, `${r.id} lists the same object twice`);
+  }
+});
