@@ -44,6 +44,14 @@ export function build() {
   const layouts = [...new Set(ROOMS.map((r) => r.layout))];
   const placement = Object.fromEntries(layouts.map((l) => [l, spots(l, 4)]));
 
+  // Some kinds decide where a fight happens regardless of the layout tag. A
+  // drain's interesting ground is the channel, not the ledges either side of
+  // it — the room's own line says the two of them are standing IN it, and the
+  // preview showed them standing politely on the kerb.
+  const placement_by_kind = {
+    bridge: [10.5, 13.5, 12.0, 14.5],
+  };
+
   // Both tables must cover every tag the world actually uses, because the
   // Godot side reads them without a fallback. A default there would swallow a
   // missing tag silently and the room would just quietly be the wrong dark.
@@ -61,6 +69,17 @@ export function build() {
     upgrades: UPGRADES,
     light_levels: LIGHT_LEVELS,
     placement,
+    placement_by_kind,
+    // Sim units per second squared. The sim is a flat arena and never needed
+    // this; a room with a stair and a drain in it does. Tuned against the
+    // player's own scale: a 2m fall lands in about 0.4s, which is a step down,
+    // not a plummet.
+    gravity: 1700,
+    // The camera. A souls room is one arena you cannot walk out of the side of
+    // — which is what rules.js has always been, an 820-unit arena — so the
+    // whole room is on screen and nothing scrolls. The blockout used to claim
+    // a 14.4m frame; it reads these now instead of asserting its own number.
+    camera: { viewport: [1280, 720], zoom: 1.35, y: -180 },
   };
 
   const world = {

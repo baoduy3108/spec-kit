@@ -39,7 +39,10 @@ func _enter_room(i: int) -> void:
 	add_child(room_node)
 	room_node.build(r)
 
-	player.global_position = Vector2(Data.units_per_metre() * 2.2, -90.0)
+	# On the floor, not above it. The first version dropped the player at a flat
+	# -90 and, with no gravity anywhere in the project, it simply hung there.
+	var spawn_x: float = room_node.standing_x(Data.units_per_metre() * 2.2)
+	player.global_position = Vector2(spawn_x, room_node.floor_at(spawn_x))
 	player.velocity = Vector2.ZERO
 	_spawn_foes(r)
 	_light(r)
@@ -55,7 +58,8 @@ func _vi(d: Variant, fallback: String) -> String:
 ## rules.json, so the sheet and the level cannot disagree about where a fight
 ## takes place.
 func _spawn_foes(r: Dictionary) -> void:
-	var at: Array = Data.rules.placement[r.layout]
+	# a kind that owns its fighting ground overrides the layout tag
+	var at: Array = Data.rules.placement_by_kind.get(r.kind, Data.rules.placement[r.layout])
 	var i := 0
 	for foe_id in r.foes:
 		var f := CharacterBody2D.new()
@@ -75,7 +79,8 @@ func _spawn_foes(r: Dictionary) -> void:
 		f.add_child(body)
 		add_child(f)
 		f.setup(foe_id)
-		f.global_position = Vector2(at[i % at.size()] * Data.units_per_metre(), -60.0)
+		var fx: float = room_node.standing_x(at[i % at.size()] * Data.units_per_metre())
+		f.global_position = Vector2(fx, room_node.floor_at(fx))
 		f.target = player
 		f.killed.connect(_on_killed)
 		foes.append(f)
@@ -180,7 +185,8 @@ func _build_hud() -> void:
 	_hud.add_child(_caption)
 
 	var cam := Camera2D.new()
-	cam.position = Vector2(Data.room_width() * 0.5, -120.0)
-	cam.zoom = Vector2(1.35, 1.35)
+	var c: Dictionary = Data.rules.camera
+	cam.position = Vector2(Data.room_width() * 0.5, float(c.y))
+	cam.zoom = Vector2(float(c.zoom), float(c.zoom))
 	add_child(cam)
 	cam.make_current()

@@ -54,6 +54,44 @@ func _solid(run: Array) -> void:
 	edge.default_color = Color(0.33, 0.40, 0.50)
 	add_child(edge)
 
+## How high the floor is at a given x, in Godot's coordinates. Everything that
+## has to be placed in a room — the player, every foe — asks this instead of
+## guessing, because guessing is how they ended up hanging in the air.
+## Returns NAN over a hole, which is a thing callers must handle rather than
+## quietly fall through.
+func floor_at(x: float) -> float:
+	var best := NAN
+	for run in _runs(room.terrain):
+		if x < run[0].x or x > run[run.size() - 1].x:
+			continue
+		var prev: Vector2 = run[0]
+		for p in run:
+			if p.x >= x:
+				# the profile is a stair of flat treads; take the one you are on
+				best = prev.y
+				break
+			prev = p
+		if is_nan(best):
+			best = run[run.size() - 1].y
+	return best
+
+## The nearest x to `from` that has floor under it, searched outward in both
+## directions. Searching forward only was quietly relocating fights: a foe
+## placed on a missing tread walked several metres up the stair to find ground,
+## which is not where the room was designed to be fought.
+func standing_x(from: float) -> float:
+	if not is_nan(floor_at(from)):
+		return from
+	var w := Data.room_width()
+	var step := 4.0
+	while step < w:
+		if from - step > 0.0 and not is_nan(floor_at(from - step)):
+			return from - step
+		if from + step < w and not is_nan(floor_at(from + step)):
+			return from + step
+		step += 4.0
+	return from
+
 func _walls() -> void:
 	var w := Data.room_width()
 	for x in [-8.0, w + 8.0]:

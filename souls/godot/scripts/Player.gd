@@ -42,7 +42,18 @@ func _physics_process(delta: float) -> void:
 	t += delta
 	_regen(delta)
 	_advance(delta)
+	_fall(delta)
 	move_and_slide()
+
+## There was no gravity in this file at all. velocity.y was never written, so
+## the figure hung wherever it was spawned and every hole in every room was
+## decorative. The preview built out of godot/data caught it on the first frame
+## it drew, which is the entire reason that tool exists.
+func _fall(delta: float) -> void:
+	if is_on_floor():
+		velocity.y = 0.0
+	else:
+		velocity.y += float(Data.rules.gravity) * delta
 
 # --- stamina --------------------------------------------------------------
 

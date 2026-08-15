@@ -5,6 +5,7 @@ import { ROOMS, AREAS, FOES } from '../src/world.js';
 import { KNIGHT, ARENA } from '../src/rules.js';
 import { HERO } from '../src/hero.js';
 import { build, UNITS_PER_METRE } from '../tools/godot.js';
+import { floorAt, standingX } from '../tools/preview.js';
 import { ROOM_M, impassable } from '../tools/draw.js';
 
 const read = (f) => JSON.parse(readFileSync(new URL(`../godot/data/${f}`, import.meta.url), 'utf8'));
@@ -114,4 +115,48 @@ test('the hero in Godot is the Lamplighter, not the knight', () => {
   const hero = read('hero.json');
   assert.equal(hero.name.vi, HERO.name.vi);
   assert.ok(!/knight/i.test(JSON.stringify(hero.look)), 'the hero is described as a knight');
+});
+
+test('no foe in the game is spawned over a hole', () => {
+  // The preview caught two placement bugs by eye — a player hanging in the air
+  // and two husks standing on the kerb of the drain they are written as being
+  // in. This is the same check over all 368 rooms, and it tests the position
+  // the game actually uses, after Room.standing_x snaps it onto real ground.
+  build();
+  const rules = read('rules.json');
+  const world = read('world.json');
+  const W = rules.room_width;
+
+  const bad = [];
+  const moved = [];
+  for (const r of world.rooms) {
+    if (!r.foes.length) continue;
+    const at = rules.placement_by_kind[r.kind] || rules.placement[r.layout];
+    r.foes.forEach((id, i) => {
+      const want = at[i % at.length] * rules.units_per_metre;
+      const got = standingX(r.terrain, want, W);
+      if (Number.isNaN(floorAt(r.terrain, got))) bad.push(`${r.id} ${id}`);
+      if (got <= 0 || got >= W) bad.push(`${r.id} ${id} snapped out of the room`);
+      // snapping is a repair, not a redesign: it must not relocate the fight
+      const drift = Math.abs(got - want) / rules.units_per_metre;
+      if (drift > 2.0) moved.push(`${r.id} ${id} moved ${drift.toFixed(1)}m`);
+    });
+  }
+  assert.deepEqual(bad, [], 'these foes have no ground under them');
+  assert.deepEqual(moved, [], 'snapping moved these fights somewhere else');
+});
+
+test('a drain puts its foes in the water, as the room says it does', () => {
+  build();
+  const rules = read('rules.json');
+  const drain = read('world.json').rooms.find((r) => r.key === 'long-drain');
+  const at = rules.placement_by_kind[drain.kind];
+  // the channel is the stretch of terrain at the lowest level in the room
+  const low = Math.max(...drain.terrain.filter((p) => p !== null).map((p) => p[1]));
+  const inWater = drain.terrain.filter((p) => p !== null && p[1] === low).map((p) => p[0]);
+  const [c0, c1] = [Math.min(...inWater), Math.max(...inWater)];
+  for (let i = 0; i < drain.foes.length; i++) {
+    const x = at[i] * rules.units_per_metre;
+    assert.ok(x >= c0 && x <= c1, `${drain.foes[i]} stands at ${x}, outside the channel ${c0}..${c1}`);
+  }
 });

@@ -21,6 +21,9 @@ import { BESTIARY } from '../src/bosses.js';
 import { LORE } from '../src/lore.js';
 import { HERO } from '../src/hero.js';
 import { KNIGHT } from '../src/rules.js';
+// The blockout must not invent a scale or a camera; both belong to the game.
+export const UNITS_PER_METRE = 34;
+const CAMERA = { viewport: [1280, 720], zoom: 1.35 };
 
 // --- scale ----------------------------------------------------------------
 // One metre is PX pixels. The hero is HERO_M metres tall, and every other
@@ -352,10 +355,12 @@ function panel(room, top) {
     text(bx + m(ex), yAt(ex) - m(0.9), lab, { size: 12, fill: INK.dim, anchor: 'middle' });
   }
   // --- what fits on screen at once -----------------------------------------
-  const camM = 14.4;
-  line(bx + m(startM), by + 8, bx + m(startM + camM), by + 8, INK.dim, 1, 0.5, '5 4');
-  for (const e of [0, camM]) line(bx + m(startM + e), by + 4, bx + m(startM + e), by + 12, INK.dim, 1, 0.5);
-  text(bx + m(startM + camM / 2), by + 20, `khung hình ${camM}m`, { size: 8.5, fill: INK.dim, anchor: 'middle', mono: true });
+  // what the camera actually shows, from the viewport and zoom the game uses
+  const camM = CAMERA.viewport[0] / CAMERA.zoom / UNITS_PER_METRE;
+  const c0 = ROOM_M / 2 - camM / 2;
+  line(bx + m(c0), by + 8, bx + m(c0 + camM), by + 8, INK.dim, 1, 0.5, '5 4');
+  for (const e of [0, camM]) line(bx + m(c0 + e), by + 4, bx + m(c0 + e), by + 12, INK.dim, 1, 0.5);
+  text(bx + m(ROOM_M / 2), by + 20, `khung hình ${camM.toFixed(1)}m`, { size: 8.5, fill: INK.dim, anchor: 'middle', mono: true });
   put(`</g>`);
 
   // --- the scale bar, outside the box --------------------------------------
