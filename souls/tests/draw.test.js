@@ -209,3 +209,32 @@ test('the pole opens routes, and never blocks progress', async () => {
     }
   }
 });
+
+test('no terrain in the game is a slope', () => {
+  // Hollow Knight's collision is rectangles at 90 degrees and never a slope or
+  // a curve, and that is what makes a high ledge a gate instead of a stroll.
+  // This file used to generate 48% of its ground as diagonals.
+  const bad = [];
+  for (const r of ROOMS) {
+    const P = profile(r);
+    for (let i = 1; i < P.length; i++) {
+      const [ax, ay] = P[i - 1];
+      const [bx, by] = P[i];
+      if (ay === null || by === null) continue;
+      if (bx > ax + 1e-6 && Math.abs(by - ay) > 1e-6)
+        bad.push(`${r.id} ${ax.toFixed(1)},${ay} -> ${bx.toFixed(1)},${by}`);
+    }
+  }
+  assert.deepEqual(bad.slice(0, 5), [], `${bad.length} sloped segments`);
+});
+
+test('every floor height is on the step grid', () => {
+  // A ledge at 2.13m is not a gate anybody can reason about. Heights snap so
+  // that "one jump" and "one jump plus the pole" are exact answers.
+  for (const r of ROOMS)
+    for (const [, y] of profile(r)) {
+      if (y === null) continue;
+      assert.ok(Math.abs(y / 0.5 - Math.round(y / 0.5)) < 1e-6,
+        `${r.id} has floor at ${y}m, off the grid`);
+    }
+});

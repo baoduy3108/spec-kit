@@ -80,6 +80,35 @@ const line = (x1, y1, x2, y2, stroke, width = 1, opacity = 1, dash = null) =>
 // room's floor line. This is the part a blockout exists for — it is the thing
 // the level is, before anything is drawn on it.
 
+/**
+ * Square every profile off into right angles.
+ *
+ * Hollow Knight's terrain collision is rectangles at 90 degrees — no slopes and
+ * no curves anywhere in the game — and that is deliberate, not a shortcut. Two
+ * things fall out of it. Predictable geometry makes a traversal system reliable:
+ * a jump onto a flat edge lands the same way every time and there is no
+ * ambiguous surface to slide off. And it is what lets terrain be a lock at all,
+ * because you cannot walk up a step the way you stroll up a ramp — a high ledge
+ * is only a gate if there is no diagonal beside it.
+ *
+ * This file was generating 48% of its ground as slopes, 1025 of them in caves.
+ * Every height change is a vertical face at one x now, snapped to a grid so
+ * that "one jump" and "one jump plus the pole" are exact answers.
+ */
+const STEP_M = 0.5;
+function squareOff(pts) {
+  const out = [];
+  let prevY = null;
+  for (const [x, y] of pts) {
+    if (y === null) { out.push([x, null]); prevY = null; continue; }
+    const q = Math.round(y / STEP_M) * STEP_M;
+    if (prevY !== null && Math.abs(q - prevY) > 1e-9) out.push([x, prevY]); // the riser
+    out.push([x, q]);
+    prevY = q;
+  }
+  return out;
+}
+
 function profile(room) {
   const rng = rngFor(room.id);
   const P = [];
@@ -123,7 +152,9 @@ function profile(room) {
     }
     case 'cave': {
       step(0, 0);
-      for (let i = 1; i <= 18; i++) step((i * ROOM_M) / 18, Math.abs(Math.sin(i * 1.9)) * 1.1 + rng() * 0.4);
+      // blocky rock shelves rather than a sine wave: a cave floor you can read
+      for (let i = 1; i <= 12; i++)
+        step((i * ROOM_M) / 12, Math.abs(Math.sin(i * 1.9)) * 1.4 + rng() * 0.4);
       break;
     }
     case 'bonfire': {
@@ -139,7 +170,7 @@ function profile(room) {
     default:
       step(0, 0); step(ROOM_M, 0);
   }
-  return P;
+  return squareOff(P);
 }
 
 /** What the player can do with the jump the sim gives them, in metres. Read,
