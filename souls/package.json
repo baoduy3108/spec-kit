@@ -11,6 +11,7 @@
     "pixel": "python3 tools/pixel.py",
     "blockout": "node tools/draw.js all",
     "godot": "node tools/godot.js",
-    "preview": "node tools/preview.js"
+    "preview": "node tools/preview.js",
+    "prompt": "node tools/prompt.js"
   }
 }

@@ -78,3 +78,29 @@ test('gaps are found where the profile has holes and nowhere else', () => {
   assert.deepEqual(gaps(P), [[4, 7]]);
   assert.deepEqual(gaps([[0, 0], [24, 0]]), []);
 });
+
+test('a prompt never claims darkness in a room that is carrying a torch', async () => {
+  const { promptFor } = await import('../tools/prompt.js');
+  const { FOES } = await import('../src/world.js');
+  const lit = ROOMS.filter((r) => r.foes.some((id) => FOES[id].burns));
+  assert.ok(lit.length > 0);
+  for (const r of lit) {
+    const p = promptFor(r);
+    assert.match(p, /light in the room is carried/,
+      `${r.id} holds a torch but its prompt does not say so`);
+    assert.ok(!/there is no light source/.test(p),
+      `${r.id} carries a torch and the prompt calls the room unlit`);
+  }
+});
+
+test('every room in the game produces a prompt with its own numbers in it', async () => {
+  const { promptFor } = await import('../tools/prompt.js');
+  for (const r of ROOMS) {
+    const p = promptFor(r);
+    assert.ok(p.includes(r.line.en), `${r.id} prompt drops the room's written line`);
+    assert.ok(p.includes(`${ROOM_M} metres wide`), `${r.id} prompt loses the room scale`);
+    for (const h of impassable(r)) assert.fail(`${r.id} is impassable: ${h}`);
+    // the foes named in the prompt are the foes the room actually has
+    for (const id of new Set(r.foes)) assert.ok(p.includes(id), `${r.id} prompt omits ${id}`);
+  }
+});

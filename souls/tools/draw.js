@@ -514,7 +514,7 @@ export function drawAll() {
   return AREAS.map((a) => ({ id: a.id, ...drawArea(a.id) }));
 }
 
-export { profile, gaps, spots, PX, HERO_M, ROOM_M };
+export { profile, gaps, spots, furnitureOf, PX, HERO_M, ROOM_M };
 
 const asked = process.argv[2];
 if (asked) {
