@@ -1,0 +1,1502 @@
+{
+ "husk": {
+  "family": "husk",
+  "tier": 0,
+  "hp": 34,
+  "damage": 9,
+  "speed": 62,
+  "poise": 12,
+  "windup": 0.55,
+  "reach": 1,
+  "burns": false,
+  "essence": 31,
+  "display": {
+   "en": "Husk",
+   "vi": "Vỏ Người"
+  },
+  "tell": {
+   "en": "The head lifts first. It always lifts before the arm moves, and it is the only warning you get.",
+   "vi": "Đầu ngẩng lên trước. Nó luôn ngẩng trước khi tay động, và đó là lời báo duy nhất bạn nhận được."
+  }
+ },
+ "husk-spear": {
+  "family": "husk",
+  "tier": 0,
+  "hp": 36,
+  "damage": 11,
+  "speed": 58,
+  "poise": 12,
+  "windup": 0.63,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 35,
+  "display": {
+   "en": "Husk",
+   "vi": "Vỏ Người"
+  },
+  "tell": {
+   "en": "The head lifts first. It always lifts before the arm moves, and it is the only warning you get.",
+   "vi": "Đầu ngẩng lên trước. Nó luôn ngẩng trước khi tay động, và đó là lời báo duy nhất bạn nhận được."
+  }
+ },
+ "husk-torch": {
+  "family": "husk",
+  "tier": 0,
+  "hp": 31,
+  "damage": 8,
+  "speed": 67,
+  "poise": 12,
+  "windup": 0.48,
+  "reach": 1,
+  "burns": true,
+  "essence": 28,
+  "display": {
+   "en": "Husk",
+   "vi": "Vỏ Người"
+  },
+  "tell": {
+   "en": "The head lifts first. It always lifts before the arm moves, and it is the only warning you get.",
+   "vi": "Đầu ngẩng lên trước. Nó luôn ngẩng trước khi tay động, và đó là lời báo duy nhất bạn nhận được."
+  }
+ },
+ "husk-heavy": {
+  "family": "husk",
+  "tier": 0,
+  "hp": 49,
+  "damage": 12,
+  "speed": 50,
+  "poise": 19,
+  "windup": 0.72,
+  "reach": 1,
+  "burns": false,
+  "essence": 44,
+  "display": {
+   "en": "Husk",
+   "vi": "Vỏ Người"
+  },
+  "tell": {
+   "en": "The head lifts first. It always lifts before the arm moves, and it is the only warning you get.",
+   "vi": "Đầu ngẩng lên trước. Nó luôn ngẩng trước khi tay động, và đó là lời báo duy nhất bạn nhận được."
+  }
+ },
+ "husk-swift": {
+  "family": "husk",
+  "tier": 0,
+  "hp": 27,
+  "damage": 8,
+  "speed": 87,
+  "poise": 12,
+  "windup": 0.41,
+  "reach": 1,
+  "burns": false,
+  "essence": 26,
+  "display": {
+   "en": "Husk",
+   "vi": "Vỏ Người"
+  },
+  "tell": {
+   "en": "The head lifts first. It always lifts before the arm moves, and it is the only warning you get.",
+   "vi": "Đầu ngẩng lên trước. Nó luôn ngẩng trước khi tay động, và đó là lời báo duy nhất bạn nhận được."
+  }
+ },
+ "hound": {
+  "family": "hound",
+  "tier": 0,
+  "hp": 22,
+  "damage": 12,
+  "speed": 148,
+  "poise": 6,
+  "windup": 0.34,
+  "reach": 1,
+  "burns": false,
+  "essence": 29,
+  "display": {
+   "en": "Hound",
+   "vi": "Chó Săn"
+  },
+  "tell": {
+   "en": "It stops. A hound that stops is a hound that has decided, and the stop is shorter than a heartbeat.",
+   "vi": "Nó khựng lại. Chó săn mà khựng là chó săn đã quyết, và cái khựng ấy ngắn hơn một nhịp tim."
+  }
+ },
+ "hound-spear": {
+  "family": "hound",
+  "tier": 0,
+  "hp": 23,
+  "damage": 14,
+  "speed": 139,
+  "poise": 6,
+  "windup": 0.39,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 33,
+  "display": {
+   "en": "Hound",
+   "vi": "Chó Săn"
+  },
+  "tell": {
+   "en": "It stops. A hound that stops is a hound that has decided, and the stop is shorter than a heartbeat.",
+   "vi": "Nó khựng lại. Chó săn mà khựng là chó săn đã quyết, và cái khựng ấy ngắn hơn một nhịp tim."
+  }
+ },
+ "hound-torch": {
+  "family": "hound",
+  "tier": 0,
+  "hp": 20,
+  "damage": 10,
+  "speed": 160,
+  "poise": 6,
+  "windup": 0.3,
+  "reach": 1,
+  "burns": true,
+  "essence": 26,
+  "display": {
+   "en": "Hound",
+   "vi": "Chó Săn"
+  },
+  "tell": {
+   "en": "It stops. A hound that stops is a hound that has decided, and the stop is shorter than a heartbeat.",
+   "vi": "Nó khựng lại. Chó săn mà khựng là chó săn đã quyết, và cái khựng ấy ngắn hơn một nhịp tim."
+  }
+ },
+ "hound-swift": {
+  "family": "hound",
+  "tier": 0,
+  "hp": 17,
+  "damage": 11,
+  "speed": 207,
+  "poise": 6,
+  "windup": 0.26,
+  "reach": 1,
+  "burns": false,
+  "essence": 25,
+  "display": {
+   "en": "Hound",
+   "vi": "Chó Săn"
+  },
+  "tell": {
+   "en": "It stops. A hound that stops is a hound that has decided, and the stop is shorter than a heartbeat.",
+   "vi": "Nó khựng lại. Chó săn mà khựng là chó săn đã quyết, và cái khựng ấy ngắn hơn một nhịp tim."
+  }
+ },
+ "crawler": {
+  "family": "crawler",
+  "tier": 1,
+  "hp": 46,
+  "damage": 14,
+  "speed": 48,
+  "poise": 20,
+  "windup": 0.7,
+  "reach": 1,
+  "burns": false,
+  "essence": 45,
+  "display": {
+   "en": "Crawler",
+   "vi": "Kẻ Bò"
+  },
+  "tell": {
+   "en": "It gathers — pulls both arms in under the chest — and the further it gathers the further it comes.",
+   "vi": "Nó thu người — kéo cả hai tay vào dưới ngực — và thu càng sâu thì lao càng xa."
+  }
+ },
+ "crawler-spear": {
+  "family": "crawler",
+  "tier": 1,
+  "hp": 48,
+  "damage": 17,
+  "speed": 45,
+  "poise": 20,
+  "windup": 0.8,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 50,
+  "display": {
+   "en": "Crawler",
+   "vi": "Kẻ Bò"
+  },
+  "tell": {
+   "en": "It gathers — pulls both arms in under the chest — and the further it gathers the further it comes.",
+   "vi": "Nó thu người — kéo cả hai tay vào dưới ngực — và thu càng sâu thì lao càng xa."
+  }
+ },
+ "crawler-torch": {
+  "family": "crawler",
+  "tier": 1,
+  "hp": 42,
+  "damage": 12,
+  "speed": 52,
+  "poise": 20,
+  "windup": 0.62,
+  "reach": 1,
+  "burns": true,
+  "essence": 40,
+  "display": {
+   "en": "Crawler",
+   "vi": "Kẻ Bò"
+  },
+  "tell": {
+   "en": "It gathers — pulls both arms in under the chest — and the further it gathers the further it comes.",
+   "vi": "Nó thu người — kéo cả hai tay vào dưới ngực — và thu càng sâu thì lao càng xa."
+  }
+ },
+ "crawler-heavy": {
+  "family": "crawler",
+  "tier": 1,
+  "hp": 67,
+  "damage": 19,
+  "speed": 38,
+  "poise": 32,
+  "windup": 0.91,
+  "reach": 1,
+  "burns": false,
+  "essence": 63,
+  "display": {
+   "en": "Crawler",
+   "vi": "Kẻ Bò"
+  },
+  "tell": {
+   "en": "It gathers — pulls both arms in under the chest — and the further it gathers the further it comes.",
+   "vi": "Nó thu người — kéo cả hai tay vào dưới ngực — và thu càng sâu thì lao càng xa."
+  }
+ },
+ "crawler-swift": {
+  "family": "crawler",
+  "tier": 1,
+  "hp": 36,
+  "damage": 13,
+  "speed": 67,
+  "poise": 20,
+  "windup": 0.52,
+  "reach": 1,
+  "burns": false,
+  "essence": 37,
+  "display": {
+   "en": "Crawler",
+   "vi": "Kẻ Bò"
+  },
+  "tell": {
+   "en": "It gathers — pulls both arms in under the chest — and the further it gathers the further it comes.",
+   "vi": "Nó thu người — kéo cả hai tay vào dưới ngực — và thu càng sâu thì lao càng xa."
+  }
+ },
+ "acolyte": {
+  "family": "acolyte",
+  "tier": 1,
+  "hp": 40,
+  "damage": 16,
+  "speed": 74,
+  "poise": 14,
+  "windup": 0.62,
+  "reach": 1,
+  "burns": false,
+  "essence": 44,
+  "display": {
+   "en": "Acolyte",
+   "vi": "Tập Sinh"
+  },
+  "tell": {
+   "en": "The hands come apart. That is the whole tell — it is a small movement and it is the only one.",
+   "vi": "Hai tay rời nhau. Chỉ có thế — một cử động rất nhỏ, và là cử động duy nhất."
+  }
+ },
+ "acolyte-spear": {
+  "family": "acolyte",
+  "tier": 1,
+  "hp": 42,
+  "damage": 19,
+  "speed": 70,
+  "poise": 14,
+  "windup": 0.71,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 50,
+  "display": {
+   "en": "Acolyte",
+   "vi": "Tập Sinh"
+  },
+  "tell": {
+   "en": "The hands come apart. That is the whole tell — it is a small movement and it is the only one.",
+   "vi": "Hai tay rời nhau. Chỉ có thế — một cử động rất nhỏ, và là cử động duy nhất."
+  }
+ },
+ "acolyte-torch": {
+  "family": "acolyte",
+  "tier": 1,
+  "hp": 37,
+  "damage": 14,
+  "speed": 80,
+  "poise": 14,
+  "windup": 0.55,
+  "reach": 1,
+  "burns": true,
+  "essence": 40,
+  "display": {
+   "en": "Acolyte",
+   "vi": "Tập Sinh"
+  },
+  "tell": {
+   "en": "The hands come apart. That is the whole tell — it is a small movement and it is the only one.",
+   "vi": "Hai tay rời nhau. Chỉ có thế — một cử động rất nhỏ, và là cử động duy nhất."
+  }
+ },
+ "acolyte-heavy": {
+  "family": "acolyte",
+  "tier": 1,
+  "hp": 58,
+  "damage": 22,
+  "speed": 59,
+  "poise": 22,
+  "windup": 0.81,
+  "reach": 1,
+  "burns": false,
+  "essence": 62,
+  "display": {
+   "en": "Acolyte",
+   "vi": "Tập Sinh"
+  },
+  "tell": {
+   "en": "The hands come apart. That is the whole tell — it is a small movement and it is the only one.",
+   "vi": "Hai tay rời nhau. Chỉ có thế — một cử động rất nhỏ, và là cử động duy nhất."
+  }
+ },
+ "acolyte-swift": {
+  "family": "acolyte",
+  "tier": 1,
+  "hp": 31,
+  "damage": 14,
+  "speed": 104,
+  "poise": 14,
+  "windup": 0.46,
+  "reach": 1,
+  "burns": false,
+  "essence": 37,
+  "display": {
+   "en": "Acolyte",
+   "vi": "Tập Sinh"
+  },
+  "tell": {
+   "en": "The hands come apart. That is the whole tell — it is a small movement and it is the only one.",
+   "vi": "Hai tay rời nhau. Chỉ có thế — một cử động rất nhỏ, và là cử động duy nhất."
+  }
+ },
+ "knightling": {
+  "family": "knightling",
+  "tier": 2,
+  "hp": 62,
+  "damage": 18,
+  "speed": 96,
+  "poise": 28,
+  "windup": 0.6,
+  "reach": 1,
+  "burns": false,
+  "essence": 59,
+  "display": {
+   "en": "Knightling",
+   "vi": "Tiểu Kỵ"
+  },
+  "tell": {
+   "en": "The shield drops an inch before it swings. It is the one flaw in an otherwise correct guard.",
+   "vi": "Khiên hạ xuống một đốt tay trước khi vung. Đó là lỗi duy nhất trong một thế thủ vốn rất chuẩn."
+  }
+ },
+ "knightling-spear": {
+  "family": "knightling",
+  "tier": 2,
+  "hp": 65,
+  "damage": 21,
+  "speed": 90,
+  "poise": 28,
+  "windup": 0.69,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 66,
+  "display": {
+   "en": "Knightling",
+   "vi": "Tiểu Kỵ"
+  },
+  "tell": {
+   "en": "The shield drops an inch before it swings. It is the one flaw in an otherwise correct guard.",
+   "vi": "Khiên hạ xuống một đốt tay trước khi vung. Đó là lỗi duy nhất trong một thế thủ vốn rất chuẩn."
+  }
+ },
+ "knightling-torch": {
+  "family": "knightling",
+  "tier": 2,
+  "hp": 57,
+  "damage": 15,
+  "speed": 104,
+  "poise": 28,
+  "windup": 0.53,
+  "reach": 1,
+  "burns": true,
+  "essence": 53,
+  "display": {
+   "en": "Knightling",
+   "vi": "Tiểu Kỵ"
+  },
+  "tell": {
+   "en": "The shield drops an inch before it swings. It is the one flaw in an otherwise correct guard.",
+   "vi": "Khiên hạ xuống một đốt tay trước khi vung. Đó là lỗi duy nhất trong một thế thủ vốn rất chuẩn."
+  }
+ },
+ "knightling-heavy": {
+  "family": "knightling",
+  "tier": 2,
+  "hp": 90,
+  "damage": 24,
+  "speed": 77,
+  "poise": 45,
+  "windup": 0.78,
+  "reach": 1,
+  "burns": false,
+  "essence": 83,
+  "display": {
+   "en": "Knightling",
+   "vi": "Tiểu Kỵ"
+  },
+  "tell": {
+   "en": "The shield drops an inch before it swings. It is the one flaw in an otherwise correct guard.",
+   "vi": "Khiên hạ xuống một đốt tay trước khi vung. Đó là lỗi duy nhất trong một thế thủ vốn rất chuẩn."
+  }
+ },
+ "knightling-swift": {
+  "family": "knightling",
+  "tier": 2,
+  "hp": 48,
+  "damage": 16,
+  "speed": 134,
+  "poise": 28,
+  "windup": 0.45,
+  "reach": 1,
+  "burns": false,
+  "essence": 49,
+  "display": {
+   "en": "Knightling",
+   "vi": "Tiểu Kỵ"
+  },
+  "tell": {
+   "en": "The shield drops an inch before it swings. It is the one flaw in an otherwise correct guard.",
+   "vi": "Khiên hạ xuống một đốt tay trước khi vung. Đó là lỗi duy nhất trong một thế thủ vốn rất chuẩn."
+  }
+ },
+ "ghoul": {
+  "family": "ghoul",
+  "tier": 2,
+  "hp": 38,
+  "damage": 15,
+  "speed": 118,
+  "poise": 10,
+  "windup": 0.4,
+  "reach": 1,
+  "burns": false,
+  "essence": 42,
+  "display": {
+   "en": "Ghoul",
+   "vi": "Quỷ Ăn Xác"
+  },
+  "tell": {
+   "en": "The stillness. It goes quiet a half-beat before it comes, and that half-beat is all you get.",
+   "vi": "Sự đứng im. Nó lặng đi nửa nhịp trước khi lao tới, và nửa nhịp đó là tất cả những gì bạn có."
+  }
+ },
+ "ghoul-spear": {
+  "family": "ghoul",
+  "tier": 2,
+  "hp": 40,
+  "damage": 18,
+  "speed": 111,
+  "poise": 10,
+  "windup": 0.46,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 47,
+  "display": {
+   "en": "Ghoul",
+   "vi": "Quỷ Ăn Xác"
+  },
+  "tell": {
+   "en": "The stillness. It goes quiet a half-beat before it comes, and that half-beat is all you get.",
+   "vi": "Sự đứng im. Nó lặng đi nửa nhịp trước khi lao tới, và nửa nhịp đó là tất cả những gì bạn có."
+  }
+ },
+ "ghoul-torch": {
+  "family": "ghoul",
+  "tier": 2,
+  "hp": 35,
+  "damage": 13,
+  "speed": 127,
+  "poise": 10,
+  "windup": 0.35,
+  "reach": 1,
+  "burns": true,
+  "essence": 37,
+  "display": {
+   "en": "Ghoul",
+   "vi": "Quỷ Ăn Xác"
+  },
+  "tell": {
+   "en": "The stillness. It goes quiet a half-beat before it comes, and that half-beat is all you get.",
+   "vi": "Sự đứng im. Nó lặng đi nửa nhịp trước khi lao tới, và nửa nhịp đó là tất cả những gì bạn có."
+  }
+ },
+ "ghoul-heavy": {
+  "family": "ghoul",
+  "tier": 2,
+  "hp": 55,
+  "damage": 20,
+  "speed": 94,
+  "poise": 16,
+  "windup": 0.52,
+  "reach": 1,
+  "burns": false,
+  "essence": 59,
+  "display": {
+   "en": "Ghoul",
+   "vi": "Quỷ Ăn Xác"
+  },
+  "tell": {
+   "en": "The stillness. It goes quiet a half-beat before it comes, and that half-beat is all you get.",
+   "vi": "Sự đứng im. Nó lặng đi nửa nhịp trước khi lao tới, và nửa nhịp đó là tất cả những gì bạn có."
+  }
+ },
+ "ghoul-swift": {
+  "family": "ghoul",
+  "tier": 2,
+  "hp": 30,
+  "damage": 14,
+  "speed": 165,
+  "poise": 10,
+  "windup": 0.3,
+  "reach": 1,
+  "burns": false,
+  "essence": 35,
+  "display": {
+   "en": "Ghoul",
+   "vi": "Quỷ Ăn Xác"
+  },
+  "tell": {
+   "en": "The stillness. It goes quiet a half-beat before it comes, and that half-beat is all you get.",
+   "vi": "Sự đứng im. Nó lặng đi nửa nhịp trước khi lao tới, và nửa nhịp đó là tất cả những gì bạn có."
+  }
+ },
+ "stonemask": {
+  "family": "stonemask",
+  "tier": 3,
+  "hp": 88,
+  "damage": 21,
+  "speed": 58,
+  "poise": 44,
+  "windup": 0.85,
+  "reach": 1,
+  "burns": false,
+  "essence": 78,
+  "display": {
+   "en": "Stonemask",
+   "vi": "Mặt Nạ Đá"
+  },
+  "tell": {
+   "en": "It turns the whole body to aim, because the neck cannot carry the mask sideways. You can see it deciding.",
+   "vi": "Nó xoay cả người để nhắm, vì cổ không đỡ nổi mặt nạ khi nghiêng. Bạn nhìn thấy được nó đang quyết định."
+  }
+ },
+ "stonemask-spear": {
+  "family": "stonemask",
+  "tier": 3,
+  "hp": 92,
+  "damage": 25,
+  "speed": 55,
+  "poise": 44,
+  "windup": 0.98,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 86,
+  "display": {
+   "en": "Stonemask",
+   "vi": "Mặt Nạ Đá"
+  },
+  "tell": {
+   "en": "It turns the whole body to aim, because the neck cannot carry the mask sideways. You can see it deciding.",
+   "vi": "Nó xoay cả người để nhắm, vì cổ không đỡ nổi mặt nạ khi nghiêng. Bạn nhìn thấy được nó đang quyết định."
+  }
+ },
+ "stonemask-torch": {
+  "family": "stonemask",
+  "tier": 3,
+  "hp": 81,
+  "damage": 18,
+  "speed": 63,
+  "poise": 44,
+  "windup": 0.75,
+  "reach": 1,
+  "burns": true,
+  "essence": 70,
+  "display": {
+   "en": "Stonemask",
+   "vi": "Mặt Nạ Đá"
+  },
+  "tell": {
+   "en": "It turns the whole body to aim, because the neck cannot carry the mask sideways. You can see it deciding.",
+   "vi": "Nó xoay cả người để nhắm, vì cổ không đỡ nổi mặt nạ khi nghiêng. Bạn nhìn thấy được nó đang quyết định."
+  }
+ },
+ "stonemask-heavy": {
+  "family": "stonemask",
+  "tier": 3,
+  "hp": 128,
+  "damage": 28,
+  "speed": 46,
+  "poise": 70,
+  "windup": 1.1,
+  "reach": 1,
+  "burns": false,
+  "essence": 110,
+  "display": {
+   "en": "Stonemask",
+   "vi": "Mặt Nạ Đá"
+  },
+  "tell": {
+   "en": "It turns the whole body to aim, because the neck cannot carry the mask sideways. You can see it deciding.",
+   "vi": "Nó xoay cả người để nhắm, vì cổ không đỡ nổi mặt nạ khi nghiêng. Bạn nhìn thấy được nó đang quyết định."
+  }
+ },
+ "stonemask-swift": {
+  "family": "stonemask",
+  "tier": 3,
+  "hp": 69,
+  "damage": 19,
+  "speed": 81,
+  "poise": 44,
+  "windup": 0.64,
+  "reach": 1,
+  "burns": false,
+  "essence": 64,
+  "display": {
+   "en": "Stonemask",
+   "vi": "Mặt Nạ Đá"
+  },
+  "tell": {
+   "en": "It turns the whole body to aim, because the neck cannot carry the mask sideways. You can see it deciding.",
+   "vi": "Nó xoay cả người để nhắm, vì cổ không đỡ nổi mặt nạ khi nghiêng. Bạn nhìn thấy được nó đang quyết định."
+  }
+ },
+ "moth": {
+  "family": "moth",
+  "tier": 3,
+  "hp": 30,
+  "damage": 13,
+  "speed": 165,
+  "poise": 4,
+  "windup": 0.3,
+  "reach": 1,
+  "burns": false,
+  "essence": 35,
+  "display": {
+   "en": "Moth",
+   "vi": "Bướm Đêm"
+  },
+  "tell": {
+   "en": "It rises. Height is the wind-up; whatever goes up is coming down on you.",
+   "vi": "Nó vọt lên cao. Độ cao chính là đòn lấy đà; cái gì lên thì sẽ rơi xuống người bạn."
+  }
+ },
+ "moth-torch": {
+  "family": "moth",
+  "tier": 3,
+  "hp": 28,
+  "damage": 11,
+  "speed": 178,
+  "poise": 4,
+  "windup": 0.26,
+  "reach": 1,
+  "burns": true,
+  "essence": 31,
+  "display": {
+   "en": "Moth",
+   "vi": "Bướm Đêm"
+  },
+  "tell": {
+   "en": "It rises. Height is the wind-up; whatever goes up is coming down on you.",
+   "vi": "Nó vọt lên cao. Độ cao chính là đòn lấy đà; cái gì lên thì sẽ rơi xuống người bạn."
+  }
+ },
+ "moth-swift": {
+  "family": "moth",
+  "tier": 3,
+  "hp": 23,
+  "damage": 12,
+  "speed": 231,
+  "poise": 4,
+  "windup": 0.22,
+  "reach": 1,
+  "burns": false,
+  "essence": 29,
+  "display": {
+   "en": "Moth",
+   "vi": "Bướm Đêm"
+  },
+  "tell": {
+   "en": "It rises. Height is the wind-up; whatever goes up is coming down on you.",
+   "vi": "Nó vọt lên cao. Độ cao chính là đòn lấy đà; cái gì lên thì sẽ rơi xuống người bạn."
+  }
+ },
+ "warder": {
+  "family": "warder",
+  "tier": 4,
+  "hp": 104,
+  "damage": 24,
+  "speed": 84,
+  "poise": 52,
+  "windup": 0.72,
+  "reach": 1,
+  "burns": false,
+  "essence": 91,
+  "display": {
+   "en": "Warder",
+   "vi": "Người Canh"
+  },
+  "tell": {
+   "en": "The lead foot turns out. It cannot swing without setting that foot, and the foot is a long way from its weapon.",
+   "vi": "Bàn chân trước xoay ra ngoài. Nó không vung nổi nếu chưa đặt chân đó, mà bàn chân thì cách vũ khí rất xa."
+  }
+ },
+ "warder-spear": {
+  "family": "warder",
+  "tier": 4,
+  "hp": 109,
+  "damage": 28,
+  "speed": 79,
+  "poise": 52,
+  "windup": 0.83,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 100,
+  "display": {
+   "en": "Warder",
+   "vi": "Người Canh"
+  },
+  "tell": {
+   "en": "The lead foot turns out. It cannot swing without setting that foot, and the foot is a long way from its weapon.",
+   "vi": "Bàn chân trước xoay ra ngoài. Nó không vung nổi nếu chưa đặt chân đó, mà bàn chân thì cách vũ khí rất xa."
+  }
+ },
+ "warder-torch": {
+  "family": "warder",
+  "tier": 4,
+  "hp": 96,
+  "damage": 21,
+  "speed": 91,
+  "poise": 52,
+  "windup": 0.63,
+  "reach": 1,
+  "burns": true,
+  "essence": 82,
+  "display": {
+   "en": "Warder",
+   "vi": "Người Canh"
+  },
+  "tell": {
+   "en": "The lead foot turns out. It cannot swing without setting that foot, and the foot is a long way from its weapon.",
+   "vi": "Bàn chân trước xoay ra ngoài. Nó không vung nổi nếu chưa đặt chân đó, mà bàn chân thì cách vũ khí rất xa."
+  }
+ },
+ "warder-heavy": {
+  "family": "warder",
+  "tier": 4,
+  "hp": 151,
+  "damage": 32,
+  "speed": 67,
+  "poise": 83,
+  "windup": 0.94,
+  "reach": 1,
+  "burns": false,
+  "essence": 128,
+  "display": {
+   "en": "Warder",
+   "vi": "Người Canh"
+  },
+  "tell": {
+   "en": "The lead foot turns out. It cannot swing without setting that foot, and the foot is a long way from its weapon.",
+   "vi": "Bàn chân trước xoay ra ngoài. Nó không vung nổi nếu chưa đặt chân đó, mà bàn chân thì cách vũ khí rất xa."
+  }
+ },
+ "warder-swift": {
+  "family": "warder",
+  "tier": 4,
+  "hp": 81,
+  "damage": 22,
+  "speed": 118,
+  "poise": 52,
+  "windup": 0.54,
+  "reach": 1,
+  "burns": false,
+  "essence": 75,
+  "display": {
+   "en": "Warder",
+   "vi": "Người Canh"
+  },
+  "tell": {
+   "en": "The lead foot turns out. It cannot swing without setting that foot, and the foot is a long way from its weapon.",
+   "vi": "Bàn chân trước xoay ra ngoài. Nó không vung nổi nếu chưa đặt chân đó, mà bàn chân thì cách vũ khí rất xa."
+  }
+ },
+ "kiln": {
+  "family": "kiln",
+  "tier": 4,
+  "hp": 72,
+  "damage": 27,
+  "speed": 90,
+  "poise": 30,
+  "windup": 0.55,
+  "reach": 1,
+  "burns": false,
+  "essence": 77,
+  "display": {
+   "en": "Kiln-Fired",
+   "vi": "Đồ Nung"
+  },
+  "tell": {
+   "en": "The cracks brighten. All the heat runs to one limb, and that is the limb that is about to be used.",
+   "vi": "Các vết nứt sáng lên. Toàn bộ hơi nóng dồn về một chi, và đó chính là chi sắp ra đòn."
+  }
+ },
+ "kiln-spear": {
+  "family": "kiln",
+  "tier": 4,
+  "hp": 76,
+  "damage": 32,
+  "speed": 85,
+  "poise": 30,
+  "windup": 0.63,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 86,
+  "display": {
+   "en": "Kiln-Fired",
+   "vi": "Đồ Nung"
+  },
+  "tell": {
+   "en": "The cracks brighten. All the heat runs to one limb, and that is the limb that is about to be used.",
+   "vi": "Các vết nứt sáng lên. Toàn bộ hơi nóng dồn về một chi, và đó chính là chi sắp ra đòn."
+  }
+ },
+ "kiln-torch": {
+  "family": "kiln",
+  "tier": 4,
+  "hp": 66,
+  "damage": 23,
+  "speed": 97,
+  "poise": 30,
+  "windup": 0.48,
+  "reach": 1,
+  "burns": true,
+  "essence": 69,
+  "display": {
+   "en": "Kiln-Fired",
+   "vi": "Đồ Nung"
+  },
+  "tell": {
+   "en": "The cracks brighten. All the heat runs to one limb, and that is the limb that is about to be used.",
+   "vi": "Các vết nứt sáng lên. Toàn bộ hơi nóng dồn về một chi, và đó chính là chi sắp ra đòn."
+  }
+ },
+ "kiln-heavy": {
+  "family": "kiln",
+  "tier": 4,
+  "hp": 104,
+  "damage": 36,
+  "speed": 72,
+  "poise": 48,
+  "windup": 0.72,
+  "reach": 1,
+  "burns": false,
+  "essence": 108,
+  "display": {
+   "en": "Kiln-Fired",
+   "vi": "Đồ Nung"
+  },
+  "tell": {
+   "en": "The cracks brighten. All the heat runs to one limb, and that is the limb that is about to be used.",
+   "vi": "Các vết nứt sáng lên. Toàn bộ hơi nóng dồn về một chi, và đó chính là chi sắp ra đòn."
+  }
+ },
+ "kiln-swift": {
+  "family": "kiln",
+  "tier": 4,
+  "hp": 56,
+  "damage": 24,
+  "speed": 126,
+  "poise": 30,
+  "windup": 0.41,
+  "reach": 1,
+  "burns": false,
+  "essence": 65,
+  "display": {
+   "en": "Kiln-Fired",
+   "vi": "Đồ Nung"
+  },
+  "tell": {
+   "en": "The cracks brighten. All the heat runs to one limb, and that is the limb that is about to be used.",
+   "vi": "Các vết nứt sáng lên. Toàn bộ hơi nóng dồn về một chi, và đó chính là chi sắp ra đòn."
+  }
+ },
+ "drowned": {
+  "family": "drowned",
+  "tier": 5,
+  "hp": 96,
+  "damage": 22,
+  "speed": 66,
+  "poise": 40,
+  "windup": 0.8,
+  "reach": 1,
+  "burns": false,
+  "essence": 84,
+  "display": {
+   "en": "Drowned",
+   "vi": "Kẻ Chết Đuối"
+  },
+  "tell": {
+   "en": "It sinks. The whole body drops a hand’s width before the blow, the way something heavy does before it swings.",
+   "vi": "Nó chìm xuống. Cả thân người hạ xuống chừng một gang tay trước khi ra đòn, kiểu một vật nặng lấy đà."
+  }
+ },
+ "drowned-spear": {
+  "family": "drowned",
+  "tier": 5,
+  "hp": 101,
+  "damage": 26,
+  "speed": 62,
+  "poise": 40,
+  "windup": 0.92,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 92,
+  "display": {
+   "en": "Drowned",
+   "vi": "Kẻ Chết Đuối"
+  },
+  "tell": {
+   "en": "It sinks. The whole body drops a hand’s width before the blow, the way something heavy does before it swings.",
+   "vi": "Nó chìm xuống. Cả thân người hạ xuống chừng một gang tay trước khi ra đòn, kiểu một vật nặng lấy đà."
+  }
+ },
+ "drowned-torch": {
+  "family": "drowned",
+  "tier": 5,
+  "hp": 88,
+  "damage": 19,
+  "speed": 71,
+  "poise": 40,
+  "windup": 0.7,
+  "reach": 1,
+  "burns": true,
+  "essence": 75,
+  "display": {
+   "en": "Drowned",
+   "vi": "Kẻ Chết Đuối"
+  },
+  "tell": {
+   "en": "It sinks. The whole body drops a hand’s width before the blow, the way something heavy does before it swings.",
+   "vi": "Nó chìm xuống. Cả thân người hạ xuống chừng một gang tay trước khi ra đòn, kiểu một vật nặng lấy đà."
+  }
+ },
+ "drowned-heavy": {
+  "family": "drowned",
+  "tier": 5,
+  "hp": 139,
+  "damage": 30,
+  "speed": 53,
+  "poise": 64,
+  "windup": 1.04,
+  "reach": 1,
+  "burns": false,
+  "essence": 118,
+  "display": {
+   "en": "Drowned",
+   "vi": "Kẻ Chết Đuối"
+  },
+  "tell": {
+   "en": "It sinks. The whole body drops a hand’s width before the blow, the way something heavy does before it swings.",
+   "vi": "Nó chìm xuống. Cả thân người hạ xuống chừng một gang tay trước khi ra đòn, kiểu một vật nặng lấy đà."
+  }
+ },
+ "drowned-swift": {
+  "family": "drowned",
+  "tier": 5,
+  "hp": 75,
+  "damage": 20,
+  "speed": 92,
+  "poise": 40,
+  "windup": 0.6,
+  "reach": 1,
+  "burns": false,
+  "essence": 69,
+  "display": {
+   "en": "Drowned",
+   "vi": "Kẻ Chết Đuối"
+  },
+  "tell": {
+   "en": "It sinks. The whole body drops a hand’s width before the blow, the way something heavy does before it swings.",
+   "vi": "Nó chìm xuống. Cả thân người hạ xuống chừng một gang tay trước khi ra đòn, kiểu một vật nặng lấy đà."
+  }
+ },
+ "chorister": {
+  "family": "chorister",
+  "tier": 5,
+  "hp": 68,
+  "damage": 30,
+  "speed": 78,
+  "poise": 24,
+  "windup": 0.9,
+  "reach": 1,
+  "burns": false,
+  "essence": 79,
+  "display": {
+   "en": "Chorister",
+   "vi": "Ca Đồng"
+  },
+  "tell": {
+   "en": "The note changes pitch. It cannot strike and hold the note, so the moment the sound moves, so does it.",
+   "vi": "Nốt nhạc đổi cao độ. Nó không thể vừa đánh vừa giữ nốt, nên tiếng vừa động là người cũng động."
+  }
+ },
+ "chorister-spear": {
+  "family": "chorister",
+  "tier": 5,
+  "hp": 71,
+  "damage": 35,
+  "speed": 73,
+  "poise": 24,
+  "windup": 1.03,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 89,
+  "display": {
+   "en": "Chorister",
+   "vi": "Ca Đồng"
+  },
+  "tell": {
+   "en": "The note changes pitch. It cannot strike and hold the note, so the moment the sound moves, so does it.",
+   "vi": "Nốt nhạc đổi cao độ. Nó không thể vừa đánh vừa giữ nốt, nên tiếng vừa động là người cũng động."
+  }
+ },
+ "chorister-torch": {
+  "family": "chorister",
+  "tier": 5,
+  "hp": 63,
+  "damage": 26,
+  "speed": 84,
+  "poise": 24,
+  "windup": 0.79,
+  "reach": 1,
+  "burns": true,
+  "essence": 71,
+  "display": {
+   "en": "Chorister",
+   "vi": "Ca Đồng"
+  },
+  "tell": {
+   "en": "The note changes pitch. It cannot strike and hold the note, so the moment the sound moves, so does it.",
+   "vi": "Nốt nhạc đổi cao độ. Nó không thể vừa đánh vừa giữ nốt, nên tiếng vừa động là người cũng động."
+  }
+ },
+ "chorister-heavy": {
+  "family": "chorister",
+  "tier": 5,
+  "hp": 99,
+  "damage": 41,
+  "speed": 62,
+  "poise": 38,
+  "windup": 1.17,
+  "reach": 1,
+  "burns": false,
+  "essence": 111,
+  "display": {
+   "en": "Chorister",
+   "vi": "Ca Đồng"
+  },
+  "tell": {
+   "en": "The note changes pitch. It cannot strike and hold the note, so the moment the sound moves, so does it.",
+   "vi": "Nốt nhạc đổi cao độ. Nó không thể vừa đánh vừa giữ nốt, nên tiếng vừa động là người cũng động."
+  }
+ },
+ "chorister-swift": {
+  "family": "chorister",
+  "tier": 5,
+  "hp": 53,
+  "damage": 27,
+  "speed": 109,
+  "poise": 24,
+  "windup": 0.68,
+  "reach": 1,
+  "burns": false,
+  "essence": 67,
+  "display": {
+   "en": "Chorister",
+   "vi": "Ca Đồng"
+  },
+  "tell": {
+   "en": "The note changes pitch. It cannot strike and hold the note, so the moment the sound moves, so does it.",
+   "vi": "Nốt nhạc đổi cao độ. Nó không thể vừa đánh vừa giữ nốt, nên tiếng vừa động là người cũng động."
+  }
+ },
+ "ironclad": {
+  "family": "ironclad",
+  "tier": 6,
+  "hp": 148,
+  "damage": 32,
+  "speed": 70,
+  "poise": 76,
+  "windup": 0.78,
+  "reach": 1,
+  "burns": false,
+  "essence": 126,
+  "display": {
+   "en": "Ironclad",
+   "vi": "Giáp Sắt"
+  },
+  "tell": {
+   "en": "A grinding sound half a second before anything visible moves. Hear it, then look.",
+   "vi": "Một tiếng nghiến vang lên nửa giây trước khi có gì đó động đậy. Nghe trước, rồi hãy nhìn."
+  }
+ },
+ "ironclad-spear": {
+  "family": "ironclad",
+  "tier": 6,
+  "hp": 155,
+  "damage": 38,
+  "speed": 66,
+  "poise": 76,
+  "windup": 0.9,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 138,
+  "display": {
+   "en": "Ironclad",
+   "vi": "Giáp Sắt"
+  },
+  "tell": {
+   "en": "A grinding sound half a second before anything visible moves. Hear it, then look.",
+   "vi": "Một tiếng nghiến vang lên nửa giây trước khi có gì đó động đậy. Nghe trước, rồi hãy nhìn."
+  }
+ },
+ "ironclad-torch": {
+  "family": "ironclad",
+  "tier": 6,
+  "hp": 136,
+  "damage": 28,
+  "speed": 76,
+  "poise": 76,
+  "windup": 0.69,
+  "reach": 1,
+  "burns": true,
+  "essence": 113,
+  "display": {
+   "en": "Ironclad",
+   "vi": "Giáp Sắt"
+  },
+  "tell": {
+   "en": "A grinding sound half a second before anything visible moves. Hear it, then look.",
+   "vi": "Một tiếng nghiến vang lên nửa giây trước khi có gì đó động đậy. Nghe trước, rồi hãy nhìn."
+  }
+ },
+ "ironclad-heavy": {
+  "family": "ironclad",
+  "tier": 6,
+  "hp": 215,
+  "damage": 43,
+  "speed": 56,
+  "poise": 122,
+  "windup": 1.01,
+  "reach": 1,
+  "burns": false,
+  "essence": 179,
+  "display": {
+   "en": "Ironclad",
+   "vi": "Giáp Sắt"
+  },
+  "tell": {
+   "en": "A grinding sound half a second before anything visible moves. Hear it, then look.",
+   "vi": "Một tiếng nghiến vang lên nửa giây trước khi có gì đó động đậy. Nghe trước, rồi hãy nhìn."
+  }
+ },
+ "ironclad-swift": {
+  "family": "ironclad",
+  "tier": 6,
+  "hp": 115,
+  "damage": 29,
+  "speed": 98,
+  "poise": 76,
+  "windup": 0.58,
+  "reach": 1,
+  "burns": false,
+  "essence": 104,
+  "display": {
+   "en": "Ironclad",
+   "vi": "Giáp Sắt"
+  },
+  "tell": {
+   "en": "A grinding sound half a second before anything visible moves. Hear it, then look.",
+   "vi": "Một tiếng nghiến vang lên nửa giây trước khi có gì đó động đậy. Nghe trước, rồi hãy nhìn."
+  }
+ },
+ "wisp": {
+  "family": "wisp",
+  "tier": 6,
+  "hp": 44,
+  "damage": 26,
+  "speed": 190,
+  "poise": 2,
+  "windup": 0.28,
+  "reach": 1,
+  "burns": false,
+  "essence": 61,
+  "display": {
+   "en": "Wisp",
+   "vi": "Đóm Lửa Ma"
+  },
+  "tell": {
+   "en": "The wake shortens. It gathers into itself right before it crosses, and it crosses the whole room.",
+   "vi": "Vệt đuôi ngắn lại. Nó co vào chính mình ngay trước khi lao, và nó lao suốt chiều dài căn phòng."
+  }
+ },
+ "wisp-torch": {
+  "family": "wisp",
+  "tier": 6,
+  "hp": 40,
+  "damage": 22,
+  "speed": 205,
+  "poise": 2,
+  "windup": 0.25,
+  "reach": 1,
+  "burns": true,
+  "essence": 54,
+  "display": {
+   "en": "Wisp",
+   "vi": "Đóm Lửa Ma"
+  },
+  "tell": {
+   "en": "The wake shortens. It gathers into itself right before it crosses, and it crosses the whole room.",
+   "vi": "Vệt đuôi ngắn lại. Nó co vào chính mình ngay trước khi lao, và nó lao suốt chiều dài căn phòng."
+  }
+ },
+ "wisp-swift": {
+  "family": "wisp",
+  "tier": 6,
+  "hp": 34,
+  "damage": 23,
+  "speed": 266,
+  "poise": 2,
+  "windup": 0.21,
+  "reach": 1,
+  "burns": false,
+  "essence": 52,
+  "display": {
+   "en": "Wisp",
+   "vi": "Đóm Lửa Ma"
+  },
+  "tell": {
+   "en": "The wake shortens. It gathers into itself right before it crosses, and it crosses the whole room.",
+   "vi": "Vệt đuôi ngắn lại. Nó co vào chính mình ngay trước khi lao, và nó lao suốt chiều dài căn phòng."
+  }
+ },
+ "colossus": {
+  "family": "colossus",
+  "tier": 7,
+  "hp": 210,
+  "damage": 38,
+  "speed": 52,
+  "poise": 110,
+  "windup": 1,
+  "reach": 1,
+  "burns": false,
+  "essence": 169,
+  "display": {
+   "en": "Colossus",
+   "vi": "Khổng Lồ"
+  },
+  "tell": {
+   "en": "The far foot leaves the ground. It has to load the whole body, and there is nothing subtle about a body that size loading.",
+   "vi": "Bàn chân xa nhấc khỏi mặt đất. Nó phải dồn lực cả thân, và một cái thân cỡ ấy dồn lực thì chẳng có gì kín đáo."
+  }
+ },
+ "colossus-spear": {
+  "family": "colossus",
+  "tier": 7,
+  "hp": 221,
+  "damage": 45,
+  "speed": 49,
+  "poise": 110,
+  "windup": 1.15,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 184,
+  "display": {
+   "en": "Colossus",
+   "vi": "Khổng Lồ"
+  },
+  "tell": {
+   "en": "The far foot leaves the ground. It has to load the whole body, and there is nothing subtle about a body that size loading.",
+   "vi": "Bàn chân xa nhấc khỏi mặt đất. Nó phải dồn lực cả thân, và một cái thân cỡ ấy dồn lực thì chẳng có gì kín đáo."
+  }
+ },
+ "colossus-torch": {
+  "family": "colossus",
+  "tier": 7,
+  "hp": 193,
+  "damage": 33,
+  "speed": 56,
+  "poise": 110,
+  "windup": 0.88,
+  "reach": 1,
+  "burns": true,
+  "essence": 152,
+  "display": {
+   "en": "Colossus",
+   "vi": "Khổng Lồ"
+  },
+  "tell": {
+   "en": "The far foot leaves the ground. It has to load the whole body, and there is nothing subtle about a body that size loading.",
+   "vi": "Bàn chân xa nhấc khỏi mặt đất. Nó phải dồn lực cả thân, và một cái thân cỡ ấy dồn lực thì chẳng có gì kín đáo."
+  }
+ },
+ "colossus-heavy": {
+  "family": "colossus",
+  "tier": 7,
+  "hp": 305,
+  "damage": 51,
+  "speed": 42,
+  "poise": 176,
+  "windup": 1.3,
+  "reach": 1,
+  "burns": false,
+  "essence": 239,
+  "display": {
+   "en": "Colossus",
+   "vi": "Khổng Lồ"
+  },
+  "tell": {
+   "en": "The far foot leaves the ground. It has to load the whole body, and there is nothing subtle about a body that size loading.",
+   "vi": "Bàn chân xa nhấc khỏi mặt đất. Nó phải dồn lực cả thân, và một cái thân cỡ ấy dồn lực thì chẳng có gì kín đáo."
+  }
+ },
+ "colossus-swift": {
+  "family": "colossus",
+  "tier": 7,
+  "hp": 164,
+  "damage": 34,
+  "speed": 73,
+  "poise": 110,
+  "windup": 0.75,
+  "reach": 1,
+  "burns": false,
+  "essence": 138,
+  "display": {
+   "en": "Colossus",
+   "vi": "Khổng Lồ"
+  },
+  "tell": {
+   "en": "The far foot leaves the ground. It has to load the whole body, and there is nothing subtle about a body that size loading.",
+   "vi": "Bàn chân xa nhấc khỏi mặt đất. Nó phải dồn lực cả thân, và một cái thân cỡ ấy dồn lực thì chẳng có gì kín đáo."
+  }
+ },
+ "shade": {
+  "family": "shade",
+  "tier": 7,
+  "hp": 120,
+  "damage": 35,
+  "speed": 130,
+  "poise": 34,
+  "windup": 0.42,
+  "reach": 1,
+  "burns": false,
+  "essence": 115,
+  "display": {
+   "en": "Shade",
+   "vi": "Bóng"
+  },
+  "tell": {
+   "en": "It rolls. Nothing else in the roster rolls, and it rolls at exactly the moment you would have.",
+   "vi": "Nó lăn. Không con nào khác trong danh sách biết lăn, và nó lăn đúng vào khoảnh khắc mà bạn cũng sẽ lăn."
+  }
+ },
+ "shade-spear": {
+  "family": "shade",
+  "tier": 7,
+  "hp": 126,
+  "damage": 41,
+  "speed": 122,
+  "poise": 34,
+  "windup": 0.48,
+  "reach": 1.4,
+  "burns": false,
+  "essence": 127,
+  "display": {
+   "en": "Shade",
+   "vi": "Bóng"
+  },
+  "tell": {
+   "en": "It rolls. Nothing else in the roster rolls, and it rolls at exactly the moment you would have.",
+   "vi": "Nó lăn. Không con nào khác trong danh sách biết lăn, và nó lăn đúng vào khoảnh khắc mà bạn cũng sẽ lăn."
+  }
+ },
+ "shade-torch": {
+  "family": "shade",
+  "tier": 7,
+  "hp": 110,
+  "damage": 30,
+  "speed": 140,
+  "poise": 34,
+  "windup": 0.37,
+  "reach": 1,
+  "burns": true,
+  "essence": 103,
+  "display": {
+   "en": "Shade",
+   "vi": "Bóng"
+  },
+  "tell": {
+   "en": "It rolls. Nothing else in the roster rolls, and it rolls at exactly the moment you would have.",
+   "vi": "Nó lăn. Không con nào khác trong danh sách biết lăn, và nó lăn đúng vào khoảnh khắc mà bạn cũng sẽ lăn."
+  }
+ },
+ "shade-heavy": {
+  "family": "shade",
+  "tier": 7,
+  "hp": 174,
+  "damage": 47,
+  "speed": 104,
+  "poise": 54,
+  "windup": 0.55,
+  "reach": 1,
+  "burns": false,
+  "essence": 162,
+  "display": {
+   "en": "Shade",
+   "vi": "Bóng"
+  },
+  "tell": {
+   "en": "It rolls. Nothing else in the roster rolls, and it rolls at exactly the moment you would have.",
+   "vi": "Nó lăn. Không con nào khác trong danh sách biết lăn, và nó lăn đúng vào khoảnh khắc mà bạn cũng sẽ lăn."
+  }
+ },
+ "shade-swift": {
+  "family": "shade",
+  "tier": 7,
+  "hp": 94,
+  "damage": 32,
+  "speed": 182,
+  "poise": 34,
+  "windup": 0.32,
+  "reach": 1,
+  "burns": false,
+  "essence": 96,
+  "display": {
+   "en": "Shade",
+   "vi": "Bóng"
+  },
+  "tell": {
+   "en": "It rolls. Nothing else in the roster rolls, and it rolls at exactly the moment you would have.",
+   "vi": "Nó lăn. Không con nào khác trong danh sách biết lăn, và nó lăn đúng vào khoảnh khắc mà bạn cũng sẽ lăn."
+  }
+ }
+}

@@ -1,0 +1,61 @@
+; Người Thắp Đèn — Godot 4 project.
+;
+; Nothing in godot/ contains a hand-entered design number. Everything the game
+; balances on is read at runtime out of godot/data/*.json, which is generated
+; from src/ by `npm run godot`. If a number here disagrees with the sim, the
+; test suite fails, not the player.
+
+config_version=5
+
+[application]
+config/name="Người Thắp Đèn"
+config/description="2D souls-like. Data generated from src/ — do not edit godot/data by hand."
+run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+
+[autoload]
+Data="*res://scripts/Data.gd"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[input]
+move_left={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":65),Object(InputEventKey,"keycode":4194319)]
+}
+move_right={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":68),Object(InputEventKey,"keycode":4194321)]
+}
+roll={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":4194325)]
+}
+attack_light={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"button_index":1)]
+}
+attack_heavy={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"button_index":2)]
+}
+guard={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":4194326)]
+}
+flask={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":81)]
+}
+room_next={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":69)]
+}
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+textures/canvas_textures/default_texture_filter=0

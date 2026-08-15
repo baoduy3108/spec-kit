@@ -1,0 +1,37 @@
+{
+ "name": {
+  "en": "The Lamplighter",
+  "vi": "Người Thắp Đèn"
+ },
+ "line": {
+  "en": "Not a knight. A works hand, sent up the mountain with an empty lantern and a list.",
+  "vi": "Không phải hiệp sĩ. Một người thợ của xưởng, bị đẩy lên núi với một cây đèn rỗng và một bản danh sách."
+ },
+ "look": {
+  "en": "Tall and stooped from a lifetime of reaching up. A long coat hung all over with lanterns taken off the dead — a dozen of them, none lit, and they knock together when it walks, which is how anything in a dark room knows it is coming. The right arm is fired clay from the elbow down, replacing what the kiln took, and the cracks in it have not gone out. In the good hand, a lamplighter's pole: too long for a room, exactly long enough to reach a lamp, and the only weapon it has ever needed.",
+  "vi": "Cao và gù, do cả đời phải với lên cao. Áo choàng dài treo đầy những cây đèn lấy từ người chết — cả tá, không cây nào cháy, và chúng va lách cách mỗi khi bước, đó là cách mọi thứ trong phòng tối biết nó đang tới. Cánh tay phải từ khuỷu xuống là đất nung, thay cho phần cái lò đã lấy đi, và các vết nứt trên đó chưa tắt. Tay lành cầm một cây sào thắp đèn: dài quá khổ so với một căn phòng, dài vừa đủ để với tới một ngọn đèn, và là vũ khí duy nhất nó từng cần."
+ },
+ "errand": {
+  "en": "It was not chosen and it is not owed anything. The clock that decides when the lanterns are lit has been wrong for years, and somebody downstairs still keeps the round — walks the list, finds every lamp dark, and cannot relight one, because there is nothing left below to light it from. So it goes up. The list is in its coat, and the lamps on the list are ticked off in order, and the last line on it is the only address that is not a lamp.",
+  "vi": "Nó không được chọn và cũng chẳng ai nợ nó điều gì. Cỗ đồng hồ quyết định giờ thắp đèn đã chạy sai nhiều năm, mà dưới kia vẫn còn một người đi tuần — đi theo danh sách, thấy đèn nào cũng tắt, và không thắp lại được cây nào, vì phía dưới chẳng còn gì để mồi. Nên nó đi lên. Bản danh sách nằm trong vạt áo, các ngọn đèn được gạch theo thứ tự, và dòng cuối cùng là địa chỉ duy nhất không phải một cây đèn."
+ },
+ "arm": {
+  "en": "It reached into a firing chamber to pull something out and did not get the arm back. What it has instead was poured in the same kiln as the things it now fights, off a rack, from a mould with a blank label. That is why it can carry heat, why it lights the lantern off its own cracks, and why the shades know it on sight: it is partly one of them, and the part that is theirs is the part that holds the fire.",
+  "vi": "Nó thọc tay vào một buồng nung để lôi thứ gì đó ra, và không lấy lại được cánh tay. Cái nó đang mang được rót ra từ đúng cái lò đã đúc nên những thứ nó đang đánh, lấy trên giá, từ một cái khuôn có nhãn để trống. Đó là lý do nó cầm được lửa, lý do nó châm đèn bằng chính khe nứt của mình, và lý do lũ Bóng nhận ra nó ngay: nó có một phần là đồng loại của chúng, và cái phần thuộc về chúng chính là phần đang cầm lửa."
+ },
+ "coat": {
+  "en": "Every lantern on the coat came off somebody who did not make it up the stair. It carries them because the job says a lamp is not finished until it is relit, and it has not been able to finish one yet. They are not trophies. They are a backlog.",
+  "vi": "Mỗi cây đèn trên áo đều lấy từ một người không leo nổi hết cầu thang. Nó mang theo vì nghề nói rằng một ngọn đèn chưa xong việc chừng nào chưa được thắp lại, mà tới giờ nó chưa xong được cây nào. Chúng không phải chiến lợi phẩm. Chúng là việc còn tồn đọng."
+ },
+ "ending": {
+  "en": "At the top is the last name on the list, and it is holding a lantern one-handed and has been for a very long time. Somebody has to carry it. Nobody said the carrier gets to put it down. The list does not say what to do after the last line, because nobody who wrote it ever got that far.",
+  "vi": "Trên đỉnh là cái tên cuối trong danh sách, và nó đang cầm một cây đèn bằng một tay, đã cầm như vậy rất lâu rồi. Phải có ai đó cầm cây đèn. Không ai nói người cầm được phép đặt nó xuống. Bản danh sách không ghi phải làm gì sau dòng cuối, vì người viết ra nó chưa từng đi được tới đó."
+ },
+ "silhouette": [
+  "taller than the frame wants, and stooped",
+  "the coat reads as a cluster of hanging shapes, not as cloth",
+  "one arm glows at the joints, the other does not",
+  "the pole is longer than the figure is tall",
+  "nothing about it is symmetrical"
+ ]
+}

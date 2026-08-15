@@ -1,0 +1,148 @@
+{
+ "units_per_metre": 34,
+ "room_width": 816,
+ "arena": {
+  "lo": 70,
+  "hi": 890
+ },
+ "player": {
+  "hp": 100,
+  "stamina": 100,
+  "speed": 195,
+  "bodyR": 20,
+  "roll": {
+   "time": 0.46,
+   "speed": 470,
+   "cost": 25,
+   "iFrom": 0.06,
+   "iTo": 0.31
+  },
+  "swings": [
+   {
+    "windup": 0.14,
+    "active": 0.09,
+    "recover": 0.3,
+    "damage": 11,
+    "reach": [
+     18,
+     94
+    ],
+    "cost": 20
+   },
+   {
+    "windup": 0.13,
+    "active": 0.1,
+    "recover": 0.42,
+    "damage": 16,
+    "reach": [
+     18,
+     104
+    ],
+    "cost": 26
+   }
+  ],
+  "block": {
+   "soak": 0.22,
+   "stamPerDamage": 1.7,
+   "regen": 9
+  },
+  "parry": {
+   "window": 0.3,
+   "lock": 0.5,
+   "stagger": 1.1
+  },
+  "skills": {
+   "kindle": {
+    "hpCost": 12,
+    "burn": 9,
+    "bonus": 1.45,
+    "oncePerRest": true
+   },
+   "seal": {
+    "soak": 0.45,
+    "drain": 22,
+    "regenOff": true
+   },
+   "draw": {
+    "damage": 62,
+    "window": 1,
+    "flask": 1
+   }
+  },
+  "drink": {
+   "time": 0.95,
+   "heal": 46
+  },
+  "hurt": 0.34,
+  "stagger": 0.85,
+  "regen": 27,
+  "regenDelay": 0.42
+ },
+ "warden": {
+  "hp": 300,
+  "bodyR": 46,
+  "speed": 96,
+  "poise": 62,
+  "staggerTime": 0.7,
+  "think": 0.34,
+  "phaseAt": 0.5,
+  "roarTime": 1.15
+ },
+ "upgrades": {
+  "vigour": {
+   "max": 5,
+   "hp": 14
+  },
+  "endurance": {
+   "max": 5,
+   "stamina": 12
+  },
+  "strength": {
+   "max": 5,
+   "damage": 2.6
+  },
+  "flasks": {
+   "max": 3
+  }
+ },
+ "light_levels": {
+  "dark": 0.16,
+  "dim": 0.3,
+  "grey": 0.46,
+  "pale": 0.62,
+  "warm": 0.42,
+  "gold": 0.58
+ },
+ "placement": {
+  "single": [
+   13,
+   14.6,
+   14.6,
+   14.6
+  ],
+  "spread": [
+   7,
+   17.5,
+   12,
+   8.6
+  ],
+  "pack": [
+   10,
+   13.5,
+   16.5,
+   7.5
+  ],
+  "ambush": [
+   18.5,
+   20.5,
+   15,
+   20.1
+  ],
+  "ring": [
+   9,
+   15,
+   12,
+   18
+  ]
+ }
+}

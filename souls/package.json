@@ -9,6 +9,7 @@
     "assets": "node tools/assets.js",
     "eye": "node tools/eye.js",
     "pixel": "python3 tools/pixel.py",
-    "blockout": "node tools/draw.js all"
+    "blockout": "node tools/draw.js all",
+    "godot": "node tools/godot.js"
   }
 }

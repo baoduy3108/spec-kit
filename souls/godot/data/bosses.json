@@ -1,0 +1,1083 @@
+{
+ "the-bloated": {
+  "area": "drainage",
+  "tier": 1,
+  "hp": 240,
+  "poise": 50,
+  "name": {
+   "en": "The Bloated",
+   "vi": "Kẻ Trương Phình"
+  },
+  "line": {
+   "en": "It drank the water the whole city drains into, and it kept drinking.",
+   "vi": "Nó uống thứ nước mà cả thành phố thải xuống, rồi vẫn uống tiếp."
+  },
+  "moves": [
+   {
+    "id": "wallow",
+    "windup": 0.8,
+    "active": 0.16,
+    "recover": 0.7,
+    "damage": 16,
+    "reach": [
+     20,
+     130
+    ],
+    "tell": "it rolls its weight backwards first"
+   },
+   {
+    "id": "spew",
+    "windup": 1,
+    "active": 0.3,
+    "recover": 0.8,
+    "damage": 20,
+    "reach": [
+     40,
+     220
+    ],
+    "tell": "the throat swells — leave the cone"
+   },
+   {
+    "id": "flop",
+    "windup": 0.9,
+    "active": 0.12,
+    "recover": 0.95,
+    "damage": 24,
+    "reach": [
+     0,
+     110
+    ],
+    "tell": "it lifts, and everything under it dies"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "The floor floods. It moves faster in it than you do.",
+    "vi": "Nước dâng. Trong nước nó nhanh hơn bạn."
+   },
+   "recoverScale": 0.82
+  }
+ },
+ "the-watchman": {
+  "area": "ramparts",
+  "tier": 2,
+  "hp": 300,
+  "poise": 62,
+  "name": {
+   "en": "The Watchman",
+   "vi": "Người Canh Gác"
+  },
+  "line": {
+   "en": "Nobody relieved him. He is still doing the job, and you are on the wall.",
+   "vi": "Không ai đến thay ca. Ông ta vẫn làm phận sự, còn bạn thì đang ở trên tường."
+  },
+  "moves": [
+   {
+    "id": "halberd-sweep",
+    "windup": 0.62,
+    "active": 0.14,
+    "recover": 0.55,
+    "damage": 19,
+    "reach": [
+     30,
+     190
+    ],
+    "tell": "the shaft goes back over his shoulder"
+   },
+   {
+    "id": "shove",
+    "windup": 0.45,
+    "active": 0.1,
+    "recover": 0.4,
+    "damage": 12,
+    "reach": [
+     10,
+     90
+    ],
+    "tell": "a short push — it wants the drop behind you"
+   },
+   {
+    "id": "overhead",
+    "windup": 1,
+    "active": 0.1,
+    "recover": 0.9,
+    "damage": 30,
+    "reach": [
+     10,
+     140
+    ],
+    "tell": "both hands up, a long beat, the biggest punish"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "He stops calling the alarm and starts closing distance.",
+    "vi": "Ông ta thôi hô báo động và bắt đầu ép sát."
+   },
+   "recoverScale": 0.8
+  }
+ },
+ "the-chanter": {
+  "area": "ossuary",
+  "tier": 3,
+  "hp": 340,
+  "poise": 46,
+  "name": {
+   "en": "The Chanter",
+   "vi": "Kẻ Tụng Kinh"
+  },
+  "line": {
+   "en": "The bones are stacked in the shape of a choir. She is keeping time for them.",
+   "vi": "Xương được xếp thành hình một dàn hợp xướng. Bà ta đang giữ nhịp cho chúng."
+  },
+  "moves": [
+   {
+    "id": "verse",
+    "windup": 0.9,
+    "active": 0.2,
+    "recover": 0.6,
+    "damage": 18,
+    "reach": [
+     -160,
+     160
+    ],
+    "tell": "a ring of sound — get outside it, not behind her"
+   },
+   {
+    "id": "censer",
+    "windup": 0.55,
+    "active": 0.12,
+    "recover": 0.5,
+    "damage": 17,
+    "reach": [
+     26,
+     150
+    ],
+    "tell": "the chain swings wide before it comes round"
+   },
+   {
+    "id": "kneel",
+    "windup": 1.1,
+    "active": 0.4,
+    "recover": 0.88,
+    "damage": 26,
+    "reach": [
+     -90,
+     90
+    ],
+    "tell": "she kneels and the floor answers"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "The choir joins in. Two verses now, back to back.",
+    "vi": "Dàn đồng ca hoà theo. Giờ là hai đoạn liền nhau."
+   },
+   "recoverScale": 0.78
+  }
+ },
+ "the-gilded": {
+  "area": "solarium",
+  "tier": 4,
+  "hp": 380,
+  "poise": 70,
+  "name": {
+   "en": "The Gilded",
+   "vi": "Kẻ Mạ Vàng"
+  },
+  "line": {
+   "en": "They covered him in gold to honour him. He has not been able to move his face since.",
+   "vi": "Người ta mạ vàng lên ông để tôn vinh. Từ đó ông không cử động nổi khuôn mặt mình nữa."
+  },
+  "moves": [
+   {
+    "id": "gleam",
+    "windup": 0.75,
+    "active": 0.14,
+    "recover": 0.6,
+    "damage": 21,
+    "reach": [
+     24,
+     170
+    ],
+    "tell": "light runs down the blade before it moves"
+   },
+   {
+    "id": "crown-toss",
+    "windup": 0.85,
+    "active": 0.25,
+    "recover": 0.7,
+    "damage": 19,
+    "reach": [
+     60,
+     300
+    ],
+    "tell": "thrown — it comes back, so do not stand still after"
+   },
+   {
+    "id": "genuflect",
+    "windup": 1.05,
+    "active": 0.12,
+    "recover": 0.85,
+    "damage": 32,
+    "reach": [
+     10,
+     130
+    ],
+    "tell": "he bows. What follows is not a bow"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "The gold cracks off him in sheets and he can finally move.",
+    "vi": "Vàng nứt ra từng mảng, và cuối cùng ông ta cử động được."
+   },
+   "recoverScale": 0.74
+  }
+ },
+ "the-drowned-king": {
+  "area": "marsh",
+  "tier": 4,
+  "hp": 420,
+  "poise": 84,
+  "name": {
+   "en": "The Drowned King",
+   "vi": "Vua Chết Đuối"
+  },
+  "line": {
+   "en": "He walked into the marsh with his court behind him. The court is still behind him.",
+   "vi": "Ông ta lội vào đầm với cả triều đình theo sau. Triều đình vẫn còn theo sau."
+  },
+  "moves": [
+   {
+    "id": "tide-pull",
+    "windup": 0.9,
+    "active": 0.3,
+    "recover": 0.65,
+    "damage": 17,
+    "reach": [
+     -200,
+     200
+    ],
+    "tell": "the water leans towards him first"
+   },
+   {
+    "id": "sceptre",
+    "windup": 0.7,
+    "active": 0.14,
+    "recover": 0.6,
+    "damage": 21,
+    "reach": [
+     30,
+     180
+    ],
+    "tell": "the sceptre lifts one beat early"
+   },
+   {
+    "id": "court-call",
+    "windup": 1.15,
+    "active": 0.2,
+    "recover": 0.9,
+    "damage": 29,
+    "reach": [
+     -140,
+     140
+    ],
+    "tell": "he calls, and three of them stand up"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "The court no longer waits to be called.",
+    "vi": "Triều đình không đợi được gọi nữa."
+   },
+   "recoverScale": 0.8
+  }
+ },
+ "the-smith": {
+  "area": "forge",
+  "tier": 5,
+  "hp": 460,
+  "poise": 96,
+  "name": {
+   "en": "The Smith",
+   "vi": "Người Thợ Rèn"
+  },
+  "line": {
+   "en": "He made most of what you are carrying. He would like it back.",
+   "vi": "Phần lớn thứ bạn đang cầm là do ông ta rèn. Ông ta muốn lấy lại."
+  },
+  "moves": [
+   {
+    "id": "hammer-fall",
+    "windup": 1,
+    "active": 0.12,
+    "recover": 0.85,
+    "damage": 34,
+    "reach": [
+     10,
+     140
+    ],
+    "tell": "the hammer goes up and the room goes quiet"
+   },
+   {
+    "id": "tongs",
+    "windup": 0.5,
+    "active": 0.1,
+    "recover": 0.45,
+    "damage": 18,
+    "reach": [
+     20,
+     120
+    ],
+    "tell": "quick, and it grabs — do not be there"
+   },
+   {
+    "id": "quench",
+    "windup": 0.85,
+    "active": 0.35,
+    "recover": 0.7,
+    "damage": 20,
+    "reach": [
+     -170,
+     170
+    ],
+    "tell": "steam, in a ring, from the trough"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "He stops working the metal and starts working you.",
+    "vi": "Ông ta thôi rèn sắt và bắt đầu rèn bạn."
+   },
+   "recoverScale": 0.76
+  }
+ },
+ "the-gardener": {
+  "area": "bone-orchard",
+  "tier": 5,
+  "hp": 430,
+  "poise": 60,
+  "name": {
+   "en": "The Gardener",
+   "vi": "Người Làm Vườn"
+  },
+  "line": {
+   "en": "Something has to plant them in rows. She has been very patient about it.",
+   "vi": "Phải có ai đó trồng chúng thành hàng. Bà ta đã rất kiên nhẫn với việc đó."
+  },
+  "moves": [
+   {
+    "id": "prune",
+    "windup": 0.6,
+    "active": 0.14,
+    "recover": 0.52,
+    "damage": 20,
+    "reach": [
+     28,
+     175
+    ],
+    "tell": "the shears open — that is your beat"
+   },
+   {
+    "id": "sow",
+    "windup": 0.95,
+    "active": 0.3,
+    "recover": 0.75,
+    "damage": 18,
+    "reach": [
+     -180,
+     180
+    ],
+    "tell": "she scatters, and the ground answers a moment later"
+   },
+   {
+    "id": "uproot",
+    "windup": 1.05,
+    "active": 0.14,
+    "recover": 0.9,
+    "damage": 30,
+    "reach": [
+     10,
+     120
+    ],
+    "tell": "she reaches into the soil for something long"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "The rows stand up. She keeps gardening around them.",
+    "vi": "Những hàng cây đứng dậy. Bà ta vẫn làm vườn giữa chúng."
+   },
+   "recoverScale": 0.8
+  }
+ },
+ "the-tide": {
+  "area": "drowned-city",
+  "tier": 6,
+  "hp": 500,
+  "poise": 74,
+  "name": {
+   "en": "The Tide",
+   "vi": "Con Nước"
+  },
+  "line": {
+   "en": "Not a person. It wears the street it came down, and the street is still moving.",
+   "vi": "Không phải một con người. Nó khoác lên mình con phố nó tràn qua, và con phố vẫn đang trôi."
+  },
+  "moves": [
+   {
+    "id": "surge",
+    "windup": 0.8,
+    "active": 0.34,
+    "recover": 0.6,
+    "damage": 22,
+    "reach": [
+     0,
+     260
+    ],
+    "tell": "it gathers at the far wall — roll through, not away"
+   },
+   {
+    "id": "undertow",
+    "windup": 0.95,
+    "active": 0.22,
+    "recover": 0.8,
+    "damage": 20,
+    "reach": [
+     -190,
+     190
+    ],
+    "tell": "the floor pulls before it hits"
+   },
+   {
+    "id": "break",
+    "windup": 1.1,
+    "active": 0.14,
+    "recover": 0.9,
+    "damage": 33,
+    "reach": [
+     10,
+     150
+    ],
+    "tell": "it rears. Everything under it goes flat"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "It stops receding between waves.",
+    "vi": "Nó thôi rút đi giữa các đợt sóng."
+   },
+   "recoverScale": 0.72
+  }
+ },
+ "the-keeper": {
+  "area": "spire",
+  "tier": 6,
+  "hp": 470,
+  "poise": 66,
+  "name": {
+   "en": "The Keeper",
+   "vi": "Người Trông Coi"
+  },
+  "line": {
+   "en": "She keeps the stair. Not from anything — she simply keeps it.",
+   "vi": "Bà ta trông coi cầu thang. Không phải để chống ai — bà ta chỉ trông coi nó."
+  },
+  "moves": [
+   {
+    "id": "descend",
+    "windup": 0.72,
+    "active": 0.3,
+    "recover": 0.66,
+    "damage": 23,
+    "reach": [
+     0,
+     200
+    ],
+    "tell": "she steps down through you"
+   },
+   {
+    "id": "lash",
+    "windup": 0.55,
+    "active": 0.12,
+    "recover": 0.5,
+    "damage": 19,
+    "reach": [
+     30,
+     165
+    ],
+    "tell": "short, fast, and it comes twice"
+   },
+   {
+    "id": "toll",
+    "windup": 1,
+    "active": 0.25,
+    "recover": 0.82,
+    "damage": 27,
+    "reach": [
+     -150,
+     150
+    ],
+    "tell": "the bell above her rings first"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "The bell rings on its own now, and she moves on it.",
+    "vi": "Chuông tự ngân, và bà ta chuyển động theo tiếng chuông."
+   },
+   "recoverScale": 0.74
+  }
+ },
+ "the-shepherd": {
+  "area": "pale-wood",
+  "tier": 6,
+  "hp": 520,
+  "poise": 88,
+  "name": {
+   "en": "The Shepherd",
+   "vi": "Người Chăn"
+  },
+  "line": {
+   "en": "The pale wood is a flock. He is not protecting it from you.",
+   "vi": "Rừng nhợt là một đàn gia súc. Ông ta không bảo vệ nó khỏi bạn đâu."
+  },
+  "moves": [
+   {
+    "id": "crook",
+    "windup": 0.68,
+    "active": 0.14,
+    "recover": 0.58,
+    "damage": 22,
+    "reach": [
+     30,
+     185
+    ],
+    "tell": "the crook hooks before it swings"
+   },
+   {
+    "id": "whistle",
+    "windup": 0.95,
+    "active": 0.18,
+    "recover": 0.85,
+    "damage": 31,
+    "reach": [
+     -200,
+     200
+    ],
+    "tell": "two notes. The trees answer the second"
+   },
+   {
+    "id": "drive",
+    "windup": 0.78,
+    "active": 0.32,
+    "recover": 0.7,
+    "damage": 23,
+    "reach": [
+     0,
+     230
+    ],
+    "tell": "he walks you backwards into the flock"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "He stops whistling and the wood keeps moving anyway.",
+    "vi": "Ông ta ngừng huýt sáo, mà rừng vẫn cứ chuyển động."
+   },
+   "recoverScale": 0.76
+  }
+ },
+ "the-ember-knight": {
+  "area": "cinder-gate",
+  "tier": 7,
+  "hp": 540,
+  "poise": 92,
+  "name": {
+   "en": "The Ember Knight",
+   "vi": "Hiệp Sĩ Than Hồng"
+  },
+  "line": {
+   "en": "The armour is the only thing holding the fire in the shape of a person.",
+   "vi": "Bộ giáp là thứ duy nhất giữ ngọn lửa ở hình dạng một con người."
+  },
+  "moves": [
+   {
+    "id": "sear",
+    "windup": 0.6,
+    "active": 0.14,
+    "recover": 0.52,
+    "damage": 24,
+    "reach": [
+     26,
+     175
+    ],
+    "tell": "the blade brightens along its length"
+   },
+   {
+    "id": "charge",
+    "windup": 0.75,
+    "active": 0.34,
+    "recover": 0.68,
+    "damage": 28,
+    "reach": [
+     0,
+     240
+    ],
+    "tell": "it comes at you — roll into it"
+   },
+   {
+    "id": "collapse",
+    "windup": 1.05,
+    "active": 0.16,
+    "recover": 0.88,
+    "damage": 36,
+    "reach": [
+     -120,
+     120
+    ],
+    "tell": "the armour opens and everything comes out"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "The armour stops closing between attacks.",
+    "vi": "Bộ giáp thôi khép lại giữa các đòn."
+   },
+   "recoverScale": 0.7
+  }
+ },
+ "the-astronomer": {
+  "area": "star-well",
+  "tier": 8,
+  "hp": 560,
+  "poise": 58,
+  "name": {
+   "en": "The Astronomer",
+   "vi": "Nhà Thiên Văn"
+  },
+  "line": {
+   "en": "He went down the well to see the sky better. He was right.",
+   "vi": "Ông ta xuống đáy giếng để nhìn bầu trời rõ hơn. Ông ta đã đúng."
+  },
+  "moves": [
+   {
+    "id": "transit",
+    "windup": 0.85,
+    "active": 0.22,
+    "recover": 0.7,
+    "damage": 25,
+    "reach": [
+     -210,
+     210
+    ],
+    "tell": "a slow line crosses the floor — it is a schedule"
+   },
+   {
+    "id": "parallax",
+    "windup": 0.6,
+    "active": 0.12,
+    "recover": 0.55,
+    "damage": 21,
+    "reach": [
+     30,
+     170
+    ],
+    "tell": "he is not where he appears for one beat"
+   },
+   {
+    "id": "eclipse",
+    "windup": 1.2,
+    "active": 0.35,
+    "recover": 0.9,
+    "damage": 34,
+    "reach": [
+     -160,
+     160
+    ],
+    "tell": "the room darkens from the edges inward"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "Two transits at once, crossing.",
+    "vi": "Hai đường quá cảnh cùng lúc, cắt nhau."
+   },
+   "recoverScale": 0.72
+  }
+ },
+ "the-old-root": {
+  "area": "root-deep",
+  "tier": 8,
+  "hp": 620,
+  "poise": 120,
+  "name": {
+   "en": "The Old Root",
+   "vi": "Rễ Già"
+  },
+  "line": {
+   "en": "Everything above ground in this world is one plant. This is the part that thinks.",
+   "vi": "Mọi thứ mọc trên mặt đất ở thế giới này là một cái cây. Đây là phần biết nghĩ."
+  },
+  "moves": [
+   {
+    "id": "grasp",
+    "windup": 0.95,
+    "active": 0.18,
+    "recover": 0.8,
+    "damage": 26,
+    "reach": [
+     -170,
+     170
+    ],
+    "tell": "the floor lifts where it will close"
+   },
+   {
+    "id": "lash",
+    "windup": 0.62,
+    "active": 0.14,
+    "recover": 0.55,
+    "damage": 23,
+    "reach": [
+     40,
+     210
+    ],
+    "tell": "one root, fast, from the side you are not watching"
+   },
+   {
+    "id": "deepen",
+    "windup": 1.25,
+    "active": 0.4,
+    "recover": 0.95,
+    "damage": 38,
+    "reach": [
+     -140,
+     140
+    ],
+    "tell": "it pulls down. Standing still is the mistake"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "It stops using roots and starts using the room.",
+    "vi": "Nó thôi dùng rễ và bắt đầu dùng cả căn phòng."
+   },
+   "recoverScale": 0.76
+  }
+ },
+ "the-slagborn": {
+  "area": "slag",
+  "tier": 9,
+  "hp": 600,
+  "poise": 104,
+  "name": {
+   "en": "The Slagborn",
+   "vi": "Kẻ Sinh Từ Xỉ"
+  },
+  "line": {
+   "en": "What the forge threw away, cooling for a hundred years into a shape with intent.",
+   "vi": "Thứ lò rèn vứt đi, nguội dần trăm năm thành một hình hài có ý đồ."
+  },
+  "moves": [
+   {
+    "id": "pour",
+    "windup": 0.9,
+    "active": 0.36,
+    "recover": 0.72,
+    "damage": 27,
+    "reach": [
+     -180,
+     180
+    ],
+    "tell": "it tips, and what comes out stays hot"
+   },
+   {
+    "id": "scab",
+    "windup": 0.55,
+    "active": 0.12,
+    "recover": 0.5,
+    "damage": 22,
+    "reach": [
+     24,
+     160
+    ],
+    "tell": "a crust flakes off first"
+   },
+   {
+    "id": "reforge",
+    "windup": 1.15,
+    "active": 0.16,
+    "recover": 0.92,
+    "damage": 37,
+    "reach": [
+     10,
+     150
+    ],
+    "tell": "it hardens, then it swings once"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "It stops cooling between moves.",
+    "vi": "Nó thôi nguội đi giữa các đòn."
+   },
+   "recoverScale": 0.7
+  }
+ },
+ "the-hourwright": {
+  "area": "clockwork",
+  "tier": 10,
+  "hp": 650,
+  "poise": 90,
+  "name": {
+   "en": "The Hourwright",
+   "vi": "Thợ Chế Giờ"
+  },
+  "line": {
+   "en": "She built the clock that decides when the lanterns are lit. It has been wrong for years.",
+   "vi": "Bà ta chế ra cái đồng hồ quyết định giờ thắp đèn. Nó chạy sai đã nhiều năm rồi."
+  },
+  "moves": [
+   {
+    "id": "escapement",
+    "windup": 0.6,
+    "active": 0.14,
+    "recover": 0.5,
+    "damage": 26,
+    "reach": [
+     28,
+     180
+    ],
+    "tell": "tick — the same beat, every time, forever"
+   },
+   {
+    "id": "mainspring",
+    "windup": 0.8,
+    "active": 0.3,
+    "recover": 0.68,
+    "damage": 29,
+    "reach": [
+     0,
+     250
+    ],
+    "tell": "she winds, then releases across the floor"
+   },
+   {
+    "id": "strike-twelve",
+    "windup": 1.3,
+    "active": 0.5,
+    "recover": 0.95,
+    "damage": 40,
+    "reach": [
+     -200,
+     200
+    ],
+    "tell": "twelve of them. Count, and move on the count"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "The clock runs fast. Everything she does is on the new beat.",
+    "vi": "Đồng hồ chạy nhanh lên. Mọi đòn của bà ta theo nhịp mới."
+   },
+   "recoverScale": 0.68
+  }
+ },
+ "the-crucible-twins": {
+  "area": "crucible",
+  "tier": 10,
+  "hp": 340,
+  "poise": 56,
+  "twin": true,
+  "name": {
+   "en": "The Crucible Twins",
+   "vi": "Cặp Song Sinh Lò Luyện"
+  },
+  "line": {
+   "en": "One of them is the fire and one of them is the vessel. They will not tell you which.",
+   "vi": "Một đứa là lửa, một đứa là cái lò. Chúng sẽ không nói cho bạn biết đứa nào."
+  },
+  "moves": [
+   {
+    "id": "cross",
+    "windup": 0.6,
+    "active": 0.14,
+    "recover": 0.5,
+    "damage": 22,
+    "reach": [
+     24,
+     170
+    ],
+    "tell": "they swing towards each other, and you are between"
+   },
+   {
+    "id": "pass",
+    "windup": 0.75,
+    "active": 0.28,
+    "recover": 0.62,
+    "damage": 25,
+    "reach": [
+     0,
+     230
+    ],
+    "tell": "one throws the fire to the other, through you"
+   },
+   {
+    "id": "seal",
+    "windup": 1.1,
+    "active": 0.2,
+    "recover": 0.85,
+    "damage": 33,
+    "reach": [
+     -150,
+     150
+    ],
+    "tell": "they meet in the middle. Do not be in the middle"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "Kill one and the other takes both jobs, and both movesets.",
+    "vi": "Giết một đứa thì đứa kia nhận cả hai vai, và cả hai bộ đòn."
+   },
+   "recoverScale": 0.66
+  }
+ },
+ "the-first-flame": {
+  "area": "kiln",
+  "tier": 11,
+  "hp": 700,
+  "poise": 130,
+  "name": {
+   "en": "The First Flame",
+   "vi": "Ngọn Lửa Đầu Tiên"
+  },
+  "line": {
+   "en": "It is not defending itself. It is trying to go out, and you are in the way.",
+   "vi": "Nó không tự vệ. Nó đang cố tắt đi, và bạn thì đứng chắn đường."
+  },
+  "moves": [
+   {
+    "id": "gutter",
+    "windup": 0.7,
+    "active": 0.16,
+    "recover": 0.58,
+    "damage": 28,
+    "reach": [
+     -190,
+     190
+    ],
+    "tell": "it dims, and the dark is the dangerous part"
+   },
+   {
+    "id": "flare",
+    "windup": 0.85,
+    "active": 0.3,
+    "recover": 0.7,
+    "damage": 32,
+    "reach": [
+     0,
+     250
+    ],
+    "tell": "it reaches, once, all the way across"
+   },
+   {
+    "id": "kindle",
+    "windup": 1.35,
+    "active": 0.45,
+    "recover": 1,
+    "damage": 42,
+    "reach": [
+     -170,
+     170
+    ],
+    "tell": "the longest tell in the world, and the last one"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "It stops trying to go out.",
+    "vi": "Nó thôi không cố tắt nữa."
+   },
+   "recoverScale": 0.66
+  }
+ },
+ "the-lantern-warden": {
+  "area": "the-lantern",
+  "tier": 11,
+  "hp": 720,
+  "poise": 140,
+  "name": {
+   "en": "The Lantern Warden",
+   "vi": "Người Gác Đèn"
+  },
+  "line": {
+   "en": "Somebody has to carry it. Nobody said the carrier gets to put it down.",
+   "vi": "Phải có ai đó cầm cây đèn. Không ai nói người cầm được phép đặt nó xuống."
+  },
+  "moves": [
+   {
+    "id": "sweep",
+    "windup": 0.62,
+    "active": 0.14,
+    "recover": 0.52,
+    "damage": 26,
+    "reach": [
+     26,
+     200
+    ],
+    "tell": "the lantern arm goes back"
+   },
+   {
+    "id": "slam",
+    "windup": 1,
+    "active": 0.1,
+    "recover": 0.9,
+    "damage": 40,
+    "reach": [
+     10,
+     160
+    ],
+    "tell": "the sword arm goes straight up alone, the longest punish in the fight"
+   },
+   {
+    "id": "lunge",
+    "windup": 0.72,
+    "active": 0.34,
+    "recover": 0.72,
+    "damage": 32,
+    "reach": [
+     0,
+     260
+    ],
+    "tell": "it crosses the room — roll into it, never away"
+   }
+  ],
+  "phase2": {
+   "at": 0.5,
+   "change": {
+    "en": "The lantern opens. Everything recovers faster, nothing telegraphs less.",
+    "vi": "Cây đèn mở ra. Mọi đòn hồi nhanh hơn, không đòn nào bớt báo trước."
+   },
+   "recoverScale": 0.76
+  }
+ }
+}
