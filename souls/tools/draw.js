@@ -21,6 +21,7 @@ import { BESTIARY } from '../src/bosses.js';
 import { LORE } from '../src/lore.js';
 import { HERO } from '../src/hero.js';
 import { KNIGHT } from '../src/rules.js';
+import { linksOf, useGeometry } from './links.js';
 // The blockout must not invent a scale or a camera; both belong to the game.
 export const UNITS_PER_METRE = 34;
 const CAMERA = { viewport: [1280, 720], zoom: 1.35 };
@@ -60,6 +61,8 @@ const INK = {
 
 const out = [];
 const put = (s) => out.push(s);
+/** The links of the area being drawn. Set by drawArea before any panel. */
+let LINKS = [];
 const n = (v) => Number(v).toFixed(1);
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -589,10 +592,34 @@ function panel(room, top) {
     text(fx, fy + 32, `${foe.hp}hp ${foe.damage}dmg ${foe.windup}s`, { size: 8, fill: INK.dim, anchor: 'middle', mono: true });
   });
 
-  // --- exits ---------------------------------------------------------------
-  for (const [ex, lab] of [[0.5, '←'], [ROOM_M - 0.5, '→']]) {
+  // --- exits: the real ones, off the link graph ----------------------------
+  // Every room used to be drawn with a door at each end, because that was the
+  // only way the game connected. Some of them are holes in the floor and ledges
+  // at the ceiling now, and the sheet has to say which.
+  const ways = LINKS.filter((l) => l.from === room.id);
+  const side = ways.filter((l) => l.dir === 'right').length;
+  for (const [ex, lab, show] of [[0.5, '←', true], [ROOM_M - 0.5, '→', side > 0]]) {
+    if (!show) continue;
     put(`<rect x="${n(bx + m(ex) - 9)}" y="${n(yAt(ex) - m(2.1))}" width="18" height="${n(m(2.1))}" fill="${INK.paper}" stroke="${INK.rule}" stroke-width="1"/>`);
     text(bx + m(ex), yAt(ex) - m(0.9), lab, { size: 12, fill: INK.dim, anchor: 'middle' });
+  }
+  for (const l of ways) {
+    const colour = l.kind === 'shortcut' ? INK.note : INK.hero;
+    const to = l.to.split(':')[1];
+    if (l.dir === 'down') {
+      const dx = bx + m(l.at);
+      put(`<path d="M ${n(dx - 11)} ${n(floor + 8)} L ${n(dx + 11)} ${n(floor + 8)} L ${n(dx)} ${n(floor + 30)} Z" fill="${colour}" fill-opacity="0.8"/>`);
+      text(dx, floor + 44, `xuống ${to}`, { size: 8.5, fill: colour, anchor: 'middle', mono: true });
+    } else if (l.dir === 'up') {
+      const dx = bx + m(l.at);
+      const ly = floor - m(JUMP_UP * 1.5) - 26;
+      put(`<path d="M ${n(dx - 11)} ${n(ly)} L ${n(dx + 11)} ${n(ly)} L ${n(dx)} ${n(ly - 22)} Z" fill="${colour}" fill-opacity="0.8"/>`);
+      text(dx, ly - 28, `lên ${to}`, { size: 8.5, fill: colour, anchor: 'middle', mono: true });
+    } else if (l.kind === 'shortcut') {
+      const dx = bx + m(l.at);
+      put(`<rect x="${n(dx - 13)}" y="${n(yAt(l.at) - m(2.4))}" width="26" height="${n(m(2.4))}" fill="none" stroke="${colour}" stroke-width="1.8" stroke-dasharray="4 3"/>`);
+      text(dx, yAt(l.at) + 15, `tắt → ${to}`, { size: 8.5, fill: colour, anchor: 'middle', mono: true });
+    }
   }
   // --- what fits on screen at once -----------------------------------------
   // what the camera actually shows, from the viewport and zoom the game uses
@@ -631,6 +658,7 @@ function panel(room, top) {
     ['hụt chân', hole.length ? hole.map(([a, b]) => `${(b - a).toFixed(1)}m`).join(', ') : 'không'],
     ['bệ trên cao', platforms(room).length ? `${platforms(room).length}${gated(room).length ? ` (${gated(room).length} cần sào)` : ''}` : '—'],
     ['băng qua', `${(ROOM_M * UNITS_PER_METRE / KNIGHT.speed).toFixed(1)}s`],
+    ['lối ra', LINKS.filter((l) => l.from === room.id).map((l) => (l.kind === 'shortcut' ? 'tắt' : l.dir)).join(', ') || 'cuối khu'],
   ];
   rows.forEach(([k, v], i) => {
     text(sx, y + 88 + i * 14, k, { size: 9.5, fill: INK.faint, mono: true });
@@ -689,6 +717,7 @@ export function drawArea(areaId) {
   });
   line(PAD, HEAD - 22, W - PAD, HEAD - 22, INK.rule, 1, 0.5);
 
+  LINKS = linksOf(areaId);
   rooms.forEach((room, i) => panel(room, HEAD + i * PANEL));
 
   const rollM = (KNIGHT.roll.speed * KNIGHT.roll.time) / 100;
@@ -715,6 +744,17 @@ export function drawAll() {
 }
 
 export { profile, platforms, gaps, spots, furnitureOf, PX, HERO_M, ROOM_M, ROOM_H_M };
+
+// --- wiring ---------------------------------------------------------------
+// links.js decides where doors go and needs the shape of a room to do it. It is
+// handed the geometry rather than importing it, so the dependency runs one way:
+// draw -> links, never back.
+//
+// At the bottom of the file on purpose. Placed at the top it reaches ROOM_M and
+// JUMP_UP before their declarations and dies in the temporal dead zone — which
+// is the exact failure the comment in links.js warns about, and is how it was
+// found. Anything that wants links imports this module and gets it wired.
+useGeometry({ profile, platforms, gated, gaps, JUMP_UP, ROOM_M });
 
 const asked = process.argv[2];
 if (asked) {

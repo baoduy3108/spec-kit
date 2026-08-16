@@ -18,6 +18,8 @@ import { HERO } from '../src/hero.js';
 import { ABILITIES, SKILLS } from '../src/abilities.js';
 import { KNIGHT, WARDEN, ARENA, UPGRADES } from '../src/rules.js';
 import { profile, platforms, spots, ROOM_M } from './draw.js';
+// draw.js is imported above and wires links.js with the geometry as it loads
+import { allLinks } from './links.js';
 
 /** How many sim units make a metre. The arena is 820 units and a room is 24
  *  metres, and the hero art has always been drawn about 68 units tall for a
@@ -86,7 +88,9 @@ export function build() {
     aggro: 260,
   };
 
+  const links = allLinks();
   const world = {
+    links,
     areas: AREAS.map((a) => ({
       id: a.id, tier: a.tier, size: a.size, to: a.to, boss: a.boss ?? null,
       entrance: a.entrance, exit: a.exit, roomIds: a.roomIds,

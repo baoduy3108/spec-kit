@@ -232,8 +232,12 @@ export function promptsFor(areaId) {
   return { rooms: rooms.length, doc, path: `dist/prompt-${areaId}.md` };
 }
 
+// Only when run directly. Guarding on process.argv[2] alone meant that
+// importing this file as a library ran its CLI as a side effect — links.js
+// asking draw.js for a profile rendered a whole sheet to disk.
+const RUN = import.meta.url === `file://${process.argv[1]}`;
 const area = process.argv[2];
-if (area) {
+if (RUN && area) {
   if (area === 'all') {
     let total = 0;
     for (const a of AREAS) total += promptsFor(a.id).rooms;

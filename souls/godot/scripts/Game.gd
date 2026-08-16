@@ -17,6 +17,8 @@ var _hp_bar: ColorRect
 var _st_bar: ColorRect
 var _caption: Label
 var _cam: Camera2D
+## A shortcut is a door you open from the far side; until then it is a wall.
+var _shortcut_open: bool = false
 
 func _ready() -> void:
 	rooms = Data.rooms_of(AREA)
@@ -47,6 +49,9 @@ func _enter_room(i: int) -> void:
 	player.velocity = Vector2.ZERO
 	_spawn_foes(r)
 	_light(r)
+	for l in Data.world.links.get(AREA, []):
+		if l.kind == "shortcut" and l.from == r.id:
+			_shortcut_open = true
 	_caption.text = "%s — %s" % [_vi(r.name, r.id), _vi(r.line, "")]
 
 func _vi(d: Variant, fallback: String) -> String:
@@ -141,12 +146,47 @@ func _resolve_hits() -> void:
 		if dx <= f.strike_reach():
 			player.take(f.damage(), f.global_position.x)
 
+## You leave a room the way the link graph says you leave it. Walking off the
+## right edge used to be the only exit in the game, which is why the map read as
+## one horizontal line: a hole in the floor was a hazard and a high ledge was
+## scenery, because neither of them went anywhere.
 func _check_exit() -> void:
 	var w := Data.room_width()
-	if player.global_position.x > w - 24.0 and index < rooms.size() - 1:
-		_enter_room(index + 1)
-	elif player.global_position.x < 24.0 and index > 0:
+	var upm := Data.units_per_metre()
+	var here: String = rooms[index].id
+	for l in Data.world.links.get(AREA, []):
+		if l.from != here:
+			continue
+		var to_index := _index_of(l.to)
+		if to_index < 0:
+			continue
+		match l.dir:
+			"right":
+				if player.global_position.x > w - 24.0:
+					_enter_room(to_index)
+					return
+			"down":
+				# through the hole, and only if you are actually falling into it
+				if player.velocity.y > 0.0 and player.global_position.y > 200.0 					and absf(player.global_position.x - float(l.at) * upm) < 40.0:
+					_enter_room(to_index)
+					return
+			"up":
+				if player.global_position.y < -float(l.at_y if l.has("at_y") else 0) - 300.0 					and absf(player.global_position.x - float(l.at) * upm) < 60.0:
+					_enter_room(to_index)
+					return
+			"shortcut":
+				# opened from the far side: standing in it sends you back to the fire
+				if absf(player.global_position.x - float(l.at) * upm) < 30.0 and _shortcut_open:
+					_enter_room(to_index)
+					return
+	if player.global_position.x < 24.0 and index > 0:
 		_enter_room(index - 1)
+
+func _index_of(room_id: String) -> int:
+	for i in rooms.size():
+		if rooms[i].id == room_id:
+			return i
+	return -1
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_pressed() and event is InputEventKey and event.keycode == KEY_R:

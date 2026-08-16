@@ -142,8 +142,12 @@ export function preview(areaId, index) {
   return { room: room.id, name: room.name ? room.name.vi : room.id, foes: room.foes.length, path: `dist/godot-${areaId}-${index}.svg` };
 }
 
+// Only when run directly. Guarding on process.argv[2] alone meant that
+// importing this file as a library ran its CLI as a side effect — links.js
+// asking draw.js for a profile rendered a whole sheet to disk.
+const RUN = import.meta.url === `file://${process.argv[1]}`;
 const area = process.argv[2];
-if (area) {
+if (RUN && area) {
   const which = process.argv[3];
   const rooms = WORLD.rooms.filter((r) => r.area === area);
   const list = which === undefined || which === 'all' ? rooms.map((_, i) => i) : [Number(which)];
