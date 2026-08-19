@@ -86,7 +86,15 @@ export function linksOf(areaId) {
       continue;
     }
     if (roll < 0.4 && climbs.length) {
-      out.push({ from: from.id, to: to.id, dir: 'up', at: round(climbs[Math.floor(rng() * climbs.length)]), kind: 'spine' });
+      const at = climbs[Math.floor(rng() * climbs.length)];
+      // the height matters as much as the x: Godot has to know how high you
+      // must be before the door counts as taken. Shipping the link without it
+      // meant every climb exit in the game was inert.
+      const ledge = g.platforms(from).find(([a, b]) => at >= a - 0.6 && at <= b + 0.6);
+      out.push({
+        from: from.id, to: to.id, dir: 'up', at: round(at),
+        at_y: round(ledge ? ledge[2] : g.JUMP_UP * 1.5), kind: 'spine',
+      });
       continue;
     }
     out.push({ from: from.id, to: to.id, dir: 'right', at: g.ROOM_M - 0.5, kind: 'spine' });

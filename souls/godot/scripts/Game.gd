@@ -167,11 +167,16 @@ func _check_exit() -> void:
 					return
 			"down":
 				# through the hole, and only if you are actually falling into it
-				if player.velocity.y > 0.0 and player.global_position.y > 200.0 					and absf(player.global_position.x - float(l.at) * upm) < 40.0:
+				if player.velocity.y > 0.0 and player.global_position.y > 200.0 and absf(player.global_position.x - float(l.at) * upm) < 40.0:
 					_enter_room(to_index)
 					return
 			"up":
-				if player.global_position.y < -float(l.at_y if l.has("at_y") else 0) - 300.0 					and absf(player.global_position.x - float(l.at) * upm) < 60.0:
+				# standing on the ledge the link names, not merely somewhere high.
+				# This compared against a height the exporter never sent, so every
+				# climb exit in the game was inert and walking right was still the
+				# only way on.
+				var top: float = -float(l.at_y) * upm
+				if player.global_position.y <= top + 24.0 and absf(player.global_position.x - float(l.at) * upm) < 60.0:
 					_enter_room(to_index)
 					return
 			"shortcut":

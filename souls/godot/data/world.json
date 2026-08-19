@@ -6,6 +6,7 @@
     "to": "undercroft:1",
     "dir": "up",
     "at": 27.2,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -20,6 +21,7 @@
     "to": "undercroft:3",
     "dir": "up",
     "at": 31.8,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -100,6 +102,7 @@
     "to": "courtyard:7",
     "dir": "up",
     "at": 6.1,
+    "at_y": 3.9,
     "kind": "spine"
    },
    {
@@ -107,6 +110,7 @@
     "to": "courtyard:8",
     "dir": "up",
     "at": 33.3,
+    "at_y": 5.3,
     "kind": "spine"
    }
   ],
@@ -144,6 +148,7 @@
     "to": "drainage:5",
     "dir": "up",
     "at": 37,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -181,6 +186,7 @@
     "to": "gatehouse:3",
     "dir": "up",
     "at": 23.5,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -209,6 +215,7 @@
     "to": "gatehouse:7",
     "dir": "up",
     "at": 30.2,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -282,6 +289,7 @@
     "to": "cistern:7",
     "dir": "up",
     "at": 34.5,
+    "at_y": 6.6,
     "kind": "spine"
    },
    {
@@ -306,6 +314,7 @@
     "to": "ramparts:1",
     "dir": "up",
     "at": 22,
+    "at_y": 4.6,
     "kind": "spine"
    },
    {
@@ -348,6 +357,7 @@
     "to": "ramparts:7",
     "dir": "up",
     "at": 31.1,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -355,6 +365,7 @@
     "to": "ramparts:8",
     "dir": "up",
     "at": 19.5,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -362,6 +373,7 @@
     "to": "ramparts:9",
     "dir": "up",
     "at": 26.1,
+    "at_y": 2.1,
     "kind": "spine"
    },
    {
@@ -386,6 +398,7 @@
     "to": "chapelyard:1",
     "dir": "up",
     "at": 27.2,
+    "at_y": 5.6,
     "kind": "spine"
    },
    {
@@ -428,6 +441,7 @@
     "to": "chapelyard:7",
     "dir": "up",
     "at": 29.6,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -487,6 +501,7 @@
     "to": "bellfry:5",
     "dir": "up",
     "at": 38.2,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -546,6 +561,7 @@
     "to": "ossuary:5",
     "dir": "up",
     "at": 21.2,
+    "at_y": 4.4,
     "kind": "spine"
    },
    {
@@ -647,6 +663,7 @@
     "to": "upper-ward:7",
     "dir": "up",
     "at": 22.5,
+    "at_y": 2.1,
     "kind": "spine"
    },
    {
@@ -793,6 +810,7 @@
     "to": "solarium:5",
     "dir": "up",
     "at": 41.7,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -845,6 +863,7 @@
     "to": "deep-vault:4",
     "dir": "up",
     "at": 19.3,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -925,6 +944,7 @@
     "to": "marsh:4",
     "dir": "up",
     "at": 30.8,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -939,6 +959,7 @@
     "to": "marsh:6",
     "dir": "up",
     "at": 41.6,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -1012,6 +1033,7 @@
     "to": "aviary:4",
     "dir": "up",
     "at": 19,
+    "at_y": 2.1,
     "kind": "spine"
    },
    {
@@ -1019,6 +1041,7 @@
     "to": "aviary:5",
     "dir": "up",
     "at": 28,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -1033,6 +1056,7 @@
     "to": "aviary:7",
     "dir": "up",
     "at": 31.5,
+    "at_y": 4.4,
     "kind": "spine"
    },
    {
@@ -1144,6 +1168,7 @@
     "to": "sunken-road:3",
     "dir": "up",
     "at": 28.3,
+    "at_y": 0.8,
     "kind": "spine"
    },
    {
@@ -1158,6 +1183,7 @@
     "to": "sunken-road:5",
     "dir": "up",
     "at": 24,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -1269,6 +1295,7 @@
     "to": "ashlands:1",
     "dir": "up",
     "at": 28.3,
+    "at_y": 4.8,
     "kind": "spine"
    },
    {
@@ -1297,6 +1324,7 @@
     "to": "ashlands:5",
     "dir": "up",
     "at": 27.9,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -1304,6 +1332,7 @@
     "to": "ashlands:6",
     "dir": "up",
     "at": 22.7,
+    "at_y": 0.8,
     "kind": "spine"
    },
    {
@@ -1311,6 +1340,7 @@
     "to": "ashlands:7",
     "dir": "up",
     "at": 20.1,
+    "at_y": 3.9,
     "kind": "spine"
    },
    {
@@ -1339,6 +1369,7 @@
     "to": "ashlands:11",
     "dir": "up",
     "at": 31.7,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -1419,6 +1450,7 @@
     "to": "pale-wood:9",
     "dir": "up",
     "at": 21.2,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -1471,6 +1503,7 @@
     "to": "observatory:4",
     "dir": "up",
     "at": 24.9,
+    "at_y": 3.9,
     "kind": "spine"
    },
    {
@@ -1610,6 +1643,7 @@
     "to": "hollow-tree:4",
     "dir": "up",
     "at": 26.9,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -1624,6 +1658,7 @@
     "to": "hollow-tree:6",
     "dir": "up",
     "at": 13.7,
+    "at_y": 0.8,
     "kind": "spine"
    },
    {
@@ -1631,6 +1666,7 @@
     "to": "hollow-tree:7",
     "dir": "up",
     "at": 11.2,
+    "at_y": 5.7,
     "kind": "spine"
    },
    {
@@ -1645,6 +1681,7 @@
     "to": "hollow-tree:9",
     "dir": "up",
     "at": 36.6,
+    "at_y": 4.1,
     "kind": "spine"
    },
    {
@@ -1704,6 +1741,7 @@
     "to": "star-well:6",
     "dir": "up",
     "at": 27.4,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -1749,6 +1787,7 @@
     "to": "furnace:4",
     "dir": "up",
     "at": 33.3,
+    "at_y": 4.4,
     "kind": "spine"
    },
    {
@@ -1756,6 +1795,7 @@
     "to": "furnace:5",
     "dir": "up",
     "at": 22.4,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -1763,6 +1803,7 @@
     "to": "furnace:6",
     "dir": "up",
     "at": 21.3,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -1791,6 +1832,7 @@
     "to": "furnace:10",
     "dir": "up",
     "at": 25.6,
+    "at_y": 4.4,
     "kind": "spine"
    },
    {
@@ -1944,6 +1986,7 @@
     "to": "vault-of-hours:6",
     "dir": "up",
     "at": 41.4,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -1989,6 +2032,7 @@
     "to": "slag:3",
     "dir": "up",
     "at": 33.4,
+    "at_y": 0.8,
     "kind": "spine"
    },
    {
@@ -2024,6 +2068,7 @@
     "to": "slag:8",
     "dir": "up",
     "at": 25.9,
+    "at_y": 0.8,
     "kind": "spine"
    },
    {
@@ -2076,6 +2121,7 @@
     "to": "heartwood:4",
     "dir": "up",
     "at": 9.5,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -2097,6 +2143,7 @@
     "to": "heartwood:7",
     "dir": "up",
     "at": 18.1,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -2149,6 +2196,7 @@
     "to": "clockwork:4",
     "dir": "up",
     "at": 16.2,
+    "at_y": 3.9,
     "kind": "spine"
    },
    {
@@ -2163,6 +2211,7 @@
     "to": "clockwork:6",
     "dir": "up",
     "at": 13.8,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -2191,6 +2240,7 @@
     "to": "clockwork:10",
     "dir": "up",
     "at": 33.3,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -2215,6 +2265,7 @@
     "to": "crucible:1",
     "dir": "up",
     "at": 16.3,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -2229,6 +2280,7 @@
     "to": "crucible:3",
     "dir": "up",
     "at": 29.8,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -2278,6 +2330,7 @@
     "to": "crucible:10",
     "dir": "up",
     "at": 17.5,
+    "at_y": 1.6,
     "kind": "spine"
    },
    {
@@ -2330,6 +2383,7 @@
     "to": "drowned-city:4",
     "dir": "up",
     "at": 22.2,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -2337,6 +2391,7 @@
     "to": "drowned-city:5",
     "dir": "up",
     "at": 27,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -2358,6 +2413,7 @@
     "to": "drowned-city:8",
     "dir": "up",
     "at": 28.3,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -2379,6 +2435,7 @@
     "to": "drowned-city:11",
     "dir": "up",
     "at": 14.4,
+    "at_y": 4.2,
     "kind": "spine"
    },
    {
@@ -2431,6 +2488,7 @@
     "to": "bone-orchard:4",
     "dir": "up",
     "at": 12.5,
+    "at_y": 2.1,
     "kind": "spine"
    },
    {
@@ -2438,6 +2496,7 @@
     "to": "bone-orchard:5",
     "dir": "up",
     "at": 38.7,
+    "at_y": 5.2,
     "kind": "spine"
    },
    {
@@ -2483,6 +2542,7 @@
     "to": "winding-stair:1",
     "dir": "up",
     "at": 34.6,
+    "at_y": 5.3,
     "kind": "spine"
    },
    {
@@ -2570,6 +2630,7 @@
     "to": "the-lantern:4",
     "dir": "up",
     "at": 18,
+    "at_y": 4.4,
     "kind": "spine"
    },
    {
@@ -2584,6 +2645,7 @@
     "to": "the-lantern:6",
     "dir": "up",
     "at": 39.1,
+    "at_y": 3.9,
     "kind": "spine"
    },
    {
@@ -2622,6 +2684,7 @@
     "to": "kiln:3",
     "dir": "up",
     "at": 11.9,
+    "at_y": 2.1,
     "kind": "spine"
    },
    {
@@ -2643,6 +2706,7 @@
     "to": "kiln:6",
     "dir": "up",
     "at": 16.1,
+    "at_y": 4.1,
     "kind": "spine"
    },
    {

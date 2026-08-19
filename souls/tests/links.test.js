@@ -86,3 +86,17 @@ test('the map is not one long horizontal line any more', () => {
   assert.ok(share < 0.6,
     `${(share * 100).toFixed(0)}% vertical — the player never walks anywhere`);
 });
+
+test('a climb link carries the height Godot needs to fire it', () => {
+  // Shipped without at_y once: Godot compared against a height that was never
+  // exported, so every climb exit in the game was inert and the only way on was
+  // still walking right.
+  for (const area of AREAS)
+    for (const l of linksOf(area.id)) {
+      if (l.dir !== 'up') continue;
+      assert.ok(typeof l.at_y === 'number' && l.at_y > 0, `${l.from}: climb link has no height`);
+      const on = platforms(byId[l.from]).some(([a, b, y]) =>
+        l.at >= a - 0.6 && l.at <= b + 0.6 && Math.abs(y - l.at_y) < 0.01);
+      assert.ok(on, `${l.from}: climb link at ${l.at}m/${l.at_y}m matches no ledge`);
+    }
+});
