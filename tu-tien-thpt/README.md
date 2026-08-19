@@ -84,3 +84,10 @@ Mỗi câu hỏi là một object trong `src/data/*.js`:
 `muc`: 1 Nhận biết · 2 Thông hiểu · 3 Vận dụng · 4 Vận dụng cao.
 
 Thêm xong chạy `node check.mjs src/config.js src/data/*.js` — bộ kiểm tra sẽ bắt các lỗi thường gặp: thiếu đáp án, câu đúng/sai không đủ 4 ý, và **đáp án trả lời ngắn không khớp với lời giải**.
+
+## Bản đóng gói
+
+`node build.mjs` xuất ra hai file:
+
+- `thien-dao-lo.html` — bản đầy đủ, mở trực tiếp bằng trình duyệt, chạy offline.
+- `thien-dao-lo.artifact.html` — cùng nội dung nhưng bỏ khung `<html>/<head>/<body>` để đăng lên nền tảng tự bọc khung.
