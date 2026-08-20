@@ -176,3 +176,71 @@ TD.KHO.anh_ct = [
   vd: 'Từ nối chỉ trình tự: First → Then/Next → After that → <b>Finally</b>. Bám vào đây là ghép được cả đoạn.',
   bay: 'Đừng dịch từng chữ — hết giờ. Chỉ đọc kỹ đoạn chứa từ khoá của câu hỏi.' }
 ];
+
+TD.KHO.van_ct.push(
+
+/* ============ BỔ SUNG: KHUNG VIẾT & KIẾN THỨC TIẾNG VIỆT ============ */
+{ nhom: 'B. Đọc hiểu', ten: 'Bộ câu trả lời mẫu cho 5 dạng câu đọc hiểu', cap: 2,
+  ct: '<b>1. Nhận biết</b> (thể thơ, phương thức, phong cách, ngôi kể): trả lời thẳng một câu, không giải thích.<br><b>2. Chỉ ra chi tiết</b> ("Theo tác giả…"): trích đúng ý trong văn bản.<br><b>3. Nêu tác dụng biện pháp tu từ:</b> gọi tên → chỉ ra biểu hiện → nêu tác dụng (hình ảnh/nhịp điệu + nội dung + tình cảm tác giả).<br><b>4. Hiểu ý kiến/câu văn:</b> giải thích từ khoá → diễn giải cả câu → nêu ý nghĩa.<br><b>5. Bài học/thông điệp:</b> nêu rõ MỘT thông điệp → lí giải ngắn bằng trải nghiệm.',
+  khi: 'Toàn bộ 4,0 điểm phần Đọc hiểu — phần dễ ăn điểm nhất của đề Văn.',
+  vd: 'Câu hỏi tác dụng điệp ngữ: "Điệp ngữ X được lặp 3 lần, tạo nhịp điệu dồn dập, nhấn mạnh…, thể hiện tình cảm…".',
+  bay: 'Câu "Theo tác giả" phải bám văn bản; câu "Theo anh/chị" mới được nêu ý kiến riêng. Đọc kĩ chủ ngữ câu hỏi.' },
+
+{ nhom: 'B. Đọc hiểu', ten: 'Nhận diện phép liên kết & nghĩa hàm ẩn', cap: 2,
+  ct: '<b>Phép lặp</b> — lặp lại từ ngữ để nhấn mạnh và nối câu.<br><b>Phép thế</b> — dùng đại từ hoặc từ đồng nghĩa thay cho từ đã có.<br><b>Phép nối</b> — dùng quan hệ từ, từ nối (nhưng, vì vậy, tuy nhiên…).<br><b>Phép liên tưởng</b> — dùng các từ cùng trường nghĩa.<br><b>Nghĩa hàm ẩn</b> — điều người nói muốn truyền đạt mà không nói trực tiếp, phải suy ra từ ngữ cảnh.',
+  khi: 'Câu hỏi về liên kết văn bản và hàm ý trong lời thoại.',
+  vd: '"Trời hôm nay lạnh đấy" nói với người sắp ra ngoài — hàm ý nhắc mặc thêm áo.',
+  bay: 'Đừng nhầm phép lặp với lỗi lặp từ. Phép lặp là chủ ý nghệ thuật, có tác dụng nhấn mạnh.' },
+
+{ nhom: 'C. Viết', ten: 'Khung dàn ý nghị luận xã hội về hiện tượng đời sống', cap: 2,
+  ct: '<b>Mở:</b> nêu hiện tượng.<br><b>Thân:</b> ① Thực trạng (số liệu, biểu hiện) → ② Nguyên nhân (khách quan + chủ quan) → ③ Hậu quả/ý nghĩa → ④ Giải pháp (cá nhân, gia đình, nhà trường, xã hội) → ⑤ Bàn luận mở rộng, phê phán mặt trái.<br><b>Kết:</b> khẳng định lại và liên hệ bản thân.<br>Khác với nghị luận tư tưởng đạo lí: giải thích → phân tích, chứng minh → bàn luận mở rộng → bài học.',
+  khi: 'Câu viết đoạn 2,0 điểm hoặc bài văn 4,0 điểm.',
+  vd: 'Đề về nghiện mạng xã hội: thực trạng → nguyên nhân → hậu quả → giải pháp → phản đề (không phủ nhận mặt tích cực).',
+  bay: 'Với đoạn 200 chữ, chỉ chọn 3–4 ý trong khung trên; nhồi đủ 5 ý sẽ vượt dung lượng và loãng.' },
+
+{ nhom: 'C. Viết', ten: 'Khung phân tích nhân vật & đoạn trích văn xuôi', cap: 3,
+  ct: '<b>Nhân vật:</b> ① Vị trí, hoàn cảnh → ② Ngoại hình, hành động → ③ Nội tâm, tính cách → ④ Nghệ thuật xây dựng nhân vật (tình huống, ngôn ngữ, chi tiết đắt) → ⑤ Ý nghĩa tư tưởng.<br><b>Đoạn trích văn xuôi:</b> ① Vị trí đoạn → ② Nội dung chính → ③ Phân tích chi tiết theo mạch → ④ Đặc sắc nghệ thuật → ⑤ Đánh giá.<br>Luôn TRÍCH DẪN dẫn chứng trong văn bản và phân tích chính chi tiết đó.',
+  khi: 'Bài nghị luận văn học 4,0 điểm.',
+  vd: 'Phân tích một chi tiết đắt: gọi tên chi tiết → đặt vào mạch truyện → nêu ý nghĩa biểu tượng.',
+  bay: 'Diễn xuôi (kể lại nội dung) là lỗi làm mất nhiều điểm nhất. Phải phân tích chất liệu nghệ thuật.' },
+
+{ nhom: 'A. Cấu trúc đề', ten: 'Bảng phân bổ thời gian & tiêu chí chấm', cap: 1,
+  ct: '<b>Đọc hiểu (4,0đ):</b> 20–25 phút · <b>Đoạn văn (2,0đ):</b> 25 phút · <b>Bài văn (4,0đ):</b> 65–70 phút · <b>Soát bài:</b> 5 phút.<br><b>Tiêu chí chấm phần viết:</b> đảm bảo cấu trúc · xác định đúng vấn đề · triển khai nội dung · chính tả & diễn đạt · sáng tạo.<br>Riêng phần "sáng tạo" và "chính tả" chiếm khoảng 0,5 điểm — mất vì cẩu thả là rất tiếc.',
+  khi: 'Chiến thuật làm bài — quyết định điểm thực tế so với điểm lí thuyết.',
+  vd: 'Bài không có kết bài mất điểm tiêu chí "đảm bảo cấu trúc" dù nội dung tốt.',
+  bay: 'Đừng để hết giờ khi đang viết dở thân bài. Thà kết ngắn còn hơn bỏ trống.' }
+);
+
+TD.KHO.anh_ct.push(
+
+/* ============ BỔ SUNG: PHỦ KÍN NGỮ PHÁP CÓ THỂ RA THI ============ */
+{ nhom: 'B. Ngữ pháp', ten: 'Đảo ngữ & câu nhấn mạnh', cap: 3,
+  ct: '<b>No sooner had</b> S + V3 <b>THAN</b> S + V(quá khứ)<br><b>Hardly/Scarcely had</b> S + V3 <b>WHEN</b> S + V(quá khứ)<br><b>Not only</b> + trợ động từ + S + V <b>but also</b>…<br><b>Only when/after/by</b>… + trợ động từ + S + V<br><b>Câu chẻ:</b> It is/was + thành phần nhấn mạnh + that/who + phần còn lại.<br>Đảo ngữ điều kiện: Should…(loại 1) · Were…(loại 2) · Had…(loại 3).',
+  khi: 'Câu ngữ pháp mức vận dụng — thường 3–5 câu trong đề.',
+  vd: 'No sooner had he arrived <b>than</b> the rain stopped.',
+  bay: 'Cặp than/when là bẫy số một: "no sooner… than", "hardly… when". Học thuộc cả cặp, đừng nhớ riêng lẻ.' },
+
+{ nhom: 'B. Ngữ pháp', ten: 'Động từ theo sau: to V hay V-ing', cap: 2,
+  ct: '<b>+ to V:</b> want, decide, hope, promise, agree, refuse, offer, plan, manage, afford, expect, pretend.<br><b>+ V-ing:</b> enjoy, avoid, mind, finish, suggest, consider, practise, deny, admit, risk, keep, imagine.<br><b>+ giới từ ⇒ V-ing:</b> look forward to, be used to, object to, be interested in.<br><b>Đổi nghĩa:</b> stop to V (dừng để làm) ≠ stop V-ing (dừng hẳn việc); remember to V (nhớ sẽ làm) ≠ remember V-ing (nhớ đã làm).',
+  khi: 'Dạng câu điền động từ — luôn có trong đề.',
+  vd: 'He stopped <b>smoking</b> = bỏ hút thuốc. He stopped <b>to smoke</b> = dừng lại để hút thuốc.',
+  bay: '"Used to V" (thói quen quá khứ) khác hẳn "be/get used to V-ing" (đã quen với việc gì).' },
+
+{ nhom: 'B. Ngữ pháp', ten: 'So sánh & mệnh đề nhượng bộ', cap: 2,
+  ct: '<b>So sánh hơn:</b> tính từ ngắn + -er + than; long adj: more + adj + than.<br><b>So sánh nhất:</b> the + adj-est / the most + adj.<br><b>So sánh bằng:</b> as + adj + as; phủ định: not so/as + adj + as.<br><b>So sánh kép:</b> The + comparative…, the + comparative…<br><b>Nhượng bộ:</b> although/though/even though + MỆNH ĐỀ; despite/in spite of + DANH TỪ hoặc V-ing.',
+  khi: 'Câu ngữ pháp và câu viết lại câu.',
+  vd: 'Although it rained, we went out. = <b>Despite the rain</b>, we went out.',
+  bay: 'Sau despite/in spite of KHÔNG được dùng mệnh đề. Muốn dùng mệnh đề phải thêm "the fact that".' },
+
+{ nhom: 'C. Từ vựng', ten: 'Collocation & cụm từ hay ra thi', cap: 2,
+  ct: '<b>make</b>: a decision, an effort, progress, a mistake, friends<br><b>do</b>: homework, housework, research, business, a favour<br><b>take</b>: care of, part in, place, advantage of, responsibility<br><b>have</b>: a good time, an effect on, difficulty in, access to<br><b>pay</b>: attention to, a visit, a compliment<br><b>Giới từ:</b> interested IN · good AT · afraid OF · depend ON · responsible FOR · famous FOR · different FROM.',
+  khi: 'Câu từ vựng và câu điền giới từ — dễ mất điểm vì học vẹt không kĩ.',
+  vd: 'She takes <b>part in</b> the competition, not "joins in the competition" trong ngữ cảnh trang trọng.',
+  bay: 'make/do rất dễ lẫn: "do homework" nhưng "make an effort". Học theo cụm, đừng dịch từng từ.' },
+
+{ nhom: 'D. Chiến thuật', ten: 'Chiến thuật 40 câu / 50 phút', cap: 1,
+  ct: '<b>Vòng 1 (20 phút):</b> làm ngữ âm, trọng âm, ngữ pháp, từ vựng — câu ngắn, ăn điểm nhanh.<br><b>Vòng 2 (22 phút):</b> làm bài đọc hiểu và điền từ đoạn văn.<br><b>Vòng 3 (8 phút):</b> quay lại câu khó, soát và tô kín đáp án.<br>Nguyên tắc: không câu nào để trống; câu bí thì loại 2 phương án sai rồi chọn.<br>Trung bình <b>75 giây/câu</b> — câu nào quá 2 phút thì đánh dấu và bỏ qua.',
+  khi: 'Quản lí thời gian phòng thi.',
+  vd: '40 câu / 50 phút ⇒ phải xong 20 câu đầu trong 20 phút mới đủ giờ cho bài đọc.',
+  bay: 'Bài đọc dài để cuối cùng dễ bị hết giờ. Nhiều bạn mất trọn 7–8 câu chỉ vì phân bổ thời gian sai.' }
+);

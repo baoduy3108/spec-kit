@@ -157,3 +157,87 @@ TD.KHO.gdkt_ct = [
   vd: 'Việt Nam và các nước ASEAN đang đàm phán <b>COC</b> — Bộ quy tắc ứng xử ở Biển Đông.',
   bay: 'Pháp luật quốc tế do các quốc gia <b>thoả thuận</b> xây dựng, không có cơ quan lập pháp đứng trên các quốc gia.' }
 ];
+
+TD.KHO.su_ct.push(
+
+/* ============ BỔ SUNG: KHUNG NHỚ NHANH ============ */
+{ nhom: 'B. Việt Nam', ten: 'Trục mốc thời gian phải thuộc', cap: 1,
+  ct: '<b>1858</b> Pháp nổ súng Đà Nẵng · <b>1930</b> Đảng ra đời · <b>1941</b> Mặt trận Việt Minh<br><b>19/8/1945</b> Tổng khởi nghĩa · <b>2/9/1945</b> Tuyên ngôn Độc lập<br><b>19/12/1946</b> Toàn quốc kháng chiến · <b>7/5/1954</b> Điện Biên Phủ · <b>21/7/1954</b> Hiệp định Genève<br><b>1959</b> Đường Trường Sơn · <b>1968</b> Mậu Thân · <b>1972</b> "Điện Biên Phủ trên không"<br><b>27/1/1973</b> Hiệp định Paris · <b>30/4/1975</b> Giải phóng miền Nam<br><b>1986</b> Đổi mới · <b>1995</b> Gia nhập ASEAN & bình thường hoá với Mỹ · <b>2007</b> Gia nhập WTO',
+  khi: 'Câu nhận biết mốc thời gian — điểm dễ nhất của đề Sử.',
+  vd: 'Hỏi "sự kiện mở đầu kỉ nguyên độc lập" ⇒ Cách mạng tháng Tám và Tuyên ngôn Độc lập 2/9/1945.',
+  bay: 'Phân biệt ngày KÍ hiệp định với ngày có HIỆU LỰC, và ngày mở màn với ngày kết thúc chiến dịch.' },
+
+{ nhom: 'B. Việt Nam', ten: 'Công thức phân tích một sự kiện lịch sử', cap: 2,
+  ct: 'Khung 5 tầng dùng cho mọi sự kiện:<br><b>1. Bối cảnh</b> (trong nước + thế giới) → <b>2. Diễn biến chính</b> → <b>3. Kết quả</b> → <b>4. Ý nghĩa</b> → <b>5. Bài học/tác động</b>.<br>Câu hỏi "nguyên nhân quyết định/quan trọng nhất" thường thuộc về nhân tố CHỦ QUAN (sự lãnh đạo của Đảng, sức mạnh đại đoàn kết dân tộc).<br>Câu "ý nghĩa lớn nhất" thường gắn với bước ngoặt, mở ra kỉ nguyên mới.',
+  khi: 'Câu vận dụng và vận dụng cao — chiếm phần lớn điểm 8–10.',
+  vd: 'Nguyên nhân quyết định thắng lợi kháng chiến chống Mỹ: sự lãnh đạo đúng đắn của Đảng — nhân tố chủ quan.',
+  bay: 'Phân biệt "nguyên nhân quyết định" (chủ quan) với "điều kiện thuận lợi" (khách quan, ví dụ sự giúp đỡ quốc tế).' },
+
+{ nhom: 'A. Thế giới', ten: 'Trục mốc lịch sử thế giới hiện đại', cap: 1,
+  ct: '<b>1945</b> Liên hợp quốc thành lập, Hội nghị Ianta · <b>1947</b> Học thuyết Truman mở đầu Chiến tranh lạnh<br><b>1949</b> NATO, CHND Trung Hoa · <b>1955</b> Tổ chức Vacsava · <b>1967</b> ASEAN ra đời<br><b>1989</b> Chiến tranh lạnh chấm dứt (Manta) · <b>1991</b> Liên Xô tan rã, trật tự hai cực sụp đổ<br><b>1993</b> Liên minh châu Âu (EU) · <b>1995</b> WTO · <b>2015</b> Cộng đồng ASEAN',
+  khi: 'Phần lịch sử thế giới — thường 8–10 câu đầu của đề.',
+  vd: 'Trật tự hai cực Ianta sụp đổ hoàn toàn khi Liên Xô tan rã năm <b>1991</b>.',
+  bay: 'Chiến tranh lạnh CHẤM DỨT năm 1989 nhưng trật tự hai cực chỉ SỤP ĐỔ năm 1991 — hai mốc khác nhau.' }
+);
+
+TD.KHO.dia_ct.push(
+
+/* ============ BỔ SUNG: CÔNG THỨC TÍNH TOÁN ĐỊA LÍ ============ */
+{ nhom: 'C. Kỹ năng', ten: 'Bộ công thức tính toán bắt buộc', cap: 2,
+  ct: '<b>Mật độ dân số</b> (người/km²) = Số dân / Diện tích<br><b>Tỉ lệ gia tăng tự nhiên</b> (%) = (Tỉ suất sinh − Tỉ suất tử)/10<br><b>Năng suất</b> (tạ/ha) = Sản lượng / Diện tích gieo trồng<br><b>Bình quân lương thực</b> (kg/người) = Sản lượng (kg) / Số dân<br><b>Độ che phủ rừng</b> (%) = Diện tích rừng / Diện tích tự nhiên × 100<br><b>Cán cân xuất nhập khẩu</b> = Xuất khẩu − Nhập khẩu (dương là xuất siêu)<br><b>Biên độ nhiệt năm</b> = Nhiệt độ tháng cao nhất − tháng thấp nhất',
+  khi: 'Câu tính toán từ bảng số liệu — dạng chắc chắn có trong đề.',
+  vd: 'Số dân 100 triệu, diện tích 331 000 km² ⇒ mật độ ≈ <b>302 người/km²</b>.',
+  bay: 'Đọc kĩ ĐƠN VỊ trong bảng: nghìn tấn hay triệu tấn, nghìn ha hay ha. Sai đơn vị là sai cả câu.' },
+
+{ nhom: 'C. Kỹ năng', ten: 'Xử lí số liệu: cơ cấu, tốc độ tăng trưởng', cap: 2,
+  ct: '<b>Cơ cấu</b> (%) = Giá trị thành phần / Tổng × 100 — tổng luôn phải bằng 100 %.<br><b>Tốc độ tăng trưởng</b> (%) = Giá trị năm n / Giá trị năm gốc × 100, lấy năm gốc = 100 %.<br><b>Chỉ số phát triển liên hoàn</b> = Giá trị năm sau / Giá trị năm liền trước × 100.<br><b>Bán kính biểu đồ tròn:</b> R₂/R₁ = √(Tổng₂/Tổng₁).',
+  khi: 'Bước bắt buộc trước khi vẽ hoặc nhận xét biểu đồ.',
+  vd: 'Năm gốc 100 nghìn tấn, năm sau 130 nghìn tấn ⇒ tốc độ tăng trưởng = <b>130 %</b> (tăng 30 %).',
+  bay: 'Phân biệt "tốc độ tăng trưởng 130 %" với "tăng 130 %". Đề hỏi TĂNG bao nhiêu thì phải trừ 100.' },
+
+{ nhom: 'C. Kỹ năng', ten: 'Nhận xét biểu đồ & bảng số liệu', cap: 1,
+  ct: 'Trình tự chuẩn: <b>khái quát chung → chi tiết từng đối tượng → so sánh → giải thích</b>.<br>Luôn kèm SỐ LIỆU dẫn chứng cho mỗi nhận xét.<br>Từ khoá nhận xét: tăng/giảm liên tục, tăng không ổn định (có biến động), tăng nhanh/chậm hơn.<br>Với cơ cấu: dùng "tỉ trọng tăng/giảm", không dùng "giá trị tăng/giảm".',
+  khi: 'Câu nhận xét, và cũng là cách loại phương án sai trong câu trắc nghiệm.',
+  vd: 'Giá trị tăng nhưng tỉ trọng vẫn giảm — hoàn toàn có thể xảy ra khi tổng tăng nhanh hơn.',
+  bay: 'Bẫy kinh điển: phương án nói "giảm" trong khi số liệu chỉ giảm TỈ TRỌNG còn giá trị tuyệt đối vẫn tăng.' },
+
+{ nhom: 'A. Tự nhiên', ten: 'Khí hậu & thiên tai theo mùa', cap: 2,
+  ct: '<b>Gió mùa mùa đông</b> (11–4): Đông Bắc, lạnh khô đầu mùa, lạnh ẩm cuối mùa; chỉ tác động mạnh từ dãy Bạch Mã trở ra.<br><b>Gió mùa mùa hạ</b> (5–10): Tây Nam, gây mưa cho Nam Bộ – Tây Nguyên, gây phơn khô nóng cho Bắc Trung Bộ.<br><b>Mưa thu đông Trung Bộ</b>: do gió Đông Bắc gặp Trường Sơn + bão + dải hội tụ.<br>Bão: tập trung tháng 8–10, chậm dần từ Bắc vào Nam.',
+  khi: 'Câu giải thích hiện tượng khí hậu — dạng vận dụng.',
+  vd: 'Cùng tháng 7: Nam Bộ mưa lớn, ven biển Trung Bộ khô nóng — do địa hình chắn gió Trường Sơn.',
+  bay: 'Gió mùa Đông Bắc suy yếu và gần như chấm dứt khi vượt qua dãy Bạch Mã (vĩ tuyến 16°B).' },
+
+{ nhom: 'B. Kinh tế', ten: 'Chuyển dịch cơ cấu kinh tế', cap: 2,
+  ct: '<b>Theo ngành:</b> giảm tỉ trọng nông – lâm – thuỷ sản, tăng công nghiệp – xây dựng và dịch vụ.<br><b>Theo thành phần:</b> giảm tỉ trọng kinh tế nhà nước, tăng kinh tế tư nhân và khu vực có vốn đầu tư nước ngoài; kinh tế nhà nước vẫn giữ vai trò chủ đạo ở lĩnh vực then chốt.<br><b>Theo lãnh thổ:</b> hình thành vùng chuyên canh, khu công nghiệp, vùng kinh tế trọng điểm.<br>Trong nội bộ nông nghiệp: tăng tỉ trọng chăn nuôi và thuỷ sản.',
+  khi: 'Câu về xu hướng phát triển kinh tế — rất hay ra ở dạng đúng/sai.',
+  vd: 'Xu hướng chung: tỉ trọng khu vực I giảm, khu vực II và III tăng — phù hợp công nghiệp hoá.',
+  bay: 'Chăn nuôi TĂNG tỉ trọng nhưng vẫn CHƯA vượt trồng trọt. Đây là bẫy hay gặp.' }
+);
+
+TD.KHO.gdkt_ct.push(
+
+/* ============ BỔ SUNG: CÔNG THỨC & KHUNG PHÁP LÍ ============ */
+{ nhom: 'A. Kinh tế', ten: 'Các chỉ tiêu kinh tế & cách tính', cap: 2,
+  ct: '<b>GDP bình quân đầu người</b> = GDP / Số dân<br><b>Tốc độ tăng trưởng GDP</b> (%) = (GDP<sub>n</sub> − GDP<sub>n−1</sub>)/GDP<sub>n−1</sub> × 100<br><b>GNI</b> = GDP + thu nhập từ nước ngoài − chi trả ra nước ngoài<br><b>Lạm phát (CPI)</b> = (Giá rổ hàng năm nay / Giá rổ năm gốc) × 100<br><b>Lãi kép:</b> A = P(1 + r)ⁿ — dùng cho bài gửi tiết kiệm.',
+  khi: 'Câu tính toán kinh tế trong đề GDKT&PL.',
+  vd: 'GDP 400 tỉ USD, dân số 100 triệu ⇒ GDP/người = <b>4000 USD</b>.',
+  bay: 'GDP tính theo LÃNH THỔ, GNI tính theo QUỐC TỊCH (sở hữu). Nước nhiều FDI thường có GDP &gt; GNI.' },
+
+{ nhom: 'A. Kinh tế', ten: 'Thuế: phân loại & vai trò', cap: 2,
+  ct: '<b>Thuế trực thu</b> (người nộp = người chịu): thuế thu nhập cá nhân, thuế thu nhập doanh nghiệp.<br><b>Thuế gián thu</b> (nộp hộ, người tiêu dùng chịu): thuế giá trị gia tăng, thuế tiêu thụ đặc biệt, thuế xuất nhập khẩu, thuế bảo vệ môi trường.<br><b>Ba vai trò:</b> tạo nguồn thu ngân sách · điều tiết kinh tế vĩ mô · góp phần công bằng xã hội.<br>Thuế thu nhập cá nhân áp dụng biểu luỹ tiến từng phần: thu nhập càng cao, thuế suất phần vượt càng lớn.',
+  khi: 'Câu phân loại thuế và tình huống nghĩa vụ nộp thuế.',
+  vd: 'Mua điện thoại đã trả VAT trong giá bán ⇒ người tiêu dùng CHỊU thuế, cửa hàng chỉ NỘP thay.',
+  bay: 'Thuế tiêu thụ đặc biệt là thuế GIÁN thu dù đánh vào hàng xa xỉ. Đừng suy luận theo cảm tính.' },
+
+{ nhom: 'B. Pháp luật', ten: 'Bốn loại vi phạm & trách nhiệm pháp lí', cap: 2,
+  ct: '<b>Hình sự</b> — tội phạm, chịu trách nhiệm hình sự (phạt tù, cải tạo…), do Toà án xét xử.<br><b>Hành chính</b> — vi phạm quy tắc quản lí nhà nước, bị xử phạt hành chính.<br><b>Dân sự</b> — xâm phạm quan hệ tài sản, nhân thân; bồi thường, thực hiện nghĩa vụ.<br><b>Kỉ luật</b> — vi phạm quy định của cơ quan, tổ chức; khiển trách, cảnh cáo, buộc thôi việc.<br><b>Tuổi:</b> đủ 14 → dưới 16 chịu trách nhiệm hình sự về tội rất nghiêm trọng, đặc biệt nghiêm trọng; đủ 16 chịu trách nhiệm hình sự về mọi tội.',
+  khi: 'Câu tình huống — dạng phổ biến nhất của đề GDKT&PL.',
+  vd: 'Đi xe máy vượt đèn đỏ ⇒ vi phạm HÀNH CHÍNH; gây tai nạn chết người ⇒ có thể thành vi phạm HÌNH SỰ.',
+  bay: 'Một hành vi có thể kéo theo NHIỀU loại trách nhiệm cùng lúc (ví dụ vừa hình sự vừa dân sự bồi thường).' },
+
+{ nhom: 'B. Pháp luật', ten: 'Các quyền tự do cơ bản của công dân', cap: 2,
+  ct: '<b>Bất khả xâm phạm về thân thể</b>: không ai bị bắt nếu không có quyết định của Toà án, quyết định hoặc phê chuẩn của Viện kiểm sát, trừ trường hợp phạm tội quả tang.<br><b>Được pháp luật bảo hộ về tính mạng, sức khoẻ, danh dự, nhân phẩm.</b><br><b>Bất khả xâm phạm về chỗ ở.</b><br><b>Bảo đảm an toàn, bí mật thư tín, điện thoại, điện tín.</b><br><b>Tự do ngôn luận</b> — thực hiện trong khuôn khổ pháp luật.',
+  khi: 'Câu tình huống về quyền công dân.',
+  vd: 'Tự ý đọc tin nhắn của người khác ⇒ xâm phạm quyền bảo đảm bí mật thư tín, điện thoại, điện tín.',
+  bay: 'Phạm tội QUẢ TANG hoặc đang bị truy nã thì ai cũng có quyền bắt — đây là ngoại lệ duy nhất được phép.' }
+);

@@ -278,3 +278,175 @@ TD.KHO.toan_ct.push(
   vd: 'cos2x = 1 − 2sin²x ⇒ sin²x = (1 − cos2x)/2 — công thức hạ bậc dùng cho tích phân.',
   bay: 'Nhớ dấu trong công thức cộng góc: cos đảo dấu (cos(a+b) có dấu TRỪ).' }
 );
+
+TD.KHO.toan_ct.push(
+
+/* ============ BỔ SUNG: PHỦ KÍN CÔNG THỨC CÓ THỂ RA THI ============ */
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'GTLN – GTNN trên đoạn [a; b]', cap: 2,
+  ct: 'Bước 1: tính y′, giải y′ = 0 lấy các nghiệm x<sub>i</sub> ∈ [a; b].<br>Bước 2: tính y(a), y(b), y(x<sub>i</sub>).<br>Bước 3: <b>max</b> = số lớn nhất, <b>min</b> = số nhỏ nhất trong các giá trị đó.<br>Trên khoảng mở hoặc ℝ: phải lập bảng biến thiên, không được chỉ so đầu mút.',
+  khi: 'Câu hỏi tìm GTLN/GTNN, bài toán tối ưu thực tế (hộp, bể, quãng đường).',
+  vd: 'y = x³ − 3x trên [0; 2]: y′ = 3x² − 3 = 0 ⇒ x = 1. y(0) = 0, y(1) = −2, y(2) = 2 ⇒ <b>max = 2, min = −2</b>.',
+  bay: 'Loại nghiệm y′ = 0 nằm NGOÀI đoạn. Rất nhiều bạn tính cả nghiệm ngoài đoạn rồi chọn nhầm.' },
+
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'Tiệm cận đứng – ngang – xiên', cap: 2,
+  ct: '<b>Tiệm cận đứng</b> x = x₀ ⇔ lim<sub>x→x₀</sub> y = ±∞ (mẫu = 0 mà tử ≠ 0).<br><b>Tiệm cận ngang</b> y = L ⇔ lim<sub>x→±∞</sub> y = L (hữu hạn).<br><b>Tiệm cận xiên</b> y = ax + b với a = lim y/x, b = lim (y − ax) — chỉ có khi bậc tử hơn bậc mẫu đúng 1.<br>Hàm y = (ax+b)/(cx+d): TCĐ x = −d/c, TCN y = a/c.',
+  khi: 'Đếm số tiệm cận, nhận dạng đồ thị, bài toán chứa tham số m.',
+  vd: 'y = (x² + 1)/(x − 1): TCĐ x = 1; chia đa thức được y = x + 1 + 2/(x−1) ⇒ <b>TCX: y = x + 1</b>.',
+  bay: 'Nếu tử và mẫu cùng triệt tiêu tại x₀ thì <b>rút gọn trước</b> — có thể mất tiệm cận đứng.' },
+
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'Tương giao & biện luận số nghiệm', cap: 3,
+  ct: 'Số giao điểm của y = f(x) và y = g(x) = số nghiệm của f(x) = g(x).<br>Dạng chuẩn: cô lập tham số về <b>m = h(x)</b> rồi đếm số giao của đường thẳng ngang y = m với đồ thị h(x) qua bảng biến thiên.<br>Hàm bậc 3 cắt Ox tại 3 điểm phân biệt ⇔ có 2 cực trị và <b>y<sub>CĐ</sub>·y<sub>CT</sub> &lt; 0</b>.<br>Trùng phương cắt Ox tại 4 điểm ⇔ ax⁴+bx²+c = 0 có 2 nghiệm dương phân biệt theo t = x².',
+  khi: 'Câu vận dụng cao về số nghiệm phương trình chứa m.',
+  vd: 'x³ − 3x = m có 3 nghiệm phân biệt ⇔ y<sub>CĐ</sub> = 2 &gt; m &gt; y<sub>CT</sub> = −2 ⇒ <b>−2 &lt; m &lt; 2</b>.',
+  bay: 'Với f(|x|) hay |f(x)|, số nghiệm đổi hoàn toàn — phải vẽ lại đồ thị đối xứng/lật rồi mới đếm.' },
+
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'Đọc bảng biến thiên & đồ thị', cap: 1,
+  ct: 'Mũi tên lên = đồng biến (y′ &gt; 0); mũi tên xuống = nghịch biến.<br>Số điểm cực trị = số lần y′ ĐỔI DẤU.<br>Bậc 3: a &gt; 0 thì nhánh cuối đi lên; a &lt; 0 thì đi xuống.<br>Trùng phương: a &gt; 0 và 3 cực trị thì dạng chữ W.<br>y = (ax+b)/(cx+d): đồ thị hai nhánh hypebol, không cực trị.',
+  khi: 'Câu nhận biết cho sẵn BBT hoặc hình vẽ — điểm dễ nhất của đề.',
+  vd: 'BBT có y′ đổi dấu + → − tại x = 1 ⇒ x = 1 là điểm <b>cực đại</b>.',
+  bay: 'y′(x₀) = 0 mà KHÔNG đổi dấu (ví dụ y = x³ tại 0) thì x₀ không phải điểm cực trị.' },
+
+{ nhom: 'II. Mũ – Logarit', ten: 'Bảng công thức logarit đầy đủ', cap: 1,
+  ct: 'log<sub>a</sub>(xy) = log<sub>a</sub>x + log<sub>a</sub>y &nbsp;·&nbsp; log<sub>a</sub>(x/y) = log<sub>a</sub>x − log<sub>a</sub>y<br>log<sub>a</sub>xⁿ = n·log<sub>a</sub>x &nbsp;·&nbsp; log<sub>aⁿ</sub>x = (1/n)·log<sub>a</sub>x<br><b>Đổi cơ số:</b> log<sub>a</sub>x = log<sub>b</sub>x / log<sub>b</sub>a &nbsp;·&nbsp; log<sub>a</sub>b · log<sub>b</sub>c = log<sub>a</sub>c &nbsp;·&nbsp; log<sub>a</sub>b = 1/log<sub>b</sub>a<br>a^(log<sub>a</sub>x) = x &nbsp;·&nbsp; log<sub>a</sub>aˣ = x. ĐK: a &gt; 0, a ≠ 1, x &gt; 0.',
+  khi: 'Mọi bài rút gọn, biểu diễn log theo a, b.',
+  vd: 'log₂6 = log₂(2·3) = 1 + log₂3. Nếu log₂3 = a thì log₆2 = 1/(1+a).',
+  bay: 'log<sub>a</sub>x² = 2log<sub>a</sub>|x| chứ không phải 2log<sub>a</sub>x — mất nghiệm âm là lỗi kinh điển.' },
+
+{ nhom: 'II. Mũ – Logarit', ten: 'Phương trình & bất phương trình mũ – log', cap: 2,
+  ct: 'aᶠ⁽ˣ⁾ = a^g(x) ⇔ f(x) = g(x). &nbsp; log<sub>a</sub>f = log<sub>a</sub>g ⇔ f = g &gt; 0.<br><b>Bất phương trình — nhớ chiều:</b><br>· a &gt; 1: aᶠ &gt; a^g ⇔ f &gt; g (giữ chiều)<br>· 0 &lt; a &lt; 1: aᶠ &gt; a^g ⇔ f &lt; g (<b>đổi chiều</b>)<br>Đặt ẩn phụ t = aˣ &gt; 0 cho dạng bậc hai theo aˣ.',
+  khi: 'Câu giải phương trình/bất phương trình, đếm nghiệm nguyên.',
+  vd: '4ˣ − 5·2ˣ + 4 = 0, đặt t = 2ˣ &gt; 0: t² − 5t + 4 = 0 ⇒ t = 1 hoặc 4 ⇒ <b>x = 0 hoặc x = 2</b>.',
+  bay: 'Luôn đặt điều kiện t &gt; 0 và điều kiện xác định của log TRƯỚC khi giải, nếu không sẽ nhận nghiệm ngoại lai.' },
+
+{ nhom: 'II. Mũ – Logarit', ten: 'Lãi kép & mô hình tăng trưởng', cap: 3,
+  ct: '<b>Lãi kép:</b> A = P(1 + r)ⁿ &nbsp;⇒&nbsp; n = log<sub>(1+r)</sub>(A/P)<br><b>Gửi góp đều đầu mỗi kì:</b> A = P·[(1+r)ⁿ − 1]/r · (1+r)<br><b>Tăng trưởng/phân rã liên tục:</b> N = N₀·e^(kt); chu kì bán rã T ⇒ N = N₀·2^(−t/T)<br><b>Trả góp:</b> số tiền trả mỗi kì m = P·r(1+r)ⁿ/[(1+r)ⁿ − 1]',
+  khi: 'Câu vận dụng thực tế — dạng chắc chắn có trong đề CT 2018.',
+  vd: 'Gửi 100 triệu, lãi 6 %/năm. Sau bao lâu được 150 triệu? n = log₁,₀₆1,5 ≈ <b>6,96 năm ⇒ 7 năm</b>.',
+  bay: 'Đọc kĩ lãi theo NĂM hay theo THÁNG. Lãi 6 %/năm ghép tháng thì r = 0,06/12 và n tính bằng tháng.' },
+
+{ nhom: 'III. Nguyên hàm – Tích phân', ten: 'Bảng nguyên hàm cơ bản', cap: 1,
+  ct: '∫xⁿdx = xⁿ⁺¹/(n+1) + C (n ≠ −1) &nbsp;·&nbsp; ∫(1/x)dx = ln|x| + C<br>∫eˣdx = eˣ + C &nbsp;·&nbsp; ∫aˣdx = aˣ/ln a + C<br>∫sin x dx = −cos x + C &nbsp;·&nbsp; ∫cos x dx = sin x + C<br>∫(1/cos²x)dx = tan x + C &nbsp;·&nbsp; ∫(1/sin²x)dx = −cot x + C<br><b>Dạng hợp:</b> ∫f(ax+b)dx = (1/a)·F(ax+b) + C',
+  khi: 'Nền tảng mọi câu nguyên hàm – tích phân.',
+  vd: '∫(2x+1)⁵dx = (1/2)·(2x+1)⁶/6 + C = <b>(2x+1)⁶/12 + C</b>.',
+  bay: 'Đừng quên hệ số 1/a khi biến trong ngoặc là ax + b. Đây là lỗi mất điểm nhiều nhất của chương này.' },
+
+{ nhom: 'III. Nguyên hàm – Tích phân', ten: 'Đổi biến & tích phân từng phần', cap: 2,
+  ct: '<b>Đổi biến:</b> đặt t = u(x) ⇒ dt = u′(x)dx, đổi luôn cận theo t.<br><b>Từng phần:</b> ∫u dv = uv − ∫v du.<br>Thứ tự ưu tiên chọn u (thần chú <b>"Nhất log, nhì đa, tam lượng, tứ mũ"</b>):<br>· có ln x ⇒ u = ln x<br>· đa thức × (sin, cos, eˣ) ⇒ u = đa thức.',
+  khi: 'Tích phân có ln, có đa thức nhân hàm mũ hoặc lượng giác.',
+  vd: '∫₀¹ x·eˣdx: u = x, dv = eˣdx ⇒ = [x·eˣ]₀¹ − ∫₀¹eˣdx = e − (e − 1) = <b>1</b>.',
+  bay: 'Khi đổi biến trong tích phân xác định, PHẢI đổi cận. Quên đổi cận là sai ngay từ dòng đầu.' },
+
+{ nhom: 'III. Nguyên hàm – Tích phân', ten: 'Thể tích khối tròn xoay', cap: 3,
+  ct: '<b>Quay quanh Ox:</b> V = π∫<sub>a</sub><sup>b</sup> f²(x)dx.<br>Giữa hai đường (f ở ngoài, g ở trong): V = π∫<sub>a</sub><sup>b</sup> |f² − g²|dx.<br><b>Quay quanh Oy:</b> V = π∫<sub>c</sub><sup>d</sup> x²(y)dy — phải biểu diễn x theo y và đổi cận sang y.',
+  khi: 'Câu tích phân ứng dụng, thường ở mức vận dụng.',
+  vd: 'y = √x, 0 ≤ x ≤ 4 quay quanh Ox: V = π∫₀⁴x dx = π·[x²/2]₀⁴ = <b>8π</b>.',
+  bay: 'Là ∫f² chứ không phải (∫f)². Và với hai đường thì lấy ∫(f² − g²), không phải ∫(f − g)².' },
+
+{ nhom: 'III. Nguyên hàm – Tích phân', ten: 'Ứng dụng vật lí của tích phân', cap: 2,
+  ct: 'v(t) = ∫a(t)dt &nbsp;·&nbsp; s(t) = ∫v(t)dt<br><b>Quãng đường đi được</b> từ t₁ đến t₂: s = ∫<sub>t₁</sub><sup>t₂</sup>|v(t)|dt<br><b>Độ dịch chuyển:</b> Δs = ∫<sub>t₁</sub><sup>t₂</sup>v(t)dt (có thể âm)<br>Lượng nước/lượng chất tích luỹ: Q = ∫ tốc độ dt.',
+  khi: 'Bài toán thực tế về chuyển động, dòng chảy, tốc độ tăng trưởng.',
+  vd: 'v = 3t² (m/s), từ t = 0 đến t = 2: s = ∫₀²3t²dt = [t³]₀² = <b>8 m</b>.',
+  bay: 'Quãng đường dùng |v|. Nếu v đổi dấu trong khoảng thì phải tách tích phân tại điểm v = 0.' },
+
+{ nhom: 'IV. Oxyz', ten: 'Vecto, tích vô hướng & tích có hướng', cap: 1,
+  ct: 'AB→ = (x<sub>B</sub>−x<sub>A</sub>; y<sub>B</sub>−y<sub>A</sub>; z<sub>B</sub>−z<sub>A</sub>) &nbsp;·&nbsp; |u→| = √(x²+y²+z²)<br><b>Tích vô hướng</b> u→·v→ = x₁x₂ + y₁y₂ + z₁z₂ = |u||v|cos(u,v) ⇒ vuông góc ⇔ tích = 0.<br><b>Tích có hướng</b> [u→,v→] = (y₁z₂−y₂z₁; z₁x₂−z₂x₁; x₁y₂−x₂y₁) ⊥ cả hai vecto.<br>Diện tích tam giác S = ½|[AB→,AC→]| &nbsp;·&nbsp; Thể tích tứ diện V = (1/6)|[AB→,AC→]·AD→|.',
+  khi: 'Nền tảng mọi bài Oxyz; tính diện tích, thể tích, xét đồng phẳng.',
+  vd: 'A(1;0;0), B(0;1;0), C(0;0;1): [AB→,AC→] = (1;1;1) ⇒ S = ½√3.',
+  bay: 'Bốn điểm đồng phẳng ⇔ [AB→,AC→]·AD→ = 0. Đây cũng là điều kiện thể tích tứ diện bằng 0.' },
+
+{ nhom: 'IV. Oxyz', ten: 'Phương trình mặt phẳng', cap: 2,
+  ct: 'Mặt phẳng qua M(x₀;y₀;z₀), pháp tuyến n→ = (A;B;C):<br><b>A(x−x₀) + B(y−y₀) + C(z−z₀) = 0</b> ⇔ Ax + By + Cz + D = 0.<br>Mặt phẳng qua 3 điểm A, B, C: n→ = [AB→, AC→].<br>Mặt phẳng theo đoạn chắn: x/a + y/b + z/c = 1.<br>Song song ⇔ cùng phương n→; vuông góc ⇔ n₁→·n₂→ = 0.',
+  khi: 'Viết phương trình mặt phẳng — hầu như đề nào cũng có.',
+  vd: 'Mp qua M(1;2;3) và ⊥ đường thẳng có u→ = (2;−1;1): 2(x−1) − (y−2) + (z−3) = 0 ⇔ <b>2x − y + z − 3 = 0</b>.',
+  bay: 'Mặt phẳng ⊥ đường thẳng thì n→ mp = u→ đường thẳng. Mặt phẳng ∥ đường thẳng thì n→·u→ = 0.' },
+
+{ nhom: 'IV. Oxyz', ten: 'Phương trình đường thẳng & mặt cầu', cap: 2,
+  ct: '<b>Đường thẳng</b> qua M(x₀;y₀;z₀), chỉ phương u→ = (a;b;c):<br>Tham số: x = x₀+at, y = y₀+bt, z = z₀+ct.<br>Chính tắc: (x−x₀)/a = (y−y₀)/b = (z−z₀)/c (khi abc ≠ 0).<br><b>Mặt cầu</b> tâm I(a;b;c), bán kính R: (x−a)² + (y−b)² + (z−c)² = R².<br>Dạng khai triển x²+y²+z²−2ax−2by−2cz+d = 0 với <b>R = √(a²+b²+c²−d)</b> (cần a²+b²+c²−d &gt; 0).',
+  khi: 'Viết phương trình đường thẳng, mặt cầu, tìm tâm và bán kính.',
+  vd: 'x²+y²+z²−2x+4y−6z+5 = 0 ⇒ I(1;−2;3), R = √(1+4+9−5) = <b>3</b>.',
+  bay: 'Dấu: hệ số −2a nên a = −(hệ số x)/2. Nhầm dấu tâm là lỗi phổ biến nhất ở dạng này.' },
+
+{ nhom: 'IV. Oxyz', ten: 'Khoảng cách, góc & vị trí tương đối', cap: 3,
+  ct: '<b>d(M, (P))</b> = |Ax₀+By₀+Cz₀+D| / √(A²+B²+C²)<br><b>d(M, Δ)</b> = |[AM→, u→]| / |u→| với A ∈ Δ<br><b>Góc hai mặt phẳng:</b> cosφ = |n₁·n₂|/(|n₁||n₂|)<br><b>Góc đường thẳng & mặt phẳng:</b> sinφ = |u·n|/(|u||n|)<br>Mặt cầu và mặt phẳng: d &gt; R rời nhau, d = R tiếp xúc, d &lt; R cắt theo đường tròn bán kính r = √(R²−d²).',
+  khi: 'Câu vận dụng: tìm bán kính đường tròn giao tuyến, viết mp tiếp xúc mặt cầu.',
+  vd: 'I(1;1;1), R = 3, mp x+y+z−1 = 0: d = |1+1+1−1|/√3 = 2/√3 ⇒ cắt, r = √(9 − 4/3).',
+  bay: 'Góc giữa đường và mặt dùng <b>sin</b>, góc giữa hai mặt/hai đường dùng <b>cos</b>. Nhớ trị tuyệt đối ở tử.' },
+
+{ nhom: 'V. Thống kê', ten: 'Số đo xu thế trung tâm — mẫu ghép nhóm', cap: 2,
+  ct: '<b>Trung bình:</b> x̄ = Σn<sub>i</sub>c<sub>i</sub>/n với c<sub>i</sub> là giá trị đại diện (trung điểm nhóm).<br><b>Trung vị:</b> M<sub>e</sub> = a<sub>m</sub> + [(n/2 − C)/n<sub>m</sub>]·h<br><b>Tứ phân vị Q<sub>k</sub>:</b> thay n/2 bằng kn/4 trong công thức trên.<br><b>Mốt:</b> M<sub>o</sub> = a<sub>m</sub> + [(n<sub>m</sub>−n<sub>m−1</sub>)/((n<sub>m</sub>−n<sub>m−1</sub>)+(n<sub>m</sub>−n<sub>m+1</sub>))]·h<br>(a<sub>m</sub>: đầu mút trái nhóm chứa, h: độ dài nhóm, C: tần số tích luỹ trước nhóm đó.)',
+  khi: 'Nội dung [MỚI] của CT 2018 — chắc chắn có trong đề.',
+  vd: 'n = 40, nhóm chứa trung vị [20;30) có C = 15, n<sub>m</sub> = 10, h = 10 ⇒ M<sub>e</sub> = 20 + (20−15)/10·10 = <b>25</b>.',
+  bay: 'Giá trị đại diện c<sub>i</sub> là TRUNG ĐIỂM của nhóm, không phải đầu mút trái.' },
+
+{ nhom: 'V. Thống kê', ten: 'Phương sai, độ lệch chuẩn & ngoại lệ', cap: 3,
+  ct: '<b>Phương sai:</b> s² = (1/n)Σn<sub>i</sub>(c<sub>i</sub> − x̄)² = (1/n)Σn<sub>i</sub>c<sub>i</sub>² − x̄²<br><b>Độ lệch chuẩn:</b> s = √(s²) — cùng đơn vị với số liệu.<br><b>Khoảng biến thiên:</b> R = max − min<br><b>Khoảng tứ phân vị:</b> Δ<sub>Q</sub> = Q₃ − Q₁ (ít bị ảnh hưởng bởi giá trị bất thường)<br><b>Ngoại lệ:</b> x &lt; Q₁ − 1,5Δ<sub>Q</sub> hoặc x &gt; Q₃ + 1,5Δ<sub>Q</sub>.',
+  khi: 'So sánh độ phân tán hai mẫu, phát hiện giá trị bất thường.',
+  vd: 'Q₁ = 4, Q₃ = 10 ⇒ Δ<sub>Q</sub> = 6; ngưỡng ngoại lệ: dưới 4 − 9 = −5 hoặc trên 10 + 9 = 19.',
+  bay: 'Độ lệch chuẩn nhỏ hơn = số liệu đồng đều hơn. Đừng so phương sai của hai mẫu khác đơn vị.' },
+
+{ nhom: 'V. Xác suất', ten: 'Quy tắc đếm – Hoán vị – Chỉnh hợp – Tổ hợp', cap: 1,
+  ct: '<b>Quy tắc cộng</b> (hoặc): n₁ + n₂. <b>Quy tắc nhân</b> (và, liên tiếp): n₁·n₂.<br>Hoán vị: P<sub>n</sub> = n! &nbsp;·&nbsp; Chỉnh hợp: A<sup>k</sup><sub>n</sub> = n!/(n−k)! &nbsp;·&nbsp; Tổ hợp: C<sup>k</sup><sub>n</sub> = n!/[k!(n−k)!]<br><b>Có thứ tự dùng A, không thứ tự dùng C.</b><br>C<sup>k</sup><sub>n</sub> = C<sup>n−k</sup><sub>n</sub> &nbsp;·&nbsp; C<sup>k</sup><sub>n</sub> + C<sup>k+1</sup><sub>n</sub> = C<sup>k+1</sup><sub>n+1</sub>.',
+  khi: 'Mọi bài đếm và xác suất cổ điển.',
+  vd: 'Chọn 3 trong 10 người vào một tổ (không phân vai): C³₁₀ = <b>120</b>. Nếu chọn tổ trưởng, tổ phó, thư kí: A³₁₀ = <b>720</b>.',
+  bay: 'Câu hỏi có phân biệt vai trò/vị trí ⇒ dùng A. Chỉ lấy ra một nhóm ⇒ dùng C.' },
+
+{ nhom: 'V. Xác suất', ten: 'Nhị thức Newton', cap: 2,
+  ct: '(a + b)ⁿ = Σ<sub>k=0</sub><sup>n</sup> C<sup>k</sup><sub>n</sub>·a<sup>n−k</sup>·b<sup>k</sup><br>Số hạng tổng quát: <b>T<sub>k+1</sub> = C<sup>k</sup><sub>n</sub>·a<sup>n−k</sup>·b<sup>k</sup></b> (có n+1 số hạng).<br>Tổng hệ số = giá trị biểu thức khi a = b = 1. Σ C<sup>k</sup><sub>n</sub> = 2ⁿ.',
+  khi: 'Tìm hệ số của xᵐ, tìm số hạng không chứa x.',
+  vd: '(x + 2/x)⁶: T<sub>k+1</sub> = C<sup>k</sup>₆·x^(6−k)·(2/x)^k = C<sup>k</sup>₆·2^k·x^(6−2k). Không chứa x ⇒ k = 3 ⇒ C³₆·8 = <b>160</b>.',
+  bay: 'Số hạng thứ k+1 ứng với chỉ số k. Hỏi "số hạng thứ 4" nghĩa là k = 3.' },
+
+{ nhom: 'V. Xác suất', ten: 'Xác suất có điều kiện & công thức Bayes', cap: 3,
+  ct: '<b>P(A|B) = P(A∩B)/P(B)</b> (với P(B) &gt; 0)<br><b>Nhân xác suất:</b> P(A∩B) = P(B)·P(A|B)<br>Độc lập ⇔ P(A∩B) = P(A)·P(B) ⇔ P(A|B) = P(A).<br><b>Xác suất toàn phần:</b> P(B) = P(A)P(B|A) + P(Ā)P(B|Ā)<br><b>Bayes:</b> P(A|B) = P(A)·P(B|A) / P(B)',
+  khi: 'Nội dung [MỚI] của CT 2018 — dạng sơ đồ hình cây, bài toán chẩn đoán.',
+  vd: 'Hộp 1 (60 %) có 20 % phế phẩm; hộp 2 (40 %) có 5 %. P(phế) = 0,6·0,2 + 0,4·0,05 = <b>0,14</b>. Nếu lấy được phế phẩm, xác suất từ hộp 1 là 0,12/0,14 ≈ <b>0,857</b>.',
+  bay: 'Vẽ sơ đồ hình cây trước: nhánh 1 là nguyên nhân, nhánh 2 là kết quả. Bayes chính là đi ngược cây.' },
+
+{ nhom: 'VI. Hình không gian', ten: 'Góc trong không gian', cap: 2,
+  ct: '<b>Góc đường thẳng & mặt phẳng:</b> góc giữa đường thẳng và hình chiếu của nó lên mặt phẳng (0° ≤ φ ≤ 90°).<br><b>Góc hai mặt phẳng:</b> dựng trong mặt phẳng vuông góc với giao tuyến, đo góc giữa hai đường cùng ⊥ giao tuyến.<br><b>Góc hai đường chéo nhau:</b> dời song song về cùng một điểm.<br>Mẹo toạ độ hoá: gắn hệ trục vào đỉnh có 3 cạnh đôi một vuông góc rồi dùng công thức Oxyz.',
+  khi: 'Bài hình không gian tổng hợp, thường mức vận dụng.',
+  vd: 'Chóp S.ABCD, SA ⊥ (ABCD): góc giữa SC và (ABCD) là góc SCA, tan = SA/AC.',
+  bay: 'Xác định hình chiếu sai là mất trọn câu. Với SA ⊥ đáy thì hình chiếu của S luôn là A.' },
+
+{ nhom: 'VI. Hình không gian', ten: 'Khoảng cách — kĩ thuật thể tích', cap: 3,
+  ct: '<b>d(A, (P)) = 3V / S<sub>(P)</sub></b> — cách nhanh nhất khi biết thể tích khối chóp.<br>Nếu AB ∥ (P) thì d(A,(P)) = d(B,(P)).<br>Nếu AB cắt (P) tại I thì d(A,(P))/d(B,(P)) = IA/IB.<br><b>Khoảng cách hai đường chéo nhau:</b> dựng đoạn vuông góc chung, hoặc d(a,b) = d(a, (P)) với (P) chứa b và ∥ a.',
+  khi: 'Dạng khó nhất của hình không gian — luôn thử hướng thể tích trước.',
+  vd: 'V = 6, S<sub>BCD</sub> = 9 ⇒ d(A, (BCD)) = 3·6/9 = <b>2</b>.',
+  bay: 'Đổi đỉnh để tính V cho dễ: V<sub>A.BCD</sub> = V<sub>D.ABC</sub>. Chọn mặt đáy nào tính diện tích dễ nhất.' },
+
+{ nhom: 'VI. Hình không gian', ten: 'Nón – Trụ – Cầu: diện tích & thể tích', cap: 1,
+  ct: '<b>Nón:</b> S<sub>xq</sub> = πrl, S<sub>tp</sub> = πrl + πr², V = (1/3)πr²h, l² = r² + h²<br><b>Trụ:</b> S<sub>xq</sub> = 2πrh, S<sub>tp</sub> = 2πrh + 2πr², V = πr²h<br><b>Cầu:</b> S = 4πR², V = (4/3)πR³<br>Nón cụt: V = (πh/3)(R² + Rr + r²).',
+  khi: 'Câu nhận biết – thông hiểu về khối tròn xoay.',
+  vd: 'Nón r = 3, h = 4 ⇒ l = 5, S<sub>xq</sub> = 15π, V = <b>12π</b>.',
+  bay: 'S<sub>xq</sub> nón dùng đường sinh l, còn V dùng chiều cao h. Lẫn l với h là bẫy số một.' },
+
+{ nhom: 'VII. Dãy số', ten: 'Giới hạn & tính liên tục', cap: 2,
+  ct: 'lim (uⁿ) = 0 khi |u| &lt; 1. lim (1/nᵏ) = 0 với k &gt; 0.<br>Giới hạn phân thức khi x → ∞: chia cho luỹ thừa bậc cao nhất; so bậc tử với bậc mẫu.<br>Dạng 0/0: phân tích nhân tử hoặc nhân liên hợp.<br><b>Liên tục tại x₀ ⇔ lim<sub>x→x₀</sub>f(x) = f(x₀)</b> (tồn tại và bằng giá trị hàm).<br>f liên tục trên [a;b] và f(a)·f(b) &lt; 0 ⇒ phương trình f(x) = 0 có nghiệm trong (a;b).',
+  khi: 'Câu về giới hạn, tìm m để hàm liên tục, chứng minh có nghiệm.',
+  vd: 'lim<sub>x→2</sub>(x²−4)/(x−2) = lim (x+2) = <b>4</b>.',
+  bay: 'Hàm cho theo nhiều công thức: phải kiểm tra giới hạn TRÁI và PHẢI tại điểm nối, cả hai phải bằng f(x₀).' },
+
+{ nhom: 'VIII. Lượng giác', ten: 'Công thức lượng giác trọng tâm', cap: 2,
+  ct: 'sin²x + cos²x = 1 &nbsp;·&nbsp; 1 + tan²x = 1/cos²x<br><b>Cộng:</b> sin(a±b) = sin a cos b ± cos a sin b; cos(a±b) = cos a cos b ∓ sin a sin b<br><b>Nhân đôi:</b> sin2a = 2sin a cos a; cos2a = cos²a − sin²a = 2cos²a − 1 = 1 − 2sin²a<br><b>Hạ bậc:</b> sin²a = (1−cos2a)/2; cos²a = (1+cos2a)/2<br><b>Biến đổi tích ⇄ tổng</b> khi cần gộp hai hàm cùng loại.',
+  khi: 'Rút gọn biểu thức, giải phương trình lượng giác, tính tích phân lượng giác.',
+  vd: '∫sin²x dx = ∫(1−cos2x)/2 dx = x/2 − sin2x/4 + C.',
+  bay: 'Nhớ dấu ∓ trong công thức cos(a+b) = cos a cos b − sin a sin b — ngược dấu so với sin.' },
+
+{ nhom: 'VIII. Lượng giác', ten: 'Phương trình lượng giác cơ bản', cap: 2,
+  ct: 'sin x = sin α ⇔ x = α + k2π hoặc x = π − α + k2π<br>cos x = cos α ⇔ x = ±α + k2π<br>tan x = tan α ⇔ x = α + kπ<br><b>Đặc biệt:</b> sin x = 0 ⇔ x = kπ; cos x = 0 ⇔ x = π/2 + kπ; sin x = 1 ⇔ x = π/2 + k2π.<br>a·sin x + b·cos x = c có nghiệm ⇔ a² + b² ≥ c².',
+  khi: 'Giải phương trình lượng giác, đếm nghiệm trên một khoảng.',
+  vd: '2sin x − 1 = 0 ⇒ sin x = 1/2 ⇒ x = π/6 + k2π hoặc x = 5π/6 + k2π.',
+  bay: 'Đếm nghiệm trên khoảng cho trước: thay k = 0, ±1, ±2… rồi lọc, đừng đoán.' },
+
+{ nhom: 'IX. Vecto & hệ thức lượng', ten: 'Hệ thức lượng trong tam giác', cap: 2,
+  ct: '<b>Định lí cosin:</b> a² = b² + c² − 2bc·cos A<br><b>Định lí sin:</b> a/sin A = b/sin B = c/sin C = 2R<br><b>Diện tích:</b> S = ½ab·sin C = abc/(4R) = pr = √[p(p−a)(p−b)(p−c)]<br>Trung tuyến: m<sub>a</sub>² = (2b² + 2c² − a²)/4.',
+  khi: 'Bài toán thực tế đo đạc khoảng cách, chiều cao — dạng ưa thích của CT 2018.',
+  vd: 'b = 5, c = 8, A = 60° ⇒ a² = 25 + 64 − 2·5·8·0,5 = 49 ⇒ <b>a = 7</b>.',
+  bay: 'Định lí cosin dùng khi biết 2 cạnh + góc XEN GIỮA hoặc biết 3 cạnh. Biết góc đối diện thì dùng định lí sin.' },
+
+{ nhom: 'IX. Vecto & hệ thức lượng', ten: 'Vecto trong không gian & phân tích vecto', cap: 2,
+  ct: 'Quy tắc ba điểm: AB→ + BC→ = AC→. Quy tắc hình bình hành: AB→ + AD→ = AC→.<br>Quy tắc hình hộp: AB→ + AD→ + AA′→ = AC′→.<br><b>Trung điểm:</b> MA→ + MB→ = 2MI→. <b>Trọng tâm:</b> GA→ + GB→ + GC→ = 0→.<br>Ba vecto đồng phẳng ⇔ tồn tại m, n để c→ = m·a→ + n·b→.',
+  khi: 'Chứng minh vuông góc, tính góc, toạ độ hoá bài hình không gian.',
+  vd: 'G là trọng tâm ABC ⇒ với mọi M: MA→ + MB→ + MC→ = 3MG→.',
+  bay: 'AB→ = −BA→. Sai chiều vecto làm sai toàn bộ dấu của phép tính về sau.' }
+);

@@ -185,7 +185,7 @@ TD.man_luyencong = function (c) {
   const luoi = el('div', 'luoi');
   TD.THU_TU_MON.forEach(m => {
     const mon = TD.MON[m];
-    const soCau = (TD.KHO[m] || []).length;
+    const khaDung = TD.soCauKhaDung(m);
     const soMau = TD.soMau(m);
     const cx = TD.doChinhXac(m);
     const t = el('div', 'the mon-the', `
@@ -195,7 +195,7 @@ TD.man_luyencong = function (c) {
       </div>
       <p style="font-size:12.6px;color:var(--chu2);margin:9px 0 6px">${mon.slogan}</p>
       <div style="font-size:12px;color:var(--chu3)">
-        ${soMau ? `<b style="color:var(--tim)">${soMau} dạng bài tự sinh (∞ câu)</b> · ` : ''}${soCau ? soCau + ' câu cố định' : (soMau ? '' : 'chưa có câu hỏi')}${cx !== null ? ' · chính xác <b style="color:var(--kim)">' + cx + '%</b>' : ''}
+        <b style="color:var(--tim)">≈ ${khaDung.toLocaleString('vi-VN')} câu khác nhau</b> · ${soMau} dạng bài${cx !== null ? ' · chính xác <b style="color:var(--kim)">' + cx + '%</b>' : ''}
       </div>`);
     t.style.setProperty('--m', mon.mau);
     t.onclick = () => TD.chonMuc(m);
@@ -221,13 +221,15 @@ TD.chonMuc = function (mon) {
   }
 
   const nut = [0, 1, 2, 3, 4].map(m => {
-    const soT = m === 0 ? kho.length : kho.filter(q => q.muc === m).length;
-    const soG = TD.soMau(mon, m === 0 ? null : m);
+    const kd = TD.soCauKhaDung(mon, m === 0 ? null : m);
     const ten = m === 0 ? 'Tất cả' : `${TD.MUC[m].ten} <span class="mo-nhat">(${TD.MUC[m].ky})</span>`;
-    const mo = soG ? `${soT + soG * 2} câu <span class="mo-nhat">· ${soG} dạng ∞</span>` : `${soT} câu`;
-    return `<button class="nut ${m === 0 ? '' : 'phu'}" ${(soT + soG) ? '' : 'disabled'}
-      onclick="TD.batDauPhien('${mon}',${m},'luyen')">${ten} · ${mo}</button>`;
+    return `<button class="nut ${m === 0 ? '' : 'phu'}" ${kd ? '' : 'disabled'}
+      onclick="TD.batDauPhien('${mon}',${m},'luyen')">${ten}
+      <span class="mo-nhat">· ${kd.toLocaleString('vi-VN')} câu</span></button>`;
   }).join('');
+  const doDai = [15, 30, 50, 100].map(n =>
+    `<button class="nut ${(TD.S.so_cau_phien || 30) === n ? 'kim' : 'phu'}" style="padding:6px 13px;font-size:12.5px"
+      onclick="TD.S.so_cau_phien=${n};TD.luu();TD.chonMuc('${mon}')">${n} câu</button>`).join('');
 
   c.appendChild(el('div', 'the', `<h3>${M.icon} ${M.ten} — ${M.phai}</h3>
     <p class="mo-nhat">${M.slogan}</p>
@@ -235,8 +237,12 @@ TD.chonMuc = function (mon) {
       M.tuluan ? 'tự luận ' + M.phut + ' phút'
       : `Phần I ${M.p1} câu${M.p2 ? ' · Phần II ' + M.p2 + ' câu đúng/sai' : ''}${M.p3 ? ' · Phần III ' + M.p3 + ' câu trả lời ngắn' : ''} · ${M.phut} phút`}</p>
     <hr class="mo">
-    ${TD.soMau(mon) ? `<p style="font-size:13px;color:var(--tim);margin-bottom:9px">
-      ♾ Môn này có <b>${TD.soMau(mon)} dạng bài tự sinh</b> — mỗi lần vào là số liệu mới, đáp án và lời giải tự tính theo số liệu đó. Cày mãi không hết đề.</p>` : ''}
+    <p style="font-size:13px;color:var(--tim);margin-bottom:9px">
+      ♾ Môn này có <b>${TD.soMau(mon)} dạng bài tự sinh</b>, ghép ra
+      <b>≈ ${TD.soCauKhaDung(mon).toLocaleString('vi-VN')} câu khác nhau</b>.
+      Mỗi lần vào là đề mới — số liệu, mệnh đề và phương án nhiễu đều đổi.</p>
+    <div style="font-size:12.5px;color:var(--chu2);margin-bottom:6px">Độ dài mỗi phiên:</div>
+    <div class="hang-nut" style="margin:0 0 12px">${doDai}</div>
     <div class="hang-nut">${nut}</div>
     <div class="hang-nut"><button class="nut phu" onclick="TD.di('luyencong')">← Đổi môn</button></div>`));
 };
@@ -245,15 +251,20 @@ TD.chonMuc = function (mon) {
    VÒNG CHƠI CHÍNH — PHIÊN LÀM CÂU HỎI
    che_do: 'luyen' | 'tamma' | 'dokiep'
    ============================================================ */
-TD.batDauPhien = function (mon, muc, cheDo, danhSach, gioiHanPhut) {
+TD.batDauPhien = function (mon, muc, cheDo, danhSach, gioiHanPhut, soCauMuon) {
   let ds;
   if (danhSach) ds = danhSach;
   else {
-    const tinh = TD.layCauHoi(mon, muc || null)
-      .map(q => ({ mon: mon, i: (TD.KHO[mon] || []).indexOf(q) }));
-    /* câu sinh tự động: mỗi mẫu đề cho vô hạn biến thể nên lấy nhiều gấp đôi */
-    const sinh = TD.sinhNhieu(mon, muc || null, TD.soMau(mon, muc || null) * 2);
-    ds = TD.xao(tinh.concat(sinh));
+    const soCau = soCauMuon || TD.S.so_cau_phien || 30;
+    /* Ưu tiên chèn một phần câu viết tay (có lời giải chi tiết nhất),
+       phần còn lại lấy từ bộ sinh — nhờ vậy phiên nào cũng đủ dài và không lặp. */
+    const tinh = TD.xao(TD.layCauHoi(mon, muc || null)
+      .map(q => ({ mon: mon, i: (TD.KHO[mon] || []).indexOf(q) })));
+    const soTinh = Math.min(tinh.length, Math.round(soCau * 0.35));
+    const sinh = TD.sinhNhieu(mon, muc || null, soCau - soTinh);
+    ds = TD.xao(tinh.slice(0, soTinh).concat(sinh));
+    /* không sinh được câu nào thì dùng toàn bộ câu cố định */
+    if (!ds.length) ds = tinh;
   }
   if (!ds.length) { TD.bao('Không có câu hỏi phù hợp.', 'lua'); return; }
 
@@ -1081,6 +1092,7 @@ TD.man_caidat = function (c) {
    ============================================================ */
 TD.khoiDong = function () {
   TD.S = TD.tai();
+  TD.dangKyMauTuMenhDe();     /* mọi môn đều có đề tự sinh, kể cả khối xã hội */
 
   const nav = $('#tab');
   TD.MAN.forEach(([k, t]) => {

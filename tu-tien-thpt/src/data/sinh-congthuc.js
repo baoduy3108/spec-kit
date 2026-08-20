@@ -133,3 +133,73 @@ TD.KHO.sinh_ct = [
   vd: '5 tế bào sinh tinh giảm phân ⇒ <b>20 tinh trùng</b>. 5 tế bào sinh trứng ⇒ <b>5 trứng</b> + 15 thể cực.',
   bay: 'Tế bào sinh tinh cho 4 tinh trùng, nhưng tế bào sinh trứng chỉ cho <b>1 trứng</b> — bẫy hay gặp.' }
 ];
+
+TD.KHO.sinh_ct.push(
+
+/* ============ BỔ SUNG: PHỦ KÍN CÔNG THỨC CÓ THỂ RA THI ============ */
+{ nhom: 'II. Di truyền NST', ten: 'Số loại kiểu gene & kiểu hình', cap: 2,
+  ct: '<b>Một gene có n allele</b> ⇒ số kiểu gene = n(n+1)/2 (trên NST thường)<br>Nhiều gene phân li độc lập: nhân số kiểu gene của từng gene.<br>Gene trên X (không có allele trên Y): số KG = n(n+1)/2 (giới XX) + n (giới XY).<br>Phép lai nhiều cặp tính trạng PLĐL: tách riêng từng cặp rồi NHÂN kết quả.',
+  khi: 'Bài đếm số kiểu gene tối đa trong quần thể.',
+  vd: 'Gene có 3 allele trên NST thường ⇒ 3·4/2 = <b>6 kiểu gene</b>.',
+  bay: 'Gene trên vùng tương đồng X–Y thì công thức khác. Đọc kĩ đề nói gene nằm ở vùng nào.' },
+
+{ nhom: 'II. Di truyền NST', ten: 'Tương tác gene & tỉ lệ biến dạng', cap: 3,
+  ct: 'F₂ của phép lai 2 cặp gene (AaBb × AaBb) luôn có nền 9 : 3 : 3 : 1, các kiểu tương tác chỉ gộp lại:<br>· <b>9 : 7</b> bổ sung · <b>9 : 6 : 1</b> bổ sung · <b>9 : 3 : 4</b> át chế lặn<br>· <b>12 : 3 : 1</b> át chế trội · <b>13 : 3</b> át chế trội · <b>15 : 1</b> cộng gộp<br>Tổng luôn bằng 16 ⇒ nhận ra ngay là tương tác gene.',
+  khi: 'Câu vận dụng cao về quy luật di truyền.',
+  vd: 'F₂ có tỉ lệ 9 : 7 ⇒ tương tác BỔ SUNG, cần cả A và B mới cho kiểu hình trội.',
+  bay: 'Thấy tỉ lệ có tổng 16 mà không phải 9:3:3:1 thì gần như chắc chắn là tương tác gene, không phải PLĐL thường.' },
+
+{ nhom: 'II. Di truyền NST', ten: 'Tần số hoán vị & bản đồ di truyền', cap: 3,
+  ct: '<b>f = (số cá thể tái tổ hợp / tổng số cá thể) × 100 %</b>, 0 &lt; f ≤ 50 %<br>Giao tử liên kết mỗi loại = (1 − f)/2; giao tử hoán vị mỗi loại = f/2.<br>1 % hoán vị = 1 cM (centiMorgan) trên bản đồ di truyền.<br>Hoán vị chỉ xảy ra ở kì đầu giảm phân I, ở cặp NST tương đồng.',
+  khi: 'Bài lai phân tích, xác định kiểu gene bố mẹ và tần số hoán vị.',
+  vd: 'Lai phân tích cho 4 kiểu hình 40 % : 40 % : 10 % : 10 % ⇒ f = 10 + 10 = <b>20 %</b>.',
+  bay: 'f không bao giờ vượt 50 %. Ra kết quả &gt; 50 % nghĩa là đã nhầm nhóm tái tổ hợp với nhóm liên kết.' },
+
+{ nhom: 'II. Di truyền NST', ten: 'Di truyền phả hệ & xác suất', cap: 3,
+  ct: 'Bố mẹ bình thường sinh con bệnh ⇒ bệnh do gene <b>LẶN</b>, bố mẹ đều dị hợp.<br>Bệnh xuất hiện ở mọi thế hệ, bố bệnh truyền cho tất cả con gái ⇒ gene trội trên X.<br>Bệnh chủ yếu ở nam, mẹ mang gene ⇒ gene lặn trên X.<br>Bệnh chỉ truyền theo dòng mẹ ⇒ gene ngoài nhân (ti thể).<br>Xác suất tổng hợp = tích xác suất các sự kiện độc lập.',
+  khi: 'Bài phả hệ — luôn có trong đề, thường ở phần trả lời ngắn.',
+  vd: 'Bố mẹ Aa × Aa, con bình thường ⇒ xác suất con đó là Aa = <b>2/3</b> (đã loại aa).',
+  bay: 'Khi đề nói "người bình thường" thì phải LOẠI kiểu gene bệnh rồi mới tính xác suất — mẫu số đổi từ 4 thành 3.' },
+
+{ nhom: 'III. Di truyền quần thể', ten: 'Quần thể tự thụ phấn', cap: 2,
+  ct: 'Sau n thế hệ tự thụ, từ 100 % Aa:<br><b>Aa = (1/2)ⁿ</b> &nbsp;·&nbsp; <b>AA = aa = [1 − (1/2)ⁿ]/2</b><br>Tần số allele KHÔNG đổi; chỉ có tỉ lệ kiểu gene thay đổi theo hướng tăng đồng hợp, giảm dị hợp.<br>Quần thể ban đầu có xAA : yAa : zaa thì áp dụng công thức trên cho phần y.',
+  khi: 'Bài tự thụ phấn, giao phối gần.',
+  vd: 'Aa tự thụ 3 thế hệ ⇒ Aa = 1/8 = <b>12,5 %</b>, AA = aa = 43,75 %.',
+  bay: 'Tự thụ phấn KHÔNG làm đổi tần số allele — chỉ đổi cấu trúc kiểu gene. Nhiều bạn nhầm chỗ này.' },
+
+{ nhom: 'III. Di truyền quần thể', ten: 'Hardy – Weinberg cho gene trên X', cap: 3,
+  ct: 'Giới XY: tần số kiểu hình = tần số allele (X^A Y và X^a Y ⇒ p và q).<br>Giới XX: p² X^A X^A + 2pq X^A X^a + q² X^a X^a.<br>Tần số allele chung của quần thể: p = (2·p<sub>XX</sub> + p<sub>XY</sub>)/3 khi tỉ lệ giới 1 : 1.<br>Vì vậy bệnh lặn trên X biểu hiện ở nam nhiều hơn nữ rất nhiều khi q nhỏ.',
+  khi: 'Bài quần thể có gene trên NST giới tính.',
+  vd: 'q = 0,1 ⇒ nam bệnh 10 %, nữ bệnh chỉ q² = <b>1 %</b>.',
+  bay: 'Đừng áp p² + 2pq + q² cho giới XY — giới đó chỉ có một allele nên tần số kiểu hình bằng luôn tần số allele.' },
+
+{ nhom: 'V. Sinh thái', ten: 'Tăng trưởng & kích thước quần thể', cap: 2,
+  ct: '<b>N<sub>t</sub> = N₀ + B − D + I − E</b> (sinh − tử + nhập cư − xuất cư)<br>Tăng trưởng theo tiềm năng sinh học (đường cong J): dN/dt = rN<br>Tăng trưởng thực tế (đường cong S): dN/dt = rN(K − N)/K, K là sức chứa môi trường.<br>Mật độ = số cá thể / đơn vị diện tích (hoặc thể tích).',
+  khi: 'Bài về biến động số lượng cá thể, khai thác hợp lí.',
+  vd: 'Khai thác hợp lí nên giữ quần thể ở khoảng <b>N = K/2</b> — nơi tốc độ tăng trưởng lớn nhất.',
+  bay: 'Đường cong J chỉ xảy ra khi nguồn sống dồi dào vô hạn — thực tế hầu như luôn là đường cong S.' },
+
+{ nhom: 'V. Sinh thái', ten: 'Hiệu suất sinh thái & tháp sinh thái', cap: 2,
+  ct: '<b>Hiệu suất sinh thái</b> = (năng lượng bậc sau / năng lượng bậc trước) × 100 %, trung bình chỉ khoảng <b>10 %</b>.<br>Vì vậy chuỗi thức ăn thường chỉ 4–5 mắt xích.<br>Tháp năng lượng LUÔN có đáy rộng đỉnh hẹp; tháp số lượng và tháp sinh khối có thể bị lộn ngược.<br>Năng lượng đi qua chuỗi theo một chiều, không tuần hoàn; vật chất thì tuần hoàn.',
+  khi: 'Bài tính năng lượng qua các bậc dinh dưỡng.',
+  vd: 'Sinh vật sản xuất có 10⁶ kcal, hiệu suất 10 % mỗi bậc ⇒ bậc 3 còn <b>10⁴ kcal</b>.',
+  bay: 'Chỉ tháp NĂNG LƯỢNG là không bao giờ lộn ngược. Hai loại tháp kia thì có thể.' },
+
+{ nhom: 'V. Sinh thái', ten: 'Chuỗi & lưới thức ăn', cap: 1,
+  ct: 'Chuỗi thức ăn khởi đầu bằng sinh vật SẢN XUẤT hoặc bằng mùn bã hữu cơ.<br>Bậc dinh dưỡng cấp 1 = sinh vật sản xuất; cấp 2 = sinh vật tiêu thụ bậc 1…<br>Một loài có thể tham gia nhiều chuỗi ⇒ tạo LƯỚI thức ăn.<br>Lưới càng phức tạp thì hệ sinh thái càng ổn định.',
+  khi: 'Câu nhận biết – thông hiểu về hệ sinh thái.',
+  vd: 'Cỏ → châu chấu → ếch → rắn: rắn là sinh vật tiêu thụ bậc 3, bậc dinh dưỡng cấp <b>4</b>.',
+  bay: 'Bậc dinh dưỡng luôn lớn hơn bậc tiêu thụ đúng 1 đơn vị. Đừng lẫn hai cách đếm.' },
+
+{ nhom: 'VI. Sinh 10–11', ten: 'Tuần hoàn & cân bằng nội môi', cap: 2,
+  ct: '<b>Huyết áp</b> giảm dần từ động mạch chủ → mao mạch → tĩnh mạch.<br><b>Vận tốc máu</b> nhỏ nhất ở mao mạch (tổng tiết diện lớn nhất) ⇒ thuận lợi trao đổi chất.<br>Chu kì tim người ≈ 0,8 s (nhĩ co 0,1 · thất co 0,3 · dãn chung 0,4). Nhịp tim = 60/chu kì.<br>Cân bằng nội môi do gan, thận và hệ nội tiết điều hoà; insulin hạ đường huyết, glucagon tăng đường huyết.',
+  khi: 'Câu vận dụng về sinh lí người và động vật.',
+  vd: 'Chu kì tim 0,8 s ⇒ nhịp tim = 60/0,8 = <b>75 lần/phút</b>.',
+  bay: 'Vận tốc máu tỉ lệ NGHỊCH với tổng tiết diện mạch, không phải với tiết diện một mạch riêng lẻ.' },
+
+{ nhom: 'VI. Sinh 10–11', ten: 'Trao đổi nước & dinh dưỡng khoáng ở thực vật', cap: 2,
+  ct: 'Nước đi vào rễ theo cơ chế thẩm thấu, vận chuyển trong mạch gỗ nhờ: áp suất rễ + lực hút do thoát hơi nước + lực liên kết giữa các phân tử nước.<br><b>Thoát hơi nước</b> chủ yếu qua khí khổng, là "tai hoạ tất yếu" — vừa mất nước vừa tạo động lực hút.<br>Nguyên tố đa lượng: N, P, K, S, Ca, Mg. Thiếu N ⇒ lá vàng; thiếu Mg ⇒ vàng giữa gân lá.',
+  khi: 'Câu về sinh lí thực vật, ứng dụng trong trồng trọt.',
+  vd: 'Cây héo vào trưa nắng do tốc độ thoát hơi nước lớn hơn tốc độ hút nước của rễ.',
+  bay: 'Khí khổng ĐÓNG khi cây thiếu nước, kéo theo giảm quang hợp — đó là lí do hạn làm giảm năng suất.' }
+);

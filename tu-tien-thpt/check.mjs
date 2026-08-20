@@ -70,6 +70,15 @@ if (Object.keys(LT).length) {
     console.log(`   ${m.padEnd(6)} ${String(k.length).padStart(4)} mệnh đề (${d} đúng / ${k.length - d} sai) · ${cd} chủ đề`);
   }
   console.log(`   ${'TỔNG'.padEnd(6)} ${String(tongLT).padStart(4)} mệnh đề`);
+  /* Mệnh đề trùng nội dung sẽ tạo ra hai phương án giống hệt nhau trong cùng một câu */
+  for (const [m, k] of Object.entries(LT)) {
+    const daGap = new Map();
+    k.forEach((x, i) => {
+      const khoa = String(x.t).trim();
+      if (daGap.has(khoa)) { console.error(`✗ ${m}: mệnh đề [${daGap.get(khoa)}] và [${i}] trùng nội dung — "${khoa.slice(0, 70)}…"`); loi++; }
+      else daGap.set(khoa, i);
+    });
+  }
 }
 if (Object.keys(GEN).length) {
   console.log('\n   BỘ SINH ĐỀ TỰ ĐỘNG');

@@ -159,3 +159,61 @@ TD.KHO_LT.su.push(
 { cd: 'Biển Đông', m: 2, a: true,  t: 'DOC là Tuyên bố về ứng xử của các bên ở Biển Đông, kí giữa ASEAN và Trung Quốc năm 2002.', v: 'Các bên đang tiếp tục đàm phán để xây dựng Bộ Quy tắc ứng xử COC có tính ràng buộc pháp lí.' },
 { cd: 'Biển Đông', m: 3, a: true,  t: 'Luật Biển Việt Nam được Quốc hội thông qua năm 2012, khẳng định chủ quyền với hai quần đảo Hoàng Sa và Trường Sa.', v: 'Phù hợp với các quy định của UNCLOS 1982.' }
 );
+
+/* ---- Bổ sung mức VẬN DỤNG – VẬN DỤNG CAO: so sánh, đánh giá, rút bài học ---- */
+TD.KHO_LT.su.push(
+{ cd: 'Liên hợp quốc', m: 4, a: true,  t: 'Việc Liên hợp quốc quy định nguyên tắc nhất trí giữa năm nước lớn phản ánh thực tế tương quan lực lượng sau Chiến tranh thế giới thứ hai.', v: 'Năm cường quốc thắng trận muốn bảo đảm vai trò chi phối của mình trong trật tự mới.' },
+{ cd: 'Liên hợp quốc', m: 4, a: false, t: 'Nguyên tắc nhất trí giữa năm nước lớn giúp Hội đồng Bảo an ra quyết định nhanh chóng trong mọi tình huống.', v: 'Ngược lại — quyền phủ quyết thường khiến Hội đồng Bảo an bế tắc khi lợi ích các nước lớn xung đột.' },
+{ cd: 'Liên hợp quốc', m: 4, a: true,  t: 'Việc Việt Nam hai lần được bầu làm Uỷ viên không thường trực Hội đồng Bảo an thể hiện vị thế quốc tế ngày càng nâng cao.', v: 'Là kết quả của đường lối đối ngoại độc lập, tự chủ, đa phương hoá, đa dạng hoá.' },
+{ cd: 'Liên hợp quốc', m: 3, a: false, t: 'Liên hợp quốc có quân đội thường trực riêng để can thiệp vào các cuộc xung đột.', v: 'Lực lượng gìn giữ hoà bình do các nước thành viên đóng góp theo từng nhiệm vụ, không phải quân đội thường trực.' },
+{ cd: 'Liên hợp quốc', m: 3, a: true,  t: 'Việt Nam đã cử lực lượng tham gia hoạt động gìn giữ hoà bình của Liên hợp quốc.', v: 'Thể hiện Việt Nam là thành viên có trách nhiệm của cộng đồng quốc tế.' },
+
+{ cd: 'Chiến tranh lạnh', m: 4, a: true,  t: 'Điểm chung của Kế hoạch Marshall và Hội đồng Tương trợ Kinh tế SEV là đều dùng công cụ kinh tế để tập hợp lực lượng cho phe mình.', v: 'Cả hai đều là biểu hiện của cuộc đối đầu hai cực trên lĩnh vực kinh tế.' },
+{ cd: 'Chiến tranh lạnh', m: 4, a: true,  t: 'Chiến tranh lạnh kết thúc mở ra thời cơ lớn cho Việt Nam phá thế bao vây, cấm vận và mở rộng quan hệ đối ngoại.', v: 'Việt Nam bình thường hoá quan hệ với Trung Quốc năm 1991, với Hoa Kỳ năm 1995 và gia nhập ASEAN cùng năm.' },
+{ cd: 'Chiến tranh lạnh', m: 4, a: false, t: 'Sau Chiến tranh lạnh, nguy cơ xung đột và chiến tranh trên thế giới đã bị loại bỏ hoàn toàn.', v: 'Xung đột sắc tộc, tôn giáo, ly khai và khủng bố vẫn diễn ra ở nhiều khu vực.' },
+{ cd: 'Chiến tranh lạnh', m: 4, a: true,  t: 'Nguyên nhân sâu xa dẫn tới Chiến tranh lạnh là sự đối lập về mục tiêu và chiến lược giữa hai cường quốc Mỹ và Liên Xô.', v: 'Mỹ muốn thiết lập trật tự do mình chi phối, Liên Xô muốn bảo vệ và mở rộng hệ thống xã hội chủ nghĩa.' },
+{ cd: 'Chiến tranh lạnh', m: 3, a: true,  t: 'Toàn cầu hoá vừa tạo thời cơ vừa đặt ra thách thức gay gắt với các nước đang phát triển.', v: 'Thời cơ về vốn, công nghệ, thị trường; thách thức về cạnh tranh, phụ thuộc và giữ gìn bản sắc.' },
+
+{ cd: 'ASEAN', m: 4, a: true,  t: 'Việc Việt Nam gia nhập ASEAN năm 1995 đánh dấu bước chuyển từ đối đầu sang đối thoại và hợp tác ở Đông Nam Á.', v: 'Chấm dứt thời kì căng thẳng giữa hai nhóm nước Đông Dương và ASEAN.' },
+{ cd: 'ASEAN', m: 4, a: true,  t: 'Nguyên tắc đồng thuận vừa là điểm mạnh vừa là điểm hạn chế của ASEAN.', v: 'Bảo đảm bình đẳng giữa các thành viên nhưng làm chậm quá trình ra quyết định trong những vấn đề gai góc.' },
+{ cd: 'ASEAN', m: 4, a: false, t: 'ASEAN đã trở thành một liên minh chính trị – quân sự chặt chẽ như Liên minh châu Âu.', v: 'ASEAN là tổ chức hợp tác khu vực dựa trên đồng thuận, không có thiết chế siêu quốc gia như EU.' },
+{ cd: 'ASEAN', m: 3, a: true,  t: 'Cộng đồng Kinh tế ASEAN hướng tới tự do lưu chuyển hàng hoá, dịch vụ, đầu tư, vốn và lao động có tay nghề.', v: 'Tạo ra thị trường chung hơn 650 triệu dân.' },
+{ cd: 'ASEAN', m: 3, a: false, t: 'ASEAN có đồng tiền chung được sử dụng ở tất cả các nước thành viên.', v: 'ASEAN KHÔNG có đồng tiền chung. Đồng tiền chung là đặc trưng của khu vực đồng euro.' },
+
+{ cd: 'Cách mạng tháng Tám', m: 4, a: true,  t: 'Cách mạng tháng Tám thành công nhanh và ít đổ máu chủ yếu nhờ Đảng đã chuẩn bị lực lượng chu đáo và chớp đúng thời cơ.', v: 'Thời cơ chỉ tồn tại trong khoảng hai tuần giữa lúc Nhật đầu hàng và quân Đồng minh vào.' },
+{ cd: 'Cách mạng tháng Tám', m: 4, a: true,  t: 'Bài học về chớp thời cơ của Cách mạng tháng Tám vẫn còn nguyên giá trị trong công cuộc xây dựng đất nước hiện nay.', v: 'Thời cơ chỉ xuất hiện trong thời gian ngắn, không nắm bắt kịp thì sẽ mất.' },
+{ cd: 'Cách mạng tháng Tám', m: 4, a: false, t: 'Cách mạng tháng Tám năm 1945 là cuộc cách mạng vô sản đầu tiên thắng lợi ở Đông Nam Á.', v: 'Đó là cuộc cách mạng DÂN TỘC DÂN CHỦ NHÂN DÂN, đặt nhiệm vụ giải phóng dân tộc lên hàng đầu.' },
+{ cd: 'Cách mạng tháng Tám', m: 4, a: true,  t: 'So với Xô viết Nghệ – Tĩnh 1930–1931, Cách mạng tháng Tám 1945 khác biệt căn bản ở chỗ đã giành được chính quyền trong cả nước.', v: 'Các cao trào trước chỉ là những cuộc tập dượt, chưa giành được chính quyền trên phạm vi toàn quốc.' },
+{ cd: 'Cách mạng tháng Tám', m: 3, a: true,  t: 'Mặt trận Việt Minh có vai trò quyết định trong việc tập hợp và xây dựng lực lượng chính trị cho Cách mạng tháng Tám.', v: 'Tập hợp mọi tầng lớp yêu nước không phân biệt giai cấp, tôn giáo, đảng phái.' },
+
+{ cd: 'Kháng chiến chống Pháp', m: 4, a: true,  t: 'Điểm giống nhau giữa chiến dịch Biên giới 1950 và chiến dịch Điện Biên Phủ 1954 là ta đều chủ động mở chiến dịch.', v: 'Khác với Việt Bắc 1947 là chiến dịch phản công khi địch tấn công lên căn cứ địa.' },
+{ cd: 'Kháng chiến chống Pháp', m: 4, a: true,  t: 'Thắng lợi quân sự ở Điện Biên Phủ là nhân tố quyết định để ta giành thắng lợi trên bàn đàm phán Genève.', v: 'Thể hiện quy luật thực lực trên chiến trường quyết định vị thế trên bàn ngoại giao.' },
+{ cd: 'Kháng chiến chống Pháp', m: 4, a: false, t: 'Hiệp định Genève năm 1954 đã giải quyết triệt để vấn đề độc lập và thống nhất của Việt Nam.', v: 'Hiệp định mới chỉ giải phóng miền Bắc; đất nước tạm bị chia cắt và phải tiếp tục kháng chiến 21 năm nữa.' },
+{ cd: 'Kháng chiến chống Pháp', m: 4, a: true,  t: 'Đường lối kháng chiến toàn dân, toàn diện, trường kì là sự vận dụng sáng tạo tư tưởng lấy nhỏ thắng lớn của dân tộc.', v: 'Phù hợp với tương quan lực lượng khi ta yếu hơn địch về vũ khí và tiềm lực kinh tế.' },
+{ cd: 'Kháng chiến chống Pháp', m: 3, a: false, t: 'Trong kháng chiến chống Pháp, ta chủ trương đánh nhanh thắng nhanh để kết thúc chiến tranh sớm.', v: 'Đó là chủ trương của PHÁP. Ta chủ trương đánh lâu dài để chuyển hoá tương quan lực lượng.' },
+
+{ cd: 'Kháng chiến chống Mỹ', m: 4, a: true,  t: 'Điểm chung của bốn chiến lược chiến tranh mà Mỹ thực hiện ở Việt Nam là đều nhằm biến miền Nam thành thuộc địa kiểu mới.', v: 'Chỉ khác nhau về lực lượng nòng cốt và quy mô, còn bản chất xâm lược thì không đổi.' },
+{ cd: 'Kháng chiến chống Mỹ', m: 4, a: true,  t: 'Cuộc Tổng tiến công Xuân Mậu Thân 1968 có ý nghĩa quyết định về mặt chiến lược dù tổn thất của ta rất lớn.', v: 'Làm lung lay ý chí xâm lược của Mỹ, buộc Mỹ xuống thang chiến tranh và ngồi vào bàn đàm phán.' },
+{ cd: 'Kháng chiến chống Mỹ', m: 4, a: true,  t: 'Việc Mỹ phải rút quân theo Hiệp định Paris đã tạo ra so sánh lực lượng có lợi hẳn cho cách mạng miền Nam.', v: 'Từ đó ta có điều kiện chuẩn bị và tiến hành tổng tiến công giải phóng miền Nam.' },
+{ cd: 'Kháng chiến chống Mỹ', m: 4, a: false, t: 'Hậu phương miền Bắc chỉ có vai trò thứ yếu trong cuộc kháng chiến chống Mỹ.', v: 'Miền Bắc là hậu phương lớn, chi viện quyết định về sức người và sức của cho tiền tuyến lớn miền Nam.' },
+{ cd: 'Kháng chiến chống Mỹ', m: 4, a: true,  t: 'Nghệ thuật quân sự nổi bật trong Đại thắng mùa Xuân 1975 là chọn đúng hướng tiến công chiến lược và đánh đòn điểm huyệt.', v: 'Chọn Tây Nguyên với trận mở màn Buôn Ma Thuột làm rung chuyển toàn bộ hệ thống phòng thủ của địch.' },
+{ cd: 'Kháng chiến chống Mỹ', m: 3, a: false, t: 'Chiến thắng "Điện Biên Phủ trên không" năm 1972 diễn ra ở tỉnh Điện Biên.', v: 'Đó là trận đánh bại cuộc tập kích bằng máy bay B52 vào HÀ NỘI và HẢI PHÒNG, chỉ mượn tên gọi ẩn dụ.' },
+
+{ cd: 'Công cuộc Đổi mới', m: 4, a: true,  t: 'Bài học lớn nhất rút ra từ giai đoạn khủng hoảng trước Đổi mới là phải tôn trọng và hành động theo quy luật khách quan.', v: 'Nóng vội, chủ quan duy ý chí trong cải tạo và xây dựng đã dẫn tới khủng hoảng kinh tế – xã hội.' },
+{ cd: 'Công cuộc Đổi mới', m: 4, a: true,  t: 'Đổi mới ở Việt Nam là quá trình vừa làm vừa rút kinh nghiệm, đi từ đổi mới từng phần đến đổi mới toàn diện.', v: 'Xuất phát từ những "khoán chui" trong nông nghiệp rồi mới được tổng kết thành đường lối.' },
+{ cd: 'Công cuộc Đổi mới', m: 4, a: false, t: 'Thành tựu của Đổi mới cho thấy Việt Nam nên từ bỏ vai trò quản lí của Nhà nước với nền kinh tế.', v: 'Nền kinh tế thị trường ở Việt Nam luôn gắn với ĐỊNH HƯỚNG XÃ HỘI CHỦ NGHĨA và sự quản lí của Nhà nước.' },
+{ cd: 'Công cuộc Đổi mới', m: 4, a: true,  t: 'Hội nhập quốc tế trong thời kì Đổi mới đòi hỏi Việt Nam vừa mở cửa vừa giữ vững độc lập, tự chủ.', v: 'Đó là nguyên tắc xuyên suốt của đường lối đối ngoại.' },
+{ cd: 'Công cuộc Đổi mới', m: 3, a: true,  t: 'Đại hội VI của Đảng đã nghiêm khắc chỉ ra những sai lầm chủ quan, nóng vội trong giai đoạn trước.', v: 'Tinh thần nhìn thẳng vào sự thật, nói rõ sự thật là tiền đề của Đổi mới.' },
+
+{ cd: 'Hồ Chí Minh', m: 4, a: true,  t: 'Điểm khác biệt căn bản giữa con đường cứu nước của Nguyễn Ái Quốc với các bậc tiền bối là hướng sang phương Tây và gắn giải phóng dân tộc với cách mạng vô sản.', v: 'Phan Bội Châu hướng sang Nhật, Phan Châu Trinh dựa vào Pháp để cải cách.' },
+{ cd: 'Hồ Chí Minh', m: 4, a: true,  t: 'Việc thành lập Đảng Cộng sản Việt Nam đầu năm 1930 đã chấm dứt cuộc khủng hoảng về đường lối cứu nước kéo dài đầu thế kỉ XX.', v: 'Cách mạng Việt Nam từ đó có một đường lối đúng đắn và một tổ chức lãnh đạo thống nhất.' },
+{ cd: 'Hồ Chí Minh', m: 4, a: false, t: 'Nguyễn Ái Quốc tiếp thu chủ nghĩa Mác – Lênin một cách máy móc, không vận dụng vào điều kiện Việt Nam.', v: 'Người vận dụng SÁNG TẠO, đặt nhiệm vụ giải phóng dân tộc lên hàng đầu — điều chưa có tiền lệ trong lý luận lúc đó.' },
+{ cd: 'Hồ Chí Minh', m: 4, a: true,  t: 'Tư tưởng đại đoàn kết dân tộc của Hồ Chí Minh được thể hiện rõ nhất qua việc xây dựng các mặt trận dân tộc thống nhất.', v: 'Từ Mặt trận Việt Minh đến Mặt trận Liên Việt và Mặt trận Tổ quốc Việt Nam.' },
+{ cd: 'Hồ Chí Minh', m: 3, a: false, t: 'Hội nghị Trung ương lần thứ 8 (1941) chủ trương đặt nhiệm vụ cách mạng ruộng đất lên hàng đầu.', v: 'Hội nghị tạm gác khẩu hiệu ruộng đất để đặt nhiệm vụ GIẢI PHÓNG DÂN TỘC lên hàng đầu.' },
+
+{ cd: 'Biển Đông', m: 4, a: true,  t: 'Việc kiên trì giải quyết tranh chấp Biển Đông bằng biện pháp hoà bình thể hiện sự kế thừa truyền thống ngoại giao hoà hiếu của dân tộc.', v: 'Đồng thời phù hợp với luật pháp quốc tế và lợi ích lâu dài của khu vực.' },
+{ cd: 'Biển Đông', m: 4, a: true,  t: 'Các châu bản triều Nguyễn và hoạt động của đội Hoàng Sa là bằng chứng cho thấy Việt Nam đã xác lập chủ quyền một cách hoà bình và liên tục.', v: 'Đây là căn cứ lịch sử – pháp lí quan trọng theo tiêu chuẩn của luật quốc tế.' },
+{ cd: 'Biển Đông', m: 4, a: false, t: 'Chủ quyền biển đảo chỉ là vấn đề của lực lượng vũ trang, không liên quan tới trách nhiệm của học sinh.', v: 'Bảo vệ chủ quyền là trách nhiệm của mọi công dân, bắt đầu từ hiểu đúng và tuyên truyền đúng.' },
+{ cd: 'Biển Đông', m: 3, a: true,  t: 'Biển Đông có vai trò chiến lược với Việt Nam cả về kinh tế, giao thông lẫn an ninh quốc phòng.', v: 'Là cửa ngõ giao thương và tuyến phòng thủ hướng biển của đất nước.' },
+{ cd: 'Biển Đông', m: 3, a: false, t: 'Vùng đặc quyền kinh tế và thềm lục địa là hai khái niệm hoàn toàn trùng nhau.', v: 'Vùng đặc quyền kinh tế tính theo cột nước 200 hải lí; thềm lục địa tính theo đáy biển và lòng đất dưới đáy, có thể mở rộng hơn 200 hải lí.' }
+);

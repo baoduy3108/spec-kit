@@ -125,3 +125,79 @@ TD.KHO.hoa_ct = [
   vd: 'M<sub>Fe₂O₃</sub> = 56·2 + 16·3 = <b>160</b>; M<sub>CuSO₄</sub> = 64 + 32 + 64 = <b>160</b>; M<sub>CaCO₃</sub> = <b>100</b>.',
   bay: 'Đề thi mới KHÔNG cho bảng tuần hoàn ở một số dạng — phải thuộc nằm lòng.' }
 ];
+
+TD.KHO.hoa_ct.push(
+
+/* ============ BỔ SUNG: PHỦ KÍN CÔNG THỨC CÓ THỂ RA THI ============ */
+{ nhom: 'Nền tảng', ten: 'Nồng độ dung dịch & pha trộn', cap: 1,
+  ct: '<b>C<sub>M</sub> = n/V</b> (mol/L) &nbsp;·&nbsp; <b>C% = m<sub>ct</sub>/m<sub>dd</sub> · 100 %</b><br>Liên hệ: C<sub>M</sub> = 10·D·C%/M (D là khối lượng riêng g/mL)<br>m<sub>dd</sub> = V(mL)·D &nbsp;·&nbsp; m<sub>dd sau</sub> = m<sub>chất cho vào</sub> + m<sub>dd đầu</sub> − m<sub>kết tủa</sub> − m<sub>khí</sub><br>Pha loãng: C₁V₁ = C₂V₂.',
+  khi: 'Mọi bài dung dịch — bước tính khối lượng dung dịch sau phản ứng.',
+  vd: 'Cho 5,6 g Fe vào HCl dư thu 0,1 mol H₂: m<sub>dd tăng</sub> = 5,6 − 0,1·2 = <b>5,4 g</b>.',
+  bay: 'Nhớ TRỪ khối lượng khí thoát ra và kết tủa khi tính khối lượng dung dịch sau phản ứng.' },
+
+{ nhom: 'Nền tảng', ten: 'pH và môi trường dung dịch', cap: 2,
+  ct: '<b>pH = −log[H⁺]</b> &nbsp;·&nbsp; pOH = −log[OH⁻] &nbsp;·&nbsp; <b>pH + pOH = 14</b> (25 °C)<br>[H⁺]·[OH⁻] = 10⁻¹⁴<br>pH &lt; 7 acid · pH = 7 trung tính · pH &gt; 7 base.<br>Acid mạnh nồng độ C: [H⁺] = C (nếu đơn chức). Base mạnh: [OH⁻] = C.<br>Trộn acid với base: tính n<sub>H⁺</sub> − n<sub>OH⁻</sub> rồi chia thể tích tổng.',
+  khi: 'Bài tính pH, chuẩn độ, trung hoà.',
+  vd: 'Trộn 100 mL HCl 0,1 M với 100 mL NaOH 0,05 M: n<sub>H⁺</sub> dư = 0,01 − 0,005 = 0,005 mol; [H⁺] = 0,005/0,2 = 0,025 ⇒ pH ≈ <b>1,6</b>.',
+  bay: 'Acid yếu (CH₃COOH) KHÔNG điện li hoàn toàn nên [H⁺] &lt; C, pH lớn hơn tính theo acid mạnh.' },
+
+{ nhom: 'Kỹ thuật', ten: 'Điện phân & định luật Faraday', cap: 3,
+  ct: '<b>m = A·I·t/(n·F)</b> với F = 96500 C/mol<br>Số mol electron trao đổi: <b>n<sub>e</sub> = I·t/F</b><br>Thứ tự điện phân ở catot: Ag⁺ &gt; Fe³⁺ &gt; Cu²⁺ &gt; H⁺ &gt; H₂O (ion kim loại mạnh như Na⁺, K⁺, Al³⁺ không bị điện phân trong dung dịch).<br>Anot: S²⁻ &gt; I⁻ &gt; Br⁻ &gt; Cl⁻ &gt; H₂O (điện cực trơ).<br>Hai điện cực luôn nhận/nhường CÙNG số mol electron.',
+  khi: 'Bài điện phân dung dịch, tính khối lượng kim loại bám catot.',
+  vd: 'I = 5 A, t = 1930 s ⇒ n<sub>e</sub> = 5·1930/96500 = 0,1 mol ⇒ Cu bám = 0,05 mol = <b>3,2 g</b>.',
+  bay: 'Khi cation hết thì nước bị điện phân, khí H₂ thoát ra ở catot — đồ thị khí gãy khúc tại đó.' },
+
+{ nhom: 'Kỹ thuật', ten: 'Pin điện hoá & thế điện cực chuẩn', cap: 2,
+  ct: '<b>E°<sub>pin</sub> = E°<sub>catot (+)</sub> − E°<sub>anot (−)</sub></b><br>Anot: xảy ra OXI HOÁ (kim loại mạnh hơn, E° nhỏ hơn) — cực âm.<br>Catot: xảy ra KHỬ — cực dương.<br>E°<sub>pin</sub> &gt; 0 thì phản ứng tự xảy ra.<br>Dãy điện hoá: K, Na, Mg, Al, Zn, Fe, Ni, Sn, Pb, (H), Cu, Ag, Au.',
+  khi: 'Nội dung [MỚI] CT 2018 — pin Galvani, ăn mòn điện hoá.',
+  vd: 'Pin Zn–Cu: E° = 0,34 − (−0,76) = <b>+1,10 V</b>.',
+  bay: 'Trong ăn mòn điện hoá, kim loại MẠNH hơn bị ăn mòn trước (đóng vai trò cực âm). Đó là nguyên lí bảo vệ bằng kẽm.' },
+
+{ nhom: 'Kỹ thuật', ten: 'Nhiệt phản ứng ΔrH và năng lượng liên kết', cap: 3,
+  ct: '<b>Δ<sub>r</sub>H°₂₉₈ = Σ Δ<sub>f</sub>H°(sản phẩm) − Σ Δ<sub>f</sub>H°(chất đầu)</b><br>Tính theo năng lượng liên kết: Δ<sub>r</sub>H = Σ E<sub>lk</sub>(chất đầu) − Σ E<sub>lk</sub>(sản phẩm)<br>Δ<sub>r</sub>H &lt; 0: phản ứng TOẢ nhiệt. Δ<sub>r</sub>H &gt; 0: THU nhiệt.<br>Δ<sub>f</sub>H° của đơn chất bền ở trạng thái chuẩn = 0.',
+  khi: 'Nội dung [MỚI] CT 2018 — chắc chắn xuất hiện trong đề.',
+  vd: 'Đốt cháy nhiên liệu luôn có Δ<sub>r</sub>H &lt; 0. Biết Δ<sub>r</sub>H và số mol thì Q toả = |Δ<sub>r</sub>H|·n.',
+  bay: 'Hai công thức trên NGƯỢC chiều nhau: theo Δ<sub>f</sub>H lấy sau trừ trước, theo E<sub>lk</sub> lấy trước trừ sau.' },
+
+{ nhom: 'Kỹ thuật', ten: 'Tốc độ phản ứng & cân bằng hoá học', cap: 2,
+  ct: '<b>v = ΔC/Δt</b>; hệ số nhiệt độ Van’t Hoff: v₂/v₁ = γ^((T₂−T₁)/10)<br><b>Hằng số cân bằng:</b> K<sub>C</sub> = [C]^c[D]^d / ([A]^a[B]^b) — chỉ tính chất khí và chất tan.<br><b>Nguyên lí Le Chatelier:</b> cân bằng chuyển dịch theo chiều chống lại tác động bên ngoài.<br>Tăng nhiệt độ ⇒ chuyển theo chiều THU nhiệt. Tăng áp suất ⇒ chuyển theo chiều GIẢM số mol khí.',
+  khi: 'Câu lí thuyết định lượng về cân bằng, bài toán tổng hợp NH₃.',
+  vd: 'N₂ + 3H₂ ⇌ 2NH₃ (Δ<sub>r</sub>H &lt; 0): tăng áp suất và giảm nhiệt độ đều làm tăng hiệu suất tạo NH₃.',
+  bay: 'Chất rắn và dung môi KHÔNG có mặt trong biểu thức K. Chất xúc tác không làm chuyển dịch cân bằng.' },
+
+{ nhom: 'Hữu cơ', ten: 'Độ bất bão hoà k và công thức phân tử', cap: 2,
+  ct: '<b>k = (2C + 2 + N − H − X)/2</b><br>k = số liên kết π + số vòng.<br>· k = 0: no, mạch hở · k = 1: 1 nối đôi hoặc 1 vòng · k = 4 thường có vòng benzene.<br>Ester no đơn hở: C<sub>n</sub>H<sub>2n</sub>O₂ (k = 1). Acid no đơn hở cũng vậy.<br>Amino acid no, 1 NH₂, 1 COOH: C<sub>n</sub>H<sub>2n+1</sub>O₂N.',
+  khi: 'Bước đầu tiên khi biện luận công thức phân tử.',
+  vd: 'C₄H₆O₂ ⇒ k = (8 + 2 − 6)/2 = <b>2</b> ⇒ có 2 π hoặc 1 π + 1 vòng.',
+  bay: 'k luôn là số nguyên không âm. Ra số lẻ hoặc âm nghĩa là công thức phân tử sai.' },
+
+{ nhom: 'Hữu cơ', ten: 'Carbohydrate — phản ứng đặc trưng', cap: 2,
+  ct: 'Glucose (C₆H₁₂O₆) + AgNO₃/NH₃ ⇒ <b>2Ag</b> (n<sub>Ag</sub> = 2n<sub>glucose</sub>)<br>Saccharose KHÔNG tráng bạc; thuỷ phân ⇒ glucose + fructose.<br>Tinh bột, cellulose (C₆H₁₀O₅)<sub>n</sub> thuỷ phân ⇒ n glucose.<br>Lên men: C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂ (nhớ nhân hiệu suất).<br>Cellulose + 3HNO₃ ⇒ cellulose trinitrat (M = 297n).',
+  khi: 'Bài tráng bạc, lên men rượu, sản xuất thuốc súng không khói.',
+  vd: 'Lên men 180 g glucose, H = 80 % ⇒ n<sub>CO₂</sub> = 2·1·0,8 = <b>1,6 mol</b>.',
+  bay: 'Fructose vẫn tráng bạc được (chuyển hoá thành glucose trong môi trường base). Saccharose thì không.' },
+
+{ nhom: 'Hữu cơ', ten: 'Amino acid & điểm đẳng điện', cap: 2,
+  ct: 'Amino acid lưỡng tính: phản ứng cả với HCl và NaOH.<br>n<sub>HCl</sub> = số nhóm NH₂ × n<sub>aa</sub> &nbsp;·&nbsp; n<sub>NaOH</sub> = số nhóm COOH × n<sub>aa</sub><br>Số NH₂ &gt; số COOH ⇒ quỳ hoá XANH (lysine). Số COOH &gt; số NH₂ ⇒ quỳ hoá ĐỎ (glutamic).<br>Glycine 75 · Alanine 89 · Valine 117 · Glutamic 147 · Lysine 146.',
+  khi: 'Bài amino acid tác dụng acid/base, nhận biết bằng quỳ tím.',
+  vd: '0,1 mol glutamic (2 COOH) cần <b>0,2 mol NaOH</b>.',
+  bay: 'Bài cho tác dụng lần lượt với HCl rồi NaOH: phải tính cả lượng NaOH trung hoà HCl dư.' },
+
+{ nhom: 'Hữu cơ', ten: 'Polymer & hệ số polymer hoá', cap: 1,
+  ct: '<b>n = M<sub>polymer</sub> / M<sub>mắt xích</sub></b><br>Trùng hợp: monome có liên kết đôi hoặc vòng kém bền (ethylene, vinyl chloride, styrene, buta-1,3-diene).<br>Trùng ngưng: monome có ≥ 2 nhóm chức, giải phóng phân tử nhỏ (nylon-6,6, tơ lapsan, nhựa phenol formaldehyde).<br>Cao su buna-S: buta-1,3-diene + styrene. Nylon-6,6: hexamethylenediamine + adipic acid.',
+  khi: 'Câu nhận biết loại phản ứng và tính hệ số polymer hoá.',
+  vd: 'PE có M = 56 000 ⇒ n = 56 000/28 = <b>2000</b>.',
+  bay: 'Trùng ngưng LUÔN giải phóng phân tử nhỏ (thường là H₂O); trùng hợp thì không.' },
+
+{ nhom: 'Bảo toàn', ten: 'Kim loại tác dụng acid & muối', cap: 2,
+  ct: '<b>Với HCl, H₂SO₄ loãng:</b> n<sub>H₂</sub> = ½ n<sub>e nhường</sub> = ½ n<sub>HCl</sub> = n<sub>H₂SO₄</sub><br>m<sub>muối</sub> = m<sub>KL</sub> + 71·n<sub>H₂</sub> (clorua) = m<sub>KL</sub> + 96·n<sub>H₂</sub> (sunfat)<br><b>Kim loại đẩy kim loại:</b> áp dụng tăng giảm khối lượng theo chênh lệch nguyên tử khối.<br>Thứ tự phản ứng: kim loại mạnh nhất đẩy ion kim loại yếu nhất trước.',
+  khi: 'Bài kim loại + acid, kim loại + dung dịch muối.',
+  vd: 'n<sub>H₂</sub> = 0,1 mol từ hỗn hợp KL nặng 5 g ⇒ m<sub>muối clorua</sub> = 5 + 7,1 = <b>12,1 g</b>.',
+  bay: 'Cu, Ag KHÔNG tan trong HCl và H₂SO₄ loãng. Al, Fe, Cr bị THỤ ĐỘNG trong HNO₃ và H₂SO₄ đặc nguội.' },
+
+{ nhom: 'Bảo toàn', ten: 'CO₂ / SO₂ tác dụng dung dịch kiềm', cap: 3,
+  ct: 'Đặt <b>T = n<sub>OH⁻</sub>/n<sub>CO₂</sub></b>:<br>· T ≤ 1: chỉ tạo HCO₃⁻ &nbsp;·&nbsp; T ≥ 2: chỉ tạo CO₃²⁻ &nbsp;·&nbsp; 1 &lt; T &lt; 2: tạo cả hai<br>Khi tạo cả hai: n<sub>CO₃²⁻</sub> = n<sub>OH⁻</sub> − n<sub>CO₂</sub>; n<sub>HCO₃⁻</sub> = 2n<sub>CO₂</sub> − n<sub>OH⁻</sub><br>Với Ca(OH)₂, Ba(OH)₂: kết tủa cực đại rồi TAN DẦN khi CO₂ dư.',
+  khi: 'Bài sục CO₂ vào kiềm, đồ thị kết tủa.',
+  vd: 'n<sub>CO₂</sub> = 0,3; n<sub>NaOH</sub> = 0,5 ⇒ T = 1,67 ⇒ n<sub>CO₃²⁻</sub> = 0,2; n<sub>HCO₃⁻</sub> = <b>0,1 mol</b>.',
+  bay: 'Đồ thị kết tủa có hai đoạn: đi lên (tạo kết tủa) rồi đi xuống (kết tủa tan). Một giá trị kết tủa thường ứng với HAI giá trị n<sub>CO₂</sub>.' }
+);

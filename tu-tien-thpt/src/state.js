@@ -13,6 +13,7 @@ TD.macDinhTrangThai = function () {
     ngay_thi: TD.MAC_DINH.ngay_thi,
     to_hop: TD.MAC_DINH.to_hop.slice(),
     chi_tieu_ngay: TD.MAC_DINH.chi_tieu_ngay,
+    so_cau_phien: 30,           /* độ dài mỗi phiên Luyện Công */
     bat_dau: TD.homNay(),
     /* thống kê: thong_ke[mon][muc] = {dung, tong} */
     thong_ke: {},
@@ -321,10 +322,15 @@ TD.theThanhMuc = function (id) {
 TD.sinhNhieu = function (mon, muc, n) {
   const mau = (TD.GEN[mon] || []).filter(t => !muc || t.muc === muc);
   if (!mau.length) return [];
+  /* Xáo danh sách mẫu rồi duyệt vòng — mỗi dạng bài đều được chạm tới
+     trước khi lặp lại dạng nào, nên phiên luyện phủ đều chứ không dồn cục. */
+  let dsMau = TD.xao(mau), vt = 0;
   const ra = [];
-  for (let k = 0; k < n; k++) {
-    const t = mau[k % mau.length];
-    ra.push({ mon: mon, g: t.ma, s: (Math.random() * 4294967295) >>> 0 });
+  for (let thu = 0; ra.length < n && thu < n * 6; thu++) {
+    if (vt >= dsMau.length) { dsMau = TD.xao(mau); vt = 0; }
+    const t = dsMau[vt++];
+    const seed = (Math.random() * 4294967295) >>> 0;
+    if (TD.sinhCau(t, seed)) ra.push({ mon: mon, g: t.ma, s: seed });
   }
   return TD.xao(ra);
 };
@@ -360,7 +366,7 @@ TD.deTaDao = function (mon, so, loai) {
   const N = TD.SO_CAU_TA_DAO;
 
   if (loai === 'baitap') {
-    const mau = (TD.GEN[mon] || []);
+    const mau = (TD.GEN[mon] || []).filter(t => !t._tuLT);   /* chỉ bài tập tính toán */
     if (!mau.length) return [];
     const ra = [];
     /* Rải đều các dạng bài rồi mới xáo, để đề nào cũng phủ hết dạng.
@@ -469,7 +475,7 @@ TD.soMenhDe = function (mon) { return (TD.KHO_LT[mon] || []).length; };
 
 /* Bộ đề Tà Đạo có dùng được không */
 TD.taDaoSan = function (mon, loai) {
-  if (loai === 'baitap') return (TD.GEN[mon] || []).length >= 3;
+  if (loai === 'baitap') return (TD.GEN[mon] || []).filter(t => !t._tuLT).length >= 3;
   const kho = TD.KHO_LT[mon] || [];
   return kho.filter(x => x.a).length >= 4 && kho.filter(x => !x.a).length >= 4;
 };
@@ -485,6 +491,105 @@ TD.ghiTaDao = function (mon, so, loai, dung, tong) {
 
 TD.ketQuaTaDao = function (mon, so, loai) {
   return (TD.S.ta_dao || {})[mon + '|' + loai + '|' + so] || null;
+};
+
+/* ============================================================
+   TỰ ĐĂNG KÝ MẪU ĐỀ TỪ KHO MỆNH ĐỀ
+   Mọi môn đều có kho mệnh đề trọng điểm, nên mọi môn đều phải có
+   đề tự sinh ở Luyện Công — kể cả Sử, Địa, GDKT&PL, Văn, Anh.
+   Mỗi CHỦ ĐỀ sinh ra 3 dạng bài:
+     · chọn phát biểu ĐÚNG  · chọn phát biểu SAI  · đúng/sai 4 ý
+   Đánh dấu _tuLT để Tà Đạo Bài tập không lấy nhầm — phần đó chỉ
+   dành cho bài tập tính toán.
+   ============================================================ */
+TD.dangKyMauTuMenhDe = function () {
+  if (TD._daDangKyLT) return;                 /* chỉ chạy một lần */
+  TD._daDangKyLT = true;
+
+  const slug = t => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[đĐ]/g, 'd').replace(/[^A-Za-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '').toLowerCase().slice(0, 26);
+
+  for (const mon of Object.keys(TD.KHO_LT)) {
+    const kho = TD.KHO_LT[mon];
+    if (!Array.isArray(kho) || kho.length < 8) continue;
+    const gDung = kho.filter(x => x.a).length, gSai = kho.length - gDung;
+
+    const theoCD = {};
+    kho.forEach((x, i2) => { const c = x.cd || 'Khác'; (theoCD[c] = theoCD[c] || []).push(i2); });
+
+    TD.GEN[mon] = TD.GEN[mon] || [];
+    for (const cd of Object.keys(theoCD)) {
+      const idx = theoCD[cd];
+      const ma = slug(cd);
+
+      /* Đăng ký RIÊNG cho từng mức độ — nếu gộp lại rồi lấy mức trung bình
+         thì mức 1 và mức 4 sẽ trống, người học không luyện riêng được. */
+      for (let muc = 1; muc <= 4; muc++) {
+        const dungM = idx.filter(i2 => kho[i2].a && (kho[i2].m || 2) === muc);
+        const saiM = idx.filter(i2 => !kho[i2].a && (kho[i2].m || 2) === muc);
+
+        if (dungM.length >= 1 && gSai >= 3) TD.GEN[mon].push({
+          ma: mon + '-ltd' + muc + '-' + ma, chuong: cd, muc: muc, dang: 'mc', _tuLT: true,
+          tao(R) { return TD.cauTuMenhDe(mon, R.chon(dungM), 'd', (R() * 4294967295) >>> 0); }
+        });
+        if (saiM.length >= 1 && gDung >= 3) TD.GEN[mon].push({
+          ma: mon + '-lts' + muc + '-' + ma, chuong: cd, muc: muc, dang: 'mc', _tuLT: true,
+          tao(R) { return TD.cauTuMenhDe(mon, R.chon(saiM), 's', (R() * 4294967295) >>> 0); }
+        });
+      }
+
+      /* Câu đúng/sai 4 ý xếp ở mức cao nhất trong chủ đề — phải soi 4 ý một lúc */
+      if (idx.length >= 6) {
+        const mucDS = Math.min(4, Math.max.apply(null, idx.map(i2 => kho[i2].m || 2)));
+        TD.GEN[mon].push({
+          ma: mon + '-ltds-' + ma, chuong: cd, muc: mucDS, dang: 'ds', _tuLT: true,
+          tao(R) { return TD.cauDsTuMenhDe(mon, R.chonNhieu(idx, 4), cd, (R() * 4294967295) >>> 0); }
+        });
+      }
+    }
+  }
+};
+
+/* ---------- ƯỚC LƯỢNG SỐ CÂU KHÁC NHAU CÓ THỂ SINH ----------
+   Đếm thật theo tổ hợp, không phải con số quảng cáo:
+   · câu nhiều lựa chọn = (số mệnh đề làm đáp án) × (số bộ 3 phương án nhiễu)
+   · câu đúng/sai       = số cách chọn 4 mệnh đề trong cùng chủ đề
+   · dạng bài tính toán = lấy 200 biến thể/dạng (mức đã đo được ở check-gen) */
+const toHop = (n, k) => {
+  if (n < k) return 0;
+  let r = 1; for (let i = 0; i < k; i++) r = r * (n - i) / (i + 1);
+  return Math.round(r);
+};
+
+TD.soCauKhaDung = function (mon, muc) {
+  let tong = TD.layCauHoi(mon, muc || null).length;
+
+  const kho = TD.KHO_LT[mon] || [];
+  if (kho.length >= 8) {
+    const gDung = kho.filter(x => x.a).length, gSai = kho.length - gDung;
+    const theoCD = {};
+    kho.forEach((x, i) => { const c = x.cd || 'Khác'; (theoCD[c] = theoCD[c] || []).push(i); });
+    for (const cd of Object.keys(theoCD)) {
+      const idx = theoCD[cd];
+      const d = idx.filter(i => kho[i].a).length, s2 = idx.length - d;
+      const nhieuSai = s2 >= 3 ? s2 : gSai;      /* nhiễu ưu tiên cùng chủ đề */
+      const nhieuDung = d >= 3 ? d : gDung;
+      /* đếm theo đúng cách đăng ký: từng mức độ một */
+      const dM = muc ? idx.filter(i => kho[i].a && (kho[i].m || 2) === muc).length : d;
+      const sM = muc ? idx.filter(i => !kho[i].a && (kho[i].m || 2) === muc).length : s2;
+      tong += dM * toHop(nhieuSai, 3);           /* câu "chọn phát biểu đúng" */
+      tong += sM * toHop(nhieuDung, 3);          /* câu "chọn phát biểu sai"  */
+      if (idx.length >= 6) {
+        const mucDS = Math.min(4, Math.max.apply(null, idx.map(i => kho[i].m || 2)));
+        if (!muc || mucDS === muc) tong += toHop(idx.length, 4);   /* câu đúng/sai 4 ý */
+      }
+    }
+  }
+
+  const mauSo = (TD.GEN[mon] || []).filter(t => !t._tuLT && (!muc || t.muc === muc)).length;
+  tong += mauSo * 200;
+  return tong;
 };
 
 /* ---------- KHO CÂU HỎI ---------- */

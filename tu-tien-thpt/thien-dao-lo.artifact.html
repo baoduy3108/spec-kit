@@ -325,6 +325,7 @@ TD.macDinhTrangThai = function () {
     ngay_thi: TD.MAC_DINH.ngay_thi,
     to_hop: TD.MAC_DINH.to_hop.slice(),
     chi_tieu_ngay: TD.MAC_DINH.chi_tieu_ngay,
+    so_cau_phien: 30,           /* độ dài mỗi phiên Luyện Công */
     bat_dau: TD.homNay(),
     /* thống kê: thong_ke[mon][muc] = {dung, tong} */
     thong_ke: {},
@@ -633,10 +634,15 @@ TD.theThanhMuc = function (id) {
 TD.sinhNhieu = function (mon, muc, n) {
   const mau = (TD.GEN[mon] || []).filter(t => !muc || t.muc === muc);
   if (!mau.length) return [];
+  /* Xáo danh sách mẫu rồi duyệt vòng — mỗi dạng bài đều được chạm tới
+     trước khi lặp lại dạng nào, nên phiên luyện phủ đều chứ không dồn cục. */
+  let dsMau = TD.xao(mau), vt = 0;
   const ra = [];
-  for (let k = 0; k < n; k++) {
-    const t = mau[k % mau.length];
-    ra.push({ mon: mon, g: t.ma, s: (Math.random() * 4294967295) >>> 0 });
+  for (let thu = 0; ra.length < n && thu < n * 6; thu++) {
+    if (vt >= dsMau.length) { dsMau = TD.xao(mau); vt = 0; }
+    const t = dsMau[vt++];
+    const seed = (Math.random() * 4294967295) >>> 0;
+    if (TD.sinhCau(t, seed)) ra.push({ mon: mon, g: t.ma, s: seed });
   }
   return TD.xao(ra);
 };
@@ -672,7 +678,7 @@ TD.deTaDao = function (mon, so, loai) {
   const N = TD.SO_CAU_TA_DAO;
 
   if (loai === 'baitap') {
-    const mau = (TD.GEN[mon] || []);
+    const mau = (TD.GEN[mon] || []).filter(t => !t._tuLT);   /* chỉ bài tập tính toán */
     if (!mau.length) return [];
     const ra = [];
     /* Rải đều các dạng bài rồi mới xáo, để đề nào cũng phủ hết dạng.
@@ -781,7 +787,7 @@ TD.soMenhDe = function (mon) { return (TD.KHO_LT[mon] || []).length; };
 
 /* Bộ đề Tà Đạo có dùng được không */
 TD.taDaoSan = function (mon, loai) {
-  if (loai === 'baitap') return (TD.GEN[mon] || []).length >= 3;
+  if (loai === 'baitap') return (TD.GEN[mon] || []).filter(t => !t._tuLT).length >= 3;
   const kho = TD.KHO_LT[mon] || [];
   return kho.filter(x => x.a).length >= 4 && kho.filter(x => !x.a).length >= 4;
 };
@@ -797,6 +803,105 @@ TD.ghiTaDao = function (mon, so, loai, dung, tong) {
 
 TD.ketQuaTaDao = function (mon, so, loai) {
   return (TD.S.ta_dao || {})[mon + '|' + loai + '|' + so] || null;
+};
+
+/* ============================================================
+   TỰ ĐĂNG KÝ MẪU ĐỀ TỪ KHO MỆNH ĐỀ
+   Mọi môn đều có kho mệnh đề trọng điểm, nên mọi môn đều phải có
+   đề tự sinh ở Luyện Công — kể cả Sử, Địa, GDKT&PL, Văn, Anh.
+   Mỗi CHỦ ĐỀ sinh ra 3 dạng bài:
+     · chọn phát biểu ĐÚNG  · chọn phát biểu SAI  · đúng/sai 4 ý
+   Đánh dấu _tuLT để Tà Đạo Bài tập không lấy nhầm — phần đó chỉ
+   dành cho bài tập tính toán.
+   ============================================================ */
+TD.dangKyMauTuMenhDe = function () {
+  if (TD._daDangKyLT) return;                 /* chỉ chạy một lần */
+  TD._daDangKyLT = true;
+
+  const slug = t => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[đĐ]/g, 'd').replace(/[^A-Za-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '').toLowerCase().slice(0, 26);
+
+  for (const mon of Object.keys(TD.KHO_LT)) {
+    const kho = TD.KHO_LT[mon];
+    if (!Array.isArray(kho) || kho.length < 8) continue;
+    const gDung = kho.filter(x => x.a).length, gSai = kho.length - gDung;
+
+    const theoCD = {};
+    kho.forEach((x, i2) => { const c = x.cd || 'Khác'; (theoCD[c] = theoCD[c] || []).push(i2); });
+
+    TD.GEN[mon] = TD.GEN[mon] || [];
+    for (const cd of Object.keys(theoCD)) {
+      const idx = theoCD[cd];
+      const ma = slug(cd);
+
+      /* Đăng ký RIÊNG cho từng mức độ — nếu gộp lại rồi lấy mức trung bình
+         thì mức 1 và mức 4 sẽ trống, người học không luyện riêng được. */
+      for (let muc = 1; muc <= 4; muc++) {
+        const dungM = idx.filter(i2 => kho[i2].a && (kho[i2].m || 2) === muc);
+        const saiM = idx.filter(i2 => !kho[i2].a && (kho[i2].m || 2) === muc);
+
+        if (dungM.length >= 1 && gSai >= 3) TD.GEN[mon].push({
+          ma: mon + '-ltd' + muc + '-' + ma, chuong: cd, muc: muc, dang: 'mc', _tuLT: true,
+          tao(R) { return TD.cauTuMenhDe(mon, R.chon(dungM), 'd', (R() * 4294967295) >>> 0); }
+        });
+        if (saiM.length >= 1 && gDung >= 3) TD.GEN[mon].push({
+          ma: mon + '-lts' + muc + '-' + ma, chuong: cd, muc: muc, dang: 'mc', _tuLT: true,
+          tao(R) { return TD.cauTuMenhDe(mon, R.chon(saiM), 's', (R() * 4294967295) >>> 0); }
+        });
+      }
+
+      /* Câu đúng/sai 4 ý xếp ở mức cao nhất trong chủ đề — phải soi 4 ý một lúc */
+      if (idx.length >= 6) {
+        const mucDS = Math.min(4, Math.max.apply(null, idx.map(i2 => kho[i2].m || 2)));
+        TD.GEN[mon].push({
+          ma: mon + '-ltds-' + ma, chuong: cd, muc: mucDS, dang: 'ds', _tuLT: true,
+          tao(R) { return TD.cauDsTuMenhDe(mon, R.chonNhieu(idx, 4), cd, (R() * 4294967295) >>> 0); }
+        });
+      }
+    }
+  }
+};
+
+/* ---------- ƯỚC LƯỢNG SỐ CÂU KHÁC NHAU CÓ THỂ SINH ----------
+   Đếm thật theo tổ hợp, không phải con số quảng cáo:
+   · câu nhiều lựa chọn = (số mệnh đề làm đáp án) × (số bộ 3 phương án nhiễu)
+   · câu đúng/sai       = số cách chọn 4 mệnh đề trong cùng chủ đề
+   · dạng bài tính toán = lấy 200 biến thể/dạng (mức đã đo được ở check-gen) */
+const toHop = (n, k) => {
+  if (n < k) return 0;
+  let r = 1; for (let i = 0; i < k; i++) r = r * (n - i) / (i + 1);
+  return Math.round(r);
+};
+
+TD.soCauKhaDung = function (mon, muc) {
+  let tong = TD.layCauHoi(mon, muc || null).length;
+
+  const kho = TD.KHO_LT[mon] || [];
+  if (kho.length >= 8) {
+    const gDung = kho.filter(x => x.a).length, gSai = kho.length - gDung;
+    const theoCD = {};
+    kho.forEach((x, i) => { const c = x.cd || 'Khác'; (theoCD[c] = theoCD[c] || []).push(i); });
+    for (const cd of Object.keys(theoCD)) {
+      const idx = theoCD[cd];
+      const d = idx.filter(i => kho[i].a).length, s2 = idx.length - d;
+      const nhieuSai = s2 >= 3 ? s2 : gSai;      /* nhiễu ưu tiên cùng chủ đề */
+      const nhieuDung = d >= 3 ? d : gDung;
+      /* đếm theo đúng cách đăng ký: từng mức độ một */
+      const dM = muc ? idx.filter(i => kho[i].a && (kho[i].m || 2) === muc).length : d;
+      const sM = muc ? idx.filter(i => !kho[i].a && (kho[i].m || 2) === muc).length : s2;
+      tong += dM * toHop(nhieuSai, 3);           /* câu "chọn phát biểu đúng" */
+      tong += sM * toHop(nhieuDung, 3);          /* câu "chọn phát biểu sai"  */
+      if (idx.length >= 6) {
+        const mucDS = Math.min(4, Math.max.apply(null, idx.map(i => kho[i].m || 2)));
+        if (!muc || mucDS === muc) tong += toHop(idx.length, 4);   /* câu đúng/sai 4 ý */
+      }
+    }
+  }
+
+  const mauSo = (TD.GEN[mon] || []).filter(t => !t._tuLT && (!muc || t.muc === muc)).length;
+  tong += mauSo * 200;
+  return tong;
 };
 
 /* ---------- KHO CÂU HỎI ---------- */
@@ -1946,6 +2051,82 @@ TD.KHO.hoa_ct = [
   bay: 'Đề thi mới KHÔNG cho bảng tuần hoàn ở một số dạng — phải thuộc nằm lòng.' }
 ];
 
+TD.KHO.hoa_ct.push(
+
+/* ============ BỔ SUNG: PHỦ KÍN CÔNG THỨC CÓ THỂ RA THI ============ */
+{ nhom: 'Nền tảng', ten: 'Nồng độ dung dịch & pha trộn', cap: 1,
+  ct: '<b>C<sub>M</sub> = n/V</b> (mol/L) &nbsp;·&nbsp; <b>C% = m<sub>ct</sub>/m<sub>dd</sub> · 100 %</b><br>Liên hệ: C<sub>M</sub> = 10·D·C%/M (D là khối lượng riêng g/mL)<br>m<sub>dd</sub> = V(mL)·D &nbsp;·&nbsp; m<sub>dd sau</sub> = m<sub>chất cho vào</sub> + m<sub>dd đầu</sub> − m<sub>kết tủa</sub> − m<sub>khí</sub><br>Pha loãng: C₁V₁ = C₂V₂.',
+  khi: 'Mọi bài dung dịch — bước tính khối lượng dung dịch sau phản ứng.',
+  vd: 'Cho 5,6 g Fe vào HCl dư thu 0,1 mol H₂: m<sub>dd tăng</sub> = 5,6 − 0,1·2 = <b>5,4 g</b>.',
+  bay: 'Nhớ TRỪ khối lượng khí thoát ra và kết tủa khi tính khối lượng dung dịch sau phản ứng.' },
+
+{ nhom: 'Nền tảng', ten: 'pH và môi trường dung dịch', cap: 2,
+  ct: '<b>pH = −log[H⁺]</b> &nbsp;·&nbsp; pOH = −log[OH⁻] &nbsp;·&nbsp; <b>pH + pOH = 14</b> (25 °C)<br>[H⁺]·[OH⁻] = 10⁻¹⁴<br>pH &lt; 7 acid · pH = 7 trung tính · pH &gt; 7 base.<br>Acid mạnh nồng độ C: [H⁺] = C (nếu đơn chức). Base mạnh: [OH⁻] = C.<br>Trộn acid với base: tính n<sub>H⁺</sub> − n<sub>OH⁻</sub> rồi chia thể tích tổng.',
+  khi: 'Bài tính pH, chuẩn độ, trung hoà.',
+  vd: 'Trộn 100 mL HCl 0,1 M với 100 mL NaOH 0,05 M: n<sub>H⁺</sub> dư = 0,01 − 0,005 = 0,005 mol; [H⁺] = 0,005/0,2 = 0,025 ⇒ pH ≈ <b>1,6</b>.',
+  bay: 'Acid yếu (CH₃COOH) KHÔNG điện li hoàn toàn nên [H⁺] &lt; C, pH lớn hơn tính theo acid mạnh.' },
+
+{ nhom: 'Kỹ thuật', ten: 'Điện phân & định luật Faraday', cap: 3,
+  ct: '<b>m = A·I·t/(n·F)</b> với F = 96500 C/mol<br>Số mol electron trao đổi: <b>n<sub>e</sub> = I·t/F</b><br>Thứ tự điện phân ở catot: Ag⁺ &gt; Fe³⁺ &gt; Cu²⁺ &gt; H⁺ &gt; H₂O (ion kim loại mạnh như Na⁺, K⁺, Al³⁺ không bị điện phân trong dung dịch).<br>Anot: S²⁻ &gt; I⁻ &gt; Br⁻ &gt; Cl⁻ &gt; H₂O (điện cực trơ).<br>Hai điện cực luôn nhận/nhường CÙNG số mol electron.',
+  khi: 'Bài điện phân dung dịch, tính khối lượng kim loại bám catot.',
+  vd: 'I = 5 A, t = 1930 s ⇒ n<sub>e</sub> = 5·1930/96500 = 0,1 mol ⇒ Cu bám = 0,05 mol = <b>3,2 g</b>.',
+  bay: 'Khi cation hết thì nước bị điện phân, khí H₂ thoát ra ở catot — đồ thị khí gãy khúc tại đó.' },
+
+{ nhom: 'Kỹ thuật', ten: 'Pin điện hoá & thế điện cực chuẩn', cap: 2,
+  ct: '<b>E°<sub>pin</sub> = E°<sub>catot (+)</sub> − E°<sub>anot (−)</sub></b><br>Anot: xảy ra OXI HOÁ (kim loại mạnh hơn, E° nhỏ hơn) — cực âm.<br>Catot: xảy ra KHỬ — cực dương.<br>E°<sub>pin</sub> &gt; 0 thì phản ứng tự xảy ra.<br>Dãy điện hoá: K, Na, Mg, Al, Zn, Fe, Ni, Sn, Pb, (H), Cu, Ag, Au.',
+  khi: 'Nội dung [MỚI] CT 2018 — pin Galvani, ăn mòn điện hoá.',
+  vd: 'Pin Zn–Cu: E° = 0,34 − (−0,76) = <b>+1,10 V</b>.',
+  bay: 'Trong ăn mòn điện hoá, kim loại MẠNH hơn bị ăn mòn trước (đóng vai trò cực âm). Đó là nguyên lí bảo vệ bằng kẽm.' },
+
+{ nhom: 'Kỹ thuật', ten: 'Nhiệt phản ứng ΔrH và năng lượng liên kết', cap: 3,
+  ct: '<b>Δ<sub>r</sub>H°₂₉₈ = Σ Δ<sub>f</sub>H°(sản phẩm) − Σ Δ<sub>f</sub>H°(chất đầu)</b><br>Tính theo năng lượng liên kết: Δ<sub>r</sub>H = Σ E<sub>lk</sub>(chất đầu) − Σ E<sub>lk</sub>(sản phẩm)<br>Δ<sub>r</sub>H &lt; 0: phản ứng TOẢ nhiệt. Δ<sub>r</sub>H &gt; 0: THU nhiệt.<br>Δ<sub>f</sub>H° của đơn chất bền ở trạng thái chuẩn = 0.',
+  khi: 'Nội dung [MỚI] CT 2018 — chắc chắn xuất hiện trong đề.',
+  vd: 'Đốt cháy nhiên liệu luôn có Δ<sub>r</sub>H &lt; 0. Biết Δ<sub>r</sub>H và số mol thì Q toả = |Δ<sub>r</sub>H|·n.',
+  bay: 'Hai công thức trên NGƯỢC chiều nhau: theo Δ<sub>f</sub>H lấy sau trừ trước, theo E<sub>lk</sub> lấy trước trừ sau.' },
+
+{ nhom: 'Kỹ thuật', ten: 'Tốc độ phản ứng & cân bằng hoá học', cap: 2,
+  ct: '<b>v = ΔC/Δt</b>; hệ số nhiệt độ Van’t Hoff: v₂/v₁ = γ^((T₂−T₁)/10)<br><b>Hằng số cân bằng:</b> K<sub>C</sub> = [C]^c[D]^d / ([A]^a[B]^b) — chỉ tính chất khí và chất tan.<br><b>Nguyên lí Le Chatelier:</b> cân bằng chuyển dịch theo chiều chống lại tác động bên ngoài.<br>Tăng nhiệt độ ⇒ chuyển theo chiều THU nhiệt. Tăng áp suất ⇒ chuyển theo chiều GIẢM số mol khí.',
+  khi: 'Câu lí thuyết định lượng về cân bằng, bài toán tổng hợp NH₃.',
+  vd: 'N₂ + 3H₂ ⇌ 2NH₃ (Δ<sub>r</sub>H &lt; 0): tăng áp suất và giảm nhiệt độ đều làm tăng hiệu suất tạo NH₃.',
+  bay: 'Chất rắn và dung môi KHÔNG có mặt trong biểu thức K. Chất xúc tác không làm chuyển dịch cân bằng.' },
+
+{ nhom: 'Hữu cơ', ten: 'Độ bất bão hoà k và công thức phân tử', cap: 2,
+  ct: '<b>k = (2C + 2 + N − H − X)/2</b><br>k = số liên kết π + số vòng.<br>· k = 0: no, mạch hở · k = 1: 1 nối đôi hoặc 1 vòng · k = 4 thường có vòng benzene.<br>Ester no đơn hở: C<sub>n</sub>H<sub>2n</sub>O₂ (k = 1). Acid no đơn hở cũng vậy.<br>Amino acid no, 1 NH₂, 1 COOH: C<sub>n</sub>H<sub>2n+1</sub>O₂N.',
+  khi: 'Bước đầu tiên khi biện luận công thức phân tử.',
+  vd: 'C₄H₆O₂ ⇒ k = (8 + 2 − 6)/2 = <b>2</b> ⇒ có 2 π hoặc 1 π + 1 vòng.',
+  bay: 'k luôn là số nguyên không âm. Ra số lẻ hoặc âm nghĩa là công thức phân tử sai.' },
+
+{ nhom: 'Hữu cơ', ten: 'Carbohydrate — phản ứng đặc trưng', cap: 2,
+  ct: 'Glucose (C₆H₁₂O₆) + AgNO₃/NH₃ ⇒ <b>2Ag</b> (n<sub>Ag</sub> = 2n<sub>glucose</sub>)<br>Saccharose KHÔNG tráng bạc; thuỷ phân ⇒ glucose + fructose.<br>Tinh bột, cellulose (C₆H₁₀O₅)<sub>n</sub> thuỷ phân ⇒ n glucose.<br>Lên men: C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂ (nhớ nhân hiệu suất).<br>Cellulose + 3HNO₃ ⇒ cellulose trinitrat (M = 297n).',
+  khi: 'Bài tráng bạc, lên men rượu, sản xuất thuốc súng không khói.',
+  vd: 'Lên men 180 g glucose, H = 80 % ⇒ n<sub>CO₂</sub> = 2·1·0,8 = <b>1,6 mol</b>.',
+  bay: 'Fructose vẫn tráng bạc được (chuyển hoá thành glucose trong môi trường base). Saccharose thì không.' },
+
+{ nhom: 'Hữu cơ', ten: 'Amino acid & điểm đẳng điện', cap: 2,
+  ct: 'Amino acid lưỡng tính: phản ứng cả với HCl và NaOH.<br>n<sub>HCl</sub> = số nhóm NH₂ × n<sub>aa</sub> &nbsp;·&nbsp; n<sub>NaOH</sub> = số nhóm COOH × n<sub>aa</sub><br>Số NH₂ &gt; số COOH ⇒ quỳ hoá XANH (lysine). Số COOH &gt; số NH₂ ⇒ quỳ hoá ĐỎ (glutamic).<br>Glycine 75 · Alanine 89 · Valine 117 · Glutamic 147 · Lysine 146.',
+  khi: 'Bài amino acid tác dụng acid/base, nhận biết bằng quỳ tím.',
+  vd: '0,1 mol glutamic (2 COOH) cần <b>0,2 mol NaOH</b>.',
+  bay: 'Bài cho tác dụng lần lượt với HCl rồi NaOH: phải tính cả lượng NaOH trung hoà HCl dư.' },
+
+{ nhom: 'Hữu cơ', ten: 'Polymer & hệ số polymer hoá', cap: 1,
+  ct: '<b>n = M<sub>polymer</sub> / M<sub>mắt xích</sub></b><br>Trùng hợp: monome có liên kết đôi hoặc vòng kém bền (ethylene, vinyl chloride, styrene, buta-1,3-diene).<br>Trùng ngưng: monome có ≥ 2 nhóm chức, giải phóng phân tử nhỏ (nylon-6,6, tơ lapsan, nhựa phenol formaldehyde).<br>Cao su buna-S: buta-1,3-diene + styrene. Nylon-6,6: hexamethylenediamine + adipic acid.',
+  khi: 'Câu nhận biết loại phản ứng và tính hệ số polymer hoá.',
+  vd: 'PE có M = 56 000 ⇒ n = 56 000/28 = <b>2000</b>.',
+  bay: 'Trùng ngưng LUÔN giải phóng phân tử nhỏ (thường là H₂O); trùng hợp thì không.' },
+
+{ nhom: 'Bảo toàn', ten: 'Kim loại tác dụng acid & muối', cap: 2,
+  ct: '<b>Với HCl, H₂SO₄ loãng:</b> n<sub>H₂</sub> = ½ n<sub>e nhường</sub> = ½ n<sub>HCl</sub> = n<sub>H₂SO₄</sub><br>m<sub>muối</sub> = m<sub>KL</sub> + 71·n<sub>H₂</sub> (clorua) = m<sub>KL</sub> + 96·n<sub>H₂</sub> (sunfat)<br><b>Kim loại đẩy kim loại:</b> áp dụng tăng giảm khối lượng theo chênh lệch nguyên tử khối.<br>Thứ tự phản ứng: kim loại mạnh nhất đẩy ion kim loại yếu nhất trước.',
+  khi: 'Bài kim loại + acid, kim loại + dung dịch muối.',
+  vd: 'n<sub>H₂</sub> = 0,1 mol từ hỗn hợp KL nặng 5 g ⇒ m<sub>muối clorua</sub> = 5 + 7,1 = <b>12,1 g</b>.',
+  bay: 'Cu, Ag KHÔNG tan trong HCl và H₂SO₄ loãng. Al, Fe, Cr bị THỤ ĐỘNG trong HNO₃ và H₂SO₄ đặc nguội.' },
+
+{ nhom: 'Bảo toàn', ten: 'CO₂ / SO₂ tác dụng dung dịch kiềm', cap: 3,
+  ct: 'Đặt <b>T = n<sub>OH⁻</sub>/n<sub>CO₂</sub></b>:<br>· T ≤ 1: chỉ tạo HCO₃⁻ &nbsp;·&nbsp; T ≥ 2: chỉ tạo CO₃²⁻ &nbsp;·&nbsp; 1 &lt; T &lt; 2: tạo cả hai<br>Khi tạo cả hai: n<sub>CO₃²⁻</sub> = n<sub>OH⁻</sub> − n<sub>CO₂</sub>; n<sub>HCO₃⁻</sub> = 2n<sub>CO₂</sub> − n<sub>OH⁻</sub><br>Với Ca(OH)₂, Ba(OH)₂: kết tủa cực đại rồi TAN DẦN khi CO₂ dư.',
+  khi: 'Bài sục CO₂ vào kiềm, đồ thị kết tủa.',
+  vd: 'n<sub>CO₂</sub> = 0,3; n<sub>NaOH</sub> = 0,5 ⇒ T = 1,67 ⇒ n<sub>CO₃²⁻</sub> = 0,2; n<sub>HCO₃⁻</sub> = <b>0,1 mol</b>.',
+  bay: 'Đồ thị kết tủa có hai đoạn: đi lên (tạo kết tủa) rồi đi xuống (kết tủa tan). Một giá trị kết tủa thường ứng với HAI giá trị n<sub>CO₂</sub>.' }
+);
+
 </script>
 <script>
 /* ============================================================
@@ -2229,6 +2410,178 @@ TD.KHO.toan_ct.push(
   bay: 'Nhớ dấu trong công thức cộng góc: cos đảo dấu (cos(a+b) có dấu TRỪ).' }
 );
 
+TD.KHO.toan_ct.push(
+
+/* ============ BỔ SUNG: PHỦ KÍN CÔNG THỨC CÓ THỂ RA THI ============ */
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'GTLN – GTNN trên đoạn [a; b]', cap: 2,
+  ct: 'Bước 1: tính y′, giải y′ = 0 lấy các nghiệm x<sub>i</sub> ∈ [a; b].<br>Bước 2: tính y(a), y(b), y(x<sub>i</sub>).<br>Bước 3: <b>max</b> = số lớn nhất, <b>min</b> = số nhỏ nhất trong các giá trị đó.<br>Trên khoảng mở hoặc ℝ: phải lập bảng biến thiên, không được chỉ so đầu mút.',
+  khi: 'Câu hỏi tìm GTLN/GTNN, bài toán tối ưu thực tế (hộp, bể, quãng đường).',
+  vd: 'y = x³ − 3x trên [0; 2]: y′ = 3x² − 3 = 0 ⇒ x = 1. y(0) = 0, y(1) = −2, y(2) = 2 ⇒ <b>max = 2, min = −2</b>.',
+  bay: 'Loại nghiệm y′ = 0 nằm NGOÀI đoạn. Rất nhiều bạn tính cả nghiệm ngoài đoạn rồi chọn nhầm.' },
+
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'Tiệm cận đứng – ngang – xiên', cap: 2,
+  ct: '<b>Tiệm cận đứng</b> x = x₀ ⇔ lim<sub>x→x₀</sub> y = ±∞ (mẫu = 0 mà tử ≠ 0).<br><b>Tiệm cận ngang</b> y = L ⇔ lim<sub>x→±∞</sub> y = L (hữu hạn).<br><b>Tiệm cận xiên</b> y = ax + b với a = lim y/x, b = lim (y − ax) — chỉ có khi bậc tử hơn bậc mẫu đúng 1.<br>Hàm y = (ax+b)/(cx+d): TCĐ x = −d/c, TCN y = a/c.',
+  khi: 'Đếm số tiệm cận, nhận dạng đồ thị, bài toán chứa tham số m.',
+  vd: 'y = (x² + 1)/(x − 1): TCĐ x = 1; chia đa thức được y = x + 1 + 2/(x−1) ⇒ <b>TCX: y = x + 1</b>.',
+  bay: 'Nếu tử và mẫu cùng triệt tiêu tại x₀ thì <b>rút gọn trước</b> — có thể mất tiệm cận đứng.' },
+
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'Tương giao & biện luận số nghiệm', cap: 3,
+  ct: 'Số giao điểm của y = f(x) và y = g(x) = số nghiệm của f(x) = g(x).<br>Dạng chuẩn: cô lập tham số về <b>m = h(x)</b> rồi đếm số giao của đường thẳng ngang y = m với đồ thị h(x) qua bảng biến thiên.<br>Hàm bậc 3 cắt Ox tại 3 điểm phân biệt ⇔ có 2 cực trị và <b>y<sub>CĐ</sub>·y<sub>CT</sub> &lt; 0</b>.<br>Trùng phương cắt Ox tại 4 điểm ⇔ ax⁴+bx²+c = 0 có 2 nghiệm dương phân biệt theo t = x².',
+  khi: 'Câu vận dụng cao về số nghiệm phương trình chứa m.',
+  vd: 'x³ − 3x = m có 3 nghiệm phân biệt ⇔ y<sub>CĐ</sub> = 2 &gt; m &gt; y<sub>CT</sub> = −2 ⇒ <b>−2 &lt; m &lt; 2</b>.',
+  bay: 'Với f(|x|) hay |f(x)|, số nghiệm đổi hoàn toàn — phải vẽ lại đồ thị đối xứng/lật rồi mới đếm.' },
+
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'Đọc bảng biến thiên & đồ thị', cap: 1,
+  ct: 'Mũi tên lên = đồng biến (y′ &gt; 0); mũi tên xuống = nghịch biến.<br>Số điểm cực trị = số lần y′ ĐỔI DẤU.<br>Bậc 3: a &gt; 0 thì nhánh cuối đi lên; a &lt; 0 thì đi xuống.<br>Trùng phương: a &gt; 0 và 3 cực trị thì dạng chữ W.<br>y = (ax+b)/(cx+d): đồ thị hai nhánh hypebol, không cực trị.',
+  khi: 'Câu nhận biết cho sẵn BBT hoặc hình vẽ — điểm dễ nhất của đề.',
+  vd: 'BBT có y′ đổi dấu + → − tại x = 1 ⇒ x = 1 là điểm <b>cực đại</b>.',
+  bay: 'y′(x₀) = 0 mà KHÔNG đổi dấu (ví dụ y = x³ tại 0) thì x₀ không phải điểm cực trị.' },
+
+{ nhom: 'II. Mũ – Logarit', ten: 'Bảng công thức logarit đầy đủ', cap: 1,
+  ct: 'log<sub>a</sub>(xy) = log<sub>a</sub>x + log<sub>a</sub>y &nbsp;·&nbsp; log<sub>a</sub>(x/y) = log<sub>a</sub>x − log<sub>a</sub>y<br>log<sub>a</sub>xⁿ = n·log<sub>a</sub>x &nbsp;·&nbsp; log<sub>aⁿ</sub>x = (1/n)·log<sub>a</sub>x<br><b>Đổi cơ số:</b> log<sub>a</sub>x = log<sub>b</sub>x / log<sub>b</sub>a &nbsp;·&nbsp; log<sub>a</sub>b · log<sub>b</sub>c = log<sub>a</sub>c &nbsp;·&nbsp; log<sub>a</sub>b = 1/log<sub>b</sub>a<br>a^(log<sub>a</sub>x) = x &nbsp;·&nbsp; log<sub>a</sub>aˣ = x. ĐK: a &gt; 0, a ≠ 1, x &gt; 0.',
+  khi: 'Mọi bài rút gọn, biểu diễn log theo a, b.',
+  vd: 'log₂6 = log₂(2·3) = 1 + log₂3. Nếu log₂3 = a thì log₆2 = 1/(1+a).',
+  bay: 'log<sub>a</sub>x² = 2log<sub>a</sub>|x| chứ không phải 2log<sub>a</sub>x — mất nghiệm âm là lỗi kinh điển.' },
+
+{ nhom: 'II. Mũ – Logarit', ten: 'Phương trình & bất phương trình mũ – log', cap: 2,
+  ct: 'aᶠ⁽ˣ⁾ = a^g(x) ⇔ f(x) = g(x). &nbsp; log<sub>a</sub>f = log<sub>a</sub>g ⇔ f = g &gt; 0.<br><b>Bất phương trình — nhớ chiều:</b><br>· a &gt; 1: aᶠ &gt; a^g ⇔ f &gt; g (giữ chiều)<br>· 0 &lt; a &lt; 1: aᶠ &gt; a^g ⇔ f &lt; g (<b>đổi chiều</b>)<br>Đặt ẩn phụ t = aˣ &gt; 0 cho dạng bậc hai theo aˣ.',
+  khi: 'Câu giải phương trình/bất phương trình, đếm nghiệm nguyên.',
+  vd: '4ˣ − 5·2ˣ + 4 = 0, đặt t = 2ˣ &gt; 0: t² − 5t + 4 = 0 ⇒ t = 1 hoặc 4 ⇒ <b>x = 0 hoặc x = 2</b>.',
+  bay: 'Luôn đặt điều kiện t &gt; 0 và điều kiện xác định của log TRƯỚC khi giải, nếu không sẽ nhận nghiệm ngoại lai.' },
+
+{ nhom: 'II. Mũ – Logarit', ten: 'Lãi kép & mô hình tăng trưởng', cap: 3,
+  ct: '<b>Lãi kép:</b> A = P(1 + r)ⁿ &nbsp;⇒&nbsp; n = log<sub>(1+r)</sub>(A/P)<br><b>Gửi góp đều đầu mỗi kì:</b> A = P·[(1+r)ⁿ − 1]/r · (1+r)<br><b>Tăng trưởng/phân rã liên tục:</b> N = N₀·e^(kt); chu kì bán rã T ⇒ N = N₀·2^(−t/T)<br><b>Trả góp:</b> số tiền trả mỗi kì m = P·r(1+r)ⁿ/[(1+r)ⁿ − 1]',
+  khi: 'Câu vận dụng thực tế — dạng chắc chắn có trong đề CT 2018.',
+  vd: 'Gửi 100 triệu, lãi 6 %/năm. Sau bao lâu được 150 triệu? n = log₁,₀₆1,5 ≈ <b>6,96 năm ⇒ 7 năm</b>.',
+  bay: 'Đọc kĩ lãi theo NĂM hay theo THÁNG. Lãi 6 %/năm ghép tháng thì r = 0,06/12 và n tính bằng tháng.' },
+
+{ nhom: 'III. Nguyên hàm – Tích phân', ten: 'Bảng nguyên hàm cơ bản', cap: 1,
+  ct: '∫xⁿdx = xⁿ⁺¹/(n+1) + C (n ≠ −1) &nbsp;·&nbsp; ∫(1/x)dx = ln|x| + C<br>∫eˣdx = eˣ + C &nbsp;·&nbsp; ∫aˣdx = aˣ/ln a + C<br>∫sin x dx = −cos x + C &nbsp;·&nbsp; ∫cos x dx = sin x + C<br>∫(1/cos²x)dx = tan x + C &nbsp;·&nbsp; ∫(1/sin²x)dx = −cot x + C<br><b>Dạng hợp:</b> ∫f(ax+b)dx = (1/a)·F(ax+b) + C',
+  khi: 'Nền tảng mọi câu nguyên hàm – tích phân.',
+  vd: '∫(2x+1)⁵dx = (1/2)·(2x+1)⁶/6 + C = <b>(2x+1)⁶/12 + C</b>.',
+  bay: 'Đừng quên hệ số 1/a khi biến trong ngoặc là ax + b. Đây là lỗi mất điểm nhiều nhất của chương này.' },
+
+{ nhom: 'III. Nguyên hàm – Tích phân', ten: 'Đổi biến & tích phân từng phần', cap: 2,
+  ct: '<b>Đổi biến:</b> đặt t = u(x) ⇒ dt = u′(x)dx, đổi luôn cận theo t.<br><b>Từng phần:</b> ∫u dv = uv − ∫v du.<br>Thứ tự ưu tiên chọn u (thần chú <b>"Nhất log, nhì đa, tam lượng, tứ mũ"</b>):<br>· có ln x ⇒ u = ln x<br>· đa thức × (sin, cos, eˣ) ⇒ u = đa thức.',
+  khi: 'Tích phân có ln, có đa thức nhân hàm mũ hoặc lượng giác.',
+  vd: '∫₀¹ x·eˣdx: u = x, dv = eˣdx ⇒ = [x·eˣ]₀¹ − ∫₀¹eˣdx = e − (e − 1) = <b>1</b>.',
+  bay: 'Khi đổi biến trong tích phân xác định, PHẢI đổi cận. Quên đổi cận là sai ngay từ dòng đầu.' },
+
+{ nhom: 'III. Nguyên hàm – Tích phân', ten: 'Thể tích khối tròn xoay', cap: 3,
+  ct: '<b>Quay quanh Ox:</b> V = π∫<sub>a</sub><sup>b</sup> f²(x)dx.<br>Giữa hai đường (f ở ngoài, g ở trong): V = π∫<sub>a</sub><sup>b</sup> |f² − g²|dx.<br><b>Quay quanh Oy:</b> V = π∫<sub>c</sub><sup>d</sup> x²(y)dy — phải biểu diễn x theo y và đổi cận sang y.',
+  khi: 'Câu tích phân ứng dụng, thường ở mức vận dụng.',
+  vd: 'y = √x, 0 ≤ x ≤ 4 quay quanh Ox: V = π∫₀⁴x dx = π·[x²/2]₀⁴ = <b>8π</b>.',
+  bay: 'Là ∫f² chứ không phải (∫f)². Và với hai đường thì lấy ∫(f² − g²), không phải ∫(f − g)².' },
+
+{ nhom: 'III. Nguyên hàm – Tích phân', ten: 'Ứng dụng vật lí của tích phân', cap: 2,
+  ct: 'v(t) = ∫a(t)dt &nbsp;·&nbsp; s(t) = ∫v(t)dt<br><b>Quãng đường đi được</b> từ t₁ đến t₂: s = ∫<sub>t₁</sub><sup>t₂</sup>|v(t)|dt<br><b>Độ dịch chuyển:</b> Δs = ∫<sub>t₁</sub><sup>t₂</sup>v(t)dt (có thể âm)<br>Lượng nước/lượng chất tích luỹ: Q = ∫ tốc độ dt.',
+  khi: 'Bài toán thực tế về chuyển động, dòng chảy, tốc độ tăng trưởng.',
+  vd: 'v = 3t² (m/s), từ t = 0 đến t = 2: s = ∫₀²3t²dt = [t³]₀² = <b>8 m</b>.',
+  bay: 'Quãng đường dùng |v|. Nếu v đổi dấu trong khoảng thì phải tách tích phân tại điểm v = 0.' },
+
+{ nhom: 'IV. Oxyz', ten: 'Vecto, tích vô hướng & tích có hướng', cap: 1,
+  ct: 'AB→ = (x<sub>B</sub>−x<sub>A</sub>; y<sub>B</sub>−y<sub>A</sub>; z<sub>B</sub>−z<sub>A</sub>) &nbsp;·&nbsp; |u→| = √(x²+y²+z²)<br><b>Tích vô hướng</b> u→·v→ = x₁x₂ + y₁y₂ + z₁z₂ = |u||v|cos(u,v) ⇒ vuông góc ⇔ tích = 0.<br><b>Tích có hướng</b> [u→,v→] = (y₁z₂−y₂z₁; z₁x₂−z₂x₁; x₁y₂−x₂y₁) ⊥ cả hai vecto.<br>Diện tích tam giác S = ½|[AB→,AC→]| &nbsp;·&nbsp; Thể tích tứ diện V = (1/6)|[AB→,AC→]·AD→|.',
+  khi: 'Nền tảng mọi bài Oxyz; tính diện tích, thể tích, xét đồng phẳng.',
+  vd: 'A(1;0;0), B(0;1;0), C(0;0;1): [AB→,AC→] = (1;1;1) ⇒ S = ½√3.',
+  bay: 'Bốn điểm đồng phẳng ⇔ [AB→,AC→]·AD→ = 0. Đây cũng là điều kiện thể tích tứ diện bằng 0.' },
+
+{ nhom: 'IV. Oxyz', ten: 'Phương trình mặt phẳng', cap: 2,
+  ct: 'Mặt phẳng qua M(x₀;y₀;z₀), pháp tuyến n→ = (A;B;C):<br><b>A(x−x₀) + B(y−y₀) + C(z−z₀) = 0</b> ⇔ Ax + By + Cz + D = 0.<br>Mặt phẳng qua 3 điểm A, B, C: n→ = [AB→, AC→].<br>Mặt phẳng theo đoạn chắn: x/a + y/b + z/c = 1.<br>Song song ⇔ cùng phương n→; vuông góc ⇔ n₁→·n₂→ = 0.',
+  khi: 'Viết phương trình mặt phẳng — hầu như đề nào cũng có.',
+  vd: 'Mp qua M(1;2;3) và ⊥ đường thẳng có u→ = (2;−1;1): 2(x−1) − (y−2) + (z−3) = 0 ⇔ <b>2x − y + z − 3 = 0</b>.',
+  bay: 'Mặt phẳng ⊥ đường thẳng thì n→ mp = u→ đường thẳng. Mặt phẳng ∥ đường thẳng thì n→·u→ = 0.' },
+
+{ nhom: 'IV. Oxyz', ten: 'Phương trình đường thẳng & mặt cầu', cap: 2,
+  ct: '<b>Đường thẳng</b> qua M(x₀;y₀;z₀), chỉ phương u→ = (a;b;c):<br>Tham số: x = x₀+at, y = y₀+bt, z = z₀+ct.<br>Chính tắc: (x−x₀)/a = (y−y₀)/b = (z−z₀)/c (khi abc ≠ 0).<br><b>Mặt cầu</b> tâm I(a;b;c), bán kính R: (x−a)² + (y−b)² + (z−c)² = R².<br>Dạng khai triển x²+y²+z²−2ax−2by−2cz+d = 0 với <b>R = √(a²+b²+c²−d)</b> (cần a²+b²+c²−d &gt; 0).',
+  khi: 'Viết phương trình đường thẳng, mặt cầu, tìm tâm và bán kính.',
+  vd: 'x²+y²+z²−2x+4y−6z+5 = 0 ⇒ I(1;−2;3), R = √(1+4+9−5) = <b>3</b>.',
+  bay: 'Dấu: hệ số −2a nên a = −(hệ số x)/2. Nhầm dấu tâm là lỗi phổ biến nhất ở dạng này.' },
+
+{ nhom: 'IV. Oxyz', ten: 'Khoảng cách, góc & vị trí tương đối', cap: 3,
+  ct: '<b>d(M, (P))</b> = |Ax₀+By₀+Cz₀+D| / √(A²+B²+C²)<br><b>d(M, Δ)</b> = |[AM→, u→]| / |u→| với A ∈ Δ<br><b>Góc hai mặt phẳng:</b> cosφ = |n₁·n₂|/(|n₁||n₂|)<br><b>Góc đường thẳng & mặt phẳng:</b> sinφ = |u·n|/(|u||n|)<br>Mặt cầu và mặt phẳng: d &gt; R rời nhau, d = R tiếp xúc, d &lt; R cắt theo đường tròn bán kính r = √(R²−d²).',
+  khi: 'Câu vận dụng: tìm bán kính đường tròn giao tuyến, viết mp tiếp xúc mặt cầu.',
+  vd: 'I(1;1;1), R = 3, mp x+y+z−1 = 0: d = |1+1+1−1|/√3 = 2/√3 ⇒ cắt, r = √(9 − 4/3).',
+  bay: 'Góc giữa đường và mặt dùng <b>sin</b>, góc giữa hai mặt/hai đường dùng <b>cos</b>. Nhớ trị tuyệt đối ở tử.' },
+
+{ nhom: 'V. Thống kê', ten: 'Số đo xu thế trung tâm — mẫu ghép nhóm', cap: 2,
+  ct: '<b>Trung bình:</b> x̄ = Σn<sub>i</sub>c<sub>i</sub>/n với c<sub>i</sub> là giá trị đại diện (trung điểm nhóm).<br><b>Trung vị:</b> M<sub>e</sub> = a<sub>m</sub> + [(n/2 − C)/n<sub>m</sub>]·h<br><b>Tứ phân vị Q<sub>k</sub>:</b> thay n/2 bằng kn/4 trong công thức trên.<br><b>Mốt:</b> M<sub>o</sub> = a<sub>m</sub> + [(n<sub>m</sub>−n<sub>m−1</sub>)/((n<sub>m</sub>−n<sub>m−1</sub>)+(n<sub>m</sub>−n<sub>m+1</sub>))]·h<br>(a<sub>m</sub>: đầu mút trái nhóm chứa, h: độ dài nhóm, C: tần số tích luỹ trước nhóm đó.)',
+  khi: 'Nội dung [MỚI] của CT 2018 — chắc chắn có trong đề.',
+  vd: 'n = 40, nhóm chứa trung vị [20;30) có C = 15, n<sub>m</sub> = 10, h = 10 ⇒ M<sub>e</sub> = 20 + (20−15)/10·10 = <b>25</b>.',
+  bay: 'Giá trị đại diện c<sub>i</sub> là TRUNG ĐIỂM của nhóm, không phải đầu mút trái.' },
+
+{ nhom: 'V. Thống kê', ten: 'Phương sai, độ lệch chuẩn & ngoại lệ', cap: 3,
+  ct: '<b>Phương sai:</b> s² = (1/n)Σn<sub>i</sub>(c<sub>i</sub> − x̄)² = (1/n)Σn<sub>i</sub>c<sub>i</sub>² − x̄²<br><b>Độ lệch chuẩn:</b> s = √(s²) — cùng đơn vị với số liệu.<br><b>Khoảng biến thiên:</b> R = max − min<br><b>Khoảng tứ phân vị:</b> Δ<sub>Q</sub> = Q₃ − Q₁ (ít bị ảnh hưởng bởi giá trị bất thường)<br><b>Ngoại lệ:</b> x &lt; Q₁ − 1,5Δ<sub>Q</sub> hoặc x &gt; Q₃ + 1,5Δ<sub>Q</sub>.',
+  khi: 'So sánh độ phân tán hai mẫu, phát hiện giá trị bất thường.',
+  vd: 'Q₁ = 4, Q₃ = 10 ⇒ Δ<sub>Q</sub> = 6; ngưỡng ngoại lệ: dưới 4 − 9 = −5 hoặc trên 10 + 9 = 19.',
+  bay: 'Độ lệch chuẩn nhỏ hơn = số liệu đồng đều hơn. Đừng so phương sai của hai mẫu khác đơn vị.' },
+
+{ nhom: 'V. Xác suất', ten: 'Quy tắc đếm – Hoán vị – Chỉnh hợp – Tổ hợp', cap: 1,
+  ct: '<b>Quy tắc cộng</b> (hoặc): n₁ + n₂. <b>Quy tắc nhân</b> (và, liên tiếp): n₁·n₂.<br>Hoán vị: P<sub>n</sub> = n! &nbsp;·&nbsp; Chỉnh hợp: A<sup>k</sup><sub>n</sub> = n!/(n−k)! &nbsp;·&nbsp; Tổ hợp: C<sup>k</sup><sub>n</sub> = n!/[k!(n−k)!]<br><b>Có thứ tự dùng A, không thứ tự dùng C.</b><br>C<sup>k</sup><sub>n</sub> = C<sup>n−k</sup><sub>n</sub> &nbsp;·&nbsp; C<sup>k</sup><sub>n</sub> + C<sup>k+1</sup><sub>n</sub> = C<sup>k+1</sup><sub>n+1</sub>.',
+  khi: 'Mọi bài đếm và xác suất cổ điển.',
+  vd: 'Chọn 3 trong 10 người vào một tổ (không phân vai): C³₁₀ = <b>120</b>. Nếu chọn tổ trưởng, tổ phó, thư kí: A³₁₀ = <b>720</b>.',
+  bay: 'Câu hỏi có phân biệt vai trò/vị trí ⇒ dùng A. Chỉ lấy ra một nhóm ⇒ dùng C.' },
+
+{ nhom: 'V. Xác suất', ten: 'Nhị thức Newton', cap: 2,
+  ct: '(a + b)ⁿ = Σ<sub>k=0</sub><sup>n</sup> C<sup>k</sup><sub>n</sub>·a<sup>n−k</sup>·b<sup>k</sup><br>Số hạng tổng quát: <b>T<sub>k+1</sub> = C<sup>k</sup><sub>n</sub>·a<sup>n−k</sup>·b<sup>k</sup></b> (có n+1 số hạng).<br>Tổng hệ số = giá trị biểu thức khi a = b = 1. Σ C<sup>k</sup><sub>n</sub> = 2ⁿ.',
+  khi: 'Tìm hệ số của xᵐ, tìm số hạng không chứa x.',
+  vd: '(x + 2/x)⁶: T<sub>k+1</sub> = C<sup>k</sup>₆·x^(6−k)·(2/x)^k = C<sup>k</sup>₆·2^k·x^(6−2k). Không chứa x ⇒ k = 3 ⇒ C³₆·8 = <b>160</b>.',
+  bay: 'Số hạng thứ k+1 ứng với chỉ số k. Hỏi "số hạng thứ 4" nghĩa là k = 3.' },
+
+{ nhom: 'V. Xác suất', ten: 'Xác suất có điều kiện & công thức Bayes', cap: 3,
+  ct: '<b>P(A|B) = P(A∩B)/P(B)</b> (với P(B) &gt; 0)<br><b>Nhân xác suất:</b> P(A∩B) = P(B)·P(A|B)<br>Độc lập ⇔ P(A∩B) = P(A)·P(B) ⇔ P(A|B) = P(A).<br><b>Xác suất toàn phần:</b> P(B) = P(A)P(B|A) + P(Ā)P(B|Ā)<br><b>Bayes:</b> P(A|B) = P(A)·P(B|A) / P(B)',
+  khi: 'Nội dung [MỚI] của CT 2018 — dạng sơ đồ hình cây, bài toán chẩn đoán.',
+  vd: 'Hộp 1 (60 %) có 20 % phế phẩm; hộp 2 (40 %) có 5 %. P(phế) = 0,6·0,2 + 0,4·0,05 = <b>0,14</b>. Nếu lấy được phế phẩm, xác suất từ hộp 1 là 0,12/0,14 ≈ <b>0,857</b>.',
+  bay: 'Vẽ sơ đồ hình cây trước: nhánh 1 là nguyên nhân, nhánh 2 là kết quả. Bayes chính là đi ngược cây.' },
+
+{ nhom: 'VI. Hình không gian', ten: 'Góc trong không gian', cap: 2,
+  ct: '<b>Góc đường thẳng & mặt phẳng:</b> góc giữa đường thẳng và hình chiếu của nó lên mặt phẳng (0° ≤ φ ≤ 90°).<br><b>Góc hai mặt phẳng:</b> dựng trong mặt phẳng vuông góc với giao tuyến, đo góc giữa hai đường cùng ⊥ giao tuyến.<br><b>Góc hai đường chéo nhau:</b> dời song song về cùng một điểm.<br>Mẹo toạ độ hoá: gắn hệ trục vào đỉnh có 3 cạnh đôi một vuông góc rồi dùng công thức Oxyz.',
+  khi: 'Bài hình không gian tổng hợp, thường mức vận dụng.',
+  vd: 'Chóp S.ABCD, SA ⊥ (ABCD): góc giữa SC và (ABCD) là góc SCA, tan = SA/AC.',
+  bay: 'Xác định hình chiếu sai là mất trọn câu. Với SA ⊥ đáy thì hình chiếu của S luôn là A.' },
+
+{ nhom: 'VI. Hình không gian', ten: 'Khoảng cách — kĩ thuật thể tích', cap: 3,
+  ct: '<b>d(A, (P)) = 3V / S<sub>(P)</sub></b> — cách nhanh nhất khi biết thể tích khối chóp.<br>Nếu AB ∥ (P) thì d(A,(P)) = d(B,(P)).<br>Nếu AB cắt (P) tại I thì d(A,(P))/d(B,(P)) = IA/IB.<br><b>Khoảng cách hai đường chéo nhau:</b> dựng đoạn vuông góc chung, hoặc d(a,b) = d(a, (P)) với (P) chứa b và ∥ a.',
+  khi: 'Dạng khó nhất của hình không gian — luôn thử hướng thể tích trước.',
+  vd: 'V = 6, S<sub>BCD</sub> = 9 ⇒ d(A, (BCD)) = 3·6/9 = <b>2</b>.',
+  bay: 'Đổi đỉnh để tính V cho dễ: V<sub>A.BCD</sub> = V<sub>D.ABC</sub>. Chọn mặt đáy nào tính diện tích dễ nhất.' },
+
+{ nhom: 'VI. Hình không gian', ten: 'Nón – Trụ – Cầu: diện tích & thể tích', cap: 1,
+  ct: '<b>Nón:</b> S<sub>xq</sub> = πrl, S<sub>tp</sub> = πrl + πr², V = (1/3)πr²h, l² = r² + h²<br><b>Trụ:</b> S<sub>xq</sub> = 2πrh, S<sub>tp</sub> = 2πrh + 2πr², V = πr²h<br><b>Cầu:</b> S = 4πR², V = (4/3)πR³<br>Nón cụt: V = (πh/3)(R² + Rr + r²).',
+  khi: 'Câu nhận biết – thông hiểu về khối tròn xoay.',
+  vd: 'Nón r = 3, h = 4 ⇒ l = 5, S<sub>xq</sub> = 15π, V = <b>12π</b>.',
+  bay: 'S<sub>xq</sub> nón dùng đường sinh l, còn V dùng chiều cao h. Lẫn l với h là bẫy số một.' },
+
+{ nhom: 'VII. Dãy số', ten: 'Giới hạn & tính liên tục', cap: 2,
+  ct: 'lim (uⁿ) = 0 khi |u| &lt; 1. lim (1/nᵏ) = 0 với k &gt; 0.<br>Giới hạn phân thức khi x → ∞: chia cho luỹ thừa bậc cao nhất; so bậc tử với bậc mẫu.<br>Dạng 0/0: phân tích nhân tử hoặc nhân liên hợp.<br><b>Liên tục tại x₀ ⇔ lim<sub>x→x₀</sub>f(x) = f(x₀)</b> (tồn tại và bằng giá trị hàm).<br>f liên tục trên [a;b] và f(a)·f(b) &lt; 0 ⇒ phương trình f(x) = 0 có nghiệm trong (a;b).',
+  khi: 'Câu về giới hạn, tìm m để hàm liên tục, chứng minh có nghiệm.',
+  vd: 'lim<sub>x→2</sub>(x²−4)/(x−2) = lim (x+2) = <b>4</b>.',
+  bay: 'Hàm cho theo nhiều công thức: phải kiểm tra giới hạn TRÁI và PHẢI tại điểm nối, cả hai phải bằng f(x₀).' },
+
+{ nhom: 'VIII. Lượng giác', ten: 'Công thức lượng giác trọng tâm', cap: 2,
+  ct: 'sin²x + cos²x = 1 &nbsp;·&nbsp; 1 + tan²x = 1/cos²x<br><b>Cộng:</b> sin(a±b) = sin a cos b ± cos a sin b; cos(a±b) = cos a cos b ∓ sin a sin b<br><b>Nhân đôi:</b> sin2a = 2sin a cos a; cos2a = cos²a − sin²a = 2cos²a − 1 = 1 − 2sin²a<br><b>Hạ bậc:</b> sin²a = (1−cos2a)/2; cos²a = (1+cos2a)/2<br><b>Biến đổi tích ⇄ tổng</b> khi cần gộp hai hàm cùng loại.',
+  khi: 'Rút gọn biểu thức, giải phương trình lượng giác, tính tích phân lượng giác.',
+  vd: '∫sin²x dx = ∫(1−cos2x)/2 dx = x/2 − sin2x/4 + C.',
+  bay: 'Nhớ dấu ∓ trong công thức cos(a+b) = cos a cos b − sin a sin b — ngược dấu so với sin.' },
+
+{ nhom: 'VIII. Lượng giác', ten: 'Phương trình lượng giác cơ bản', cap: 2,
+  ct: 'sin x = sin α ⇔ x = α + k2π hoặc x = π − α + k2π<br>cos x = cos α ⇔ x = ±α + k2π<br>tan x = tan α ⇔ x = α + kπ<br><b>Đặc biệt:</b> sin x = 0 ⇔ x = kπ; cos x = 0 ⇔ x = π/2 + kπ; sin x = 1 ⇔ x = π/2 + k2π.<br>a·sin x + b·cos x = c có nghiệm ⇔ a² + b² ≥ c².',
+  khi: 'Giải phương trình lượng giác, đếm nghiệm trên một khoảng.',
+  vd: '2sin x − 1 = 0 ⇒ sin x = 1/2 ⇒ x = π/6 + k2π hoặc x = 5π/6 + k2π.',
+  bay: 'Đếm nghiệm trên khoảng cho trước: thay k = 0, ±1, ±2… rồi lọc, đừng đoán.' },
+
+{ nhom: 'IX. Vecto & hệ thức lượng', ten: 'Hệ thức lượng trong tam giác', cap: 2,
+  ct: '<b>Định lí cosin:</b> a² = b² + c² − 2bc·cos A<br><b>Định lí sin:</b> a/sin A = b/sin B = c/sin C = 2R<br><b>Diện tích:</b> S = ½ab·sin C = abc/(4R) = pr = √[p(p−a)(p−b)(p−c)]<br>Trung tuyến: m<sub>a</sub>² = (2b² + 2c² − a²)/4.',
+  khi: 'Bài toán thực tế đo đạc khoảng cách, chiều cao — dạng ưa thích của CT 2018.',
+  vd: 'b = 5, c = 8, A = 60° ⇒ a² = 25 + 64 − 2·5·8·0,5 = 49 ⇒ <b>a = 7</b>.',
+  bay: 'Định lí cosin dùng khi biết 2 cạnh + góc XEN GIỮA hoặc biết 3 cạnh. Biết góc đối diện thì dùng định lí sin.' },
+
+{ nhom: 'IX. Vecto & hệ thức lượng', ten: 'Vecto trong không gian & phân tích vecto', cap: 2,
+  ct: 'Quy tắc ba điểm: AB→ + BC→ = AC→. Quy tắc hình bình hành: AB→ + AD→ = AC→.<br>Quy tắc hình hộp: AB→ + AD→ + AA′→ = AC′→.<br><b>Trung điểm:</b> MA→ + MB→ = 2MI→. <b>Trọng tâm:</b> GA→ + GB→ + GC→ = 0→.<br>Ba vecto đồng phẳng ⇔ tồn tại m, n để c→ = m·a→ + n·b→.',
+  khi: 'Chứng minh vuông góc, tính góc, toạ độ hoá bài hình không gian.',
+  vd: 'G là trọng tâm ABC ⇒ với mọi M: MA→ + MB→ + MC→ = 3MG→.',
+  bay: 'AB→ = −BA→. Sai chiều vecto làm sai toàn bộ dấu của phép tính về sau.' }
+);
+
 </script>
 <script>
 /* ============================================================
@@ -2502,6 +2855,148 @@ TD.KHO.ly_ct.push(
   bay: 'Cơ năng KHÔNG đổi, nhưng động năng và thế năng thì biến thiên với tần số GẤP ĐÔI tần số dao động.' }
 );
 
+TD.KHO.ly_ct.push(
+
+/* ============ BỔ SUNG: PHỦ KÍN CÔNG THỨC CÓ THỂ RA THI ============ */
+{ nhom: 'I. Vật lí nhiệt', ten: 'Phương trình cân bằng nhiệt', cap: 2,
+  ct: '<b>Q<sub>toả</sub> = Q<sub>thu</sub></b><br>m₁c₁(t₁ − t) = m₂c₂(t − t₂)<br>⇒ t = (m₁c₁t₁ + m₂c₂t₂)/(m₁c₁ + m₂c₂)<br>Nếu có chuyển thể thì cộng thêm Q = λm (nóng chảy) hoặc Q = Lm (hoá hơi).',
+  khi: 'Bài trộn chất, thả vật nóng vào nước, nhiệt lượng kế.',
+  vd: 'Trộn 1 kg nước 20 °C với 1 kg nước 80 °C: t = (20+80)/2 = <b>50 °C</b>.',
+  bay: 'Phải kiểm tra xem đá có tan hết chưa TRƯỚC khi lập phương trình. So Q toả với λm.' },
+
+{ nhom: 'I. Vật lí nhiệt', ten: 'Nhiệt nóng chảy – nhiệt hoá hơi', cap: 1,
+  ct: '<b>Q = λm</b> (nóng chảy, λ: nhiệt nóng chảy riêng, J/kg)<br><b>Q = Lm</b> (hoá hơi, L: nhiệt hoá hơi riêng, J/kg)<br>Nước đá: λ = 3,34·10⁵ J/kg. Nước: L = 2,26·10⁶ J/kg, c = 4200 J/(kg·K).<br>Trong quá trình chuyển thể, <b>nhiệt độ không đổi</b>.',
+  khi: 'Bài đun nước, làm tan đá, tính năng lượng toàn quá trình.',
+  vd: 'Làm tan 0,5 kg nước đá ở 0 °C: Q = 3,34·10⁵·0,5 = <b>167 kJ</b>.',
+  bay: 'Quá trình nhiều giai đoạn phải cộng đủ: nóng lên (mcΔt) + chuyển thể (λm hoặc Lm) + nóng tiếp.' },
+
+{ nhom: 'I. Vật lí nhiệt', ten: 'Hiệu suất động cơ nhiệt', cap: 3,
+  ct: '<b>H = A/Q₁ = (Q₁ − Q₂)/Q₁</b><br>Giới hạn Carnot: <b>H<sub>max</sub> = 1 − T₂/T₁</b> (T tính bằng Kelvin)<br>Không động cơ thực nào vượt được H<sub>max</sub>.',
+  khi: 'Câu vận dụng cao về nhiệt động lực học.',
+  vd: 'T₁ = 600 K, T₂ = 300 K ⇒ H<sub>max</sub> = 1 − 0,5 = <b>50 %</b>.',
+  bay: 'Bắt buộc đổi sang Kelvin. Dùng °C trong công thức Carnot là sai hoàn toàn.' },
+
+{ nhom: 'II. Khí lí tưởng', ten: 'Ba định luật chất khí', cap: 1,
+  ct: '<b>Đẳng nhiệt (Boyle):</b> p₁V₁ = p₂V₂ (T không đổi)<br><b>Đẳng tích (Charles):</b> p₁/T₁ = p₂/T₂<br><b>Đẳng áp (Gay-Lussac):</b> V₁/T₁ = V₂/T₂<br>Tổng quát: <b>p₁V₁/T₁ = p₂V₂/T₂</b>. T luôn tính bằng Kelvin: T = t(°C) + 273.',
+  khi: 'Mọi bài biến đổi trạng thái khí.',
+  vd: 'Nén đẳng nhiệt V còn 1/3 ⇒ p tăng <b>3 lần</b>.',
+  bay: 'Quên đổi °C sang K là lỗi phổ biến nhất của chương này. 27 °C = 300 K, không phải 27.' },
+
+{ nhom: 'II. Khí lí tưởng', ten: 'Phương trình Clapeyron – Mendeleev', cap: 2,
+  ct: '<b>pV = nRT = (m/M)RT</b><br>R = 8,31 J/(mol·K) khi p tính bằng Pa, V bằng m³.<br>Khối lượng riêng: ρ = m/V = pM/(RT).<br>Ở điều kiện chuẩn (0 °C, 1 atm): 1 mol khí chiếm 22,4 lít.',
+  khi: 'Bài tính khối lượng khí, số mol, khối lượng riêng của khí.',
+  vd: 'n = 2 mol, T = 300 K, V = 0,05 m³ ⇒ p = nRT/V = 2·8,31·300/0,05 ≈ <b>9,97·10⁴ Pa</b>.',
+  bay: 'Kiểm tra đơn vị: 1 lít = 10⁻³ m³; 1 atm ≈ 1,013·10⁵ Pa. Sai đơn vị lệch cả nghìn lần.' },
+
+{ nhom: 'II. Khí lí tưởng', ten: 'Thuyết động học phân tử', cap: 3,
+  ct: '<b>Động năng tịnh tiến trung bình:</b> W̄<sub>đ</sub> = (3/2)kT với k = 1,38·10⁻²³ J/K<br><b>Áp suất khí:</b> p = (2/3)·(N/V)·W̄<sub>đ</sub> = n<sub>0</sub>kT<br>Tốc độ căn quân phương: v = √(3kT/m) = √(3RT/M) ⇒ <b>v ∝ 1/√M</b>.',
+  khi: 'Câu lí thuyết định lượng về bản chất nhiệt độ và áp suất.',
+  vd: 'Cùng T, H₂ (M = 2) chuyển động nhanh hơn O₂ (M = 32) √16 = <b>4 lần</b>.',
+  bay: 'Cùng nhiệt độ thì mọi khí có W̄đ như nhau, nhưng TỐC ĐỘ thì khác vì khối lượng phân tử khác.' },
+
+{ nhom: 'III. Từ trường', ten: 'Lực từ & lực Lorentz', cap: 2,
+  ct: '<b>Lực từ lên dây dẫn:</b> F = BIℓ·sinα (α là góc giữa dây và B→)<br>Quy tắc bàn tay trái xác định chiều.<br><b>Lực Lorentz:</b> f = |q|vB·sinα<br>Hạt chuyển động ⊥ B: quỹ đạo tròn bán kính <b>R = mv/(|q|B)</b>, chu kì T = 2πm/(|q|B).',
+  khi: 'Bài lực từ, khung dây trong từ trường, hạt tích điện bay vào từ trường.',
+  vd: 'B = 0,2 T, I = 5 A, ℓ = 0,4 m, α = 90° ⇒ F = 0,2·5·0,4 = <b>0,4 N</b>.',
+  bay: 'Dây song song B thì F = 0. Lực Lorentz luôn ⊥ v→ nên không sinh công, chỉ đổi hướng chuyển động.' },
+
+{ nhom: 'III. Từ trường', ten: 'Từ thông & cảm ứng điện từ', cap: 2,
+  ct: '<b>Từ thông:</b> Φ = NBS·cosα (α là góc giữa B→ và pháp tuyến), đơn vị Weber.<br><b>Định luật Faraday:</b> e<sub>c</sub> = −N·ΔΦ/Δt ⇒ độ lớn |e| = N|ΔΦ|/Δt<br><b>Định luật Lenz:</b> dòng cảm ứng có chiều chống lại nguyên nhân sinh ra nó.<br>Thanh dẫn chuyển động: e = Bℓv·sinθ.',
+  khi: 'Bài tính suất điện động cảm ứng, xác định chiều dòng cảm ứng.',
+  vd: 'N = 100, ΔΦ = 0,02 Wb mỗi vòng, Δt = 0,1 s ⇒ |e| = 100·0,02/0,1 = <b>20 V</b>.',
+  bay: 'ΔΦ là biến thiên qua MỘT vòng; nhân N mới ra suất điện động của cả cuộn.' },
+
+{ nhom: 'III. Từ trường', ten: 'Máy biến áp & truyền tải điện năng', cap: 3,
+  ct: '<b>Máy biến áp lí tưởng:</b> U₁/U₂ = N₁/N₂ = I₂/I₁ (công suất bảo toàn)<br><b>Hao phí trên đường dây:</b> ΔP = P²R/(U²cos²φ) — tỉ lệ nghịch với U²<br><b>Hiệu suất truyền tải:</b> H = (P − ΔP)/P<br>Tăng U lên k lần ⇒ ΔP giảm k² lần.',
+  khi: 'Câu vận dụng về truyền tải điện đi xa.',
+  vd: 'Tăng điện áp truyền tải 10 lần ⇒ hao phí giảm <b>100 lần</b>.',
+  bay: 'Máy biến áp KHÔNG làm tăng công suất. Tăng áp thì dòng giảm đúng bấy nhiêu lần.' },
+
+{ nhom: 'IV. Hạt nhân', ten: 'Hệ thức Einstein & năng lượng liên kết', cap: 2,
+  ct: '<b>E = mc²</b>; 1 u = 931,5 MeV/c²<br><b>Độ hụt khối:</b> Δm = Z·m<sub>p</sub> + (A−Z)·m<sub>n</sub> − m<sub>hn</sub><br><b>Năng lượng liên kết:</b> W<sub>lk</sub> = Δm·c²<br><b>Năng lượng liên kết riêng:</b> ε = W<sub>lk</sub>/A — đại lượng đo độ BỀN VỮNG.',
+  khi: 'So sánh độ bền hạt nhân, tính năng lượng liên kết.',
+  vd: 'Δm = 0,03 u ⇒ W<sub>lk</sub> = 0,03·931,5 ≈ <b>27,9 MeV</b>.',
+  bay: 'So sánh độ bền phải dùng ε chứ không dùng W<sub>lk</sub>. Fe-56 có ε lớn nhất (≈ 8,8 MeV/nucleon).' },
+
+{ nhom: 'IV. Hạt nhân', ten: 'Định luật phóng xạ', cap: 2,
+  ct: '<b>N = N₀·2^(−t/T) = N₀·e^(−λt)</b> với <b>λ = ln2/T</b><br>Khối lượng: m = m₀·2^(−t/T)<br><b>Độ phóng xạ:</b> H = λN = H₀·2^(−t/T), đơn vị Bq (1 Ci = 3,7·10¹⁰ Bq)<br>Số hạt đã phân rã: ΔN = N₀(1 − 2^(−t/T)).',
+  khi: 'Bài tính lượng còn lại, tuổi cổ vật (C-14), tỉ lệ mẹ/con.',
+  vd: 'Sau 3T còn N₀/8 = <b>12,5 %</b>; đã phân rã 87,5 %.',
+  bay: 'Tỉ số hạt con / hạt mẹ = 2^(t/T) − 1 chứ không phải 2^(t/T).' },
+
+{ nhom: 'IV. Hạt nhân', ten: 'Năng lượng phản ứng hạt nhân', cap: 3,
+  ct: '<b>ΔE = (m<sub>trước</sub> − m<sub>sau</sub>)·c²</b><br>ΔE &gt; 0: phản ứng TOẢ năng lượng; ΔE &lt; 0: THU năng lượng.<br>Tính theo năng lượng liên kết: ΔE = ΣW<sub>lk sau</sub> − ΣW<sub>lk trước</sub><br><b>Bảo toàn:</b> số khối A và điện tích Z luôn bảo toàn; động lượng và năng lượng toàn phần bảo toàn.',
+  khi: 'Bài phân hạch, nhiệt hạch, tính năng lượng toả ra của 1 kg nhiên liệu.',
+  vd: 'Δm = 0,2 u ⇒ ΔE = 0,2·931,5 ≈ <b>186,3 MeV</b> toả ra.',
+  bay: 'Khối lượng GIẢM thì toả năng lượng. Nhớ chiều: "hụt khối thì sinh năng lượng".' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Động học: thẳng đều, biến đổi đều, rơi tự do', cap: 1,
+  ct: '<b>Thẳng đều:</b> s = vt<br><b>Biến đổi đều:</b> v = v₀ + at; s = v₀t + ½at²; <b>v² − v₀² = 2as</b><br><b>Rơi tự do:</b> v = gt; h = ½gt² ⇒ t = √(2h/g), v = √(2gh)<br><b>Ném ngang:</b> tầm bay xa L = v₀√(2h/g)<br><b>Ném xiên:</b> tầm xa L = v₀²sin2α/g, độ cao cực đại H = v₀²sin²α/(2g).',
+  khi: 'Nền tảng cơ học lớp 10, vẫn xuất hiện trong đề dưới dạng câu vận dụng thực tế.',
+  vd: 'Rơi từ h = 20 m, g = 10 ⇒ t = √4 = 2 s, v chạm đất = <b>20 m/s</b>.',
+  bay: 'Ném ngang: chuyển động ngang ĐỀU, chuyển động đứng là rơi tự do. Hai chuyển động độc lập.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Các lực cơ học', cap: 2,
+  ct: '<b>Định luật II Newton:</b> F→ = ma→<br><b>Ma sát trượt:</b> F<sub>ms</sub> = μN<br><b>Đàn hồi (Hooke):</b> F<sub>đh</sub> = k·|Δℓ|<br><b>Hấp dẫn:</b> F = G·m₁m₂/r², G = 6,67·10⁻¹¹<br><b>Hướng tâm:</b> F<sub>ht</sub> = mv²/r = mω²r; a<sub>ht</sub> = v²/r; v = ωr = 2πr/T.',
+  khi: 'Bài vật trượt trên mặt phẳng nghiêng, chuyển động tròn, vệ tinh.',
+  vd: 'm = 2 kg, μ = 0,2, mặt ngang ⇒ F<sub>ms</sub> = 0,2·2·10 = <b>4 N</b>.',
+  bay: 'Trên mặt nghiêng góc α: N = mg·cosα chứ không phải mg. Đây là bẫy số một của dạng này.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Công – Năng lượng – Động lượng', cap: 2,
+  ct: '<b>Công:</b> A = F·s·cosα &nbsp;·&nbsp; <b>Công suất:</b> P = A/t = F·v<br><b>Động năng:</b> W<sub>đ</sub> = ½mv² &nbsp;·&nbsp; <b>Thế năng:</b> W<sub>t</sub> = mgh (trọng trường), ½kx² (đàn hồi)<br><b>Định lí động năng:</b> A<sub>ngoại lực</sub> = ΔW<sub>đ</sub><br><b>Động lượng:</b> p→ = mv→; bảo toàn khi hệ kín: m₁v₁ + m₂v₂ = m₁v₁′ + m₂v₂′<br>Hiệu suất: H = A<sub>có ích</sub>/A<sub>toàn phần</sub>.',
+  khi: 'Bài va chạm, bài tính công của động cơ, bảo toàn cơ năng.',
+  vd: 'Va chạm mềm: v′ = (m₁v₁ + m₂v₂)/(m₁ + m₂).',
+  bay: 'Va chạm mềm KHÔNG bảo toàn động năng (một phần chuyển thành nhiệt), nhưng động lượng vẫn bảo toàn.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Dao động điều hoà', cap: 2,
+  ct: 'x = A·cos(ωt + φ); v = −ωA·sin(ωt + φ); a = −ω²x<br>v<sub>max</sub> = ωA (ở VTCB); a<sub>max</sub> = ω²A (ở biên)<br><b>Hệ thức độc lập:</b> A² = x² + v²/ω²<br><b>Cơ năng:</b> W = ½kA² = ½mω²A², bảo toàn.<br><b>Con lắc lò xo:</b> T = 2π√(m/k). <b>Con lắc đơn:</b> T = 2π√(ℓ/g).',
+  khi: 'Chương dao động — nền tảng cho sóng và điện xoay chiều.',
+  vd: 'ℓ tăng 4 lần ⇒ T tăng <b>2 lần</b> (T ∝ √ℓ).',
+  bay: 'Chu kì con lắc đơn không phụ thuộc khối lượng; chu kì con lắc lò xo không phụ thuộc g.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Dao động tắt dần – cưỡng bức – cộng hưởng', cap: 3,
+  ct: '<b>Tắt dần:</b> biên độ và cơ năng giảm dần do ma sát; tần số coi như không đổi.<br><b>Cưỡng bức:</b> dao động với tần số của NGOẠI LỰC, biên độ phụ thuộc |f<sub>ngoại</sub> − f₀| và lực cản.<br><b>Cộng hưởng:</b> xảy ra khi <b>f<sub>ngoại</sub> = f₀</b> (tần số riêng) ⇒ biên độ cực đại.<br>Lực cản càng nhỏ, đỉnh cộng hưởng càng nhọn và cao.',
+  khi: 'Câu lí thuyết về dao động, bài xe chạy qua các mối nối đường ray.',
+  vd: 'Con lắc có T₀ = 2 s; xe qua mối ray cách nhau 12 m thì cộng hưởng khi v = 12/2 = <b>6 m/s</b>.',
+  bay: 'Dao động duy trì giữ nguyên tần số riêng f₀; dao động cưỡng bức lấy tần số ngoại lực. Đừng lẫn hai loại.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Sóng cơ – Giao thoa – Sóng dừng', cap: 3,
+  ct: '<b>v = λf = λ/T</b><br><b>Độ lệch pha</b> hai điểm cách nhau d: Δφ = 2πd/λ<br><b>Giao thoa hai nguồn cùng pha:</b> cực đại d₂ − d₁ = kλ; cực tiểu d₂ − d₁ = (k + 0,5)λ<br><b>Sóng dừng:</b> hai đầu cố định ℓ = kλ/2 (k bó, k+1 nút); một đầu tự do ℓ = (2k+1)λ/4<br>Khoảng cách hai nút liên tiếp = λ/2; nút đến bụng gần nhất = λ/4.',
+  khi: 'Bài đếm số cực đại, số nút/bụng, tính tốc độ truyền sóng.',
+  vd: 'Dây hai đầu cố định ℓ = 60 cm có 3 bó ⇒ λ = 2ℓ/3 = <b>40 cm</b>.',
+  bay: 'Số bó sóng = số bụng; số nút = số bụng + 1 (hai đầu cố định). Đếm nhầm là mất câu.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Sóng âm & mức cường độ âm', cap: 2,
+  ct: '<b>Cường độ âm:</b> I = P/(4πr²) ⇒ I ∝ 1/r²<br><b>Mức cường độ âm:</b> L = 10·log(I/I₀) dB, với I₀ = 10⁻¹² W/m²<br>⇒ L₁ − L₂ = 10·log(I₁/I₂) = 20·log(r₂/r₁)<br>Khoảng cách tăng 10 lần ⇒ L giảm 20 dB.',
+  khi: 'Bài về âm thanh, so sánh độ to tại hai vị trí.',
+  vd: 'r tăng gấp đôi ⇒ L giảm 20·log2 ≈ <b>6 dB</b>.',
+  bay: 'Cường độ âm giảm theo 1/r² nhưng MỨC cường độ âm giảm theo log — đừng nhân chia trực tiếp trên dB.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Dòng điện không đổi & ghép nguồn', cap: 2,
+  ct: '<b>Định luật Ohm toàn mạch:</b> I = ξ/(R<sub>N</sub> + r); U = ξ − I·r<br><b>Nối tiếp:</b> R = R₁ + R₂; <b>song song:</b> 1/R = 1/R₁ + 1/R₂<br><b>Ghép nguồn nối tiếp:</b> ξ<sub>b</sub> = nξ, r<sub>b</sub> = nr<br><b>Ghép song song</b> (n nguồn giống nhau): ξ<sub>b</sub> = ξ, r<sub>b</sub> = r/n<br><b>Công suất:</b> P = UI = I²R = U²/R; điện năng A = UIt.',
+  khi: 'Bài mạch điện một chiều, tính hiệu suất nguồn.',
+  vd: 'ξ = 12 V, r = 1 Ω, R = 5 Ω ⇒ I = 12/6 = 2 A, U = 12 − 2 = <b>10 V</b>.',
+  bay: 'Công suất cực đại trên mạch ngoài khi R<sub>N</sub> = r, khi đó hiệu suất chỉ đạt 50 %.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Điện trường – Điện thế – Tụ điện', cap: 2,
+  ct: '<b>Coulomb:</b> F = k·|q₁q₂|/(εr²), k = 9·10⁹<br><b>Cường độ điện trường:</b> E = F/q = k|Q|/(εr²); điện trường đều E = U/d<br><b>Công của lực điện:</b> A = qEd = q(V₁ − V₂) = qU<br><b>Tụ điện:</b> Q = CU; năng lượng W = ½CU² = Q²/(2C)<br>Ghép tụ song song C = C₁ + C₂; nối tiếp 1/C = 1/C₁ + 1/C₂.',
+  khi: 'Bài điện trường, chuyển động của điện tích trong điện trường.',
+  vd: 'U = 100 V, d = 2 cm ⇒ E = 100/0,02 = <b>5000 V/m</b>.',
+  bay: 'Ghép tụ ngược với ghép điện trở: tụ SONG SONG thì cộng điện dung, NỐI TIẾP thì cộng nghịch đảo.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Điện xoay chiều & mạch RLC', cap: 3,
+  ct: 'U = U₀/√2; I = I₀/√2<br>Z<sub>L</sub> = ωL; Z<sub>C</sub> = 1/(ωC); <b>Z = √(R² + (Z<sub>L</sub> − Z<sub>C</sub>)²)</b><br>tanφ = (Z<sub>L</sub> − Z<sub>C</sub>)/R; <b>P = UI·cosφ = I²R</b><br><b>Cộng hưởng:</b> Z<sub>L</sub> = Z<sub>C</sub> ⇔ ω² = 1/(LC) ⇒ Z<sub>min</sub> = R, I<sub>max</sub> = U/R, cosφ = 1.',
+  khi: 'Chương điện xoay chiều — bài toán cực trị, cộng hưởng.',
+  vd: 'R = 30, Z<sub>L</sub> = 80, Z<sub>C</sub> = 40 ⇒ Z = √(900 + 1600) = <b>50 Ω</b>.',
+  bay: 'Cuộn cảm thuần và tụ KHÔNG tiêu thụ công suất. P chỉ toả trên R.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Sóng ánh sáng & lượng tử ánh sáng', cap: 3,
+  ct: '<b>Giao thoa khe Young:</b> khoảng vân i = λD/a; vân sáng bậc k tại x = k·i; vân tối tại x = (k + 0,5)i<br><b>Năng lượng photon:</b> ε = hf = hc/λ, h = 6,625·10⁻³⁴ J·s<br><b>Quang điện:</b> hc/λ = A + W<sub>đmax</sub>; <b>giới hạn quang điện λ₀ = hc/A</b>; điều kiện xảy ra: λ ≤ λ₀<br>Thang sóng điện từ (bước sóng giảm dần): vô tuyến → hồng ngoại → ánh sáng nhìn thấy → tử ngoại → tia X → tia gamma.',
+  khi: 'Bài giao thoa ánh sáng, hiện tượng quang điện.',
+  vd: 'λ = 0,6 μm, D = 2 m, a = 1 mm ⇒ i = 0,6·10⁻⁶·2/10⁻³ = <b>1,2 mm</b>.',
+  bay: 'Quang điện phụ thuộc BƯỚC SÓNG, không phụ thuộc cường độ sáng. Cường độ chỉ quyết định số electron bật ra.' }
+);
+
 </script>
 <script>
 /* ============================================================
@@ -2639,6 +3134,76 @@ TD.KHO.sinh_ct = [
   vd: '5 tế bào sinh tinh giảm phân ⇒ <b>20 tinh trùng</b>. 5 tế bào sinh trứng ⇒ <b>5 trứng</b> + 15 thể cực.',
   bay: 'Tế bào sinh tinh cho 4 tinh trùng, nhưng tế bào sinh trứng chỉ cho <b>1 trứng</b> — bẫy hay gặp.' }
 ];
+
+TD.KHO.sinh_ct.push(
+
+/* ============ BỔ SUNG: PHỦ KÍN CÔNG THỨC CÓ THỂ RA THI ============ */
+{ nhom: 'II. Di truyền NST', ten: 'Số loại kiểu gene & kiểu hình', cap: 2,
+  ct: '<b>Một gene có n allele</b> ⇒ số kiểu gene = n(n+1)/2 (trên NST thường)<br>Nhiều gene phân li độc lập: nhân số kiểu gene của từng gene.<br>Gene trên X (không có allele trên Y): số KG = n(n+1)/2 (giới XX) + n (giới XY).<br>Phép lai nhiều cặp tính trạng PLĐL: tách riêng từng cặp rồi NHÂN kết quả.',
+  khi: 'Bài đếm số kiểu gene tối đa trong quần thể.',
+  vd: 'Gene có 3 allele trên NST thường ⇒ 3·4/2 = <b>6 kiểu gene</b>.',
+  bay: 'Gene trên vùng tương đồng X–Y thì công thức khác. Đọc kĩ đề nói gene nằm ở vùng nào.' },
+
+{ nhom: 'II. Di truyền NST', ten: 'Tương tác gene & tỉ lệ biến dạng', cap: 3,
+  ct: 'F₂ của phép lai 2 cặp gene (AaBb × AaBb) luôn có nền 9 : 3 : 3 : 1, các kiểu tương tác chỉ gộp lại:<br>· <b>9 : 7</b> bổ sung · <b>9 : 6 : 1</b> bổ sung · <b>9 : 3 : 4</b> át chế lặn<br>· <b>12 : 3 : 1</b> át chế trội · <b>13 : 3</b> át chế trội · <b>15 : 1</b> cộng gộp<br>Tổng luôn bằng 16 ⇒ nhận ra ngay là tương tác gene.',
+  khi: 'Câu vận dụng cao về quy luật di truyền.',
+  vd: 'F₂ có tỉ lệ 9 : 7 ⇒ tương tác BỔ SUNG, cần cả A và B mới cho kiểu hình trội.',
+  bay: 'Thấy tỉ lệ có tổng 16 mà không phải 9:3:3:1 thì gần như chắc chắn là tương tác gene, không phải PLĐL thường.' },
+
+{ nhom: 'II. Di truyền NST', ten: 'Tần số hoán vị & bản đồ di truyền', cap: 3,
+  ct: '<b>f = (số cá thể tái tổ hợp / tổng số cá thể) × 100 %</b>, 0 &lt; f ≤ 50 %<br>Giao tử liên kết mỗi loại = (1 − f)/2; giao tử hoán vị mỗi loại = f/2.<br>1 % hoán vị = 1 cM (centiMorgan) trên bản đồ di truyền.<br>Hoán vị chỉ xảy ra ở kì đầu giảm phân I, ở cặp NST tương đồng.',
+  khi: 'Bài lai phân tích, xác định kiểu gene bố mẹ và tần số hoán vị.',
+  vd: 'Lai phân tích cho 4 kiểu hình 40 % : 40 % : 10 % : 10 % ⇒ f = 10 + 10 = <b>20 %</b>.',
+  bay: 'f không bao giờ vượt 50 %. Ra kết quả &gt; 50 % nghĩa là đã nhầm nhóm tái tổ hợp với nhóm liên kết.' },
+
+{ nhom: 'II. Di truyền NST', ten: 'Di truyền phả hệ & xác suất', cap: 3,
+  ct: 'Bố mẹ bình thường sinh con bệnh ⇒ bệnh do gene <b>LẶN</b>, bố mẹ đều dị hợp.<br>Bệnh xuất hiện ở mọi thế hệ, bố bệnh truyền cho tất cả con gái ⇒ gene trội trên X.<br>Bệnh chủ yếu ở nam, mẹ mang gene ⇒ gene lặn trên X.<br>Bệnh chỉ truyền theo dòng mẹ ⇒ gene ngoài nhân (ti thể).<br>Xác suất tổng hợp = tích xác suất các sự kiện độc lập.',
+  khi: 'Bài phả hệ — luôn có trong đề, thường ở phần trả lời ngắn.',
+  vd: 'Bố mẹ Aa × Aa, con bình thường ⇒ xác suất con đó là Aa = <b>2/3</b> (đã loại aa).',
+  bay: 'Khi đề nói "người bình thường" thì phải LOẠI kiểu gene bệnh rồi mới tính xác suất — mẫu số đổi từ 4 thành 3.' },
+
+{ nhom: 'III. Di truyền quần thể', ten: 'Quần thể tự thụ phấn', cap: 2,
+  ct: 'Sau n thế hệ tự thụ, từ 100 % Aa:<br><b>Aa = (1/2)ⁿ</b> &nbsp;·&nbsp; <b>AA = aa = [1 − (1/2)ⁿ]/2</b><br>Tần số allele KHÔNG đổi; chỉ có tỉ lệ kiểu gene thay đổi theo hướng tăng đồng hợp, giảm dị hợp.<br>Quần thể ban đầu có xAA : yAa : zaa thì áp dụng công thức trên cho phần y.',
+  khi: 'Bài tự thụ phấn, giao phối gần.',
+  vd: 'Aa tự thụ 3 thế hệ ⇒ Aa = 1/8 = <b>12,5 %</b>, AA = aa = 43,75 %.',
+  bay: 'Tự thụ phấn KHÔNG làm đổi tần số allele — chỉ đổi cấu trúc kiểu gene. Nhiều bạn nhầm chỗ này.' },
+
+{ nhom: 'III. Di truyền quần thể', ten: 'Hardy – Weinberg cho gene trên X', cap: 3,
+  ct: 'Giới XY: tần số kiểu hình = tần số allele (X^A Y và X^a Y ⇒ p và q).<br>Giới XX: p² X^A X^A + 2pq X^A X^a + q² X^a X^a.<br>Tần số allele chung của quần thể: p = (2·p<sub>XX</sub> + p<sub>XY</sub>)/3 khi tỉ lệ giới 1 : 1.<br>Vì vậy bệnh lặn trên X biểu hiện ở nam nhiều hơn nữ rất nhiều khi q nhỏ.',
+  khi: 'Bài quần thể có gene trên NST giới tính.',
+  vd: 'q = 0,1 ⇒ nam bệnh 10 %, nữ bệnh chỉ q² = <b>1 %</b>.',
+  bay: 'Đừng áp p² + 2pq + q² cho giới XY — giới đó chỉ có một allele nên tần số kiểu hình bằng luôn tần số allele.' },
+
+{ nhom: 'V. Sinh thái', ten: 'Tăng trưởng & kích thước quần thể', cap: 2,
+  ct: '<b>N<sub>t</sub> = N₀ + B − D + I − E</b> (sinh − tử + nhập cư − xuất cư)<br>Tăng trưởng theo tiềm năng sinh học (đường cong J): dN/dt = rN<br>Tăng trưởng thực tế (đường cong S): dN/dt = rN(K − N)/K, K là sức chứa môi trường.<br>Mật độ = số cá thể / đơn vị diện tích (hoặc thể tích).',
+  khi: 'Bài về biến động số lượng cá thể, khai thác hợp lí.',
+  vd: 'Khai thác hợp lí nên giữ quần thể ở khoảng <b>N = K/2</b> — nơi tốc độ tăng trưởng lớn nhất.',
+  bay: 'Đường cong J chỉ xảy ra khi nguồn sống dồi dào vô hạn — thực tế hầu như luôn là đường cong S.' },
+
+{ nhom: 'V. Sinh thái', ten: 'Hiệu suất sinh thái & tháp sinh thái', cap: 2,
+  ct: '<b>Hiệu suất sinh thái</b> = (năng lượng bậc sau / năng lượng bậc trước) × 100 %, trung bình chỉ khoảng <b>10 %</b>.<br>Vì vậy chuỗi thức ăn thường chỉ 4–5 mắt xích.<br>Tháp năng lượng LUÔN có đáy rộng đỉnh hẹp; tháp số lượng và tháp sinh khối có thể bị lộn ngược.<br>Năng lượng đi qua chuỗi theo một chiều, không tuần hoàn; vật chất thì tuần hoàn.',
+  khi: 'Bài tính năng lượng qua các bậc dinh dưỡng.',
+  vd: 'Sinh vật sản xuất có 10⁶ kcal, hiệu suất 10 % mỗi bậc ⇒ bậc 3 còn <b>10⁴ kcal</b>.',
+  bay: 'Chỉ tháp NĂNG LƯỢNG là không bao giờ lộn ngược. Hai loại tháp kia thì có thể.' },
+
+{ nhom: 'V. Sinh thái', ten: 'Chuỗi & lưới thức ăn', cap: 1,
+  ct: 'Chuỗi thức ăn khởi đầu bằng sinh vật SẢN XUẤT hoặc bằng mùn bã hữu cơ.<br>Bậc dinh dưỡng cấp 1 = sinh vật sản xuất; cấp 2 = sinh vật tiêu thụ bậc 1…<br>Một loài có thể tham gia nhiều chuỗi ⇒ tạo LƯỚI thức ăn.<br>Lưới càng phức tạp thì hệ sinh thái càng ổn định.',
+  khi: 'Câu nhận biết – thông hiểu về hệ sinh thái.',
+  vd: 'Cỏ → châu chấu → ếch → rắn: rắn là sinh vật tiêu thụ bậc 3, bậc dinh dưỡng cấp <b>4</b>.',
+  bay: 'Bậc dinh dưỡng luôn lớn hơn bậc tiêu thụ đúng 1 đơn vị. Đừng lẫn hai cách đếm.' },
+
+{ nhom: 'VI. Sinh 10–11', ten: 'Tuần hoàn & cân bằng nội môi', cap: 2,
+  ct: '<b>Huyết áp</b> giảm dần từ động mạch chủ → mao mạch → tĩnh mạch.<br><b>Vận tốc máu</b> nhỏ nhất ở mao mạch (tổng tiết diện lớn nhất) ⇒ thuận lợi trao đổi chất.<br>Chu kì tim người ≈ 0,8 s (nhĩ co 0,1 · thất co 0,3 · dãn chung 0,4). Nhịp tim = 60/chu kì.<br>Cân bằng nội môi do gan, thận và hệ nội tiết điều hoà; insulin hạ đường huyết, glucagon tăng đường huyết.',
+  khi: 'Câu vận dụng về sinh lí người và động vật.',
+  vd: 'Chu kì tim 0,8 s ⇒ nhịp tim = 60/0,8 = <b>75 lần/phút</b>.',
+  bay: 'Vận tốc máu tỉ lệ NGHỊCH với tổng tiết diện mạch, không phải với tiết diện một mạch riêng lẻ.' },
+
+{ nhom: 'VI. Sinh 10–11', ten: 'Trao đổi nước & dinh dưỡng khoáng ở thực vật', cap: 2,
+  ct: 'Nước đi vào rễ theo cơ chế thẩm thấu, vận chuyển trong mạch gỗ nhờ: áp suất rễ + lực hút do thoát hơi nước + lực liên kết giữa các phân tử nước.<br><b>Thoát hơi nước</b> chủ yếu qua khí khổng, là "tai hoạ tất yếu" — vừa mất nước vừa tạo động lực hút.<br>Nguyên tố đa lượng: N, P, K, S, Ca, Mg. Thiếu N ⇒ lá vàng; thiếu Mg ⇒ vàng giữa gân lá.',
+  khi: 'Câu về sinh lí thực vật, ứng dụng trong trồng trọt.',
+  vd: 'Cây héo vào trưa nắng do tốc độ thoát hơi nước lớn hơn tốc độ hút nước của rễ.',
+  bay: 'Khí khổng ĐÓNG khi cây thiếu nước, kéo theo giảm quang hợp — đó là lí do hạn làm giảm năng suất.' }
+);
 
 </script>
 <script>
@@ -2801,6 +3366,90 @@ TD.KHO.gdkt_ct = [
   vd: 'Việt Nam và các nước ASEAN đang đàm phán <b>COC</b> — Bộ quy tắc ứng xử ở Biển Đông.',
   bay: 'Pháp luật quốc tế do các quốc gia <b>thoả thuận</b> xây dựng, không có cơ quan lập pháp đứng trên các quốc gia.' }
 ];
+
+TD.KHO.su_ct.push(
+
+/* ============ BỔ SUNG: KHUNG NHỚ NHANH ============ */
+{ nhom: 'B. Việt Nam', ten: 'Trục mốc thời gian phải thuộc', cap: 1,
+  ct: '<b>1858</b> Pháp nổ súng Đà Nẵng · <b>1930</b> Đảng ra đời · <b>1941</b> Mặt trận Việt Minh<br><b>19/8/1945</b> Tổng khởi nghĩa · <b>2/9/1945</b> Tuyên ngôn Độc lập<br><b>19/12/1946</b> Toàn quốc kháng chiến · <b>7/5/1954</b> Điện Biên Phủ · <b>21/7/1954</b> Hiệp định Genève<br><b>1959</b> Đường Trường Sơn · <b>1968</b> Mậu Thân · <b>1972</b> "Điện Biên Phủ trên không"<br><b>27/1/1973</b> Hiệp định Paris · <b>30/4/1975</b> Giải phóng miền Nam<br><b>1986</b> Đổi mới · <b>1995</b> Gia nhập ASEAN & bình thường hoá với Mỹ · <b>2007</b> Gia nhập WTO',
+  khi: 'Câu nhận biết mốc thời gian — điểm dễ nhất của đề Sử.',
+  vd: 'Hỏi "sự kiện mở đầu kỉ nguyên độc lập" ⇒ Cách mạng tháng Tám và Tuyên ngôn Độc lập 2/9/1945.',
+  bay: 'Phân biệt ngày KÍ hiệp định với ngày có HIỆU LỰC, và ngày mở màn với ngày kết thúc chiến dịch.' },
+
+{ nhom: 'B. Việt Nam', ten: 'Công thức phân tích một sự kiện lịch sử', cap: 2,
+  ct: 'Khung 5 tầng dùng cho mọi sự kiện:<br><b>1. Bối cảnh</b> (trong nước + thế giới) → <b>2. Diễn biến chính</b> → <b>3. Kết quả</b> → <b>4. Ý nghĩa</b> → <b>5. Bài học/tác động</b>.<br>Câu hỏi "nguyên nhân quyết định/quan trọng nhất" thường thuộc về nhân tố CHỦ QUAN (sự lãnh đạo của Đảng, sức mạnh đại đoàn kết dân tộc).<br>Câu "ý nghĩa lớn nhất" thường gắn với bước ngoặt, mở ra kỉ nguyên mới.',
+  khi: 'Câu vận dụng và vận dụng cao — chiếm phần lớn điểm 8–10.',
+  vd: 'Nguyên nhân quyết định thắng lợi kháng chiến chống Mỹ: sự lãnh đạo đúng đắn của Đảng — nhân tố chủ quan.',
+  bay: 'Phân biệt "nguyên nhân quyết định" (chủ quan) với "điều kiện thuận lợi" (khách quan, ví dụ sự giúp đỡ quốc tế).' },
+
+{ nhom: 'A. Thế giới', ten: 'Trục mốc lịch sử thế giới hiện đại', cap: 1,
+  ct: '<b>1945</b> Liên hợp quốc thành lập, Hội nghị Ianta · <b>1947</b> Học thuyết Truman mở đầu Chiến tranh lạnh<br><b>1949</b> NATO, CHND Trung Hoa · <b>1955</b> Tổ chức Vacsava · <b>1967</b> ASEAN ra đời<br><b>1989</b> Chiến tranh lạnh chấm dứt (Manta) · <b>1991</b> Liên Xô tan rã, trật tự hai cực sụp đổ<br><b>1993</b> Liên minh châu Âu (EU) · <b>1995</b> WTO · <b>2015</b> Cộng đồng ASEAN',
+  khi: 'Phần lịch sử thế giới — thường 8–10 câu đầu của đề.',
+  vd: 'Trật tự hai cực Ianta sụp đổ hoàn toàn khi Liên Xô tan rã năm <b>1991</b>.',
+  bay: 'Chiến tranh lạnh CHẤM DỨT năm 1989 nhưng trật tự hai cực chỉ SỤP ĐỔ năm 1991 — hai mốc khác nhau.' }
+);
+
+TD.KHO.dia_ct.push(
+
+/* ============ BỔ SUNG: CÔNG THỨC TÍNH TOÁN ĐỊA LÍ ============ */
+{ nhom: 'C. Kỹ năng', ten: 'Bộ công thức tính toán bắt buộc', cap: 2,
+  ct: '<b>Mật độ dân số</b> (người/km²) = Số dân / Diện tích<br><b>Tỉ lệ gia tăng tự nhiên</b> (%) = (Tỉ suất sinh − Tỉ suất tử)/10<br><b>Năng suất</b> (tạ/ha) = Sản lượng / Diện tích gieo trồng<br><b>Bình quân lương thực</b> (kg/người) = Sản lượng (kg) / Số dân<br><b>Độ che phủ rừng</b> (%) = Diện tích rừng / Diện tích tự nhiên × 100<br><b>Cán cân xuất nhập khẩu</b> = Xuất khẩu − Nhập khẩu (dương là xuất siêu)<br><b>Biên độ nhiệt năm</b> = Nhiệt độ tháng cao nhất − tháng thấp nhất',
+  khi: 'Câu tính toán từ bảng số liệu — dạng chắc chắn có trong đề.',
+  vd: 'Số dân 100 triệu, diện tích 331 000 km² ⇒ mật độ ≈ <b>302 người/km²</b>.',
+  bay: 'Đọc kĩ ĐƠN VỊ trong bảng: nghìn tấn hay triệu tấn, nghìn ha hay ha. Sai đơn vị là sai cả câu.' },
+
+{ nhom: 'C. Kỹ năng', ten: 'Xử lí số liệu: cơ cấu, tốc độ tăng trưởng', cap: 2,
+  ct: '<b>Cơ cấu</b> (%) = Giá trị thành phần / Tổng × 100 — tổng luôn phải bằng 100 %.<br><b>Tốc độ tăng trưởng</b> (%) = Giá trị năm n / Giá trị năm gốc × 100, lấy năm gốc = 100 %.<br><b>Chỉ số phát triển liên hoàn</b> = Giá trị năm sau / Giá trị năm liền trước × 100.<br><b>Bán kính biểu đồ tròn:</b> R₂/R₁ = √(Tổng₂/Tổng₁).',
+  khi: 'Bước bắt buộc trước khi vẽ hoặc nhận xét biểu đồ.',
+  vd: 'Năm gốc 100 nghìn tấn, năm sau 130 nghìn tấn ⇒ tốc độ tăng trưởng = <b>130 %</b> (tăng 30 %).',
+  bay: 'Phân biệt "tốc độ tăng trưởng 130 %" với "tăng 130 %". Đề hỏi TĂNG bao nhiêu thì phải trừ 100.' },
+
+{ nhom: 'C. Kỹ năng', ten: 'Nhận xét biểu đồ & bảng số liệu', cap: 1,
+  ct: 'Trình tự chuẩn: <b>khái quát chung → chi tiết từng đối tượng → so sánh → giải thích</b>.<br>Luôn kèm SỐ LIỆU dẫn chứng cho mỗi nhận xét.<br>Từ khoá nhận xét: tăng/giảm liên tục, tăng không ổn định (có biến động), tăng nhanh/chậm hơn.<br>Với cơ cấu: dùng "tỉ trọng tăng/giảm", không dùng "giá trị tăng/giảm".',
+  khi: 'Câu nhận xét, và cũng là cách loại phương án sai trong câu trắc nghiệm.',
+  vd: 'Giá trị tăng nhưng tỉ trọng vẫn giảm — hoàn toàn có thể xảy ra khi tổng tăng nhanh hơn.',
+  bay: 'Bẫy kinh điển: phương án nói "giảm" trong khi số liệu chỉ giảm TỈ TRỌNG còn giá trị tuyệt đối vẫn tăng.' },
+
+{ nhom: 'A. Tự nhiên', ten: 'Khí hậu & thiên tai theo mùa', cap: 2,
+  ct: '<b>Gió mùa mùa đông</b> (11–4): Đông Bắc, lạnh khô đầu mùa, lạnh ẩm cuối mùa; chỉ tác động mạnh từ dãy Bạch Mã trở ra.<br><b>Gió mùa mùa hạ</b> (5–10): Tây Nam, gây mưa cho Nam Bộ – Tây Nguyên, gây phơn khô nóng cho Bắc Trung Bộ.<br><b>Mưa thu đông Trung Bộ</b>: do gió Đông Bắc gặp Trường Sơn + bão + dải hội tụ.<br>Bão: tập trung tháng 8–10, chậm dần từ Bắc vào Nam.',
+  khi: 'Câu giải thích hiện tượng khí hậu — dạng vận dụng.',
+  vd: 'Cùng tháng 7: Nam Bộ mưa lớn, ven biển Trung Bộ khô nóng — do địa hình chắn gió Trường Sơn.',
+  bay: 'Gió mùa Đông Bắc suy yếu và gần như chấm dứt khi vượt qua dãy Bạch Mã (vĩ tuyến 16°B).' },
+
+{ nhom: 'B. Kinh tế', ten: 'Chuyển dịch cơ cấu kinh tế', cap: 2,
+  ct: '<b>Theo ngành:</b> giảm tỉ trọng nông – lâm – thuỷ sản, tăng công nghiệp – xây dựng và dịch vụ.<br><b>Theo thành phần:</b> giảm tỉ trọng kinh tế nhà nước, tăng kinh tế tư nhân và khu vực có vốn đầu tư nước ngoài; kinh tế nhà nước vẫn giữ vai trò chủ đạo ở lĩnh vực then chốt.<br><b>Theo lãnh thổ:</b> hình thành vùng chuyên canh, khu công nghiệp, vùng kinh tế trọng điểm.<br>Trong nội bộ nông nghiệp: tăng tỉ trọng chăn nuôi và thuỷ sản.',
+  khi: 'Câu về xu hướng phát triển kinh tế — rất hay ra ở dạng đúng/sai.',
+  vd: 'Xu hướng chung: tỉ trọng khu vực I giảm, khu vực II và III tăng — phù hợp công nghiệp hoá.',
+  bay: 'Chăn nuôi TĂNG tỉ trọng nhưng vẫn CHƯA vượt trồng trọt. Đây là bẫy hay gặp.' }
+);
+
+TD.KHO.gdkt_ct.push(
+
+/* ============ BỔ SUNG: CÔNG THỨC & KHUNG PHÁP LÍ ============ */
+{ nhom: 'A. Kinh tế', ten: 'Các chỉ tiêu kinh tế & cách tính', cap: 2,
+  ct: '<b>GDP bình quân đầu người</b> = GDP / Số dân<br><b>Tốc độ tăng trưởng GDP</b> (%) = (GDP<sub>n</sub> − GDP<sub>n−1</sub>)/GDP<sub>n−1</sub> × 100<br><b>GNI</b> = GDP + thu nhập từ nước ngoài − chi trả ra nước ngoài<br><b>Lạm phát (CPI)</b> = (Giá rổ hàng năm nay / Giá rổ năm gốc) × 100<br><b>Lãi kép:</b> A = P(1 + r)ⁿ — dùng cho bài gửi tiết kiệm.',
+  khi: 'Câu tính toán kinh tế trong đề GDKT&PL.',
+  vd: 'GDP 400 tỉ USD, dân số 100 triệu ⇒ GDP/người = <b>4000 USD</b>.',
+  bay: 'GDP tính theo LÃNH THỔ, GNI tính theo QUỐC TỊCH (sở hữu). Nước nhiều FDI thường có GDP &gt; GNI.' },
+
+{ nhom: 'A. Kinh tế', ten: 'Thuế: phân loại & vai trò', cap: 2,
+  ct: '<b>Thuế trực thu</b> (người nộp = người chịu): thuế thu nhập cá nhân, thuế thu nhập doanh nghiệp.<br><b>Thuế gián thu</b> (nộp hộ, người tiêu dùng chịu): thuế giá trị gia tăng, thuế tiêu thụ đặc biệt, thuế xuất nhập khẩu, thuế bảo vệ môi trường.<br><b>Ba vai trò:</b> tạo nguồn thu ngân sách · điều tiết kinh tế vĩ mô · góp phần công bằng xã hội.<br>Thuế thu nhập cá nhân áp dụng biểu luỹ tiến từng phần: thu nhập càng cao, thuế suất phần vượt càng lớn.',
+  khi: 'Câu phân loại thuế và tình huống nghĩa vụ nộp thuế.',
+  vd: 'Mua điện thoại đã trả VAT trong giá bán ⇒ người tiêu dùng CHỊU thuế, cửa hàng chỉ NỘP thay.',
+  bay: 'Thuế tiêu thụ đặc biệt là thuế GIÁN thu dù đánh vào hàng xa xỉ. Đừng suy luận theo cảm tính.' },
+
+{ nhom: 'B. Pháp luật', ten: 'Bốn loại vi phạm & trách nhiệm pháp lí', cap: 2,
+  ct: '<b>Hình sự</b> — tội phạm, chịu trách nhiệm hình sự (phạt tù, cải tạo…), do Toà án xét xử.<br><b>Hành chính</b> — vi phạm quy tắc quản lí nhà nước, bị xử phạt hành chính.<br><b>Dân sự</b> — xâm phạm quan hệ tài sản, nhân thân; bồi thường, thực hiện nghĩa vụ.<br><b>Kỉ luật</b> — vi phạm quy định của cơ quan, tổ chức; khiển trách, cảnh cáo, buộc thôi việc.<br><b>Tuổi:</b> đủ 14 → dưới 16 chịu trách nhiệm hình sự về tội rất nghiêm trọng, đặc biệt nghiêm trọng; đủ 16 chịu trách nhiệm hình sự về mọi tội.',
+  khi: 'Câu tình huống — dạng phổ biến nhất của đề GDKT&PL.',
+  vd: 'Đi xe máy vượt đèn đỏ ⇒ vi phạm HÀNH CHÍNH; gây tai nạn chết người ⇒ có thể thành vi phạm HÌNH SỰ.',
+  bay: 'Một hành vi có thể kéo theo NHIỀU loại trách nhiệm cùng lúc (ví dụ vừa hình sự vừa dân sự bồi thường).' },
+
+{ nhom: 'B. Pháp luật', ten: 'Các quyền tự do cơ bản của công dân', cap: 2,
+  ct: '<b>Bất khả xâm phạm về thân thể</b>: không ai bị bắt nếu không có quyết định của Toà án, quyết định hoặc phê chuẩn của Viện kiểm sát, trừ trường hợp phạm tội quả tang.<br><b>Được pháp luật bảo hộ về tính mạng, sức khoẻ, danh dự, nhân phẩm.</b><br><b>Bất khả xâm phạm về chỗ ở.</b><br><b>Bảo đảm an toàn, bí mật thư tín, điện thoại, điện tín.</b><br><b>Tự do ngôn luận</b> — thực hiện trong khuôn khổ pháp luật.',
+  khi: 'Câu tình huống về quyền công dân.',
+  vd: 'Tự ý đọc tin nhắn của người khác ⇒ xâm phạm quyền bảo đảm bí mật thư tín, điện thoại, điện tín.',
+  bay: 'Phạm tội QUẢ TANG hoặc đang bị truy nã thì ai cũng có quyền bắt — đây là ngoại lệ duy nhất được phép.' }
+);
 
 </script>
 <script>
@@ -2982,6 +3631,74 @@ TD.KHO.anh_ct = [
   vd: 'Từ nối chỉ trình tự: First → Then/Next → After that → <b>Finally</b>. Bám vào đây là ghép được cả đoạn.',
   bay: 'Đừng dịch từng chữ — hết giờ. Chỉ đọc kỹ đoạn chứa từ khoá của câu hỏi.' }
 ];
+
+TD.KHO.van_ct.push(
+
+/* ============ BỔ SUNG: KHUNG VIẾT & KIẾN THỨC TIẾNG VIỆT ============ */
+{ nhom: 'B. Đọc hiểu', ten: 'Bộ câu trả lời mẫu cho 5 dạng câu đọc hiểu', cap: 2,
+  ct: '<b>1. Nhận biết</b> (thể thơ, phương thức, phong cách, ngôi kể): trả lời thẳng một câu, không giải thích.<br><b>2. Chỉ ra chi tiết</b> ("Theo tác giả…"): trích đúng ý trong văn bản.<br><b>3. Nêu tác dụng biện pháp tu từ:</b> gọi tên → chỉ ra biểu hiện → nêu tác dụng (hình ảnh/nhịp điệu + nội dung + tình cảm tác giả).<br><b>4. Hiểu ý kiến/câu văn:</b> giải thích từ khoá → diễn giải cả câu → nêu ý nghĩa.<br><b>5. Bài học/thông điệp:</b> nêu rõ MỘT thông điệp → lí giải ngắn bằng trải nghiệm.',
+  khi: 'Toàn bộ 4,0 điểm phần Đọc hiểu — phần dễ ăn điểm nhất của đề Văn.',
+  vd: 'Câu hỏi tác dụng điệp ngữ: "Điệp ngữ X được lặp 3 lần, tạo nhịp điệu dồn dập, nhấn mạnh…, thể hiện tình cảm…".',
+  bay: 'Câu "Theo tác giả" phải bám văn bản; câu "Theo anh/chị" mới được nêu ý kiến riêng. Đọc kĩ chủ ngữ câu hỏi.' },
+
+{ nhom: 'B. Đọc hiểu', ten: 'Nhận diện phép liên kết & nghĩa hàm ẩn', cap: 2,
+  ct: '<b>Phép lặp</b> — lặp lại từ ngữ để nhấn mạnh và nối câu.<br><b>Phép thế</b> — dùng đại từ hoặc từ đồng nghĩa thay cho từ đã có.<br><b>Phép nối</b> — dùng quan hệ từ, từ nối (nhưng, vì vậy, tuy nhiên…).<br><b>Phép liên tưởng</b> — dùng các từ cùng trường nghĩa.<br><b>Nghĩa hàm ẩn</b> — điều người nói muốn truyền đạt mà không nói trực tiếp, phải suy ra từ ngữ cảnh.',
+  khi: 'Câu hỏi về liên kết văn bản và hàm ý trong lời thoại.',
+  vd: '"Trời hôm nay lạnh đấy" nói với người sắp ra ngoài — hàm ý nhắc mặc thêm áo.',
+  bay: 'Đừng nhầm phép lặp với lỗi lặp từ. Phép lặp là chủ ý nghệ thuật, có tác dụng nhấn mạnh.' },
+
+{ nhom: 'C. Viết', ten: 'Khung dàn ý nghị luận xã hội về hiện tượng đời sống', cap: 2,
+  ct: '<b>Mở:</b> nêu hiện tượng.<br><b>Thân:</b> ① Thực trạng (số liệu, biểu hiện) → ② Nguyên nhân (khách quan + chủ quan) → ③ Hậu quả/ý nghĩa → ④ Giải pháp (cá nhân, gia đình, nhà trường, xã hội) → ⑤ Bàn luận mở rộng, phê phán mặt trái.<br><b>Kết:</b> khẳng định lại và liên hệ bản thân.<br>Khác với nghị luận tư tưởng đạo lí: giải thích → phân tích, chứng minh → bàn luận mở rộng → bài học.',
+  khi: 'Câu viết đoạn 2,0 điểm hoặc bài văn 4,0 điểm.',
+  vd: 'Đề về nghiện mạng xã hội: thực trạng → nguyên nhân → hậu quả → giải pháp → phản đề (không phủ nhận mặt tích cực).',
+  bay: 'Với đoạn 200 chữ, chỉ chọn 3–4 ý trong khung trên; nhồi đủ 5 ý sẽ vượt dung lượng và loãng.' },
+
+{ nhom: 'C. Viết', ten: 'Khung phân tích nhân vật & đoạn trích văn xuôi', cap: 3,
+  ct: '<b>Nhân vật:</b> ① Vị trí, hoàn cảnh → ② Ngoại hình, hành động → ③ Nội tâm, tính cách → ④ Nghệ thuật xây dựng nhân vật (tình huống, ngôn ngữ, chi tiết đắt) → ⑤ Ý nghĩa tư tưởng.<br><b>Đoạn trích văn xuôi:</b> ① Vị trí đoạn → ② Nội dung chính → ③ Phân tích chi tiết theo mạch → ④ Đặc sắc nghệ thuật → ⑤ Đánh giá.<br>Luôn TRÍCH DẪN dẫn chứng trong văn bản và phân tích chính chi tiết đó.',
+  khi: 'Bài nghị luận văn học 4,0 điểm.',
+  vd: 'Phân tích một chi tiết đắt: gọi tên chi tiết → đặt vào mạch truyện → nêu ý nghĩa biểu tượng.',
+  bay: 'Diễn xuôi (kể lại nội dung) là lỗi làm mất nhiều điểm nhất. Phải phân tích chất liệu nghệ thuật.' },
+
+{ nhom: 'A. Cấu trúc đề', ten: 'Bảng phân bổ thời gian & tiêu chí chấm', cap: 1,
+  ct: '<b>Đọc hiểu (4,0đ):</b> 20–25 phút · <b>Đoạn văn (2,0đ):</b> 25 phút · <b>Bài văn (4,0đ):</b> 65–70 phút · <b>Soát bài:</b> 5 phút.<br><b>Tiêu chí chấm phần viết:</b> đảm bảo cấu trúc · xác định đúng vấn đề · triển khai nội dung · chính tả & diễn đạt · sáng tạo.<br>Riêng phần "sáng tạo" và "chính tả" chiếm khoảng 0,5 điểm — mất vì cẩu thả là rất tiếc.',
+  khi: 'Chiến thuật làm bài — quyết định điểm thực tế so với điểm lí thuyết.',
+  vd: 'Bài không có kết bài mất điểm tiêu chí "đảm bảo cấu trúc" dù nội dung tốt.',
+  bay: 'Đừng để hết giờ khi đang viết dở thân bài. Thà kết ngắn còn hơn bỏ trống.' }
+);
+
+TD.KHO.anh_ct.push(
+
+/* ============ BỔ SUNG: PHỦ KÍN NGỮ PHÁP CÓ THỂ RA THI ============ */
+{ nhom: 'B. Ngữ pháp', ten: 'Đảo ngữ & câu nhấn mạnh', cap: 3,
+  ct: '<b>No sooner had</b> S + V3 <b>THAN</b> S + V(quá khứ)<br><b>Hardly/Scarcely had</b> S + V3 <b>WHEN</b> S + V(quá khứ)<br><b>Not only</b> + trợ động từ + S + V <b>but also</b>…<br><b>Only when/after/by</b>… + trợ động từ + S + V<br><b>Câu chẻ:</b> It is/was + thành phần nhấn mạnh + that/who + phần còn lại.<br>Đảo ngữ điều kiện: Should…(loại 1) · Were…(loại 2) · Had…(loại 3).',
+  khi: 'Câu ngữ pháp mức vận dụng — thường 3–5 câu trong đề.',
+  vd: 'No sooner had he arrived <b>than</b> the rain stopped.',
+  bay: 'Cặp than/when là bẫy số một: "no sooner… than", "hardly… when". Học thuộc cả cặp, đừng nhớ riêng lẻ.' },
+
+{ nhom: 'B. Ngữ pháp', ten: 'Động từ theo sau: to V hay V-ing', cap: 2,
+  ct: '<b>+ to V:</b> want, decide, hope, promise, agree, refuse, offer, plan, manage, afford, expect, pretend.<br><b>+ V-ing:</b> enjoy, avoid, mind, finish, suggest, consider, practise, deny, admit, risk, keep, imagine.<br><b>+ giới từ ⇒ V-ing:</b> look forward to, be used to, object to, be interested in.<br><b>Đổi nghĩa:</b> stop to V (dừng để làm) ≠ stop V-ing (dừng hẳn việc); remember to V (nhớ sẽ làm) ≠ remember V-ing (nhớ đã làm).',
+  khi: 'Dạng câu điền động từ — luôn có trong đề.',
+  vd: 'He stopped <b>smoking</b> = bỏ hút thuốc. He stopped <b>to smoke</b> = dừng lại để hút thuốc.',
+  bay: '"Used to V" (thói quen quá khứ) khác hẳn "be/get used to V-ing" (đã quen với việc gì).' },
+
+{ nhom: 'B. Ngữ pháp', ten: 'So sánh & mệnh đề nhượng bộ', cap: 2,
+  ct: '<b>So sánh hơn:</b> tính từ ngắn + -er + than; long adj: more + adj + than.<br><b>So sánh nhất:</b> the + adj-est / the most + adj.<br><b>So sánh bằng:</b> as + adj + as; phủ định: not so/as + adj + as.<br><b>So sánh kép:</b> The + comparative…, the + comparative…<br><b>Nhượng bộ:</b> although/though/even though + MỆNH ĐỀ; despite/in spite of + DANH TỪ hoặc V-ing.',
+  khi: 'Câu ngữ pháp và câu viết lại câu.',
+  vd: 'Although it rained, we went out. = <b>Despite the rain</b>, we went out.',
+  bay: 'Sau despite/in spite of KHÔNG được dùng mệnh đề. Muốn dùng mệnh đề phải thêm "the fact that".' },
+
+{ nhom: 'C. Từ vựng', ten: 'Collocation & cụm từ hay ra thi', cap: 2,
+  ct: '<b>make</b>: a decision, an effort, progress, a mistake, friends<br><b>do</b>: homework, housework, research, business, a favour<br><b>take</b>: care of, part in, place, advantage of, responsibility<br><b>have</b>: a good time, an effect on, difficulty in, access to<br><b>pay</b>: attention to, a visit, a compliment<br><b>Giới từ:</b> interested IN · good AT · afraid OF · depend ON · responsible FOR · famous FOR · different FROM.',
+  khi: 'Câu từ vựng và câu điền giới từ — dễ mất điểm vì học vẹt không kĩ.',
+  vd: 'She takes <b>part in</b> the competition, not "joins in the competition" trong ngữ cảnh trang trọng.',
+  bay: 'make/do rất dễ lẫn: "do homework" nhưng "make an effort". Học theo cụm, đừng dịch từng từ.' },
+
+{ nhom: 'D. Chiến thuật', ten: 'Chiến thuật 40 câu / 50 phút', cap: 1,
+  ct: '<b>Vòng 1 (20 phút):</b> làm ngữ âm, trọng âm, ngữ pháp, từ vựng — câu ngắn, ăn điểm nhanh.<br><b>Vòng 2 (22 phút):</b> làm bài đọc hiểu và điền từ đoạn văn.<br><b>Vòng 3 (8 phút):</b> quay lại câu khó, soát và tô kín đáp án.<br>Nguyên tắc: không câu nào để trống; câu bí thì loại 2 phương án sai rồi chọn.<br>Trung bình <b>75 giây/câu</b> — câu nào quá 2 phút thì đánh dấu và bỏ qua.',
+  khi: 'Quản lí thời gian phòng thi.',
+  vd: '40 câu / 50 phút ⇒ phải xong 20 câu đầu trong 20 phút mới đủ giờ cho bài đọc.',
+  bay: 'Bài đọc dài để cuối cùng dễ bị hết giờ. Nhiều bạn mất trọn 7–8 câu chỉ vì phân bổ thời gian sai.' }
+);
 
 </script>
 
@@ -4241,7 +4958,44 @@ TD.KHO_LT.ly.push(
 { cd: 'Lớp 10 – 11', m: 2, a: true,  t: 'Suất điện động của nguồn điện đặc trưng cho khả năng thực hiện công của nguồn để dịch chuyển điện tích.', v: 'ξ = A/q, đơn vị vôn.' },
 { cd: 'Lớp 10 – 11', m: 2, a: false, t: 'Hiệu điện thế giữa hai cực của nguồn điện luôn bằng suất điện động của nguồn.', v: 'Chỉ bằng nhau khi mạch hở. Khi có dòng chạy qua thì U = ξ − I·r.' },
 { cd: 'Lớp 10 – 11', m: 2, a: true,  t: 'Điện trở của kim loại tăng khi nhiệt độ tăng.', v: 'Dao động nhiệt của ion trong mạng tinh thể cản trở dòng electron nhiều hơn.' },
-{ cd: 'Lớp 10 – 11', m: 2, a: false, t: 'Điện trở của kim loại giảm khi nhiệt độ tăng.', v: 'Kim loại thì TĂNG. Chất bán dẫn mới có điện trở giảm khi nhiệt độ tăng.' }
+{ cd: 'Lớp 10 – 11', m: 2, a: false, t: 'Điện trở của kim loại giảm khi nhiệt độ tăng.', v: 'Kim loại thì TĂNG. Chất bán dẫn mới có điện trở giảm khi nhiệt độ tăng.' },
+
+/* ========== BỔ SUNG MỨC 3–4: VẬN DỤNG & VẬN DỤNG CAO ========== */
+{ cd: 'Vật lí nhiệt', m: 4, a: true,  t: 'Trộn hai lượng nước có khối lượng bằng nhau ở 20 °C và 80 °C thì nhiệt độ cân bằng là 50 °C.', v: 'Cùng chất, cùng khối lượng nên m·c triệt tiêu: t = (20 + 80)/2 = 50 °C.' },
+{ cd: 'Vật lí nhiệt', m: 4, a: false, t: 'Trộn 1 kg nước ở 100 °C với 1 kg nước đá ở 0 °C thì nước đá không tan hết.', v: 'Nước toả 4200·1·100 = 420 000 J, chỉ cần 334 000 J là tan hết đá; còn dư 86 000 J nên hỗn hợp ấm lên khoảng 10 °C.' },
+{ cd: 'Vật lí nhiệt', m: 4, a: false, t: 'Một động cơ nhiệt hoạt động giữa hai nguồn 600 K và 300 K có thể đạt hiệu suất 60 %.', v: 'Hiệu suất cực đại (Carnot) H = 1 − 300/600 = 50 %. Không máy nào vượt được giới hạn này.' },
+{ cd: 'Vật lí nhiệt', m: 4, a: true,  t: 'Sau một chu trình khép kín, độ biến thiên nội năng bằng 0 nên nhiệt lượng khí nhận đúng bằng công khí sinh ra.', v: 'ΔU = 0 ⇒ Q = −A, tức nhiệt nhận vào chuyển hết thành công có ích của chu trình.' },
+{ cd: 'Vật lí nhiệt', m: 3, a: true,  t: 'Muốn đun 2 kg nước từ 25 °C lên 100 °C cần khoảng 630 kJ nhiệt lượng.', v: 'Q = m·c·Δt = 2·4200·75 = 630 000 J = 630 kJ.' },
+{ cd: 'Khí lí tưởng', m: 4, a: true,  t: 'Nung nóng đẳng tích một lượng khí từ 27 °C lên 327 °C thì áp suất tăng gấp đôi.', v: 'Đổi Kelvin: 300 K → 600 K. Đẳng tích p ∝ T nên áp suất tăng 2 lần.' },
+{ cd: 'Khí lí tưởng', m: 4, a: false, t: 'Nung nóng đẳng tích một lượng khí từ 27 °C lên 54 °C thì áp suất tăng gấp đôi.', v: 'Phải dùng Kelvin: 300 K → 327 K, áp suất chỉ tăng 1,09 lần. Đây là bẫy quen thuộc của đề thi.' },
+{ cd: 'Khí lí tưởng', m: 4, a: true,  t: 'Ở cùng nhiệt độ và áp suất, 1 g khí H₂ chiếm thể tích lớn hơn 1 g khí O₂ khoảng 16 lần.', v: 'Cùng khối lượng nhưng M(H₂) = 2, M(O₂) = 32 nên số mol H₂ gấp 16 lần; V ∝ n.' },
+{ cd: 'Khí lí tưởng', m: 4, a: true,  t: 'Động năng tịnh tiến trung bình của phân tử khí lí tưởng chỉ phụ thuộc nhiệt độ, không phụ thuộc loại khí.', v: 'W̄đ = (3/2)kT, chỉ chứa T nên mọi khí ở cùng nhiệt độ đều có động năng trung bình như nhau.' },
+{ cd: 'Khí lí tưởng', m: 4, a: false, t: 'Ở cùng nhiệt độ, phân tử O₂ và phân tử H₂ chuyển động với tốc độ trung bình bằng nhau.', v: 'Cùng động năng nhưng m khác nhau: v ∝ 1/√m nên H₂ nhanh hơn O₂ khoảng 4 lần.' },
+{ cd: 'Khí lí tưởng', m: 3, a: true,  t: 'Nén đẳng nhiệt một lượng khí xuống còn 1/3 thể tích thì áp suất tăng 3 lần.', v: 'Định luật Boyle: pV = hằng số nên V giảm bao nhiêu lần thì p tăng bấy nhiêu lần.' },
+{ cd: 'Từ trường', m: 4, a: true,  t: 'Khung dây 100 vòng có từ thông qua mỗi vòng giảm đều từ 0,02 Wb về 0 trong 0,1 s thì suất điện động cảm ứng có độ lớn 20 V.', v: '|e| = N·|ΔΦ|/Δt = 100·0,02/0,1 = 20 V.' },
+{ cd: 'Từ trường', m: 4, a: true,  t: 'Khi tăng điện áp truyền tải lên 10 lần mà giữ nguyên công suất truyền đi thì công suất hao phí trên đường dây giảm 100 lần.', v: 'ΔP = P²R/(U²cos²φ) tỉ lệ nghịch với U², nên U tăng 10 lần thì ΔP giảm 10² = 100 lần.' },
+{ cd: 'Từ trường', m: 4, a: false, t: 'Máy biến áp lí tưởng làm tăng điện áp thì đồng thời làm tăng công suất truyền tải.', v: 'Máy biến áp lí tưởng bảo toàn công suất: U₁I₁ = U₂I₂. Tăng áp thì dòng giảm tương ứng.' },
+{ cd: 'Từ trường', m: 4, a: false, t: 'Lực từ tác dụng lên đoạn dây mang dòng điện đặt song song với đường sức từ đạt giá trị lớn nhất.', v: 'F = BIℓsinα; song song thì α = 0 nên F = 0. Lực lớn nhất khi dây vuông góc với đường sức.' },
+{ cd: 'Từ trường', m: 3, a: true,  t: 'Dòng điện xoay chiều có cường độ hiệu dụng 2 A thì cường độ cực đại là 2√2 ≈ 2,83 A.', v: 'I₀ = I√2. Ampe kế và vôn kế xoay chiều luôn chỉ giá trị hiệu dụng.' },
+{ cd: 'Vật lí hạt nhân', m: 4, a: true,  t: 'Một mẫu chất phóng xạ sau 3 chu kì bán rã chỉ còn lại 12,5 % số hạt nhân ban đầu.', v: 'N = N₀/2³ = N₀/8 = 12,5 %.' },
+{ cd: 'Vật lí hạt nhân', m: 4, a: true,  t: 'Sau thời gian bằng 2 chu kì bán rã, số hạt nhân đã bị phân rã chiếm 75 % số hạt ban đầu.', v: 'Còn lại 1/4 = 25 %, vậy đã phân rã 75 %.' },
+{ cd: 'Vật lí hạt nhân', m: 4, a: false, t: 'Muốn so sánh độ bền vững của hai hạt nhân, ta so tổng năng lượng liên kết của chúng.', v: 'Phải so năng lượng liên kết RIÊNG (trên mỗi nucleon). Hạt nhân nặng có tổng năng lượng liên kết lớn nhưng chưa chắc bền hơn Fe-56.' },
+{ cd: 'Vật lí hạt nhân', m: 4, a: true,  t: 'Tính trên mỗi nucleon, phản ứng nhiệt hạch toả năng lượng lớn hơn phản ứng phân hạch.', v: 'Đó là lí do nhiệt hạch được coi là nguồn năng lượng tương lai, dù điều kiện nhiệt độ rất khắt khe.' },
+{ cd: 'Vật lí hạt nhân', m: 3, a: true,  t: 'Độ phóng xạ của một mẫu giảm theo thời gian đúng cùng quy luật hàm mũ với số hạt nhân còn lại.', v: 'H = λN nên H = H₀·2^(−t/T), giống hệt công thức của N.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: true,  t: 'Trong dao động điều hoà, vận tốc sớm pha π/2 so với li độ còn gia tốc ngược pha với li độ.', v: 'x = Acos(ωt+φ), v = −ωAsin(...), a = −ω²x. Quan hệ pha này là gốc của mọi bài dao động.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: false, t: 'Tại vị trí biên, vật dao động điều hoà có tốc độ cực đại.', v: 'Tại biên tốc độ bằng 0 và gia tốc mới cực đại. Tốc độ cực đại ở vị trí cân bằng.' },
+{ cd: 'Lớp 10 – 11', m: 4, a: true,  t: 'Tăng chiều dài con lắc đơn lên 4 lần thì chu kì dao động tăng 2 lần.', v: 'T = 2π√(ℓ/g) nên T ∝ √ℓ; ℓ tăng 4 lần thì T tăng √4 = 2 lần.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: true,  t: 'Chu kì con lắc đơn không phụ thuộc khối lượng vật nặng và biên độ (khi biên độ nhỏ).', v: 'Chỉ phụ thuộc chiều dài dây và gia tốc trọng trường nơi treo con lắc.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: true,  t: 'Với hai nguồn kết hợp cùng pha, điểm có hiệu đường đi bằng số nguyên lần bước sóng sẽ dao động với biên độ cực đại.', v: 'd₂ − d₁ = kλ là cực đại; d₂ − d₁ = (k + 0,5)λ là cực tiểu.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: true,  t: 'Sóng dừng trên dây hai đầu cố định có chiều dài bằng số nguyên lần nửa bước sóng.', v: 'ℓ = kλ/2. Nếu một đầu tự do thì ℓ = (2k+1)λ/4.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: false, t: 'Khoảng cách giữa hai nút sóng liên tiếp trong sóng dừng bằng một bước sóng.', v: 'Bằng NỬA bước sóng. Khoảng cách nút – bụng gần nhất mới là λ/4.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: true,  t: 'Trong mạch RLC nối tiếp xảy ra cộng hưởng, tổng trở nhỏ nhất và bằng đúng điện trở thuần R.', v: 'Khi Z_L = Z_C thì Z = R, dòng điện hiệu dụng đạt cực đại I = U/R và u cùng pha với i.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: true,  t: 'Công suất tiêu thụ của mạch RLC nối tiếp là P = UIcosφ và chỉ toả nhiệt trên điện trở thuần.', v: 'Cuộn cảm thuần và tụ điện không tiêu thụ điện năng, chỉ trao đổi năng lượng với nguồn.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: false, t: 'Tia hồng ngoại có bước sóng nhỏ hơn tia tử ngoại.', v: 'Hồng ngoại có bước sóng LỚN hơn ánh sáng đỏ, còn tử ngoại nhỏ hơn ánh sáng tím.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: true,  t: 'Sắp theo bước sóng giảm dần: sóng vô tuyến, hồng ngoại, ánh sáng nhìn thấy, tử ngoại, tia X, tia gamma.', v: 'Bước sóng giảm thì tần số và năng lượng photon tăng.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: true,  t: 'Hiện tượng quang điện ngoài chỉ xảy ra khi bước sóng ánh sáng kích thích nhỏ hơn hoặc bằng giới hạn quang điện.', v: 'Điều kiện λ ≤ λ₀ với λ₀ = hc/A, A là công thoát của kim loại.' },
+{ cd: 'Lớp 10 – 11', m: 3, a: false, t: 'Chiếu ánh sáng có cường độ càng lớn thì càng dễ gây ra hiện tượng quang điện.', v: 'Quang điện phụ thuộc BƯỚC SÓNG chứ không phụ thuộc cường độ. Cường độ chỉ quyết định số electron bật ra khi đã xảy ra hiện tượng.' },
+{ cd: 'Lớp 10 – 11', m: 4, a: true,  t: 'Giảm bước sóng ánh sáng kích thích thì động năng ban đầu cực đại của electron quang điện tăng.', v: 'hc/λ = A + Wđmax; λ giảm ⇒ năng lượng photon tăng ⇒ phần dư thành động năng tăng.' }
 );
 
 </script>
@@ -4581,6 +5335,64 @@ TD.KHO_LT.su.push(
 { cd: 'Biển Đông', m: 3, a: true,  t: 'Luật Biển Việt Nam được Quốc hội thông qua năm 2012, khẳng định chủ quyền với hai quần đảo Hoàng Sa và Trường Sa.', v: 'Phù hợp với các quy định của UNCLOS 1982.' }
 );
 
+/* ---- Bổ sung mức VẬN DỤNG – VẬN DỤNG CAO: so sánh, đánh giá, rút bài học ---- */
+TD.KHO_LT.su.push(
+{ cd: 'Liên hợp quốc', m: 4, a: true,  t: 'Việc Liên hợp quốc quy định nguyên tắc nhất trí giữa năm nước lớn phản ánh thực tế tương quan lực lượng sau Chiến tranh thế giới thứ hai.', v: 'Năm cường quốc thắng trận muốn bảo đảm vai trò chi phối của mình trong trật tự mới.' },
+{ cd: 'Liên hợp quốc', m: 4, a: false, t: 'Nguyên tắc nhất trí giữa năm nước lớn giúp Hội đồng Bảo an ra quyết định nhanh chóng trong mọi tình huống.', v: 'Ngược lại — quyền phủ quyết thường khiến Hội đồng Bảo an bế tắc khi lợi ích các nước lớn xung đột.' },
+{ cd: 'Liên hợp quốc', m: 4, a: true,  t: 'Việc Việt Nam hai lần được bầu làm Uỷ viên không thường trực Hội đồng Bảo an thể hiện vị thế quốc tế ngày càng nâng cao.', v: 'Là kết quả của đường lối đối ngoại độc lập, tự chủ, đa phương hoá, đa dạng hoá.' },
+{ cd: 'Liên hợp quốc', m: 3, a: false, t: 'Liên hợp quốc có quân đội thường trực riêng để can thiệp vào các cuộc xung đột.', v: 'Lực lượng gìn giữ hoà bình do các nước thành viên đóng góp theo từng nhiệm vụ, không phải quân đội thường trực.' },
+{ cd: 'Liên hợp quốc', m: 3, a: true,  t: 'Việt Nam đã cử lực lượng tham gia hoạt động gìn giữ hoà bình của Liên hợp quốc.', v: 'Thể hiện Việt Nam là thành viên có trách nhiệm của cộng đồng quốc tế.' },
+
+{ cd: 'Chiến tranh lạnh', m: 4, a: true,  t: 'Điểm chung của Kế hoạch Marshall và Hội đồng Tương trợ Kinh tế SEV là đều dùng công cụ kinh tế để tập hợp lực lượng cho phe mình.', v: 'Cả hai đều là biểu hiện của cuộc đối đầu hai cực trên lĩnh vực kinh tế.' },
+{ cd: 'Chiến tranh lạnh', m: 4, a: true,  t: 'Chiến tranh lạnh kết thúc mở ra thời cơ lớn cho Việt Nam phá thế bao vây, cấm vận và mở rộng quan hệ đối ngoại.', v: 'Việt Nam bình thường hoá quan hệ với Trung Quốc năm 1991, với Hoa Kỳ năm 1995 và gia nhập ASEAN cùng năm.' },
+{ cd: 'Chiến tranh lạnh', m: 4, a: false, t: 'Sau Chiến tranh lạnh, nguy cơ xung đột và chiến tranh trên thế giới đã bị loại bỏ hoàn toàn.', v: 'Xung đột sắc tộc, tôn giáo, ly khai và khủng bố vẫn diễn ra ở nhiều khu vực.' },
+{ cd: 'Chiến tranh lạnh', m: 4, a: true,  t: 'Nguyên nhân sâu xa dẫn tới Chiến tranh lạnh là sự đối lập về mục tiêu và chiến lược giữa hai cường quốc Mỹ và Liên Xô.', v: 'Mỹ muốn thiết lập trật tự do mình chi phối, Liên Xô muốn bảo vệ và mở rộng hệ thống xã hội chủ nghĩa.' },
+{ cd: 'Chiến tranh lạnh', m: 3, a: true,  t: 'Toàn cầu hoá vừa tạo thời cơ vừa đặt ra thách thức gay gắt với các nước đang phát triển.', v: 'Thời cơ về vốn, công nghệ, thị trường; thách thức về cạnh tranh, phụ thuộc và giữ gìn bản sắc.' },
+
+{ cd: 'ASEAN', m: 4, a: true,  t: 'Việc Việt Nam gia nhập ASEAN năm 1995 đánh dấu bước chuyển từ đối đầu sang đối thoại và hợp tác ở Đông Nam Á.', v: 'Chấm dứt thời kì căng thẳng giữa hai nhóm nước Đông Dương và ASEAN.' },
+{ cd: 'ASEAN', m: 4, a: true,  t: 'Nguyên tắc đồng thuận vừa là điểm mạnh vừa là điểm hạn chế của ASEAN.', v: 'Bảo đảm bình đẳng giữa các thành viên nhưng làm chậm quá trình ra quyết định trong những vấn đề gai góc.' },
+{ cd: 'ASEAN', m: 4, a: false, t: 'ASEAN đã trở thành một liên minh chính trị – quân sự chặt chẽ như Liên minh châu Âu.', v: 'ASEAN là tổ chức hợp tác khu vực dựa trên đồng thuận, không có thiết chế siêu quốc gia như EU.' },
+{ cd: 'ASEAN', m: 3, a: true,  t: 'Cộng đồng Kinh tế ASEAN hướng tới tự do lưu chuyển hàng hoá, dịch vụ, đầu tư, vốn và lao động có tay nghề.', v: 'Tạo ra thị trường chung hơn 650 triệu dân.' },
+{ cd: 'ASEAN', m: 3, a: false, t: 'ASEAN có đồng tiền chung được sử dụng ở tất cả các nước thành viên.', v: 'ASEAN KHÔNG có đồng tiền chung. Đồng tiền chung là đặc trưng của khu vực đồng euro.' },
+
+{ cd: 'Cách mạng tháng Tám', m: 4, a: true,  t: 'Cách mạng tháng Tám thành công nhanh và ít đổ máu chủ yếu nhờ Đảng đã chuẩn bị lực lượng chu đáo và chớp đúng thời cơ.', v: 'Thời cơ chỉ tồn tại trong khoảng hai tuần giữa lúc Nhật đầu hàng và quân Đồng minh vào.' },
+{ cd: 'Cách mạng tháng Tám', m: 4, a: true,  t: 'Bài học về chớp thời cơ của Cách mạng tháng Tám vẫn còn nguyên giá trị trong công cuộc xây dựng đất nước hiện nay.', v: 'Thời cơ chỉ xuất hiện trong thời gian ngắn, không nắm bắt kịp thì sẽ mất.' },
+{ cd: 'Cách mạng tháng Tám', m: 4, a: false, t: 'Cách mạng tháng Tám năm 1945 là cuộc cách mạng vô sản đầu tiên thắng lợi ở Đông Nam Á.', v: 'Đó là cuộc cách mạng DÂN TỘC DÂN CHỦ NHÂN DÂN, đặt nhiệm vụ giải phóng dân tộc lên hàng đầu.' },
+{ cd: 'Cách mạng tháng Tám', m: 4, a: true,  t: 'So với Xô viết Nghệ – Tĩnh 1930–1931, Cách mạng tháng Tám 1945 khác biệt căn bản ở chỗ đã giành được chính quyền trong cả nước.', v: 'Các cao trào trước chỉ là những cuộc tập dượt, chưa giành được chính quyền trên phạm vi toàn quốc.' },
+{ cd: 'Cách mạng tháng Tám', m: 3, a: true,  t: 'Mặt trận Việt Minh có vai trò quyết định trong việc tập hợp và xây dựng lực lượng chính trị cho Cách mạng tháng Tám.', v: 'Tập hợp mọi tầng lớp yêu nước không phân biệt giai cấp, tôn giáo, đảng phái.' },
+
+{ cd: 'Kháng chiến chống Pháp', m: 4, a: true,  t: 'Điểm giống nhau giữa chiến dịch Biên giới 1950 và chiến dịch Điện Biên Phủ 1954 là ta đều chủ động mở chiến dịch.', v: 'Khác với Việt Bắc 1947 là chiến dịch phản công khi địch tấn công lên căn cứ địa.' },
+{ cd: 'Kháng chiến chống Pháp', m: 4, a: true,  t: 'Thắng lợi quân sự ở Điện Biên Phủ là nhân tố quyết định để ta giành thắng lợi trên bàn đàm phán Genève.', v: 'Thể hiện quy luật thực lực trên chiến trường quyết định vị thế trên bàn ngoại giao.' },
+{ cd: 'Kháng chiến chống Pháp', m: 4, a: false, t: 'Hiệp định Genève năm 1954 đã giải quyết triệt để vấn đề độc lập và thống nhất của Việt Nam.', v: 'Hiệp định mới chỉ giải phóng miền Bắc; đất nước tạm bị chia cắt và phải tiếp tục kháng chiến 21 năm nữa.' },
+{ cd: 'Kháng chiến chống Pháp', m: 4, a: true,  t: 'Đường lối kháng chiến toàn dân, toàn diện, trường kì là sự vận dụng sáng tạo tư tưởng lấy nhỏ thắng lớn của dân tộc.', v: 'Phù hợp với tương quan lực lượng khi ta yếu hơn địch về vũ khí và tiềm lực kinh tế.' },
+{ cd: 'Kháng chiến chống Pháp', m: 3, a: false, t: 'Trong kháng chiến chống Pháp, ta chủ trương đánh nhanh thắng nhanh để kết thúc chiến tranh sớm.', v: 'Đó là chủ trương của PHÁP. Ta chủ trương đánh lâu dài để chuyển hoá tương quan lực lượng.' },
+
+{ cd: 'Kháng chiến chống Mỹ', m: 4, a: true,  t: 'Điểm chung của bốn chiến lược chiến tranh mà Mỹ thực hiện ở Việt Nam là đều nhằm biến miền Nam thành thuộc địa kiểu mới.', v: 'Chỉ khác nhau về lực lượng nòng cốt và quy mô, còn bản chất xâm lược thì không đổi.' },
+{ cd: 'Kháng chiến chống Mỹ', m: 4, a: true,  t: 'Cuộc Tổng tiến công Xuân Mậu Thân 1968 có ý nghĩa quyết định về mặt chiến lược dù tổn thất của ta rất lớn.', v: 'Làm lung lay ý chí xâm lược của Mỹ, buộc Mỹ xuống thang chiến tranh và ngồi vào bàn đàm phán.' },
+{ cd: 'Kháng chiến chống Mỹ', m: 4, a: true,  t: 'Việc Mỹ phải rút quân theo Hiệp định Paris đã tạo ra so sánh lực lượng có lợi hẳn cho cách mạng miền Nam.', v: 'Từ đó ta có điều kiện chuẩn bị và tiến hành tổng tiến công giải phóng miền Nam.' },
+{ cd: 'Kháng chiến chống Mỹ', m: 4, a: false, t: 'Hậu phương miền Bắc chỉ có vai trò thứ yếu trong cuộc kháng chiến chống Mỹ.', v: 'Miền Bắc là hậu phương lớn, chi viện quyết định về sức người và sức của cho tiền tuyến lớn miền Nam.' },
+{ cd: 'Kháng chiến chống Mỹ', m: 4, a: true,  t: 'Nghệ thuật quân sự nổi bật trong Đại thắng mùa Xuân 1975 là chọn đúng hướng tiến công chiến lược và đánh đòn điểm huyệt.', v: 'Chọn Tây Nguyên với trận mở màn Buôn Ma Thuột làm rung chuyển toàn bộ hệ thống phòng thủ của địch.' },
+{ cd: 'Kháng chiến chống Mỹ', m: 3, a: false, t: 'Chiến thắng "Điện Biên Phủ trên không" năm 1972 diễn ra ở tỉnh Điện Biên.', v: 'Đó là trận đánh bại cuộc tập kích bằng máy bay B52 vào HÀ NỘI và HẢI PHÒNG, chỉ mượn tên gọi ẩn dụ.' },
+
+{ cd: 'Công cuộc Đổi mới', m: 4, a: true,  t: 'Bài học lớn nhất rút ra từ giai đoạn khủng hoảng trước Đổi mới là phải tôn trọng và hành động theo quy luật khách quan.', v: 'Nóng vội, chủ quan duy ý chí trong cải tạo và xây dựng đã dẫn tới khủng hoảng kinh tế – xã hội.' },
+{ cd: 'Công cuộc Đổi mới', m: 4, a: true,  t: 'Đổi mới ở Việt Nam là quá trình vừa làm vừa rút kinh nghiệm, đi từ đổi mới từng phần đến đổi mới toàn diện.', v: 'Xuất phát từ những "khoán chui" trong nông nghiệp rồi mới được tổng kết thành đường lối.' },
+{ cd: 'Công cuộc Đổi mới', m: 4, a: false, t: 'Thành tựu của Đổi mới cho thấy Việt Nam nên từ bỏ vai trò quản lí của Nhà nước với nền kinh tế.', v: 'Nền kinh tế thị trường ở Việt Nam luôn gắn với ĐỊNH HƯỚNG XÃ HỘI CHỦ NGHĨA và sự quản lí của Nhà nước.' },
+{ cd: 'Công cuộc Đổi mới', m: 4, a: true,  t: 'Hội nhập quốc tế trong thời kì Đổi mới đòi hỏi Việt Nam vừa mở cửa vừa giữ vững độc lập, tự chủ.', v: 'Đó là nguyên tắc xuyên suốt của đường lối đối ngoại.' },
+{ cd: 'Công cuộc Đổi mới', m: 3, a: true,  t: 'Đại hội VI của Đảng đã nghiêm khắc chỉ ra những sai lầm chủ quan, nóng vội trong giai đoạn trước.', v: 'Tinh thần nhìn thẳng vào sự thật, nói rõ sự thật là tiền đề của Đổi mới.' },
+
+{ cd: 'Hồ Chí Minh', m: 4, a: true,  t: 'Điểm khác biệt căn bản giữa con đường cứu nước của Nguyễn Ái Quốc với các bậc tiền bối là hướng sang phương Tây và gắn giải phóng dân tộc với cách mạng vô sản.', v: 'Phan Bội Châu hướng sang Nhật, Phan Châu Trinh dựa vào Pháp để cải cách.' },
+{ cd: 'Hồ Chí Minh', m: 4, a: true,  t: 'Việc thành lập Đảng Cộng sản Việt Nam đầu năm 1930 đã chấm dứt cuộc khủng hoảng về đường lối cứu nước kéo dài đầu thế kỉ XX.', v: 'Cách mạng Việt Nam từ đó có một đường lối đúng đắn và một tổ chức lãnh đạo thống nhất.' },
+{ cd: 'Hồ Chí Minh', m: 4, a: false, t: 'Nguyễn Ái Quốc tiếp thu chủ nghĩa Mác – Lênin một cách máy móc, không vận dụng vào điều kiện Việt Nam.', v: 'Người vận dụng SÁNG TẠO, đặt nhiệm vụ giải phóng dân tộc lên hàng đầu — điều chưa có tiền lệ trong lý luận lúc đó.' },
+{ cd: 'Hồ Chí Minh', m: 4, a: true,  t: 'Tư tưởng đại đoàn kết dân tộc của Hồ Chí Minh được thể hiện rõ nhất qua việc xây dựng các mặt trận dân tộc thống nhất.', v: 'Từ Mặt trận Việt Minh đến Mặt trận Liên Việt và Mặt trận Tổ quốc Việt Nam.' },
+{ cd: 'Hồ Chí Minh', m: 3, a: false, t: 'Hội nghị Trung ương lần thứ 8 (1941) chủ trương đặt nhiệm vụ cách mạng ruộng đất lên hàng đầu.', v: 'Hội nghị tạm gác khẩu hiệu ruộng đất để đặt nhiệm vụ GIẢI PHÓNG DÂN TỘC lên hàng đầu.' },
+
+{ cd: 'Biển Đông', m: 4, a: true,  t: 'Việc kiên trì giải quyết tranh chấp Biển Đông bằng biện pháp hoà bình thể hiện sự kế thừa truyền thống ngoại giao hoà hiếu của dân tộc.', v: 'Đồng thời phù hợp với luật pháp quốc tế và lợi ích lâu dài của khu vực.' },
+{ cd: 'Biển Đông', m: 4, a: true,  t: 'Các châu bản triều Nguyễn và hoạt động của đội Hoàng Sa là bằng chứng cho thấy Việt Nam đã xác lập chủ quyền một cách hoà bình và liên tục.', v: 'Đây là căn cứ lịch sử – pháp lí quan trọng theo tiêu chuẩn của luật quốc tế.' },
+{ cd: 'Biển Đông', m: 4, a: false, t: 'Chủ quyền biển đảo chỉ là vấn đề của lực lượng vũ trang, không liên quan tới trách nhiệm của học sinh.', v: 'Bảo vệ chủ quyền là trách nhiệm của mọi công dân, bắt đầu từ hiểu đúng và tuyên truyền đúng.' },
+{ cd: 'Biển Đông', m: 3, a: true,  t: 'Biển Đông có vai trò chiến lược với Việt Nam cả về kinh tế, giao thông lẫn an ninh quốc phòng.', v: 'Là cửa ngõ giao thương và tuyến phòng thủ hướng biển của đất nước.' },
+{ cd: 'Biển Đông', m: 3, a: false, t: 'Vùng đặc quyền kinh tế và thềm lục địa là hai khái niệm hoàn toàn trùng nhau.', v: 'Vùng đặc quyền kinh tế tính theo cột nước 200 hải lí; thềm lục địa tính theo đáy biển và lòng đất dưới đáy, có thể mở rộng hơn 200 hải lí.' }
+);
+
 </script>
 <script>
 /* ============================================================
@@ -4725,7 +5537,36 @@ TD.KHO_LT.dia.push(
 { cd: 'Ngành kinh tế', m: 2, a: false, t: 'Rừng sản xuất là loại rừng có chức năng chính là bảo tồn các hệ sinh thái tự nhiên quý hiếm.', v: 'Đó là chức năng của rừng ĐẶC DỤNG (vườn quốc gia, khu bảo tồn).' },
 { cd: 'Ngành kinh tế', m: 3, a: true,  t: 'Suy giảm tài nguyên rừng làm gia tăng xói mòn đất, lũ lụt và suy giảm đa dạng sinh học.', v: 'Vì vậy bảo vệ rừng gắn liền với bảo vệ môi trường và phòng chống thiên tai.' },
 { cd: 'Ngành kinh tế', m: 2, a: true,  t: 'Ngành du lịch nước ta có tính mùa vụ rõ rệt ở nhiều địa phương.', v: 'Do phụ thuộc khí hậu, mùa lễ hội và kì nghỉ.' },
-{ cd: 'Ngành kinh tế', m: 3, a: true,  t: 'Cơ cấu thành phần kinh tế nước ta chuyển dịch theo hướng phát huy vai trò của kinh tế tư nhân và khu vực có vốn đầu tư nước ngoài.', v: 'Trong khi kinh tế nhà nước vẫn giữ vai trò chủ đạo ở các lĩnh vực then chốt.' }
+{ cd: 'Ngành kinh tế', m: 3, a: true,  t: 'Cơ cấu thành phần kinh tế nước ta chuyển dịch theo hướng phát huy vai trò của kinh tế tư nhân và khu vực có vốn đầu tư nước ngoài.', v: 'Trong khi kinh tế nhà nước vẫn giữ vai trò chủ đạo ở các lĩnh vực then chốt.' },
+
+/* ========== BỔ SUNG MỨC 3–4: VẬN DỤNG & VẬN DỤNG CAO ========== */
+{ cd: 'Vị trí địa lí', m: 4, a: true,  t: 'Do nằm hoàn toàn trong vùng nội chí tuyến bán cầu Bắc nên mọi địa điểm trên đất liền nước ta đều có hai lần Mặt Trời lên thiên đỉnh trong năm.', v: 'Đây là hệ quả trực tiếp của vị trí nội chí tuyến, tạo nền nhiệt cao và tổng bức xạ lớn quanh năm.' },
+{ cd: 'Vị trí địa lí', m: 4, a: true,  t: 'Vị trí tiếp giáp Biển Đông làm cho thiên nhiên nước ta khác hẳn các nước cùng vĩ độ ở Tây Nam Á và Bắc Phi vốn khô hạn hoang mạc.', v: 'Biển Đông cung cấp ẩm, làm khí hậu điều hoà và mang lại lượng mưa lớn cho lãnh thổ.' },
+{ cd: 'Vị trí địa lí', m: 3, a: true,  t: 'Vị trí nằm trên ngã tư đường hàng hải và hàng không quốc tế tạo điều kiện cho nước ta phát triển kinh tế biển và hội nhập.', v: 'Đồng thời cũng đặt ra yêu cầu cao về bảo vệ chủ quyền biển đảo và an ninh quốc phòng.' },
+{ cd: 'Khí hậu', m: 4, a: true,  t: 'Gió phơn Tây Nam gây khô nóng cho Bắc Trung Bộ là do khối khí từ vịnh Bengal vượt dãy Trường Sơn, trút mưa ở sườn Tây rồi biến tính khô nóng khi xuống sườn Đông.', v: 'Hiệu ứng phơn: lên cao giảm nhiệt và gây mưa, xuống thấp nén đoạn nhiệt nên nóng và khô.' },
+{ cd: 'Khí hậu', m: 4, a: false, t: 'Miền Nam nước ta có biên độ nhiệt độ trung bình năm lớn hơn miền Bắc.', v: 'Ngược lại. Miền Bắc có mùa đông lạnh do gió mùa Đông Bắc nên biên độ nhiệt năm lớn; miền Nam nóng quanh năm, biên độ nhỏ.' },
+{ cd: 'Khí hậu', m: 4, a: true,  t: 'Mưa vào thu đông ở Trung Bộ là do gió Đông Bắc gặp dãy Trường Sơn kết hợp bão, dải hội tụ nhiệt đới và áp thấp.', v: 'Vì vậy Trung Bộ có mùa mưa lệch hẳn về thu đông so với cả nước.' },
+{ cd: 'Khí hậu', m: 4, a: true,  t: 'Cùng thời điểm tháng 7, gió mùa Tây Nam gây mưa lớn cho Nam Bộ và Tây Nguyên nhưng lại gây khô nóng cho ven biển Trung Bộ.', v: 'Cùng một khối khí nhưng địa hình chắn gió tạo ra hai kiểu thời tiết trái ngược ở hai sườn Trường Sơn.' },
+{ cd: 'Phân hoá thiên nhiên', m: 4, a: true,  t: 'Đai ôn đới gió mùa trên núi ở nước ta chỉ xuất hiện ở dãy Hoàng Liên Sơn, từ độ cao khoảng 2600 m trở lên.', v: 'Vì chỉ nơi này đủ độ cao; đó cũng là đai hẹp nhất và duy nhất có nhiệt độ trung bình năm dưới 15 °C.' },
+{ cd: 'Phân hoá thiên nhiên', m: 4, a: true,  t: 'Ranh giới đai nhiệt đới gió mùa ở miền Bắc thấp hơn miền Nam khoảng 300–400 m.', v: 'Miền Bắc có mùa đông lạnh nên nền nhiệt thấp hơn, đai nhiệt đới kết thúc sớm hơn theo độ cao.' },
+{ cd: 'Phân hoá thiên nhiên', m: 3, a: true,  t: 'Thiên nhiên nước ta phân hoá theo cả ba chiều: Bắc – Nam, Đông – Tây và theo độ cao.', v: 'Nguyên nhân lần lượt là vĩ độ kết hợp gió mùa, ảnh hưởng của biển kết hợp địa hình, và quy luật đai cao.' },
+{ cd: 'Dân cư', m: 4, a: true,  t: 'Nước ta đang trong thời kì cơ cấu dân số vàng nhưng đồng thời cũng đã bước vào giai đoạn già hoá dân số.', v: 'Hai đặc điểm cùng tồn tại: tỉ lệ người trong tuổi lao động cao, nhưng tỉ trọng người từ 65 tuổi trở lên tăng nhanh.' },
+{ cd: 'Dân cư', m: 4, a: true,  t: 'Tỉ lệ gia tăng dân số tự nhiên giảm nhưng quy mô dân số nước ta vẫn tiếp tục tăng thêm mỗi năm.', v: 'Vì quy mô dân số nền đã rất lớn, nên dù tỉ lệ giảm thì số người tăng tuyệt đối vẫn đáng kể.' },
+{ cd: 'Dân cư', m: 4, a: false, t: 'Đô thị hoá ở nước ta hiện nay đã tương xứng với trình độ phát triển công nghiệp.', v: 'Đô thị hoá nước ta vẫn diễn ra chưa tương xứng, còn tự phát ở nhiều nơi, gây sức ép về hạ tầng, việc làm và môi trường.' },
+{ cd: 'Vùng kinh tế', m: 4, a: true,  t: 'Đồng bằng sông Cửu Long mạnh về lúa gạo, thuỷ sản và cây ăn quả nhưng hạn chế lớn nhất là xâm nhập mặn và thiếu nước ngọt vào mùa khô.', v: 'Biến đổi khí hậu và nước biển dâng làm vấn đề này ngày càng gay gắt, đòi hỏi chuyển đổi cơ cấu mùa vụ.' },
+{ cd: 'Vùng kinh tế', m: 4, a: true,  t: 'Tây Nguyên có mùa khô kéo dài sâu sắc nên thuỷ lợi là vấn đề quan trọng hàng đầu của vùng.', v: 'Mùa khô 4–5 tháng, mực nước ngầm hạ thấp, ảnh hưởng trực tiếp đến cây công nghiệp lâu năm như cà phê.' },
+{ cd: 'Vùng kinh tế', m: 4, a: true,  t: 'Đông Nam Bộ dẫn đầu cả nước về thu hút vốn đầu tư nước ngoài nhờ cơ sở hạ tầng, lao động kĩ thuật và vị trí đầu mối giao thông.', v: 'Đây là vùng có GRDP bình quân đầu người và tỉ trọng công nghiệp – dịch vụ cao nhất cả nước.' },
+{ cd: 'Vùng kinh tế', m: 4, a: false, t: 'Trung du và miền núi Bắc Bộ có thế mạnh nổi bật nhất là nuôi trồng thuỷ sản nước lợ.', v: 'Thế mạnh của vùng là khoáng sản, thuỷ điện, cây công nghiệp cận nhiệt và chăn nuôi gia súc lớn. Thuỷ sản nước lợ là thế mạnh của các vùng đồng bằng ven biển.' },
+{ cd: 'Vùng kinh tế', m: 4, a: true,  t: 'Duyên hải Nam Trung Bộ có lợi thế phát triển nghề cá và du lịch biển nhưng lại thiếu nước và hay hạn hán ở đồng bằng ven biển.', v: 'Đây là vùng khô hạn nhất cả nước, đặc biệt là khu vực Ninh Thuận – Bình Thuận.' },
+{ cd: 'Kỹ năng', m: 4, a: true,  t: 'Khi bảng số liệu có nhiều năm và đề yêu cầu thể hiện TỐC ĐỘ TĂNG TRƯỞNG, biểu đồ thích hợp nhất là biểu đồ đường.', v: 'Trước khi vẽ phải xử lí số liệu về dạng chỉ số %, lấy năm đầu bằng 100 %.' },
+{ cd: 'Kỹ năng', m: 4, a: true,  t: 'Muốn thể hiện đồng thời quy mô và cơ cấu của hai hoặc ba năm, biểu đồ thích hợp nhất là biểu đồ tròn có bán kính khác nhau.', v: 'Bán kính tỉ lệ với căn bậc hai của tổng giá trị để phản ánh đúng quy mô.' },
+{ cd: 'Kỹ năng', m: 4, a: true,  t: 'Biểu đồ miền thích hợp nhất để thể hiện sự chuyển dịch cơ cấu qua nhiều năm (thường từ 4 năm trở lên).', v: 'Nếu chỉ có 1–3 năm thì dùng biểu đồ tròn hoặc cột chồng.' },
+{ cd: 'Kỹ năng', m: 4, a: false, t: 'Khi đề cho số liệu tuyệt đối và yêu cầu thể hiện cơ cấu, có thể vẽ ngay biểu đồ tròn mà không cần xử lí số liệu.', v: 'Phải chuyển sang số liệu tương đối (%) trước rồi mới vẽ; bỏ bước này là mất điểm xử lí số liệu.' },
+{ cd: 'Kỹ năng', m: 3, a: true,  t: 'Khi khai thác Atlat, phải đọc kí hiệu ở trang 3 trước rồi mới đọc bản đồ chuyên đề.', v: 'Trang 3 là bảng chú giải chung, nắm được nó thì đọc mọi trang khác đều nhanh và chính xác.' },
+{ cd: 'Ngành kinh tế', m: 4, a: true,  t: 'Công nghiệp năng lượng nước ta dựa trên thế mạnh than ở Quảng Ninh, dầu khí ở thềm lục địa phía Nam và thuỷ điện trên các hệ thống sông lớn.', v: 'Gần đây bổ sung mạnh điện gió, điện mặt trời ở Nam Trung Bộ và Tây Nguyên.' },
+{ cd: 'Ngành kinh tế', m: 4, a: true,  t: 'Việc đẩy mạnh chế biến sâu nông sản giúp nâng cao giá trị gia tăng và giảm phụ thuộc vào xuất khẩu thô.', v: 'Đây là hướng chuyển dịch trọng tâm để thoát khỏi tình trạng "được mùa mất giá".' },
+{ cd: 'Ngành kinh tế', m: 4, a: false, t: 'Ngành chăn nuôi nước ta đã chiếm tỉ trọng lớn hơn trồng trọt trong cơ cấu giá trị sản xuất nông nghiệp.', v: 'Chăn nuôi đang tăng tỉ trọng nhưng trồng trọt vẫn chiếm tỉ trọng lớn hơn.' },
+{ cd: 'Ngành kinh tế', m: 3, a: true,  t: 'Giao thông vận tải đường biển có vai trò quan trọng nhất trong vận chuyển hàng hoá xuất nhập khẩu của nước ta.', v: 'Nhờ khối lượng lớn, giá rẻ và đường bờ biển dài với nhiều cảng nước sâu.' }
 );
 
 </script>
@@ -4874,7 +5715,34 @@ TD.KHO_LT.gdkt.push(
 { cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Nguyên tắc không can thiệp vào công việc nội bộ của quốc gia khác là nguyên tắc cơ bản của pháp luật quốc tế.', v: 'Xuất phát từ nguyên tắc bình đẳng chủ quyền giữa các quốc gia.' },
 { cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Công dân nước ngoài cư trú tại Việt Nam phải tuân theo pháp luật Việt Nam.', v: 'Trừ những trường hợp được hưởng quyền ưu đãi, miễn trừ ngoại giao theo điều ước quốc tế.' },
 { cd: 'Pháp luật quốc tế', m: 3, a: true,  t: 'Khi điều ước quốc tế mà Việt Nam là thành viên có quy định khác với luật trong nước, thường áp dụng quy định của điều ước quốc tế.', v: 'Theo nguyên tắc được ghi nhận trong pháp luật Việt Nam.' },
-{ cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Hợp tác quốc tế là một trong các nguyên tắc cơ bản của pháp luật quốc tế nhằm giải quyết các vấn đề toàn cầu.', v: 'Như biến đổi khí hậu, dịch bệnh, khủng bố, tội phạm xuyên quốc gia.' }
+{ cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Hợp tác quốc tế là một trong các nguyên tắc cơ bản của pháp luật quốc tế nhằm giải quyết các vấn đề toàn cầu.', v: 'Như biến đổi khí hậu, dịch bệnh, khủng bố, tội phạm xuyên quốc gia.' },
+
+/* ========== BỔ SUNG MỨC 3–4: VẬN DỤNG & VẬN DỤNG CAO ========== */
+{ cd: 'Tăng trưởng – Phát triển', m: 4, a: true,  t: 'Một nền kinh tế có tăng trưởng GDP cao nhưng bất bình đẳng gia tăng và môi trường suy thoái thì chưa được coi là phát triển bền vững.', v: 'Phát triển bền vững đòi hỏi hài hoà cả ba trụ cột: kinh tế, xã hội và môi trường.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 4, a: true,  t: 'GDP bình quân đầu người phản ánh mức sống tốt hơn tổng GDP khi so sánh giữa các quốc gia có quy mô dân số khác nhau.', v: 'Một nước GDP lớn nhưng dân đông vẫn có thể có mức sống thấp.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 4, a: false, t: 'Tăng trưởng kinh tế và phát triển kinh tế là hai khái niệm đồng nhất.', v: 'Tăng trưởng chỉ là sự gia tăng về lượng; phát triển bao gồm cả chuyển dịch cơ cấu và tiến bộ xã hội.' },
+{ cd: 'Hội nhập quốc tế', m: 4, a: true,  t: 'Tham gia các hiệp định thương mại tự do vừa mở rộng thị trường xuất khẩu vừa tạo sức ép cạnh tranh lớn lên doanh nghiệp trong nước.', v: 'Vì hàng nhập khẩu cũng được giảm thuế, buộc doanh nghiệp nội địa phải nâng chất lượng và hạ giá thành.' },
+{ cd: 'Hội nhập quốc tế', m: 4, a: true,  t: 'Hội nhập kinh tế quốc tế đòi hỏi doanh nghiệp phải đáp ứng các tiêu chuẩn về xuất xứ, lao động và môi trường của thị trường nhập khẩu.', v: 'Không đáp ứng thì dù thuế bằng 0 % hàng vẫn không vào được thị trường đó.' },
+{ cd: 'Hội nhập quốc tế', m: 4, a: false, t: 'Hội nhập kinh tế quốc tế chỉ mang lại lợi ích, không kèm theo rủi ro nào cho nền kinh tế.', v: 'Kèm theo rủi ro: phụ thuộc thị trường bên ngoài, dễ bị tác động bởi khủng hoảng toàn cầu, cạnh tranh gay gắt.' },
+{ cd: 'Bảo hiểm – An sinh', m: 4, a: true,  t: 'Người lao động làm việc theo hợp đồng lao động từ đủ 1 tháng trở lên thuộc đối tượng tham gia bảo hiểm xã hội bắt buộc.', v: 'Cả người lao động và người sử dụng lao động đều có trách nhiệm đóng theo tỉ lệ luật định.' },
+{ cd: 'Bảo hiểm – An sinh', m: 4, a: true,  t: 'Bảo hiểm xã hội và bảo hiểm thương mại khác nhau ở chỗ bảo hiểm xã hội phi lợi nhuận, do Nhà nước tổ chức thực hiện.', v: 'Bảo hiểm thương mại do doanh nghiệp kinh doanh, hoạt động vì lợi nhuận, tham gia trên cơ sở tự nguyện.' },
+{ cd: 'Bảo hiểm – An sinh', m: 4, a: false, t: 'Người tham gia bảo hiểm y tế được thanh toán 100 % chi phí trong mọi trường hợp khám chữa bệnh.', v: 'Mức hưởng phụ thuộc nhóm đối tượng, có đúng tuyến hay không và danh mục dịch vụ được chi trả.' },
+{ cd: 'Quản lí thu chi', m: 4, a: true,  t: 'Khi lập kế hoạch tài chính cá nhân, nên trích khoản tiết kiệm ngay khi có thu nhập rồi mới chi tiêu phần còn lại.', v: 'Nguyên tắc "trả cho mình trước"; nếu để chi tiêu trước thì hầu như không còn gì để tiết kiệm.' },
+{ cd: 'Quản lí thu chi', m: 4, a: true,  t: 'Quỹ dự phòng khẩn cấp nên đủ trang trải chi phí sinh hoạt thiết yếu trong khoảng 3–6 tháng.', v: 'Giúp không phải vay nợ lãi cao khi mất việc, ốm đau hay có sự cố đột xuất.' },
+{ cd: 'Quản lí thu chi', m: 4, a: false, t: 'Vay tiêu dùng để mua sắm những thứ không thiết yếu là một cách quản lí tài chính hợp lí khi còn trẻ.', v: 'Vay tiêu dùng lãi suất cao cho nhu cầu không thiết yếu làm suy giảm khả năng tích luỹ và dễ dẫn tới vòng xoáy nợ.' },
+{ cd: 'Quản lí thu chi', m: 3, a: true,  t: 'Lập kế hoạch chi tiêu cần phân biệt rõ khoản chi thiết yếu và khoản chi không thiết yếu.', v: 'Khi thu nhập giảm thì cắt khoản không thiết yếu trước, giữ nguyên khoản thiết yếu.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 4, a: true,  t: 'Thuế giá trị gia tăng là thuế gián thu: người tiêu dùng cuối cùng chịu thuế còn doanh nghiệp chỉ thu hộ và nộp thay Nhà nước.', v: 'Thuế đã nằm trong giá bán hàng hoá, dịch vụ mà người mua trả.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 4, a: false, t: 'Thuế thu nhập cá nhân là thuế gián thu.', v: 'Đó là thuế TRỰC THU: người có thu nhập chính là người nộp thuế và chịu thuế.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 4, a: true,  t: 'Thuế có ba vai trò chính: tạo nguồn thu ngân sách, điều tiết kinh tế vĩ mô và góp phần thực hiện công bằng xã hội.', v: 'Thuế luỹ tiến với thu nhập cao là công cụ điều tiết thu nhập, giảm bất bình đẳng.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 4, a: true,  t: 'Chủ doanh nghiệp tư nhân chịu trách nhiệm bằng toàn bộ tài sản của mình về mọi hoạt động của doanh nghiệp.', v: 'Khác với công ty TNHH và công ty cổ phần — chỉ chịu trách nhiệm hữu hạn trong phạm vi vốn góp.' },
+{ cd: 'Quyền & nghĩa vụ', m: 4, a: true,  t: 'Tự ý vào chỗ ở của người khác khi chưa được đồng ý là vi phạm quyền bất khả xâm phạm về chỗ ở, kể cả khi nghi ngờ người đó giữ tài sản của mình.', v: 'Nghi ngờ phải trình báo cơ quan có thẩm quyền; chỉ khám xét theo quyết định của người có thẩm quyền và đúng trình tự luật định.' },
+{ cd: 'Quyền & nghĩa vụ', m: 4, a: true,  t: 'Đọc trộm tin nhắn, thư điện tử của người khác là hành vi xâm phạm quyền được bảo đảm an toàn và bí mật thư tín, điện thoại, điện tín.', v: 'Kể cả người thân trong gia đình cũng không được tự ý mở thư tín của người khác.' },
+{ cd: 'Quyền & nghĩa vụ', m: 4, a: false, t: 'Công dân chỉ bình đẳng trước pháp luật về quyền, còn về nghĩa vụ và trách nhiệm pháp lí thì tuỳ theo địa vị xã hội.', v: 'Bình đẳng trước pháp luật gồm cả ba mặt: quyền, nghĩa vụ và trách nhiệm pháp lí, không phân biệt địa vị.' },
+{ cd: 'Quyền & nghĩa vụ', m: 4, a: true,  t: 'Người từ đủ 16 tuổi trở lên phải chịu trách nhiệm hành chính về mọi vi phạm hành chính do mình gây ra.', v: 'Người từ đủ 14 đến dưới 16 tuổi chỉ bị xử phạt hành chính về vi phạm do lỗi cố ý.' },
+{ cd: 'Quyền & nghĩa vụ', m: 4, a: true,  t: 'Khiếu nại và tố cáo khác nhau ở chủ thể và mục đích: khiếu nại nhằm khôi phục quyền lợi của chính người khiếu nại, tố cáo nhằm ngăn chặn hành vi vi phạm.', v: 'Vì thế mọi công dân đều có quyền tố cáo, còn khiếu nại chỉ do người bị ảnh hưởng trực tiếp thực hiện.' },
+{ cd: 'Pháp luật quốc tế', m: 4, a: true,  t: 'Vùng đặc quyền kinh tế rộng 200 hải lí tính từ đường cơ sở; quốc gia ven biển có quyền chủ quyền về kinh tế nhưng các nước khác vẫn được tự do hàng hải và hàng không.', v: 'Theo Công ước Luật Biển 1982 (UNCLOS). Đây là điểm phân biệt với lãnh hải — nơi quốc gia có chủ quyền đầy đủ.' },
+{ cd: 'Pháp luật quốc tế', m: 4, a: true,  t: 'Lãnh hải nước ta rộng 12 hải lí tính từ đường cơ sở và là bộ phận lãnh thổ quốc gia trên biển.', v: 'Tàu thuyền nước ngoài được quyền đi qua không gây hại nhưng phải tuân thủ pháp luật Việt Nam.' },
+{ cd: 'Pháp luật quốc tế', m: 4, a: false, t: 'Trong vùng đặc quyền kinh tế, quốc gia ven biển có chủ quyền hoàn toàn và tuyệt đối như trên đất liền.', v: 'Chỉ có QUYỀN CHỦ QUYỀN về thăm dò, khai thác tài nguyên và quyền tài phán về một số lĩnh vực, không phải chủ quyền đầy đủ.' }
 );
 
 </script>
@@ -5035,7 +5903,41 @@ TD.KHO_LT.van.push(
 { cd: 'Kĩ năng làm bài', m: 2, a: false, t: 'Viết càng dài thì điểm bài văn càng cao.', v: 'Điểm phụ thuộc chất lượng lập luận và phân tích, không phụ thuộc độ dài.' },
 { cd: 'Kĩ năng làm bài', m: 2, a: true,  t: 'Nên phân bổ thời gian trước khi làm bài và bám sát mốc thời gian đã định.', v: 'Đề xuất: Đọc hiểu 20–25 phút, đoạn văn 25 phút, bài văn 65–70 phút, soát lại 5 phút.' },
 { cd: 'Kĩ năng làm bài', m: 3, a: true,  t: 'Khi bí ý ở phần viết, có thể quay lại bám vào từ khoá của đề để triển khai tiếp.', v: 'Từ khoá của đề luôn gợi ra hướng lập luận.' },
-{ cd: 'Kĩ năng làm bài', m: 2, a: true,  t: 'Nên gạch đầu dòng dàn ý ngay trên đề thi hoặc giấy nháp để không bỏ sót luận điểm.', v: 'Mất vài phút nhưng bảo đảm bài không thiếu ý.' }
+{ cd: 'Kĩ năng làm bài', m: 2, a: true,  t: 'Nên gạch đầu dòng dàn ý ngay trên đề thi hoặc giấy nháp để không bỏ sót luận điểm.', v: 'Mất vài phút nhưng bảo đảm bài không thiếu ý.' },
+
+/* ========== BỔ SUNG MỨC 3–4: VẬN DỤNG & VẬN DỤNG CAO ========== */
+{ cd: 'Cấu trúc đề', m: 4, a: true,  t: 'Khi đề yêu cầu viết đoạn nghị luận văn học 200 chữ về MỘT khía cạnh của tác phẩm, phải tập trung phân tích đúng khía cạnh đó thay vì tóm tắt toàn bộ tác phẩm.', v: 'Lạc đề bộ phận là lỗi mất điểm nặng nhất ở câu 2 điểm; giám khảo chấm theo đúng yêu cầu đã nêu.' },
+{ cd: 'Cấu trúc đề', m: 4, a: false, t: 'Vì ngữ liệu lấy ngoài sách giáo khoa nên việc học kĩ các tác phẩm trong sách là vô ích.', v: 'Tác phẩm trong sách là nơi rèn kĩ năng đọc và kho dẫn chứng cho phần viết; ngữ liệu mới chỉ thay chất liệu chứ không thay kĩ năng.' },
+{ cd: 'Cấu trúc đề', m: 3, a: true,  t: 'Với đề yêu cầu viết đoạn 200 chữ, dung sai chấp nhận được thường khoảng 2/3 đến 1,5 lần số chữ quy định.', v: 'Viết quá ngắn bị coi là chưa đủ ý, quá dài dễ lan man và mất thời gian cho câu 4 điểm.' },
+{ cd: 'Đọc hiểu', m: 3, a: true,  t: 'Câu hỏi dạng "Anh/chị hiểu như thế nào về ý kiến…" thuộc mức thông hiểu: phải giải thích từ khoá rồi diễn giải bằng lời của mình.', v: 'Chỉ chép lại nguyên câu trong ngữ liệu sẽ không được điểm vì chưa thể hiện sự hiểu.' },
+{ cd: 'Đọc hiểu', m: 3, a: true,  t: 'Với câu "Thông điệp nào có ý nghĩa nhất với anh/chị? Vì sao?", phải nêu rõ MỘT thông điệp rồi lí giải bằng trải nghiệm hoặc nhận thức cá nhân.', v: 'Nêu nhiều thông điệp mà không lí giải là lỗi phổ biến khiến mất nửa số điểm.' },
+{ cd: 'Đọc hiểu', m: 3, a: false, t: 'Với câu hỏi rút ra bài học, chỉ cần chép lại một câu có sẵn trong ngữ liệu là đủ điểm.', v: 'Câu vận dụng đòi hỏi HS tự rút ra và diễn đạt bằng ngôn ngữ của mình, có lí giải ngắn.' },
+{ cd: 'Đọc hiểu', m: 4, a: true,  t: 'Khi câu hỏi yêu cầu chỉ ra biện pháp tu từ, nếu chỉ gọi tên mà không nêu tác dụng thì thường chỉ đạt tối đa một nửa số điểm của câu đó.', v: 'Đáp án luôn gồm hai vế: gọi tên biện pháp + phân tích hiệu quả nghệ thuật trong ngữ cảnh cụ thể.' },
+{ cd: 'Đọc hiểu', m: 4, a: true,  t: 'Câu hỏi "Theo tác giả, …" bắt buộc phải trả lời đúng theo nội dung văn bản, không được nêu quan điểm riêng.', v: 'Khác với câu "Theo anh/chị…" mới là chỗ trình bày ý kiến cá nhân. Đọc kĩ chủ ngữ của câu hỏi.' },
+{ cd: 'Đọc hiểu', m: 3, a: true,  t: 'Nên đọc hết các câu hỏi trước rồi mới đọc ngữ liệu để biết cần chú ý những chi tiết nào.', v: 'Cách này rút ngắn thời gian đọc lại và giúp gạch chân đúng chỗ ngay từ lượt đọc đầu.' },
+{ cd: 'Biện pháp tu từ', m: 4, a: true,  t: 'Trong hai câu "Mặt trời của bắp thì nằm trên đồi / Mặt trời của mẹ, em nằm trên lưng", "mặt trời" thứ hai là ẩn dụ chỉ đứa con.', v: 'Ẩn dụ dựa trên nét tương đồng: con là nguồn sống, nguồn ấm áp của mẹ như mặt trời với cây bắp.' },
+{ cd: 'Biện pháp tu từ', m: 4, a: true,  t: 'Điệp ngữ lặp lại từ ngữ, còn điệp cấu trúc lặp lại mô hình cú pháp mà không nhất thiết lặp nguyên từ.', v: 'Cả hai đều tạo nhịp điệu và nhấn mạnh, nhưng khi phân tích phải gọi đúng tên biện pháp.' },
+{ cd: 'Biện pháp tu từ', m: 4, a: false, t: 'Mọi phép so sánh đều bắt buộc phải có từ so sánh như "như", "tựa", "là".', v: 'Có so sánh ngầm, không dùng từ so sánh, ví dụ "Anh đội viên mơ màng / Như nằm trong giấc mộng" khác với kiểu so sánh ẩn.' },
+{ cd: 'Biện pháp tu từ', m: 4, a: true,  t: 'Nói giảm nói tránh trong câu "Bác đã đi rồi sao, Bác ơi!" làm dịu nỗi đau mất mát và thể hiện sự kính trọng.', v: 'Dùng "đi" thay cho "mất" — đây là dạng nói giảm rất hay được hỏi trong đề đọc hiểu.' },
+{ cd: 'Biện pháp tu từ', m: 3, a: true,  t: 'Khi phân tích tác dụng của biện pháp tu từ, cần nêu đủ ba tầng: tạo hình ảnh/nhịp điệu, làm nổi bật nội dung, thể hiện tình cảm tác giả.', v: 'Đây là công thức trả lời đầy đủ, hầu như luôn khớp với thang điểm chi tiết.' },
+{ cd: 'Nghị luận xã hội', m: 4, a: true,  t: 'Trong đoạn nghị luận xã hội 200 chữ nên chọn MỘT dẫn chứng ngắn gọn, tiêu biểu thay vì kể dài nhiều dẫn chứng.', v: 'Dung lượng quá nhỏ; kể lể dẫn chứng sẽ lấn hết chỗ dành cho lập luận và bàn luận mở rộng.' },
+{ cd: 'Nghị luận xã hội', m: 4, a: false, t: 'Đoạn văn nghị luận xã hội 200 chữ vẫn phải xuống dòng chia thành ba đoạn mở – thân – kết.', v: 'Đoạn văn viết liền mạch, KHÔNG xuống dòng. Xuống dòng là biến đoạn thành bài, bị trừ điểm hình thức.' },
+{ cd: 'Nghị luận xã hội', m: 4, a: true,  t: 'Phần bàn luận mở rộng (lật ngược vấn đề, phê phán biểu hiện trái chiều) là chỗ tạo khác biệt giữa bài khá và bài giỏi.', v: 'Bài chỉ khẳng định một chiều thường dừng ở mức trung bình khá vì thiếu chiều sâu tư duy phản biện.' },
+{ cd: 'Nghị luận xã hội', m: 3, a: true,  t: 'Với đề nghị luận về một hiện tượng đời sống, cần có phần chỉ ra nguyên nhân và đề xuất giải pháp.', v: 'Khác với nghị luận về tư tưởng đạo lí — vốn nghiêng về giải thích, chứng minh và bàn luận.' },
+{ cd: 'Nghị luận văn học', m: 4, a: true,  t: 'Khi phân tích một đoạn thơ, phải bám vào từ ngữ, hình ảnh, nhịp điệu, biện pháp tu từ cụ thể chứ không diễn xuôi nội dung.', v: 'Diễn xuôi là lỗi nặng nhất của bài nghị luận văn học: kể lại ý thơ mà không phân tích chất liệu nghệ thuật.' },
+{ cd: 'Nghị luận văn học', m: 4, a: true,  t: 'Bài nghị luận văn học đạt điểm cao thường có phần đánh giá, mở rộng, liên hệ ở cuối chứ không dừng lại ở phân tích.', v: 'Đánh giá đóng góp của tác giả, vị trí tác phẩm hoặc liên hệ tác phẩm cùng đề tài giúp bài có tầm khái quát.' },
+{ cd: 'Nghị luận văn học', m: 4, a: false, t: 'Trong bài nghị luận văn học, phần giới thiệu tác giả – tác phẩm càng dài càng thể hiện sự hiểu biết.', v: 'Mở bài dài dòng chiếm thời gian mà không được tính điểm nội dung. Chỉ cần 2–3 câu rồi vào vấn đề.' },
+{ cd: 'Nghị luận văn học', m: 4, a: true,  t: 'Với đề so sánh hai đoạn trích, phải có phần chỉ ra điểm tương đồng, điểm khác biệt và lí giải nguyên nhân khác biệt.', v: 'Lí giải nguyên nhân (hoàn cảnh sáng tác, phong cách, thể loại) là tầng cao nhất của dạng đề so sánh.' },
+{ cd: 'Thể loại', m: 4, a: true,  t: 'Truyện ngắn hiện đại có thể không có cốt truyện rõ ràng mà thiên về dòng tâm trạng, cảm giác của nhân vật.', v: 'Kiểu "truyện không có chuyện" như của Thạch Lam; khi phân tích phải bám vào tâm trạng chứ không bám sự kiện.' },
+{ cd: 'Thể loại', m: 4, a: true,  t: 'Trong kí, cái tôi tác giả xuất hiện trực tiếp và là yếu tố tạo nên sức hấp dẫn của tác phẩm.', v: 'Khác truyện — nơi tác giả ẩn sau nhân vật. Phân tích kí phải chỉ ra được cái tôi quan sát và cảm nhận.' },
+{ cd: 'Thể loại', m: 3, a: true,  t: 'Kịch xây dựng xung đột và tính cách nhân vật chủ yếu qua hành động và lời thoại.', v: 'Vì vậy khi phân tích kịch phải bám vào lời thoại và chỉ dẫn sân khấu.' },
+{ cd: 'Tiếng Việt', m: 4, a: true,  t: 'Phép thế và phép lặp đều là phương tiện liên kết, nhưng phép thế dùng từ ngữ khác thay cho từ đã có còn phép lặp giữ nguyên từ ngữ đó.', v: 'Phép thế giúp tránh lặp; phép lặp lại dùng để nhấn mạnh. Đề hay hỏi gọi tên phép liên kết trong đoạn.' },
+{ cd: 'Tiếng Việt', m: 4, a: true,  t: 'Nghĩa hàm ẩn là nội dung người nói muốn truyền đạt nhưng không nói trực tiếp, phải suy ra từ ngữ cảnh.', v: 'Câu hỏi "Câu nói của nhân vật hàm ý gì?" chính là hỏi nghĩa hàm ẩn.' },
+{ cd: 'Tiếng Việt', m: 3, a: false, t: 'Câu bị động trong tiếng Việt luôn phải có từ "bị" hoặc "được".', v: 'Có những câu mang ý bị động mà không dùng từ nào, ví dụ "Ngôi nhà xây xong năm ngoái".' },
+{ cd: 'Kĩ năng làm bài', m: 4, a: true,  t: 'Nếu sắp hết giờ ở câu viết bài văn, nên viết nhanh một kết bài ngắn thay vì bỏ trống.', v: 'Bài không có kết bị trừ điểm hình thức và bố cục; một kết bài 2 câu cũng cứu được phần điểm đó.' },
+{ cd: 'Kĩ năng làm bài', m: 4, a: true,  t: 'Mỗi luận điểm trong bài văn nên tách thành một đoạn riêng có câu chủ đề mở đầu.', v: 'Giúp giám khảo thấy rõ ý và cho điểm đúng phần; viết một khối liền dễ bị đánh giá là ý lộn xộn.' },
+{ cd: 'Kĩ năng làm bài', m: 3, a: false, t: 'Có thể bỏ hẳn phần đọc hiểu để dành toàn bộ thời gian cho phần viết vì phần viết nhiều điểm hơn.', v: 'Đọc hiểu 4 điểm là phần dễ ăn điểm nhất, tốn ít thời gian nhất — bỏ nó là tự đánh mất cơ hội rõ ràng.' },
+{ cd: 'Kĩ năng làm bài', m: 3, a: true,  t: 'Nên dành 3–5 phút cuối để soát lỗi chính tả, diễn đạt và bổ sung ý còn thiếu.', v: 'Lỗi chính tả nhiều làm mất điểm tiêu chí diễn đạt dù nội dung tốt.' }
 );
 
 </script>
@@ -5193,7 +6095,47 @@ TD.KHO_LT.anh.push(
 { cd: 'Ngữ pháp khác', m: 2, a: true,  t: 'Giới từ chỉ thời gian: "in" dùng cho tháng, năm, mùa; "on" cho ngày; "at" cho giờ.', v: 'Ví dụ: in May, on Monday, at 7 o\'clock.' },
 { cd: 'Ngữ pháp khác', m: 2, a: false, t: 'Giới từ "at" được dùng trước tên tháng và năm.', v: 'Trước tháng và năm dùng "in". "at" dùng cho giờ và một số cụm cố định như at night.' },
 { cd: 'Ngữ pháp khác', m: 2, a: true,  t: 'Mạo từ "the" dùng khi danh từ đã được xác định hoặc là duy nhất.', v: 'Ví dụ: the sun, the moon, the book I bought yesterday.' },
-{ cd: 'Ngữ pháp khác', m: 3, a: true,  t: '"Neither... nor" và "Either... or" chia động từ theo chủ ngữ đứng GẦN động từ nhất.', v: 'Ví dụ: Neither he nor his friends are here.' }
+{ cd: 'Ngữ pháp khác', m: 3, a: true,  t: '"Neither... nor" và "Either... or" chia động từ theo chủ ngữ đứng GẦN động từ nhất.', v: 'Ví dụ: Neither he nor his friends are here.' },
+
+/* ========== BỔ SUNG MỨC 3–4: VẬN DỤNG & VẬN DỤNG CAO ========== */
+{ cd: 'Thì động từ', m: 3, a: true,  t: 'Trong câu "By the time he arrived, the meeting had already finished", hành động xảy ra trước phải dùng quá khứ hoàn thành.', v: 'Cấu trúc: By the time + S + V(quá khứ đơn), S + had + V3.' },
+{ cd: 'Thì động từ', m: 3, a: false, t: 'Sau "This is the first time" ta dùng thì quá khứ đơn.', v: 'Phải dùng hiện tại hoàn thành: This is the first time I have seen this film.' },
+{ cd: 'Thì động từ', m: 3, a: false, t: 'Câu "I will call you when I will arrive" là câu đúng ngữ pháp.', v: 'Mệnh đề trạng ngữ chỉ thời gian không dùng "will": … when I arrive.' },
+{ cd: 'Thì động từ', m: 3, a: true,  t: 'Với "since" ta dùng mốc thời gian, còn với "for" ta dùng khoảng thời gian.', v: 'since 2020 / for five years. Cả hai đều đi với hiện tại hoàn thành.' },
+{ cd: 'Thì động từ', m: 4, a: true,  t: 'Trong câu "He said he would have finished the report by the following day", "would have finished" là dạng tương lai hoàn thành trong lời nói gián tiếp.', v: 'will have finished lùi thì thành would have finished; tomorrow lùi thành the following day.' },
+{ cd: 'Thì động từ', m: 4, a: true,  t: 'Câu "I have been studying English for five years" nhấn mạnh tính liên tục kéo dài, còn "I have studied English for five years" nhấn mạnh kết quả.', v: 'Hiện tại hoàn thành tiếp diễn nhấn quá trình; hiện tại hoàn thành nhấn kết quả đã đạt được.' },
+{ cd: 'Thì động từ', m: 4, a: false, t: 'Các động từ trạng thái như know, believe, belong có thể dùng ở thì tiếp diễn để nhấn mạnh.', v: 'Stative verbs thường KHÔNG dùng ở thì tiếp diễn. Không nói "I am knowing the answer".' },
+{ cd: 'Câu điều kiện', m: 4, a: true,  t: 'Câu "If I had studied harder, I would be a doctor now" là câu điều kiện hỗn hợp: vế if loại 3, vế chính loại 2.', v: 'Điều kiện trái với quá khứ nhưng kết quả nói về hiện tại — dấu hiệu nhận biết là trạng từ "now".' },
+{ cd: 'Câu điều kiện', m: 4, a: true,  t: 'Có thể đảo ngữ câu điều kiện loại 3 thành "Had I known about it, I would have told you".', v: 'Bỏ "if", đảo "had" lên trước chủ ngữ. Loại 1 đảo thành "Should…", loại 2 đảo thành "Were…".' },
+{ cd: 'Câu điều kiện', m: 4, a: false, t: 'Trong câu điều kiện loại 2, với chủ ngữ số ít ta bắt buộc dùng "was" chứ không dùng "were".', v: 'Ngược lại — dạng chuẩn trong câu điều kiện loại 2 là "were" cho mọi ngôi: If I were you…' },
+{ cd: 'Câu điều kiện', m: 4, a: true,  t: 'Cấu trúc "Unless" mang nghĩa phủ định sẵn nên mệnh đề đi kèm phải ở dạng khẳng định.', v: 'Unless you hurry = If you do not hurry. Viết "Unless you do not hurry" là sai.' },
+{ cd: 'Bị động – Tường thuật', m: 4, a: true,  t: 'Câu "People believe that he is honest" có thể chuyển thành "He is believed to be honest".', v: 'Cấu trúc bị động kép: S + be + V3 (say/believe/think/report) + to V.' },
+{ cd: 'Bị động – Tường thuật', m: 4, a: true,  t: 'Câu "They made him work overtime" ở thể bị động là "He was made TO work overtime", phải thêm "to".', v: 'Với make, ở chủ động bỏ "to" nhưng ở bị động phải thêm lại. Riêng "let" thì chuyển thành "be allowed to".' },
+{ cd: 'Bị động – Tường thuật', m: 4, a: false, t: 'Khi tường thuật một chân lí hay sự thật hiển nhiên, vẫn phải lùi thì như bình thường.', v: 'Chân lí, sự thật hiển nhiên và điều kiện loại 2, 3 thì KHÔNG lùi thì.' },
+{ cd: 'Bị động – Tường thuật', m: 4, a: true,  t: 'Khi tường thuật câu mệnh lệnh, dùng "told/asked + O + to V" và bỏ trợ động từ.', v: 'He said "Close the door" → He told me to close the door. Phủ định: told me not to close…' },
+{ cd: 'Mệnh đề quan hệ', m: 4, a: true,  t: 'Trong mệnh đề quan hệ không xác định (có dấu phẩy), không được dùng "that".', v: 'Chỉ dùng who, whom, which, whose. Ví dụ đúng: My father, who is 50, still works.' },
+{ cd: 'Mệnh đề quan hệ', m: 4, a: false, t: 'Câu "The book, that I bought yesterday, is interesting" là câu đúng ngữ pháp.', v: 'Sai vì có dấu phẩy nên không được dùng "that"; phải là "which".' },
+{ cd: 'Mệnh đề quan hệ', m: 4, a: true,  t: 'Có thể rút gọn "The man who is standing there" thành "The man standing there".', v: 'Rút gọn chủ động dùng V-ing; rút gọn bị động dùng V3: The book which was written by him → The book written by him.' },
+{ cd: 'Mệnh đề quan hệ', m: 4, a: true,  t: 'Khi có giới từ đứng trước đại từ quan hệ, không được dùng "that" và không được dùng "who".', v: 'Đúng: the house in which I live / the man to whom I spoke. Sai: in that, to who.' },
+{ cd: 'Từ loại', m: 4, a: true,  t: 'Trong câu "He spoke ___ about the plan", chỗ trống cần trạng từ "confidently" vì bổ nghĩa cho động từ "spoke".', v: 'Quy tắc: bổ nghĩa cho động từ dùng trạng từ, bổ nghĩa cho danh từ dùng tính từ.' },
+{ cd: 'Từ loại', m: 4, a: true,  t: 'Tính từ đuôi -ed mô tả cảm xúc của người, còn đuôi -ing mô tả tính chất của sự vật gây ra cảm xúc đó.', v: 'I am bored (tôi thấy chán) khác The film is boring (bộ phim gây chán).' },
+{ cd: 'Từ loại', m: 4, a: false, t: 'Sau động từ nối như "seem", "become", "feel" phải dùng trạng từ.', v: 'Sau linking verb dùng TÍNH TỪ: She feels happy, không phải happily.' },
+{ cd: 'Từ loại', m: 4, a: true,  t: 'Tiền tố "un-", "in-", "im-", "ir-", "dis-" tạo nghĩa phủ định; "im-" dùng trước các từ bắt đầu bằng m, p.', v: 'impossible, impatient; irregular đứng trước r; illegal đứng trước l.' },
+{ cd: 'Ngữ âm – Trọng âm', m: 4, a: true,  t: 'Từ "record" khi là danh từ trọng âm ở âm tiết đầu, khi là động từ trọng âm ở âm tiết thứ hai.', v: 'Quy tắc chung cho cặp danh–động hai âm tiết: RE-cord (n) / re-CORD (v). Tương tự present, export, increase.' },
+{ cd: 'Ngữ âm – Trọng âm', m: 4, a: true,  t: 'Các hậu tố -ic, -ical, -ion, -ity khiến trọng âm rơi vào âm tiết ngay TRƯỚC hậu tố đó.', v: 'eco-NO-mic, in-for-MA-tion, a-BI-li-ty.' },
+{ cd: 'Ngữ âm – Trọng âm', m: 4, a: false, t: 'Đuôi -ed sau các âm vô thanh như /p/, /k/, /f/ được phát âm là /id/.', v: 'Sau âm vô thanh (trừ /t/) đuôi -ed đọc là /t/. Chỉ sau /t/ và /d/ mới đọc /id/.' },
+{ cd: 'Ngữ âm – Trọng âm', m: 4, a: true,  t: 'Đuôi -s/-es được phát âm là /iz/ sau các âm gió và âm xuýt như /s/, /z/, /ʃ/, /tʃ/, /dʒ/.', v: 'watches /iz/, boxes /iz/. Sau âm vô thanh khác đọc /s/, sau âm hữu thanh đọc /z/.' },
+{ cd: 'Cấu trúc – Chiến thuật', m: 4, a: true,  t: 'Với câu hỏi dạng "The word it in line 5 refers to…", phải tìm danh từ gần nhất phía trước phù hợp cả về nghĩa lẫn về số.', v: 'Cách kiểm tra: thay danh từ đó vào vị trí đại từ, câu vẫn hợp nghĩa thì đúng.' },
+{ cd: 'Cấu trúc – Chiến thuật', m: 4, a: true,  t: 'Câu hỏi "Which of the following is NOT mentioned" cần đối chiếu từng phương án với bài đọc để loại dần.', v: 'Ba phương án sẽ tìm được trong bài, phương án còn lại là đáp án. Đừng chọn theo cảm tính.' },
+{ cd: 'Cấu trúc – Chiến thuật', m: 4, a: true,  t: 'Với bài điền từ vào đoạn văn, nên đọc trọn câu chứa chỗ trống và cả câu liền trước để nắm mạch nghĩa.', v: 'Nhiều chỗ trống là từ nối (however, therefore, moreover) chỉ chọn đúng khi hiểu quan hệ giữa hai câu.' },
+{ cd: 'Cấu trúc – Chiến thuật', m: 4, a: false, t: 'Trong bài đọc hiểu, câu hỏi về ý chính nên trả lời bằng cách chọn phương án có nhiều chi tiết cụ thể nhất.', v: 'Ý chính phải khái quát cả bài. Phương án quá chi tiết thường chỉ đúng một đoạn nên là bẫy.' },
+{ cd: 'Ngữ pháp khác', m: 4, a: true,  t: 'Cấu trúc đảo ngữ "No sooner had he left THAN the phone rang" đi với "than", không đi với "when".', v: 'Còn "Hardly/Scarcely had he left WHEN the phone rang" mới đi với "when". Đây là cặp bẫy kinh điển.' },
+{ cd: 'Ngữ pháp khác', m: 4, a: true,  t: 'Sau "suggest" dùng V-ing hoặc mệnh đề "that + S + (should) + V nguyên thể", không dùng "to V".', v: 'Đúng: He suggested going out / He suggested that we should go out. Sai: He suggested to go out.' },
+{ cd: 'Ngữ pháp khác', m: 4, a: true,  t: 'Cấu trúc "It is/was + thành phần nhấn mạnh + that…" là câu chẻ dùng để nhấn mạnh một thành phần của câu.', v: 'It was John that broke the window — nhấn mạnh chủ thể John.' },
+{ cd: 'Ngữ pháp khác', m: 4, a: false, t: 'Sau "would rather" ở dạng nói về hiện tại, ta dùng động từ nguyên thể có "to".', v: 'would rather + V nguyên thể không "to". Nếu có hai chủ ngữ: would rather + S + V(quá khứ đơn).' },
+{ cd: 'Ngữ pháp khác', m: 4, a: true,  t: 'So sánh kép "The + so sánh hơn…, the + so sánh hơn…" diễn tả hai sự việc cùng tăng hoặc cùng giảm.', v: 'The harder you study, the better results you get.' },
+{ cd: 'Ngữ pháp khác', m: 3, a: true,  t: 'Sau "used to" dùng V nguyên thể (thói quen trong quá khứ), còn sau "be/get used to" dùng V-ing (đã quen với).', v: 'I used to smoke ≠ I am used to smoking. Đề rất hay đánh vào cặp này.' },
+{ cd: 'Ngữ pháp khác', m: 3, a: false, t: 'Cụm "because of" và liên từ "because" dùng thay thế cho nhau được vì cùng nghĩa "bởi vì".', v: 'Sau "because of" dùng danh từ hoặc V-ing; sau "because" mới dùng mệnh đề đầy đủ.' }
 );
 
 </script>
@@ -7470,7 +8412,7 @@ TD.man_luyencong = function (c) {
   const luoi = el('div', 'luoi');
   TD.THU_TU_MON.forEach(m => {
     const mon = TD.MON[m];
-    const soCau = (TD.KHO[m] || []).length;
+    const khaDung = TD.soCauKhaDung(m);
     const soMau = TD.soMau(m);
     const cx = TD.doChinhXac(m);
     const t = el('div', 'the mon-the', `
@@ -7480,7 +8422,7 @@ TD.man_luyencong = function (c) {
       </div>
       <p style="font-size:12.6px;color:var(--chu2);margin:9px 0 6px">${mon.slogan}</p>
       <div style="font-size:12px;color:var(--chu3)">
-        ${soMau ? `<b style="color:var(--tim)">${soMau} dạng bài tự sinh (∞ câu)</b> · ` : ''}${soCau ? soCau + ' câu cố định' : (soMau ? '' : 'chưa có câu hỏi')}${cx !== null ? ' · chính xác <b style="color:var(--kim)">' + cx + '%</b>' : ''}
+        <b style="color:var(--tim)">≈ ${khaDung.toLocaleString('vi-VN')} câu khác nhau</b> · ${soMau} dạng bài${cx !== null ? ' · chính xác <b style="color:var(--kim)">' + cx + '%</b>' : ''}
       </div>`);
     t.style.setProperty('--m', mon.mau);
     t.onclick = () => TD.chonMuc(m);
@@ -7506,13 +8448,15 @@ TD.chonMuc = function (mon) {
   }
 
   const nut = [0, 1, 2, 3, 4].map(m => {
-    const soT = m === 0 ? kho.length : kho.filter(q => q.muc === m).length;
-    const soG = TD.soMau(mon, m === 0 ? null : m);
+    const kd = TD.soCauKhaDung(mon, m === 0 ? null : m);
     const ten = m === 0 ? 'Tất cả' : `${TD.MUC[m].ten} <span class="mo-nhat">(${TD.MUC[m].ky})</span>`;
-    const mo = soG ? `${soT + soG * 2} câu <span class="mo-nhat">· ${soG} dạng ∞</span>` : `${soT} câu`;
-    return `<button class="nut ${m === 0 ? '' : 'phu'}" ${(soT + soG) ? '' : 'disabled'}
-      onclick="TD.batDauPhien('${mon}',${m},'luyen')">${ten} · ${mo}</button>`;
+    return `<button class="nut ${m === 0 ? '' : 'phu'}" ${kd ? '' : 'disabled'}
+      onclick="TD.batDauPhien('${mon}',${m},'luyen')">${ten}
+      <span class="mo-nhat">· ${kd.toLocaleString('vi-VN')} câu</span></button>`;
   }).join('');
+  const doDai = [15, 30, 50, 100].map(n =>
+    `<button class="nut ${(TD.S.so_cau_phien || 30) === n ? 'kim' : 'phu'}" style="padding:6px 13px;font-size:12.5px"
+      onclick="TD.S.so_cau_phien=${n};TD.luu();TD.chonMuc('${mon}')">${n} câu</button>`).join('');
 
   c.appendChild(el('div', 'the', `<h3>${M.icon} ${M.ten} — ${M.phai}</h3>
     <p class="mo-nhat">${M.slogan}</p>
@@ -7520,8 +8464,12 @@ TD.chonMuc = function (mon) {
       M.tuluan ? 'tự luận ' + M.phut + ' phút'
       : `Phần I ${M.p1} câu${M.p2 ? ' · Phần II ' + M.p2 + ' câu đúng/sai' : ''}${M.p3 ? ' · Phần III ' + M.p3 + ' câu trả lời ngắn' : ''} · ${M.phut} phút`}</p>
     <hr class="mo">
-    ${TD.soMau(mon) ? `<p style="font-size:13px;color:var(--tim);margin-bottom:9px">
-      ♾ Môn này có <b>${TD.soMau(mon)} dạng bài tự sinh</b> — mỗi lần vào là số liệu mới, đáp án và lời giải tự tính theo số liệu đó. Cày mãi không hết đề.</p>` : ''}
+    <p style="font-size:13px;color:var(--tim);margin-bottom:9px">
+      ♾ Môn này có <b>${TD.soMau(mon)} dạng bài tự sinh</b>, ghép ra
+      <b>≈ ${TD.soCauKhaDung(mon).toLocaleString('vi-VN')} câu khác nhau</b>.
+      Mỗi lần vào là đề mới — số liệu, mệnh đề và phương án nhiễu đều đổi.</p>
+    <div style="font-size:12.5px;color:var(--chu2);margin-bottom:6px">Độ dài mỗi phiên:</div>
+    <div class="hang-nut" style="margin:0 0 12px">${doDai}</div>
     <div class="hang-nut">${nut}</div>
     <div class="hang-nut"><button class="nut phu" onclick="TD.di('luyencong')">← Đổi môn</button></div>`));
 };
@@ -7530,15 +8478,20 @@ TD.chonMuc = function (mon) {
    VÒNG CHƠI CHÍNH — PHIÊN LÀM CÂU HỎI
    che_do: 'luyen' | 'tamma' | 'dokiep'
    ============================================================ */
-TD.batDauPhien = function (mon, muc, cheDo, danhSach, gioiHanPhut) {
+TD.batDauPhien = function (mon, muc, cheDo, danhSach, gioiHanPhut, soCauMuon) {
   let ds;
   if (danhSach) ds = danhSach;
   else {
-    const tinh = TD.layCauHoi(mon, muc || null)
-      .map(q => ({ mon: mon, i: (TD.KHO[mon] || []).indexOf(q) }));
-    /* câu sinh tự động: mỗi mẫu đề cho vô hạn biến thể nên lấy nhiều gấp đôi */
-    const sinh = TD.sinhNhieu(mon, muc || null, TD.soMau(mon, muc || null) * 2);
-    ds = TD.xao(tinh.concat(sinh));
+    const soCau = soCauMuon || TD.S.so_cau_phien || 30;
+    /* Ưu tiên chèn một phần câu viết tay (có lời giải chi tiết nhất),
+       phần còn lại lấy từ bộ sinh — nhờ vậy phiên nào cũng đủ dài và không lặp. */
+    const tinh = TD.xao(TD.layCauHoi(mon, muc || null)
+      .map(q => ({ mon: mon, i: (TD.KHO[mon] || []).indexOf(q) })));
+    const soTinh = Math.min(tinh.length, Math.round(soCau * 0.35));
+    const sinh = TD.sinhNhieu(mon, muc || null, soCau - soTinh);
+    ds = TD.xao(tinh.slice(0, soTinh).concat(sinh));
+    /* không sinh được câu nào thì dùng toàn bộ câu cố định */
+    if (!ds.length) ds = tinh;
   }
   if (!ds.length) { TD.bao('Không có câu hỏi phù hợp.', 'lua'); return; }
 
@@ -8366,6 +9319,7 @@ TD.man_caidat = function (c) {
    ============================================================ */
 TD.khoiDong = function () {
   TD.S = TD.tai();
+  TD.dangKyMauTuMenhDe();     /* mọi môn đều có đề tự sinh, kể cả khối xã hội */
 
   const nav = $('#tab');
   TD.MAN.forEach(([k, t]) => {
