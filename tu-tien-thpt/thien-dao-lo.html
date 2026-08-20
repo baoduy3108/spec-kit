@@ -8156,6 +8156,2380 @@ TD.GEN.sinh = [
 </script>
 <script>
 /* ============================================================
+   TIẾNG ANH — KHO TỪ VỰNG & COLLOCATION THI THPT
+   Ghi dạng "từ|loại từ|nghĩa" cho gọn, nạp xong mới dựng thành đối tượng.
+   Gom theo CHỦ ĐỀ để câu hỏi lấy phương án nhiễu cùng chủ đề — khó hơn
+   và sát đề thật hơn là lấy nhiễu ngẫu nhiên khắp kho.
+   Loại từ: n danh · v động · adj tính · adv trạng · phr cụm
+   ============================================================ */
+window.TD = window.TD || {};
+TD.KHO_TU = TD.KHO_TU || [];
+
+(function () {
+const nap = (cd, tho) => {
+  tho.trim().split('\n').forEach(d => {
+    const p = d.split('|');
+    if (p.length < 3) return;
+    TD.KHO_TU.push({ w: p[0].trim(), l: p[1].trim(), n: p[2].trim(), cd: cd });
+  });
+};
+
+nap('Giáo dục & học tập', `
+academic|adj|thuộc về học thuật, hàn lâm
+achievement|n|thành tựu, thành tích
+apply for|phr|nộp đơn xin (học bổng, việc làm)
+assignment|n|bài tập được giao
+attend|v|tham dự, đi học
+bachelor's degree|n|bằng cử nhân
+campus|n|khuôn viên trường
+certificate|n|chứng chỉ, giấy chứng nhận
+compulsory|adj|bắt buộc
+concentrate on|phr|tập trung vào
+credit|n|tín chỉ
+curriculum|n|chương trình giảng dạy
+deadline|n|hạn chót
+degree|n|bằng cấp, học vị
+diploma|n|bằng tốt nghiệp, văn bằng
+discipline|n|kỉ luật; môn học
+dormitory|n|kí túc xá
+drop out|phr|bỏ học giữa chừng
+elective|adj|tự chọn
+enrol|v|ghi danh, nhập học
+entrance exam|n|kì thi tuyển sinh
+extracurricular|adj|ngoại khoá
+faculty|n|khoa (trong trường đại học)
+fail|v|trượt, thi hỏng
+fluent|adj|trôi chảy, lưu loát
+graduate|v|tốt nghiệp
+grade|n|điểm số; lớp học
+handout|n|tài liệu phát tay
+higher education|n|giáo dục đại học
+homework|n|bài tập về nhà
+knowledge|n|kiến thức
+laboratory|n|phòng thí nghiệm
+lecture|n|bài giảng
+lecturer|n|giảng viên
+literacy|n|khả năng đọc viết, sự biết chữ
+major in|phr|học chuyên ngành
+memorise|v|học thuộc lòng
+mock exam|n|kì thi thử
+motivation|n|động lực
+peer|n|bạn đồng trang lứa
+plagiarism|n|đạo văn
+primary school|n|trường tiểu học
+principal|n|hiệu trưởng
+qualification|n|bằng cấp, trình độ chuyên môn
+reference|n|tài liệu tham khảo
+revise|v|ôn tập
+scholarship|n|học bổng
+semester|n|học kì
+seminar|n|buổi hội thảo, xê-mi-na
+submit|v|nộp (bài, đơn)
+syllabus|n|đề cương môn học
+take notes|phr|ghi chép
+term|n|học kì, kì
+textbook|n|sách giáo khoa
+transcript|n|bảng điểm
+tuition fee|n|học phí
+tutor|n|gia sư, giáo viên phụ đạo
+undergraduate|n|sinh viên đại học
+vocational|adj|thuộc về dạy nghề
+distance learning|n|học từ xa
+lifelong learning|n|học tập suốt đời
+`);
+
+nap('Nghề nghiệp & việc làm', `
+applicant|n|người nộp đơn, ứng viên
+apprentice|n|người học việc
+be in charge of|phr|chịu trách nhiệm về
+benefit|n|phúc lợi, quyền lợi
+candidate|n|ứng cử viên
+career|n|sự nghiệp
+colleague|n|đồng nghiệp
+commute|v|đi lại giữa nhà và nơi làm việc
+competent|adj|có năng lực, đủ trình độ
+CV|n|bản lí lịch xin việc
+deadline pressure|n|áp lực về hạn chót
+dedicated|adj|tận tuỵ, hết lòng
+demanding|adj|đòi hỏi cao, vất vả
+dismiss|v|sa thải
+employee|n|nhân viên, người làm công
+employer|n|người sử dụng lao động
+freelance|adj|làm việc tự do
+full-time|adj|toàn thời gian
+income|n|thu nhập
+interview|n|cuộc phỏng vấn
+job satisfaction|n|sự hài lòng với công việc
+labour force|n|lực lượng lao động
+manual work|n|lao động chân tay
+occupation|n|nghề nghiệp
+overtime|n|giờ làm thêm
+part-time|adj|bán thời gian
+pay rise|n|sự tăng lương
+promote|v|thăng chức
+recruit|v|tuyển dụng
+redundant|adj|bị dư thừa, bị cho thôi việc
+resign|v|từ chức, xin thôi việc
+retire|v|nghỉ hưu
+salary|n|lương tháng
+self-employed|adj|tự làm chủ, tự kinh doanh
+shift|n|ca làm việc
+skilled worker|n|công nhân lành nghề
+staff|n|đội ngũ nhân viên
+teamwork|n|làm việc nhóm
+unemployment|n|tình trạng thất nghiệp
+vacancy|n|vị trí còn trống
+wage|n|tiền công (theo giờ, ngày)
+workforce|n|lực lượng lao động
+workload|n|khối lượng công việc
+work-life balance|n|cân bằng giữa công việc và cuộc sống
+`);
+
+nap('Gia đình & đời sống', `
+adopt|v|nhận làm con nuôi
+ancestor|n|tổ tiên
+be close to|phr|thân thiết với
+bring up|phr|nuôi dạy
+chore|n|việc vặt trong nhà
+conflict|n|xung đột, mâu thuẫn
+divorce|n|sự li hôn
+elderly|adj|cao tuổi
+engagement|n|lễ đính hôn
+extended family|n|gia đình nhiều thế hệ
+generation gap|n|khoảng cách thế hệ
+get along with|phr|hoà thuận với
+household|n|hộ gia đình
+in-laws|n|họ hàng bên vợ hoặc chồng
+look after|phr|chăm sóc
+marital status|n|tình trạng hôn nhân
+nuclear family|n|gia đình hạt nhân (bố mẹ và con)
+obedient|adj|vâng lời
+parenting|n|việc nuôi dạy con cái
+relative|n|họ hàng
+responsibility|n|trách nhiệm
+sibling|n|anh chị em ruột
+spouse|n|vợ hoặc chồng
+supportive|adj|luôn ủng hộ, động viên
+take after|phr|giống (người thân)
+tolerant|adj|khoan dung, độ lượng
+upbringing|n|sự nuôi dạy
+value|n|giá trị (sống)
+`);
+
+nap('Sức khoẻ & y tế', `
+addiction|n|sự nghiện
+balanced diet|n|chế độ ăn cân bằng
+cardiovascular|adj|thuộc tim mạch
+contagious|adj|dễ lây lan
+cure|v|chữa khỏi
+diagnose|v|chẩn đoán
+disease|n|bệnh tật
+epidemic|n|dịch bệnh
+fatigue|n|sự mệt mỏi
+first aid|n|sơ cứu
+healthcare|n|chăm sóc sức khoẻ
+hygiene|n|vệ sinh
+immune system|n|hệ miễn dịch
+infection|n|sự nhiễm trùng
+injury|n|chấn thương
+insomnia|n|chứng mất ngủ
+mental health|n|sức khoẻ tinh thần
+nutrition|n|dinh dưỡng
+obesity|n|bệnh béo phì
+outbreak|n|sự bùng phát (dịch)
+patient|n|bệnh nhân
+prescription|n|đơn thuốc
+prevent|v|ngăn ngừa
+recover|v|hồi phục
+sedentary|adj|ít vận động, ngồi nhiều
+side effect|n|tác dụng phụ
+stress|n|sự căng thẳng
+surgery|n|ca phẫu thuật
+symptom|n|triệu chứng
+treatment|n|sự điều trị
+vaccination|n|sự tiêm chủng
+well-being|n|trạng thái khoẻ mạnh, hạnh phúc
+`);
+
+nap('Môi trường & phát triển bền vững', `
+biodiversity|n|đa dạng sinh học
+carbon footprint|n|dấu chân carbon, lượng khí thải gây ra
+climate change|n|biến đổi khí hậu
+conservation|n|sự bảo tồn
+contaminate|v|làm ô nhiễm, nhiễm bẩn
+deforestation|n|nạn phá rừng
+degradation|n|sự suy thoái
+discharge|v|thải ra, xả ra
+drought|n|hạn hán
+ecosystem|n|hệ sinh thái
+emission|n|khí thải
+endangered species|n|loài có nguy cơ tuyệt chủng
+environmentally friendly|adj|thân thiện với môi trường
+erosion|n|sự xói mòn
+extinction|n|sự tuyệt chủng
+fossil fuel|n|nhiên liệu hoá thạch
+global warming|n|sự nóng lên toàn cầu
+greenhouse effect|n|hiệu ứng nhà kính
+habitat|n|môi trường sống của sinh vật
+landfill|n|bãi chôn lấp rác
+natural resources|n|tài nguyên thiên nhiên
+non-renewable|adj|không tái tạo được
+organic|adj|hữu cơ
+overfishing|n|đánh bắt cá quá mức
+pesticide|n|thuốc trừ sâu
+pollutant|n|chất gây ô nhiễm
+preserve|v|bảo tồn, giữ gìn
+recycle|v|tái chế
+reduce|v|giảm bớt
+renewable energy|n|năng lượng tái tạo
+reuse|v|tái sử dụng
+sea level rise|n|mực nước biển dâng
+sewage|n|nước thải sinh hoạt
+solar power|n|năng lượng mặt trời
+sustainable|adj|bền vững
+waste treatment|n|xử lí chất thải
+wildlife|n|động vật hoang dã
+`);
+
+nap('Khoa học & công nghệ', `
+artificial intelligence|n|trí tuệ nhân tạo
+automation|n|sự tự động hoá
+breakthrough|n|bước đột phá
+cutting-edge|adj|tối tân, tiên tiến nhất
+cyberbullying|n|bắt nạt trên mạng
+data|n|dữ liệu
+device|n|thiết bị
+digital literacy|n|năng lực số
+download|v|tải xuống
+experiment|n|thí nghiệm
+gadget|n|đồ dùng công nghệ nhỏ gọn
+innovation|n|sự đổi mới sáng tạo
+install|v|cài đặt
+invention|n|phát minh
+laptop|n|máy tính xách tay
+launch|v|ra mắt, phóng (vệ tinh)
+network|n|mạng lưới
+online platform|n|nền tảng trực tuyến
+password|n|mật khẩu
+privacy|n|quyền riêng tư
+programme|v|lập trình
+remote control|n|điều khiển từ xa
+research|n|nghiên cứu
+robot|n|người máy
+satellite|n|vệ tinh
+screen time|n|thời gian nhìn màn hình
+software|n|phần mềm
+solve|v|giải quyết
+technology|n|công nghệ
+update|v|cập nhật
+upload|v|tải lên
+user-friendly|adj|dễ sử dụng
+virtual reality|n|thực tế ảo
+virus|n|vi-rút (máy tính, sinh học)
+`);
+
+nap('Du lịch & văn hoá', `
+accommodation|n|chỗ ở
+adventure|n|cuộc phiêu lưu
+attraction|n|điểm thu hút khách
+authentic|adj|nguyên bản, đích thực
+booking|n|việc đặt chỗ
+cultural identity|n|bản sắc văn hoá
+custom|n|phong tục
+delayed|adj|bị hoãn, bị trễ
+departure|n|sự khởi hành
+destination|n|điểm đến
+diverse|adj|đa dạng
+festival|n|lễ hội
+guided tour|n|chuyến tham quan có hướng dẫn
+heritage|n|di sản
+hospitality|n|lòng hiếu khách
+itinerary|n|lịch trình
+landmark|n|địa danh nổi tiếng
+landscape|n|phong cảnh
+luggage|n|hành lí
+package tour|n|tour trọn gói
+passport|n|hộ chiếu
+ritual|n|nghi lễ
+scenery|n|phong cảnh
+sightseeing|n|việc ngắm cảnh
+souvenir|n|đồ lưu niệm
+tradition|n|truyền thống
+traveller|n|người đi du lịch
+visa|n|thị thực
+`);
+
+nap('Xã hội & truyền thông', `
+advertisement|n|quảng cáo
+audience|n|khán giả, độc giả
+broadcast|v|phát sóng
+campaign|n|chiến dịch
+charity|n|tổ chức từ thiện
+citizen|n|công dân
+community|n|cộng đồng
+discrimination|n|sự phân biệt đối xử
+donate|v|quyên góp
+equality|n|sự bình đẳng
+gender|n|giới tính
+headline|n|tiêu đề tin
+influence|v|ảnh hưởng
+journalist|n|nhà báo
+literate|adj|biết đọc biết viết
+media|n|phương tiện truyền thông
+poverty|n|sự nghèo đói
+prejudice|n|định kiến
+promote a campaign|phr|đẩy mạnh một chiến dịch
+public opinion|n|dư luận
+raise awareness|phr|nâng cao nhận thức
+reliable|adj|đáng tin cậy
+social network|n|mạng xã hội
+subscribe|v|đăng kí theo dõi
+survey|n|cuộc khảo sát
+urbanisation|n|đô thị hoá
+viewer|n|người xem
+volunteer|n|tình nguyện viên
+`);
+
+nap('Từ học thuật hay gặp trong bài đọc', `
+abundant|adj|dồi dào, phong phú
+accelerate|v|tăng tốc, đẩy nhanh
+accurate|adj|chính xác
+adapt|v|thích nghi
+adequate|adj|đầy đủ, thoả đáng
+alter|v|thay đổi
+approach|n|cách tiếp cận
+assess|v|đánh giá
+assume|v|cho rằng, giả định
+beneficial|adj|có lợi
+comprehensive|adj|toàn diện
+consequence|n|hậu quả, kết quả
+considerable|adj|đáng kể
+constant|adj|không đổi, liên tục
+crucial|adj|then chốt, cốt yếu
+decline|v|suy giảm
+demonstrate|v|chứng minh, thể hiện
+diminish|v|giảm bớt
+distinguish|v|phân biệt
+dramatic|adj|đột ngột, mạnh mẽ
+eliminate|v|loại bỏ
+emerge|v|xuất hiện, nổi lên
+enhance|v|nâng cao, cải thiện
+essential|adj|thiết yếu
+evidence|n|bằng chứng
+evolve|v|tiến hoá, phát triển dần
+exceed|v|vượt quá
+facilitate|v|tạo điều kiện thuận lợi
+factor|n|yếu tố
+fluctuate|v|dao động, lên xuống
+generate|v|tạo ra, sinh ra
+gradual|adj|dần dần
+hypothesis|n|giả thuyết
+identify|v|nhận diện, xác định
+impact|n|tác động
+implement|v|thực thi, triển khai
+imply|v|hàm ý
+inevitable|adj|không thể tránh khỏi
+initial|adj|ban đầu
+integrate|v|hợp nhất, tích hợp
+interpret|v|diễn giải
+maintain|v|duy trì
+minimise|v|giảm thiểu
+modify|v|sửa đổi
+obtain|v|thu được, đạt được
+occur|v|xảy ra
+overcome|v|vượt qua
+phenomenon|n|hiện tượng
+potential|n|tiềm năng
+predict|v|dự đoán
+previous|adj|trước đó
+principle|n|nguyên tắc
+priority|n|ưu tiên
+reduce significantly|phr|giảm đáng kể
+regardless of|phr|bất kể
+relevant|adj|liên quan, thích đáng
+reluctant|adj|miễn cưỡng, ngần ngại
+require|v|đòi hỏi, yêu cầu
+resource|n|nguồn lực
+restrict|v|hạn chế
+reveal|v|tiết lộ
+significant|adj|đáng kể, quan trọng
+substantial|adj|đáng kể, lớn
+sufficient|adj|đủ
+tendency|n|xu hướng
+transform|v|biến đổi
+undergo|v|trải qua
+vary|v|thay đổi, khác nhau
+widespread|adj|lan rộng, phổ biến
+`);
+
+nap('Tính từ mô tả tính cách & cảm xúc', `
+ambitious|adj|có tham vọng
+anxious|adj|lo lắng
+arrogant|adj|kiêu ngạo
+brave|adj|dũng cảm
+cautious|adj|thận trọng
+cheerful|adj|vui vẻ
+confident|adj|tự tin
+considerate|adj|chu đáo, biết nghĩ cho người khác
+courageous|adj|can đảm
+creative|adj|sáng tạo
+curious|adj|tò mò, ham hiểu biết
+determined|adj|quyết tâm
+diligent|adj|siêng năng
+disappointed|adj|thất vọng
+enthusiastic|adj|nhiệt tình
+generous|adj|hào phóng
+grateful|adj|biết ơn
+honest|adj|trung thực
+humble|adj|khiêm tốn
+independent|adj|độc lập
+jealous|adj|ghen tị
+loyal|adj|trung thành
+optimistic|adj|lạc quan
+be patient with|phr|kiên nhẫn với
+persistent|adj|kiên trì
+pessimistic|adj|bi quan
+polite|adj|lịch sự
+punctual|adj|đúng giờ
+reliable person|phr|người đáng tin cậy
+responsible|adj|có trách nhiệm
+selfish|adj|ích kỉ
+sensitive|adj|nhạy cảm
+sincere|adj|chân thành
+sociable|adj|hoà đồng
+stubborn|adj|bướng bỉnh
+sympathetic|adj|thông cảm
+thoughtful|adj|ân cần, chu đáo
+`);
+
+nap('Cụm động từ (phrasal verbs)', `
+break down|phr|hỏng hóc; suy sụp
+bring about|phr|gây ra, dẫn đến
+call off|phr|huỷ bỏ
+carry out|phr|tiến hành, thực hiện
+come across|phr|tình cờ gặp, bắt gặp
+cut down on|phr|cắt giảm
+deal with|phr|giải quyết, đối phó
+figure out|phr|hiểu ra, tìm ra
+find out|phr|phát hiện ra
+get over|phr|vượt qua, hồi phục
+give up|phr|từ bỏ
+go on|phr|tiếp tục
+grow up|phr|lớn lên
+hand in|phr|nộp bài
+hold on|phr|chờ máy, đợi một chút
+keep up with|phr|theo kịp
+look forward to|phr|mong đợi
+look into|phr|điều tra, xem xét
+look up|phr|tra cứu
+make up|phr|bịa ra; làm hoà
+put off|phr|hoãn lại
+put up with|phr|chịu đựng
+run out of|phr|hết, cạn kiệt
+set up|phr|thành lập, dựng lên
+take on|phr|đảm nhận
+take part in|phr|tham gia
+take up|phr|bắt đầu (sở thích)
+turn down|phr|từ chối; vặn nhỏ
+turn up|phr|xuất hiện; vặn to
+work out|phr|tập thể dục; tính ra
+`);
+
+nap('Thể thao & giải trí', `
+amateur|n|người nghiệp dư
+athlete|n|vận động viên điền kinh
+championship|n|giải vô địch
+cheer|v|cổ vũ
+coach|n|huấn luyện viên
+compete|v|thi đấu
+defeat|v|đánh bại
+endurance|n|sức bền
+fitness|n|thể lực, sự sung sức
+gym|n|phòng tập
+league|n|giải đấu
+opponent|n|đối thủ
+Olympic Games|n|Thế vận hội Olympic
+participant|n|người tham gia
+performance|n|màn trình diễn, thành tích
+professional|adj|chuyên nghiệp
+qualify|v|giành quyền vào vòng trong
+referee|n|trọng tài
+score|v|ghi điểm, ghi bàn
+spectator|n|khán giả xem thi đấu
+sportsmanship|n|tinh thần thể thao
+stadium|n|sân vận động
+teammate|n|đồng đội
+tournament|n|giải đấu
+train|v|luyện tập
+trophy|n|cúp vô địch
+warm up|phr|khởi động
+audition|n|buổi thử vai
+blockbuster|n|phim bom tấn
+cast|n|dàn diễn viên
+comedy|n|phim hài
+concert|n|buổi hoà nhạc
+director|n|đạo diễn
+entertainment|n|sự giải trí
+genre|n|thể loại
+plot|n|cốt truyện
+release|v|phát hành
+review|n|bài đánh giá
+soundtrack|n|nhạc phim
+subtitle|n|phụ đề
+`);
+
+nap('Ẩm thực & dinh dưỡng', `
+appetite|n|sự thèm ăn
+bake|v|nướng bằng lò
+beverage|n|đồ uống
+boil|v|luộc, đun sôi
+canteen|n|căng tin
+cuisine|n|nền ẩm thực
+delicious|adj|ngon
+dessert|n|món tráng miệng
+diet|n|chế độ ăn
+dish|n|món ăn
+edible|adj|ăn được
+fast food|n|đồ ăn nhanh
+flavour|n|hương vị
+fresh|adj|tươi
+fry|v|rán, chiên
+grill|v|nướng vỉ
+ingredient|n|nguyên liệu
+junk food|n|đồ ăn vặt kém dinh dưỡng
+leftover|n|thức ăn thừa
+meal|n|bữa ăn
+nutritious|adj|bổ dưỡng
+portion|n|khẩu phần
+preservative|n|chất bảo quản
+recipe|n|công thức nấu ăn
+seasoning|n|gia vị
+snack|n|đồ ăn nhẹ
+spicy|adj|cay
+steam|v|hấp
+tasteless|adj|nhạt nhẽo
+vegetarian|n|người ăn chay
+`);
+
+nap('Nhà ở & đô thị', `
+apartment|n|căn hộ
+architecture|n|kiến trúc
+balcony|n|ban công
+brick|n|viên gạch
+ceiling|n|trần nhà
+congestion|n|sự tắc nghẽn
+construction|n|việc xây dựng
+cottage|n|nhà tranh, nhà nhỏ ở quê
+downtown|n|khu trung tâm
+facility|n|tiện ích, cơ sở vật chất
+furnished|adj|có sẵn nội thất
+infrastructure|n|cơ sở hạ tầng
+landlord|n|chủ nhà cho thuê
+maintenance|n|việc bảo trì
+neighbourhood|n|khu phố, hàng xóm
+overcrowded|adj|quá đông đúc
+pavement|n|vỉa hè
+rent|v|thuê, cho thuê
+residence|n|nơi cư trú
+residential area|n|khu dân cư
+rural|adj|thuộc nông thôn
+skyscraper|n|toà nhà chọc trời
+slum|n|khu ổ chuột
+suburb|n|vùng ngoại ô
+tenant|n|người thuê nhà
+urban|adj|thuộc thành thị
+utilities|n|các dịch vụ điện nước
+`);
+
+nap('Mua sắm & tiêu dùng', `
+afford|v|đủ tiền mua
+bargain|n|món hời
+brand|n|thương hiệu
+budget|n|ngân sách
+consumer|n|người tiêu dùng
+customer|n|khách hàng
+delivery|n|việc giao hàng
+discount|n|khoản giảm giá
+exchange|v|đổi hàng
+expense|n|khoản chi tiêu
+expensive|adj|đắt đỏ
+guarantee|n|sự bảo hành
+inexpensive|adj|không đắt
+in stock|phr|còn hàng
+invoice|n|hoá đơn
+loyalty card|n|thẻ khách hàng thân thiết
+purchase|v|mua
+receipt|n|biên lai
+refund|n|khoản hoàn tiền
+retail|n|bán lẻ
+sale|n|đợt giảm giá
+second-hand|adj|đã qua sử dụng
+shopaholic|n|người nghiện mua sắm
+supplier|n|nhà cung cấp
+wholesale|n|bán buôn
+window shopping|n|đi ngắm đồ không mua
+`);
+
+nap('Giao thông & đi lại', `
+accident|n|tai nạn
+board|v|lên (tàu, xe, máy bay)
+boarding pass|n|thẻ lên máy bay
+breakdown|n|sự hỏng xe
+carriage|n|toa tàu
+crossroads|n|ngã tư
+cyclist|n|người đi xe đạp
+destination point|phr|điểm đến cuối cùng
+detour|n|đường vòng
+driving licence|n|bằng lái xe
+fare|n|tiền vé
+fasten|v|thắt (dây an toàn)
+helmet|n|mũ bảo hiểm
+highway|n|đường cao tốc
+jam|n|sự ùn tắc
+lane|n|làn đường
+overtake|v|vượt xe
+passenger|n|hành khách
+pedestrian|n|người đi bộ
+petrol|n|xăng
+platform|n|sân ga
+public transport|n|giao thông công cộng
+rush hour|n|giờ cao điểm
+seat belt|n|dây an toàn
+speed limit|n|giới hạn tốc độ
+timetable|n|thời gian biểu, lịch chạy
+traffic light|n|đèn giao thông
+vehicle|n|phương tiện giao thông
+`);
+
+nap('Thời tiết & thiên tai', `
+avalanche|n|trận tuyết lở
+blizzard|n|bão tuyết
+breeze|n|làn gió nhẹ
+chilly|adj|lạnh buốt
+cyclone|n|xoáy thuận nhiệt đới
+damp|adj|ẩm ướt
+disaster|n|thảm hoạ
+earthquake|n|trận động đất
+evacuate|v|sơ tán
+flood|n|trận lụt
+forecast|n|dự báo
+freezing|adj|đóng băng, rất lạnh
+hail|n|mưa đá
+humid|adj|ẩm
+hurricane|n|bão lớn
+landslide|n|sạt lở đất
+lightning|n|tia chớp
+mild|adj|ôn hoà, dịu
+rainfall|n|lượng mưa
+relief|n|cứu trợ
+rescue|v|giải cứu
+shelter|n|nơi trú ẩn
+storm|n|cơn bão
+temperature|n|nhiệt độ
+thunder|n|sấm
+tsunami|n|sóng thần
+volcanic eruption|n|sự phun trào núi lửa
+`);
+
+nap('Kinh tế & tiền bạc', `
+account|n|tài khoản
+asset|n|tài sản
+borrow|v|vay, mượn
+capital|n|vốn
+currency|n|tiền tệ
+debt|n|khoản nợ
+deposit|v|gửi tiền
+economy|n|nền kinh tế
+exchange rate|n|tỉ giá hối đoái
+export|v|xuất khẩu
+finance|n|tài chính
+import|v|nhập khẩu
+inflation|n|lạm phát
+insurance|n|bảo hiểm
+interest rate|n|lãi suất
+invest|v|đầu tư
+lend|v|cho vay
+loan|n|khoản vay
+market|n|thị trường
+mortgage|n|khoản vay thế chấp
+profit|n|lợi nhuận
+recession|n|suy thoái kinh tế
+revenue|n|doanh thu
+savings|n|tiền tiết kiệm
+share|n|cổ phần
+supply and demand|n|cung và cầu
+tax|n|thuế
+transaction|n|giao dịch
+withdraw|v|rút tiền
+`);
+
+nap('Pháp luật & công lí', `
+accuse|v|buộc tội
+arrest|v|bắt giữ
+authority|n|nhà chức trách
+ban|v|cấm
+court|n|toà án
+crime|n|tội phạm
+criminal|n|tội phạm (người)
+defendant|n|bị cáo
+enforce|v|thực thi (luật)
+evidence in court|phr|chứng cứ trước toà
+fine|n|khoản tiền phạt
+guilty|adj|có tội
+illegal|adj|bất hợp pháp
+innocent|adj|vô tội
+judge|n|thẩm phán
+jury|n|bồi thẩm đoàn
+justice|n|công lí
+lawyer|n|luật sư
+legal|adj|hợp pháp
+offence|n|hành vi phạm tội
+penalty|n|hình phạt
+prison|n|nhà tù
+prohibit|v|nghiêm cấm
+regulation|n|quy định
+sentence|v|kết án
+suspect|n|nghi phạm
+trial|n|phiên toà xét xử
+victim|n|nạn nhân
+witness|n|nhân chứng
+`);
+
+nap('Động từ thông dụng', `
+abandon|v|từ bỏ, bỏ rơi
+accompany|v|đi cùng
+acquire|v|thu nhận, có được
+admire|v|ngưỡng mộ
+recommend strongly|phr|khuyên dùng mạnh mẽ
+announce|v|thông báo
+appreciate|v|đánh giá cao, trân trọng
+approve|v|chấp thuận
+argue|v|tranh luận
+arrange|v|sắp xếp
+attract|v|thu hút
+avoid|v|tránh
+blame|v|đổ lỗi
+celebrate|v|kỉ niệm, ăn mừng
+combine|v|kết hợp
+compare|v|so sánh
+complain|v|phàn nàn
+confirm|v|xác nhận
+consider|v|cân nhắc
+convince|v|thuyết phục
+cooperate|v|hợp tác
+decrease|v|giảm
+deny|v|phủ nhận
+describe|v|mô tả
+develop|v|phát triển
+discover|v|khám phá
+discuss|v|thảo luận
+emphasise|v|nhấn mạnh
+encourage|v|khuyến khích
+estimate|v|ước tính
+examine|v|xem xét, khám
+expand|v|mở rộng
+explore|v|khám phá, thăm dò
+express|v|bày tỏ
+forbid|v|cấm đoán
+hesitate|v|do dự
+ignore|v|phớt lờ
+improve|v|cải thiện
+increase|v|tăng lên
+inspire|v|truyền cảm hứng
+introduce|v|giới thiệu
+involve|v|liên quan, bao gồm
+justify|v|biện minh
+manage|v|xoay xở, quản lí
+mention|v|đề cập
+negotiate|v|đàm phán
+observe|v|quan sát
+organise|v|tổ chức
+participate|v|tham gia
+persuade|v|thuyết phục
+postpone|v|hoãn lại
+prefer|v|thích hơn
+prepare|v|chuẩn bị
+pretend|v|giả vờ
+protect|v|bảo vệ
+provide|v|cung cấp
+recognise|v|nhận ra
+recommend|v|giới thiệu, khuyên dùng
+refuse|v|từ chối
+remind|v|nhắc nhở
+replace|v|thay thế
+represent|v|đại diện cho
+respond|v|phản hồi
+suggest|v|gợi ý, đề nghị
+supply|v|cung cấp
+support|v|ủng hộ
+survive|v|sống sót
+warn|v|cảnh báo
+`);
+
+nap('Danh từ & tính từ thông dụng', `
+ability|n|khả năng
+advantage|n|lợi thế
+guidance|n|sự chỉ dẫn, hướng dẫn
+aim|n|mục tiêu
+alternative|n|lựa chọn thay thế
+attitude|n|thái độ
+attempt|n|nỗ lực, cố gắng
+behaviour|n|hành vi
+belief|n|niềm tin
+challenge|n|thách thức
+circumstance|n|hoàn cảnh
+comparison|n|sự so sánh
+competition|n|cuộc cạnh tranh, cuộc thi
+concern|n|mối lo ngại
+condition|n|điều kiện
+confidence|n|sự tự tin
+contribution|n|sự đóng góp
+convenience|n|sự tiện lợi
+cooperation|n|sự hợp tác
+creativity|n|sự sáng tạo
+curiosity|n|sự tò mò
+decision|n|quyết định
+difficulty|n|khó khăn
+disadvantage|n|bất lợi
+effort|n|nỗ lực
+emotion|n|cảm xúc
+encouragement|n|sự khích lệ
+experience|n|kinh nghiệm, trải nghiệm
+freedom|n|sự tự do
+goal|n|mục tiêu
+habit|n|thói quen
+honesty|n|sự trung thực
+imagination|n|trí tưởng tượng
+improvement|n|sự cải thiện
+independence|n|sự độc lập
+intention|n|ý định
+interaction|n|sự tương tác
+method|n|phương pháp
+mistake|n|lỗi lầm
+obstacle|n|trở ngại
+opportunity|n|cơ hội
+patience|n|sự kiên nhẫn
+perspective|n|góc nhìn
+pressure|n|áp lực
+purpose|n|mục đích
+quality|n|chất lượng
+quantity|n|số lượng
+reaction|n|phản ứng
+reason|n|lí do
+relationship|n|mối quan hệ
+reputation|n|danh tiếng
+result|n|kết quả
+role|n|vai trò
+situation|n|tình huống
+solution|n|giải pháp
+strength|n|điểm mạnh
+success|n|sự thành công
+suggestion|n|lời gợi ý
+trust|n|sự tin tưởng
+weakness|n|điểm yếu
+appropriate|adj|phù hợp, thích đáng
+available|adj|có sẵn
+aware|adj|nhận thức được
+common|adj|phổ biến
+complex|adj|phức tạp
+convenient|adj|tiện lợi
+dangerous|adj|nguy hiểm
+difficult|adj|khó khăn
+effective|adj|hiệu quả
+efficient|adj|hiệu suất cao
+equal|adj|bằng nhau, ngang bằng
+flexible|adj|linh hoạt
+frequent|adj|thường xuyên
+harmful|adj|có hại
+impressive|adj|ấn tượng
+necessary|adj|cần thiết
+obvious|adj|hiển nhiên
+particular|adj|cụ thể, riêng biệt
+permanent|adj|lâu dài, vĩnh viễn
+practical|adj|thực tế, thiết thực
+rare|adj|hiếm
+reasonable|adj|hợp lí
+temporary|adj|tạm thời
+typical|adj|điển hình
+unique|adj|độc nhất
+useful|adj|hữu ích
+valuable|adj|có giá trị
+various|adj|đa dạng, khác nhau
+willing|adj|sẵn lòng
+`);
+
+nap('Trạng từ & từ nối', `
+absolutely|adv|hoàn toàn
+actually|adv|thực ra
+additionally|adv|thêm vào đó
+apparently|adv|có vẻ như
+approximately|adv|xấp xỉ, khoảng
+barely|adv|hầu như không
+carefully|adv|một cách cẩn thận
+certainly|adv|chắc chắn
+clearly|adv|rõ ràng
+consequently|adv|do đó
+currently|adv|hiện nay
+definitely|adv|chắc chắn
+easily|adv|một cách dễ dàng
+effectively|adv|một cách hiệu quả
+entirely|adv|hoàn toàn
+especially|adv|đặc biệt là
+eventually|adv|cuối cùng thì
+extremely|adv|cực kì
+fortunately|adv|may thay
+frequently|adv|thường xuyên
+furthermore|adv|hơn nữa
+gradually|adv|dần dần
+hardly|adv|hầu như không
+however|adv|tuy nhiên
+immediately|adv|ngay lập tức
+increasingly|adv|ngày càng
+indeed|adv|quả thực
+instead|adv|thay vào đó
+likely|adv|có khả năng
+meanwhile|adv|trong khi đó
+moreover|adv|hơn thế nữa
+namely|adv|cụ thể là
+nevertheless|adv|tuy nhiên, dù vậy
+obviously|adv|rõ ràng là
+occasionally|adv|thỉnh thoảng
+otherwise|adv|nếu không thì
+particularly|adv|đặc biệt
+possibly|adv|có thể
+previously|adv|trước đây
+probably|adv|có lẽ
+rarely|adv|hiếm khi
+recently|adv|gần đây
+relatively|adv|tương đối
+seldom|adv|hiếm khi
+seriously|adv|nghiêm túc
+similarly|adv|tương tự
+slightly|adv|hơi, một chút
+therefore|adv|vì vậy
+thoroughly|adv|kĩ lưỡng
+thus|adv|do đó
+unfortunately|adv|không may là
+usually|adv|thường thường
+whereas|adv|trong khi (đối lập)
+`);
+
+nap('Nông nghiệp & tài nguyên', `
+agriculture|n|nông nghiệp
+breed|v|nhân giống, chăn nuôi
+crop|n|vụ mùa, cây trồng
+cultivate|v|trồng trọt, canh tác
+drought-resistant|adj|chịu hạn
+fertiliser|n|phân bón
+grain|n|ngũ cốc
+harvest|n|vụ thu hoạch
+irrigation|n|hệ thống tưới tiêu
+livestock|n|gia súc
+mineral|n|khoáng sản
+paddy field|n|ruộng lúa
+plantation|n|đồn điền
+poultry|n|gia cầm
+soil|n|đất trồng
+sow|v|gieo hạt
+yield|n|sản lượng thu hoạch
+aquaculture|n|nuôi trồng thuỷ sản
+exploit|v|khai thác
+extract|v|chiết xuất, khai thác
+mine|v|khai mỏ
+timber|n|gỗ xẻ
+`);
+
+nap('Cảm xúc & giao tiếp', `
+admit|v|thừa nhận
+agree|v|đồng ý
+amuse|v|làm vui thích
+annoy|v|làm phiền, chọc tức
+apologise|v|xin lỗi
+appreciate help|phr|trân trọng sự giúp đỡ
+astonish|v|làm sửng sốt
+beg|v|van xin
+boast|v|khoe khoang
+comfort|v|an ủi
+compliment|n|lời khen
+congratulate|v|chúc mừng
+criticise|v|phê bình
+disagree|v|không đồng ý
+embarrass|v|làm xấu hổ
+frighten|v|làm sợ hãi
+greet|v|chào hỏi
+insult|v|lăng mạ
+interrupt|v|ngắt lời
+mislead|v|dẫn dắt sai lệch
+promise|v|hứa
+quarrel|v|cãi nhau
+refuse politely|phr|từ chối lịch sự
+regret|v|hối tiếc
+satisfy|v|làm hài lòng
+scold|v|mắng
+sympathise|v|đồng cảm
+threaten|v|đe doạ
+whisper|v|thì thầm
+`);
+
+nap('Từ dễ nhầm lẫn', `
+affect|v|(động từ) tác động đến
+effect|n|(danh từ) tác động, hiệu ứng
+advise|v|(động từ) khuyên
+advice|n|(danh từ) lời khuyên
+practise|v|(động từ) luyện tập
+practice|n|(danh từ) sự luyện tập
+economic|adj|thuộc kinh tế
+economical|adj|tiết kiệm, không tốn kém
+historic|adj|mang tính lịch sử, trọng đại
+historical|adj|liên quan đến lịch sử
+sensible|adj|khôn ngoan, hợp lí
+sensitive person|phr|người nhạy cảm
+successful|adj|thành công
+successive|adj|liên tiếp
+industrial|adj|thuộc công nghiệp
+industrious|adj|chăm chỉ
+respectful|adj|tôn trọng người khác
+respectable|adj|đáng kính
+literal|adj|theo nghĩa đen
+literary|adj|thuộc văn chương
+continual|adj|lặp đi lặp lại có ngắt quãng
+continuous|adj|liên tục không ngắt
+lie|v|nằm; nói dối
+lay|v|đặt, để nằm xuống
+rise|v|tăng lên (tự thân)
+raise|v|nâng lên (tác động lên vật khác)
+borrow money|phr|vay tiền của ai
+lend money|phr|cho ai vay tiền
+bring|v|mang tới (chỗ người nói)
+take away|phr|mang đi (khỏi chỗ người nói)
+`);
+
+nap('Thành ngữ & cách diễn đạt', `
+a piece of cake|phr|dễ như ăn bánh
+better late than never|phr|muộn còn hơn không
+break the ice|phr|phá tan bầu không khí ngượng ngùng
+once in a blue moon|phr|hoạ hoằn lắm mới xảy ra
+under the weather|phr|thấy trong người không khoẻ
+hit the books|phr|vùi đầu vào học
+learn by heart|phr|học thuộc lòng
+keep in touch|phr|giữ liên lạc
+make ends meet|phr|xoay xở đủ sống
+be on the same page|phr|cùng chung quan điểm
+get the hang of|phr|nắm được cách làm
+pull someone's leg|phr|trêu chọc ai đó
+cost an arm and a leg|phr|đắt cắt cổ
+be all ears|phr|sẵn sàng lắng nghe
+in the long run|phr|về lâu về dài
+from scratch|phr|từ đầu, từ con số không
+on the whole|phr|nhìn chung
+as a matter of fact|phr|thực ra là
+in terms of|phr|xét về mặt
+due to|phr|do bởi
+thanks to|phr|nhờ có
+in spite of|phr|mặc dù
+as long as|phr|miễn là
+as soon as|phr|ngay khi
+no longer|phr|không còn nữa
+sooner or later|phr|sớm muộn gì
+by no means|phr|hoàn toàn không
+for the time being|phr|tạm thời lúc này
+`);
+
+nap('Bổ sung học thuật', `
+allocate|v|phân bổ
+anticipate|v|dự đoán trước
+appropriate response|phr|phản ứng phù hợp
+categorise|v|phân loại
+coincide|v|trùng khớp, xảy ra đồng thời
+compensate|v|bù đắp, đền bù
+comply with|phr|tuân thủ
+conduct research|phr|tiến hành nghiên cứu
+constitute|v|cấu thành, chiếm
+correlate|v|có mối tương quan
+derive from|phr|bắt nguồn từ
+deteriorate|v|xấu đi, suy giảm
+deviate|v|đi chệch khỏi
+diverse background|phr|xuất thân đa dạng
+elaborate|v|trình bày chi tiết
+encounter|v|gặp phải
+equivalent|adj|tương đương
+exclude|v|loại trừ
+exhibit|v|trưng bày, biểu lộ
+formulate|v|xây dựng, soạn thảo
+illustrate|v|minh hoạ
+incorporate|v|kết hợp, đưa vào
+indicate|v|chỉ ra
+inhibit|v|kìm hãm
+initiate|v|khởi xướng
+intervene|v|can thiệp
+justification|n|sự biện minh
+manipulate|v|thao túng, điều khiển
+notion|n|khái niệm
+outcome|n|kết quả đầu ra
+predominant|adj|chiếm ưu thế
+prospect|n|triển vọng
+scenario|n|kịch bản, viễn cảnh
+scope|n|phạm vi
+sequence|n|trình tự
+simulate|v|mô phỏng
+sustain|v|duy trì, chống đỡ
+terminate|v|chấm dứt
+underlying|adj|nằm bên dưới, cốt lõi
+utilise|v|tận dụng
+validate|v|xác nhận tính đúng đắn
+`);
+
+/* ---------- COLLOCATION: động từ + danh từ, tính từ + giới từ ---------- */
+TD.KHO_COLLOC = TD.KHO_COLLOC || [];
+const nc = (nhom, tho) => {
+  tho.trim().split('\n').forEach(d => {
+    const p = d.split('|');
+    if (p.length < 3) return;
+    TD.KHO_COLLOC.push({ tu: p[0].trim(), cum: p[1].trim(), n: p[2].trim(), nhom: nhom });
+  });
+};
+
+nc('make / do / take / have', `
+make|a decision|đưa ra quyết định
+make|an effort|nỗ lực
+make|progress|tiến bộ
+make|a mistake|mắc lỗi
+make|friends|kết bạn
+make|a difference|tạo ra khác biệt
+make|an appointment|hẹn gặp
+make|a suggestion|đưa ra gợi ý
+do|homework|làm bài tập về nhà
+do|housework|làm việc nhà
+do|research|nghiên cứu
+do|business|kinh doanh
+do|a favour|giúp một việc
+do|the washing-up|rửa bát
+do|exercise|tập thể dục
+take|care of|chăm sóc
+take|part in|tham gia
+take|place|diễn ra
+take|advantage of|tận dụng
+take|responsibility|nhận trách nhiệm
+take|a risk|chấp nhận rủi ro
+take|notes|ghi chép
+have|a good time|có khoảng thời gian vui vẻ
+have|an effect on|có ảnh hưởng tới
+have|difficulty in|gặp khó khăn khi
+have|access to|có quyền tiếp cận
+have|a chat|trò chuyện
+have|breakfast|ăn sáng
+`);
+
+nc('Tính từ + giới từ', `
+good|at|giỏi về
+bad|at|kém về
+interested|in|quan tâm tới
+afraid|of|sợ
+proud|of|tự hào về
+aware|of|nhận thức được
+capable|of|có khả năng
+fond|of|thích
+tired|of|chán ngán
+famous|for|nổi tiếng vì
+responsible|for|chịu trách nhiệm về
+suitable|for|phù hợp với
+grateful|for|biết ơn vì
+different|from|khác với
+absent|from|vắng mặt ở
+similar|to|giống với
+addicted|to|nghiện
+harmful|to|có hại cho
+married|to|kết hôn với
+satisfied|with|hài lòng với
+familiar|with|quen thuộc với
+crowded|with|đông đúc
+disappointed|with|thất vọng về
+worried|about|lo lắng về
+`);
+
+nc('Động từ + giới từ', `
+depend|on|phụ thuộc vào
+concentrate|on|tập trung vào
+insist|on|khăng khăng đòi
+rely|on|dựa vào
+believe|in|tin vào
+succeed|in|thành công trong
+result|in|dẫn đến kết quả là
+result|from|bắt nguồn từ
+suffer|from|chịu đựng, mắc phải
+prevent|from|ngăn không cho
+apologise|for|xin lỗi vì
+apply|for|nộp đơn xin
+search|for|tìm kiếm
+wait|for|chờ đợi
+belong|to|thuộc về
+contribute|to|góp phần vào
+lead|to|dẫn tới
+object|to|phản đối
+agree|with|đồng ý với
+deal|with|giải quyết
+provide|with|cung cấp cho
+compare|with|so sánh với
+accuse|of|buộc tội
+consist|of|bao gồm
+`);
+
+nc('Cụm danh từ thường gặp', `
+heavy|rain|mưa lớn
+strong|wind|gió mạnh
+heavy|traffic|giao thông đông đúc
+high|salary|lương cao
+close|friend|bạn thân
+serious|problem|vấn đề nghiêm trọng
+huge|impact|tác động to lớn
+key|role|vai trò then chốt
+main|reason|lí do chính
+wide|range|phạm vi rộng
+growing|concern|mối lo ngại ngày càng tăng
+major|challenge|thách thức lớn
+significant|improvement|sự cải thiện đáng kể
+valuable|experience|kinh nghiệm quý báu
+`);
+
+})();
+
+</script>
+<script>
+/* ============================================================
+   TIẾNG ANH — MẪU ĐỀ BÀI TẬP TỰ SINH
+   Ba nguồn: kho 1000+ từ vựng · kho collocation · các bảng ngữ pháp
+   dựng riêng cho từng chuyên đề (thì, điều kiện, bị động, tường thuật,
+   mệnh đề quan hệ, đảo ngữ, word form, ngữ âm, trọng âm, tìm lỗi sai).
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án: ${it.d}\n${it.v}`, meo: meo };
+};
+
+/* ---------- 1. Từ vựng: từ → nghĩa và nghĩa → từ ---------- */
+const theoCD = {};
+(TD.KHO_TU || []).forEach(x => { (theoCD[x.cd] = theoCD[x.cd] || []).push(x); });
+
+const nhieuTu = (R, x, lay) => {
+  /* phương án nhiễu: cùng chủ đề và cùng loại từ trước, thiếu thì mở rộng ra cả kho */
+  let bo = (theoCD[x.cd] || []).filter(y => y.w !== x.w && y.l === x.l && y.n !== x.n);
+  if (bo.length < 3) bo = (TD.KHO_TU || []).filter(y => y.w !== x.w && y.l === x.l && y.n !== x.n);
+  if (bo.length < 3) bo = (TD.KHO_TU || []).filter(y => y.w !== x.w && y.n !== x.n);
+  if (bo.length < 3) return null;
+  return R.chonNhieu(bo, 3).map(lay);
+};
+
+TD.GEN.anh = (TD.GEN.anh || []).concat([
+
+{ ma: 'anh-nghia', chuong: 'Từ loại', muc: 1, dang: 'mc',
+  tao(R) {
+    const kho = TD.KHO_TU || [];
+    if (kho.length < 8) return null;
+    const x = R.chon(kho);
+    const s = nhieuTu(R, x, y => y.n);
+    if (!s) return null;
+    return MC(R, `Từ "<b>${x.w}</b>" (${x.l}) có nghĩa là gì?`,
+      { d: x.n, s: s, v: `${x.w} (${x.l}) = ${x.n}. Thuộc chủ đề: ${x.cd}.` },
+      'Học từ theo CHỦ ĐỀ và theo CỤM, đừng học rời từng từ — đề đọc hiểu luôn xoay quanh một chủ đề nhất định.');
+  } },
+
+{ ma: 'anh-tu', chuong: 'Từ loại', muc: 2, dang: 'mc',
+  tao(R) {
+    const kho = TD.KHO_TU || [];
+    if (kho.length < 8) return null;
+    const x = R.chon(kho);
+    const s = nhieuTu(R, x, y => y.w);
+    if (!s) return null;
+    return MC(R, `Từ tiếng Anh nào mang nghĩa "<b>${x.n}</b>"? (${x.l})`,
+      { d: x.w, s: s, v: `${x.n} = ${x.w} (${x.l}). Thuộc chủ đề: ${x.cd}.` },
+      'Nhớ được nghĩa Việt → Anh mới viết được câu. Chỉ nhận ra mặt chữ thì chỉ đủ cho phần đọc hiểu.');
+  } },
+
+{ ma: 'anh-colloc', chuong: 'Ngữ pháp khác', muc: 3, dang: 'mc',
+  tao(R) {
+    const kho = (TD.KHO_COLLOC || []).filter(x => x.nhom === 'make / do / take / have');
+    if (kho.length < 8) return null;
+    const x = R.chon(kho);
+    const s = ['make', 'do', 'take', 'have'].filter(v => v !== x.tu);
+    return MC(R, `Chọn động từ đúng: "____ ${x.cum}" (${x.n})`,
+      { d: x.tu, s: s, v: `Cụm chuẩn là "<b>${x.tu} ${x.cum}</b>" = ${x.n}.\n`
+        + `make/do/take/have là bốn động từ đi kèm rất nhiều danh từ khác nhau, phải học thuộc theo cụm.` },
+      'make thiên về TẠO RA cái mới (a decision, progress); do thiên về THỰC HIỆN công việc '
+      + '(homework, research); take thiên về NHẬN/CHIẾM (part in, care of, place).');
+  } },
+
+{ ma: 'anh-gioitu', chuong: 'Ngữ pháp khác', muc: 2, dang: 'mc',
+  tao(R) {
+    const kho = (TD.KHO_COLLOC || []).filter(x => x.nhom === 'Tính từ + giới từ' || x.nhom === 'Động từ + giới từ');
+    if (kho.length < 8) return null;
+    const x = R.chon(kho);
+    const moi = ['at', 'in', 'on', 'of', 'for', 'to', 'with', 'from', 'about'];
+    const s = R.chonNhieu(moi.filter(g => g !== x.cum), 3);
+    return MC(R, `Điền giới từ đúng: "${x.tu} ____" (${x.n})`,
+      { d: x.cum, s: s, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.` },
+      'Giới từ không suy luận được, phải học thuộc theo cụm. Nhóm hay ra thi nhất: '
+      + 'good AT · interested IN · afraid OF · famous FOR · similar TO · satisfied WITH · different FROM.');
+  } },
+
+/* ---------- 2. Ngữ pháp theo chuyên đề ---------- */
+{ ma: 'anh-thi', chuong: 'Thì động từ', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'She ____ in this company since 2019.', d: 'has worked', s: ['worked', 'works', 'is working'],
+        v: '"since + mốc thời gian" là dấu hiệu của thì hiện tại hoàn thành: has/have + V3.' },
+      { q: 'By the time we arrived, the film ____.', d: 'had already started', s: ['already started', 'has already started', 'was already starting'],
+        v: 'Hành động xảy ra TRƯỚC một mốc quá khứ khác ⇒ quá khứ hoàn thành: had + V3.' },
+      { q: 'Look at those clouds! It ____ rain.', d: 'is going to', s: ['will', 'would', 'is raining'],
+        v: 'Có DẤU HIỆU nhìn thấy được ở hiện tại ⇒ dự đoán bằng "be going to", không dùng "will".' },
+      { q: 'This time next week I ____ on the beach.', d: 'will be lying', s: ['will lie', 'am lying', 'have lain'],
+        v: '"This time next week" là mốc trong tương lai ⇒ tương lai tiếp diễn: will be + V-ing.' },
+      { q: 'He ____ his homework before his mother came home.', d: 'had finished', s: ['finished', 'has finished', 'was finishing'],
+        v: 'Xong TRƯỚC một hành động quá khứ khác ⇒ quá khứ hoàn thành.' },
+      { q: 'Water ____ at 100 degrees Celsius.', d: 'boils', s: ['is boiling', 'boiled', 'has boiled'],
+        v: 'Chân lí, sự thật hiển nhiên luôn dùng hiện tại đơn.' },
+      { q: 'I ____ English for five years and I still find it hard.', d: 'have been learning', s: ['learn', 'learned', 'am learning'],
+        v: 'Nhấn mạnh quá trình KÉO DÀI từ quá khứ tới hiện tại ⇒ hiện tại hoàn thành tiếp diễn.' },
+      { q: 'When I ____ him yesterday, he was reading a book.', d: 'saw', s: ['have seen', 'was seeing', 'had seen'],
+        v: '"yesterday" là mốc quá khứ xác định ⇒ quá khứ đơn cắt ngang hành động đang diễn ra.' },
+      { q: 'She said she ____ me the next day.', d: 'would call', s: ['will call', 'calls', 'called'],
+        v: 'Lời nói gián tiếp lùi thì: will → would; tomorrow → the next day.' },
+      { q: 'It is the first time I ____ such a beautiful place.', d: 'have visited', s: ['visited', 'visit', 'had visited'],
+        v: 'Sau "It is the first time" bắt buộc dùng hiện tại hoàn thành.' }
+    ]);
+    return MC(R, `Chọn dạng đúng của động từ:\n\n${it.q}`, it,
+      'Tìm DẤU HIỆU thời gian trước khi chọn thì: since/for/already ⇒ hoàn thành · '
+      + 'yesterday/ago ⇒ quá khứ đơn · by the time + quá khứ ⇒ quá khứ hoàn thành.');
+  } },
+
+{ ma: 'anh-dieukien', chuong: 'Câu điều kiện', muc: 3, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'If it ____ tomorrow, we will cancel the trip.', d: 'rains', s: ['will rain', 'rained', 'would rain'],
+        v: 'Điều kiện loại 1: If + hiện tại đơn, S + will + V. Sau "if" KHÔNG dùng "will".' },
+      { q: 'If I ____ you, I would accept the offer.', d: 'were', s: ['am', 'will be', 'had been'],
+        v: 'Điều kiện loại 2 (giả định trái hiện tại) dùng "were" cho mọi ngôi.' },
+      { q: 'If she had studied harder, she ____ the exam.', d: 'would have passed', s: ['would pass', 'will pass', 'passed'],
+        v: 'Điều kiện loại 3 (trái với quá khứ): If + had + V3, S + would have + V3.' },
+      { q: 'If he had taken the medicine, he ____ fine now.', d: 'would be', s: ['would have been', 'will be', 'is'],
+        v: 'Điều kiện HỖN HỢP: vế if loại 3 (quá khứ) nhưng kết quả ở HIỆN TẠI ("now") ⇒ would + V.' },
+      { q: '____ I known about the meeting, I would have come.', d: 'Had', s: ['If', 'Should', 'Were'],
+        v: 'Đảo ngữ điều kiện loại 3: bỏ "if", đưa "had" lên trước chủ ngữ.' },
+      { q: '____ you need any help, please call me.', d: 'Should', s: ['Had', 'Were', 'Would'],
+        v: 'Đảo ngữ điều kiện loại 1: Should + S + V (nguyên thể).' },
+      { q: 'I wish I ____ how to swim.', d: 'knew', s: ['know', 'have known', 'will know'],
+        v: 'Wish về HIỆN TẠI dùng thì quá khứ đơn (giả định trái thực tế).' },
+      { q: 'She wishes she ____ harder last year.', d: 'had studied', s: ['studied', 'has studied', 'would study'],
+        v: 'Wish về QUÁ KHỨ dùng quá khứ hoàn thành: had + V3.' },
+      { q: '____ you hurry, you will miss the bus.', d: 'Unless', s: ['If', 'Provided', 'As long as'],
+        v: '"Unless" = "If … not". Câu mang nghĩa "nếu bạn KHÔNG nhanh lên".' }
+    ]);
+    return MC(R, `Chọn phương án đúng:\n\n${it.q}`, it,
+      'Ba loại chuẩn: ① có thật ở tương lai · ② trái hiện tại · ③ trái quá khứ. '
+      + 'Thấy trạng từ "now" trong vế chính mà vế if ở quá khứ hoàn thành ⇒ câu HỖN HỢP.');
+  } },
+
+{ ma: 'anh-bidong', chuong: 'Bị động – Tường thuật', muc: 3, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'They built this bridge in 1990.', d: 'This bridge was built in 1990.',
+        s: ['This bridge is built in 1990.', 'This bridge has been built in 1990.', 'This bridge was build in 1990.'],
+        v: 'Quá khứ đơn chủ động → bị động: was/were + V3. "build" phải chia thành "built".' },
+      { q: 'People say that he is very rich.', d: 'He is said to be very rich.',
+        s: ['He is said to being very rich.', 'He said to be very rich.', 'He is saying to be very rich.'],
+        v: 'Bị động kép: S + be + V3(say/think/believe) + to V.' },
+      { q: 'They made him work overtime.', d: 'He was made to work overtime.',
+        s: ['He was made work overtime.', 'He was make to work overtime.', 'He made to work overtime.'],
+        v: 'Với "make", chủ động bỏ "to" nhưng bị động PHẢI thêm "to".' },
+      { q: 'Someone is cleaning the room now.', d: 'The room is being cleaned now.',
+        s: ['The room is cleaned now.', 'The room has been cleaned now.', 'The room was being cleaned now.'],
+        v: 'Hiện tại tiếp diễn bị động: is/are + being + V3.' },
+      { q: 'They have completed the project.', d: 'The project has been completed.',
+        s: ['The project has completed.', 'The project was been completed.', 'The project is completed by them.'],
+        v: 'Hiện tại hoàn thành bị động: has/have + been + V3.' },
+      { q: 'You must finish the report today.', d: 'The report must be finished today.',
+        s: ['The report must finished today.', 'The report must to be finished today.', 'The report must been finished today.'],
+        v: 'Sau động từ khuyết thiếu: modal + be + V3.' },
+      { q: 'They will announce the results tomorrow.', d: 'The results will be announced tomorrow.',
+        s: ['The results will announced tomorrow.', 'The results will been announced tomorrow.', 'The results are announced tomorrow.'],
+        v: 'Tương lai đơn bị động: will + be + V3.' }
+    ]);
+    return MC(R, `Chọn câu bị động ĐÚNG NGHĨA với câu sau:\n\n"${it.q}"`, it,
+      'Công thức chung: be + V3, trong đó "be" chia đúng thì của động từ chính ở câu chủ động. '
+      + 'Nhớ hai ngoại lệ: make (bị động thêm to) và let (bị động thành be allowed to).');
+  } },
+
+{ ma: 'anh-tuongthuat', chuong: 'Bị động – Tường thuật', muc: 3, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'She said, "I am tired."', d: 'She said she was tired.',
+        s: ['She said she is tired.', 'She said I was tired.', 'She said that she has been tired.'],
+        v: 'Lùi thì: am → was; đại từ "I" đổi theo chủ ngữ tường thuật thành "she".' },
+      { q: 'He said, "I will come tomorrow."', d: 'He said he would come the following day.',
+        s: ['He said he will come tomorrow.', 'He said he would come tomorrow.', 'He said he comes the following day.'],
+        v: 'will → would và tomorrow → the following day / the next day.' },
+      { q: 'The teacher said, "Close your books."', d: 'The teacher told us to close our books.',
+        s: ['The teacher said to close your books.', 'The teacher told us close our books.', 'The teacher said us to close our books.'],
+        v: 'Tường thuật câu mệnh lệnh: told + tân ngữ + to V. "said" không đi trực tiếp với tân ngữ.' },
+      { q: 'She asked, "Where do you live?"', d: 'She asked me where I lived.',
+        s: ['She asked me where did I live.', 'She asked me where do I live.', 'She asked where I live.'],
+        v: 'Câu hỏi tường thuật trở về trật tự KHẲNG ĐỊNH (S + V), bỏ trợ động từ "do" và lùi thì.' },
+      { q: 'He said, "Don\'t touch that."', d: 'He told me not to touch that.',
+        s: ['He told me to not touch that.', 'He said me not to touch that.', 'He told me don\'t touch that.'],
+        v: 'Mệnh lệnh phủ định: told + O + NOT to V.' },
+      { q: 'She asked, "Are you a student?"', d: 'She asked me if I was a student.',
+        s: ['She asked me if was I a student.', 'She asked me that I was a student.', 'She asked me if I am a student.'],
+        v: 'Câu hỏi Yes/No tường thuật dùng "if/whether" và trở về trật tự khẳng định.' }
+    ]);
+    return MC(R, `Chọn câu tường thuật ĐÚNG:\n\n${it.q}`, it,
+      'Ba việc phải làm cùng lúc: LÙI THÌ · đổi ĐẠI TỪ · đổi TRẠNG TỪ chỉ thời gian và nơi chốn. '
+      + 'Không lùi thì khi tường thuật chân lí hoặc điều kiện loại 2, 3.');
+  } },
+
+{ ma: 'anh-menhdeqh', chuong: 'Mệnh đề quan hệ', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'The man ____ helped me yesterday is my neighbour.', d: 'who', s: ['which', 'whose', 'whom'],
+        v: 'Thay cho NGƯỜI và làm CHỦ NGỮ của mệnh đề quan hệ ⇒ "who".' },
+      { q: 'The book ____ I bought last week is very interesting.', d: 'which', s: ['who', 'whose', 'where'],
+        v: 'Thay cho VẬT và làm tân ngữ ⇒ "which" (hoặc "that", hoặc lược bỏ).' },
+      { q: 'That is the girl ____ father is a doctor.', d: 'whose', s: ['who', 'which', 'whom'],
+        v: '"whose" chỉ quan hệ SỞ HỮU, đứng ngay trước danh từ bị sở hữu.' },
+      { q: 'This is the house ____ I was born.', d: 'where', s: ['which', 'that', 'when'],
+        v: 'Thay cho NƠI CHỐN và theo sau là mệnh đề đầy đủ ⇒ "where" (= in which).' },
+      { q: 'I still remember the day ____ we first met.', d: 'when', s: ['where', 'which', 'whose'],
+        v: 'Thay cho THỜI GIAN ⇒ "when" (= on which).' },
+      { q: 'My father, ____ is 60 years old, still works every day.', d: 'who', s: ['that', 'which', 'whom'],
+        v: 'Mệnh đề quan hệ KHÔNG XÁC ĐỊNH (có dấu phẩy) thì tuyệt đối không dùng "that".' },
+      { q: 'The house ____ was built in 1990 belongs to my uncle.', d: 'which', s: ['who', 'whose', 'where'],
+        v: 'Chủ ngữ là VẬT ⇒ "which"; ở đây không thể dùng "where" vì sau đó là động từ chứ không phải mệnh đề đầy đủ.' },
+      { q: 'The man to ____ I spoke is our new manager.', d: 'whom', s: ['who', 'that', 'which'],
+        v: 'Sau GIỚI TỪ chỉ được dùng "whom" (người) hoặc "which" (vật), không dùng "who" hay "that".' }
+    ]);
+    return MC(R, `Chọn đại từ quan hệ đúng:\n\n${it.q}`, it,
+      'Hai câu hỏi tự đặt: đại từ thay cho NGƯỜI hay VẬT? nó làm CHỦ NGỮ, TÂN NGỮ hay chỉ SỞ HỮU? '
+      + 'Có dấu phẩy hoặc có giới từ đứng trước ⇒ loại ngay "that".');
+  } },
+
+{ ma: 'anh-vinging', chuong: 'Ngữ pháp khác', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'She enjoys ____ novels in her free time.', d: 'reading', s: ['to read', 'read', 'to reading'],
+        v: 'Sau "enjoy" luôn dùng V-ing.' },
+      { q: 'He decided ____ abroad next year.', d: 'to study', s: ['studying', 'study', 'studied'],
+        v: 'Sau "decide" dùng to V.' },
+      { q: 'I look forward to ____ from you soon.', d: 'hearing', s: ['hear', 'to hear', 'heard'],
+        v: '"look forward TO" có "to" là GIỚI TỪ nên theo sau phải là V-ing.' },
+      { q: 'He stopped ____ because it was bad for his health.', d: 'smoking', s: ['to smoke', 'smoke', 'to smoking'],
+        v: '"stop V-ing" = dừng hẳn việc gì; "stop to V" = dừng lại ĐỂ làm việc khác. Ngữ cảnh ở đây là bỏ hẳn.' },
+      { q: 'Remember ____ the door before you leave.', d: 'to lock', s: ['locking', 'lock', 'locked'],
+        v: '"remember to V" = nhớ SẼ làm; "remember V-ing" = nhớ ĐÃ làm. Câu này nói về việc sắp làm.' },
+      { q: 'My teacher suggested ____ more English books.', d: 'reading', s: ['to read', 'read', 'us to read'],
+        v: 'Sau "suggest" dùng V-ing hoặc "that + S + (should) + V", KHÔNG dùng to V.' },
+      { q: 'She is used to ____ up early.', d: 'getting', s: ['get', 'to get', 'got'],
+        v: '"be used to" (đã quen với) + V-ing; khác hẳn "used to + V" (thói quen trong quá khứ).' },
+      { q: 'They avoided ____ about the problem.', d: 'talking', s: ['to talk', 'talk', 'to talking'],
+        v: 'Sau "avoid" luôn dùng V-ing.' },
+      { q: 'He managed ____ the exam despite being ill.', d: 'to pass', s: ['passing', 'pass', 'passed'],
+        v: 'Sau "manage" dùng to V (xoay xở làm được việc gì).' }
+    ]);
+    return MC(R, `Chọn dạng đúng của động từ:\n\n${it.q}`, it,
+      'Nhóm + to V: want, decide, hope, promise, agree, refuse, plan, manage, expect. '
+      + 'Nhóm + V-ing: enjoy, avoid, mind, finish, suggest, consider, practise, deny, admit. '
+      + 'Sau GIỚI TỪ (kể cả chữ "to" là giới từ) luôn là V-ing.');
+  } },
+
+{ ma: 'anh-daongu', chuong: 'Ngữ pháp khác', muc: 4, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'No sooner had he left ____ the phone rang.', d: 'than', s: ['when', 'then', 'as'],
+        v: '"No sooner … THAN" là cặp cố định. Đừng lẫn với "Hardly … WHEN".' },
+      { q: 'Hardly had she sat down ____ the bell rang.', d: 'when', s: ['than', 'then', 'that'],
+        v: '"Hardly/Scarcely … WHEN" là cặp cố định.' },
+      { q: 'Not only ____ well, but he also writes beautifully.', d: 'does he speak', s: ['he speaks', 'speaks he', 'he does speak'],
+        v: 'Sau "Not only" đầu câu phải đảo ngữ: trợ động từ + S + V nguyên thể.' },
+      { q: 'Only when the sun set ____ home.', d: 'did they go', s: ['they went', 'went they', 'they did go'],
+        v: 'Sau "Only when + mệnh đề" thì MỆNH ĐỀ CHÍNH mới đảo ngữ.' },
+      { q: 'Never ____ such a beautiful sunset.', d: 'have I seen', s: ['I have seen', 'I saw', 'saw I'],
+        v: 'Trạng từ phủ định "Never" đầu câu ⇒ đảo trợ động từ lên trước chủ ngữ.' },
+      { q: 'Under no circumstances ____ this door.', d: 'should you open', s: ['you should open', 'open you should', 'you open should'],
+        v: 'Cụm phủ định "Under no circumstances" đầu câu ⇒ đảo ngữ: modal + S + V.' }
+    ]);
+    return MC(R, `Chọn phương án đúng:\n\n${it.q}`, it,
+      'Đảo ngữ là câu phân loại điểm 9–10. Nhớ hai cặp bẫy: No sooner … THAN và Hardly … WHEN. '
+      + 'Sau khi đảo, động từ chính luôn ở dạng nguyên thể.');
+  } },
+
+{ ma: 'anh-wordform', chuong: 'Từ loại', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'He spoke ____ about his plan. (confident)', d: 'confidently', s: ['confident', 'confidence', 'confidences'],
+        v: 'Bổ nghĩa cho ĐỘNG TỪ "spoke" ⇒ dùng trạng từ "confidently".' },
+      { q: 'Her ____ to the project was significant. (contribute)', d: 'contribution', s: ['contribute', 'contributive', 'contributing'],
+        v: 'Sau tính từ sở hữu "Her" và trước giới từ ⇒ cần DANH TỪ "contribution".' },
+      { q: 'The film was really ____. (impress)', d: 'impressive', s: ['impress', 'impression', 'impressively'],
+        v: 'Sau động từ nối "was" và trạng từ "really" ⇒ cần TÍNH TỪ.' },
+      { q: 'We must ____ our energy consumption. (reduction)', d: 'reduce', s: ['reduction', 'reduced', 'reducible'],
+        v: 'Sau động từ khuyết thiếu "must" phải là ĐỘNG TỪ nguyên thể.' },
+      { q: 'She felt ____ after the long journey. (exhaust)', d: 'exhausted', s: ['exhausting', 'exhaust', 'exhaustion'],
+        v: 'Mô tả CẢM XÚC của người ⇒ dùng đuôi -ed. Đuôi -ing mô tả tính chất của sự vật gây ra cảm xúc.' },
+      { q: 'The instructions were very ____. (confuse)', d: 'confusing', s: ['confused', 'confuse', 'confusion'],
+        v: 'Sự vật GÂY RA cảm xúc ⇒ dùng đuôi -ing.' },
+      { q: 'It is ____ to finish the work on time. (possible)', d: 'impossible', s: ['possibly', 'possibility', 'unpossible'],
+        v: 'Tiền tố phủ định của "possible" là "im-" (đứng trước p). "unpossible" không tồn tại.' },
+      { q: 'His answer was completely ____. (correct)', d: 'incorrect', s: ['uncorrect', 'correctly', 'correction'],
+        v: 'Tiền tố phủ định của "correct" là "in-".' }
+    ]);
+    return MC(R, `Chọn dạng đúng của từ trong ngoặc:\n\n${it.q}`, it,
+      'Nhìn VỊ TRÍ chỗ trống: sau to be/linking verb ⇒ tính từ · bổ nghĩa động từ ⇒ trạng từ · '
+      + 'sau mạo từ hoặc tính từ sở hữu ⇒ danh từ · sau modal ⇒ động từ nguyên thể.');
+  } },
+
+{ ma: 'anh-trongam', chuong: 'Ngữ âm – Trọng âm', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { d: 'engineer', s: ['hospital', 'family', 'beautiful'], v: '"engineer" trọng âm âm tiết CUỐI (en-gi-NEER); ba từ còn lại trọng âm âm tiết ĐẦU.' },
+      { d: 'develop', s: ['organise', 'estimate', 'demonstrate'], v: '"develop" trọng âm âm tiết THỨ HAI (de-VE-lop); ba từ còn lại trọng âm âm tiết đầu.' },
+      { d: 'economic', s: ['comfortable', 'interesting', 'necessary'], v: 'Hậu tố -ic kéo trọng âm về âm tiết ngay trước nó (e-co-NO-mic); ba từ kia trọng âm âm tiết đầu.' },
+      { d: 'photograph', s: ['photographer', 'photography', 'geography'], v: '"photograph" trọng âm âm tiết ĐẦU (PHO-to-graph); ba từ còn lại đều trọng âm âm tiết THỨ HAI (pho-TOG-ra-pher, pho-TOG-ra-phy, ge-OG-ra-phy).' },
+      { d: 'polite', s: ['careful', 'happy', 'silent'], v: 'Tính từ hai âm tiết "polite" trọng âm âm tiết thứ hai (po-LITE); ba từ kia trọng âm âm tiết đầu.' },
+      { d: 'volunteer', s: ['gentleman', 'furniture', 'atmosphere'], v: 'Hậu tố -eer luôn nhận trọng âm (vo-lun-TEER).' },
+      { d: 'Japanese', s: ['difficult', 'popular', 'accurate'], v: 'Hậu tố -ese luôn nhận trọng âm (Ja-pa-NESE); ba từ còn lại trọng âm âm tiết đầu.' },
+      { d: 'employee', s: ['employer', 'important', 'develop'], v: 'Hậu tố -ee nhận trọng âm (em-ploy-EE); ba từ còn lại trọng âm âm tiết THỨ HAI.' }
+    ]);
+    return MC(R, `Chọn từ có vị trí trọng âm KHÁC với ba từ còn lại:`, it,
+      'Quy tắc nhanh: hậu tố -ic, -ical, -ion, -ity, -ive kéo trọng âm về âm tiết NGAY TRƯỚC nó. '
+      + 'Hậu tố -ee, -eer, -ese, -ique tự nhận trọng âm. Danh từ hai âm tiết thường trọng âm đầu, '
+      + 'động từ hai âm tiết thường trọng âm sau.');
+  } },
+
+{ ma: 'anh-phatam', chuong: 'Ngữ âm – Trọng âm', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { h: 'đuôi -ed', d: 'wanted', s: ['worked', 'stopped', 'watched'], v: '"wanted" đuôi -ed đọc /ɪd/ (sau /t/); ba từ kia đọc /t/ vì đứng sau âm vô thanh.' },
+      { h: 'đuôi -ed', d: 'needed', s: ['laughed', 'washed', 'helped'], v: '"needed" đọc /ɪd/ (sau /d/); ba từ kia đọc /t/.' },
+      { h: 'đuôi -ed', d: 'played', s: ['asked', 'missed', 'looked'], v: '"played" đọc /d/ (sau âm hữu thanh); ba từ kia đọc /t/.' },
+      { h: 'đuôi -es', d: 'watches', s: ['books', 'cats', 'maps'], v: '"watches" đuôi -es đọc /ɪz/ (sau âm xuýt /tʃ/); ba từ kia đọc /s/.' },
+      { h: 'đuôi -es', d: 'boxes', s: ['lamps', 'hats', 'shops'], v: '"boxes" đọc /ɪz/ (sau /ks/); ba từ kia đọc /s/.' },
+      { h: 'đuôi -s', d: 'dogs', s: ['ships', 'cakes', 'roofs'], v: '"dogs" đọc /z/ (sau âm hữu thanh /g/); ba từ kia đọc /s/.' },
+      { h: 'chữ ch', d: 'chemistry', s: ['children', 'church', 'cheese'], v: '"chemistry" có "ch" đọc /k/; ba từ kia đọc /tʃ/.' },
+      { h: 'chữ th', d: 'thought', s: ['though', 'these', 'those'], v: '"thought" có "th" đọc vô thanh /θ/; ba từ kia đọc hữu thanh /ð/.' }
+    ]);
+    return MC(R, `Chọn từ có <b>${it.h}</b> được phát âm KHÁC với ba từ còn lại:`, it,
+      'Đuôi -ed: /ɪd/ sau /t/ và /d/ · /t/ sau âm vô thanh · /d/ sau âm hữu thanh. '
+      + 'Đuôi -s/-es: /ɪz/ sau âm xuýt · /s/ sau âm vô thanh · /z/ sau âm hữu thanh.');
+  } },
+
+{ ma: 'anh-timloi', chuong: 'Cấu trúc – Chiến thuật', muc: 3, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'The number of students <b>are</b> increasing every year.', d: '"are" phải là "is"',
+        s: ['"number" phải là "numbers"', '"increasing" phải là "increased"', '"every" phải là "each"'],
+        v: '"The number of + N số nhiều" luôn đi với động từ SỐ ÍT. (Còn "A number of" mới đi với số nhiều.)' },
+      { q: 'She is one of the <b>most tallest</b> girls in her class.', d: '"most tallest" phải là "tallest"',
+        s: ['"one of" phải là "one in"', '"girls" phải là "girl"', '"her" phải là "his"'],
+        v: 'Không dùng đồng thời "most" và đuôi "-est". Tính từ ngắn chỉ cần thêm -est.' },
+      { q: 'Despite <b>it was raining</b>, we went out.', d: '"it was raining" phải là "the rain"',
+        s: ['"Despite" phải là "Although"', '"went" phải là "go"', '"out" phải là "outside"'],
+        v: 'Sau "Despite / In spite of" dùng DANH TỪ hoặc V-ing, không dùng mệnh đề. (Đổi "Despite" thành "Although" cũng đúng nhưng đề gạch chân vế sau.)' },
+      { q: 'He suggested <b>to go</b> to the cinema.', d: '"to go" phải là "going"',
+        s: ['"suggested" phải là "suggest"', '"the cinema" phải là "cinema"', '"He" phải là "Him"'],
+        v: 'Sau "suggest" dùng V-ing hoặc "that + S + (should) + V", không dùng to V.' },
+      { q: 'If I <b>will have</b> time, I will visit you.', d: '"will have" phải là "have"',
+        s: ['"will visit" phải là "visit"', '"If" phải là "Unless"', '"you" phải là "your"'],
+        v: 'Mệnh đề "if" của điều kiện loại 1 dùng hiện tại đơn, không dùng "will".' },
+      { q: 'The book <b>who</b> I borrowed from the library is very useful.', d: '"who" phải là "which"',
+        s: ['"borrowed" phải là "borrow"', '"is" phải là "are"', '"useful" phải là "usefully"'],
+        v: '"The book" là VẬT nên phải dùng "which" hoặc "that", không dùng "who".' },
+      { q: 'Each of the students <b>have</b> a laptop.', d: '"have" phải là "has"',
+        s: ['"students" phải là "student"', '"Each" phải là "Every"', '"a laptop" phải là "laptops"'],
+        v: '"Each of + N số nhiều" đi với động từ SỐ ÍT.' },
+      { q: 'She has been working here <b>since</b> five years.', d: '"since" phải là "for"',
+        s: ['"has been" phải là "was"', '"working" phải là "worked"', '"here" phải là "there"'],
+        v: '"since" đi với MỐC thời gian, "for" đi với KHOẢNG thời gian. "five years" là khoảng.' }
+    ]);
+    return MC(R, `Tìm lỗi sai trong câu sau và chọn cách sửa đúng:\n\n${it.q}`, it,
+      'Bốn ổ lỗi hay bị gài: sự hoà hợp CHỦ NGỮ – ĐỘNG TỪ · THÌ của động từ · '
+      + 'đại từ quan hệ người/vật · giới từ và dạng từ theo sau.');
+  } },
+
+{ ma: 'anh-soanh', chuong: 'Ngữ pháp khác', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'This exercise is ____ than the last one.', d: 'more difficult', s: ['difficulter', 'most difficult', 'as difficult'],
+        v: 'Tính từ dài (3 âm tiết) so sánh hơn dùng "more + adj + than".' },
+      { q: 'He runs ____ than his brother.', d: 'faster', s: ['more fast', 'fastest', 'more faster'],
+        v: 'Tính/trạng từ ngắn thêm "-er"; không dùng đồng thời "more" và "-er".' },
+      { q: 'She is not ____ her sister.', d: 'as tall as', s: ['as taller as', 'so tall than', 'tall as'],
+        v: 'So sánh bằng phủ định: not + as/so + adj + as.' },
+      { q: '____ you study, the better results you will get.', d: 'The harder', s: ['Harder', 'The hardest', 'More hard'],
+        v: 'So sánh kép: The + comparative …, the + comparative …' },
+      { q: 'This is ____ film I have ever seen.', d: 'the most boring', s: ['the boringest', 'more boring', 'most boring'],
+        v: 'So sánh nhất của tính từ dài: the most + adj. Phải có mạo từ "the".' },
+      { q: 'His car is ____ expensive as mine.', d: 'twice as', s: ['twice more', 'two times more', 'as twice'],
+        v: 'So sánh gấp bội: twice/three times + as + adj + as.' }
+    ]);
+    return MC(R, `Chọn phương án đúng:\n\n${it.q}`, it,
+      'Đếm ÂM TIẾT trước: 1–2 âm tiết dùng -er/-est; từ 3 âm tiết trở lên dùng more/the most. '
+      + 'Bất quy tắc: good–better–best, bad–worse–worst, far–further–furthest.');
+  } }
+
+]);
+
+})();
+
+</script>
+<script>
+/* ============================================================
+   SỬ · ĐỊA · GDKT&PL · VĂN · ANH — MẪU ĐỀ BÀI TẬP TỰ SINH
+   Khối xã hội vẫn có "bài tập": Địa tính toán từ bảng số liệu,
+   GDKT tính thuế – lãi – chỉ tiêu kinh tế, Sử xử lí mốc thời gian,
+   Văn nhận diện trên ngữ liệu, Anh là bài tập ngữ pháp.
+   Nhờ vậy Tà Đạo bản BÀI TẬP mở được cho cả 9 môn.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const S = TD.soVN;
+const T = TD.lamTron;
+const D = TD.dapSo;
+
+/* Khuôn trắc nghiệm 1 đúng + 3 nhiễu riêng của từng câu */
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án: ${it.d}\n${it.v}`, meo: meo };
+};
+
+/* ==========================================================
+   ĐỊA LÍ — tính toán từ bảng số liệu
+   ========================================================== */
+TD.GEN.dia = (TD.GEN.dia || []).concat([
+
+{ ma: 'dia-matdo', chuong: 'Dân cư', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const v = R.chon([
+      { t: 'Đồng bằng sông Hồng', dt: 21278 }, { t: 'Đồng bằng sông Cửu Long', dt: 40816 },
+      { t: 'Đông Nam Bộ', dt: 23552 }, { t: 'Tây Nguyên', dt: 54508 },
+      { t: 'Bắc Trung Bộ', dt: 51455 }, { t: 'Trung du và miền núi Bắc Bộ', dt: 95222 }
+    ]);
+    const dan = R.nguyen(15, 220) / 10;                 /* triệu người */
+    const md = T(dan * 1e6 / v.dt, 0);
+    return {
+      q: `Vùng ${v.t} có diện tích ${S(v.dt)} km² và số dân ${S(dan, 1)} triệu người. `
+        + `Tính mật độ dân số của vùng (người/km², làm tròn đến hàng đơn vị).`,
+      ans: D(md, 0),
+      giai: `Mật độ dân số = Số dân ÷ Diện tích\n`
+        + `= ${S(dan, 1)}·10⁶ ÷ ${S(v.dt)} = ${D(md, 0)} người/km².`,
+      meo: 'Nhớ đổi "triệu người" ra người trước khi chia. Mật độ cả nước hiện khoảng 300 người/km² — '
+        + 'ra số lệch xa quá thì phải soát lại đơn vị.'
+    };
+  } },
+
+{ ma: 'dia-giatang', chuong: 'Dân cư', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const sinh = R.nguyen(120, 220) / 10, tu = R.nguyen(50, 90) / 10;   /* ‰ */
+    const gt = T((sinh - tu) / 10, 2);
+    return {
+      q: `Một địa phương có tỉ suất sinh thô ${S(sinh, 1)}‰ và tỉ suất tử thô ${S(tu, 1)}‰. `
+        + `Tỉ lệ gia tăng dân số tự nhiên của địa phương đó là bao nhiêu phần trăm? `
+        + `(làm tròn đến hàng phần trăm)`,
+      ans: D(gt, 2),
+      giai: `Tỉ lệ gia tăng tự nhiên (%) = (Tỉ suất sinh − Tỉ suất tử) ÷ 10\n`
+        + `= (${S(sinh, 1)} − ${S(tu, 1)}) ÷ 10 = ${D(gt, 2)}%.`,
+      meo: 'Hai tỉ suất cho theo ‰ (phần nghìn) mà đề hỏi % (phần trăm) nên phải CHIA 10. '
+        + 'Quên bước này là lệch đúng 10 lần.'
+    };
+  } },
+
+{ ma: 'dia-nangsuat', chuong: 'Ngành kinh tế', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const cay = R.chon(['lúa cả năm', 'ngô', 'cà phê nhân', 'cao su', 'mía']);
+    const dt = R.nguyen(200, 7500) / 10;             /* nghìn ha */
+    const sl = T(dt * R.nguyen(20, 80) / 10, 1);     /* nghìn tấn */
+    const ns = T(sl * 10000 / (dt * 1000), 2);       /* tạ/ha */
+    return {
+      q: `Diện tích gieo trồng ${cay} của một tỉnh là ${S(dt, 1)} nghìn ha, sản lượng đạt `
+        + `${S(sl, 1)} nghìn tấn. Năng suất ${cay} của tỉnh là bao nhiêu tạ/ha? `
+        + `(làm tròn đến hàng phần trăm)`,
+      ans: D(ns, 2),
+      giai: `Năng suất = Sản lượng ÷ Diện tích\n`
+        + `1 nghìn tấn = 10 000 tạ; 1 nghìn ha = 1 000 ha\n`
+        + `= (${S(sl, 1)} × 10 000) ÷ (${S(dt, 1)} × 1 000) = ${D(ns, 2)} tạ/ha.`,
+      meo: 'Năng suất lúa cả năm của nước ta hiện khoảng 60 tạ/ha. Kết quả ra vài trăm hay vài phần mười '
+        + 'là chắc chắn sai đơn vị.'
+    };
+  } },
+
+{ ma: 'dia-binhquan', chuong: 'Ngành kinh tế', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const sl = R.nguyen(200, 500) / 10;      /* triệu tấn lương thực */
+    const dan = R.nguyen(850, 1050) / 10;    /* triệu người */
+    const bq = T(sl * 1e6 * 1000 / (dan * 1e6), 1);
+    return {
+      q: `Một quốc gia có sản lượng lương thực ${S(sl, 1)} triệu tấn và số dân ${S(dan, 1)} triệu người. `
+        + `Bình quân lương thực theo đầu người là bao nhiêu kg/người? (làm tròn đến hàng phần mười)`,
+      ans: D(bq, 1),
+      giai: `Bình quân lương thực = Sản lượng (kg) ÷ Số dân\n`
+        + `= (${S(sl, 1)}·10⁶ tấn × 1 000 kg) ÷ ${S(dan, 1)}·10⁶ người = ${D(bq, 1)} kg/người.`,
+      meo: 'Mẹo nhẩm: triệu tấn ÷ triệu người = tấn/người, nhân 1 000 ra kg/người. '
+        + 'Nước ta hiện khoảng 500 kg/người.'
+    };
+  } },
+
+{ ma: 'dia-cocau', chuong: 'Ngành kinh tế', muc: 1, dang: 'tln', duong: true,
+  tao(R) {
+    const a = R.nguyen(80, 400), b = R.nguyen(200, 900), c = R.nguyen(150, 800);
+    const hoi = R.chon([['nông – lâm – thuỷ sản', a], ['công nghiệp – xây dựng', b], ['dịch vụ', c]]);
+    const pct = T(hoi[1] / (a + b + c) * 100, 2);
+    return {
+      q: `Cơ cấu GDP của một quốc gia (đơn vị: nghìn tỉ đồng) gồm nông – lâm – thuỷ sản ${S(a)}, `
+        + `công nghiệp – xây dựng ${S(b)}, dịch vụ ${S(c)}. Tính tỉ trọng của khu vực ${hoi[0]} `
+        + `trong cơ cấu GDP (%, làm tròn đến hàng phần trăm).`,
+      ans: D(pct, 2),
+      giai: `Tổng GDP = ${S(a)} + ${S(b)} + ${S(c)} = ${S(a + b + c)} nghìn tỉ đồng\n`
+        + `Tỉ trọng = ${S(hoi[1])} ÷ ${S(a + b + c)} × 100 = ${D(pct, 2)}%.`,
+      meo: 'Ba tỉ trọng cộng lại phải bằng 100%. Tính xong cả ba mà không tròn 100 là đã sai ở đâu đó.'
+    };
+  } },
+
+{ ma: 'dia-tocdo', chuong: 'Kỹ năng', muc: 3, dang: 'tln', duong: true,
+  tao(R) {
+    const goc = R.nguyen(150, 900) / 10;
+    const sau = T(goc * R.nguyen(105, 260) / 100, 1);
+    const td = T(sau / goc * 100, 2);
+    const nam1 = R.nguyen(2005, 2015), nam2 = nam1 + R.chon([5, 10, 15]);
+    return {
+      q: `Giá trị xuất khẩu của một mặt hàng năm ${nam1} là ${S(goc, 1)} tỉ USD, năm ${nam2} là `
+        + `${S(sau, 1)} tỉ USD. Lấy năm ${nam1} = 100%, tốc độ tăng trưởng năm ${nam2} là bao nhiêu phần trăm? `
+        + `(làm tròn đến hàng phần trăm)`,
+      ans: D(td, 2),
+      giai: `Tốc độ tăng trưởng = Giá trị năm sau ÷ Giá trị năm gốc × 100\n`
+        + `= ${S(sau, 1)} ÷ ${S(goc, 1)} × 100 = ${D(td, 2)}%\n`
+        + `Nghĩa là so với năm ${nam1}, giá trị đã TĂNG THÊM ${D(td - 100, 2)}%.`,
+      meo: 'Phân biệt "tốc độ tăng trưởng bằng 130%" với "tăng 130%". Đề hỏi TĂNG bao nhiêu thì phải trừ 100.'
+    };
+  } },
+
+{ ma: 'dia-xnk', chuong: 'Ngành kinh tế', muc: 2, dang: 'tln',
+  tao(R) {
+    const xk = R.nguyen(1500, 4000) / 10, nk = R.nguyen(1500, 4000) / 10;
+    if (Math.abs(xk - nk) < 1) return null;
+    const cc = T(xk - nk, 1);
+    return {
+      q: `Năm nay một quốc gia xuất khẩu ${S(xk, 1)} tỉ USD và nhập khẩu ${S(nk, 1)} tỉ USD. `
+        + `Cán cân xuất nhập khẩu của quốc gia đó là bao nhiêu tỉ USD? `
+        + `(ghi cả dấu; làm tròn đến hàng phần mười)`,
+      ans: D(cc, 1),
+      giai: `Cán cân xuất nhập khẩu = Xuất khẩu − Nhập khẩu\n`
+        + `= ${S(xk, 1)} − ${S(nk, 1)} = ${D(cc, 1)} tỉ USD\n`
+        + `Giá trị ${cc > 0 ? 'DƯƠNG ⇒ quốc gia XUẤT SIÊU' : 'ÂM ⇒ quốc gia NHẬP SIÊU'}.`,
+      meo: 'Dương là xuất siêu, âm là nhập siêu. Đề hay hỏi ngược lại: cho cán cân, tìm giá trị còn thiếu.'
+    };
+  } },
+
+{ ma: 'dia-chephu', chuong: 'Ngành kinh tế', muc: 1, dang: 'tln', duong: true,
+  tao(R) {
+    const dt = R.nguyen(50, 990) * 10;          /* nghìn ha diện tích tự nhiên */
+    const rung = T(dt * R.nguyen(25, 75) / 100, 1);
+    const pct = T(rung / dt * 100, 2);
+    return {
+      q: `Một tỉnh có diện tích tự nhiên ${S(dt)} nghìn ha, trong đó diện tích rừng là ${S(rung, 1)} nghìn ha. `
+        + `Độ che phủ rừng của tỉnh là bao nhiêu phần trăm? (làm tròn đến hàng phần trăm)`,
+      ans: D(pct, 2),
+      giai: `Độ che phủ rừng = Diện tích rừng ÷ Diện tích tự nhiên × 100\n`
+        + `= ${S(rung, 1)} ÷ ${S(dt)} × 100 = ${D(pct, 2)}%.`,
+      meo: 'Độ che phủ rừng cả nước hiện khoảng 42%. Con số vượt 100% là chắc chắn nhầm tử với mẫu.'
+    };
+  } },
+
+{ ma: 'dia-biendo', chuong: 'Khí hậu', muc: 1, dang: 'tln', duong: true,
+  tao(R) {
+    const tp = R.chon([
+      { t: 'Hà Nội', c: R.nguyen(285, 300) / 10, l: R.nguyen(160, 175) / 10 },
+      { t: 'Huế', c: R.nguyen(290, 300) / 10, l: R.nguyen(195, 205) / 10 },
+      { t: 'TP Hồ Chí Minh', c: R.nguyen(285, 295) / 10, l: R.nguyen(255, 265) / 10 },
+      { t: 'Lạng Sơn', c: R.nguyen(270, 285) / 10, l: R.nguyen(125, 140) / 10 }
+    ]);
+    const bd = T(tp.c - tp.l, 1);
+    return {
+      q: `Tại trạm khí tượng ${tp.t}, nhiệt độ trung bình tháng cao nhất là ${S(tp.c, 1)} °C, `
+        + `tháng thấp nhất là ${S(tp.l, 1)} °C. Biên độ nhiệt độ trung bình năm là bao nhiêu °C? `
+        + `(làm tròn đến hàng phần mười)`,
+      ans: D(bd, 1),
+      giai: `Biên độ nhiệt năm = Nhiệt độ tháng cao nhất − Nhiệt độ tháng thấp nhất\n`
+        + `= ${S(tp.c, 1)} − ${S(tp.l, 1)} = ${D(bd, 1)} °C.`,
+      meo: 'Càng vào Nam biên độ nhiệt năm càng NHỎ (do không còn mùa đông lạnh). '
+        + 'Biên độ Hà Nội khoảng 12–13 °C, TP.HCM chỉ 3–4 °C.'
+    };
+  } },
+
+{ ma: 'dia-bankinh', chuong: 'Kỹ năng', muc: 3, dang: 'tln', duong: true,
+  tao(R) {
+    const t1 = R.nguyen(100, 400), k = R.nguyen(12, 40) / 10;
+    const t2 = T(t1 * k, 0);
+    const R1 = R.chon([1, 1.5, 2]);
+    const R2 = T(R1 * Math.sqrt(t2 / t1), 2);
+    return {
+      q: `Vẽ hai biểu đồ tròn thể hiện cơ cấu của hai năm có tổng giá trị lần lượt là ${S(t1)} và ${S(t2)} `
+        + `nghìn tỉ đồng. Nếu lấy bán kính hình tròn năm đầu bằng ${S(R1)} đơn vị thì bán kính hình tròn `
+        + `năm sau bằng bao nhiêu đơn vị? (làm tròn đến hàng phần trăm)`,
+      ans: D(R2, 2),
+      giai: `Diện tích hình tròn tỉ lệ với bình phương bán kính, mà diện tích phải tỉ lệ với tổng giá trị:\n`
+        + `R₂/R₁ = √(Tổng₂ / Tổng₁) = √(${S(t2)} / ${S(t1)}) = ${S(Math.sqrt(t2 / t1), 4)}\n`
+        + `R₂ = ${S(R1)} × ${S(Math.sqrt(t2 / t1), 4)} = ${D(R2, 2)} đơn vị.`,
+      meo: 'Lấy tỉ lệ thẳng (không khai căn) là lỗi kinh điển — hình tròn sẽ to sai hẳn so với quy mô thật.'
+    };
+  } },
+
+{ ma: 'dia-chonbieudo', chuong: 'Kỹ năng', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { d: 'Biểu đồ đường', v: 'Yêu cầu thể hiện TỐC ĐỘ TĂNG TRƯỞNG qua nhiều năm ⇒ biểu đồ đường (xử lí số liệu về % với năm gốc = 100%).',
+        y: 'thể hiện tốc độ tăng trưởng của ba nhóm hàng giai đoạn 2010 – 2023', s: ['Biểu đồ tròn', 'Biểu đồ miền', 'Biểu đồ cột chồng'] },
+      { d: 'Biểu đồ miền', v: 'Yêu cầu thể hiện SỰ CHUYỂN DỊCH CƠ CẤU qua từ 4 năm trở lên ⇒ biểu đồ miền.',
+        y: 'thể hiện sự chuyển dịch cơ cấu GDP giai đoạn 2010 – 2023 (6 năm)', s: ['Biểu đồ tròn', 'Biểu đồ đường', 'Biểu đồ cột ghép'] },
+      { d: 'Biểu đồ tròn', v: 'Chỉ có 2 năm và yêu cầu thể hiện QUY MÔ và CƠ CẤU ⇒ biểu đồ tròn có bán kính khác nhau.',
+        y: 'thể hiện quy mô và cơ cấu lao động theo khu vực kinh tế của hai năm 2015 và 2023', s: ['Biểu đồ miền', 'Biểu đồ đường', 'Biểu đồ cột chồng'] },
+      { d: 'Biểu đồ cột ghép', v: 'So sánh GIÁ TRỊ tuyệt đối của nhiều đối tượng qua vài năm ⇒ biểu đồ cột ghép.',
+        y: 'so sánh sản lượng thuỷ sản khai thác và nuôi trồng của bốn năm', s: ['Biểu đồ tròn', 'Biểu đồ miền', 'Biểu đồ đường'] },
+      { d: 'Biểu đồ kết hợp cột và đường', v: 'Hai đại lượng KHÁC ĐƠN VỊ trên cùng một biểu đồ ⇒ kết hợp cột (giá trị) và đường (tỉ lệ hoặc năng suất).',
+        y: 'thể hiện diện tích (nghìn ha) và năng suất lúa (tạ/ha) giai đoạn 2010 – 2023', s: ['Biểu đồ tròn', 'Biểu đồ miền', 'Biểu đồ cột chồng'] }
+    ]);
+    return MC(R, `Cho bảng số liệu và yêu cầu ${it.y}. Dạng biểu đồ thích hợp nhất là gì?`, it,
+      'Đọc kỹ ĐỘNG TỪ trong yêu cầu: "tốc độ tăng trưởng" ⇒ đường · "chuyển dịch cơ cấu" nhiều năm ⇒ miền · '
+      + '"quy mô và cơ cấu" 2–3 năm ⇒ tròn · "so sánh" giá trị ⇒ cột · hai đơn vị khác nhau ⇒ kết hợp.');
+  } },
+
+{ ma: 'dia-dothi', chuong: 'Dân cư', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const dan = R.nguyen(850, 1050) / 10;             /* triệu người */
+    const tt = T(dan * R.nguyen(300, 450) / 1000, 2); /* triệu người thành thị */
+    const pct = T(tt / dan * 100, 2);
+    return {
+      q: `Một quốc gia có ${S(dan, 1)} triệu dân, trong đó dân thành thị là ${S(tt, 2)} triệu người. `
+        + `Tỉ lệ dân thành thị là bao nhiêu phần trăm? (làm tròn đến hàng phần trăm)`,
+      ans: D(pct, 2),
+      giai: `Tỉ lệ dân thành thị = Dân thành thị ÷ Tổng số dân × 100\n`
+        + `= ${S(tt, 2)} ÷ ${S(dan, 1)} × 100 = ${D(pct, 2)}%.`,
+      meo: 'Tỉ lệ dân thành thị nước ta hiện khoảng 38–40%, thấp hơn mức trung bình thế giới — '
+        + 'dấu hiệu đô thị hoá còn chưa tương xứng với công nghiệp hoá.'
+    };
+  } }
+
+]);
+
+/* ==========================================================
+   GDKT & PHÁP LUẬT — tính toán kinh tế và tình huống pháp luật
+   ========================================================== */
+TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
+
+{ ma: 'gdkt-gdpnguoi', chuong: 'Tăng trưởng – Phát triển', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const gdp = R.nguyen(2000, 9000) / 10;    /* tỉ USD */
+    const dan = R.nguyen(200, 1400) / 10;     /* triệu người */
+    const bq = T(gdp * 1e9 / (dan * 1e6), 0);
+    return {
+      q: `Một quốc gia có GDP đạt ${S(gdp, 1)} tỉ USD với số dân ${S(dan, 1)} triệu người. `
+        + `GDP bình quân đầu người của quốc gia đó là bao nhiêu USD? (làm tròn đến hàng đơn vị)`,
+      ans: D(bq, 0),
+      giai: `GDP bình quân đầu người = GDP ÷ Số dân\n`
+        + `= ${S(gdp, 1)}·10⁹ USD ÷ ${S(dan, 1)}·10⁶ người = ${D(bq, 0)} USD/người.`,
+      meo: 'Mẹo nhẩm: tỉ USD ÷ triệu người = nghìn USD/người. Việt Nam hiện khoảng 4 500 USD/người.'
+    };
+  } },
+
+{ ma: 'gdkt-tocdogdp', chuong: 'Tăng trưởng – Phát triển', muc: 2, dang: 'tln',
+  tao(R) {
+    const a = R.nguyen(3000, 9000) / 10;
+    const b = T(a * R.nguyen(96, 112) / 100, 1);
+    const td = T((b - a) / a * 100, 2);
+    if (Math.abs(td) < 0.1) return null;
+    return {
+      q: `GDP của một quốc gia năm trước là ${S(a, 1)} tỉ USD, năm nay là ${S(b, 1)} tỉ USD. `
+        + `Tốc độ tăng trưởng GDP năm nay là bao nhiêu phần trăm? (ghi cả dấu; làm tròn đến hàng phần trăm)`,
+      ans: D(td, 2),
+      giai: `Tốc độ tăng trưởng = (GDP năm nay − GDP năm trước) ÷ GDP năm trước × 100\n`
+        + `= (${S(b, 1)} − ${S(a, 1)}) ÷ ${S(a, 1)} × 100 = ${D(td, 2)}%\n`
+        + `${td > 0 ? 'Giá trị dương ⇒ nền kinh tế tăng trưởng.' : 'Giá trị âm ⇒ nền kinh tế suy giảm (tăng trưởng âm).'}`,
+      meo: 'Công thức này lấy PHẦN CHÊNH chia cho năm gốc, khác với "chỉ số phát triển" là lấy nguyên năm sau chia năm gốc.'
+    };
+  } },
+
+{ ma: 'gdkt-cpi', chuong: 'Tăng trưởng – Phát triển', muc: 3, dang: 'tln', duong: true,
+  tao(R) {
+    const goc = R.nguyen(2000, 5000) / 10;
+    const nay = T(goc * R.nguyen(101, 135) / 100, 1);
+    const cpi = T(nay / goc * 100, 2);
+    return {
+      q: `Chi phí mua một rổ hàng hoá cố định năm gốc là ${S(goc, 1)} nghìn đồng, năm nay là `
+        + `${S(nay, 1)} nghìn đồng. Chỉ số giá tiêu dùng (CPI) năm nay là bao nhiêu? `
+        + `(làm tròn đến hàng phần trăm)`,
+      ans: D(cpi, 2),
+      giai: `CPI = Chi phí rổ hàng năm nay ÷ Chi phí rổ hàng năm gốc × 100\n`
+        + `= ${S(nay, 1)} ÷ ${S(goc, 1)} × 100 = ${D(cpi, 2)}\n`
+        + `Tỉ lệ lạm phát so với năm gốc = ${D(cpi - 100, 2)}%.`,
+      meo: 'CPI là CHỈ SỐ (năm gốc = 100), còn tỉ lệ lạm phát là phần vượt trên 100. Đừng lẫn hai con số.'
+    };
+  } },
+
+{ ma: 'gdkt-laikep', chuong: 'Quản lí thu chi', muc: 3, dang: 'tln', duong: true,
+  tao(R) {
+    const P = R.nguyen(10, 200) * 10;      /* triệu đồng */
+    const r = R.chon([4.5, 5, 5.5, 6, 6.5, 7]) / 100;
+    const n = R.nguyen(2, 10);
+    const A = T(P * Math.pow(1 + r, n), 2);
+    return {
+      q: `Gửi tiết kiệm ${S(P)} triệu đồng với lãi suất ${S(r * 100, 1)}%/năm theo thể thức lãi kép, `
+        + `không rút gốc lẫn lãi. Sau ${S(n)} năm số tiền cả gốc lẫn lãi là bao nhiêu triệu đồng? `
+        + `(làm tròn đến hàng phần trăm)`,
+      ans: D(A, 2),
+      giai: `Công thức lãi kép: A = P(1 + r)ⁿ\n`
+        + `A = ${S(P)} × (1 + ${S(r, 3)})^${S(n)} = ${S(P)} × ${S(Math.pow(1 + r, n), 6)} = ${D(A, 2)} triệu đồng\n`
+        + `Riêng tiền lãi = ${D(A - P, 2)} triệu đồng.`,
+      meo: 'Lãi kép khác lãi đơn ở chỗ lãi năm trước được nhập vào gốc. '
+        + 'Bấm máy: nhập P × (1 + r) rồi bấm mũ n, đừng nhân tay từng năm.'
+    };
+  } },
+
+{ ma: 'gdkt-thuetncn', chuong: 'Doanh nghiệp – Thuế', muc: 4, dang: 'tln', duong: true,
+  tao(R) {
+    /* biểu thuế luỹ tiến từng phần: bậc 1 5% đến 5 tr, bậc 2 10% đến 10 tr, bậc 3 15% đến 18 tr */
+    const tn = R.nguyen(60, 180) / 10;    /* triệu đồng thu nhập TÍNH THUẾ mỗi tháng */
+    let thue = 0;
+    const b1 = Math.min(tn, 5); thue += b1 * 0.05;
+    const b2 = Math.min(Math.max(tn - 5, 0), 5); thue += b2 * 0.10;
+    const b3 = Math.max(tn - 10, 0); thue += b3 * 0.15;
+    const kq = T(thue, 3);
+    return {
+      q: `Thuế thu nhập cá nhân áp dụng biểu thuế luỹ tiến từng phần: đến 5 triệu đồng chịu 5%, `
+        + `phần trên 5 đến 10 triệu chịu 10%, phần trên 10 đến 18 triệu chịu 15%. `
+        + `Một người có thu nhập tính thuế ${S(tn, 1)} triệu đồng/tháng thì phải nộp bao nhiêu triệu đồng `
+        + `tiền thuế mỗi tháng? (làm tròn đến hàng phần nghìn)`,
+      ans: D(kq, 3),
+      giai: `Luỹ tiến TỪNG PHẦN nghĩa là mỗi bậc chỉ đánh thuế trên phần thu nhập nằm trong bậc đó:\n`
+        + `  Bậc 1: ${S(b1, 1)} × 5% = ${S(b1 * 0.05, 4)} triệu\n`
+        + (b2 > 0 ? `  Bậc 2: ${S(b2, 1)} × 10% = ${S(b2 * 0.10, 4)} triệu\n` : '')
+        + (b3 > 0 ? `  Bậc 3: ${S(b3, 1)} × 15% = ${S(b3 * 0.15, 4)} triệu\n` : '')
+        + `  Tổng thuế = ${D(kq, 3)} triệu đồng.`,
+      meo: 'Bẫy lớn nhất: lấy TOÀN BỘ thu nhập nhân với thuế suất của bậc cao nhất. '
+        + 'Luỹ tiến TỪNG PHẦN chỉ đánh thuế phần vượt vào mỗi bậc.'
+    };
+  } },
+
+{ ma: 'gdkt-bhxh', chuong: 'Bảo hiểm – An sinh', muc: 3, dang: 'tln', duong: true,
+  tao(R) {
+    const luong = R.nguyen(60, 300) / 10;      /* triệu đồng */
+    const ai = R.chon([
+      { t: 'người lao động', p: 10.5, v: 'Người lao động đóng 8% BHXH + 1,5% BHYT + 1% BHTN = 10,5%.' },
+      { t: 'người sử dụng lao động', p: 21.5, v: 'Người sử dụng lao động đóng 17,5% BHXH + 3% BHYT + 1% BHTN = 21,5%.' }
+    ]);
+    const kq = T(luong * ai.p / 100, 4);
+    return {
+      q: `Tiền lương tháng làm căn cứ đóng bảo hiểm của một người là ${S(luong, 1)} triệu đồng. `
+        + `Biết ${ai.t} phải đóng tổng cộng ${S(ai.p, 1)}% tiền lương cho các loại bảo hiểm bắt buộc. `
+        + `Số tiền ${ai.t} phải đóng mỗi tháng là bao nhiêu triệu đồng? (làm tròn đến hàng phần vạn)`,
+      ans: D(kq, 4),
+      giai: `${ai.v}\n`
+        + `Số tiền đóng = ${S(luong, 1)} × ${S(ai.p, 1)}% = ${D(kq, 4)} triệu đồng.`,
+      meo: 'Nhớ tách hai vế: người lao động 10,5%, người sử dụng lao động 21,5%. '
+        + 'Tổng quỹ bảo hiểm bắt buộc là 32% tiền lương.'
+    };
+  } },
+
+{ ma: 'gdkt-vat', chuong: 'Doanh nghiệp – Thuế', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const gia = R.nguyen(50, 900) * 10;    /* nghìn đồng, chưa thuế */
+    const suat = R.chon([5, 8, 10]);
+    const hoi = R.nguyen(0, 1);
+    const thue = T(gia * suat / 100, 2);
+    const tong = T(gia + thue, 2);
+    return {
+      q: hoi === 0
+        ? `Một sản phẩm có giá chưa thuế là ${S(gia)} nghìn đồng, thuế suất giá trị gia tăng ${S(suat)}%. `
+          + `Người mua phải trả tổng cộng bao nhiêu nghìn đồng? (làm tròn đến hàng phần trăm)`
+        : `Một sản phẩm có giá chưa thuế là ${S(gia)} nghìn đồng, thuế suất giá trị gia tăng ${S(suat)}%. `
+          + `Tiền thuế giá trị gia tăng của sản phẩm là bao nhiêu nghìn đồng? (làm tròn đến hàng phần trăm)`,
+      ans: hoi === 0 ? D(tong, 2) : D(thue, 2),
+      giai: `Thuế GTGT = Giá chưa thuế × Thuế suất = ${S(gia)} × ${S(suat)}% = ${D(thue, 2)} nghìn đồng\n`
+        + `Giá thanh toán = ${S(gia)} + ${D(thue, 2)} = ${D(tong, 2)} nghìn đồng\n`
+        + `Đáp án cần tìm: ${hoi === 0 ? D(tong, 2) : D(thue, 2)} nghìn đồng.`,
+      meo: 'VAT là thuế GIÁN THU: doanh nghiệp thu hộ rồi nộp cho Nhà nước, người tiêu dùng cuối cùng mới là người chịu thuế.'
+    };
+  } },
+
+{ ma: 'gdkt-chitieu', chuong: 'Quản lí thu chi', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const tn = R.nguyen(60, 300) / 10;
+    const nhom = R.chon([
+      { t: 'chi thiết yếu', p: 50 }, { t: 'chi linh hoạt', p: 30 }, { t: 'tiết kiệm và đầu tư', p: 20 }
+    ]);
+    const kq = T(tn * nhom.p / 100, 3);
+    return {
+      q: `Áp dụng quy tắc quản lí tài chính cá nhân 50/30/20 (50% chi thiết yếu, 30% chi linh hoạt, `
+        + `20% tiết kiệm và đầu tư) cho mức thu nhập ${S(tn, 1)} triệu đồng/tháng. `
+        + `Khoản dành cho ${nhom.t} là bao nhiêu triệu đồng? (làm tròn đến hàng phần nghìn)`,
+      ans: D(kq, 3),
+      giai: `Khoản ${nhom.t} chiếm ${S(nhom.p)}% thu nhập:\n`
+        + `= ${S(tn, 1)} × ${S(nhom.p)}% = ${D(kq, 3)} triệu đồng.`,
+      meo: 'Nguyên tắc "trả cho mình trước": trích khoản tiết kiệm 20% ngay khi nhận thu nhập, '
+        + 'đừng đợi cuối tháng còn dư mới để dành.'
+    };
+  } },
+
+{ ma: 'gdkt-vipham', chuong: 'Quyền & nghĩa vụ', muc: 3, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { y: 'Anh A điều khiển xe máy vượt đèn đỏ và bị cảnh sát giao thông lập biên bản xử phạt',
+        d: 'Vi phạm hành chính', v: 'Hành vi xâm phạm quy tắc quản lí nhà nước về trật tự an toàn giao thông, mức độ chưa đến mức tội phạm ⇒ vi phạm hành chính.',
+        s: ['Vi phạm hình sự', 'Vi phạm dân sự', 'Vi phạm kỉ luật'] },
+      { y: 'Chị B mượn xe của bạn nhưng quá hạn không trả và làm hỏng xe',
+        d: 'Vi phạm dân sự', v: 'Xâm phạm quan hệ tài sản, phát sinh nghĩa vụ bồi thường ⇒ vi phạm dân sự.',
+        s: ['Vi phạm hành chính', 'Vi phạm hình sự', 'Vi phạm kỉ luật'] },
+      { y: 'Ông C là nhân viên công ty, tự ý nghỉ việc nhiều ngày không có lí do',
+        d: 'Vi phạm kỉ luật', v: 'Xâm phạm quy định nội bộ của cơ quan, tổ chức về lao động ⇒ vi phạm kỉ luật.',
+        s: ['Vi phạm hành chính', 'Vi phạm dân sự', 'Vi phạm hình sự'] },
+      { y: 'Anh D dùng vũ lực cướp tài sản của người đi đường, gây thương tích nặng',
+        d: 'Vi phạm hình sự', v: 'Hành vi nguy hiểm cho xã hội được Bộ luật Hình sự quy định là tội phạm ⇒ vi phạm hình sự.',
+        s: ['Vi phạm hành chính', 'Vi phạm dân sự', 'Vi phạm kỉ luật'] },
+      { y: 'Doanh nghiệp E xả nước thải chưa xử lí ra sông, mức độ chưa đến ngưỡng truy cứu hình sự',
+        d: 'Vi phạm hành chính', v: 'Xâm phạm quy tắc quản lí nhà nước về bảo vệ môi trường, chưa đến mức tội phạm ⇒ vi phạm hành chính (kèm trách nhiệm dân sự bồi thường thiệt hại).',
+        s: ['Vi phạm hình sự', 'Vi phạm kỉ luật', 'Không vi phạm pháp luật'] }
+    ]);
+    return MC(R, `Tình huống: ${it.y}. Hành vi trên thuộc loại vi phạm pháp luật nào?`, it,
+      'Bốn loại: HÌNH SỰ (tội phạm) · HÀNH CHÍNH (quy tắc quản lí nhà nước) · '
+      + 'DÂN SỰ (quan hệ tài sản, nhân thân) · KỈ LUẬT (nội quy cơ quan, tổ chức). '
+      + 'Một hành vi có thể kéo theo nhiều loại trách nhiệm cùng lúc.');
+  } },
+
+{ ma: 'gdkt-quyen', chuong: 'Quyền & nghĩa vụ', muc: 3, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { y: 'Anh K tự ý mở và đọc thư của em trai mình rồi kể lại nội dung cho người khác',
+        d: 'Quyền được bảo đảm an toàn và bí mật thư tín, điện thoại, điện tín',
+        v: 'Không ai được tự ý bóc mở, thu giữ, tiêu huỷ thư tín của người khác, kể cả người thân trong gia đình.',
+        s: ['Quyền bất khả xâm phạm về chỗ ở', 'Quyền bất khả xâm phạm về thân thể', 'Quyền tự do ngôn luận'] },
+      { y: 'Nghi ngờ nhà hàng xóm giấu con gà bị mất, ông M xông vào lục soát khi chủ nhà vắng mặt',
+        d: 'Quyền bất khả xâm phạm về chỗ ở',
+        v: 'Chỉ được khám xét chỗ ở khi có quyết định của cơ quan có thẩm quyền và theo đúng trình tự luật định. Nghi ngờ thì phải trình báo.',
+        s: ['Quyền được bảo hộ về danh dự, nhân phẩm', 'Quyền bất khả xâm phạm về thân thể', 'Quyền khiếu nại, tố cáo'] },
+      { y: 'Bà N tung tin bịa đặt trên mạng xã hội làm ảnh hưởng nghiêm trọng uy tín của người khác',
+        d: 'Quyền được pháp luật bảo hộ về danh dự và nhân phẩm',
+        v: 'Không ai được xúc phạm, bịa đặt nhằm hạ uy tín người khác; hành vi này có thể bị xử phạt hành chính hoặc truy cứu hình sự.',
+        s: ['Quyền tự do ngôn luận', 'Quyền bất khả xâm phạm về chỗ ở', 'Quyền bí mật thư tín'] },
+      { y: 'Anh P bị bảo vệ tổ dân phố giữ lại hơn một ngày mà không có quyết định của cơ quan có thẩm quyền',
+        d: 'Quyền bất khả xâm phạm về thân thể',
+        v: 'Không ai bị bắt nếu không có quyết định của Toà án, quyết định hoặc phê chuẩn của Viện kiểm sát, trừ trường hợp phạm tội quả tang.',
+        s: ['Quyền bất khả xâm phạm về chỗ ở', 'Quyền bí mật thư tín', 'Quyền được bảo hộ về danh dự'] }
+    ]);
+    return MC(R, `Tình huống: ${it.y}. Hành vi đó xâm phạm quyền nào của công dân?`, it,
+      'Đọc kỹ ĐỐI TƯỢNG bị xâm phạm: thư từ ⇒ bí mật thư tín · nhà ở ⇒ bất khả xâm phạm chỗ ở · '
+      + 'bắt giữ người ⇒ bất khả xâm phạm thân thể · nói xấu, bịa đặt ⇒ danh dự nhân phẩm.');
+  } }
+
+]);
+
+/* ==========================================================
+   LỊCH SỬ — xử lí mốc thời gian, trình tự, ghép sự kiện
+   ========================================================== */
+const SU_KIEN = [
+  { n: 1930, t: 'Đảng Cộng sản Việt Nam ra đời', y: 'chấm dứt khủng hoảng về đường lối và giai cấp lãnh đạo cách mạng Việt Nam' },
+  { n: 1941, t: 'Mặt trận Việt Minh được thành lập', y: 'tập hợp lực lượng toàn dân tộc, chuẩn bị trực tiếp cho Tổng khởi nghĩa' },
+  { n: 1945, t: 'Cách mạng tháng Tám thành công và nước Việt Nam Dân chủ Cộng hoà ra đời', y: 'mở ra kỉ nguyên độc lập, tự do và nhân dân làm chủ đất nước' },
+  { n: 1946, t: 'Toàn quốc kháng chiến bùng nổ', y: 'mở đầu cuộc kháng chiến chống thực dân Pháp trên phạm vi cả nước' },
+  { n: 1954, t: 'Chiến thắng Điện Biên Phủ và Hiệp định Genève', y: 'buộc Pháp chấm dứt chiến tranh, công nhận độc lập của ba nước Đông Dương' },
+  { n: 1959, t: 'Đường Trường Sơn – đường Hồ Chí Minh được mở', y: 'nối hậu phương miền Bắc với tiền tuyến miền Nam' },
+  { n: 1968, t: 'Cuộc Tổng tiến công và nổi dậy Xuân Mậu Thân', y: 'buộc Mỹ phải xuống thang chiến tranh và ngồi vào bàn đàm phán Paris' },
+  { n: 1972, t: 'Chiến thắng "Điện Biên Phủ trên không"', y: 'buộc Mỹ phải trở lại kí Hiệp định Paris' },
+  { n: 1973, t: 'Hiệp định Paris được kí kết', y: 'buộc Mỹ rút hết quân, tạo thời cơ để giải phóng hoàn toàn miền Nam' },
+  { n: 1975, t: 'Đại thắng mùa Xuân, giải phóng hoàn toàn miền Nam', y: 'kết thúc kháng chiến chống Mỹ, mở ra kỉ nguyên độc lập, thống nhất và đi lên chủ nghĩa xã hội' },
+  { n: 1976, t: 'Nước Cộng hoà xã hội chủ nghĩa Việt Nam được thành lập', y: 'hoàn thành thống nhất đất nước về mặt nhà nước' },
+  { n: 1986, t: 'Đại hội VI của Đảng mở đầu công cuộc Đổi mới', y: 'chuyển nền kinh tế từ tập trung bao cấp sang kinh tế thị trường định hướng xã hội chủ nghĩa' },
+  { n: 1995, t: 'Việt Nam gia nhập ASEAN và bình thường hoá quan hệ với Hoa Kỳ', y: 'phá thế bao vây cấm vận, mở đầu thời kì hội nhập khu vực và quốc tế' },
+  { n: 2007, t: 'Việt Nam gia nhập Tổ chức Thương mại Thế giới (WTO)', y: 'đưa nền kinh tế hội nhập đầy đủ vào hệ thống thương mại toàn cầu' },
+  { n: 1945, t: 'Liên hợp quốc được thành lập', y: 'duy trì hoà bình và an ninh quốc tế sau Chiến tranh thế giới thứ hai' },
+  { n: 1947, t: 'Học thuyết Truman ra đời', y: 'mở đầu cuộc Chiến tranh lạnh giữa hai phe' },
+  { n: 1949, t: 'Khối quân sự NATO được thành lập', y: 'liên minh quân sự của các nước tư bản phương Tây do Mỹ đứng đầu' },
+  { n: 1967, t: 'Hiệp hội các quốc gia Đông Nam Á (ASEAN) ra đời', y: 'hợp tác phát triển kinh tế – văn hoá giữa các nước trong khu vực' },
+  { n: 1989, t: 'Chiến tranh lạnh chấm dứt', y: 'hai siêu cường tuyên bố chấm dứt đối đầu tại cuộc gặp Manta' },
+  { n: 1991, t: 'Liên Xô tan rã', y: 'trật tự thế giới hai cực Ianta sụp đổ hoàn toàn' },
+  { n: 1993, t: 'Liên minh châu Âu (EU) được thành lập', y: 'liên kết khu vực chặt chẽ nhất thế giới về kinh tế và chính trị' },
+  { n: 2015, t: 'Cộng đồng ASEAN chính thức hình thành', y: 'nâng hợp tác khu vực lên tầm cộng đồng với ba trụ cột' },
+  { n: 1911, t: 'Nguyễn Tất Thành ra đi tìm đường cứu nước', y: 'mở đầu hành trình tìm con đường giải phóng dân tộc theo hướng mới' },
+  { n: 1920, t: 'Nguyễn Ái Quốc đọc Luận cương của Lênin và bỏ phiếu tán thành Quốc tế Cộng sản', y: 'đánh dấu bước chuyển từ chủ nghĩa yêu nước sang chủ nghĩa cộng sản của Nguyễn Ái Quốc' },
+  { n: 1925, t: 'Hội Việt Nam Cách mạng Thanh niên được thành lập', y: 'tổ chức tiền thân truyền bá chủ nghĩa Mác – Lênin vào Việt Nam' },
+  { n: 1929, t: 'Ba tổ chức cộng sản lần lượt ra đời ở Việt Nam', y: 'phản ánh bước phát triển mạnh của phong trào công nhân nhưng gây chia rẽ, đòi hỏi phải hợp nhất' },
+  { n: 1936, t: 'Phong trào dân chủ 1936 – 1939 bùng nổ', y: 'cuộc tập dượt thứ hai chuẩn bị cho Cách mạng tháng Tám' },
+  { n: 1940, t: 'Nhật vào Đông Dương', y: 'nhân dân ta chịu ách một cổ hai tròng Nhật – Pháp' },
+  { n: 1944, t: 'Đội Việt Nam Tuyên truyền Giải phóng quân được thành lập', y: 'tiền thân của Quân đội nhân dân Việt Nam' },
+  { n: 1947, t: 'Chiến dịch Việt Bắc thu – đông', y: 'làm phá sản chiến lược đánh nhanh thắng nhanh của thực dân Pháp' },
+  { n: 1950, t: 'Chiến dịch Biên giới thu – đông', y: 'khai thông biên giới, ta giành được thế chủ động trên chiến trường chính Bắc Bộ' },
+  { n: 1951, t: 'Đại hội đại biểu lần thứ II của Đảng', y: 'đưa Đảng ra hoạt động công khai với tên Đảng Lao động Việt Nam' },
+  { n: 1960, t: 'Phong trào Đồng khởi và Mặt trận Dân tộc Giải phóng miền Nam ra đời', y: 'chuyển cách mạng miền Nam từ thế giữ gìn lực lượng sang thế tiến công' },
+  { n: 1961, t: 'Mỹ tiến hành chiến lược Chiến tranh đặc biệt ở miền Nam', y: 'dùng quân đội Sài Gòn làm nòng cốt dưới sự chỉ huy của cố vấn Mỹ' },
+  { n: 1965, t: 'Mỹ tiến hành chiến lược Chiến tranh cục bộ và đưa quân viễn chinh vào miền Nam', y: 'đánh dấu bước leo thang chiến tranh cao nhất của Mỹ ở Việt Nam' },
+  { n: 1969, t: 'Chủ tịch Hồ Chí Minh qua đời và để lại bản Di chúc', y: 'kết tinh tư tưởng về đoàn kết, về Đảng và về chăm lo cho nhân dân' },
+  { n: 1974, t: 'Trung Quốc dùng vũ lực chiếm đóng trái phép quần đảo Hoàng Sa', y: 'hành động xâm phạm chủ quyền Việt Nam, không tạo ra bất kì cơ sở pháp lí nào' },
+  { n: 1979, t: 'Chiến tranh bảo vệ biên giới phía Bắc', y: 'quân dân ta bảo vệ vững chắc chủ quyền lãnh thổ biên giới phía Bắc' },
+  { n: 1982, t: 'Công ước Liên hợp quốc về Luật Biển (UNCLOS) được thông qua', y: 'cơ sở pháp lí quốc tế xác định các vùng biển và giải quyết tranh chấp trên biển' },
+  { n: 1988, t: 'Sự kiện Gạc Ma ở quần đảo Trường Sa', y: 'sự hi sinh của các chiến sĩ hải quân khẳng định ý chí bảo vệ chủ quyền biển đảo' },
+  { n: 1994, t: 'Công ước Luật Biển 1982 chính thức có hiệu lực', y: 'trở thành "hiến pháp của đại dương", Việt Nam phê chuẩn cùng năm' },
+  { n: 1998, t: 'Việt Nam gia nhập Diễn đàn Hợp tác kinh tế châu Á – Thái Bình Dương (APEC)', y: 'mở rộng hội nhập kinh tế ra khu vực châu Á – Thái Bình Dương' },
+  { n: 2002, t: 'ASEAN và Trung Quốc kí Tuyên bố về ứng xử của các bên ở Biển Đông (DOC)', y: 'cam kết kiềm chế, giải quyết tranh chấp bằng biện pháp hoà bình' },
+  { n: 2008, t: 'Việt Nam lần đầu làm Uỷ viên không thường trực Hội đồng Bảo an Liên hợp quốc', y: 'khẳng định vị thế và uy tín quốc tế của Việt Nam' },
+  { n: 2019, t: 'Việt Nam lần thứ hai làm Uỷ viên không thường trực Hội đồng Bảo an Liên hợp quốc', y: 'tiếp tục đóng góp vào việc duy trì hoà bình và an ninh quốc tế' },
+  { n: 1917, t: 'Cách mạng tháng Mười Nga thành công', y: 'mở ra thời kì mới trong lịch sử thế giới, cổ vũ phong trào giải phóng dân tộc' },
+  { n: 1939, t: 'Chiến tranh thế giới thứ hai bùng nổ', y: 'cuộc chiến tàn khốc nhất lịch sử nhân loại, làm thay đổi trật tự thế giới' },
+  { n: 1955, t: 'Tổ chức Hiệp ước Vacsava được thành lập', y: 'liên minh quân sự của các nước xã hội chủ nghĩa ở châu Âu, đối trọng với NATO' },
+  { n: 1957, t: 'Liên Xô phóng vệ tinh nhân tạo đầu tiên Sputnik', y: 'mở đầu kỉ nguyên chinh phục vũ trụ của loài người' },
+  { n: 1972, t: 'Mỹ và Liên Xô kí Hiệp ước ABM và SALT-1', y: 'bước hoà hoãn Đông – Tây đầu tiên trong Chiến tranh lạnh' },
+  { n: 1978, t: 'Trung Quốc bắt đầu công cuộc cải cách mở cửa', y: 'đưa Trung Quốc trở thành nền kinh tế lớn thứ hai thế giới' },
+  { n: 1990, t: 'Nước Đức tái thống nhất', y: 'kết quả trực tiếp của việc bức tường Berlin sụp đổ năm 1989' },
+  { n: 1997, t: 'Lào và Myanmar gia nhập ASEAN', y: 'đưa ASEAN tiến gần tới mục tiêu bao gồm toàn bộ mười nước Đông Nam Á' },
+  { n: 1999, t: 'Campuchia gia nhập ASEAN', y: 'hoàn tất ASEAN gồm mười nước thành viên' },
+  { n: 2016, t: 'Toà Trọng tài thường trực ra phán quyết về vụ kiện Biển Đông', y: 'bác bỏ yêu sách "đường chín đoạn" vì không có cơ sở pháp lí theo UNCLOS' },
+  { n: 1945, t: 'Hội nghị Ianta được triệu tập', y: 'hình thành khuôn khổ trật tự thế giới hai cực Ianta sau chiến tranh' },
+  { n: 1986, t: 'Việt Nam bắt đầu chuyển sang nền kinh tế nhiều thành phần', y: 'thừa nhận sự tồn tại lâu dài của nhiều hình thức sở hữu và thành phần kinh tế' }
+];
+
+TD.GEN.su = (TD.GEN.su || []).concat([
+
+{ ma: 'su-nam', chuong: 'Cách mạng tháng Tám', muc: 1, dang: 'tln', duong: true,
+  tao(R) {
+    const sk = R.chon(SU_KIEN);
+    return {
+      q: `Sự kiện "${sk.t}" diễn ra vào năm nào?`,
+      ans: String(sk.n),
+      giai: `Năm ${sk.n}: ${sk.t}.\nÝ nghĩa: ${sk.y}.`,
+      meo: 'Học mốc theo CHUỖI nhân quả chứ đừng học rời: 1930 có Đảng → 1941 có Việt Minh → '
+        + '1945 giành chính quyền → 1946 toàn quốc kháng chiến.'
+    };
+  } },
+
+{ ma: 'su-khoangcach', chuong: 'Kháng chiến chống Mỹ', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const bo = R.chonNhieu(SU_KIEN, 2);
+    const a = bo[0], b = bo[1];
+    if (a.n === b.n) return null;
+    const truoc = a.n < b.n ? a : b, sau = a.n < b.n ? b : a;
+    return {
+      q: `Tính khoảng cách thời gian (số năm) giữa hai sự kiện: "${truoc.t}" và "${sau.t}".`,
+      ans: String(sau.n - truoc.n),
+      giai: `${truoc.t} — năm ${truoc.n}\n${sau.t} — năm ${sau.n}\n`
+        + `Khoảng cách = ${sau.n} − ${truoc.n} = ${sau.n - truoc.n} năm.`,
+      meo: 'Vẽ trục thời gian ra nháp ngay khi vào phòng thi. Dạng câu "bao nhiêu năm sau" và '
+        + '"sự kiện nào diễn ra trước" đều giải được trong 5 giây nếu có trục.'
+    };
+  } },
+
+{ ma: 'su-trinhtu', chuong: 'Kháng chiến chống Pháp', muc: 2, dang: 'mc',
+  tao(R) {
+    const bo = R.chonNhieu(SU_KIEN.filter(x => x.n >= 1930), 4);
+    if (new Set(bo.map(x => x.n)).size < 4) return null;
+    const sapXep = bo.slice().sort((a, b) => a.n - b.n);
+    const dung = sapXep[0];
+    return MC(R, `Trong các sự kiện sau, sự kiện nào diễn ra SỚM NHẤT?`,
+      { d: dung.t, s: sapXep.slice(1).map(x => x.t),
+        v: sapXep.map(x => `${x.n} — ${x.t}`).join('\n') },
+      'Câu sắp xếp trình tự chỉ cần nhớ NĂM, không cần nhớ nội dung. Đây là câu dễ ăn điểm nhất của đề Sử.');
+  } },
+
+{ ma: 'su-ynghia', chuong: 'Công cuộc Đổi mới', muc: 3, dang: 'mc',
+  tao(R) {
+    const bo = R.chonNhieu(SU_KIEN, 4);
+    if (new Set(bo.map(x => x.y)).size < 4) return null;
+    const dung = bo[0];
+    return MC(R, `Sự kiện "${dung.t}" (năm ${dung.n}) có ý nghĩa lịch sử nào sau đây?`,
+      { d: dung.y.charAt(0).toUpperCase() + dung.y.slice(1),
+        s: bo.slice(1).map(x => x.y.charAt(0).toUpperCase() + x.y.slice(1)),
+        v: `Năm ${dung.n}: ${dung.t} — ${dung.y}.` },
+      'Câu hỏi ý nghĩa thường có một phương án đúng nhưng thuộc về SỰ KIỆN KHÁC. '
+      + 'Đọc kỹ xem ý nghĩa đó gắn với mốc nào.');
+  } },
+
+{ ma: 'su-thapnien', chuong: 'Chiến tranh lạnh', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const sk = R.chon(SU_KIEN);
+    const tk = Math.floor(sk.n / 10) * 10;
+    return {
+      q: `Sự kiện "${sk.t}" diễn ra vào thập niên nào của thế kỉ ${sk.n < 2000 ? 'XX' : 'XXI'}? `
+        + `(ghi năm mở đầu thập niên, ví dụ 1940)`,
+      ans: String(tk),
+      giai: `Sự kiện diễn ra năm ${sk.n} ⇒ thuộc thập niên ${tk} (từ ${tk} đến ${tk + 9}).`,
+      meo: 'Thập niên lấy theo chữ số hàng chục: 1954 thuộc thập niên 1950, 1968 thuộc thập niên 1960.'
+    };
+  } }
+
+]);
+
+/* ==========================================================
+   NGỮ VĂN — nhận diện trên ngữ liệu
+   ========================================================== */
+TD.GEN.van = (TD.GEN.van || []).concat([
+
+{ ma: 'van-bienphap', chuong: 'Biện pháp tu từ', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { q: 'Mặt trời của bắp thì nằm trên đồi / Mặt trời của mẹ, em nằm trên lưng', d: 'Ẩn dụ',
+        v: '"Mặt trời" thứ hai chỉ đứa con — gọi tên sự vật này bằng tên sự vật khác có nét tương đồng (con là nguồn sống, nguồn ấm áp của mẹ).',
+        s: ['Hoán dụ', 'So sánh', 'Nhân hoá'] },
+      { q: 'Áo chàm đưa buổi phân li / Cầm tay nhau biết nói gì hôm nay', d: 'Hoán dụ',
+        v: '"Áo chàm" là dấu hiệu để chỉ người dân Việt Bắc — lấy dấu hiệu của sự vật để gọi sự vật, đó là hoán dụ.',
+        s: ['Ẩn dụ', 'So sánh', 'Nói quá'] },
+      { q: 'Sóng gợn tràng giang buồn điệp điệp / Con thuyền xuôi mái nước song song', d: 'Từ láy kết hợp điệp cấu trúc',
+        v: 'Hai từ láy "điệp điệp – song song" đặt ở cuối hai dòng theo cùng một mô hình cú pháp, tạo nhịp điệu miên man và nỗi buồn dàn trải.',
+        s: ['Ẩn dụ', 'Hoán dụ', 'Nói giảm nói tránh'] },
+      { q: 'Bác đã đi rồi sao, Bác ơi!', d: 'Nói giảm nói tránh',
+        v: 'Dùng từ "đi" thay cho "mất" để làm dịu nỗi đau và thể hiện sự kính trọng.',
+        s: ['Nói quá', 'Ẩn dụ', 'Điệp ngữ'] },
+      { q: 'Bàn tay ta làm nên tất cả / Có sức người sỏi đá cũng thành cơm', d: 'Nói quá kết hợp hoán dụ',
+        v: '"Sỏi đá cũng thành cơm" là nói quá để khẳng định sức lao động; "bàn tay ta" là hoán dụ chỉ con người lao động.',
+        s: ['Nói giảm nói tránh', 'So sánh', 'Nhân hoá'] },
+      { q: 'Trâu ơi ta bảo trâu này / Trâu ra ngoài ruộng trâu cày với ta', d: 'Nhân hoá',
+        v: 'Gọi và trò chuyện với con trâu như với người, khiến vật vô tri trở nên gần gũi có tình.',
+        s: ['Ẩn dụ', 'Hoán dụ', 'Nói quá'] },
+      { q: 'Người ta là hoa đất', d: 'So sánh',
+        v: 'Dùng từ "là" để đối chiếu con người với hoa đất — quan hệ so sánh ngang bằng.',
+        s: ['Ẩn dụ', 'Hoán dụ', 'Nhân hoá'] },
+      { q: 'Một cây làm chẳng nên non / Ba cây chụm lại nên hòn núi cao', d: 'Ẩn dụ',
+        v: '"Một cây", "ba cây" ẩn dụ cho cá nhân đơn lẻ và tập thể đoàn kết.',
+        s: ['Hoán dụ', 'Nói giảm nói tránh', 'Nhân hoá'] }
+    ]);
+    return MC(R, `Xác định biện pháp tu từ NỔI BẬT trong ngữ liệu sau:\n\n"${it.q}"`, it,
+      'Phân biệt ẩn dụ với hoán dụ: ẩn dụ dựa trên nét TƯƠNG ĐỒNG (giống nhau), '
+      + 'hoán dụ dựa trên quan hệ GẦN GŨI (bộ phận – toàn thể, dấu hiệu – sự vật, vật chứa – vật bị chứa).');
+  } },
+
+{ ma: 'van-thetho', chuong: 'Thể loại', muc: 1, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { y: 'mỗi dòng 6 chữ xen kẽ dòng 8 chữ, gieo vần chân và vần lưng', d: 'Lục bát',
+        v: 'Lục bát: dòng sáu chữ nối dòng tám chữ; tiếng thứ 6 của câu lục vần với tiếng thứ 6 của câu bát.',
+        s: ['Song thất lục bát', 'Thất ngôn bát cú', 'Tự do'] },
+      { y: 'mỗi dòng 7 chữ, toàn bài 8 dòng, có niêm luật và đối ở hai cặp câu giữa', d: 'Thất ngôn bát cú Đường luật',
+        v: 'Bố cục đề – thực – luận – kết, đối ở cặp 3–4 và 5–6, gieo vần ở các câu 1, 2, 4, 6, 8.',
+        s: ['Thất ngôn tứ tuyệt', 'Lục bát', 'Ngũ ngôn'] },
+      { y: 'mỗi dòng 7 chữ, toàn bài chỉ 4 dòng', d: 'Thất ngôn tứ tuyệt',
+        v: 'Bốn dòng bảy chữ, cô đọng, thường gieo vần ở câu 1, 2, 4.',
+        s: ['Thất ngôn bát cú Đường luật', 'Ngũ ngôn tứ tuyệt', 'Tự do'] },
+      { y: 'số chữ mỗi dòng không đều nhau, số dòng mỗi khổ cũng không cố định, không theo niêm luật', d: 'Thơ tự do',
+        v: 'Thơ tự do không bị ràng buộc số chữ, số dòng, vần và nhịp cố định; nhịp điệu đi theo cảm xúc.',
+        s: ['Lục bát', 'Thất ngôn bát cú', 'Song thất lục bát'] },
+      { y: 'hai dòng bảy chữ rồi tới một dòng sáu chữ và một dòng tám chữ, lặp lại theo khổ', d: 'Song thất lục bát',
+        v: 'Mỗi khổ gồm hai câu bảy chữ + một cặp lục bát; thể thơ thuần Việt, hợp với giọng ngâm ngợi tâm trạng.',
+        s: ['Lục bát', 'Thất ngôn bát cú', 'Tự do'] },
+      { y: 'mỗi dòng 5 chữ, các khổ đều nhau, nhịp ngắn gọn', d: 'Thơ năm chữ (ngũ ngôn)',
+        v: 'Mỗi dòng năm tiếng, nhịp 2/3 hoặc 3/2, thường dùng để kể và tả.',
+        s: ['Thơ bốn chữ', 'Lục bát', 'Thất ngôn tứ tuyệt'] }
+    ]);
+    return MC(R, `Một văn bản thơ có đặc điểm: ${it.y}. Văn bản đó thuộc thể thơ nào?`, it,
+      'Câu nhận diện thể thơ là câu số 1 của phần Đọc hiểu — chỉ cần ĐẾM SỐ CHỮ mỗi dòng là xong, '
+      + 'không được bỏ trống.');
+  } },
+
+{ ma: 'van-phuongthuc', chuong: 'Đọc hiểu', muc: 1, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { y: 'kể lại diễn biến một chuỗi sự việc có nhân vật, có mở đầu và kết thúc', d: 'Tự sự',
+        v: 'Tự sự là trình bày chuỗi sự việc, sự việc này dẫn đến sự việc kia rồi đi tới kết thúc.',
+        s: ['Miêu tả', 'Biểu cảm', 'Nghị luận'] },
+      { y: 'dùng ngôn ngữ tái hiện hình dáng, màu sắc, âm thanh để người đọc hình dung được đối tượng', d: 'Miêu tả',
+        v: 'Miêu tả giúp người đọc "nhìn thấy" sự vật, con người, cảnh vật qua chi tiết cụ thể.',
+        s: ['Tự sự', 'Thuyết minh', 'Nghị luận'] },
+      { y: 'trực tiếp bộc lộ tình cảm, cảm xúc của người viết trước một đối tượng', d: 'Biểu cảm',
+        v: 'Biểu cảm nhằm bày tỏ tình cảm, cảm xúc, thái độ chứ không nhằm kể hay tả.',
+        s: ['Tự sự', 'Miêu tả', 'Thuyết minh'] },
+      { y: 'nêu luận điểm rồi dùng lí lẽ và dẫn chứng để thuyết phục người đọc về một quan điểm', d: 'Nghị luận',
+        v: 'Nghị luận dùng lí lẽ và bằng chứng để làm sáng tỏ một vấn đề và thuyết phục người đọc.',
+        s: ['Thuyết minh', 'Biểu cảm', 'Tự sự'] },
+      { y: 'cung cấp tri thức khách quan về đặc điểm, cấu tạo, công dụng của một sự vật, hiện tượng', d: 'Thuyết minh',
+        v: 'Thuyết minh giới thiệu tri thức chính xác, khách quan, không bộc lộ cảm xúc cá nhân.',
+        s: ['Nghị luận', 'Miêu tả', 'Biểu cảm'] }
+    ]);
+    return MC(R, `Một đoạn trích ${it.y}. Đoạn trích sử dụng phương thức biểu đạt chính nào?`, it,
+      'Sáu phương thức: tự sự · miêu tả · biểu cảm · nghị luận · thuyết minh · hành chính công vụ. '
+      + 'Đề chỉ hỏi phương thức CHÍNH nên chọn cái chiếm dung lượng lớn nhất.');
+  } },
+
+{ ma: 'van-lienket', chuong: 'Tiếng Việt', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { y: 'Lan rất chăm học. Cô bé luôn làm hết bài tập trước khi đến lớp.', d: 'Phép thế',
+        v: '"Cô bé" ở câu sau thay thế cho "Lan" ở câu trước — dùng từ ngữ khác thay cho từ đã có để tránh lặp.',
+        s: ['Phép lặp', 'Phép nối', 'Phép liên tưởng'] },
+      { y: 'Sách mở ra cho ta chân trời mới. Sách là người bạn không bao giờ phản bội.', d: 'Phép lặp',
+        v: 'Từ "sách" được lặp lại ở đầu cả hai câu, vừa liên kết vừa nhấn mạnh đối tượng bàn luận.',
+        s: ['Phép thế', 'Phép nối', 'Phép liên tưởng'] },
+      { y: 'Trời mưa rất to. Tuy nhiên, buổi lễ vẫn diễn ra đúng giờ.', d: 'Phép nối',
+        v: '"Tuy nhiên" là từ nối biểu thị quan hệ tương phản giữa hai câu.',
+        s: ['Phép thế', 'Phép lặp', 'Phép liên tưởng'] },
+      { y: 'Cả cánh đồng vàng rực. Lúa trĩu bông, bờ ruộng thơm mùi rơm mới.', d: 'Phép liên tưởng',
+        v: '"Cánh đồng – lúa – bờ ruộng – rơm" cùng một trường nghĩa nên móc nối các câu lại với nhau.',
+        s: ['Phép thế', 'Phép nối', 'Phép lặp'] }
+    ]);
+    return MC(R, `Xác định phép liên kết được dùng giữa hai câu sau:\n\n"${it.y}"`, it,
+      'Bốn phép liên kết hình thức: LẶP (giữ nguyên từ) · THẾ (thay bằng từ khác) · '
+      + 'NỐI (dùng quan hệ từ) · LIÊN TƯỞNG (dùng từ cùng trường nghĩa).');
+  } },
+
+{ ma: 'van-phongcach', chuong: 'Đọc hiểu', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { y: 'một bài báo đưa tin về tình hình xuất khẩu gạo, có số liệu và trích lời chuyên gia', d: 'Phong cách ngôn ngữ báo chí',
+        v: 'Báo chí: thông tin thời sự, ngắn gọn, sinh động, có tính hấp dẫn và xác thực.',
+        s: ['Phong cách ngôn ngữ khoa học', 'Phong cách ngôn ngữ nghệ thuật', 'Phong cách ngôn ngữ hành chính'] },
+      { y: 'một đoạn trong truyện ngắn tả cảnh chiều tà với nhiều hình ảnh giàu sức gợi', d: 'Phong cách ngôn ngữ nghệ thuật',
+        v: 'Nghệ thuật: tính hình tượng, tính truyền cảm và tính cá thể hoá trong cách dùng từ.',
+        s: ['Phong cách ngôn ngữ báo chí', 'Phong cách ngôn ngữ chính luận', 'Phong cách ngôn ngữ sinh hoạt'] },
+      { y: 'một đoạn trong bài phát biểu kêu gọi thanh niên sống có lí tưởng, lập luận chặt chẽ', d: 'Phong cách ngôn ngữ chính luận',
+        v: 'Chính luận: công khai bày tỏ quan điểm chính trị – xã hội, lập luận chặt chẽ, giàu sức thuyết phục.',
+        s: ['Phong cách ngôn ngữ nghệ thuật', 'Phong cách ngôn ngữ khoa học', 'Phong cách ngôn ngữ sinh hoạt'] },
+      { y: 'một đoạn giải thích cơ chế quang hợp của cây xanh, dùng thuật ngữ chính xác', d: 'Phong cách ngôn ngữ khoa học',
+        v: 'Khoa học: tính trừu tượng khái quát, tính lí trí logic và tính khách quan phi cá thể.',
+        s: ['Phong cách ngôn ngữ báo chí', 'Phong cách ngôn ngữ chính luận', 'Phong cách ngôn ngữ nghệ thuật'] },
+      { y: 'một đoạn nhật kí ghi lại tâm sự trong ngày, dùng nhiều khẩu ngữ', d: 'Phong cách ngôn ngữ sinh hoạt',
+        v: 'Sinh hoạt: tính cụ thể, tính cảm xúc và tính cá thể; dùng nhiều từ ngữ đời thường.',
+        s: ['Phong cách ngôn ngữ nghệ thuật', 'Phong cách ngôn ngữ báo chí', 'Phong cách ngôn ngữ hành chính'] }
+    ]);
+    return MC(R, `Ngữ liệu là ${it.y}. Ngữ liệu thuộc phong cách ngôn ngữ nào?`, it,
+      'Sáu phong cách: sinh hoạt · nghệ thuật · báo chí · chính luận · khoa học · hành chính. '
+      + 'Nhận diện qua MỤC ĐÍCH giao tiếp và lớp từ ngữ được dùng.');
+  } },
+
+{ ma: 'van-thanhngu', chuong: 'Tiếng Việt', muc: 2, dang: 'mc',
+  tao(R) {
+    const it = R.chon([
+      { y: 'Nước đổ lá khoai', d: 'Khuyên bảo mà người nghe không tiếp thu, mọi lời nói đều vô ích',
+        v: 'Nước rơi trên lá khoai thì trôi tuột đi, không thấm — ví lời khuyên không lọt tai người nghe.',
+        s: ['Làm việc gì cũng phải kiên trì mới thành công', 'Của cải làm ra dễ dàng thì cũng mất nhanh', 'Người hiền lành thường bị bắt nạt'] },
+      { y: 'Ăn cây nào rào cây ấy', d: 'Hưởng lợi từ đâu thì phải có trách nhiệm giữ gìn, bảo vệ nơi đó',
+        v: 'Đề cao lòng biết ơn và tinh thần trách nhiệm với nơi mình gắn bó.',
+        s: ['Sống ích kỉ chỉ lo cho bản thân', 'Làm việc gì cũng phải có kế hoạch', 'Đoàn kết thì tạo nên sức mạnh'] },
+      { y: 'Góp gió thành bão', d: 'Những cái nhỏ tích lại lâu ngày sẽ tạo nên sức mạnh lớn',
+        v: 'Đề cao sự tích luỹ bền bỉ và sức mạnh của tập thể.',
+        s: ['Làm việc lớn thì không cần chú ý tiểu tiết', 'Nói nhiều mà làm ít', 'Gặp may mắn bất ngờ'] },
+      { y: 'Đứng núi này trông núi nọ', d: 'Không bằng lòng với cái mình đang có, luôn dòm ngó nơi khác',
+        v: 'Phê phán thái độ thiếu kiên định, thiếu chuyên tâm.',
+        s: ['Có tầm nhìn xa trông rộng', 'Biết vươn lên trong cuộc sống', 'Sống chan hoà với mọi người'] },
+      { y: 'Uống nước nhớ nguồn', d: 'Được hưởng thành quả thì phải nhớ ơn người tạo ra thành quả đó',
+        v: 'Truyền thống đạo lí về lòng biết ơn của dân tộc Việt Nam.',
+        s: ['Phải biết tiết kiệm nước sạch', 'Làm việc gì cũng cần tìm hiểu kỹ', 'Sống phải có chí tiến thủ'] }
+    ]);
+    return MC(R, `Thành ngữ, tục ngữ "${it.y}" có nghĩa là gì?`, it,
+      'Câu giải nghĩa thành ngữ hay xuất hiện ở phần Đọc hiểu. Bám vào NGHĨA BÓNG (bài học rút ra), '
+      + 'đừng giải theo nghĩa đen của từng chữ.');
+  } }
+
+]);
+
+})();
+
+</script>
+<script>
+/* ============================================================
    VẬN DỤNG CAO — MẪU ĐỀ NHIỀU BƯỚC, GẮN BỐI CẢNH THỰC TIỄN
    Bám định hướng CT GDPT 2018: câu mức 4 không nặng tính toán
    thuần tuý mà bắt phải hiểu bản chất, ghép nhiều mảng kiến thức
