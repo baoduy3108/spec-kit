@@ -10,7 +10,11 @@ ctx.globalThis = ctx;
 ctx.document = { addEventListener() {}, getElementById: () => null, querySelectorAll: () => [], body: {} };
 ctx.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
 
-const files = process.argv.slice(2);
+/* Thứ tự nạp phải giống hệt index.html: có file nối thêm vào mảng của file khác,
+   nạp sai thứ tự là bị ghi đè mà không báo lỗi gì. */
+const THU_TU_INDEX = [...fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')
+  .matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1]).filter(f => f !== 'src/app.js');   /* app.js là giao diện, không phải dữ liệu */
+const files = process.argv.length > 2 ? process.argv.slice(2) : THU_TU_INDEX;
 for (const f of files) {
   const src = fs.readFileSync(path.resolve(ROOT, f), 'utf8');
   try { vm.runInContext(src, ctx, { filename: f }); }

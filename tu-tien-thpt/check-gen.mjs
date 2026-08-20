@@ -8,7 +8,9 @@ const ctx = vm.createContext({ console, Math, Date, JSON, String, Number, Object
 ctx.window = ctx; ctx.globalThis = ctx;
 ctx.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
 
-for (const f of process.argv.slice(2))
+const THU_TU_INDEX = [...fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')
+  .matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1]).filter(f => f !== 'src/app.js');   /* app.js là giao diện, không phải dữ liệu */
+for (const f of (process.argv.length > 2 ? process.argv.slice(2) : THU_TU_INDEX))
   vm.runInContext(fs.readFileSync(path.resolve(ROOT, f), 'utf8'), ctx, { filename: f });
 
 const TD = ctx.TD;
