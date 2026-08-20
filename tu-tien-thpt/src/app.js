@@ -61,6 +61,7 @@ TD.MAN = [
   ['luyencong','⚔️ Luyện Công'],
   ['tamma',    '👹 Tâm Ma Kiếp'],
   ['tangkinh', '📜 Tàng Kinh Các'],
+  ['tadao',    '☠️ Tà Đạo'],
   ['dokiep',   '⚡ Độ Kiếp'],
   ['thienmenh','🗓️ Thiên Mệnh Bảng'],
   ['biluc',    '🎯 Bí Lục'],
@@ -467,6 +468,12 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
   box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   if (dotPha) TD.bao('☯ Đột phá cảnh giới!', 'kim');
+
+  /* lưu tiến độ bộ đề Tà Đạo để lần sau vào là học tiếp, không phải làm lại từ đầu */
+  if (p.taDao) {
+    TD.S.ta_dao_tien = TD.S.ta_dao_tien || {};
+    TD.S.ta_dao_tien[p.taDao.khoa] = { vt: p.vt + 1, dung: p.dung, tong: p.ds.length };
+  }
   TD.luu();
 };
 
@@ -480,6 +487,21 @@ TD.ketThucPhien = function () {
   const phut = Math.round((Date.now() - p.batDau) / 60000);
 
   let tieuDe = '📕 Kết thúc phiên luyện công', them = '';
+  if (p.taDao) {
+    const t = p.taDao, xong = p.vt >= p.ds.length;
+    if (xong) {
+      TD.ghiTaDao(t.mon, t.so, t.loai, p.dung, p.ds.length);
+      if (TD.S.ta_dao_tien) delete TD.S.ta_dao_tien[t.khoa];
+      const pt2 = Math.round((p.dung / p.ds.length) * 100);
+      tieuDe = pt2 >= 80 ? '☠️ TÀ ĐẠO — QUA ẢI' : '☠️ Tà Đạo — chưa qua ải';
+      them = `<p style="color:var(--chu2)">Bộ đề <b>${t.loai === 'lythuyet' ? 'Lý thuyết' : 'Bài tập'} số ${t.so}</b> môn ${TD.MON[t.mon].ten}.
+        ${pt2 >= 80 ? 'Đạt chuẩn qua ải (≥ 80%). Sang bộ đề tiếp theo.' : 'Chưa đạt 80%. Xem lại các câu sai rồi làm lại bộ đề này.'}</p>`;
+    } else {
+      tieuDe = '☠️ Tạm dừng Tà Đạo';
+      them = `<p style="color:var(--chu2)">Đã lưu tiến độ ở câu <b>${p.vt}/${p.ds.length}</b>.
+        Lần sau vào bộ đề này sẽ học tiếp từ đúng chỗ đang dở.</p>`;
+    }
+  }
   if (p.cheDo === 'dokiep') {
     const M = TD.MON[p.mon];
     const diem10 = Math.round(p.diem * 10) / 10;
@@ -661,8 +683,23 @@ TD.moThe = function (khoa, i) {
     ${x.dc ? `<div class="dc">${x.dc}</div>` : ''}
     <div class="hang-nut">
       <button class="nut" id="tk-khac">✅ Đã thuộc — khắc cốt ghi tâm</button>
+      <span id="tk-thu"></span>
       <button class="nut phu" onclick="TD.di('tangkinh')">← Quay lại</button>
     </div>`));
+
+  /* Kiểm tra ngay: tìm chủ đề trong kho mệnh đề khớp với thẻ vừa đọc */
+  const monTK = TD.monTK || 'hoa';
+  const khoLT = TD.KHO_LT[monTK] || [];
+  const dsCD = [...new Set(khoLT.map(z => z.cd))];
+  const khop = dsCD.find(cd2 => {
+    const a2 = (cd2 || '').toLowerCase(), b2 = (x.nhom || x.chu_de || '').toLowerCase();
+    return a2 && b2 && (a2.includes(b2.slice(0, 8)) || b2.includes(a2.slice(0, 8)));
+  }) || dsCD[0];
+  if (khop && khoLT.filter(z => z.cd === khop).length >= 4) {
+    const nut2 = el('button', 'nut kim', '📝 Kiểm tra ngay');
+    nut2.onclick = () => TD.kiemTraNhanh(monTK, khop);
+    $('#tk-thu').replaceWith(nut2);
+  }
 
   $('#tk-khac').onclick = () => {
     const id = khoa + '#' + i;
@@ -779,6 +816,131 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
     const d = q.dang === 'mc' ? diem * M.d1 : q.dang === 'tln' ? diem * M.d3 : diem;
     _chotCauGoc.call(TD, q, mon, dung, d * p.heSo, diemToiDa, ghiChu);
   } else _chotCauGoc.call(TD, q, mon, dung, diem, diemToiDa, ghiChu);
+};
+
+/* ============================================================
+   MÀN — TÀ ĐẠO (bộ đề trọng điểm, rút ngắn khoảng cách tu tiên)
+   ============================================================ */
+TD.man_tadao = function (c) {
+  const mon = TD.tham || TD.monTD || 'hoa';
+  TD.monTD = mon;
+  const loai = TD.loaiTD || 'lythuyet';
+
+  c.appendChild(el('div', 'the vien-lua', `<h3>☠️ Tà Đạo — rút ngắn khoảng cách tu tiên</h3>
+    <p style="font-size:14px">Chính đạo tu luyện tuần tự, tà đạo đi thẳng vào <b>trọng điểm</b>. Mỗi môn có
+    <b>${TD.SO_DE_TA_DAO} bộ đề Lý thuyết</b> và <b>${TD.SO_DE_TA_DAO} bộ đề Bài tập</b>, mỗi bộ
+    <b>${TD.SO_CAU_TA_DAO} câu</b> — dựng từ kho mệnh đề trọng điểm và bộ sinh đề của chính môn đó.</p>
+    <div class="the" style="background:rgba(231,76,60,.07);border-color:rgba(231,76,60,.3);margin-top:12px">
+      <b>⚠ Lời cảnh báo của tiền bối</b>
+      <p style="font-size:13.5px;margin:7px 0 0">Cày hết phần lý thuyết trọng điểm trong <b>1 tuần</b> thì phần
+      Nhận biết – Thông hiểu của đề thi gần như ăn trọn, tương ứng khoảng <b>7–8 điểm</b>. Nhưng tà đạo có giá của nó:
+      <b>phần Vận dụng cao vẫn phải cày chính đạo</b> ở Luyện Công và Độ Kiếp. Muốn 9+ thì không có đường tắt.</p>
+    </div>`));
+
+  const chonMon = TD.THU_TU_MON.map(m =>
+    `<button class="nut ${m === mon ? '' : 'phu'}" style="padding:8px 13px;font-size:13px"
+      onclick="TD.monTD='${m}';TD.di('tadao')">${TD.MON[m].icon} ${TD.MON[m].ten}</button>`).join('');
+  const chonLoai = [['lythuyet', '📘 Lý thuyết trọng điểm'], ['baitap', '🧮 Bài tập trọng điểm']].map(([k, t]) =>
+    `<button class="nut ${k === loai ? 'kim' : 'phu'}" style="padding:8px 15px"
+      onclick="TD.loaiTD='${k}';TD.di('tadao')">${t}</button>`).join('');
+
+  c.appendChild(el('div', 'the', `<div class="hang-nut" style="margin:0">${chonMon}</div>
+    <hr class="mo"><div class="hang-nut" style="margin:0">${chonLoai}</div>`));
+
+  if (!TD.taDaoSan(mon, loai)) {
+    c.appendChild(el('div', 'the vien-kim', `<h3>Chưa mở được</h3>
+      <p>Môn ${TD.MON[mon].ten} chưa có ${loai === 'baitap' ? 'bộ sinh bài tập' : 'kho mệnh đề lý thuyết'} đủ để dựng đề.
+      ${loai === 'baitap' ? 'Hãy chuyển sang phần <b>Lý thuyết trọng điểm</b>.' : ''}</p>`));
+    return;
+  }
+
+  /* thống kê tiến độ chung */
+  let daQua = 0, tongPt = 0, coDiem = 0;
+  for (let i = 1; i <= TD.SO_DE_TA_DAO; i++) {
+    const kq = TD.ketQuaTaDao(mon, i, loai);
+    if (kq) { coDiem++; tongPt += kq.pt; if (kq.pt >= 80) daQua++; }
+  }
+  const nguon = loai === 'lythuyet'
+    ? `${TD.soMenhDe(mon)} mệnh đề trọng điểm`
+    : `${TD.soMau(mon)} dạng bài tự sinh`;
+
+  c.appendChild(el('div', 'the vien-kim', `
+    <div style="display:flex;gap:26px;flex-wrap:wrap">
+      <div><div class="so-to" style="color:${daQua ? 'var(--dung)' : 'var(--chu3)'}">${daQua}/${TD.SO_DE_TA_DAO}</div><div class="so-nhan">bộ đề đã qua ải</div></div>
+      <div><div class="so-to">${coDiem ? Math.round(tongPt / coDiem) + '%' : '—'}</div><div class="so-nhan">chính xác trung bình</div></div>
+      <div><div class="so-to">${TD.SO_DE_TA_DAO * TD.SO_CAU_TA_DAO}</div><div class="so-nhan">tổng số câu</div></div>
+    </div>
+    <p class="mo-nhat tren12">Nguồn đề: ${nguon} của môn ${TD.MON[mon].ten}. Qua ải = đúng từ <b>80%</b> trở lên.</p>`));
+
+  /* lưới 20 bộ đề */
+  const luoi = el('div', 'luoi');
+  for (let i = 1; i <= TD.SO_DE_TA_DAO; i++) {
+    const kq = TD.ketQuaTaDao(mon, i, loai);
+    const tien = (TD.S.ta_dao_tien || {})[mon + '|' + loai + '|' + i];
+    const qua = kq && kq.pt >= 80;
+    const t = el('div', 'the mon-the');
+    t.style.setProperty('--m', qua ? 'var(--dung)' : kq ? 'var(--kim)' : 'var(--vien)');
+    t.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+        <b style="font-size:15px">Bộ đề ${i}</b>
+        <span style="font-size:19px">${qua ? '✅' : kq ? '🔸' : '⬜'}</span>
+      </div>
+      <div style="font-size:12.5px;color:var(--chu2);margin-top:6px">
+        ${kq ? `Cao nhất: <b style="color:${qua ? 'var(--dung)' : 'var(--kim)'}">${kq.pt}%</b> (${kq.dung}/${kq.tong})`
+             : `${TD.SO_CAU_TA_DAO} câu · chưa làm`}
+      </div>
+      ${tien ? `<div style="font-size:12px;color:var(--tim);margin-top:4px">⏸ đang dở ở câu ${tien.vt}/${tien.tong}</div>` : ''}`;
+    t.onclick = () => TD.moDeTaDao(mon, i, loai);
+    luoi.appendChild(t);
+  }
+  c.appendChild(luoi);
+};
+
+TD.moDeTaDao = function (mon, so, loai) {
+  const ds = TD.deTaDao(mon, so, loai);
+  if (!ds.length) { TD.bao('Không dựng được bộ đề này.', 'lua'); return; }
+  const khoa = mon + '|' + loai + '|' + so;
+  const tien = (TD.S.ta_dao_tien || {})[khoa];
+  const kq = TD.ketQuaTaDao(mon, so, loai);
+  const M = TD.MON[mon];
+
+  const c = $('#noidung'); c.innerHTML = '';
+  c.appendChild(el('div', 'the vien-lua', `
+    <h3>☠️ ${M.icon} ${M.ten} — ${loai === 'lythuyet' ? 'Lý thuyết' : 'Bài tập'} · Bộ đề ${so}</h3>
+    <p style="font-size:13.6px;color:var(--chu2)">Gồm <b>${ds.length} câu</b>
+      ${loai === 'lythuyet'
+        ? `(${ds.filter(x => x.lt !== undefined).length} câu nhiều lựa chọn + ${ds.filter(x => x.dsy).length} câu đúng/sai 4 ý)`
+        : '(bài tập tính toán, số liệu sinh mới mỗi lần)'}.
+      Không giới hạn thời gian — cứ dừng giữa chừng, tiến độ được lưu lại.</p>
+    ${kq ? `<p style="font-size:13.5px">Lần làm tốt nhất: <b style="color:var(--kim)">${kq.pt}%</b> (${kq.dung}/${kq.tong}) ngày ${kq.ngay}</p>` : ''}
+    <div class="hang-nut">
+      ${tien ? `<button class="nut kim" id="td-tiep">Học tiếp từ câu ${tien.vt}</button>` : ''}
+      <button class="nut ${tien ? 'phu' : ''}" id="td-batdau">${tien ? 'Làm lại từ đầu' : 'Bắt đầu'}</button>
+      <button class="nut phu" onclick="TD.di('tadao')">← Quay lại</button>
+    </div>`));
+
+  const chay = (batDauTu) => {
+    TD.batDauPhien(mon, null, 'tadao', ds);
+    TD.phien.taDao = { mon: mon, so: so, loai: loai, khoa: khoa };
+    if (batDauTu > 0 && batDauTu < ds.length) { TD.phien.vt = batDauTu; TD.veCau(); }
+  };
+  $('#td-batdau').onclick = () => chay(0);
+  if (tien) $('#td-tiep').onclick = () => chay(tien.vt);
+};
+
+/* Kiểm tra nhanh ngay trong Tàng Kinh Các: bốc câu hỏi đúng chủ đề vừa đọc */
+TD.kiemTraNhanh = function (mon, cd) {
+  const kho = TD.KHO_LT[mon] || [];
+  const chiSo = [];
+  kho.forEach((x, i) => { if ((x.cd || '') === cd) chiSo.push(i); });
+  if (chiSo.length < 4) { TD.bao('Chủ đề này chưa đủ câu để kiểm tra.', 'lua'); return; }
+
+  const ds = TD.xao(chiSo).slice(0, 8).map(i =>
+    ({ mon: mon, lt: i, c: kho[i].a ? 'd' : 's', s: (Math.random() * 4294967295) >>> 0 }));
+  /* thêm 2 câu đúng/sai 4 ý cho chắc */
+  for (let k = 0; k < 2 && chiSo.length >= 4; k++)
+    ds.push({ mon: mon, dsy: TD.xao(chiSo).slice(0, 4), cd: cd, s: (Math.random() * 4294967295) >>> 0 });
+
+  TD.batDauPhien(mon, null, 'luyen', TD.xao(ds));
 };
 
 /* ============================================================

@@ -44,9 +44,11 @@ for (const mon of Object.keys(TD.GEN)) {
         const thieu = canhan.filter(v => !phang.includes(v));
         if (thieu.length) { bao(mau.ma, `đáp án "${thieu.join(',')}" không có trong lời giải`, q); break; }
         /* đáp án không được là số âm hoặc 0 với các đại lượng vật chất */
+        /* Chỉ đại lượng vật chất mới bắt buộc dương. Toán, Lí có đáp án âm hợp lệ
+           (tổng cấp số, hệ số góc, nghiệm phương trình, độ biến thiên nội năng...). */
+        const phaiDuong = mau.duong !== undefined ? mau.duong : (mon === 'hoa' && !mau.chapNhanKhong);
         const so = parseFloat(String(q.ans).replace(',', '.'));
-        const nguong = mau.chapNhanKhong ? 0 : 1e-9;
-        if (!isNaN(so) && so < nguong) { bao(mau.ma, `đáp án không hợp lệ: ${q.ans}`, q); break; }
+        if (phaiDuong && !isNaN(so) && so <= 0) { bao(mau.ma, `đáp án không dương: ${q.ans}`, q); break; }
       } else if (q.dang === 'mc') {
         if (!Array.isArray(q.opts) || q.opts.length !== 4) { bao(mau.ma, 'không đủ 4 phương án', q); break; }
         if (new Set(q.opts).size !== 4) { bao(mau.ma, 'có phương án trùng nhau', q); break; }

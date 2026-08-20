@@ -1,0 +1,146 @@
+/* ============================================================
+   GIÁO DỤC KINH TẾ & PHÁP LUẬT — KHO MỆNH ĐỀ TRỌNG ĐIỂM
+   ============================================================ */
+window.TD = window.TD || {}; TD.KHO_LT = TD.KHO_LT || {};
+
+TD.KHO_LT.gdkt = [
+/* ========== TĂNG TRƯỞNG & PHÁT TRIỂN ========== */
+{ cd: 'Tăng trưởng – Phát triển', m: 1, a: true,  t: 'Tăng trưởng kinh tế là sự gia tăng về quy mô sản lượng của nền kinh tế trong một thời kì nhất định.', v: 'Đo bằng GDP, GNI, GDP bình quân đầu người hoặc tốc độ tăng GDP.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: true,  t: 'Phát triển kinh tế bao gồm tăng trưởng kinh tế, chuyển dịch cơ cấu kinh tế tiến bộ và tiến bộ xã hội.', v: 'Phát triển là khái niệm rộng hơn tăng trưởng.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: false, t: 'Tăng trưởng kinh tế và phát triển kinh tế là hai khái niệm hoàn toàn giống nhau.', v: 'Tăng trưởng chỉ là "to ra" về lượng; phát triển còn đòi hỏi chuyển dịch cơ cấu và tiến bộ xã hội.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: true,  t: 'GDP bình quân đầu người được tính bằng tổng sản phẩm quốc nội chia cho tổng số dân.', v: 'Là chỉ tiêu phản ánh mức sống trung bình của dân cư.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: true,  t: 'Chỉ số phát triển con người HDI là chỉ tiêu đánh giá tiến bộ xã hội chứ không phải chỉ tiêu tăng trưởng kinh tế.', v: 'HDI gồm ba thành phần: tuổi thọ, giáo dục và thu nhập.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: false, t: 'Chỉ số HDI là chỉ tiêu chủ yếu dùng để đo tăng trưởng kinh tế.', v: 'HDI đo PHÁT TRIỂN CON NGƯỜI. Tăng trưởng kinh tế đo bằng GDP, GNI.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 3, a: true,  t: 'Phát triển bền vững là sự kết hợp hài hoà giữa tăng trưởng kinh tế, tiến bộ xã hội và bảo vệ môi trường.', v: 'Đáp ứng nhu cầu hiện tại mà không làm tổn hại khả năng của thế hệ tương lai.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 3, a: false, t: 'Một quốc gia có GDP tăng nhanh thì chắc chắn đã phát triển bền vững.', v: 'GDP tăng nhưng ô nhiễm nặng và bất bình đẳng gia tăng thì KHÔNG phải phát triển bền vững.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: true,  t: 'Tốc độ tăng GDP được tính bằng phần trăm chênh lệch GDP năm sau so với GDP năm trước.', v: 'Công thức: (GDPₙ − GDPₙ₋₁)/GDPₙ₋₁ × 100%.' },
+
+/* ========== HỘI NHẬP KINH TẾ QUỐC TẾ ========== */
+{ cd: 'Hội nhập quốc tế', m: 2, a: true,  t: 'Hội nhập kinh tế quốc tế diễn ra theo ba cấp độ: song phương, khu vực và toàn cầu.', v: 'Ví dụ FTA song phương, AEC ở cấp khu vực, WTO ở cấp toàn cầu.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: true,  t: 'FDI là đầu tư trực tiếp nước ngoài, trong đó nhà đầu tư nước ngoài bỏ vốn và trực tiếp tham gia quản lí.', v: 'Khác với ODA là nguồn hỗ trợ phát triển chính thức.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: false, t: 'ODA và FDI là hai tên gọi khác nhau của cùng một hình thức đầu tư nước ngoài.', v: 'FDI là đầu tư trực tiếp của doanh nghiệp; ODA là vốn hỗ trợ phát triển chính thức từ chính phủ hoặc tổ chức quốc tế.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: true,  t: 'Hội nhập kinh tế quốc tế mang lại cơ hội mở rộng thị trường, thu hút vốn và công nghệ.', v: 'Đồng thời tạo việc làm và nâng cao vị thế quốc gia.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: true,  t: 'Thách thức của hội nhập kinh tế quốc tế gồm cạnh tranh gay gắt, nguy cơ phụ thuộc và mai một bản sắc văn hoá.', v: 'Cùng với sức ép về môi trường và chảy máu chất xám.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: false, t: 'Hội nhập kinh tế quốc tế chỉ mang lại cơ hội mà không kèm theo thách thức nào.', v: 'Hội nhập luôn là con dao hai lưỡi: vừa cơ hội vừa thách thức.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: true,  t: 'Việt Nam đã tham gia nhiều hiệp định thương mại tự do thế hệ mới như CPTPP, EVFTA và RCEP.', v: 'Các hiệp định này có phạm vi cam kết rộng và tiêu chuẩn cao.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: true,  t: 'Ngoại thương bao gồm hoạt động xuất khẩu và nhập khẩu hàng hoá, dịch vụ.', v: 'Là hình thức hội nhập kinh tế quốc tế phổ biến nhất.' },
+
+/* ========== BẢO HIỂM & AN SINH XÃ HỘI ========== */
+{ cd: 'Bảo hiểm – An sinh', m: 1, a: true,  t: 'Bảo hiểm xã hội, bảo hiểm y tế và bảo hiểm thất nghiệp do Nhà nước tổ chức và hoạt động không vì mục tiêu lợi nhuận.', v: 'Khác với bảo hiểm thương mại do doanh nghiệp cung cấp nhằm mục tiêu lợi nhuận.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: false, t: 'Bảo hiểm y tế là loại hình bảo hiểm thương mại hoạt động vì mục tiêu lợi nhuận.', v: 'BHYT do Nhà nước tổ chức, mang tính bắt buộc toàn dân và PHI LỢI NHUẬN.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: true,  t: 'Bảo hiểm xã hội bù đắp một phần thu nhập khi người lao động ốm đau, thai sản, tai nạn lao động, hết tuổi lao động hoặc chết.', v: 'Gồm bảo hiểm xã hội bắt buộc và bảo hiểm xã hội tự nguyện.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: true,  t: 'Bảo hiểm thất nghiệp hỗ trợ người lao động khi mất việc làm, gồm trợ cấp thất nghiệp và hỗ trợ học nghề, tìm việc.', v: 'Giúp người lao động sớm quay lại thị trường lao động.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: true,  t: 'Người lao động có hợp đồng lao động từ đủ một tháng trở lên thuộc diện tham gia bảo hiểm xã hội bắt buộc.', v: 'Cả người lao động và người sử dụng lao động đều có trách nhiệm đóng.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: false, t: 'Chỉ người sử dụng lao động mới có trách nhiệm đóng bảo hiểm xã hội bắt buộc.', v: 'CẢ HAI bên đều có trách nhiệm đóng theo tỉ lệ quy định.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: true,  t: 'An sinh xã hội gồm bốn trụ cột: việc làm và giảm nghèo, bảo hiểm xã hội, trợ giúp xã hội và dịch vụ xã hội cơ bản.', v: 'Nhằm bảo đảm mức sống tối thiểu và hỗ trợ nhóm yếu thế.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: true,  t: 'Trợ giúp xã hội hướng tới các nhóm yếu thế như người cao tuổi cô đơn, trẻ mồ côi, người khuyết tật.', v: 'Gồm trợ giúp thường xuyên và trợ giúp đột xuất.' },
+{ cd: 'Bảo hiểm – An sinh', m: 3, a: false, t: 'An sinh xã hội chỉ dành riêng cho những người đã tham gia đóng bảo hiểm.', v: 'An sinh xã hội bao trùm toàn dân, gồm cả trợ giúp cho những người không tham gia bảo hiểm.' },
+
+/* ========== QUẢN LÍ THU CHI ========== */
+{ cd: 'Quản lí thu chi', m: 2, a: true,  t: 'Tiết kiệm được tính bằng tổng thu nhập trừ đi tổng chi tiêu.', v: 'Muốn có tích luỹ thì thu phải lớn hơn chi.' },
+{ cd: 'Quản lí thu chi', m: 2, a: true,  t: 'Chi tiêu thiết yếu gồm các khoản như ăn uống, nhà ở, đi lại, y tế và giáo dục.', v: 'Chi không thiết yếu gồm giải trí, du lịch, mua sắm xa xỉ.' },
+{ cd: 'Quản lí thu chi', m: 2, a: false, t: 'Chi cho du lịch và mua sắm hàng hiệu được xếp vào nhóm chi tiêu thiết yếu.', v: 'Đó là chi tiêu KHÔNG thiết yếu, có thể cắt giảm khi cần.' },
+{ cd: 'Quản lí thu chi', m: 2, a: true,  t: 'Theo quy tắc 50/30/20, hai mươi phần trăm thu nhập được dành cho tiết kiệm và đầu tư.', v: '50% cho nhu cầu thiết yếu và 30% cho mong muốn cá nhân.' },
+{ cd: 'Quản lí thu chi', m: 2, a: false, t: 'Theo quy tắc 50/30/20, năm mươi phần trăm thu nhập được dành cho tiết kiệm.', v: '50% dành cho nhu cầu THIẾT YẾU. Tiết kiệm chỉ chiếm 20%.' },
+{ cd: 'Quản lí thu chi', m: 2, a: true,  t: 'Các bước lập kế hoạch tài chính gồm xác định mục tiêu, xác định nguồn thu, phân bổ khoản chi rồi thực hiện và điều chỉnh.', v: 'Theo dõi và điều chỉnh là bước không thể thiếu.' },
+{ cd: 'Quản lí thu chi', m: 3, a: true,  t: 'Lập kế hoạch tài chính cá nhân giúp chủ động ứng phó với rủi ro và đạt được mục tiêu dài hạn.', v: 'Tránh tình trạng chi tiêu vượt quá khả năng.' },
+{ cd: 'Quản lí thu chi', m: 2, a: true,  t: 'Thu nhập của gia đình có thể đến từ tiền lương, tiền công, hoạt động kinh doanh, đầu tư và các khoản trợ cấp.', v: 'Cần thống kê đầy đủ mọi nguồn thu khi lập kế hoạch.' },
+{ cd: 'Quản lí thu chi', m: 3, a: false, t: 'Vay tiêu dùng để mua sắm hàng xa xỉ là biểu hiện của quản lí tài chính hiệu quả.', v: 'Vay để chi tiêu không thiết yếu làm tăng gánh nặng nợ, đi ngược nguyên tắc quản lí tài chính.' },
+
+/* ========== DOANH NGHIỆP – THUẾ ========== */
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Công dân có quyền tự do kinh doanh trong những ngành nghề mà pháp luật không cấm.', v: 'Đi kèm nghĩa vụ kinh doanh đúng ngành nghề đã đăng kí và nộp thuế đầy đủ.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: false, t: 'Công dân được tự do kinh doanh mọi ngành nghề mà không bị hạn chế nào.', v: 'Phải là ngành nghề pháp luật KHÔNG CẤM, và một số ngành còn có điều kiện.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Thuế thu nhập cá nhân và thuế thu nhập doanh nghiệp là các loại thuế trực thu.', v: 'Người nộp thuế đồng thời là người chịu thuế.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Thuế giá trị gia tăng là loại thuế gián thu, được cộng vào giá bán và do người tiêu dùng chịu.', v: 'Doanh nghiệp chỉ là bên thu hộ và nộp cho ngân sách nhà nước.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: false, t: 'Thuế giá trị gia tăng là loại thuế trực thu do doanh nghiệp chịu hoàn toàn.', v: 'VAT là thuế GIÁN THU; người chịu thuế thực sự là người tiêu dùng cuối cùng.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Thuế tiêu thụ đặc biệt đánh vào một số hàng hoá, dịch vụ nhằm hạn chế tiêu dùng.', v: 'Ví dụ rượu, bia, thuốc lá, ô tô, kinh doanh vũ trường.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Thuế là nguồn thu chủ yếu của ngân sách nhà nước và là công cụ điều tiết kinh tế vĩ mô.', v: 'Đồng thời góp phần phân phối lại thu nhập trong xã hội.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Trách nhiệm xã hội của doanh nghiệp bao gồm bảo vệ môi trường, bảo đảm quyền lợi người lao động và người tiêu dùng.', v: 'Bên cạnh trách nhiệm kinh tế và tuân thủ pháp luật.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 3, a: false, t: 'Doanh nghiệp chỉ cần tối đa hoá lợi nhuận, không có trách nhiệm nào với xã hội và môi trường.', v: 'Doanh nghiệp có trách nhiệm xã hội, được pháp luật quy định và xã hội giám sát.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Trốn thuế là hành vi vi phạm pháp luật và có thể bị xử lí hình sự.', v: 'Tuỳ mức độ mà bị xử phạt hành chính hoặc truy cứu trách nhiệm hình sự.' },
+
+/* ========== QUYỀN & NGHĨA VỤ CÔNG DÂN ========== */
+{ cd: 'Quyền & nghĩa vụ', m: 1, a: true,  t: 'Công dân đủ 18 tuổi trở lên có quyền bầu cử đại biểu Quốc hội và Hội đồng nhân dân.', v: 'Quyền ứng cử yêu cầu đủ 21 tuổi trở lên.' },
+{ cd: 'Quyền & nghĩa vụ', m: 1, a: false, t: 'Công dân đủ 18 tuổi trở lên có quyền ứng cử đại biểu Quốc hội.', v: 'Đủ 18 tuổi mới có quyền BẦU CỬ. Quyền ỨNG CỬ cần đủ 21 tuổi.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Bầu cử ở nước ta được tiến hành theo bốn nguyên tắc: phổ thông, bình đẳng, trực tiếp và bỏ phiếu kín.', v: 'Bốn nguyên tắc này bảo đảm quyền làm chủ của nhân dân.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: false, t: 'Cử tri có thể nhờ người khác bỏ phiếu thay mình trong cuộc bầu cử.', v: 'Vi phạm nguyên tắc bầu cử TRỰC TIẾP — cử tri phải tự mình bỏ phiếu.' },
+{ cd: 'Quyền & nghĩa vụ', m: 1, a: true,  t: 'Độ tuổi kết hôn theo pháp luật Việt Nam là nam từ đủ 20 tuổi và nữ từ đủ 18 tuổi.', v: 'Kết hôn phải hoàn toàn tự nguyện, không bị ép buộc hay lừa dối.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: false, t: 'Độ tuổi kết hôn theo pháp luật Việt Nam là nam và nữ đều từ đủ 18 tuổi.', v: 'Nam phải từ đủ 20 tuổi, nữ từ đủ 18 tuổi.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Chế độ hôn nhân ở nước ta là tự nguyện, tiến bộ, một vợ một chồng, vợ chồng bình đẳng.', v: 'Pháp luật cấm cưỡng ép kết hôn và tảo hôn.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Vợ chồng bình đẳng với nhau trong cả quan hệ nhân thân lẫn quan hệ tài sản.', v: 'Tài sản chung khi đăng kí quyền sở hữu phải ghi tên cả hai vợ chồng.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: false, t: 'Người chồng có quyền quyết định mọi vấn đề quan trọng của gia đình.', v: 'Vi phạm nguyên tắc BÌNH ĐẲNG giữa vợ và chồng.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Pháp luật cấm kết hôn giữa những người có cùng dòng máu về trực hệ và trong phạm vi ba đời.', v: 'Nhằm bảo đảm chất lượng nòi giống và phù hợp đạo đức xã hội.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Bảo vệ Tổ quốc là nghĩa vụ thiêng liêng và quyền cao quý của công dân.', v: 'Công dân nam trong độ tuổi quy định phải đăng kí nghĩa vụ quân sự.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Mọi công dân đều bình đẳng trước pháp luật, không phân biệt dân tộc, giới tính, tôn giáo hay địa vị xã hội.', v: 'Bình đẳng cả về quyền, nghĩa vụ lẫn trách nhiệm pháp lí.' },
+{ cd: 'Quyền & nghĩa vụ', m: 3, a: false, t: 'Người giữ chức vụ cao trong cơ quan nhà nước được giảm nhẹ trách nhiệm pháp lí khi vi phạm pháp luật.', v: 'Vi phạm nguyên tắc bình đẳng về TRÁCH NHIỆM PHÁP LÍ — mọi công dân đều bị xử lí như nhau.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Công dân có quyền học tập không hạn chế và học thường xuyên, học suốt đời.', v: 'Nhà nước tạo điều kiện để mọi người đều được học tập.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Bình đẳng giới nghĩa là nam và nữ có vị trí, vai trò ngang nhau, được tạo điều kiện phát huy năng lực như nhau.', v: 'Thể hiện trong cả lĩnh vực chính trị, kinh tế, lao động, giáo dục và gia đình.' },
+
+/* ========== PHÁP LUẬT QUỐC TẾ ========== */
+{ cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Pháp luật quốc tế do các quốc gia và chủ thể khác của luật quốc tế thoả thuận xây dựng nên.', v: 'Không có cơ quan lập pháp đứng trên các quốc gia.' },
+{ cd: 'Pháp luật quốc tế', m: 2, a: false, t: 'Pháp luật quốc tế do Liên hợp quốc ban hành và áp đặt lên các quốc gia thành viên.', v: 'Pháp luật quốc tế hình thành trên cơ sở THOẢ THUẬN giữa các quốc gia.' },
+{ cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Nguyên tắc tận tâm thực hiện cam kết quốc tế là một nguyên tắc cơ bản của pháp luật quốc tế.', v: 'Còn gọi là nguyên tắc pacta sunt servanda.' },
+{ cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Cấm dùng vũ lực hoặc đe doạ dùng vũ lực trong quan hệ quốc tế là nguyên tắc cơ bản của pháp luật quốc tế.', v: 'Cùng với nguyên tắc giải quyết tranh chấp bằng biện pháp hoà bình.' },
+{ cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Điều ước quốc tế là thoả thuận bằng văn bản giữa các chủ thể của luật quốc tế.', v: 'Có thể mang tên Công ước, Hiệp định, Hiệp ước, Nghị định thư.' },
+{ cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Nguyên tắc dân tộc tự quyết khẳng định mọi dân tộc đều có quyền tự quyết định chế độ chính trị và con đường phát triển của mình.', v: 'Đây là cơ sở pháp lí cho phong trào giải phóng dân tộc.' },
+{ cd: 'Pháp luật quốc tế', m: 3, a: true,  t: 'Công ước Liên hợp quốc về Luật Biển năm 1982 là cơ sở pháp lí quan trọng nhất để giải quyết các vấn đề trên biển.', v: 'Việt Nam phê chuẩn Công ước này năm 1994.' }
+];
+
+TD.KHO_LT.gdkt.push(
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: false, t: 'GDP là tổng thu nhập của công dân một nước dù họ sản xuất ở đâu.', v: 'Đó là GNI. GDP là tổng sản phẩm tạo ra TRONG LÃNH THỔ một nước.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: false, t: 'Tăng trưởng kinh tế cao luôn đi kèm với việc giảm bất bình đẳng thu nhập.', v: 'Không nhất thiết — nhiều nước tăng trưởng nhanh nhưng khoảng cách giàu nghèo lại giãn ra.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: true,  t: 'Chuyển dịch cơ cấu kinh tế theo hướng tiến bộ là giảm tỉ trọng nông nghiệp, tăng tỉ trọng công nghiệp và dịch vụ.', v: 'Là một tiêu chí bắt buộc của phát triển kinh tế.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: false, t: 'Chuyển dịch cơ cấu kinh tế tiến bộ là tăng tỉ trọng ngành nông nghiệp trong GDP.', v: 'Ngược lại — hướng tiến bộ là GIẢM tỉ trọng nông nghiệp.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 3, a: true,  t: 'Vai trò của tăng trưởng kinh tế là tạo tiền đề vật chất để giải quyết các vấn đề xã hội.', v: 'Có tăng trưởng mới có nguồn lực cho giáo dục, y tế, giảm nghèo.' },
+{ cd: 'Tăng trưởng – Phát triển', m: 2, a: true,  t: 'Ba trụ cột của phát triển bền vững là kinh tế, xã hội và môi trường.', v: 'Thiếu bất kì trụ cột nào thì sự phát triển không bền vững.' },
+
+{ cd: 'Hội nhập quốc tế', m: 2, a: false, t: 'Việt Nam gia nhập Tổ chức Thương mại Thế giới WTO năm 1995.', v: 'Năm 1995 là mốc gia nhập ASEAN. Vào WTO là năm 2007.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: true,  t: 'Việt Nam gia nhập ASEAN năm 1995, APEC năm 1998 và WTO năm 2007.', v: 'Ba mốc lớn của tiến trình hội nhập kinh tế quốc tế.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: false, t: 'Hội nhập kinh tế quốc tế đồng nghĩa với việc từ bỏ chủ quyền quốc gia về kinh tế.', v: 'Hội nhập là chủ động tham gia trên cơ sở giữ vững độc lập, tự chủ.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: true,  t: 'Xuất siêu là tình trạng giá trị xuất khẩu lớn hơn giá trị nhập khẩu.', v: 'Ngược lại là nhập siêu.' },
+{ cd: 'Hội nhập quốc tế', m: 2, a: true,  t: 'Chủ động và tích cực hội nhập quốc tế là chủ trương nhất quán của Việt Nam.', v: 'Trên nguyên tắc giữ vững độc lập, tự chủ và bảo đảm lợi ích quốc gia – dân tộc.' },
+{ cd: 'Hội nhập quốc tế', m: 3, a: true,  t: 'Để tận dụng cơ hội từ hội nhập, doanh nghiệp Việt Nam cần nâng cao năng lực cạnh tranh và chất lượng nguồn nhân lực.', v: 'Đồng thời tuân thủ các tiêu chuẩn quốc tế về chất lượng và môi trường.' },
+
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: false, t: 'Bảo hiểm nhân thọ là một loại hình bảo hiểm xã hội do Nhà nước tổ chức.', v: 'Bảo hiểm nhân thọ là bảo hiểm THƯƠNG MẠI, do doanh nghiệp cung cấp, mang tính tự nguyện và vì lợi nhuận.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: true,  t: 'Bảo hiểm thương mại mang tính tự nguyện và do doanh nghiệp bảo hiểm cung cấp.', v: 'Người tham gia đóng phí theo hợp đồng đã thoả thuận.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: false, t: 'Tham gia bảo hiểm y tế là hoàn toàn tự nguyện với mọi công dân.', v: 'BHYT mang tính BẮT BUỘC toàn dân theo lộ trình quy định của pháp luật.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: true,  t: 'Bảo hiểm xã hội tự nguyện dành cho người lao động không thuộc diện tham gia bảo hiểm xã hội bắt buộc.', v: 'Người tham gia được lựa chọn mức đóng và phương thức đóng.' },
+{ cd: 'Bảo hiểm – An sinh', m: 3, a: true,  t: 'Chính sách an sinh xã hội góp phần bảo đảm công bằng và ổn định xã hội.', v: 'Giúp giảm thiểu rủi ro và thu hẹp khoảng cách giàu nghèo.' },
+{ cd: 'Bảo hiểm – An sinh', m: 2, a: false, t: 'Người đã nghỉ hưu thì không còn được hưởng bất kì chế độ bảo hiểm xã hội nào.', v: 'Chế độ hưu trí chính là một trong các chế độ của bảo hiểm xã hội.' },
+
+{ cd: 'Quản lí thu chi', m: 2, a: false, t: 'Nếu tổng chi lớn hơn tổng thu thì gia đình vẫn có tích luỹ.', v: 'Chi lớn hơn thu nghĩa là thâm hụt, không thể có tích luỹ.' },
+{ cd: 'Quản lí thu chi', m: 2, a: true,  t: 'Quỹ dự phòng nên được lập để ứng phó với các tình huống bất ngờ như ốm đau, mất việc.', v: 'Thường khuyến nghị dự phòng bằng 3–6 tháng chi tiêu.' },
+{ cd: 'Quản lí thu chi', m: 2, a: true,  t: 'Khi thu nhập giảm, ưu tiên cắt giảm trước các khoản chi không thiết yếu.', v: 'Giữ lại các khoản chi thiết yếu để bảo đảm cuộc sống cơ bản.' },
+{ cd: 'Quản lí thu chi', m: 3, a: true,  t: 'Ghi chép thu chi hằng ngày giúp kiểm soát dòng tiền và phát hiện khoản chi lãng phí.', v: 'Là bước theo dõi trong quy trình quản lí tài chính.' },
+{ cd: 'Quản lí thu chi', m: 2, a: false, t: 'Mục tiêu tài chính không cần cụ thể về số tiền và thời hạn.', v: 'Mục tiêu tài chính phải CỤ THỂ, đo lường được và có thời hạn rõ ràng thì mới thực hiện được.' },
+{ cd: 'Quản lí thu chi', m: 2, a: true,  t: 'Đầu tư luôn đi kèm rủi ro, lợi nhuận kì vọng càng cao thì rủi ro càng lớn.', v: 'Cần đa dạng hoá và chỉ đầu tư khoản tiền nhàn rỗi.' },
+
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: false, t: 'Thuế xuất khẩu và thuế nhập khẩu là các loại thuế trực thu.', v: 'Đó là thuế GIÁN THU, được tính vào giá hàng hoá.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Doanh nghiệp phải kinh doanh đúng ngành nghề đã đăng kí trong giấy chứng nhận đăng kí doanh nghiệp.', v: 'Kinh doanh ngoài ngành nghề đăng kí là vi phạm pháp luật.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Doanh nghiệp có nghĩa vụ bảo đảm quyền lợi hợp pháp của người lao động như tiền lương, bảo hiểm và an toàn lao động.', v: 'Đây là nội dung quan trọng của trách nhiệm xã hội doanh nghiệp.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: false, t: 'Doanh nghiệp có quyền tự do xả thải ra môi trường nếu đã nộp đủ thuế.', v: 'Nộp thuế không thay thế nghĩa vụ bảo vệ môi trường. Xả thải trái phép là vi phạm pháp luật.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Cạnh tranh lành mạnh là động lực thúc đẩy doanh nghiệp đổi mới và nâng cao chất lượng sản phẩm.', v: 'Pháp luật cấm các hành vi cạnh tranh không lành mạnh.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 3, a: true,  t: 'Ý tưởng kinh doanh tốt cần xuất phát từ nhu cầu thực tế của thị trường và lợi thế của người kinh doanh.', v: 'Kèm theo đánh giá khả năng thực hiện và rủi ro.' },
+{ cd: 'Doanh nghiệp – Thuế', m: 2, a: true,  t: 'Kế hoạch kinh doanh thường gồm mục tiêu, sản phẩm, thị trường, đối thủ, nguồn lực và các bước triển khai.', v: 'Giúp chủ động và giảm rủi ro khi khởi nghiệp.' },
+
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: false, t: 'Người từ đủ 16 tuổi trở lên được tham gia bầu cử đại biểu Quốc hội.', v: 'Phải đủ 18 tuổi trở lên.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Công dân có quyền khiếu nại, tố cáo với cơ quan nhà nước có thẩm quyền.', v: 'Khiếu nại nhằm bảo vệ quyền lợi của chính mình; tố cáo nhằm báo về hành vi vi phạm pháp luật.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: false, t: 'Khiếu nại và tố cáo là hai khái niệm hoàn toàn giống nhau.', v: 'Khiếu nại là đề nghị xem xét lại quyết định ảnh hưởng tới quyền lợi CỦA MÌNH; tố cáo là báo về hành vi vi phạm gây hại cho nhà nước, tổ chức, cá nhân khác.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Công dân có quyền bất khả xâm phạm về thân thể, chỗ ở và bí mật thư tín.', v: 'Việc bắt người, khám xét chỗ ở phải theo trình tự pháp luật quy định.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: false, t: 'Bất kì ai cũng có quyền bắt người mà mình nghi ngờ phạm tội.', v: 'Chỉ được bắt người theo quyết định của cơ quan có thẩm quyền, trừ trường hợp phạm tội quả tang hoặc đang bị truy nã.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Công dân được bắt người trong trường hợp phạm tội quả tang hoặc đang bị truy nã.', v: 'Sau khi bắt phải giải ngay đến cơ quan công an, viện kiểm sát hoặc uỷ ban nhân dân gần nhất.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Bình đẳng trong lao động thể hiện ở quyền tự do lựa chọn việc làm và bình đẳng giữa lao động nam và lao động nữ.', v: 'Không phân biệt đối xử về giới trong tuyển dụng và trả lương.' },
+{ cd: 'Quyền & nghĩa vụ', m: 3, a: false, t: 'Người sử dụng lao động được quyền trả lương cho lao động nữ thấp hơn lao động nam khi làm cùng công việc.', v: 'Vi phạm nguyên tắc BÌNH ĐẲNG GIỚI trong lao động — cùng công việc phải trả lương như nhau.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Công dân từ đủ 18 tuổi đến hết 25 tuổi thuộc diện gọi nhập ngũ, có thể kéo dài đến 27 tuổi với người được đào tạo trình độ cao đẳng, đại học.', v: 'Đây là nghĩa vụ bảo vệ Tổ quốc.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Quyền tự do tín ngưỡng, tôn giáo của công dân được pháp luật bảo hộ, nhưng không được lợi dụng để vi phạm pháp luật.', v: 'Mọi tôn giáo đều bình đẳng trước pháp luật.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: false, t: 'Người theo tôn giáo được miễn trừ trách nhiệm pháp lí khi vi phạm pháp luật.', v: 'Mọi công dân đều bình đẳng trước pháp luật, không có ngoại lệ vì lí do tôn giáo.' },
+{ cd: 'Quyền & nghĩa vụ', m: 3, a: true,  t: 'Trách nhiệm pháp lí gồm bốn loại: hình sự, hành chính, dân sự và kỉ luật.', v: 'Tuỳ tính chất và mức độ vi phạm mà áp dụng loại trách nhiệm tương ứng.' },
+{ cd: 'Quyền & nghĩa vụ', m: 2, a: true,  t: 'Vi phạm pháp luật là hành vi trái pháp luật, có lỗi, do người có năng lực trách nhiệm pháp lí thực hiện.', v: 'Đủ ba dấu hiệu này mới cấu thành vi phạm pháp luật.' },
+
+{ cd: 'Pháp luật quốc tế', m: 2, a: false, t: 'Điều ước quốc tế chỉ có hiệu lực với các quốc gia là thành viên Liên hợp quốc.', v: 'Điều ước có hiệu lực với các bên KÍ KẾT và phê chuẩn nó, không phụ thuộc tư cách thành viên Liên hợp quốc.' },
+{ cd: 'Pháp luật quốc tế', m: 2, a: false, t: 'Một quốc gia có thể tuỳ ý không thực hiện điều ước quốc tế mà mình đã phê chuẩn.', v: 'Vi phạm nguyên tắc tận tâm thực hiện cam kết quốc tế.' },
+{ cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Nguyên tắc không can thiệp vào công việc nội bộ của quốc gia khác là nguyên tắc cơ bản của pháp luật quốc tế.', v: 'Xuất phát từ nguyên tắc bình đẳng chủ quyền giữa các quốc gia.' },
+{ cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Công dân nước ngoài cư trú tại Việt Nam phải tuân theo pháp luật Việt Nam.', v: 'Trừ những trường hợp được hưởng quyền ưu đãi, miễn trừ ngoại giao theo điều ước quốc tế.' },
+{ cd: 'Pháp luật quốc tế', m: 3, a: true,  t: 'Khi điều ước quốc tế mà Việt Nam là thành viên có quy định khác với luật trong nước, thường áp dụng quy định của điều ước quốc tế.', v: 'Theo nguyên tắc được ghi nhận trong pháp luật Việt Nam.' },
+{ cd: 'Pháp luật quốc tế', m: 2, a: true,  t: 'Hợp tác quốc tế là một trong các nguyên tắc cơ bản của pháp luật quốc tế nhằm giải quyết các vấn đề toàn cầu.', v: 'Như biến đổi khí hậu, dịch bệnh, khủng bố, tội phạm xuyên quốc gia.' }
+);

@@ -136,3 +136,135 @@ TD.KHO.ly_ct = [
   vd: 'A = 5 cm, ω = 10 rad/s ⇒ v<sub>max</sub> = <b>50 cm/s</b>, a<sub>max</sub> = <b>500 cm/s²</b>.',
   bay: 'a luôn NGƯỢC dấu với x và hướng về vị trí cân bằng. Tại biên: v = 0, a cực đại. Tại VTCB: v cực đại, a = 0.' }
 ];
+
+TD.KHO.ly_ct.push(
+{ nhom: 'I. Vật lí nhiệt', ten: 'Số mol, khối lượng & số phân tử', cap: 2,
+  ct: '<b>n = m/M = N/N<sub>A</sub></b> với N<sub>A</sub> = 6,02·10²³ phân tử/mol<br>' +
+      'Số phân tử: N = n·N<sub>A</sub> = (m/M)·N<sub>A</sub><br>' +
+      'Khối lượng một phân tử: m₀ = M/N<sub>A</sub><br>' +
+      '<b>Liên hệ hằng số:</b> R = k·N<sub>A</sub> ⇒ 8,31 = 1,38·10⁻²³ × 6,02·10²³',
+  khi: 'Bài nối giữa vĩ mô (khối lượng, áp suất) và vi mô (số phân tử, động năng).',
+  vd: '2 g khí H₂ (M = 2) là 1 mol, chứa 6,02·10²³ phân tử.',
+  bay: 'Đừng nhầm khối lượng mol M (g/mol) với khối lượng một phân tử m₀ (kg).' },
+
+{ nhom: 'I. Vật lí nhiệt', ten: 'Hiệu suất & động cơ nhiệt', cap: 3,
+  ct: '<b>H = A/Q₁ = (Q₁ − Q₂)/Q₁</b><br>' +
+      '&nbsp;&nbsp;Q₁: nhiệt nhận từ nguồn nóng · Q₂: nhiệt nhả cho nguồn lạnh · A: công sinh ra<br>' +
+      '<b>Hiệu suất cực đại (chu trình Carnot):</b> H<sub>max</sub> = 1 − T₂/T₁ (nhiệt độ tính bằng K)<br>' +
+      'Hiệu suất luôn nhỏ hơn 100% — hệ quả của nguyên lí II nhiệt động lực học.',
+  khi: 'Câu về động cơ nhiệt, hiệu suất chuyển hoá năng lượng.',
+  vd: 'Nguồn nóng 500 K, nguồn lạnh 300 K ⇒ H<sub>max</sub> = 1 − 300/500 = <b>40%</b>.',
+  bay: 'Không thể có động cơ nhiệt hiệu suất 100% — mọi phương án ghi 100% đều sai.' },
+
+{ nhom: 'II. Khí lí tưởng', ten: 'Đồ thị các đẳng quá trình', cap: 3,
+  ct: '<table class="kq small"><tr><th>Quá trình</th><th>p–V</th><th>p–T</th><th>V–T</th></tr>' +
+      '<tr><td>Đẳng nhiệt (T const)</td><td><b>hypebol</b></td><td>đường thẳng đứng</td><td>đường thẳng đứng</td></tr>' +
+      '<tr><td>Đẳng tích (V const)</td><td>đường thẳng đứng</td><td><b>đường thẳng qua gốc O</b></td><td>đường thẳng ngang</td></tr>' +
+      '<tr><td>Đẳng áp (p const)</td><td>đường thẳng ngang</td><td>đường thẳng ngang</td><td><b>đường thẳng qua gốc O</b></td></tr></table>' +
+      'Đường đẳng nhiệt ở nhiệt độ càng cao thì càng xa gốc toạ độ trên đồ thị p–V.',
+  khi: 'Câu cho đồ thị rồi hỏi quá trình nào, hoặc so sánh trạng thái.',
+  vd: 'Đường thẳng kéo dài đi qua gốc toạ độ trên đồ thị p–T ⇒ đó là quá trình ĐẲNG TÍCH.',
+  bay: 'Đường thẳng qua gốc toạ độ chỉ đúng khi trục nhiệt độ là KELVIN. Với trục °C thì đường thẳng cắt trục tại −273.' },
+
+{ nhom: 'III. Từ trường', ten: 'Cảm ứng từ của dòng điện', cap: 3,
+  ct: '<b>Dây dẫn thẳng dài:</b> B = 2·10⁻⁷·I/r<br>' +
+      '<b>Tâm vòng dây tròn</b> bán kính R, N vòng: B = 2π·10⁻⁷·N·I/R<br>' +
+      '<b>Trong lòng ống dây dài:</b> <b>B = 4π·10⁻⁷·n·I</b> với n = N/ℓ (số vòng trên mỗi mét)<br>' +
+      '<b>Nguyên lí chồng chất:</b> B⃗ = B⃗₁ + B⃗₂ + … (cộng vectơ)',
+  khi: 'Bài tính từ trường do dòng điện sinh ra.',
+  vd: 'Ống dây dài 50 cm có 1000 vòng, I = 2 A ⇒ n = 2000 vòng/m ⇒ B = 4π·10⁻⁷·2000·2 ≈ <b>5,03·10⁻³ T</b>.',
+  bay: 'Trong công thức ống dây, n là số vòng TRÊN MỖI MÉT, không phải tổng số vòng N.' },
+
+{ nhom: 'III. Từ trường', ten: 'Chuyển động của hạt trong từ trường', cap: 3,
+  ct: '<b>Lực Lorentz: f = |q|·v·B·sinθ</b><br>' +
+      'Hạt bay <b>vuông góc</b> với B⃗ ⇒ chuyển động <b>tròn đều</b> với:<br>' +
+      '&nbsp;&nbsp;<b>Bán kính R = mv/(|q|B)</b><br>' +
+      '&nbsp;&nbsp;Chu kì T = 2πm/(|q|B) — <b>không phụ thuộc vận tốc</b><br>' +
+      'Lực Lorentz luôn vuông góc vận tốc ⇒ <b>không sinh công</b>, không đổi độ lớn vận tốc.',
+  khi: 'Câu về máy gia tốc, ống phóng điện tử, khối phổ kế.',
+  vd: 'Hạt bay SONG SONG với B⃗ (θ = 0) ⇒ f = 0 ⇒ chuyển động thẳng đều.',
+  bay: 'Chu kì chuyển động tròn KHÔNG phụ thuộc vào vận tốc hạt — kết quả phản trực giác nhưng hay được hỏi.' },
+
+{ nhom: 'III. Từ trường', ten: 'Dòng điện xoay chiều — công suất', cap: 3,
+  ct: '<b>Máy phát điện xoay chiều:</b> tần số f = n·p/60 (n vòng/phút, p số cặp cực) hoặc f = n·p (n vòng/giây)<br>' +
+      '<b>Suất điện động cực đại:</b> E₀ = NBSω với ω = 2πf<br>' +
+      '<b>Giá trị hiệu dụng:</b> U = U₀/√2 ; I = I₀/√2 ; E = E₀/√2<br>' +
+      '<b>Công suất tiêu thụ:</b> P = U·I·cosφ &nbsp;·&nbsp; <b>Công suất toả nhiệt:</b> P = I²R<br>' +
+      '<b>Hiệu suất truyền tải:</b> H = (P − P<sub>hp</sub>)/P với P<sub>hp</sub> = P²R/(U²cos²φ)',
+  khi: 'Bài máy phát, truyền tải điện năng.',
+  vd: 'Máy phát có 4 cặp cực quay 750 vòng/phút ⇒ f = 750·4/60 = <b>50 Hz</b>.',
+  bay: 'Số cặp cực p khác số cực (số cực = 2p). Đọc kỹ đề cho cái nào.' },
+
+{ nhom: 'IV. Hạt nhân', ten: 'Số hạt nhân trong một mẫu chất', cap: 3,
+  ct: '<b>N = (m/A)·N<sub>A</sub></b> với A là số khối (coi như khối lượng mol tính bằng g/mol)<br>' +
+      '<b>Độ phóng xạ: H = λ·N</b> với λ = ln2/T<br>' +
+      '&nbsp;&nbsp;H = H₀·2^(−t/T), đơn vị becquerel (Bq); 1 Ci = 3,7·10¹⁰ Bq<br>' +
+      '<b>Số hạt đã phân rã:</b> ΔN = N₀(1 − 2^(−t/T))<br>' +
+      '<b>Tỉ số còn lại / đã rã:</b> N/ΔN = 2^(−t/T)/(1 − 2^(−t/T))',
+  khi: 'Bài tính số hạt, độ phóng xạ, xác định tuổi cổ vật.',
+  vd: '1 g ²³⁸U chứa N = (1/238)·6,02·10²³ ≈ <b>2,53·10²¹</b> hạt nhân.',
+  bay: 'Chu kì bán rã T và hằng số phóng xạ λ tỉ lệ NGHỊCH: λ = ln2/T ≈ 0,693/T.' },
+
+{ nhom: 'IV. Hạt nhân', ten: 'Năng lượng phân hạch & nhiệt hạch', cap: 3,
+  ct: '<b>Năng lượng toả ra của N phản ứng:</b> E = N·ΔE<br>' +
+      'Với m gam nhiên liệu: N = (m/A)·N<sub>A</sub> ⇒ <b>E = (m/A)·N<sub>A</sub>·ΔE</b><br>' +
+      '<b>Phân hạch ²³⁵U:</b> mỗi phản ứng toả ≈ <b>200 MeV</b><br>' +
+      '<b>Nhiệt hạch D–T:</b> mỗi phản ứng toả ≈ <b>17,6 MeV</b><br>' +
+      'Đổi đơn vị: 1 MeV = 1,6·10⁻¹³ J · 1 eV = 1,6·10⁻¹⁹ J',
+  khi: 'Bài tính năng lượng nhà máy điện hạt nhân, so sánh với nhiên liệu hoá thạch.',
+  vd: '1 g ²³⁵U phân hạch hết toả ≈ (1/235)·6,02·10²³·200 MeV ≈ <b>8,2·10¹⁰ J</b> — tương đương gần 3 tấn than.',
+  bay: 'Tính trên MỖI NUCLON thì nhiệt hạch toả nhiều hơn; nhưng một phản ứng phân hạch đơn lẻ lại toả nhiều hơn.' },
+
+{ nhom: 'IV. Hạt nhân', ten: 'Bảo toàn trong phản ứng hạt nhân', cap: 3,
+  ct: 'Với phản ứng A + B → C + D, các đại lượng <b>bảo toàn</b>:<br>' +
+      '&nbsp;&nbsp;① <b>Số nuclon A</b> (số khối) &nbsp;② <b>Điện tích Z</b><br>' +
+      '&nbsp;&nbsp;③ <b>Động lượng</b> p⃗ &nbsp;④ <b>Năng lượng toàn phần</b><br>' +
+      '<b>KHÔNG bảo toàn:</b> khối lượng nghỉ, số proton riêng, số neutron riêng.<br>' +
+      '<b>Năng lượng phản ứng:</b> ΔE = (m<sub>trước</sub> − m<sub>sau</sub>)·931,5 (MeV) = W<sub>lk sau</sub> − W<sub>lk trước</sub><br>' +
+      'Liên hệ động lượng – động năng: <b>p² = 2mW<sub>đ</sub></b>',
+  khi: 'Viết phương trình phản ứng, tính năng lượng, tính động năng các hạt.',
+  vd: 'Cân bằng ²³⁵U + n → ¹⁴⁴Ba + ⁸⁹Kr + x·n ⇒ theo số khối: 236 = 144 + 89 + x ⇒ <b>x = 3</b>.',
+  bay: 'Số proton và số neutron riêng lẻ KHÔNG bảo toàn, chỉ tổng số nuclon mới bảo toàn.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Momen lực & cân bằng vật rắn', cap: 2,
+  ct: '<b>M = F·d</b> (d là cánh tay đòn — khoảng cách từ trục quay đến giá của lực), đơn vị N·m<br>' +
+      '<b>Điều kiện cân bằng của vật có trục quay:</b> ΣM<sub>thuận</sub> = ΣM<sub>nghịch</sub><br>' +
+      '<b>Điều kiện cân bằng của chất điểm:</b> ΣF⃗ = 0⃗<br>' +
+      '<b>Quy tắc hợp lực song song cùng chiều:</b> F = F₁ + F₂ và F₁/F₂ = d₂/d₁',
+  khi: 'Bài đòn bẩy, cân, thanh chịu lực.',
+  vd: 'Lực có giá đi qua trục quay thì cánh tay đòn d = 0 ⇒ momen bằng 0, không làm vật quay.',
+  bay: 'Cánh tay đòn là khoảng cách VUÔNG GÓC từ trục quay tới giá của lực, không phải tới điểm đặt lực.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Sóng cơ & giao thoa', cap: 3,
+  ct: '<b>v = λf = λ/T</b><br>' +
+      '<b>Độ lệch pha giữa hai điểm</b> cách nhau d: Δφ = 2πd/λ<br>' +
+      '&nbsp;&nbsp;Cùng pha ⇔ d = kλ · Ngược pha ⇔ d = (k + ½)λ<br>' +
+      '<b>Giao thoa hai nguồn cùng pha:</b><br>' +
+      '&nbsp;&nbsp;Cực đại (dao động mạnh nhất): d₂ − d₁ = <b>kλ</b><br>' +
+      '&nbsp;&nbsp;Cực tiểu (đứng yên): d₂ − d₁ = <b>(k + ½)λ</b><br>' +
+      '<b>Sóng dừng:</b> khoảng cách giữa hai nút liên tiếp = λ/2',
+  khi: 'Câu về sóng cơ, sóng âm, giao thoa.',
+  vd: 'Sóng có f = 50 Hz, v = 20 m/s ⇒ λ = v/f = <b>0,4 m</b>.',
+  bay: 'Khi sóng truyền sang môi trường khác, TẦN SỐ không đổi còn v và λ thay đổi.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Điện trường & tụ điện', cap: 2,
+  ct: '<b>Coulomb:</b> F = k·|q₁q₂|/(ε·r²) với k = 9·10⁹ N·m²/C²<br>' +
+      '<b>Cường độ điện trường:</b> E = F/q = k·|Q|/(ε·r²), đơn vị V/m<br>' +
+      '<b>Hiệu điện thế:</b> U = E·d (điện trường đều) · <b>Công lực điện:</b> A = q·U<br>' +
+      '<b>Tụ điện:</b> C = Q/U (đơn vị fara) · Năng lượng W = ½CU² = ½QU = Q²/(2C)<br>' +
+      '&nbsp;&nbsp;Ghép nối tiếp: 1/C = Σ1/Cᵢ · Ghép song song: C = ΣCᵢ',
+  khi: 'Câu về điện tích, điện trường, tụ điện (Vật lí 11).',
+  vd: 'Điện trường đều giữa hai bản cách nhau 2 cm, U = 100 V ⇒ E = 100/0,02 = <b>5000 V/m</b>.',
+  bay: 'Ghép tụ NGƯỢC với ghép điện trở: tụ song song thì cộng điện dung, tụ nối tiếp thì cộng nghịch đảo.' },
+
+{ nhom: 'V. Lớp 10–11', ten: 'Năng lượng trong dao động điều hoà', cap: 3,
+  ct: '<b>Cơ năng: W = ½kA² = ½mω²A² = const</b><br>' +
+      'Động năng W<sub>đ</sub> = ½mv² · Thế năng W<sub>t</sub> = ½kx²<br>' +
+      '<b>W = W<sub>đ</sub> + W<sub>t</sub></b> — không đổi theo thời gian.<br>' +
+      'W<sub>đ</sub> và W<sub>t</sub> biến thiên tuần hoàn với tần số <b>gấp đôi</b> tần số dao động (chu kì T/2).<br>' +
+      'Tại vị trí W<sub>đ</sub> = W<sub>t</sub>: <b>x = ±A/√2</b><br>' +
+      'Hệ thức độc lập: <b>A² = x² + v²/ω²</b>',
+  khi: 'Câu về năng lượng dao động, tìm li độ theo điều kiện năng lượng.',
+  vd: 'Tại biên: W = W<sub>t</sub> (động năng bằng 0). Tại vị trí cân bằng: W = W<sub>đ</sub> (thế năng bằng 0).',
+  bay: 'Cơ năng KHÔNG đổi, nhưng động năng và thế năng thì biến thiên với tần số GẤP ĐÔI tần số dao động.' }
+);

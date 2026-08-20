@@ -7,16 +7,6 @@
    ============================================================ */
 window.TD = window.TD || {};
 
-/* Xáo mảng bằng bộ ngẫu nhiên có hạt giống (để cùng seed cho cùng đề) */
-TD.xaoR = function (R, a) {
-  const b = a.slice();
-  for (let i = b.length - 1; i > 0; i--) {
-    const j = Math.floor(R() * (i + 1));
-    [b[i], b[j]] = [b[j], b[i]];
-  }
-  return b;
-};
-
 /* Mỗi phần tử kho: { t: 'nội dung', v: 'vì sao' } */
 TD.mcTu = function (R, de, khoDung, khoSai, meo) {
   const d = R.chon(khoDung);

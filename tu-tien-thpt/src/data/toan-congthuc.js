@@ -139,3 +139,142 @@ TD.KHO.toan_ct = [
   vd: 'CSN u₁ = 2, q = 3: u₅ = 2·3⁴ = <b>162</b>; S₅ = 2(1−243)/(1−3) = <b>242</b>.',
   bay: 'Công thức S<sub>n</sub> của CSN chỉ dùng khi q ≠ 1. Nếu q = 1 thì S<sub>n</sub> = n·u₁.' }
 ];
+
+TD.KHO.toan_ct.push(
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'Đạo hàm hàm hợp & bảng mở rộng', cap: 2,
+  ct: '<b>[f(u)]′ = f′(u)·u′</b> — quy tắc dây chuyền, gốc của mọi bài đạo hàm phức tạp.<br>' +
+      '(uⁿ)′ = n·uⁿ⁻¹·u′ &nbsp;·&nbsp; (√u)′ = u′/(2√u) &nbsp;·&nbsp; (1/u)′ = −u′/u²<br>' +
+      '(e^u)′ = u′·e^u &nbsp;·&nbsp; (a^u)′ = u′·a^u·ln a &nbsp;·&nbsp; <b>(ln u)′ = u′/u</b><br>' +
+      '(sin u)′ = u′·cos u &nbsp;·&nbsp; (cos u)′ = −u′·sin u &nbsp;·&nbsp; (tan u)′ = u′/cos²u<br>' +
+      '<b>Đạo hàm cấp hai:</b> y″ = (y′)′ — dùng để xét cực trị và điểm uốn.',
+  khi: 'Mọi bài có hàm lồng trong hàm.',
+  vd: 'y = ln(x² + 1) ⇒ y′ = (x² + 1)′/(x² + 1) = <b>2x/(x² + 1)</b>.',
+  bay: 'Quên nhân u′ là lỗi phổ biến nhất. Luôn tự hỏi "bên trong là gì?" trước khi đạo hàm.' },
+
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'Điểm uốn & tính lồi lõm', cap: 3,
+  ct: '<b>y″ > 0</b> trên khoảng K ⇒ đồ thị <b>lõm</b> (quay bề lõm lên trên) trên K.<br>' +
+      '<b>y″ < 0</b> ⇒ đồ thị <b>lồi</b>.<br>' +
+      '<b>Điểm uốn:</b> điểm mà y″ đổi dấu khi đi qua.<br>' +
+      'Hàm bậc ba y = ax³+bx²+cx+d luôn có <b>đúng một điểm uốn</b> tại x = −b/(3a), và điểm uốn chính là <b>tâm đối xứng</b> của đồ thị.',
+  khi: 'Câu hỏi về dạng đồ thị, tâm đối xứng, hoặc dùng dấu hiệu 2 để xét cực trị.',
+  vd: 'y = x³ − 3x² + 2 ⇒ y″ = 6x − 6 = 0 ⇒ x = 1 là điểm uốn và là tâm đối xứng.',
+  bay: 'y″(x₀) = 0 chưa đủ để x₀ là điểm uốn — y″ phải ĐỔI DẤU qua x₀.' },
+
+{ nhom: 'I. Đạo hàm – Khảo sát', ten: 'Nhận dạng đồ thị hàm số', cap: 2,
+  ct: '<table class="kq small"><tr><th>Đồ thị</th><th>Dấu hiệu nhận biết</th></tr>' +
+      '<tr><td>Bậc ba</td><td>Hai "khúc uốn"; a > 0 thì nhánh phải đi lên; có 2 hoặc 0 cực trị</td></tr>' +
+      '<tr><td>Trùng phương</td><td><b>Đối xứng qua trục tung</b>; hình chữ W (a>0, 3 cực trị) hoặc chữ U (1 cực trị)</td></tr>' +
+      '<tr><td>Phân thức bậc nhất/bậc nhất</td><td>Hai nhánh hypebol, có TCĐ và TCN, <b>không có cực trị</b></td></tr>' +
+      '<tr><td>Phân thức bậc hai/bậc nhất</td><td>Có TCĐ và <b>TCX</b>; có thể có 2 cực trị</td></tr></table>' +
+      '<b>Đọc hệ số từ đồ thị:</b> giao với Oy cho d (hoặc c); nhánh cuối bên phải đi lên ⇒ a > 0.',
+  khi: 'Câu cho hình vẽ đồ thị rồi hỏi dấu các hệ số hoặc số nghiệm phương trình.',
+  vd: 'Đồ thị đối xứng qua trục tung ⇒ hàm chẵn ⇒ chỉ chứa luỹ thừa bậc chẵn ⇒ hàm trùng phương.',
+  bay: 'Số nghiệm của f(x) = m chính là số giao điểm của đồ thị với đường thẳng NGANG y = m.' },
+
+{ nhom: 'II. Mũ – Logarit', ten: 'Bài toán thực tế mũ – logarit', cap: 3,
+  ct: '<b>Lãi kép:</b> A = P(1 + r)ⁿ &nbsp;·&nbsp; <b>Lãi đơn:</b> A = P(1 + rn)<br>' +
+      '<b>Tăng trưởng/phân rã liên tục:</b> A = P·e^(rt)<br>' +
+      '<b>Vay trả góp</b> (trả đều mỗi kì số tiền m): m = P·r(1+r)ⁿ / [(1+r)ⁿ − 1]<br>' +
+      '<b>Tìm số kì n:</b> lấy logarit hai vế — n = log<sub>(1+r)</sub>(A/P) = ln(A/P)/ln(1+r)<br>' +
+      '<b>Thang đo logarit:</b> pH = −log[H⁺] · độ Richter · decibel L = 10·log(I/I₀)',
+  khi: 'Câu vận dụng thực tế — dạng ra rất đều ở phần trả lời ngắn.',
+  vd: 'Gửi 100 triệu lãi 6%/năm, sau bao lâu được 200 triệu? n = ln2/ln(1,06) ≈ <b>11,9 năm</b> ⇒ 12 năm.',
+  bay: 'Đề hỏi "sau ít nhất bao nhiêu năm" thì phải làm tròn LÊN, không làm tròn thông thường.' },
+
+{ nhom: 'III. Nguyên hàm – Tích phân', ten: 'Bảng nguyên hàm mở rộng', cap: 3,
+  ct: '∫(1/(ax+b))dx = (1/a)·ln|ax+b| + C<br>' +
+      '∫e^(ax+b)dx = (1/a)·e^(ax+b) + C<br>' +
+      '∫sin(ax+b)dx = −(1/a)·cos(ax+b) + C &nbsp;·&nbsp; ∫cos(ax+b)dx = (1/a)·sin(ax+b) + C<br>' +
+      '∫tan x dx = −ln|cos x| + C &nbsp;·&nbsp; ∫cot x dx = ln|sin x| + C<br>' +
+      '<b>Hạ bậc:</b> sin²x = (1 − cos2x)/2 ; cos²x = (1 + cos2x)/2 — dùng khi gặp sin²x, cos²x.',
+  khi: 'Tích phân có hàm lượng giác hoặc hàm hợp bậc nhất.',
+  vd: '∫₀^(π/2) sin²x dx = ∫₀^(π/2)(1 − cos2x)/2 dx = <b>π/4</b>.',
+  bay: 'Luôn nhớ hệ số 1/a khi biến bên trong là ax + b. Với sin²/cos² phải hạ bậc trước, không tích phân trực tiếp.' },
+
+{ nhom: 'III. Nguyên hàm – Tích phân', ten: 'Tích phân hàm cho bởi đồ thị / bảng', cap: 4,
+  ct: '<b>Tích phân = diện tích đại số</b> dưới đồ thị: phần trên trục hoành tính dương, phần dưới tính âm.<br>' +
+      '⇒ Nhìn đồ thị, chia thành các hình tam giác/hình thang/nửa đường tròn quen thuộc rồi cộng đại số.<br>' +
+      '<b>Diện tích hình phẳng</b> thì ngược lại: mọi phần đều tính DƯƠNG (lấy trị tuyệt đối).<br>' +
+      'Nếu đề cho f′(x) và biết f(a), thì <b>f(b) = f(a) + ∫<sub>a</sub><sup>b</sup>f′(x)dx</b>.',
+  khi: 'Câu cho đồ thị của f hoặc f′ rồi hỏi giá trị tích phân hoặc so sánh f tại các điểm.',
+  vd: 'Đồ thị f′ nằm trên trục hoành trên (a;b) ⇒ f tăng trên (a;b) ⇒ f(b) > f(a).',
+  bay: 'Phân biệt rõ TÍCH PHÂN (có dấu) và DIỆN TÍCH (luôn dương) — đây là bẫy chính của dạng này.' },
+
+{ nhom: 'IV. Oxyz', ten: 'Vị trí tương đối trong Oxyz', cap: 3,
+  ct: '<b>Hai mặt phẳng:</b> song song ⇔ n⃗₁ ∥ n⃗₂ và D₁ ≠ D₂ · trùng ⇔ n⃗₁ ∥ n⃗₂ và D₁ = D₂ · vuông góc ⇔ n⃗₁·n⃗₂ = 0<br>' +
+      '<b>Đường thẳng và mặt phẳng:</b> d ∥ (P) ⇔ u⃗·n⃗ = 0 và M ∉ (P) · d ⊥ (P) ⇔ u⃗ ∥ n⃗<br>' +
+      '<b>Đường thẳng và mặt cầu:</b> so d(I, d) với R<br>' +
+      '<b>Hai đường thẳng:</b> chéo nhau ⇔ [u⃗₁, u⃗₂]·M₁M₂⃗ ≠ 0<br>' +
+      '<b>Góc:</b> giữa hai đường thẳng cos φ = |u⃗₁·u⃗₂|/(|u⃗₁||u⃗₂|) · giữa đường thẳng và mặt phẳng <b>sin</b> φ = |u⃗·n⃗|/(|u⃗||n⃗|)',
+  khi: 'Câu xét vị trí tương đối, tính góc.',
+  vd: 'Góc giữa đường thẳng và mặt phẳng dùng SIN chứ không dùng COS — đây là điểm khác biệt bắt buộc nhớ.',
+  bay: 'Mọi công thức góc đều lấy TRỊ TUYỆT ĐỐI ở tử để góc nằm trong [0°; 90°].' },
+
+{ nhom: 'IV. Oxyz', ten: 'Hình chiếu & điểm đối xứng', cap: 4,
+  ct: '<b>Hình chiếu H của M lên mặt phẳng (P):</b> viết đường thẳng qua M, vuông góc (P) (nhận n⃗ làm vectơ chỉ phương), rồi tìm giao với (P).<br>' +
+      '<b>Điểm M′ đối xứng M qua (P):</b> H là trung điểm MM′ ⇒ M′ = 2H − M.<br>' +
+      '<b>Hình chiếu lên các mặt phẳng toạ độ:</b> M(a;b;c) → (Oxy): (a;b;0) · (Oyz): (0;b;c) · (Oxz): (a;0;c)<br>' +
+      '<b>Đối xứng qua trục Ox:</b> (a;−b;−c) · <b>qua gốc O:</b> (−a;−b;−c)',
+  khi: 'Câu vận dụng cao Oxyz về khoảng cách, cực trị hình học.',
+  vd: 'd(M, (Oxy)) = |z<sub>M</sub>| — dùng rất nhiều khi xét mặt cầu tiếp xúc mặt phẳng toạ độ.',
+  bay: 'Nhớ M′ = 2H − M chứ không phải H − M.' },
+
+{ nhom: 'V. Thống kê', ten: 'Trung vị, mốt & tứ phân vị mẫu ghép nhóm [MỚI]', cap: 3, moi: true,
+  ct: '<b>Trung vị M<sub>e</sub> = Q₂</b>, tính theo công thức tứ phân vị với k = 2.<br>' +
+      '<b>Q<sub>k</sub> = u<sub>m</sub> + [(k·n/4 − C)/n<sub>m</sub>]·(u<sub>m+1</sub> − u<sub>m</sub>)</b><br>' +
+      '&nbsp;&nbsp;• u<sub>m</sub>: đầu mút trái nhóm chứa Q<sub>k</sub> · n<sub>m</sub>: tần số nhóm đó<br>' +
+      '&nbsp;&nbsp;• C: tần số tích luỹ của các nhóm ĐỨNG TRƯỚC nhóm đó<br>' +
+      '<b>Mốt M₀</b> nằm ở nhóm có tần số lớn nhất:<br>' +
+      '&nbsp;&nbsp;M₀ = u<sub>m</sub> + [(n<sub>m</sub> − n<sub>m−1</sub>)/((n<sub>m</sub>−n<sub>m−1</sub>)+(n<sub>m</sub>−n<sub>m+1</sub>))]·(u<sub>m+1</sub> − u<sub>m</sub>)',
+  khi: 'Câu thống kê mẫu ghép nhóm — nội dung mới, ra rất đều.',
+  vd: 'Tìm nhóm chứa Q₁: cộng dồn tần số tới khi vượt n/4.',
+  bay: 'C là tần số tích luỹ của các nhóm TRƯỚC nhóm chứa Q, không bao gồm chính nhóm đó.' },
+
+{ nhom: 'V. Xác suất', ten: 'Biến ngẫu nhiên rời rạc [MỚI]', cap: 3, moi: true,
+  ct: '<b>Bảng phân bố xác suất:</b> liệt kê các giá trị x₁, x₂,… kèm xác suất p₁, p₂,… với <b>Σpᵢ = 1</b>.<br>' +
+      '<b>Kỳ vọng:</b> E(X) = Σ xᵢ·pᵢ — giá trị trung bình mà X nhận được về lâu dài.<br>' +
+      '<b>Phương sai:</b> V(X) = Σ xᵢ²·pᵢ − [E(X)]²<br>' +
+      '<b>Độ lệch chuẩn:</b> σ(X) = √(V(X))',
+  khi: 'Câu về trò chơi may rủi, bảo hiểm, đầu tư — dạng thực tế mới.',
+  vd: 'Tung một con xúc xắc cân đối: E(X) = (1+2+3+4+5+6)/6 = <b>3,5</b>.',
+  bay: 'Luôn kiểm tra Σpᵢ = 1 trước khi tính. Công thức phương sai là "trung bình của bình phương trừ bình phương của trung bình".' },
+
+{ nhom: 'VI. Hình không gian', ten: 'Mặt cầu ngoại tiếp khối đa diện', cap: 4,
+  ct: '<b>Hình hộp chữ nhật a×b×c:</b> R = ½√(a² + b² + c²)<br>' +
+      '<b>Chóp có cạnh bên vuông góc đáy (SA ⊥ đáy):</b> R = ½√(R<sub>đ</sub>² ·4 + SA²) với R<sub>đ</sub> là bán kính đường tròn ngoại tiếp đáy.<br>' +
+      '&nbsp;&nbsp;Viết gọn: <b>R = √(R<sub>đ</sub>² + SA²/4)</b><br>' +
+      '<b>Chóp đều:</b> R = (cạnh bên)²/(2·chiều cao)<br>' +
+      '<b>Tam giác vuông:</b> R<sub>đ</sub> = ½·cạnh huyền · <b>Tam giác đều cạnh a:</b> R<sub>đ</sub> = a/√3',
+  khi: 'Câu vận dụng cao về khối tròn xoay ngoại tiếp.',
+  vd: 'Hình lập phương cạnh a: R = ½·a√3 ⇒ V mặt cầu = (4/3)π(a√3/2)³.',
+  bay: 'Phân biệt mặt cầu NGOẠI tiếp (đi qua các đỉnh) và NỘI tiếp (tiếp xúc các mặt).' },
+
+{ nhom: 'VI. Hình không gian', ten: 'Diện tích & hệ thức lượng tam giác', cap: 2,
+  ct: '<b>S = ½·a·h<sub>a</sub> = ½·ab·sinC = abc/(4R) = p·r = √[p(p−a)(p−b)(p−c)]</b><br>' +
+      '<b>Định lí cosin:</b> a² = b² + c² − 2bc·cosA<br>' +
+      '<b>Định lí sin:</b> a/sinA = b/sinB = c/sinC = 2R<br>' +
+      '<b>Tam giác đều cạnh a:</b> S = a²√3/4, đường cao a√3/2<br>' +
+      '<b>Hình thang:</b> S = ½(a+b)·h · <b>Hình bình hành:</b> S = a·h = ab·sinα',
+  khi: 'Tính diện tích đáy trong bài khối đa diện.',
+  vd: 'Tam giác vuông cân cạnh góc vuông a: S = a²/2.',
+  bay: 'Nhớ tam giác ĐỀU cạnh a có S = a²√3/4 — công thức xuất hiện dày đặc trong hình không gian.' },
+
+{ nhom: 'VII. Dãy số', ten: 'Bất đẳng thức & giá trị lớn nhất nhỏ nhất', cap: 3,
+  ct: '<b>AM–GM (Cauchy) hai số:</b> a + b ≥ 2√(ab), dấu "=" khi a = b (a, b ≥ 0)<br>' +
+      '<b>Ba số:</b> a + b + c ≥ 3∛(abc)<br>' +
+      '<b>Hệ quả hay dùng:</b> a + 1/a ≥ 2 với a > 0<br>' +
+      '<b>Tổng không đổi ⇒ tích lớn nhất khi các số bằng nhau.</b><br>' +
+      '<b>Tích không đổi ⇒ tổng nhỏ nhất khi các số bằng nhau.</b>',
+  khi: 'Bài toán tối ưu thực tế — kiểm tra nhanh đáp án trước khi giải bằng đạo hàm.',
+  vd: 'Hình chữ nhật có chu vi không đổi ⇒ diện tích lớn nhất khi là HÌNH VUÔNG.',
+  bay: 'Điều kiện a, b ≥ 0 là bắt buộc. Luôn chỉ ra dấu "=" xảy ra khi nào.' },
+
+{ nhom: 'VII. Dãy số', ten: 'Lượng giác cơ bản phải thuộc', cap: 2,
+  ct: '<b>sin²x + cos²x = 1</b> · tan x = sin x/cos x · 1 + tan²x = 1/cos²x<br>' +
+      '<b>Công thức nhân đôi:</b> sin2x = 2sinx·cosx · cos2x = cos²x − sin²x = 2cos²x − 1 = 1 − 2sin²x<br>' +
+      '<b>Cộng góc:</b> sin(a±b) = sina·cosb ± cosa·sinb · cos(a±b) = cosa·cosb ∓ sina·sinb<br>' +
+      '<b>Giá trị đặc biệt:</b> sin30° = ½ · sin45° = √2/2 · sin60° = √3/2 · cos60° = ½',
+  khi: 'Tích phân lượng giác, hình học, phương trình lượng giác.',
+  vd: 'cos2x = 1 − 2sin²x ⇒ sin²x = (1 − cos2x)/2 — công thức hạ bậc dùng cho tích phân.',
+  bay: 'Nhớ dấu trong công thức cộng góc: cos đảo dấu (cos(a+b) có dấu TRỪ).' }
+);

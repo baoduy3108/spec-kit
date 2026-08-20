@@ -57,5 +57,34 @@ for (const [k, v] of Object.entries(K)) {
     if (!q.q) { console.error(`✗ ${nhan}: thiếu đề bài`); loi++; }
   });
 }
+/* ---- Tổng kê kho mệnh đề trọng điểm và bộ sinh đề ---- */
+const LT = TD.KHO_LT || {}, GEN = TD.GEN || {};
+if (Object.keys(LT).length) {
+  console.log('\n   KHO MỆNH ĐỀ TRỌNG ĐIỂM (Tà Đạo)');
+  let tongLT = 0;
+  for (const m of (TD.THU_TU_MON || Object.keys(LT))) {
+    const k = LT[m]; if (!k) continue;
+    tongLT += k.length;
+    const d = k.filter(x => x.a).length;
+    const cd = new Set(k.map(x => x.cd)).size;
+    console.log(`   ${m.padEnd(6)} ${String(k.length).padStart(4)} mệnh đề (${d} đúng / ${k.length - d} sai) · ${cd} chủ đề`);
+  }
+  console.log(`   ${'TỔNG'.padEnd(6)} ${String(tongLT).padStart(4)} mệnh đề`);
+}
+if (Object.keys(GEN).length) {
+  console.log('\n   BỘ SINH ĐỀ TỰ ĐỘNG');
+  let tongMau = 0;
+  for (const m of Object.keys(GEN)) { tongMau += GEN[m].length; console.log(`   ${m.padEnd(6)} ${String(GEN[m].length).padStart(4)} dạng bài`); }
+  console.log(`   ${'TỔNG'.padEnd(6)} ${String(tongMau).padStart(4)} dạng bài (mỗi dạng sinh vô hạn biến thể)`);
+}
+if (TD.SO_DE_TA_DAO) {
+  const monCo = (TD.THU_TU_MON || []).filter(m => (LT[m] || []).length >= 8);
+  console.log(`\n   Tà Đạo: ${monCo.length} môn × ${TD.SO_DE_TA_DAO} bộ đề × ${TD.SO_CAU_TA_DAO} câu = `
+    + `${(monCo.length * TD.SO_DE_TA_DAO * TD.SO_CAU_TA_DAO).toLocaleString('vi-VN')} câu lý thuyết`);
+  const monBT = Object.keys(GEN);
+  console.log(`   Cộng ${monBT.length} môn × ${TD.SO_DE_TA_DAO} bộ đề bài tập × ${TD.SO_CAU_TA_DAO} câu = `
+    + `${(monBT.length * TD.SO_DE_TA_DAO * TD.SO_CAU_TA_DAO).toLocaleString('vi-VN')} câu bài tập`);
+}
+
 console.log(loi ? `\n✗ ${loi} lỗi dữ liệu` : '\n✓ Dữ liệu hợp lệ');
 process.exit(loi ? 1 : 0);
