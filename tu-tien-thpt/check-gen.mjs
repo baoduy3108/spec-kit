@@ -54,8 +54,8 @@ for (const mon of Object.keys(TD.GEN)) {
         if (phaiDuong && !isNaN(so) && so <= 0) { bao(mau.ma, `đáp án không dương: ${q.ans}`, q); break; }
         /* Đề đã ghi rõ làm tròn tới hàng nào thì đáp án phải ghi đúng bấy nhiêu chữ số thập phân.
            Thiếu chữ số là học sinh tính đúng vẫn bị chấm sai — lỗi này lời giải không lộ ra. */
-        const BAC = { 'đơn vị': 0, 'phần mười': 1, 'phần trăm': 2, 'phần nghìn': 3, 'phần vạn': 4 };
-        const yc = String(q.q).match(/làm tròn đến hàng (đơn vị|phần mười|phần trăm|phần nghìn|phần vạn)(?! nếu)/);
+        const BAC = { 'đơn vị': 0, 'phần mười': 1, 'phần trăm': 2, 'phần nghìn': 3, 'phần vạn': 4, 'phần trăm nghìn': 5 };
+        const yc = String(q.q).match(/làm tròn đến hàng (phần trăm nghìn|đơn vị|phần mười|phần trăm|phần nghìn|phần vạn)(?! nếu)/);
         if (yc && String(q.ans).indexOf(';') < 0 && !isNaN(so)) {
           const can = BAC[yc[1]];
           const day = so.toFixed(can);                       /* dạng đủ chữ số */
