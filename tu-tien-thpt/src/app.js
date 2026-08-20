@@ -185,6 +185,7 @@ TD.man_luyencong = function (c) {
   TD.THU_TU_MON.forEach(m => {
     const mon = TD.MON[m];
     const soCau = (TD.KHO[m] || []).length;
+    const soMau = TD.soMau(m);
     const cx = TD.doChinhXac(m);
     const t = el('div', 'the mon-the', `
       <div style="display:flex;gap:11px;align-items:center">
@@ -193,7 +194,7 @@ TD.man_luyencong = function (c) {
       </div>
       <p style="font-size:12.6px;color:var(--chu2);margin:9px 0 6px">${mon.slogan}</p>
       <div style="font-size:12px;color:var(--chu3)">
-        ${soCau ? soCau + ' câu hỏi' : 'chưa có câu hỏi'}${cx !== null ? ' · chính xác <b style="color:var(--kim)">' + cx + '%</b>' : ''}
+        ${soMau ? `<b style="color:var(--tim)">${soMau} dạng bài tự sinh (∞ câu)</b> · ` : ''}${soCau ? soCau + ' câu cố định' : (soMau ? '' : 'chưa có câu hỏi')}${cx !== null ? ' · chính xác <b style="color:var(--kim)">' + cx + '%</b>' : ''}
       </div>`);
     t.style.setProperty('--m', mon.mau);
     t.onclick = () => TD.chonMuc(m);
@@ -207,7 +208,7 @@ TD.chonMuc = function (mon) {
   const M = TD.MON[mon];
   const kho = TD.KHO[mon] || [];
 
-  if (!kho.length) {
+  if (!kho.length && !TD.soMau(mon)) {
     c.appendChild(el('div', 'the vien-kim', `<h3>${M.icon} ${M.ten}</h3>
       <p>Môn này chưa có ngân hàng câu hỏi trắc nghiệm${mon === 'van' ? ' (Ngữ văn thi tự luận)' : ''}.
       Hãy vào <b>Tàng Kinh Các</b> để học phần lý thuyết và kỹ năng.</p>
@@ -218,13 +219,13 @@ TD.chonMuc = function (mon) {
     return;
   }
 
-  const dem = {};
-  [1, 2, 3, 4].forEach(m => dem[m] = kho.filter(q => q.muc === m).length);
   const nut = [0, 1, 2, 3, 4].map(m => {
-    const so = m === 0 ? kho.length : dem[m];
+    const soT = m === 0 ? kho.length : kho.filter(q => q.muc === m).length;
+    const soG = TD.soMau(mon, m === 0 ? null : m);
     const ten = m === 0 ? 'Tất cả' : `${TD.MUC[m].ten} <span class="mo-nhat">(${TD.MUC[m].ky})</span>`;
-    return `<button class="nut ${m === 0 ? '' : 'phu'}" ${so ? '' : 'disabled'}
-      onclick="TD.batDauPhien('${mon}',${m},'luyen')">${ten} · ${so} câu</button>`;
+    const mo = soG ? `${soT + soG * 2} câu <span class="mo-nhat">· ${soG} dạng ∞</span>` : `${soT} câu`;
+    return `<button class="nut ${m === 0 ? '' : 'phu'}" ${(soT + soG) ? '' : 'disabled'}
+      onclick="TD.batDauPhien('${mon}',${m},'luyen')">${ten} · ${mo}</button>`;
   }).join('');
 
   c.appendChild(el('div', 'the', `<h3>${M.icon} ${M.ten} — ${M.phai}</h3>
@@ -232,7 +233,10 @@ TD.chonMuc = function (mon) {
     <p style="font-size:13px;color:var(--chu2);margin-top:10px">Cấu trúc đề: ${
       M.tuluan ? 'tự luận ' + M.phut + ' phút'
       : `Phần I ${M.p1} câu${M.p2 ? ' · Phần II ' + M.p2 + ' câu đúng/sai' : ''}${M.p3 ? ' · Phần III ' + M.p3 + ' câu trả lời ngắn' : ''} · ${M.phut} phút`}</p>
-    <hr class="mo"><div class="hang-nut">${nut}</div>
+    <hr class="mo">
+    ${TD.soMau(mon) ? `<p style="font-size:13px;color:var(--tim);margin-bottom:9px">
+      ♾ Môn này có <b>${TD.soMau(mon)} dạng bài tự sinh</b> — mỗi lần vào là số liệu mới, đáp án và lời giải tự tính theo số liệu đó. Cày mãi không hết đề.</p>` : ''}
+    <div class="hang-nut">${nut}</div>
     <div class="hang-nut"><button class="nut phu" onclick="TD.di('luyencong')">← Đổi môn</button></div>`));
 };
 
@@ -244,8 +248,11 @@ TD.batDauPhien = function (mon, muc, cheDo, danhSach, gioiHanPhut) {
   let ds;
   if (danhSach) ds = danhSach;
   else {
-    const kho = TD.layCauHoi(mon, muc || null);
-    ds = TD.xao(kho).map(q => ({ mon: mon, i: (TD.KHO[mon] || []).indexOf(q) }));
+    const tinh = TD.layCauHoi(mon, muc || null)
+      .map(q => ({ mon: mon, i: (TD.KHO[mon] || []).indexOf(q) }));
+    /* câu sinh tự động: mỗi mẫu đề cho vô hạn biến thể nên lấy nhiều gấp đôi */
+    const sinh = TD.sinhNhieu(mon, muc || null, TD.soMau(mon, muc || null) * 2);
+    ds = TD.xao(tinh.concat(sinh));
   }
   if (!ds.length) { TD.bao('Không có câu hỏi phù hợp.', 'lua'); return; }
 
@@ -263,7 +270,9 @@ TD.veCau = function () {
   if (p.vt >= p.ds.length) { TD.ketThucPhien(); return; }
 
   const m = p.ds[p.vt].mon;
-  const q = TD.KHO[m][p.ds[p.vt].i];
+  const q = TD.layCau(p.ds[p.vt]);
+  if (!q) { p.vt++; TD.veCau(); return; }
+  p.cauHienTai = q;
   const M = TD.MON[m], MU = TD.MUC[q.muc];
   c.innerHTML = '';
 
@@ -275,6 +284,7 @@ TD.veCau = function () {
       <div>
         <span class="nhan m${q.muc}">${MU.ten}</span>
         <span class="nhan">${q.dang === 'mc' ? 'Phần I' : q.dang === 'ds' ? 'Phần II · Đúng/Sai' : 'Phần III · Trả lời ngắn'}</span>
+        ${q._sinh ? '<span class="nhan" style="color:var(--tim);border-color:var(--tim)">Đề tự sinh</span>' : ''}
         ${p.gioiHan ? '<span class="nhan" id="dongho">--:--</span>' : ''}
       </div>
     </div>
@@ -412,10 +422,10 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
   const p = TD.phien;
   p.diem += diem; p.diemToiDa += diemToiDa;
   if (dung) p.dung++;
-  p.ketQua.push({ mon: mon, i: p.ds[p.vt].i, dung: dung, diem: diem });
+  p.ketQua.push({ mon: mon, muc: q.muc, chuong: q.chuong, de: q.q, dung: dung, diem: diem });
 
   TD.ghiNhan(mon, q.muc, dung);
-  TD.SRS.capNhat(mon + '#' + p.ds[p.vt].i, dung);
+  TD.SRS.capNhat(TD.idThe(p.ds[p.vt]), dung);
 
   /* thưởng linh khí & linh thạch */
   let exp = 0, ls = 0;
@@ -502,11 +512,10 @@ TD.ketThucPhien = function () {
   /* danh sách câu sai để xem lại */
   const sai = p.ketQua.filter(k => !k.dung);
   if (sai.length) {
-    const ds = sai.map(k => {
-      const q = TD.KHO[k.mon][k.i];
-      return `<li style="margin-bottom:9px"><b>${q.chuong}</b> · ${TD.MUC[q.muc].ten}<br>
-        <span style="font-size:13.3px;color:var(--chu2)">${String(q.q).replace(/<[^>]+>/g, '').slice(0, 130)}…</span></li>`;
-    }).join('');
+    const ds = sai.map(k =>
+      `<li style="margin-bottom:9px"><b>${k.chuong}</b> · ${TD.MUC[k.muc].ten}<br>
+        <span style="font-size:13.3px;color:var(--chu2)">${String(k.de).replace(/<[^>]+>/g, '').slice(0, 130)}…</span></li>`
+    ).join('');
     c.appendChild(el('div', 'the vien-lua', `<h3>📓 Ghi vào sổ lỗi sai (${sai.length} câu)</h3>
       <ol style="padding-left:20px;margin:8px 0">${ds}</ol>
       <p class="mo-nhat">Hãy chép các câu này vào sổ lỗi sai thật của bạn, ghi rõ <b>sai vì gì</b> — đó là thứ tạo ra khác biệt giữa 8 và 9,5 điểm.</p>`));
@@ -520,10 +529,7 @@ TD.ketThucPhien = function () {
    ============================================================ */
 TD.man_tamma = function (c) {
   const han = TD.SRS.denHan();
-  const hopLe = han.filter(id => {
-    const [m, i] = id.split('#');
-    return TD.KHO[m] && TD.KHO[m][+i];
-  });
+  const hopLe = han.filter(id => TD.theThanhMuc(id) !== null);
 
   c.appendChild(el('div', 'the vien-lua', `<h3>👹 Tâm Ma Kiếp</h3>
     <p class="mo-nhat">Mỗi câu trả lời sai đọng lại thành tâm ma. Hệ thống dùng <b>thuật toán ôn giãn cách</b>:
@@ -541,7 +547,7 @@ TD.man_tamma = function (c) {
 
   if (hopLe.length) {
     $('#tm-batdau').onclick = () => {
-      const ds = TD.xao(hopLe).map(id => { const [m, i] = id.split('#'); return { mon: m, i: +i }; });
+      const ds = TD.xao(hopLe).map(TD.theThanhMuc).filter(Boolean);
       TD.batDauPhien(null, null, 'tamma', ds);
     };
   }
@@ -553,10 +559,10 @@ TD.man_tamma = function (c) {
     .sort((a, b) => b.t.sai - a.t.sai).slice(0, 10);
   if (kho.length) {
     const ds = kho.map(x => {
-      const [m, i] = x.id.split('#');
-      const q = TD.KHO[m] && TD.KHO[m][+i]; if (!q) return '';
-      return `<li style="margin-bottom:7px"><span class="nhan m${q.muc}">${TD.MON[m].ten}</span>
-        <b>${q.chuong}</b> — sai <b style="color:var(--lua)">${x.t.sai}</b> lần</li>`;
+      const it = TD.theThanhMuc(x.id); if (!it) return '';
+      const q = TD.layCau(it); if (!q) return '';
+      return `<li style="margin-bottom:7px"><span class="nhan m${q.muc}">${TD.MON[it.mon].ten}</span>
+        <b>${q.chuong}</b>${it.g ? ' <span class="mo-nhat">(dạng bài)</span>' : ''} — sai <b style="color:var(--lua)">${x.t.sai}</b> lần</li>`;
     }).join('');
     c.appendChild(el('div', 'the', `<h3>🔥 Tâm ma cứng đầu nhất</h3>
       <ol style="padding-left:20px">${ds}</ol>
@@ -681,7 +687,8 @@ TD.man_dokiep = function (c) {
     const M = TD.MON[m];
     if (M.tuluan) return;
     const kho = TD.KHO[m] || [];
-    const co = { mc: kho.filter(q => q.dang === 'mc').length, ds: kho.filter(q => q.dang === 'ds').length, tln: kho.filter(q => q.dang === 'tln').length };
+    const dem = d => kho.filter(q => q.dang === d).length + (TD.GEN[m] || []).filter(t => t.dang === d).length;
+    const co = { mc: dem('mc'), ds: dem('ds'), tln: dem('tln') };
     const du = co.mc > 0 && (M.p2 === 0 || co.ds > 0) && (M.p3 === 0 || co.tln > 0);
     const ls = (TD.S.do_kiep[m] || []);
     const caoNhat = ls.length ? Math.max(...ls.map(x => x.diem)) : null;
@@ -709,8 +716,17 @@ TD.man_dokiep = function (c) {
 TD.dungDe = function (mon) {
   const M = TD.MON[mon], kho = TD.KHO[mon] || [];
   const lay = (dang, n) => {
-    const co = TD.xao(kho.map((q, i) => ({ q: q, i: i })).filter(x => x.q.dang === dang));
-    return co.slice(0, Math.min(n, co.length)).map(x => ({ mon: mon, i: x.i }));
+    const tinh = TD.xao(kho.map((q, i) => ({ q: q, i: i })).filter(x => x.q.dang === dang))
+      .map(x => ({ mon: mon, i: x.i }));
+    const mau = TD.xao((TD.GEN[mon] || []).filter(t => t.dang === dang))
+      .map(t => ({ mon: mon, g: t.ma, s: (Math.random() * 4294967295) >>> 0 }));
+    /* ưu tiên trộn đều: lấy xen kẽ câu sinh và câu cố định cho đủ n */
+    const gop = [];
+    for (let k = 0; gop.length < n && (k < tinh.length || k < mau.length); k++) {
+      if (k < mau.length) gop.push(mau[k]);
+      if (gop.length < n && k < tinh.length) gop.push(tinh[k]);
+    }
+    return TD.xao(gop).slice(0, n);
   };
   const p1 = lay('mc', M.p1), p2 = lay('ds', M.p2), p3 = lay('tln', M.p3);
   const ds = p1.concat(p3, p2);           /* thứ tự khuyến nghị: Phần I → III → II */

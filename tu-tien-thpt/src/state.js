@@ -211,6 +211,106 @@ TD.tuanHienTai = function () {
   return Math.min(20, Math.floor(ngay / 7) + 1);
 };
 
+/* ============================================================
+   BỘ SINH ĐỀ — mỗi "mẫu đề" là một dạng bài tự random số liệu,
+   tự tính đáp án và tự viết lời giải theo đúng số liệu đó.
+   ⇒ một mẫu = vô hạn câu, đáp án không thể sai.
+   ============================================================ */
+TD.GEN = {};                      /* TD.GEN[mon] = [mau, ...] */
+
+/* Bộ sinh số giả ngẫu nhiên có hạt giống (mulberry32) — cùng seed cho cùng đề */
+TD.rng = function (seed) {
+  let a = (seed >>> 0) || 1;
+  const r = function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  /* tiện ích dùng trong mẫu đề */
+  r.nguyen = (min, max) => min + Math.floor(r() * (max - min + 1));
+  r.chon = arr => arr[Math.floor(r() * arr.length)];
+  /* chọn k phần tử khác nhau */
+  r.chonNhieu = (arr, k) => {
+    const b = arr.slice();
+    for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
+    return b.slice(0, k);
+  };
+  return r;
+};
+
+/* Làm tròn và định dạng số kiểu Việt Nam (dấu phẩy thập phân) */
+TD.lamTron = function (x, n) {
+  const m = Math.pow(10, n === undefined ? 2 : n);
+  return Math.round(x * m) / m;
+};
+TD.soVN = function (x, n) {
+  const v = TD.lamTron(x, n);
+  return String(v).replace('.', ',');
+};
+
+TD.timMau = function (mon, ma) {
+  return (TD.GEN[mon] || []).find(t => t.ma === ma);
+};
+
+/* Dựng một câu hỏi cụ thể từ mẫu đề + hạt giống */
+TD.sinhCau = function (mau, seed) {
+  const R = TD.rng(seed);
+  let o;
+  try { o = mau.tao(R); } catch (e) { console.warn('Mẫu đề lỗi:', mau.ma, e); return null; }
+  if (!o) return null;
+  return Object.assign({
+    chuong: mau.chuong, muc: mau.muc, dang: mau.dang, _ma: mau.ma, _sinh: true
+  }, o);
+};
+
+/* Lấy câu hỏi từ một mục trong danh sách phiên.
+   Mục tĩnh: {mon, i} · Mục sinh: {mon, g: mã mẫu, s: hạt giống} */
+TD.layCau = function (it) {
+  if (!it) return null;
+  if (it.g) {
+    const mau = TD.timMau(it.mon, it.g);
+    return mau ? TD.sinhCau(mau, it.s) : null;
+  }
+  return (TD.KHO[it.mon] || [])[it.i];
+};
+
+/* Khoá thẻ ôn giãn cách.
+   Với câu sinh tự động, thẻ gắn với MẪU ĐỀ chứ không phải số liệu cụ thể
+   — nên khi tâm ma quay lại, bạn gặp một biến thể MỚI của cùng dạng bài. */
+TD.idThe = function (it) {
+  return it.g ? it.mon + '@' + it.g : it.mon + '#' + it.i;
+};
+
+/* Đọc ngược khoá thẻ thành mục danh sách (hạt giống mới mỗi lần ôn) */
+TD.theThanhMuc = function (id) {
+  if (id.indexOf('@') > 0) {
+    const [mon, ma] = id.split('@');
+    if (!TD.timMau(mon, ma)) return null;
+    return { mon: mon, g: ma, s: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0 };
+  }
+  const [mon, i] = id.split('#');
+  if (!TD.KHO[mon] || !TD.KHO[mon][+i]) return null;
+  return { mon: mon, i: +i };
+};
+
+/* Sinh n mục câu hỏi tự động cho một môn, lọc theo mức độ nếu có */
+TD.sinhNhieu = function (mon, muc, n) {
+  const mau = (TD.GEN[mon] || []).filter(t => !muc || t.muc === muc);
+  if (!mau.length) return [];
+  const ra = [];
+  for (let k = 0; k < n; k++) {
+    const t = mau[k % mau.length];
+    ra.push({ mon: mon, g: t.ma, s: (Math.random() * 4294967295) >>> 0 });
+  }
+  return TD.xao(ra);
+};
+
+/* Đếm số mẫu đề của một môn */
+TD.soMau = function (mon, muc) {
+  return (TD.GEN[mon] || []).filter(t => !muc || t.muc === muc).length;
+};
+
 /* ---------- KHO CÂU HỎI ---------- */
 TD.layCauHoi = function (mon, locMuc) {
   const kho = (TD.KHO[mon] || []).slice();
