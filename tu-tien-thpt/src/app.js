@@ -607,15 +607,15 @@ TD.man_tamma = function (c) {
    MÀN 4 — TÀNG KINH CÁC (khẩu quyết & công thức)
    ============================================================ */
 TD.NGUON_LT = {
-  hoa:  [['hoa_kq', '88 Khẩu quyết trọng điểm'], ['hoa_ct', 'Bí kíp giải nhanh']],
-  toan: [['toan_ct', 'Công thức Toán 12']],
-  ly:   [['ly_ct', 'Công thức Vật lí']],
-  sinh: [['sinh_ct', 'Công thức Sinh học']],
-  su:   [['su_ct', 'Lịch sử trọng điểm']],
-  dia:  [['dia_ct', 'Địa lí trọng điểm']],
-  gdkt: [['gdkt_ct', 'GDKT & Pháp luật']],
-  van:  [['van_ct', 'Kỹ năng Ngữ văn']],
-  anh:  [['anh_ct', 'Ngữ pháp & mẹo Tiếng Anh']]
+  hoa:  [['hoa_kq', '88 Khẩu quyết trọng điểm'], ['hoa_cam', '📕 Cấm Thư — mẹo phòng thi'], ['hoa_ct', 'Bí kíp giải nhanh']],
+  toan: [['toan_cam', '📕 Cấm Thư — mẹo phòng thi'], ['toan_ct', 'Công thức Toán 12']],
+  ly:   [['ly_cam', '📕 Cấm Thư — mẹo phòng thi'], ['ly_ct', 'Công thức Vật lí']],
+  sinh: [['sinh_cam', '📕 Cấm Thư — mẹo phòng thi'], ['sinh_ct', 'Công thức Sinh học']],
+  su:   [['su_cam', '📕 Cấm Thư — mẹo phòng thi'], ['su_ct', 'Lịch sử trọng điểm']],
+  dia:  [['dia_cam', '📕 Cấm Thư — mẹo phòng thi'], ['dia_ct', 'Địa lí trọng điểm']],
+  gdkt: [['gdkt_cam', '📕 Cấm Thư — mẹo phòng thi'], ['gdkt_ct', 'GDKT & Pháp luật']],
+  van:  [['van_cam', '📕 Cấm Thư — mẹo phòng thi'], ['van_ct', 'Kỹ năng Ngữ văn']],
+  anh:  [['anh_cam', '📕 Cấm Thư — mẹo phòng thi'], ['anh_ct', 'Ngữ pháp & mẹo Tiếng Anh']]
 };
 
 TD.man_tangkinh = function (c) {
@@ -641,7 +641,7 @@ TD.man_tangkinh = function (c) {
       (nhom[key] = nhom[key] || []).push({ x: x, i: i });
     });
 
-    const box = el('div', 'the vien-ngoc');
+    const box = el('div', khoa.endsWith('_cam') ? 'the vien-tim' : 'the vien-ngoc');
     box.appendChild(el('h3', '', `${ten} <span class="mo-nhat">(${ds.length} mục)</span>`));
 
     Object.keys(nhom).forEach(k => {

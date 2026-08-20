@@ -56,6 +56,7 @@ nav.tab button.on{background:linear-gradient(135deg,var(--ngoc),#2e9e88);color:#
 .the.vien-ngoc{border-color:rgba(72,201,176,.45)}
 .the.vien-kim{border-color:rgba(245,199,107,.45)}
 .the.vien-lua{border-color:rgba(231,76,60,.45)}
+.the.vien-tim{border-color:rgba(155,89,182,.55);background:linear-gradient(180deg,rgba(155,89,182,.07),transparent)}
 .luoi{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(215px,1fr))}
 .luoi-2{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 
