@@ -698,17 +698,18 @@ TD.moThe = function (khoa, i) {
       <button class="nut phu" onclick="TD.di('tangkinh')">← Quay lại</button>
     </div>`));
 
-  /* Kiểm tra ngay: tìm chủ đề trong kho mệnh đề khớp với thẻ vừa đọc */
+  /* Kiểm tra ngay: chỉ ra câu ĐÚNG chuyên đề của thẻ vừa đọc.
+     Không ghép được chuyên đề (thẻ kỹ thuật xuyên suốt) thì nói thẳng là kiểm tra
+     tổng hợp cả môn, chứ không gán bừa một chủ đề rồi hỏi lạc đề. */
   const monTK = TD.monTK || 'hoa';
   const khoLT = TD.KHO_LT[monTK] || [];
-  const dsCD = [...new Set(khoLT.map(z => z.cd))];
-  const khop = dsCD.find(cd2 => {
-    const a2 = (cd2 || '').toLowerCase(), b2 = (x.nhom || x.chu_de || '').toLowerCase();
-    return a2 && b2 && (a2.includes(b2.slice(0, 8)) || b2.includes(a2.slice(0, 8)));
-  }) || dsCD[0];
-  if (khop && khoLT.filter(z => z.cd === khop).length >= 4) {
-    const nut2 = el('button', 'nut kim', '📝 Kiểm tra ngay');
-    nut2.onclick = () => TD.kiemTraNhanh(monTK, khop);
+  const khop = TD.chuDeCuaThe(monTK, x);
+  if (khoLT.length >= 8) {
+    const du = khop && khoLT.filter(z => z.cd === khop).length >= 4;
+    const nut2 = el('button', 'nut kim', du
+      ? `📝 Kiểm tra ngay — ${khop}`
+      : `📝 Kiểm tra tổng hợp ${TD.MON[monTK].ten}`);
+    nut2.onclick = () => TD.kiemTraNhanh(monTK, du ? khop : null);
     $('#tk-thu').replaceWith(nut2);
   }
 
@@ -940,18 +941,9 @@ TD.moDeTaDao = function (mon, so, loai) {
 
 /* Kiểm tra nhanh ngay trong Tàng Kinh Các: bốc câu hỏi đúng chủ đề vừa đọc */
 TD.kiemTraNhanh = function (mon, cd) {
-  const kho = TD.KHO_LT[mon] || [];
-  const chiSo = [];
-  kho.forEach((x, i) => { if ((x.cd || '') === cd) chiSo.push(i); });
-  if (chiSo.length < 4) { TD.bao('Chủ đề này chưa đủ câu để kiểm tra.', 'lua'); return; }
-
-  const ds = TD.xao(chiSo).slice(0, 8).map(i =>
-    ({ mon: mon, lt: i, c: kho[i].a ? 'd' : 's', s: (Math.random() * 4294967295) >>> 0 }));
-  /* thêm 2 câu đúng/sai 4 ý cho chắc */
-  for (let k = 0; k < 2 && chiSo.length >= 4; k++)
-    ds.push({ mon: mon, dsy: TD.xao(chiSo).slice(0, 4), cd: cd, s: (Math.random() * 4294967295) >>> 0 });
-
-  TD.batDauPhien(mon, null, 'luyen', TD.xao(ds));
+  const ds = TD.deChuyenDe(mon, cd, TD.SO_CAU_KIEM_TRA);
+  if (ds.length < 4) { TD.bao('Chuyên đề này chưa đủ câu để kiểm tra.', 'lua'); return; }
+  TD.batDauPhien(mon, null, 'luyen', ds);
 };
 
 /* ============================================================

@@ -27,7 +27,10 @@ for (const mon of Object.keys(TD.GEN)) {
     let ok = 0, rong = 0;
     const deKhac = new Set();
     for (let k = 0; k < LAN; k++) {
-      const q = TD.sinhCau(mau, (k * 2654435761 + 12345) >>> 0);
+      let q;
+      try { q = mau.tao(TD.rng((k * 2654435761 + 12345) >>> 0)); }
+      catch (e) { bao(mau.ma, `ném lỗi khi sinh đề: ${e.message}`); break; }
+      if (q) q = TD.sinhCau(mau, (k * 2654435761 + 12345) >>> 0);
       if (!q) { rong++; continue; }
       tongSinh++;
       const chuoi = JSON.stringify(q);
@@ -49,6 +52,22 @@ for (const mon of Object.keys(TD.GEN)) {
         const phaiDuong = mau.duong !== undefined ? mau.duong : (mon === 'hoa' && !mau.chapNhanKhong);
         const so = parseFloat(String(q.ans).replace(',', '.'));
         if (phaiDuong && !isNaN(so) && so <= 0) { bao(mau.ma, `đáp án không dương: ${q.ans}`, q); break; }
+        /* Đề đã ghi rõ làm tròn tới hàng nào thì đáp án phải ghi đúng bấy nhiêu chữ số thập phân.
+           Thiếu chữ số là học sinh tính đúng vẫn bị chấm sai — lỗi này lời giải không lộ ra. */
+        const BAC = { 'đơn vị': 0, 'phần mười': 1, 'phần trăm': 2, 'phần nghìn': 3, 'phần vạn': 4 };
+        const yc = String(q.q).match(/làm tròn đến hàng (đơn vị|phần mười|phần trăm|phần nghìn|phần vạn)(?! nếu)/);
+        if (yc && String(q.ans).indexOf(';') < 0 && !isNaN(so)) {
+          const can = BAC[yc[1]];
+          const day = so.toFixed(can);                       /* dạng đủ chữ số */
+          const gon = can ? day.replace(/0+$/, '').replace(/\.$/, '') : day;
+          const dap = String(q.ans).replace(',', '.');
+          /* Chấp nhận cả dạng đủ (2,50) lẫn dạng đã cắt số 0 cuối (2,5);
+             mọi dạng khác nghĩa là đáp án sai độ chính xác so với yêu cầu của đề. */
+          if (dap !== day && dap !== gon) {
+            bao(mau.ma, `đề yêu cầu làm tròn đến hàng ${yc[1]} nhưng đáp án là "${q.ans}" (đúng phải là "${day.replace('.', ',')}")`, q);
+            break;
+          }
+        }
       } else if (q.dang === 'mc') {
         if (!Array.isArray(q.opts) || q.opts.length !== 4) { bao(mau.ma, 'không đủ 4 phương án', q); break; }
         if (new Set(q.opts).size !== 4) { bao(mau.ma, 'có phương án trùng nhau', q); break; }
@@ -65,6 +84,7 @@ for (const mon of Object.keys(TD.GEN)) {
     const canh = tiLeRong > 40 ? `  ⚠ ${tiLeRong}% lượt sinh bị bỏ` : '';
     console.log(`   ${mau.ma.padEnd(22)} ${String(ok).padStart(3)}/${LAN} đạt · ${String(deKhac.size).padStart(3)} đề khác nhau${canh}`);
     const SAN = mau.toiThieu || 50;          /* mỗi mẫu phải đẻ được ít nhất 50 đề khác nhau */
+    if (ok === 0) bao(mau.ma, 'không sinh được câu nào — mẫu đề hỏng hoặc điều kiện lọc quá chặt');
     if (ok > 100 && deKhac.size < SAN) bao(mau.ma, `quá ít biến thể: chỉ ${deKhac.size} đề khác nhau (cần ≥ ${SAN})`);
     tongBienThe += deKhac.size;
   }

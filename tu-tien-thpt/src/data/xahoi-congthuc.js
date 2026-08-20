@@ -161,19 +161,19 @@ TD.KHO.gdkt_ct = [
 TD.KHO.su_ct.push(
 
 /* ============ BỔ SUNG: KHUNG NHỚ NHANH ============ */
-{ nhom: 'B. Việt Nam', ten: 'Trục mốc thời gian phải thuộc', cap: 1,
+{ nhom: 'B. Việt Nam', ten: 'Trục mốc thời gian phải thuộc', cd: '*', cap: 1,
   ct: '<b>1858</b> Pháp nổ súng Đà Nẵng · <b>1930</b> Đảng ra đời · <b>1941</b> Mặt trận Việt Minh<br><b>19/8/1945</b> Tổng khởi nghĩa · <b>2/9/1945</b> Tuyên ngôn Độc lập<br><b>19/12/1946</b> Toàn quốc kháng chiến · <b>7/5/1954</b> Điện Biên Phủ · <b>21/7/1954</b> Hiệp định Genève<br><b>1959</b> Đường Trường Sơn · <b>1968</b> Mậu Thân · <b>1972</b> "Điện Biên Phủ trên không"<br><b>27/1/1973</b> Hiệp định Paris · <b>30/4/1975</b> Giải phóng miền Nam<br><b>1986</b> Đổi mới · <b>1995</b> Gia nhập ASEAN & bình thường hoá với Mỹ · <b>2007</b> Gia nhập WTO',
   khi: 'Câu nhận biết mốc thời gian — điểm dễ nhất của đề Sử.',
   vd: 'Hỏi "sự kiện mở đầu kỉ nguyên độc lập" ⇒ Cách mạng tháng Tám và Tuyên ngôn Độc lập 2/9/1945.',
   bay: 'Phân biệt ngày KÍ hiệp định với ngày có HIỆU LỰC, và ngày mở màn với ngày kết thúc chiến dịch.' },
 
-{ nhom: 'B. Việt Nam', ten: 'Công thức phân tích một sự kiện lịch sử', cap: 2,
+{ nhom: 'B. Việt Nam', ten: 'Công thức phân tích một sự kiện lịch sử', cd: '*', cap: 2,
   ct: 'Khung 5 tầng dùng cho mọi sự kiện:<br><b>1. Bối cảnh</b> (trong nước + thế giới) → <b>2. Diễn biến chính</b> → <b>3. Kết quả</b> → <b>4. Ý nghĩa</b> → <b>5. Bài học/tác động</b>.<br>Câu hỏi "nguyên nhân quyết định/quan trọng nhất" thường thuộc về nhân tố CHỦ QUAN (sự lãnh đạo của Đảng, sức mạnh đại đoàn kết dân tộc).<br>Câu "ý nghĩa lớn nhất" thường gắn với bước ngoặt, mở ra kỉ nguyên mới.',
   khi: 'Câu vận dụng và vận dụng cao — chiếm phần lớn điểm 8–10.',
   vd: 'Nguyên nhân quyết định thắng lợi kháng chiến chống Mỹ: sự lãnh đạo đúng đắn của Đảng — nhân tố chủ quan.',
   bay: 'Phân biệt "nguyên nhân quyết định" (chủ quan) với "điều kiện thuận lợi" (khách quan, ví dụ sự giúp đỡ quốc tế).' },
 
-{ nhom: 'A. Thế giới', ten: 'Trục mốc lịch sử thế giới hiện đại', cap: 1,
+{ nhom: 'A. Thế giới', ten: 'Trục mốc lịch sử thế giới hiện đại', cd: '*', cap: 1,
   ct: '<b>1945</b> Liên hợp quốc thành lập, Hội nghị Ianta · <b>1947</b> Học thuyết Truman mở đầu Chiến tranh lạnh<br><b>1949</b> NATO, CHND Trung Hoa · <b>1955</b> Tổ chức Vacsava · <b>1967</b> ASEAN ra đời<br><b>1989</b> Chiến tranh lạnh chấm dứt (Manta) · <b>1991</b> Liên Xô tan rã, trật tự hai cực sụp đổ<br><b>1993</b> Liên minh châu Âu (EU) · <b>1995</b> WTO · <b>2015</b> Cộng đồng ASEAN',
   khi: 'Phần lịch sử thế giới — thường 8–10 câu đầu của đề.',
   vd: 'Trật tự hai cực Ianta sụp đổ hoàn toàn khi Liên Xô tan rã năm <b>1991</b>.',

@@ -254,6 +254,183 @@ TD.soVN = function (x, n) {
   return String(v).replace('.', ',');
 };
 
+/* Đáp án số cho câu trả lời ngắn: làm tròn ĐÚNG số chữ số thập phân mà đề yêu cầu,
+   giữ cả chữ số 0 ở cuối để học sinh biết mức chính xác cần ghi. */
+TD.dapSo = function (x, n) {
+  const v = TD.lamTron(x, n || 0);
+  return (n ? v.toFixed(n) : String(Math.round(v))).replace('.', ',');
+};
+
+/* ============================================================
+   GHÉP THẺ TÀNG KINH CÁC ↔ CHỦ ĐỀ TRONG KHO MỆNH ĐỀ
+   Thẻ có thể tự khai bằng trường `cd`. Không khai thì so khớp theo từ khoá.
+   Không khớp thì trả về null — thà KHÔNG hiện nút Kiểm tra ngay còn hơn
+   ném cho người học một mớ câu hỏi lạc chuyên đề.
+   ============================================================ */
+const CHI_SO = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9',
+                 '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
+TD.khongDau = function (t) {
+  return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    /* CO₂, HNO₃, Fe³⁺ … phải quy về co2, hno3, fe3 thì bảng từ khoá mới bắt được */
+    .replace(/[₀-₉⁰-⁹¹²³]/g, c => CHI_SO[c] || c)
+    .toLowerCase();
+};
+
+const BO_QUA = ['va', 'voi', 'cua', 'trong', 'cac', 'nhung', 'mot', 'cho', 'tren', 'theo'];
+
+TD.tuKhoa = function (t) {
+  return TD.khongDau(t)
+    .replace(/^[ivxlcdm]+\s*[.\-–]\s*/i, '')       /* bỏ "I. ", "IV. " */
+    .replace(/^[a-z]\s*[.\-–]\s*/i, '')            /* bỏ "A. ", "B. " */
+    .replace(/^\d+\s*[.\-–]\s*/, '')              /* bỏ "1. " */
+    .split(/[^a-z0-9]+/)
+    .filter(w => w.length >= 3 && BO_QUA.indexOf(w) < 0);
+};
+
+/* Bảng từ khoá → chủ đề. Nhiều thẻ đặt tên theo KỸ THUẬT ("Bảo toàn", "Quy đổi")
+   chứ không theo chương, so chuỗi thuần không thể ghép được nên phải khai ra ở đây.
+   Thứ tự quan trọng: luật hẹp đặt trước luật rộng. */
+TD.BAN_DO_CD = {
+  hoa: [
+    [/ester|este |xa phong|chat beo|lipid|triolein|tristearin|glycerol/, 'Ester – Lipid'],
+    [/glucose|fructose|saccharose|tinh bot|cellulose|carbohydrate|trang bac|maltose/, 'Carbohydrate'],
+    [/amine|amino acid|peptide|protein|glycine|alanine|anilin|lysine|glutamic|muoi amoni/, 'Amine – Amino acid – Peptide'],
+    [/polymer|cao su|trung hop|trung ngung|nhua |to nilon|to capron|to tam/, 'Polymer'],
+    [/dien phan|pin dien|galvani|an mon|faraday|the dien cuc|ma dien|nhien lieu pin/, 'Điện phân – Pin điện'],
+    [/\bsat\b|fe2|fe3|feo|crom|\bcr\b|gang|thep|quy doi hon hop/, 'Sắt – Crom'],
+    [/nhom|al2o3|kiem tho|nuoc cung|thach cao|boxit|natri|kali|canxi|magnesium|\bco2\b|\bso2\b/, 'IA – IIA – Nhôm'],
+    [/hno3|h2so4|nh3|nito|phosphor|photpho|luu huynh|halogen|\bclo\b|phan bon|\bph\b|acid|base|phi kim/, 'Phi kim – Vô cơ'],
+    [/dung dich|can bang trong dung dich|chuan do|nong do/, 'Phi kim – Vô cơ'],
+    [/kim loai|dien hoa|hop kim|dieu che|bao toan electron|tang giam khoi luong/, 'Đại cương kim loại'],
+    [/huu co|dong phan|danh phap|cong thuc phan tu|bat bao hoa|hydrocarbon|alkane|alkene|alkyne|arene|benzen|alcohol|phenol|aldehyde|ketone|carboxylic|\bir\b|pho khoi|dot chay/, 'Đại cương hữu cơ']
+  ],
+  toan: [
+    [/thong ke|xac suat|ghep nhom|trung vi|tu phan vi|phuong sai|do lech chuan|bayes|to hop|chinh hop|hoan vi|nhi thuc/, 'Thống kê – Xác suất'],
+    [/tich phan|nguyen ham|dien tich hinh phang|the tich tron xoay|ung dung tich phan/, 'Nguyên hàm – Tích phân'],
+    [/oxyz|mat phang|mat cau|vecto|toa do/, 'Oxyz'],
+    [/luong giac|he thuc luong|tam giac|khoi chop|khoi lang tru|hinh khong gian|khoi tron xoay|non|tru|cau|goc|khoang cach/, 'Hình không gian'],
+    [/logarit|\bmu\b|lai kep|tang truong/, 'Mũ – Logarit'],
+    [/day so|cap so cong|cap so nhan|cap so|gioi han|lien tuc/, 'Dãy số – Cấp số'],
+    [/dao ham|khao sat|don dieu|cuc tri|tiem can|tuong giao|gtln|gtnn|bang bien thien|tiep tuyen|ham so/, 'Đạo hàm – Khảo sát']
+  ],
+  dia: [
+    [/bieu do|so lieu|atlat|tinh toan|nhan xet|xu li/, 'Kỹ năng'],
+    [/khi hau|gio mua|bao|mua |nhiet do/, 'Khí hậu'],
+    [/dan cu|do thi|lao dong|dan so/, 'Dân cư'],
+    [/vung |dong bang|tay nguyen|trung du|duyen hai|dong nam bo/, 'Vùng kinh tế'],
+    [/nganh|cong nghiep|nong nghiep|dich vu|giao thong|chuyen dich/, 'Ngành kinh tế'],
+    [/phan hoa|dai cao|thien nhien/, 'Phân hoá thiên nhiên'],
+    [/vi tri|lanh tho|bien dong/, 'Vị trí địa lí']
+  ],
+  gdkt: [
+    [/thue|doanh nghiep|kinh doanh/, 'Doanh nghiệp – Thuế'],
+    [/bao hiem|an sinh/, 'Bảo hiểm – An sinh'],
+    [/thu chi|tai chinh ca nhan|tiet kiem|ke hoach chi tieu/, 'Quản lí thu chi'],
+    [/hoi nhap|quoc te|fta|wto/, 'Hội nhập quốc tế'],
+    [/quyen|nghia vu|vi pham|trach nhiem phap li|khieu nai|to cao|hon nhan|bau cu/, 'Quyền & nghĩa vụ'],
+    [/cong uoc|luat bien|unclos|lanh hai|dac quyen kinh te/, 'Pháp luật quốc tế'],
+    [/tang truong|phat trien|gdp|gni|cpi|lam phat|chi tieu kinh te/, 'Tăng trưởng – Phát triển']
+  ],
+  ly: [
+    [/khi li tuong|dang nhiet|dang tich|dang ap|boyle|charles|clapeyron|phan tu khi/, 'Khí lí tưởng'],
+    [/nhiet|noi nang|nhiet dong luc|chuyen the|nong chay|hoa hoi|nhiet dung|carnot|dong co nhiet/, 'Vật lí nhiệt'],
+    [/tu truong|cam ung|tu thong|luc tu|lorentz|bien ap|truyen tai|xoay chieu/, 'Từ trường'],
+    [/hat nhan|phong xa|phan hach|nhiet hach|lien ket rieng|hut khoi|chu ki ban ra/, 'Vật lí hạt nhân'],
+    [/dao dong|con lac|song|am|dong dien|dien truong|tu dien|quang dien|giao thoa|khuc xa|luong tu/, 'Lớp 10 – 11']
+  ],
+  sinh: [
+    [/dna|adn|arn|rna|gene|phien ma|dich ma|nhan doi|codon|nucleotide|dot bien gene|ma di truyen/, 'Di truyền phân tử'],
+    [/mendel|hoan vi|lien ket gene|nhiem sac the|\bnst\b|gioi tinh|tuong tac gene|pha he|kieu gen/, 'Di truyền NST'],
+    [/quan the|hardy|weinberg|tan so allele|tu thu|ngau phoi/, 'Di truyền quần thể'],
+    [/tien hoa|chon loc|hinh thanh loai|nhan to tien hoa|di nhap gen/, 'Tiến hoá'],
+    [/sinh thai|quan xa|he sinh thai|chuoi thuc an|thap sinh thai|dien the|hieu suat sinh thai/, 'Sinh thái học'],
+    [/nguyen phan|giam phan|quang hop|ho hap|tuan hoan|noi moi|te bao|thuc vat|dong vat/, 'Sinh 10 – 11']
+  ],
+  anh: [
+    [/word form|tu loai|hau to|tien to|duoi tu/, 'Từ loại'],
+    [/ngu am|trong am|phat am/, 'Ngữ âm – Trọng âm'],
+    [/dieu kien|conditional|wish/, 'Câu điều kiện'],
+    [/bi dong|tuong thuat|passive|reported/, 'Bị động – Tường thuật'],
+    [/menh de quan he|relative/, 'Mệnh đề quan hệ'],
+    [/\bthi\b|tense|thi dong tu/, 'Thì động từ'],
+    [/doc hieu|chien thuat|cau truc de|sap xep|dien tu/, 'Cấu trúc – Chiến thuật']
+  ]
+};
+
+TD.chuDeCuaThe = function (mon, x) {
+  const kho = TD.KHO_LT[mon] || [];
+  const dsCD = [];
+  kho.forEach(z => { if (z.cd && dsCD.indexOf(z.cd) < 0) dsCD.push(z.cd); });
+  if (!dsCD.length) return null;
+  /* ① thẻ tự khai chủ đề thì tin tuyệt đối */
+  if (x.cd && dsCD.indexOf(x.cd) >= 0) return x.cd;
+  if (x.cd === '*') return null;                 /* thẻ khai rõ là kỹ thuật xuyên suốt */
+
+  const van = TD.khongDau((x.nhom || '') + ' ' + (x.ten || '') + ' ' + (x.chu_de || ''));
+  /* ② bảng từ khoá */
+  for (const [re, cd] of (TD.BAN_DO_CD[mon] || []))
+    if (re.test(van) && dsCD.indexOf(cd) >= 0) return cd;
+
+  /* ③ so trùng từ khoá với tên chủ đề */
+  const nguon = TD.tuKhoa((x.nhom || '') + ' ' + (x.ten || x.chu_de || ''));
+  if (!nguon.length) return null;
+  let tot = null, diemTot = 0;
+  for (const cd of dsCD) {
+    const dich = TD.tuKhoa(cd);
+    if (!dich.length) continue;
+    let trung = 0;
+    for (const w of dich) if (nguon.indexOf(w) >= 0) trung++;
+    const diem = trung / dich.length;
+    if (diem > diemTot) { diemTot = diem; tot = cd; }
+  }
+  /* ④ dưới ngưỡng ⇒ null. Thà kiểm tra tổng hợp cả môn còn hơn gắn nhãn sai chuyên đề. */
+  return diemTot >= 0.5 ? tot : null;
+};
+
+TD.SO_CAU_KIEM_TRA = 50;
+
+/* Bộ đề kiểm tra một chuyên đề: chỉ lấy mệnh đề đúng chủ đề đó và bài tập
+   thuộc đúng chương đó. cd = null ⇒ kiểm tra tổng hợp cả môn.
+   Thứ tự: hỏi hết mệnh đề → thêm bài tập tính toán → bù bằng câu đúng/sai 4 ý
+   (mỗi câu là một tổ hợp 4 mệnh đề khác nhau nên không lặp lại). */
+TD.deChuyenDe = function (mon, cd, soCau) {
+  const kho = TD.KHO_LT[mon] || [];
+  const n = soCau || TD.SO_CAU_KIEM_TRA;
+  const chiSo = [];
+  kho.forEach((z, i) => { if (!cd || (z.cd || '') === cd) chiSo.push(i); });
+  if (chiSo.length < 4) return [];
+  const ds = [];
+
+  /* ① mỗi mệnh đề một câu: đúng thì hỏi "chọn phát biểu ĐÚNG", sai thì hỏi "chọn phát biểu SAI" */
+  TD.xao(chiSo).slice(0, n).forEach(i => ds.push({ mon: mon, lt: i,
+    c: kho[i].a ? 'd' : 's', s: (Math.random() * 4294967295) >>> 0 }));
+
+  /* ② bài tập tính toán thuộc đúng chương đó (nếu môn có bộ sinh đề) */
+  const mau = (TD.GEN[mon] || []).filter(t =>
+    !t._tuLT && (!cd || TD.chuDeCuaThe(mon, { nhom: t.chuong }) === cd));
+  if (mau.length) {
+    const soBT = Math.min(Math.round(n * 0.3), n - ds.length);
+    let vt = 0, quay = TD.xao(mau);
+    for (let k = 0, thu = 0; k < soBT && thu < soBT * 8; thu++) {
+      if (vt >= quay.length) { quay = TD.xao(mau); vt = 0; }
+      const t = quay[vt++], seed = (Math.random() * 4294967295) >>> 0;
+      if (TD.sinhCau(t, seed)) { ds.push({ mon: mon, g: t.ma, s: seed }); k++; }
+    }
+  }
+
+  /* ③ bù cho đủ số câu bằng câu đúng/sai 4 ý, không trùng tổ hợp */
+  const daDung = {}, cdDS = cd || kho[chiSo[0]].cd;
+  let thu = 0;
+  while (ds.length < n && thu++ < n * 60) {
+    const bo = TD.xao(chiSo).slice(0, 4).sort((a, b) => a - b), khoa = bo.join('-');
+    if (daDung[khoa]) continue;
+    daDung[khoa] = 1;
+    ds.push({ mon: mon, dsy: bo, cd: cdDS, s: (Math.random() * 4294967295) >>> 0 });
+  }
+  return TD.xao(ds).slice(0, n);
+};
+
 TD.timMau = function (mon, ma) {
   return (TD.GEN[mon] || []).find(t => t.ma === ma);
 };

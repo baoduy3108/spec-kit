@@ -7,13 +7,13 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
 
 TD.KHO.hoa_ct = [
 /* ---------- I. BỐN ĐỊNH LUẬT BẢO TOÀN ---------- */
-{ nhom: 'Bảo toàn', ten: 'Bảo toàn khối lượng (BTKL)', cap: 2,
+{ nhom: 'Bảo toàn', ten: 'Bảo toàn khối lượng (BTKL)', cd: '*', cap: 2,
   ct: '<b>Σm<sub>chất tham gia</sub> = Σm<sub>sản phẩm</sub></b><br>Dạng hay dùng: m<sub>muối</sub> = m<sub>kim loại</sub> + m<sub>anion tạo muối</sub><br>m<sub>dd sau</sub> = m<sub>chất tan thêm</sub> + m<sub>dd trước</sub> − m<sub>↓</sub> − m<sub>khí</sub>',
   khi: 'Bài cho khối lượng hỗn hợp đầu và hỏi khối lượng hỗn hợp sau (hoặc ngược lại) mà không cần biết từng chất.',
   vd: 'Cho 8,3 g hỗn hợp Al, Fe + HCl dư thu 5,6 lít H₂ (đktc). m<sub>muối</sub> = 8,3 + 0,25·2·35,5 = <b>26,05 g</b> (vì n<sub>Cl⁻</sub> = 2n<sub>H₂</sub>).',
   bay: 'Quên trừ khối lượng khí thoát ra hoặc kết tủa khi tính khối lượng dung dịch.' },
 
-{ nhom: 'Bảo toàn', ten: 'Bảo toàn nguyên tố (BTNT)', cap: 2,
+{ nhom: 'Bảo toàn', ten: 'Bảo toàn nguyên tố (BTNT)', cd: '*', cap: 2,
   ct: '<b>n<sub>X</sub> trước = n<sub>X</sub> sau</b> (với mọi nguyên tố X)<br>Hay dùng nhất: BTNT <b>O</b>, <b>C</b>, <b>H</b>, <b>N</b>, kim loại.<br>Đốt cháy: n<sub>O₂</sub>·2 + n<sub>O(trong chất)</sub> = 2n<sub>CO₂</sub> + n<sub>H₂O</sub>',
   khi: 'Bài nhiều giai đoạn nối tiếp (nung, khử, hoà tan…) — chỉ quan tâm đầu và cuối.',
   vd: 'Đốt m g ester no đơn hở thu 0,3 mol CO₂ và 0,3 mol H₂O. BTNT O: 2n<sub>ester</sub> + 2n<sub>O₂</sub> = 2·0,3 + 0,3.',
@@ -38,13 +38,13 @@ TD.KHO.hoa_ct = [
   vd: 'Hoà tan 11,2 g hỗn hợp oxit sắt bằng HNO₃ → 0,05 mol NO. Đặt Fe = a, O = b: 56a + 16b = 11,2 và 3a = 2b + 3·0,05.',
   bay: 'Sau khi quy đổi, số mol có thể ra ÂM — vẫn hợp lệ về mặt toán học, đừng loại nghiệm.' },
 
-{ nhom: 'Kỹ thuật', ten: 'Tăng – giảm khối lượng', cap: 3,
+{ nhom: 'Kỹ thuật', ten: 'Tăng – giảm khối lượng', cd: '*', cap: 3,
   ct: 'Δm = n<sub>phản ứng</sub> × (M<sub>thay vào</sub> − M<sub>thay ra</sub>)',
   khi: 'KL + muối (thanh kim loại nhúng vào dung dịch); alcohol + CuO; ester hoá; muối carbonate + acid.',
   vd: 'Nhúng Fe vào CuSO₄, khối lượng thanh <b>tăng</b> 0,8 g ⇒ n<sub>Fe p/ứ</sub> = 0,8/(64−56) = <b>0,1 mol</b>.',
   bay: 'Nhầm chiều tăng/giảm. Nhớ: KL thay vào nặng hơn ⇒ thanh nặng lên.' },
 
-{ nhom: 'Kỹ thuật', ten: 'Trung bình & đường chéo', cap: 3,
+{ nhom: 'Kỹ thuật', ten: 'Trung bình & đường chéo', cd: '*', cap: 3,
   ct: '<b>M̄ = Σ(mᵢ)/Σ(nᵢ)</b> ⇒ luôn có M₁ &lt; M̄ &lt; M₂<br><b>Đường chéo:</b> n₁/n₂ = |M₂ − M̄| / |M̄ − M₁|<br>d<sub>A/B</sub> = M<sub>A</sub>/M<sub>B</sub>; d<sub>A/kk</sub> = M<sub>A</sub>/29',
   khi: '2 chất đồng đẳng kế tiếp; pha trộn dung dịch; hỗn hợp khí biết tỉ khối.',
   vd: 'Hỗn hợp 2 alkane kế tiếp có M̄ = 36,5 ⇒ 30 (C₂H₆) &lt; 36,5 &lt; 44 (C₃H₈); tỉ lệ mol = (44−36,5):(36,5−30) = 7,5:6,5.',
@@ -113,13 +113,13 @@ TD.KHO.hoa_ct = [
   bay: 'Đề hỏi "khối lượng nguyên liệu cần dùng" ⇒ phải CHIA cho H%, không nhân.' },
 
 /* ---------- V. CÁC CÔNG THỨC NỀN ---------- */
-{ nhom: 'Nền tảng', ten: 'Bộ công thức mol cơ bản', cap: 1,
+{ nhom: 'Nền tảng', ten: 'Bộ công thức mol cơ bản', cd: '*', cap: 1,
   ct: 'n = m/M = V<sub>khí(đktc)</sub>/22,4 = V<sub>khí(25°C, 1 bar)</sub>/<b>24,79</b> = C<sub>M</sub>·V<sub>dd(L)</sub> = N/6,022·10²³<br>C% = (m<sub>ct</sub>/m<sub>dd</sub>)·100 · C<sub>M</sub> = (10·D·C%)/M<br>m<sub>dd</sub> = V<sub>dd</sub>(mL) × D (g/mL)',
   khi: 'Mọi bài tính toán.',
   vd: '2,479 lít khí ở 25 °C, 1 bar = <b>0,1 mol</b> (SGK mới dùng điều kiện chuẩn này thay cho đktc 22,4).',
   bay: '<b>SGK 2018 dùng 24,79 L/mol (25 °C, 1 bar)</b>, không phải 22,4 L/mol. Đọc kỹ điều kiện đề cho!' },
 
-{ nhom: 'Nền tảng', ten: 'Bảng nguyên tử khối phải thuộc', cap: 1,
+{ nhom: 'Nền tảng', ten: 'Bảng nguyên tử khối phải thuộc', cd: '*', cap: 1,
   ct: 'H=1 · C=12 · N=14 · O=16 · Na=23 · Mg=24 · Al=27 · Si=28 · P=31 · S=32 · Cl=35,5 · K=39 · Ca=40 · Cr=52 · Mn=55 · <b>Fe=56</b> · Ni=59 · <b>Cu=64</b> · Zn=65 · Br=80 · Ag=108 · Ba=137 · I=127 · Pb=207',
   khi: 'Luôn luôn.',
   vd: 'M<sub>Fe₂O₃</sub> = 56·2 + 16·3 = <b>160</b>; M<sub>CuSO₄</sub> = 64 + 32 + 64 = <b>160</b>; M<sub>CaCO₃</sub> = <b>100</b>.',
@@ -129,7 +129,7 @@ TD.KHO.hoa_ct = [
 TD.KHO.hoa_ct.push(
 
 /* ============ BỔ SUNG: PHỦ KÍN CÔNG THỨC CÓ THỂ RA THI ============ */
-{ nhom: 'Nền tảng', ten: 'Nồng độ dung dịch & pha trộn', cap: 1,
+{ nhom: 'Nền tảng', ten: 'Nồng độ dung dịch & pha trộn', cd: '*', cap: 1,
   ct: '<b>C<sub>M</sub> = n/V</b> (mol/L) &nbsp;·&nbsp; <b>C% = m<sub>ct</sub>/m<sub>dd</sub> · 100 %</b><br>Liên hệ: C<sub>M</sub> = 10·D·C%/M (D là khối lượng riêng g/mL)<br>m<sub>dd</sub> = V(mL)·D &nbsp;·&nbsp; m<sub>dd sau</sub> = m<sub>chất cho vào</sub> + m<sub>dd đầu</sub> − m<sub>kết tủa</sub> − m<sub>khí</sub><br>Pha loãng: C₁V₁ = C₂V₂.',
   khi: 'Mọi bài dung dịch — bước tính khối lượng dung dịch sau phản ứng.',
   vd: 'Cho 5,6 g Fe vào HCl dư thu 0,1 mol H₂: m<sub>dd tăng</sub> = 5,6 − 0,1·2 = <b>5,4 g</b>.',
@@ -153,13 +153,13 @@ TD.KHO.hoa_ct.push(
   vd: 'Pin Zn–Cu: E° = 0,34 − (−0,76) = <b>+1,10 V</b>.',
   bay: 'Trong ăn mòn điện hoá, kim loại MẠNH hơn bị ăn mòn trước (đóng vai trò cực âm). Đó là nguyên lí bảo vệ bằng kẽm.' },
 
-{ nhom: 'Kỹ thuật', ten: 'Nhiệt phản ứng ΔrH và năng lượng liên kết', cap: 3,
+{ nhom: 'Kỹ thuật', ten: 'Nhiệt phản ứng ΔrH và năng lượng liên kết', cd: '*', cap: 3,
   ct: '<b>Δ<sub>r</sub>H°₂₉₈ = Σ Δ<sub>f</sub>H°(sản phẩm) − Σ Δ<sub>f</sub>H°(chất đầu)</b><br>Tính theo năng lượng liên kết: Δ<sub>r</sub>H = Σ E<sub>lk</sub>(chất đầu) − Σ E<sub>lk</sub>(sản phẩm)<br>Δ<sub>r</sub>H &lt; 0: phản ứng TOẢ nhiệt. Δ<sub>r</sub>H &gt; 0: THU nhiệt.<br>Δ<sub>f</sub>H° của đơn chất bền ở trạng thái chuẩn = 0.',
   khi: 'Nội dung [MỚI] CT 2018 — chắc chắn xuất hiện trong đề.',
   vd: 'Đốt cháy nhiên liệu luôn có Δ<sub>r</sub>H &lt; 0. Biết Δ<sub>r</sub>H và số mol thì Q toả = |Δ<sub>r</sub>H|·n.',
   bay: 'Hai công thức trên NGƯỢC chiều nhau: theo Δ<sub>f</sub>H lấy sau trừ trước, theo E<sub>lk</sub> lấy trước trừ sau.' },
 
-{ nhom: 'Kỹ thuật', ten: 'Tốc độ phản ứng & cân bằng hoá học', cap: 2,
+{ nhom: 'Kỹ thuật', ten: 'Tốc độ phản ứng & cân bằng hoá học', cd: '*', cap: 2,
   ct: '<b>v = ΔC/Δt</b>; hệ số nhiệt độ Van’t Hoff: v₂/v₁ = γ^((T₂−T₁)/10)<br><b>Hằng số cân bằng:</b> K<sub>C</sub> = [C]^c[D]^d / ([A]^a[B]^b) — chỉ tính chất khí và chất tan.<br><b>Nguyên lí Le Chatelier:</b> cân bằng chuyển dịch theo chiều chống lại tác động bên ngoài.<br>Tăng nhiệt độ ⇒ chuyển theo chiều THU nhiệt. Tăng áp suất ⇒ chuyển theo chiều GIẢM số mol khí.',
   khi: 'Câu lí thuyết định lượng về cân bằng, bài toán tổng hợp NH₃.',
   vd: 'N₂ + 3H₂ ⇌ 2NH₃ (Δ<sub>r</sub>H &lt; 0): tăng áp suất và giảm nhiệt độ đều làm tăng hiệu suất tạo NH₃.',

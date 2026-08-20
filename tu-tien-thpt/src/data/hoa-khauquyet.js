@@ -25,7 +25,7 @@ TD.KHO.hoa_kq = [
 <tr><td>Thụ động (không + HNO₃/H₂SO₄ đặc nguội)</td><td><b>Al, Fe, Cr</b></td></tr></table>`,
   meo: 'Nhớ "Al – Fe – Cr thụ động với axit đặc nguội" ⇒ dùng bình Al chở HNO₃ đặc nguội.' },
 
-{ so: 3, chu_de: 'Chất lưỡng tính', cap: 1,
+{ so: 3, cd: 'IA – IIA – Nhôm', chu_de: 'Chất lưỡng tính', cap: 1,
   hoi: 'Chất lưỡng tính tác dụng được với gì? Kể oxit / hiđroxit / muối lưỡng tính.',
   dap: `Lưỡng tính = tác dụng <b>cả HCl và NaOH</b>.<br>
 <table class="kq"><tr><td>Oxit lưỡng tính</td><td>Al₂O₃, ZnO, Cr₂O₃, BeO, SnO, PbO</td></tr>
@@ -80,7 +80,7 @@ Ví dụ: Al₂O₃, CuO, FeO + CO dư (t°) → rắn gồm <b>Al₂O₃, Cu, F
 <b>Ứng dụng:</b> Na, K lỏng → chất trao đổi nhiệt trong lò hạt nhân; hợp kim Na–K làm thiết bị báo cháy; <b>Cs</b> → tế bào quang điện.<br>
 <b>Từ trên xuống:</b> bán kính R ↑, tính khử ↑, tính bazơ của hiđroxit ↑.` },
 
-{ so: 9, chu_de: 'Muối hiđrocacbonat', cap: 2,
+{ so: 9, cd: 'IA – IIA – Nhôm', chu_de: 'Muối hiđrocacbonat', cap: 2,
   hoi: 'NaHCO₃, Ca(HCO₃)₂ có lưỡng tính không? Viết phản ứng xâm thực đá vôi và tạo thạch nhũ.',
   dap: `Cả 2 đều <b>lưỡng tính</b> và đều <b>dễ bị nhiệt phân</b>.<br>
 <b>Xâm thực núi đá vôi:</b> CaCO₃ + CO₂ + H₂O → Ca(HCO₃)₂ (tan)<br>
@@ -126,7 +126,7 @@ Al₂S₃ + 6H₂O → 2Al(OH)₃↓ + 3H₂S↑`,
 <tr><td>NaAlO₂ + CO₂ dư</td><td>↓ trắng, <b>không tan</b> (H₂CO₃ là axit yếu)</td></tr></table>`,
   meo: '"Bazơ mạnh/axit mạnh dư ⇒ tan. Bazơ yếu (NH₃)/axit yếu (CO₂, H₂S) dư ⇒ không tan."' },
 
-{ so: 14, chu_de: 'Na + Al vào nước', cap: 3,
+{ so: 14, cd: 'IA – IIA – Nhôm', chu_de: 'Na + Al vào nước', cap: 3,
   hoi: 'Hỗn hợp Na và Al (hoặc Ba và Al) vào H₂O dư — xảy ra mấy phản ứng? Thu được gì?',
   dap: `Cả 2 hỗn hợp đều xảy ra <b>2 phản ứng nối tiếp</b>:<br>
 (1) 2Na + 2H₂O → 2NaOH + H₂↑<br>
@@ -154,7 +154,7 @@ Hỗn hợp <b>+ HCl có khí ⇒ có Fe hoặc Al</b>.`,
   dc: 'Bảng photo ghi "0,1 mol P₂O₅ + 3 mol NaOH" — với 3 mol NaOH thì T = 15, chỉ tạo Na₃PO₄. Số liệu đúng để ra 2 muối NaH₂PO₄ + Na₂HPO₄ phải là <b>0,3 mol NaOH</b>.',
   meo: 'Nhớ 2 công thức "vàng": n↓ = 2n<sub>Ca(OH)₂</sub> − n<sub>CO₂</sub> (khi có 2 muối) và n↓ = 4n<sub>Al³⁺</sub> − n<sub>OH⁻</sub> (khi ↓ đã tan 1 phần).' },
 
-{ so: 17, chu_de: 'Hiện tượng đặc trưng', cap: 2,
+{ so: 17, cd: '*', chu_de: 'Hiện tượng đặc trưng', cap: 2,
   hoi: 'Hiện tượng khi cho từ từ CO₂ vào Ca(OH)₂, NaOH dư vào AlCl₃/ZnCl₂, HCl vào NaAlO₂?',
   dap: `<b>Cu(OH)₂ và Zn(OH)₂ TAN trong NH₃ dư</b> tạo phức [Cu(NH₃)₄](OH)₂ xanh thẫm và [Zn(NH₃)₄](OH)₂.<br>
 <table class="kq"><tr><th>Thí nghiệm</th><th>Hiện tượng</th></tr>
@@ -230,7 +230,7 @@ Với HCl/H₂SO₄ loãng: Cr → <b>Cr(II)</b>.<br>
 
 /* ---------- PHI KIM – ĐẠI CƯƠNG (25–39) ---------- */
 TD.KHO.hoa_kq.push(
-{ so: 25, chu_de: 'Phản ứng oxi hoá – khử hay gặp', cap: 2,
+{ so: 25, cd: 'Đại cương kim loại', chu_de: 'Phản ứng oxi hoá – khử hay gặp', cap: 2,
   hoi: 'Trong Fe₃O₄+HCl, NaOH+Cl₂, Ca(OH)₂+Cl₂, NaOH+NO₂, KOH+NaHCO₃ — phản ứng nào là oxi hoá – khử? Thu mấy muối?',
   dap: `<table class="kq"><tr><th>Phản ứng</th><th>Muối thu được</th><th>Loại</th></tr>
 <tr><td>Fe₃O₄ + HCl / H₂SO₄ loãng</td><td>Fe²⁺ và Fe³⁺ (2 muối)</td><td>trao đổi</td></tr>
@@ -240,7 +240,7 @@ TD.KHO.hoa_kq.push(
 <tr><td>KOH + NaHCO₃ → Na₂CO₃ + K₂CO₃ + H₂O</td><td>Na₂CO₃, K₂CO₃</td><td>trao đổi</td></tr></table>`,
   meo: 'Cl₂ và NO₂ vào kiềm ⇒ luôn tự oxi hoá – khử, cho 2 muối có số oxi hoá khác nhau.' },
 
-{ so: 26, chu_de: 'Hoá học & môi trường', cap: 1,
+{ so: 26, cd: 'Phi kim – Vô cơ', chu_de: 'Hoá học & môi trường', cap: 1,
   hoi: 'Chất gây mưa axit, hiệu ứng nhà kính, thủng tầng ozon? Xử lí thuỷ ngân rơi vãi bằng gì?',
   dap: `<table class="kq"><tr><td>Bảo quản thực phẩm an toàn</td><td>nước đá / làm lạnh</td></tr>
 <tr><td>Xử lí Hg rơi vãi</td><td><b>bột S</b> (Hg + S → HgS rắn, ngay nhiệt độ thường)</td></tr>
@@ -254,7 +254,7 @@ TD.KHO.hoa_kq.push(
 <tr><td>Nhận biết H₂S</td><td>Cu²⁺, Pb²⁺ → ↓ <b>đen</b> CuS, PbS</td></tr>
 <tr><td>Chất gây nghiện</td><td>heroin, morphin, nicotin, cafein, cocain</td></tr></table>` },
 
-{ so: 27, chu_de: 'Cấu hình electron – vị trí bảng tuần hoàn', cap: 2,
+{ so: 27, cd: '*', chu_de: 'Cấu hình electron – vị trí bảng tuần hoàn', cap: 2,
   hoi: 'Số e lớp ngoài cùng phân biệt kim loại/phi kim thế nào? Viết cấu hình và vị trí của Na, K, Al, Fe.',
   dap: `<b>e lớp ngoài cùng:</b> 1, 2, 3 → kim loại; 5, 6, 7 → phi kim; 4 → có thể cả hai; 8 → khí hiếm (trừ He có 2).<br>
 <table class="kq small"><tr><th></th><th>Cấu hình e</th><th>Loại</th><th>Chu kì</th><th>Nhóm</th><th>e ngoài</th><th>Hoá trị</th><th>Điều chế</th></tr>
@@ -274,7 +274,7 @@ Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của
 + Fe: F₂, Cl₂, Br₂ → <b>Fe³⁺</b>; I₂ → <b>Fe²⁺</b> (I₂ oxi hoá yếu).`,
   dc: 'Bảng photo ghi "F: khí, màu xanh" — chính xác phải là <b>lục nhạt (vàng lục rất nhạt)</b>.' },
 
-{ so: 29, chu_de: 'Tốc độ phản ứng & cân bằng hoá học', cap: 2,
+{ so: 29, cd: '*', chu_de: 'Tốc độ phản ứng & cân bằng hoá học', cap: 2,
   hoi: 'Yếu tố nào ảnh hưởng tốc độ? Yếu tố nào làm chuyển dịch cân bằng?',
   dap: `v = ΔC/Δt (mol·L⁻¹·s⁻¹). Hệ số nhiệt độ Van’t Hoff: v₂/v₁ = γ^((T₂−T₁)/10).<br>
 <table class="kq"><tr><th>Yếu tố</th><th>Tốc độ p/ứ</th><th>Chuyển dịch cân bằng</th></tr>
@@ -286,7 +286,7 @@ Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của
 <b>Nguyên lí Le Chatelier:</b> cân bằng chuyển dịch theo chiều <b>chống lại</b> sự thay đổi bên ngoài.`,
   meo: 'Nếu số mol khí 2 vế BẰNG NHAU (VD: H₂ + I₂ ⇄ 2HI) thì áp suất KHÔNG làm chuyển dịch cân bằng — đây là bẫy quen thuộc.' },
 
-{ so: 30, chu_de: 'Liên kết hoá học', cap: 1,
+{ so: 30, cd: '*', chu_de: 'Liên kết hoá học', cap: 1,
   hoi: 'Khi nào liên kết ion, cộng hoá trị có cực, không cực? Dựa vào đâu?',
   dap: `Dựa vào <b>hiệu độ âm điện Δχ</b>: Δχ &lt; 0,4 → CHT không cực · 0,4 ≤ Δχ &lt; 1,7 → CHT có cực · Δχ ≥ 1,7 → <b>ion</b>.<br>
 <table class="kq"><tr><td>CHT không cực</td><td>O₃, O₂, H₂, Cl₂, N₂ (2 nguyên tử giống nhau)</td></tr>
@@ -294,7 +294,7 @@ Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của
 <tr><td>Ion</td><td>NaCl, KBr, MgO, CaF₂ (kim loại điển hình + phi kim điển hình)</td></tr></table>
 <b>Liên kết hiđro</b> (làm t°<sub>sôi</sub> cao bất thường): có ở H–F, H–O, H–N ⇒ HF, H₂O, NH₃, alcohol, carboxylic acid, amine.` },
 
-{ so: 31, chu_de: 'Nhiệt phân muối', cap: 2,
+{ so: 31, cd: 'Phi kim – Vô cơ', chu_de: 'Nhiệt phân muối', cap: 2,
   hoi: 'Nhiệt phân muối nitrat theo dãy điện hoá cho sản phẩm gì? Muối amoni thì sao?',
   dap: `<b>Quy tắc nhiệt phân muối nitrat theo vị trí kim loại:</b><br>
 <table class="kq"><tr><td>Trước Mg (K, Na, Ca, Ba)</td><td>muối <b>nitrit</b> + O₂ &nbsp;· 2NaNO₃ → 2NaNO₂ + O₂</td></tr>
@@ -316,7 +316,7 @@ Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của
 <tr><td>Nitrophotka</td><td>(NH₄)₂HPO₄ và KNO₃ — phân hỗn hợp NPK</td></tr></table>`,
   dc: 'Bảng photo ghi supephotphat đơn là "Ca(HPO₄)₂" — sai chính tả công thức. Đúng là <b>Ca(H₂PO₄)₂</b>.' },
 
-{ so: 33, chu_de: 'Số oxi hoá', cap: 1,
+{ so: 33, cd: '*', chu_de: 'Số oxi hoá', cap: 1,
   hoi: 'Chất nào vừa có tính khử vừa có tính oxi hoá? Các số oxi hoá thường gặp?',
   dap: `<b>Vừa khử vừa oxi hoá</b> = nguyên tố ở số oxi hoá <b>trung gian</b>: SO₂, FeO, NO₂, Cl₂, N₂, C, CO, FeCl₂, Fe(NO₃)₂, FeSO₄, S, H₂O₂ … <b>tất cả</b>.<br>
 <table class="kq"><tr><td>N</td><td>−3, 0, +1, +2, +3, +4, +5</td></tr><tr><td>S</td><td>−2, 0, +4, +6</td></tr>
@@ -325,7 +325,7 @@ Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của
 <tr><td>Mn</td><td>+2, +4, +6, +7</td></tr></table>
 <b>Chỉ có tính oxi hoá:</b> số oxh cao nhất (HNO₃, H₂SO₄ đặc, KMnO₄, Fe³⁺). <b>Chỉ có tính khử:</b> số oxh thấp nhất (H₂S, NH₃, HI, KL tự do).` },
 
-{ so: 34, chu_de: 'Nhận biết chất khí', cap: 1,
+{ so: 34, cd: 'Phi kim – Vô cơ', chu_de: 'Nhận biết chất khí', cap: 1,
   hoi: 'Màu và tính chất đặc trưng của NO₂, NO, O₃, CO, CO₂, SO₂, SO₃, Cl₂?',
   dap: `<table class="kq small"><tr><th>Khí</th><th>Màu / đặc điểm</th><th>Dấu hiệu nhận biết</th></tr>
 <tr><td>NO₂</td><td><b>nâu đỏ</b>, mùi hắc</td><td>vừa khử vừa oxh</td></tr>
@@ -339,7 +339,7 @@ Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của
 <tr><td>Cl₂</td><td><b>vàng lục</b></td><td>làm mất màu quỳ ẩm; vừa khử vừa oxh</td></tr></table>`,
   meo: 'Phân biệt CO₂ và SO₂: cả hai làm đục nước vôi, nhưng <b>chỉ SO₂ làm mất màu nước brom</b>.' },
 
-{ so: 35, chu_de: 'Màu sắc kết tủa & dung dịch', cap: 1,
+{ so: 35, cd: 'Sắt – Crom', chu_de: 'Màu sắc kết tủa & dung dịch', cap: 1,
   hoi: 'Vì sao Al và Cr bền trong không khí? Màu của các kết tủa hay gặp?',
   dap: `Al và Cr bền vì có <b>màng oxit Al₂O₃, Cr₂O₃ đặc khít</b> bảo vệ.<br>
 <table class="kq small"><tr><td>Al(OH)₃, Zn(OH)₂, BaSO₄, AgCl, CaCO₃</td><td>↓ <b>trắng</b></td></tr>
@@ -351,7 +351,7 @@ Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của
 <tr><td>Cu₂O</td><td>↓ <b>đỏ gạch</b></td></tr>
 <tr><td>dd Cu²⁺ xanh lam · Fe³⁺ vàng nâu · Fe²⁺ lục nhạt</td><td>dd KMnO₄ tím · K₂Cr₂O₇ da cam · K₂CrO₄ vàng</td></tr></table>` },
 
-{ so: 36, chu_de: 'Phương pháp thu khí', cap: 1,
+{ so: 36, cd: 'Phi kim – Vô cơ', chu_de: 'Phương pháp thu khí', cap: 1,
   hoi: 'Khí nào thu bằng cách dời chỗ nước? Khí nào phải dời chỗ không khí (úp/ngửa bình)?',
   dap: `<b>Dời chỗ nước</b> (khí <b>không tan</b> và không phản ứng với nước): O₂, H₂, N₂, CH₄, C₂H₄, C₂H₂, CO.<br>
 <b>Dời chỗ không khí</b> (khí <b>tan nhiều</b> trong nước): HCl, NH₃, SO₂, CO₂, Cl₂, NO₂.<br>
@@ -359,7 +359,7 @@ Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của
 &nbsp;&nbsp;• Nhẹ hơn không khí (M &lt; 29) → <b>úp bình</b>: NH₃ (M = 17), H₂, CH₄.`,
   meo: 'So M của khí với 29 để quyết định úp hay ngửa bình — câu thực hành rất hay hỏi.' },
 
-{ so: 37, chu_de: 'Phản ứng xảy ra ở điều kiện thường', cap: 2,
+{ so: 37, cd: '*', chu_de: 'Phản ứng xảy ra ở điều kiện thường', cap: 2,
   hoi: 'Chất nào + H₂O ở điều kiện thường tạo khí? Kể các phản ứng đặc biệt xảy ra ngay ở nhiệt độ thường.',
   dap: `Trong Ba, Na₂O, Na, CaO, NaH: <b>+ H₂O tạo khí</b> là <b>Ba, Na, NaH</b> (NaH + H₂O → NaOH + H₂↑).<br>
 <div class="pu">
@@ -373,7 +373,7 @@ Al₄C₃ + 12H₂O → 4Al(OH)₃↓ + 3CH₄↑<br>
 CaC₂ + 2H₂O → C₂H₂↑ + Ca(OH)₂ &nbsp;<i>(đất đèn — ủ chín trái cây)</i>
 </div>` },
 
-{ so: 38, chu_de: 'Phản ứng tạo đơn chất', cap: 3,
+{ so: 38, cd: '*', chu_de: 'Phản ứng tạo đơn chất', cap: 3,
   hoi: 'NH₃ + O₂ cho khí gì? Có Pt xúc tác thì sao? Kể các phản ứng tạo ra đơn chất.',
   dap: `4NH₃ + 3O₂ <span class="ar">t°</span> 2N₂ + 6H₂O &nbsp;|&nbsp; 4NH₃ + 5O₂ <span class="ar">Pt, 850°C</span> <b>4NO</b> + 6H₂O<br>
 <div class="pu">
@@ -389,7 +389,7 @@ Na₂S₂O₃ + 2HCl → 2NaCl + H₂O + SO₂ + <b>S↓</b><br>
 2KMnO₄ + 16HCl<sub>đặc</sub> → 2KCl + 2MnCl₂ + 8H₂O + 5<b>Cl₂</b>↑
 </div>` },
 
-{ so: 39, chu_de: 'Quặng & hợp chất công nghiệp', cap: 1,
+{ so: 39, cd: 'Sắt – Crom', chu_de: 'Quặng & hợp chất công nghiệp', cap: 1,
   hoi: 'Thành phần chính của gang, thép? Công thức và ứng dụng các quặng quan trọng?',
   dap: `Gang, thép đều là hợp kim <b>Fe – C</b> (Fe là chính). Gang: 2–5% C. Thép: &lt; 2% C.<br>
 <table class="kq small"><tr><th>Tên</th><th>Công thức</th><th>Ứng dụng</th></tr>
@@ -409,7 +409,7 @@ Na₂S₂O₃ + 2HCl → 2NaCl + H₂O + SO₂ + <b>S↓</b><br>
 
 /* ---------- HỮU CƠ (40–72) — kèm tên IUPAC mới của CT 2018 ---------- */
 TD.KHO.hoa_kq.push(
-{ so: 40, chu_de: 'Công thức chung dãy đồng đẳng', cap: 1,
+{ so: 40, cd: 'Đại cương hữu cơ', chu_de: 'Công thức chung dãy đồng đẳng', cap: 1,
   hoi: 'Viết công thức chung và điều kiện số C của các dãy đồng đẳng cơ bản.',
   dap: `<table class="kq"><tr><th>Dãy</th><th>CTTQ</th><th>Điều kiện</th><th>k (độ bất bão hoà)</th></tr>
 <tr><td>Alkane (ankan)</td><td>CₙH₂ₙ₊₂</td><td>n ≥ 1</td><td>0</td></tr>
@@ -447,7 +447,7 @@ TD.KHO.hoa_kq.push(
 <tr><td>FeCl₃ + CH₃NH₂ + H₂O</td><td>↓ <b>nâu đỏ</b> Fe(OH)₃ (methylamine là base)</td></tr>
 <tr><td>Anilin + nước Br₂</td><td>↓ <b>trắng</b> 2,4,6-tribromanilin</td></tr></table>` },
 
-{ so: 43, chu_de: 'Phản ứng với Na và NaOH', cap: 2,
+{ so: 43, cd: 'Đại cương hữu cơ', chu_de: 'Phản ứng với Na và NaOH', cap: 2,
   hoi: 'Chất nào chỉ tác dụng Na? Chỉ tác dụng NaOH? Cả hai?',
   dap: `<table class="kq"><tr><th>Tính chất</th><th>Chất</th></tr>
 <tr><td>Tác dụng <b>Na</b>, không tác dụng NaOH</td><td>alcohol (C₂H₅OH), nước</td></tr>
@@ -470,7 +470,7 @@ C₂H₄(OH)₂ + 2CuO <span class="ar">t°</span> (CHO)₂ + 2Cu + 2H₂O<br>
 <b>Dấu hiệu:</b> chất rắn đen CuO → đỏ Cu; khối lượng rắn <b>giảm 16 g/mol</b> alcohol phản ứng.`,
   meo: 'Δm(rắn giảm) = 16·n<sub>alcohol p/ứ</sub> — công thức "ăn tiền" của dạng bài này.' },
 
-{ so: 45, chu_de: 'Phản ứng tách nước tạo ether', cap: 2,
+{ so: 45, cd: 'Đại cương hữu cơ', chu_de: 'Phản ứng tách nước tạo ether', cap: 2,
   hoi: 'n alcohol tách nước tạo bao nhiêu ether? Quan hệ mol và bảo toàn khối lượng?',
   dap: `R₁OH + R₂OH <span class="ar">H₂SO₄ đặc, 140°C</span> R₁OR₂ + H₂O<br>
 <b>n alcohol khác nhau → n(n+1)/2 ether</b>, trong đó n ether đối xứng.<br>
@@ -583,7 +583,7 @@ Các acid béo khác: palmitic C₁₅H₃₁COOH (M = 256), linoleic C₁₇H�
 <tr><td><b>Cao su Buna-N</b></td><td>buta-1,3-diene + <b>acrylonitrile</b> CH₂=CH–CN</td><td>đồng trùng hợp</td></tr></table>`,
   dc: 'Bảng photo ghi acrylonitrile là "CH₂=CH–N" — thiếu C. Đúng là <b>CH₂=CH–CN</b>.' },
 
-{ so: 55, chu_de: 'Phân loại tơ', cap: 1,
+{ so: 55, cd: 'Polymer', chu_de: 'Phân loại tơ', cap: 1,
   hoi: 'Tơ khác chất dẻo ở điểm nào? Phân loại tơ và cho ví dụ.',
   dap: `Tơ: vật liệu polymer <b>hình sợi dài, mảnh, bền</b>. Chất dẻo: có tính <b>dẻo</b>, tạo hình được.<br>
 <table class="kq"><tr><th>Loại</th><th>Ví dụ</th><th>Có phải tơ hoá học?</th></tr>
@@ -631,7 +631,7 @@ C₆H₁₂O₆ + H₂ <span class="ar">Ni, t°</span> C₆H₁₄O₆ (<b>sorbi
 <b>Hiệu suất:</b> m<sub>ethanol</sub> = m<sub>tinh bột</sub> · (92/162) · H%.`,
   meo: 'Tỉ lệ khối lượng tinh bột → ethanol là 162 → 92 (2·46). Nhớ cặp số <b>162/92</b>.' },
 
-{ so: 59, chu_de: 'Bài toán khối lượng bình tăng/giảm', cap: 3,
+{ so: 59, cd: '*', chu_de: 'Bài toán khối lượng bình tăng/giảm', cap: 3,
   hoi: 'Khi hấp thụ sản phẩm cháy, khối lượng bình và khối lượng dung dịch thay đổi thế nào?',
   dap: `<table class="kq"><tr><td>Bình đựng <b>H₂SO₄ đặc / P₂O₅ / CaCl₂ khan</b> tăng</td><td>= m<sub>H₂O</sub></td></tr>
 <tr><td>Bình đựng <b>dd kiềm</b> (NaOH, Ca(OH)₂) tăng</td><td>= m<sub>CO₂</sub> + m<sub>H₂O</sub></td></tr>
@@ -665,7 +665,7 @@ CO₂ vào nước vôi trong <b>dư</b> ⇒ chỉ tạo CaCO₃, <b>n<sub>CO₂
 <tr><td>PS</td><td>M = 104n</td></tr><tr><td>Cao su isoprene</td><td>M = 68n</td></tr></table>
 <b>Hệ số polymer hoá:</b> n = M<sub>polymer</sub> / M<sub>mắt xích</sub>.` },
 
-{ so: 62, chu_de: 'Số sản phẩm phản ứng cộng/thế', cap: 2,
+{ so: 62, cd: 'Đại cương hữu cơ', chu_de: 'Số sản phẩm phản ứng cộng/thế', cap: 2,
   hoi: 'Quy tắc Markovnikov là gì? Đếm số sản phẩm của propene + HCl, propane + Cl₂, but-2-ene + H₂O.',
   dap: `<b>Quy tắc Markovnikov:</b> khi cộng HX vào alkene bất đối xứng, <b>H cộng vào C có nhiều H hơn</b>, X vào C ít H hơn ⇒ đó là sản phẩm <b>chính</b>.<br>
 <table class="kq"><tr><th>Phản ứng</th><th>Số sản phẩm</th><th>Sản phẩm chính</th></tr>
@@ -757,7 +757,7 @@ n<sub>Ag</sub>/n<sub>chất</sub> = 4 ⇒ chất là HCHO hoặc aldehyde 2 ch�
 <tr><td>3 amino acid tạo mấy tripeptide (mỗi loại 1 lần)?</td><td><b>6</b></td><td>3! = 6 hoán vị</td></tr></table>`,
   meo: 'Nhớ 2 công thức: triglyceride từ n acid béo = <b>n²(n+1)/2</b>; k-peptide từ n amino acid = <b>nᵏ</b>.' },
 
-{ so: 70, chu_de: 'Tên gọi các phản ứng', cap: 1,
+{ so: 70, cd: '*', chu_de: 'Tên gọi các phản ứng', cap: 1,
   hoi: 'Gọi tên các phản ứng: ester + H₂O, ester + NaOH, acid + alcohol, ethylene → PE, tạo nilon-6,6, cây xanh tạo tinh bột.',
   dap: `<table class="kq"><tr><td>Ester + H₂O (H⁺, ⇄)</td><td>phản ứng <b>thuỷ phân</b> (thuận nghịch)</td></tr>
 <tr><td>Ester + NaOH (→)</td><td>phản ứng <b>xà phòng hoá</b> (một chiều)</td></tr>
@@ -768,7 +768,7 @@ n<sub>Ag</sub>/n<sub>chất</sub> = 4 ⇒ chất là HCHO hoặc aldehyde 2 ch�
 <tr><td>Glucose → ethanol</td><td><b>lên men</b> rượu</td></tr>
 <tr><td>Chất béo lỏng + H₂ → chất béo rắn</td><td>phản ứng <b>hydrogen hoá</b> (SX bơ nhân tạo)</td></tr></table>` },
 
-{ so: 71, chu_de: 'Phản ứng đặc trưng của từng loại chất', cap: 1,
+{ so: 71, cd: 'Đại cương hữu cơ', chu_de: 'Phản ứng đặc trưng của từng loại chất', cap: 1,
   hoi: 'Phản ứng đặc trưng của alkane, alkene, alkyne, toluene/phenol/aniline?',
   dap: `<table class="kq"><tr><td>Alkane</td><td>phản ứng <b>thế</b> (halogen, ánh sáng); tách; cháy</td></tr>
 <tr><td>Alkene, alkadiene</td><td>phản ứng <b>cộng</b> (Br₂, H₂, HX, H₂O); trùng hợp; oxi hoá (mất màu KMnO₄)</td></tr>
@@ -778,7 +778,7 @@ n<sub>Ag</sub>/n<sub>chất</sub> = 4 ⇒ chất là HCHO hoặc aldehyde 2 ch�
 <tr><td>Nitrobenzene (–NO₂ hút e)</td><td>khó thế, ưu tiên vị trí <b>meta</b></td></tr></table>`,
   meo: 'Nhóm đẩy e (–CH₃, –OH, –NH₂, –OR) định hướng o,p và làm dễ thế. Nhóm hút e (–NO₂, –COOH, –CHO) định hướng m và làm khó thế.' },
 
-{ so: 72, chu_de: 'Thành phần nguyên tố', cap: 1,
+{ so: 72, cd: '*', chu_de: 'Thành phần nguyên tố', cap: 1,
   hoi: 'Hydrocarbon thể khí có mấy C? Các loại hợp chất chứa nguyên tố nào?',
   dap: `Hydrocarbon ở <b>thể khí</b> khi <b>số C ≤ 4</b>.<br>
 <table class="kq"><tr><td>Alkane, alkene, alkyne, benzene, toluene, styrene</td><td><b>C, H</b></td></tr>
@@ -806,7 +806,7 @@ TD.KHO.hoa_kq.push(
 <tr><td>etyl axetat</td><td><b>ethyl acetate</b></td><td>anilin</td><td><b>aniline</b></td></tr></table>`,
   meo: 'Đề thi dùng TÊN MỚI. Nếu học tài liệu cũ, phải nhớ song song — đây là nguồn mất điểm oan lớn nhất khi ôn bằng tài liệu 2006.' },
 
-{ so: 74, moi: true, chu_de: 'Năng lượng hoá học – Enthalpy ΔH', cap: 2,
+{ so: 74, cd: '*', moi: true, chu_de: 'Năng lượng hoá học – Enthalpy ΔH', cap: 2,
   hoi: 'Định nghĩa ΔH? Cách tính biến thiên enthalpy theo nhiệt tạo thành và theo năng lượng liên kết?',
   dap: `Δ<sub>r</sub>H°₂₉₈ &lt; 0 → phản ứng <b>toả nhiệt</b>. Δ<sub>r</sub>H°₂₉₈ &gt; 0 → phản ứng <b>thu nhiệt</b>.<br>
 <b>① Theo nhiệt tạo thành:</b><br>
@@ -816,7 +816,7 @@ TD.KHO.hoa_kq.push(
 <b>Lưu ý:</b> Δ<sub>f</sub>H° của <b>đơn chất bền</b> ở trạng thái chuẩn = <b>0</b> (O₂ khí, C graphite, Fe rắn…).`,
   meo: 'Đảo dấu: công thức ① là "SP − ĐẦU", công thức ② là "ĐẦU − SP". Nhầm chỗ này là mất trọn câu.' },
 
-{ so: 75, moi: true, chu_de: 'Tốc độ phản ứng – biểu thức', cap: 2,
+{ so: 75, cd: '*', moi: true, chu_de: 'Tốc độ phản ứng – biểu thức', cap: 2,
   hoi: 'Biểu thức tốc độ tức thời? Hệ số nhiệt độ Van’t Hoff?',
   dap: `Với aA + bB → cC + dD:<br>
 v = −(1/a)·ΔC<sub>A</sub>/Δt = −(1/b)·ΔC<sub>B</sub>/Δt = (1/c)·ΔC<sub>C</sub>/Δt = (1/d)·ΔC<sub>D</sub>/Δt<br>
@@ -845,7 +845,7 @@ Phản ứng tự xảy ra khi E°<sub>pin</sub> &gt; 0, tức chất khử củ
 <b>m<sub>dd giảm</sub> = m<sub>KL bám catot</sub> + m<sub>khí thoát ra</sub></b>`,
   meo: 'Bài điện phân luôn quy về n<sub>e</sub> = It/96500 rồi "chia" cho 2 cực. Vẽ 2 cột catot/anot trên nháp là xong.' },
 
-{ so: 78, moi: true, chu_de: 'Phức chất', cap: 2,
+{ so: 78, cd: 'Sắt – Crom', moi: true, chu_de: 'Phức chất', cap: 2,
   hoi: 'Phức chất gồm những thành phần nào? Số phối trí và dạng hình học thường gặp?',
   dap: `<b>Phức chất</b> = <b>nguyên tử/ion trung tâm</b> (thường là ion kim loại chuyển tiếp) + các <b>phối tử (ligand)</b> liên kết bằng <b>liên kết cho – nhận</b> (phối tử cho cặp e).<br>
 <table class="kq"><tr><td>Phối tử hay gặp</td><td>H₂O (aqua), NH₃ (ammine), Cl⁻ (chlorido), OH⁻, CN⁻</td></tr>
@@ -886,7 +886,7 @@ pH &lt; 7 acid · pH = 7 trung tính · pH &gt; 7 base.<br>
 <b>Sự thuỷ phân muối:</b> muối của acid mạnh + base yếu (NH₄Cl, AlCl₃) → <b>pH &lt; 7</b>; acid yếu + base mạnh (CH₃COONa, Na₂CO₃) → <b>pH &gt; 7</b>; mạnh + mạnh (NaCl) → pH = 7.`,
   meo: 'Trộn acid mạnh + base mạnh: tính n(H⁺) − n(OH⁻) rồi chia cho tổng thể tích ⇒ ra [H⁺] hoặc [OH⁻] dư.' },
 
-{ so: 82, moi: true, chu_de: 'Nitrogen – Sulfur (Hoá 11)', cap: 2,
+{ so: 82, cd: 'Phi kim – Vô cơ', moi: true, chu_de: 'Nitrogen – Sulfur (Hoá 11)', cap: 2,
   hoi: 'Vì sao N₂ trơ? Mưa acid hình thành thế nào? Sản xuất H₂SO₄ theo mấy giai đoạn?',
   dap: `N₂ trơ vì có <b>liên kết ba N≡N</b> rất bền (E<sub>b</sub> = 945 kJ/mol).<br>
 <b>Chu trình mưa acid:</b> N₂ + O₂ <span class="ar">tia lửa điện/động cơ</span> 2NO → NO₂ → HNO₃; S + O₂ → SO₂ → SO₃ → H₂SO₄.<br>
@@ -927,7 +927,7 @@ pH &lt; 7 acid · pH = 7 trung tính · pH &gt; 7 base.<br>
 <b>Xác định công thức phân tử:</b> phổ <b>MS</b> cho phân tử khối M⁺ (peak ion phân tử); phổ <b>IR</b> cho nhóm chức (C=O ≈ 1700 cm⁻¹, O–H ≈ 3200–3600 cm⁻¹ tù, N–H ≈ 3300 cm⁻¹).`,
   meo: 'Phổ IR: đỉnh tù rộng ~3300 = O–H (alcohol/acid); đỉnh nhọn mạnh ~1715 = C=O. Đề mới hay cho đọc phổ.' },
 
-{ so: 86, moi: true, chu_de: 'Hợp chất carbonyl (Hoá 11)', cap: 2,
+{ so: 86, cd: 'Đại cương hữu cơ', moi: true, chu_de: 'Hợp chất carbonyl (Hoá 11)', cap: 2,
   hoi: 'Phân biệt aldehyde và ketone bằng thuốc thử nào? Phản ứng iodoform?',
   dap: `<table class="kq"><tr><th>Thuốc thử</th><th>Aldehyde</th><th>Ketone</th></tr>
 <tr><td>AgNO₃/NH₃ (Tollens)</td><td><b>↓ Ag</b></td><td>✗</td></tr>
@@ -949,7 +949,7 @@ Chất cho phản ứng iodoform: CH₃CHO, CH₃COCH₃, CH₃COC₂H₅, C₂H
 <tr><td>Quỳ tím</td><td>✗</td><td>✗</td><td>✗ (rất yếu)</td></tr></table>`,
   meo: 'Bộ 3 nhận biết: NaOH tách phenol – Cu(OH)₂ tách glycerol – còn lại là alcohol đơn chức.' },
 
-{ so: 88, moi: true, chu_de: 'Thực hành – an toàn thí nghiệm', cap: 1,
+{ so: 88, cd: '*', moi: true, chu_de: 'Thực hành – an toàn thí nghiệm', cap: 1,
   hoi: 'Các quy tắc an toàn và thao tác thí nghiệm hay bị hỏi trong đề mới?',
   dap: `<table class="kq"><tr><td>Pha loãng H₂SO₄ đặc</td><td><b>Rót từ từ acid vào nước</b>, khuấy đều. TUYỆT ĐỐI không làm ngược (bắn, bỏng).</td></tr>
 <tr><td>Đun ống nghiệm</td><td>Nghiêng 45°, <b>miệng ống hướng ra chỗ không có người</b>, hơ đều trước khi tập trung.</td></tr>
