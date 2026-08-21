@@ -584,7 +584,7 @@ TD.deTaDao = function (mon, so, loai) {
   const N = TD.SO_CAU_TA_DAO;
 
   if (loai === 'baitap') {
-    const mau = (TD.GEN[mon] || []).filter(t => !t._tuLT);   /* chỉ bài tập tính toán */
+    const mau = (TD.GEN[mon] || []).filter(t => !t._tuLT && !t._song);   /* chỉ bài tập tính toán, bỏ bản song sinh cho khỏi lặp */
     if (!mau.length) return [];
     const ra = [];
     /* Rải đều các dạng bài rồi mới xáo, để đề nào cũng phủ hết dạng.
@@ -982,13 +982,18 @@ TD.deThiThat = function (mon, seed, cap) {
         if (ra.length >= n || quota[m] <= 0) break;
         if (them(x)) quota[m]--;
       }
-    /* hết hạn ngạch mà vẫn thiếu câu thì vét tiếp — đề thi không được hụt câu */
-    if (ra.length < n)
-      for (const m of thuTu)
+    /* Hết hạn ngạch mà vẫn thiếu câu thì phải vét tiếp, nhưng vét theo đúng khuynh hướng
+       của cấp lôi kiếp: đề cấp cao thiếu câu khó thì vét câu khó, không được vét câu dễ
+       nhất trước. Trước đây Phần I luôn vét từ mức 1 nên đề "học sinh giỏi" bị nhét đầy
+       câu nhận biết ở cuối. */
+    if (ra.length < n) {
+      const uuTienVet = [1, 2, 3, 4].sort((a, b) => (K.tong[b] || 0) - (K.tong[a] || 0));
+      for (const m of uuTienVet)
         for (const x of theoMuc[m]) {
           if (ra.length >= n) break;
           if (them(x)) quota[m] = Math.max(0, quota[m] - 1);
         }
+    }
     return ra;
   };
 

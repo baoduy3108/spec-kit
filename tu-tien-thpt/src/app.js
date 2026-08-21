@@ -1565,6 +1565,7 @@ TD.man_caidat = function (c) {
 TD.khoiDong = function () {
   TD.S = TD.tai();
   TD.dangKyMauTuMenhDe();     /* mọi môn đều có đề tự sinh, kể cả khối xã hội */
+  TD.dangKyVdcMc();           /* bản trắc nghiệm của các mẫu vận dụng cao, cho Phần I có câu phân hoá */
 
   const nav = $('#tab');
   TD.MAN.forEach(([k, t]) => {
