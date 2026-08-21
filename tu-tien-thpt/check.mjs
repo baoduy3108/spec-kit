@@ -99,5 +99,32 @@ if (TD.SO_DE_TA_DAO) {
     + `${(monBT.length * TD.SO_DE_TA_DAO * TD.SO_CAU_TA_DAO).toLocaleString('vi-VN')} câu bài tập`);
 }
 
+/* ---- Luyện Công phải là LÀM BÀI, không phải đọc nhận định ----
+   Mẫu sinh từ mệnh đề (_tuLT) chỉ hỏi "phát biểu nào sau đây đúng về…".
+   Môn Anh từng 76% là loại đó, tức không hề luyện ngữ pháp. */
+if (typeof TD.dangKyMauTuMenhDe === 'function') {
+  TD.dangKyMauTuMenhDe();
+  if (typeof TD.dangKyVdcMc === 'function') TD.dangKyVdcMc();
+  console.log('\n   TỈ LỆ BÀI TẬP THẬT TRONG LUYỆN CÔNG');
+  for (const [m, san] of Object.entries(TD.TY_LE_BAI_TAP || {})) {
+    /* sinhNhieu trả về {mon, g, s} nên phải tra ngược mã g về mẫu đề mới biết loại */
+    const laLT = new Map((GEN[m] || []).map(t => [t.ma, !!t._tuLT]));
+    let bt = 0, tong = 0;
+    for (const muc of [1, 2, 3, 4]) {
+      const ra = TD.sinhNhieu(m, muc, 40) || [];
+      tong += ra.length;
+      bt += ra.filter(x => !laLT.get(x.g)).length;
+    }
+    const ty = tong ? bt / tong : 0;
+    console.log(`   ${m.padEnd(6)} ${(ty * 100).toFixed(0).padStart(3)}% bài tập (sàn ${(san * 100).toFixed(0)}%)`);
+    if (ty < san - 0.08) { console.error(`✗ ${m}: Luyện Công chỉ ${(ty * 100).toFixed(0)}% là bài tập thật, dưới sàn ${(san * 100).toFixed(0)}%`); loi++; }
+  }
+  /* Mười mảng ngữ pháp trọng tâm của đề thi Anh phải có bộ sinh riêng */
+  const CAN_CO = ['anh-maotu', 'anh-luongtu', 'anh-hoahop', 'anh-cauhoiduoi', 'anh-lientu',
+                  'anh-modal', 'anh-phrasal', 'anh-cauuoc', 'anh-rutgon', 'anh-danhtu'];
+  const coSan = new Set((GEN.anh || []).map(x => x.ma));
+  for (const ma of CAN_CO) if (!coSan.has(ma)) { console.error(`✗ thiếu bộ sinh ngữ pháp "${ma}"`); loi++; }
+}
+
 console.log(loi ? `\n✗ ${loi} lỗi dữ liệu` : '\n✓ Dữ liệu hợp lệ');
 process.exit(loi ? 1 : 0);

@@ -537,20 +537,49 @@ TD.theThanhMuc = function (id) {
 };
 
 /* Sinh n mục câu hỏi tự động cho một môn, lọc theo mức độ nếu có */
+/* Tỉ lệ tối thiểu câu BÀI TẬP (không phải câu nhận định lý thuyết) trong một
+   phiên Luyện Công. Phải khớp với bản chất từng môn:
+   · Tiếng Anh — đề thi không có lấy một câu "phát biểu nào sau đây đúng"; toàn bộ
+     là câu tiếng Anh phải điền, phải chọn, phải đọc. Học ngoại ngữ bằng cách đọc
+     nhận định về ngữ pháp thì không ra kỹ năng, nên đặt cao nhất.
+   · Toán – Lí – Hoá – Sinh — Phần I của đề thật có cả câu lý thuyết nên chia đôi.
+   · Sử – Địa – GDKT – Văn — bản thân đề đã là câu nhận định, không cần ràng buộc. */
+TD.TY_LE_BAI_TAP = { anh: 0.85, toan: 0.6, ly: 0.55, hoa: 0.55, sinh: 0.55 };
+
 TD.sinhNhieu = function (mon, muc, n) {
   const mau = (TD.GEN[mon] || []).filter(t => !muc || t.muc === muc);
   if (!mau.length) return [];
-  /* Xáo danh sách mẫu rồi duyệt vòng — mỗi dạng bài đều được chạm tới
-     trước khi lặp lại dạng nào, nên phiên luyện phủ đều chứ không dồn cục. */
-  let dsMau = TD.xao(mau), vt = 0;
-  const ra = [];
-  for (let thu = 0; ra.length < n && thu < n * 6; thu++) {
-    if (vt >= dsMau.length) { dsMau = TD.xao(mau); vt = 0; }
-    const t = dsMau[vt++];
-    const seed = (Math.random() * 4294967295) >>> 0;
-    if (TD.sinhCau(t, seed)) ra.push({ mon: mon, g: t.ma, s: seed });
+
+  /* Rút n mục từ một danh sách mẫu: xáo rồi duyệt vòng nên mỗi dạng bài đều
+     được chạm tới trước khi lặp lại dạng nào. */
+  const rutTu = (bo, can) => {
+    const ra = [];
+    if (!bo.length || can <= 0) return ra;
+    let ds = TD.xao(bo), vt = 0;
+    for (let thu = 0; ra.length < can && thu < can * 6; thu++) {
+      if (vt >= ds.length) { ds = TD.xao(bo); vt = 0; }
+      const t = ds[vt++];
+      const seed = (Math.random() * 4294967295) >>> 0;
+      if (TD.sinhCau(t, seed)) ra.push({ mon: mon, g: t.ma, s: seed });
+    }
+    return ra;
+  };
+
+  const tyLe = TD.TY_LE_BAI_TAP[mon];
+  if (tyLe) {
+    const baiTap = mau.filter(t => !t._tuLT);
+    const lyThuyet = mau.filter(t => t._tuLT);
+    if (baiTap.length) {
+      const canBT = Math.round(n * tyLe);
+      const bt = rutTu(baiTap, canBT);
+      const lt = rutTu(lyThuyet, n - bt.length);
+      const ra = bt.concat(lt);
+      /* thiếu thì bù nốt bằng bài tập, không bù bằng câu lý thuyết */
+      if (ra.length < n) ra.push.apply(ra, rutTu(baiTap, n - ra.length));
+      return TD.xao(ra);
+    }
   }
-  return TD.xao(ra);
+  return TD.xao(rutTu(mau, n));
 };
 
 /* Đếm số mẫu đề của một môn */
