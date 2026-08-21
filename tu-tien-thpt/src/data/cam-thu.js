@@ -245,30 +245,88 @@ cam('sinh', [
 ]);
 
 /* ---------------- CHUNG CHO KHỐI XÃ HỘI ---------------- */
-const chungXH = [
+/* Hai thẻ dưới đây dùng chung cho các môn trắc nghiệm khối xã hội, nhưng
+   MỖI MÔN phải tự cấp ví dụ và bảng từ khoá của mình. Viết dưới dạng hàm
+   nhận `r` (phần riêng của môn) để không thể thêm thẻ chung mà quên phần
+   riêng — đó chính là lỗi khiến Cấm Thư Tiếng Anh từng chứa ví dụ Lịch sử. */
+const chungXH = (r) => [
 { nhom: '👁️ Nhìn là biết', ten: 'Từ tuyệt đối hoá — dấu hiệu của phát biểu sai', cap: 2,
   ct: 'Phát biểu chứa <b>"luôn luôn", "duy nhất", "mọi", "tất cả", "chỉ", "không bao giờ", "hoàn toàn"</b> '
     + 'có xác suất sai cao hơn hẳn.<br>'
-    + 'Ngược lại, phát biểu chứa <b>"thường", "chủ yếu", "một trong những", "góp phần"</b> '
+    + 'Ngược lại, phát biểu chứa <b>"thường", "chủ yếu", "một trong những", "góp phần", "phần lớn"</b> '
     + 'có xác suất đúng cao hơn.<br>'
-    + 'Đây là hệ quả của cách viết học thuật: sự thật xã hội hiếm khi tuyệt đối.',
-  khi: 'Câu lý thuyết Sử, Địa, GDKT khi không nhớ chắc kiến thức.',
-  vd: '"Đây là nguyên nhân DUY NHẤT dẫn tới thắng lợi" ⇒ gần như chắc chắn sai; thắng lợi luôn do nhiều nguyên nhân.',
-  bay: 'Có ngoại lệ thật: "Cách mạng tháng Tám 1945 mở ra kỉ nguyên độc lập tự do" là phát biểu tuyệt đối mà ĐÚNG. '
-     + 'Mẹo này chỉ để xếp thứ tự ưu tiên khi đã bí.' },
+    + 'Đây là hệ quả của cách viết học thuật: kết luận tuyệt đối rất khó đúng trong mọi trường hợp.',
+  khi: `Câu lý thuyết ${r.ten} khi không nhớ chắc kiến thức.`,
+  vd: r.vdTuyetDoi,
+  bay: r.bayTuyetDoi },
 
 { nhom: '👁️ Nhìn là biết', ten: 'Đọc từ khoá trong câu hỏi trước khi đọc phương án', cap: 1,
-  ct: 'Gạch chân từ khoá định hướng:<br>'
-    + '· <b>"nguyên nhân quyết định"</b> ⇒ nhân tố CHỦ QUAN (sự lãnh đạo, sức mạnh dân tộc)<br>'
-    + '· <b>"nguyên nhân khách quan"</b> ⇒ yếu tố bên ngoài (bối cảnh quốc tế, sự giúp đỡ)<br>'
-    + '· <b>"ý nghĩa lớn nhất"</b> ⇒ bước ngoặt, mở ra kỉ nguyên mới<br>'
-    + '· <b>"KHÔNG phải", "NGOẠI TRỪ"</b> ⇒ ba phương án đúng, tìm cái sai<br>'
-    + '· <b>"chủ yếu", "quan trọng nhất"</b> ⇒ có nhiều phương án đúng, phải chọn cái trọng yếu nhất',
-  khi: 'Mọi câu trắc nghiệm của khối xã hội.',
-  vd: 'Câu hỏi "Điều nào sau đây KHÔNG phải đặc điểm của…" — nhiều bạn đọc lướt rồi chọn phương án ĐÚNG, mất điểm oan.',
-  bay: 'Chữ "không" thường in thường, không in đậm. Đọc chậm lại ở những câu này — mỗi câu là 0,25 điểm.' },
+  ct: '<b>Từ khoá dùng chung cho mọi môn trắc nghiệm:</b><br>'
+    + '· <b>"KHÔNG phải", "NGOẠI TRỪ"</b> ⇒ ba phương án đúng, phải tìm cái SAI<br>'
+    + '· <b>"chủ yếu", "quan trọng nhất", "trực tiếp"</b> ⇒ nhiều phương án cùng đúng, chọn cái trọng yếu nhất<br>'
+    + '· <b>"theo đoạn trích", "theo bảng số liệu"</b> ⇒ bám dữ liệu đề cho, không suy diễn ngoài<br>'
+    + `<b>Từ khoá riêng của ${r.ten}:</b><br>${r.tuKhoa}`,
+  khi: `Mọi câu trắc nghiệm ${r.ten}.`,
+  vd: r.vdTuKhoa,
+  bay: 'Chữ "không" và "ngoại trừ" thường in thường, không in đậm. Đọc chậm lại ở những câu này — '
+     + 'đọc lướt rồi chọn phương án ĐÚNG là mất điểm oan.' }
+];
 
-{ nhom: '👁️ Nhìn là biết', ten: 'Loại phương án bằng mốc thời gian và logic nhân quả', cap: 3,
+const RIENG_XH = {
+  su: { ten: 'Lịch sử',
+    vdTuyetDoi: '"Đây là nguyên nhân DUY NHẤT dẫn tới thắng lợi" ⇒ gần như chắc chắn sai; '
+      + 'thắng lợi luôn do nhiều nguyên nhân hợp lại.',
+    bayTuyetDoi: 'Có ngoại lệ thật: "Cách mạng tháng Tám 1945 mở ra kỉ nguyên độc lập, tự do" là phát biểu '
+      + 'tuyệt đối mà ĐÚNG. Mẹo này chỉ để xếp thứ tự ưu tiên khi đã bí.',
+    tuKhoa: '· <b>"nguyên nhân quyết định"</b> ⇒ nhân tố CHỦ QUAN (sự lãnh đạo của Đảng, sức mạnh đại đoàn kết)<br>'
+      + '· <b>"nguyên nhân khách quan"</b> ⇒ yếu tố bên ngoài (bối cảnh quốc tế, sự giúp đỡ của bạn bè)<br>'
+      + '· <b>"ý nghĩa lớn nhất"</b> ⇒ bước ngoặt, mở ra thời kì hoặc kỉ nguyên mới<br>'
+      + '· <b>"điểm khác biệt căn bản"</b> ⇒ khác ở BẢN CHẤT, không phải khác ở hình thức hay qui mô',
+    vdTuKhoa: 'Hỏi "nguyên nhân quyết định thắng lợi kháng chiến chống Mỹ" ⇒ chọn sự lãnh đạo của Đảng, '
+      + 'không chọn sự giúp đỡ của Liên Xô và Trung Quốc (đó là điều kiện khách quan).' },
+
+  dia: { ten: 'Địa lí',
+    vdTuyetDoi: '"Vùng này KHÔNG gặp bất kì khó khăn nào về tài nguyên" ⇒ gần như chắc chắn sai; '
+      + 'vùng nào cũng có hạn chế riêng.',
+    bayTuyetDoi: 'Có ngoại lệ thật: "Tây Nguyên là vùng DUY NHẤT không giáp biển" là phát biểu tuyệt đối mà ĐÚNG. '
+      + 'Mẹo này chỉ dùng khi đã bí.',
+    tuKhoa: '· <b>"nhân tố chủ yếu", "nguyên nhân chủ yếu"</b> ⇒ thường là địa hình, hoàn lưu khí quyển hoặc vị trí<br>'
+      + '· <b>"nhằm mục đích chủ yếu"</b> ⇒ chọn mục tiêu kinh tế trọng tâm, không chọn mục tiêu phụ<br>'
+      + '· <b>"thể hiện rõ nhất"</b> ⇒ chọn dạng biểu đồ khớp với động từ trong yêu cầu<br>'
+      + '· <b>"theo bảng số liệu, nhận xét nào đúng"</b> ⇒ phải TÍNH rồi mới kết luận, không đoán',
+    vdTuKhoa: 'Hỏi "nhân tố chủ yếu khiến Bắc Trung Bộ khô nóng đầu mùa hạ" ⇒ chọn hiệu ứng phơn do dãy Trường Sơn, '
+      + 'không chọn "vị trí gần chí tuyến".' },
+
+  gdkt: { ten: 'GDKT & Pháp luật',
+    vdTuyetDoi: '"Hội nhập kinh tế CHỈ mang lại lợi ích" ⇒ chắc chắn sai; hội nhập luôn có hai mặt.',
+    bayTuyetDoi: 'Có ngoại lệ thật: "Mọi công dân đều bình đẳng trước pháp luật" là phát biểu tuyệt đối mà ĐÚNG '
+      + 'vì đó là nguyên tắc hiến định. Mẹo này không thay được việc nắm luật.',
+    tuKhoa: '· <b>"vi phạm loại nào"</b> ⇒ xác định quan hệ bị xâm phạm: quản lí nhà nước, tài sản, nội quy hay tội phạm<br>'
+      + '· <b>"quyền nào bị xâm phạm"</b> ⇒ bám ĐỐI TƯỢNG bị xâm phạm: thư từ, chỗ ở, thân thể hay danh dự<br>'
+      + '· <b>"phải chịu trách nhiệm gì"</b> ⇒ một hành vi có thể kéo theo NHIỀU loại trách nhiệm cùng lúc<br>'
+      + '· <b>"trực tiếp thực hiện"</b> ⇒ tìm chủ thể hành động, không tìm chủ thể xúi giục hay bao che',
+    vdTuKhoa: 'Tình huống vượt đèn đỏ gây tai nạn chết người ⇒ vừa vi phạm hành chính vừa vi phạm hình sự '
+      + 'và phải bồi thường dân sự.' },
+
+  anh: { ten: 'Tiếng Anh',
+    vdTuyetDoi: 'Trong bài đọc hiểu, phương án chứa "always", "never", "all", "only" thường quá mạnh so với '
+      + 'giọng điệu thận trọng của bài; phương án đúng hay dùng "often", "may", "tend to", "most".',
+    bayTuyetDoi: 'Mẹo này chỉ áp dụng cho câu SUY LUẬN và câu ý chính của bài đọc. '
+      + 'Câu ngữ pháp thì đúng sai do quy tắc, không liên quan tới mức độ mạnh yếu của từ ngữ.',
+    tuKhoa: '· <b>"According to the passage"</b> ⇒ đáp án nằm NGUYÊN trong bài, không suy diễn<br>'
+      + '· <b>"can be inferred", "implies"</b> ⇒ đáp án KHÔNG có sẵn, phải suy từ dữ kiện trong bài<br>'
+      + '· <b>"closest in meaning to"</b> ⇒ đoán nghĩa theo NGỮ CẢNH, không theo nghĩa quen thuộc nhất<br>'
+      + '· <b>"refers to"</b> ⇒ tìm danh từ gần nhất phía trước, khớp cả nghĩa lẫn số ít/số nhiều<br>'
+      + '· <b>"The word/phrase … in line X"</b> ⇒ quay lại đúng dòng đó rồi đọc trọn câu chứa nó',
+    vdTuKhoa: 'Câu "What can be inferred about the author\'s attitude?" ⇒ tác giả không nói thẳng thái độ, '
+      + 'phải suy từ cách trình bày (nêu cả ưu lẫn nhược ⇒ thái độ trung lập, cân bằng).' }
+};
+
+['su', 'dia', 'gdkt', 'anh'].forEach(m => cam(m, chungXH(RIENG_XH[m])));
+
+/* Thẻ riêng cho từng môn — trước đây thiếu nên phải mượn tạm thẻ của Lịch sử */
+TD.KHO.su_cam = (TD.KHO.su_cam || []).concat([
+{ nhom: '👁️ Nhìn là biết', ten: 'Loại phương án bằng mốc thời gian và logic nhân quả', cap: 3, cd: '*',
   ct: 'Một phương án chỉ đúng nếu nó KHẢ THI về mặt thời gian:<br>'
     + '· Kết quả không thể xảy ra TRƯỚC nguyên nhân.<br>'
     + '· Tổ chức chưa ra đời thì không thể tham gia sự kiện.<br>'
@@ -277,10 +335,61 @@ const chungXH = [
   khi: 'Câu Sử về nguyên nhân, ý nghĩa, tác động.',
   vd: 'Câu hỏi về Cách mạng tháng Tám 1945 mà phương án nhắc tới "gia nhập ASEAN" (1995) ⇒ loại ngay.',
   bay: 'Cẩn thận với sự kiện diễn ra CÙNG NĂM — lúc đó phải nhớ tới tháng, ví dụ Hiệp định Genève (7/1954) '
-     + 'sau chiến thắng Điện Biên Phủ (5/1954).' }
-];
+     + 'diễn ra SAU chiến thắng Điện Biên Phủ (5/1954).' }
+]);
 
-['su', 'dia', 'gdkt', 'anh'].forEach(m => cam(m, chungXH.map(x => Object.assign({}, x))));
+TD.KHO.dia_cam = (TD.KHO.dia_cam || []).concat([
+{ nhom: '👁️ Nhìn là biết', ten: 'Bẫy số liệu: giá trị tăng nhưng tỉ trọng giảm', cap: 3, cd: '*',
+  ct: 'Đây là bẫy xuất hiện gần như mọi đề Địa:<br>'
+    + '· <b>Giá trị tuyệt đối TĂNG</b> mà <b>tỉ trọng vẫn GIẢM</b> — xảy ra khi tổng tăng nhanh hơn thành phần đó.<br>'
+    + '· Ngược lại, tỉ trọng tăng chưa chắc giá trị tăng.<br>'
+    + 'Khi nhận xét cơ cấu phải dùng chữ <b>"tỉ trọng"</b>; khi nhận xét bảng giá trị mới dùng chữ '
+    + '<b>"giá trị", "sản lượng"</b>.<br>'
+    + 'Gặp câu "nhận xét nào đúng" ⇒ tính nhanh cả HAI năm rồi mới kết luận.',
+  khi: 'Câu nhận xét bảng số liệu và biểu đồ — chiếm nhiều điểm của đề Địa.',
+  vd: 'Nông nghiệp từ 20 lên 25 nghìn tỉ nhưng tổng GDP từ 100 lên 150 ⇒ giá trị TĂNG mà tỉ trọng GIẢM từ 20% xuống 16,7%.',
+  bay: 'Đọc kĩ đơn vị của bảng: "%" là cơ cấu, "nghìn tỉ đồng" hay "nghìn tấn" là giá trị. '
+     + 'Nhận xét sai loại là mất điểm dù tính đúng.' },
+
+{ nhom: '👁️ Nhìn là biết', ten: 'Nhận dạng vùng qua đặc điểm độc nhất', cap: 2, cd: '*',
+  ct: 'Mỗi vùng có một dấu hiệu KHÔNG vùng nào khác có — thấy là chốt ngay:<br>'
+    + '· <b>Tây Nguyên</b> — vùng duy nhất KHÔNG giáp biển; đất badan lớn nhất<br>'
+    + '· <b>Đồng bằng sông Hồng</b> — mật độ dân số cao nhất; có mùa đông lạnh ở đồng bằng<br>'
+    + '· <b>Trung du miền núi Bắc Bộ</b> — mùa đông lạnh nhất; trữ năng thuỷ điện lớn nhất<br>'
+    + '· <b>Duyên hải Nam Trung Bộ</b> — khô hạn nhất cả nước<br>'
+    + '· <b>Đông Nam Bộ</b> — dẫn đầu công nghiệp, FDI và GRDP/người<br>'
+    + '· <b>Đồng bằng sông Cửu Long</b> — dẫn đầu lúa, thuỷ sản, cây ăn quả; xâm nhập mặn nặng nhất',
+  khi: 'Câu "vùng nào có…" và câu nhận dạng vùng qua Atlat.',
+  vd: 'Đề nhắc "vùng có thế mạnh nuôi trồng thuỷ sản nước lợ lớn nhất" ⇒ Đồng bằng sông Cửu Long, '
+    + 'loại ngay Tây Nguyên và Trung du miền núi Bắc Bộ.',
+  bay: 'Đề hay gán thế mạnh của vùng NÀY sang vùng KHÁC. Nhớ dấu hiệu độc nhất là loại được ngay.' }
+]);
+
+TD.KHO.gdkt_cam = (TD.KHO.gdkt_cam || []).concat([
+{ nhom: '👁️ Nhìn là biết', ten: 'Giải tình huống pháp luật theo ba câu hỏi', cap: 3, cd: '*',
+  ct: '<b>① Hành vi xâm phạm QUAN HỆ nào?</b> quản lí nhà nước ⇒ hành chính · tài sản, nhân thân ⇒ dân sự · '
+    + 'nội quy cơ quan ⇒ kỉ luật · nguy hiểm cho xã hội ⇒ hình sự.<br>'
+    + '<b>② Mức độ đã tới ngưỡng TỘI PHẠM chưa?</b> cùng một hành vi, nhẹ thì hành chính, nặng thành hình sự.<br>'
+    + '<b>③ Chủ thể đã đủ TUỔI chịu trách nhiệm chưa?</b> đủ 14 đến dưới 16 chịu trách nhiệm hình sự về tội rất '
+    + 'nghiêm trọng và đặc biệt nghiêm trọng · đủ 16 chịu trách nhiệm về mọi tội · '
+    + 'đủ 14 đến dưới 16 chỉ bị phạt hành chính về vi phạm CỐ Ý · đủ 16 chịu trách nhiệm hành chính về mọi vi phạm.<br>'
+    + 'Một hành vi có thể kéo theo NHIỀU loại trách nhiệm cùng lúc.',
+  khi: 'Câu tình huống — dạng phổ biến nhất của đề GDKT & Pháp luật.',
+  vd: 'Học sinh 15 tuổi đi xe máy trên 50 cm³ ⇒ vi phạm hành chính (lỗi cố ý nên vẫn bị xử phạt).',
+  bay: 'Đừng chọn loại vi phạm theo cảm tính "nghe nghiêm trọng". Phải bám QUAN HỆ bị xâm phạm và MỨC ĐỘ.' },
+
+{ nhom: '👁️ Nhìn là biết', ten: 'Cặp khái niệm kinh tế hay bị đảo', cap: 2, cd: '*',
+  ct: '· <b>Tăng trưởng</b> (tăng về lượng) ≠ <b>phát triển</b> (kèm chuyển dịch cơ cấu và tiến bộ xã hội)<br>'
+    + '· <b>GDP</b> (theo lãnh thổ) ≠ <b>GNI</b> (theo sở hữu, quốc tịch)<br>'
+    + '· <b>Thuế trực thu</b> (người nộp = người chịu: TNCN, TNDN) ≠ <b>thuế gián thu</b> (nộp hộ: VAT, tiêu thụ đặc biệt)<br>'
+    + '· <b>CPI</b> (chỉ số, năm gốc = 100) ≠ <b>tỉ lệ lạm phát</b> (phần vượt trên 100)<br>'
+    + '· <b>Khiếu nại</b> (người bị ảnh hưởng trực tiếp, đòi lại quyền lợi) ≠ <b>tố cáo</b> (mọi công dân, ngăn hành vi vi phạm)<br>'
+    + '· <b>Bảo hiểm xã hội</b> (phi lợi nhuận, Nhà nước tổ chức) ≠ <b>bảo hiểm thương mại</b> (doanh nghiệp, vì lợi nhuận)',
+  khi: 'Câu lý thuyết và câu tình huống — đề luôn khai thác chỗ dễ đảo này.',
+  vd: 'Thuế tiêu thụ đặc biệt đánh vào hàng xa xỉ nhưng vẫn là thuế GIÁN thu, không phải trực thu.',
+  bay: 'Đừng suy luận theo cảm tính "đánh vào người giàu nên là trực thu". Phân loại dựa trên việc '
+     + 'người NỘP và người CHỊU thuế có phải một hay không.' }
+]);
 
 /* Ngữ văn thi TỰ LUẬN nên mẹo loại phương án trắc nghiệm không dùng được.
    Cấm Thư của Văn là mẹo ăn điểm trong bài viết. */
