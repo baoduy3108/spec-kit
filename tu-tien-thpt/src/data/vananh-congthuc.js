@@ -84,15 +84,17 @@ TD.KHO.van_ct = [
 /* ==================== TIẾNG ANH ==================== */
 TD.KHO.anh_ct = [
 { nhom: 'A. Cấu trúc đề', ten: 'Bản đồ đề Tiếng Anh — 40 câu / 50 phút', cap: 1,
-  ct: '<b>Các nhóm câu hỏi (theo format từ 2025):</b><br>' +
-      '&nbsp;&nbsp;• <b>Điền vào thông báo / quảng cáo</b> — ngữ cảnh thực tế<br>' +
-      '&nbsp;&nbsp;• <b>Sắp xếp câu thành đoạn hội thoại / đoạn văn</b> (arrangement) — dạng MỚI<br>' +
-      '&nbsp;&nbsp;• <b>Hoàn thành đoạn văn</b> (cloze test) — điền từ vựng, liên từ, ngữ pháp theo mạch<br>' +
-      '&nbsp;&nbsp;• <b>Đọc hiểu</b> 2 bài — chiếm tỉ trọng lớn nhất<br>' +
-      '&nbsp;&nbsp;• Ngữ âm, trọng âm, đồng nghĩa/trái nghĩa, tìm lỗi sai, câu gần nghĩa nhất<br>' +
-      '<b>Chiến thuật thời gian:</b> câu ngữ pháp/từ vựng <b>≤ 40 giây/câu</b> · đọc hiểu <b>~1,5 phút/câu</b> · chừa <b>5 phút</b> tô đáp án và soát.',
+  ct: '<b>Bốn dạng bài của cấu trúc từ năm 2025 — tổng đúng 40 câu:</b><br>' +
+      '&nbsp;&nbsp;• <b>Điền từ, cụm từ ngắn vào đoạn</b> — <b>12 câu</b> (ngữ pháp và từ vựng đặt trong ngữ cảnh)<br>' +
+      '&nbsp;&nbsp;• <b>Sắp xếp câu</b> thành đoạn văn hoặc lá thư — <b>5 câu</b> (dạng MỚI)<br>' +
+      '&nbsp;&nbsp;• <b>Điền câu, cụm từ dài</b> vào chỗ trống trong đoạn — <b>5 câu</b> (dạng MỚI)<br>' +
+      '&nbsp;&nbsp;• <b>Đọc hiểu</b> — <b>18 câu</b>, gần một nửa toàn đề<br>' +
+      '<b>ĐÃ BỊ LOẠI khỏi đề:</b> ngữ âm, trọng âm, tìm lỗi sai, chọn câu gần nghĩa nhất, ' +
+      'đồng nghĩa – trái nghĩa, hoàn thành hội thoại.<br>' +
+      '<b>Thời gian:</b> 12 câu điền từ ≤ 40 giây/câu · sắp xếp và chèn câu ~1 phút/câu · ' +
+      'đọc hiểu ~1,5 phút/câu · chừa 5 phút tô đáp án và soát.',
   khi: 'Đọc trước khi luyện đề.',
-  vd: 'Đề mới <b>giảm mạnh ngữ pháp thuần</b>, tăng câu đặt trong ngữ cảnh ⇒ phải luyện đọc nhiều hơn học công thức.',
+  vd: 'Riêng đọc hiểu đã 18/40 câu ⇒ luyện đọc quan trọng hơn hẳn việc học thuộc mẹo ngữ pháp lẻ.',
   bay: 'Dạng <b>sắp xếp</b> là dạng mới nhiều bạn mất điểm nhất. Mẹo: tìm câu mở đầu (chào hỏi/nêu chủ đề) rồi lần theo từ nối và đại từ thay thế.' },
 
 { nhom: 'B. Ngữ pháp', ten: 'Hệ thống 12 thì — dấu hiệu nhận biết', cap: 2,
@@ -147,19 +149,21 @@ TD.KHO.anh_ct = [
   vd: '"He works ___ (care)" ⇒ sau động từ thường ⇒ trạng từ ⇒ <b>carefully</b>.',
   bay: 'Tính từ đuôi <b>-ing</b> tả tính chất sự vật (interesting book); đuôi <b>-ed</b> tả cảm xúc người (I am interested).' },
 
-{ nhom: 'C. Từ vựng', ten: 'Ngữ âm & trọng âm — quy tắc nhanh', cap: 2,
-  ct: '<b>Phát âm đuôi -s/-es:</b><br>' +
-      '&nbsp;&nbsp;• /ɪz/ sau <b>s, x, z, ch, sh, ge, ce</b> · /s/ sau âm vô thanh (p, t, k, f, θ) · <b>/z/</b> các trường hợp còn lại.<br>' +
-      '<b>Phát âm đuôi -ed:</b><br>' +
-      '&nbsp;&nbsp;• <b>/ɪd/ sau /t/, /d/</b> · /t/ sau âm vô thanh · <b>/d/</b> còn lại.<br>' +
-      '<b>Trọng âm:</b><br>' +
-      '&nbsp;&nbsp;• Từ 2 âm tiết: <b>danh/tính từ → âm 1</b>; <b>động từ → âm 2</b>.<br>' +
-      '&nbsp;&nbsp;• Đuôi <b>-ic, -tion, -sion, -ial, -ian</b> → trọng âm rơi vào âm tiết <b>ngay trước</b> nó.<br>' +
-      '&nbsp;&nbsp;• Đuôi <b>-ate, -ary, -ity, -ify, -graphy, -logy</b> → trọng âm rơi vào âm tiết <b>thứ 3 từ cuối lên</b>.<br>' +
-      '&nbsp;&nbsp;• Các đuôi <b>-ment, -ness, -ful, -less, -er, -or, -ly, -ing, -ed</b> <b>không</b> ảnh hưởng trọng âm.',
-  khi: 'Câu ngữ âm – trọng âm, làm trong 15 giây.',
-  vd: 'eco<b>NO</b>mic (đuôi -ic ⇒ trọng âm trước nó) · <b>RE</b>cord (danh từ) vs re<b>CORD</b> (động từ).',
-  bay: 'Bẫy đuôi -ed: watch<b>ed</b> /t/, want<b>ed</b> /ɪd/, play<b>ed</b> /d/. Chỉ /t/ và /d/ mới cho /ɪd/.' },
+{ nhom: 'D. Chiến thuật', ten: 'Ba dạng bài mới: sắp xếp, chèn câu, tóm tắt', cap: 3,
+  ct: '<b>① Sắp xếp câu (5 câu)</b> — dựng lại một đoạn văn hoặc lá thư.<br>' +
+      '&nbsp;&nbsp;• Tìm câu MỞ ĐẦU: lời chào, câu nêu chủ đề chung nhất, câu không chứa đại từ thay thế.<br>' +
+      '&nbsp;&nbsp;• Tìm câu KẾT: câu kí tên, câu đề nghị phản hồi, câu bắt đầu bằng Therefore hoặc The key is.<br>' +
+      '&nbsp;&nbsp;• Nối phần giữa bằng TỪ NỐI và ĐẠI TỪ.<br>' +
+      '<b>② Chèn câu vào đoạn (5 câu)</b> — đặt một câu cho sẵn vào đúng chỗ.<br>' +
+      '&nbsp;&nbsp;• Từ nối đầu câu (For this reason, However, Therefore) chỉ quan hệ với câu LIỀN TRƯỚC.<br>' +
+      '&nbsp;&nbsp;• Đại từ (they, this, such) phải có danh từ tương ứng ở câu ngay trước.<br>' +
+      '&nbsp;&nbsp;• Câu chèn không được cắt đứt mạch giữa hai câu vốn dính nhau.<br>' +
+      '<b>③ Tóm tắt đoạn văn</b> — nằm trong phần đọc hiểu.<br>' +
+      '&nbsp;&nbsp;• Bản tóm tắt phải bao ĐỦ mọi ý chính, không thêm ý ngoài, không đổi mức độ khẳng định.',
+  khi: 'Ba dạng chiếm tới 10 câu, cộng với câu tóm tắt trong phần đọc hiểu.',
+  vd: 'Câu chèn bắt đầu bằng "For this reason" ⇒ phải đứng ngay sau câu nêu lí do, không đứng ở đầu đoạn.',
+  bay: 'Phương án tóm tắt chứa <b>completely, every, only, should be banned</b> thường quá mạnh so với giọng điệu ' +
+      'thận trọng của bài đọc — loại trước.' },
 
 { nhom: 'D. Chiến thuật', ten: 'Mẹo làm bài đọc hiểu & sắp xếp', cap: 3,
   ct: '<b>Đọc hiểu — quy trình 4 bước:</b><br>' +
@@ -239,8 +243,8 @@ TD.KHO.anh_ct.push(
   bay: 'make/do rất dễ lẫn: "do homework" nhưng "make an effort". Học theo cụm, đừng dịch từng từ.' },
 
 { nhom: 'D. Chiến thuật', ten: 'Chiến thuật 40 câu / 50 phút', cap: 1,
-  ct: '<b>Vòng 1 (20 phút):</b> làm ngữ âm, trọng âm, ngữ pháp, từ vựng — câu ngắn, ăn điểm nhanh.<br><b>Vòng 2 (22 phút):</b> làm bài đọc hiểu và điền từ đoạn văn.<br><b>Vòng 3 (8 phút):</b> quay lại câu khó, soát và tô kín đáp án.<br>Nguyên tắc: không câu nào để trống; câu bí thì loại 2 phương án sai rồi chọn.<br>Trung bình <b>75 giây/câu</b> — câu nào quá 2 phút thì đánh dấu và bỏ qua.',
+  ct: '<b>Vòng 1 (~12 phút):</b> làm 12 câu điền từ và cụm ngắn — có ngữ cảnh nhưng vẫn là câu ăn điểm nhanh nhất.<br><b>Vòng 2 (~10 phút):</b> làm 5 câu sắp xếp và 5 câu chèn câu — bám từ nối và đại từ.<br><b>Vòng 3 (~23 phút):</b> làm 18 câu đọc hiểu, đọc câu hỏi trước rồi quét bài.<br><b>Vòng 4 (5 phút):</b> quay lại câu khó, soát và tô kín đáp án.<br>Nguyên tắc: không câu nào để trống vì đề KHÔNG trừ điểm câu sai.<br>Trung bình <b>75 giây/câu</b> — câu nào quá 2 phút thì đánh dấu và bỏ qua.',
   khi: 'Quản lí thời gian phòng thi.',
-  vd: '40 câu / 50 phút ⇒ phải xong 20 câu đầu trong 20 phút mới đủ giờ cho bài đọc.',
+  vd: 'Đọc hiểu 18 câu ngốn gần một nửa thời gian, nên phải xong 22 câu đầu trong khoảng 22 phút.',
   bay: 'Bài đọc dài để cuối cùng dễ bị hết giờ. Nhiều bạn mất trọn 7–8 câu chỉ vì phân bổ thời gian sai.' }
 );

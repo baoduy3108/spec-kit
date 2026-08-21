@@ -471,4 +471,121 @@ TD.KHO.anh_cam = (TD.KHO.anh_cam || []).concat([
   bay: 'Học theo CẶP chứ đừng học lẻ từng vế — đề luôn cho vế này rồi bắt điền vế kia.' }
 ]);
 
+/* ---------------- CASIO: PHÍM BẤM THEO TỪNG ĐỜI MÁY ---------------- */
+TD.KHO.toan_cam = (TD.KHO.toan_cam || []).concat([
+{ nhom: '⌨️ Casio', ten: 'Bảng phím đối chiếu fx-570VN Plus ↔ fx-580VN X', cap: 1, cd: '*',
+  ct: 'Cả hai máy đều được mang vào phòng thi. Khác nhau lớn nhất: <b>570 dùng phím MODE + số</b>, '
+    + '<b>580 dùng phím MENU</b> và hiện tên chế độ bằng tiếng Việt.<br><br>'
+    + '<table style="width:100%;border-collapse:collapse;font-size:13px">'
+    + '<tr style="color:var(--kim)"><td><b>Cần làm gì</b></td><td><b>fx-570VN Plus</b></td><td><b>fx-580VN X</b></td></tr>'
+    + '<tr><td>Tính toán thường</td><td>MODE 1 (COMP)</td><td>MENU → <i>Tính toán</i></td></tr>'
+    + '<tr><td>Thống kê một biến</td><td>MODE 3 → 1 (1-VAR)</td><td>MENU → <i>Thống kê</i> → 1-Biến</td></tr>'
+    + '<tr><td>Giải phương trình, hệ</td><td>MODE 5 (EQN)</td><td>MENU → <i>Phương trình/Hàm số</i></td></tr>'
+    + '<tr><td>Lập bảng giá trị</td><td><b>MODE 7</b> (TABLE)</td><td>MENU → <i>Bảng số</i></td></tr>'
+    + '<tr><td>Vectơ</td><td>MODE 8 (VECTOR)</td><td>MENU → <i>Vectơ</i></td></tr>'
+    + '<tr><td>Ma trận</td><td>MODE 6 (MATRIX)</td><td>MENU → <i>Ma trận</i></td></tr>'
+    + '</table><br>'
+    + '<b>Giống hệt nhau trên cả hai máy:</b> <b>SHIFT + CALC = SOLVE</b> · phím <b>∫dx</b> tính tích phân · '
+    + '<b>SHIFT + ∫dx = d/dx</b> tính đạo hàm tại một điểm · <b>nCr, nPr</b> · <b>SHIFT + STO</b> lưu vào biến A…F · '
+    + '<b>ALPHA</b> gọi lại biến · <b>AC</b> xoá màn hình mà không mất biến đã lưu.',
+  khi: 'Đọc một lần trước khi luyện đề để khỏi loay hoay tìm phím trong phòng thi.',
+  vd: 'Muốn lập bảng giá trị: máy 570 bấm MODE 7, máy 580 bấm MENU rồi chọn dòng "Bảng số".',
+  bay: 'Số thứ tự trong MENU của máy 580 có thể lệch giữa các đời phần mềm, nên hãy chọn theo <b>TÊN</b> hiện trên '
+     + 'màn hình chứ đừng học vẹt con số. Máy 570 thì số MODE cố định.' },
+
+{ nhom: '⌨️ Casio', ten: 'Dãy phím cụ thể cho sáu dạng bài hay gặp', cap: 2, cd: '*',
+  ct: '<b>① Thử một giá trị vào biểu thức</b><br>'
+    + '&nbsp;&nbsp;Nhập biểu thức có X (bấm ALPHA rồi phím ")" để ra X) → <b>CALC</b> → nhập giá trị → <b>=</b><br>'
+    + '<b>② Dò nghiệm phương trình</b><br>'
+    + '&nbsp;&nbsp;Nhập <i>vế trái − vế phải</i> → <b>SHIFT + CALC</b> (SOLVE) → nhập giá trị khởi tạo → <b>=</b><br>'
+    + '&nbsp;&nbsp;Đổi giá trị khởi tạo (−5, 0, 5…) rồi SOLVE lại để gom đủ nghiệm.<br>'
+    + '<b>③ Lập bảng giá trị tìm GTLN – GTNN hoặc đếm nghiệm</b><br>'
+    + '&nbsp;&nbsp;570: <b>MODE 7</b> · 580: <b>MENU → Bảng số</b> → nhập f(X) → Start, End, Step → dò cột f(X)<br>'
+    + '<b>④ Tích phân và đạo hàm</b><br>'
+    + '&nbsp;&nbsp;Tích phân: phím <b>∫dx</b> → nhập hàm, cận dưới, cận trên → <b>=</b><br>'
+    + '&nbsp;&nbsp;Đạo hàm tại điểm: <b>SHIFT + ∫dx</b> → nhập hàm và giá trị x → <b>=</b><br>'
+    + '<b>⑤ Giải hệ phương trình (bài hỗn hợp Hoá, bài tương giao Toán)</b><br>'
+    + '&nbsp;&nbsp;570: <b>MODE 5</b> → chọn 1 (hệ 2 ẩn) hoặc 2 (hệ 3 ẩn) → nhập hệ số<br>'
+    + '&nbsp;&nbsp;580: <b>MENU → Phương trình/Hàm số</b> → chọn hệ phương trình bậc nhất → chọn số ẩn<br>'
+    + '<b>⑥ Trung bình và độ lệch chuẩn của bảng tần số</b><br>'
+    + '&nbsp;&nbsp;Bật cột tần số trước: <b>SHIFT + MODE</b> (570) hoặc <b>SHIFT + MENU</b> (580) → <b>Statistics/Tần số → ON</b><br>'
+    + '&nbsp;&nbsp;Rồi vào chế độ thống kê, nhập cột x và cột FREQ, bấm <b>AC</b> → <b>SHIFT + 1</b> để lấy x̄, σ, Σx, Σx².',
+  khi: 'Mọi bài tính toán của Toán, Lý, Hoá, Sinh.',
+  vd: 'Tìm GTLN của y = x³ − 3x trên [0; 2]: vào bảng giá trị, Start 0, End 2, Step 0,1 rồi dò cột f(X).',
+  bay: 'Nếu bảng tần số nhập vào mà máy không hiện cột FREQ thì là do CHƯA BẬT tần số trong SETUP. '
+     + 'Rất nhiều bạn tính sai độ lệch chuẩn chỉ vì quên bước này.' },
+
+{ nhom: '⌨️ Casio', ten: 'Bốn thói quen bấm máy tránh sai vặt', cap: 2, cd: '*',
+  ct: '<b>① Luôn kiểm tra đơn vị góc.</b> Bài lượng giác dùng radian thì phải bật <b>R</b>; bài hình học dùng độ thì bật '
+    + '<b>D</b>. Bấm <b>SHIFT + MODE</b> (570) hoặc <b>SHIFT + MENU</b> (580) để đổi. Sai chế độ là sai toàn bộ đáp số.<br>'
+    + '<b>② Nhập luỹ thừa 10 bằng phím ×10ˣ</b>, đừng gõ "× 10 ^". Gõ tay dễ sai thứ tự ưu tiên.<br>'
+    + '<b>③ Lưu số trung gian vào biến</b> bằng <b>SHIFT + STO + A</b> thay vì chép tay ra nháp rồi nhập lại — '
+    + 'chép tay là nguồn sai số và sai chữ số phổ biến nhất.<br>'
+    + '<b>④ Đọc lại biểu thức trên màn hình trước khi bấm "="</b>, đặc biệt chú ý dấu ngoặc của phân số và căn. '
+    + 'Máy hiển thị đúng dạng toán học nên nhìn là thấy ngay chỗ thiếu ngoặc.',
+  khi: 'Suốt buổi thi, nhất là những bài nhiều bước.',
+  vd: 'Tính sin(π/6): ở chế độ D máy trả 0,0091 (sai); ở chế độ R mới trả 0,5 (đúng).',
+  bay: 'Bấm <b>AC</b> chỉ xoá màn hình, KHÔNG xoá biến đã lưu. Muốn xoá hết biến phải dùng '
+     + '<b>SHIFT + 9 → Clear Memory</b> — đừng làm giữa chừng khi đang cần biến.' }
+]);
+
+/* ---------------- TIẾNG ANH: THÊM MẸO NHÌN ---------------- */
+TD.KHO.anh_cam = (TD.KHO.anh_cam || []).concat([
+{ nhom: '👁️ Nhìn là biết', ten: 'Dạng sắp xếp câu: bốn mỏ neo giải trong 40 giây', cap: 3, cd: '*',
+  ct: '<b>① Tìm câu ĐẦU</b> — câu chào (Dear…, Hi…), hoặc câu khái quát nhất, hoặc câu KHÔNG chứa đại từ thay thế '
+    + 'và không chứa từ nối.<br>'
+    + '<b>② Tìm câu CUỐI</b> — câu kí tên (Yours faithfully, Love…), câu đề nghị phản hồi, hoặc câu bắt đầu bằng '
+    + 'Therefore, The key is, In short.<br>'
+    + '<b>③ Nối phần giữa bằng TỪ NỐI</b> — However và On the other hand đứng sau ý thuận; As a result và '
+    + 'Therefore đứng sau nguyên nhân; Moreover đứng sau ý cùng chiều.<br>'
+    + '<b>④ Kiểm tra ĐẠI TỪ</b> — it, they, this, such, these benefits luôn phải có danh từ tương ứng ở câu ngay trước.<br>'
+    + 'Chỉ cần chốt được câu đầu và câu cuối là thường loại được ba trong bốn phương án.',
+  khi: '5 câu dạng sắp xếp trong đề — dạng mới nên nhiều bạn mất điểm oan.',
+  vd: '"Dear Sir or Madam" mở đầu thì câu kí tên bắt buộc là "Yours faithfully" — hai cụm này luôn đi cặp.',
+  bay: 'Đừng dịch từng câu rồi đoán mạch. Bám DẤU HIỆU HÌNH THỨC (chào, kí tên, từ nối, đại từ) nhanh hơn nhiều '
+     + 'và ít sai hơn.' },
+
+{ nhom: '👁️ Nhìn là biết', ten: 'Sáu loại câu hỏi đọc hiểu và cách xử lí từng loại', cap: 3, cd: '*',
+  ct: '<b>① Ý chính (main idea)</b> — đọc câu ĐẦU và câu CUỐI của bài; loại phương án quá chi tiết.<br>'
+    + '<b>② Chi tiết (According to…)</b> — quét tìm từ khoá trong bài, đáp án nằm nguyên trong đó.<br>'
+    + '<b>③ Từ vựng (closest in meaning)</b> — đọc TRỌN câu chứa từ, đoán theo ngữ cảnh; thử thay từng phương án vào.<br>'
+    + '<b>④ Quy chiếu (refers to)</b> — lùi lên tìm danh từ gần nhất khớp cả nghĩa lẫn số ít – số nhiều.<br>'
+    + '<b>⑤ Suy luận (can be inferred)</b> — đáp án KHÔNG có sẵn; chọn điều bài ngầm cho phép kết luận, '
+    + 'không chọn điều bài nói thẳng.<br>'
+    + '<b>⑥ NOT mentioned</b> — đối chiếu từng phương án, ba cái tìm được thì cái còn lại là đáp án.<br>'
+    + 'Làm theo THỨ TỰ: ② và ④ trước (nhanh nhất), ① và ③ sau, ⑤ và ⑥ cuối cùng.',
+  khi: '18 câu đọc hiểu — gần một nửa toàn đề.',
+  vd: 'Câu "The word yields is closest in meaning to" trong bài về nông nghiệp ⇒ nghĩa là SẢN LƯỢNG, '
+    + 'không phải nghĩa "nhường đường" quen thuộc.',
+  bay: 'Câu ⑤ suy luận hay bị chọn nhầm sang phương án bài NÓI THẲNG. Đã nói thẳng thì đó là chi tiết, '
+     + 'không phải suy luận.' },
+
+{ nhom: '👁️ Nhìn là biết', ten: 'Đọc chỗ trống trước, đoán loại từ rồi mới nhìn phương án', cap: 2, cd: '*',
+  ct: 'Với 12 câu điền từ trong đoạn, quy trình ba bước nhanh hơn hẳn việc thử từng phương án:<br>'
+    + '<b>① Che phương án lại</b>, đọc trọn câu chứa chỗ trống và cả câu liền trước.<br>'
+    + '<b>② Tự đoán</b> chỗ trống cần LOẠI TỪ gì (danh, động, tính, trạng, giới từ, từ nối) và mang nghĩa gì.<br>'
+    + '<b>③ Mở phương án ra</b>, chọn cái khớp với dự đoán; nếu hai phương án cùng loại từ thì phân biệt bằng nghĩa '
+    + 'hoặc bằng cụm cố định.<br>'
+    + 'Nếu chỗ trống là <b>từ nối</b> thì phải xác định quan hệ giữa hai câu: cùng chiều, trái chiều, nhân quả '
+    + 'hay điều kiện phủ định.',
+  khi: '12 câu điền từ và cụm ngắn — phần ăn điểm nhanh nhất của đề.',
+  vd: 'Chỗ trống sau "a" và trước "of students" ⇒ chắc chắn cần DANH TỪ, loại ngay mọi phương án là tính từ hay động từ.',
+  bay: 'Nhìn phương án trước rồi mới đọc câu là cách làm chậm nhất và dễ bị phương án nhiễu dẫn dắt nhất.' },
+
+{ nhom: '👁️ Nhìn là biết', ten: 'Những gì KHÔNG còn trong đề — đừng ôn phí thời gian', cap: 1, cd: '*',
+  ct: 'Từ năm 2025, đề Tiếng Anh tốt nghiệp THPT <b>đã loại bỏ</b> các dạng sau:<br>'
+    + '&nbsp;&nbsp;• Ngữ âm (chọn từ có phần gạch chân phát âm khác)<br>'
+    + '&nbsp;&nbsp;• Trọng âm (chọn từ có trọng âm khác)<br>'
+    + '&nbsp;&nbsp;• Tìm lỗi sai<br>'
+    + '&nbsp;&nbsp;• Chọn câu có nghĩa gần nhất và nối hai câu thành một<br>'
+    + '&nbsp;&nbsp;• Chọn từ đồng nghĩa – trái nghĩa hỏi riêng lẻ<br>'
+    + '&nbsp;&nbsp;• Hoàn thành hội thoại ngắn<br>'
+    + 'Rất nhiều tài liệu ôn thi cũ vẫn dạy các dạng này. Học chúng bây giờ là <b>đổi thời gian lấy 0 điểm</b>.<br>'
+    + 'Thay vào đó dồn sức cho: đọc hiểu (18 câu) · điền từ trong đoạn (12 câu) · sắp xếp câu (5) · chèn câu (5).',
+  khi: 'Đọc ngay khi bắt đầu ôn để không chọn nhầm tài liệu.',
+  vd: 'Một cuốn sách luyện đề in trước 2025 thường dành hẳn hai chương cho ngữ âm và trọng âm — bỏ qua hai chương đó.',
+  bay: 'Kiến thức phát âm vẫn có ích cho việc học tiếng Anh nói chung, nhưng KHÔNG được hỏi trong đề. '
+     + 'Đây là chuyện phân bổ thời gian ôn, không phải chuyện kiến thức đúng hay sai.' }
+]);
+
 })();

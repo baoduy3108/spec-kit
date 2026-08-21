@@ -55,14 +55,6 @@ TD.KHO_LT.anh = [
 { cd: 'Từ loại', m: 2, a: true,  t: 'Các hậu tố -ise/-ize, -ify, -en thường tạo thành động từ.', v: 'Ví dụ: modernise, simplify, strengthen.' },
 
 /* ========== NGỮ ÂM – TRỌNG ÂM ========== */
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Đuôi -ed đọc là /ɪd/ khi động từ nguyên thể kết thúc bằng âm /t/ hoặc /d/.', v: 'Ví dụ: wanted, needed, decided.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: false, t: 'Đuôi -ed đọc là /ɪd/ khi động từ kết thúc bằng âm /k/ hoặc /p/.', v: 'Kết thúc bằng âm vô thanh như /k/, /p/ thì đuôi -ed đọc là /t/.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Đuôi -s/-es đọc là /ɪz/ sau các âm s, x, z, ch, sh, ge, ce.', v: 'Sau âm vô thanh đọc /s/, còn lại đọc /z/.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Với từ hai âm tiết, danh từ và tính từ thường nhấn âm tiết thứ nhất, động từ thường nhấn âm tiết thứ hai.', v: 'Ví dụ: REcord (danh từ) và reCORD (động từ).' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Các đuôi -ic, -tion, -sion, -ial, -ian kéo trọng âm về âm tiết ngay trước nó.', v: 'Ví dụ: ecoNOmic, inforMAtion, deCIsion.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: false, t: 'Đuôi -ic khiến trọng âm rơi vào chính âm tiết chứa đuôi đó.', v: 'Trọng âm rơi vào âm tiết NGAY TRƯỚC đuôi -ic.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 3, a: true,  t: 'Các đuôi -ment, -ness, -ful, -less, -er, -ly, -ing, -ed không làm thay đổi trọng âm của từ gốc.', v: 'Đó là các hậu tố trung tính về trọng âm.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 3, a: true,  t: 'Các đuôi -ity, -ify, -graphy, -logy thường khiến trọng âm rơi vào âm tiết thứ ba từ cuối đếm lên.', v: 'Ví dụ: aBIlity, phoTOgraphy, biOlogy.' },
 
 /* ========== CẤU TRÚC – CHIẾN THUẬT ========== */
 { cd: 'Cấu trúc – Chiến thuật', m: 1, a: true,  t: 'Đề Tiếng Anh tốt nghiệp THPT gồm 40 câu trắc nghiệm làm trong 50 phút, mỗi câu 0,25 điểm.', v: 'Trung bình chỉ hơn một phút cho mỗi câu.' },
@@ -126,10 +118,6 @@ TD.KHO_LT.anh.push(
 { cd: 'Từ loại', m: 3, a: false, t: '"hardly" là dạng trạng từ của tính từ "hard" và có nghĩa là một cách chăm chỉ.', v: '"hardly" nghĩa là HẦU NHƯ KHÔNG. Trạng từ của "hard" chính là "hard".' },
 { cd: 'Từ loại', m: 2, a: true,  t: 'Trong cụm danh từ, trật tự tính từ thường là: ý kiến – kích thước – tuổi – hình dáng – màu sắc – nguồn gốc – chất liệu.', v: 'Ví dụ: a beautiful small old round brown Italian wooden table.' },
 
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Đuôi -s/-es đọc là /s/ sau các âm vô thanh như /p/, /t/, /k/, /f/.', v: 'Ví dụ: books, cats, maps.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 3, a: true,  t: 'Với từ ghép, danh từ ghép thường nhấn ở từ thứ nhất còn tính từ ghép và động từ ghép thường nhấn ở từ thứ hai.', v: 'Ví dụ: BLACKboard (bảng đen) và black BOARD (tấm ván màu đen).' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: false, t: 'Trong tiếng Anh, mọi từ hai âm tiết đều nhấn trọng âm ở âm tiết đầu.', v: 'Danh từ và tính từ thường nhấn âm đầu, nhưng ĐỘNG TỪ thường nhấn âm thứ hai.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Các tiền tố như un-, im-, dis-, re- thường không mang trọng âm chính.', v: 'Trọng âm thường rơi vào phần gốc của từ.' },
 
 { cd: 'Cấu trúc – Chiến thuật', m: 2, a: true,  t: 'Nên dành khoảng 5 phút cuối giờ để soát và tô kín đáp án trên phiếu trả lời trắc nghiệm.', v: 'Tránh tình trạng hết giờ mà chưa kịp tô.' },
 { cd: 'Cấu trúc – Chiến thuật', m: 2, a: true,  t: 'Với câu tìm từ đồng nghĩa hoặc trái nghĩa, nên đoán nghĩa từ ngữ cảnh của cả câu.', v: 'Ngay cả khi không biết chính xác nghĩa của từ được gạch chân.' },
@@ -177,10 +165,6 @@ TD.KHO_LT.anh.push(
 { cd: 'Từ loại', m: 4, a: true,  t: 'Tính từ đuôi -ed mô tả cảm xúc của người, còn đuôi -ing mô tả tính chất của sự vật gây ra cảm xúc đó.', v: 'I am bored (tôi thấy chán) khác The film is boring (bộ phim gây chán).' },
 { cd: 'Từ loại', m: 4, a: false, t: 'Sau động từ nối như "seem", "become", "feel" phải dùng trạng từ.', v: 'Sau linking verb dùng TÍNH TỪ: She feels happy, không phải happily.' },
 { cd: 'Từ loại', m: 4, a: true,  t: 'Tiền tố "un-", "in-", "im-", "ir-", "dis-" tạo nghĩa phủ định; "im-" dùng trước các từ bắt đầu bằng m, p.', v: 'impossible, impatient; irregular đứng trước r; illegal đứng trước l.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 4, a: true,  t: 'Từ "record" khi là danh từ trọng âm ở âm tiết đầu, khi là động từ trọng âm ở âm tiết thứ hai.', v: 'Quy tắc chung cho cặp danh–động hai âm tiết: RE-cord (n) / re-CORD (v). Tương tự present, export, increase.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 4, a: true,  t: 'Các hậu tố -ic, -ical, -ion, -ity khiến trọng âm rơi vào âm tiết ngay TRƯỚC hậu tố đó.', v: 'eco-NO-mic, in-for-MA-tion, a-BI-li-ty.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 4, a: false, t: 'Đuôi -ed sau các âm vô thanh như /p/, /k/, /f/ được phát âm là /id/.', v: 'Sau âm vô thanh (trừ /t/) đuôi -ed đọc là /t/. Chỉ sau /t/ và /d/ mới đọc /id/.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 4, a: true,  t: 'Đuôi -s/-es được phát âm là /iz/ sau các âm gió và âm xuýt như /s/, /z/, /ʃ/, /tʃ/, /dʒ/.', v: 'watches /iz/, boxes /iz/. Sau âm vô thanh khác đọc /s/, sau âm hữu thanh đọc /z/.' },
 { cd: 'Cấu trúc – Chiến thuật', m: 4, a: true,  t: 'Với câu hỏi dạng "The word it in line 5 refers to…", phải tìm danh từ gần nhất phía trước phù hợp cả về nghĩa lẫn về số.', v: 'Cách kiểm tra: thay danh từ đó vào vị trí đại từ, câu vẫn hợp nghĩa thì đúng.' },
 { cd: 'Cấu trúc – Chiến thuật', m: 4, a: true,  t: 'Câu hỏi "Which of the following is NOT mentioned" cần đối chiếu từng phương án với bài đọc để loại dần.', v: 'Ba phương án sẽ tìm được trong bài, phương án còn lại là đáp án. Đừng chọn theo cảm tính.' },
 { cd: 'Cấu trúc – Chiến thuật', m: 4, a: true,  t: 'Với bài điền từ vào đoạn văn, nên đọc trọn câu chứa chỗ trống và cả câu liền trước để nắm mạch nghĩa.', v: 'Nhiều chỗ trống là từ nối (however, therefore, moreover) chỉ chọn đúng khi hiểu quan hệ giữa hai câu.' },

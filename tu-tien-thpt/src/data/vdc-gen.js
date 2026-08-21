@@ -1317,47 +1317,6 @@ TD.GEN.van = (TD.GEN.van || []).concat([
 
 TD.GEN.anh = (TD.GEN.anh || []).concat([
 
-{ ma: 'anh-vdc-vietlai', chuong: 'Ngữ pháp khác', muc: 4, dang: 'mc',
-  tao(R) {
-    const it = R.chon([
-      { q: 'It was not until 1990 that she started her career.',
-        d: 'Not until 1990 did she start her career.',
-        s: ['Not until 1990 she started her career.', 'Not until 1990 she did start her career.', 'Not until 1990 started she her career.'],
-        v: 'Đưa "Not until + mốc thời gian" lên đầu thì mệnh đề chính phải ĐẢO NGỮ: trợ động từ + S + V nguyên thể.' },
-      { q: 'I regret not studying harder for the exam.',
-        d: 'I wish I had studied harder for the exam.',
-        s: ['I wish I studied harder for the exam.', 'I wish I would study harder for the exam.', 'I wish I have studied harder for the exam.'],
-        v: 'Nuối tiếc về QUÁ KHỨ dùng "wish + had + V3". Câu gốc "regret not V-ing" chỉ điều đã không làm.' },
-      { q: 'She is too young to watch this film.',
-        d: 'She is not old enough to watch this film.',
-        s: ['She is enough old to watch this film.', 'She is so young to watch this film.', 'She is not too old to watch this film.'],
-        v: '"too + adj + to V" ⇔ "not + adj trái nghĩa + enough + to V". Lưu ý "enough" đứng SAU tính từ.' },
-      { q: 'People believe that the company will expand next year.',
-        d: 'The company is believed to expand next year.',
-        s: ['The company is believed expanding next year.', 'The company believes to expand next year.', 'The company is believed that will expand next year.'],
-        v: 'Bị động kép: S + be + V3 (believe) + to V. Vì hành động ở tương lai và cùng thì với động từ chính nên dùng "to V".' },
-      { q: 'Although he was tired, he finished the report.',
-        d: 'Despite his tiredness, he finished the report.',
-        s: ['Despite he was tired, he finished the report.', 'Despite of his tiredness, he finished the report.', 'Although his tiredness, he finished the report.'],
-        v: 'Sau "Despite" dùng DANH TỪ hoặc V-ing, không có "of" và không dùng mệnh đề.' },
-      { q: 'The last time I saw him was five years ago.',
-        d: 'I have not seen him for five years.',
-        s: ['I did not see him for five years.', 'I have not seen him since five years.', 'I had not seen him for five years.'],
-        v: '"The last time … was X ago" ⇔ "have not + V3 + for X". "for" đi với KHOẢNG thời gian, "since" đi với mốc.' },
-      { q: 'He said, "Why did you leave so early?"',
-        d: 'He asked me why I had left so early.',
-        s: ['He asked me why did I leave so early.', 'He asked me why I left so early.', 'He asked me that why I had left so early.'],
-        v: 'Câu hỏi tường thuật trở về trật tự KHẲNG ĐỊNH, bỏ trợ động từ "did" và lùi thì (quá khứ đơn → quá khứ hoàn thành).' },
-      { q: 'If you do not leave now, you will miss the last bus.',
-        d: 'Unless you leave now, you will miss the last bus.',
-        s: ['Unless you do not leave now, you will miss the last bus.', 'Unless you left now, you would miss the last bus.', 'Unless you will leave now, you will miss the last bus.'],
-        v: '"Unless" đã mang sẵn nghĩa phủ định (= if not) nên mệnh đề đi kèm phải ở dạng KHẲNG ĐỊNH.' }
-    ]);
-    return MC2(R, `Chọn câu có nghĩa GẦN NHẤT với câu sau:\n\n"${it.q}"`, it,
-      'Câu viết lại luôn ghép hai điểm ngữ pháp cùng lúc. Làm hai bước: ① nhận ra CẤU TRÚC bị đổi '
-      + '② kiểm tra lại THÌ và trật tự từ của phương án. Ba phương án nhiễu thường đúng cấu trúc nhưng sai thì hoặc sai trật tự.');
-  } },
-
 { ma: 'anh-vdc-cloze', chuong: 'Cấu trúc – Chiến thuật', muc: 4, dang: 'mc',
   tao(R) {
     const it = R.chon([

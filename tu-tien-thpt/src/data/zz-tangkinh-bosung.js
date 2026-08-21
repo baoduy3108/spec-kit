@@ -588,4 +588,239 @@ them('anh_ct', [
      + 'Đề luôn cho một vế rồi bắt điền vế kia.' }
 ]);
 
+/* ===== THẺ CHO CÁC CHUYÊN ĐỀ VỪA BỔ SUNG ===== */
+them('toan_ct', [
+{ nhom: 'VII. Dãy số', cd: 'Giới hạn – Liên tục', ten: 'Giới hạn — bảng quy tắc xử lí dạng vô định', cap: 3,
+  ct: '<b>Dạng ∞/∞ (phân thức khi x → ∞):</b> chia cả tử và mẫu cho luỹ thừa bậc cao nhất của mẫu.<br>'
+    + '&nbsp;&nbsp;· bậc tử &lt; bậc mẫu ⇒ giới hạn 0 · bậc bằng nhau ⇒ tỉ số hệ số cao nhất · bậc tử &gt; bậc mẫu ⇒ ±∞<br>'
+    + '<b>Dạng 0/0:</b> phân tích thành nhân tử rồi rút gọn; nếu có căn thì nhân liên hợp.<br>'
+    + '<b>Dạng ∞ − ∞:</b> nhân liên hợp hoặc quy đồng để đưa về hai dạng trên.<br>'
+    + '<b>Giới hạn nền:</b> lim(1/nᵏ) = 0 · lim qⁿ = 0 khi |q| &lt; 1 · tổng cấp số nhân lùi vô hạn u₁/(1 − q).',
+  khi: 'Câu giới hạn và câu tìm tiệm cận của đồ thị.',
+  vd: 'lim (√(x²+1) − x) khi x → +∞: nhân liên hợp được 1/(√(x²+1) + x) → 0.',
+  bay: 'Với x → −∞ thì √(x²) = |x| = −x chứ không phải x. Quên dấu ở đây là sai ngay từ bước đầu.' }
+]);
+
+them('hoa_ct', [
+{ nhom: 'Kỹ thuật', cd: 'Phức chất', ten: 'Phức chất — cấu tạo và phản ứng nhận biết', cap: 2,
+  ct: '<b>Cấu tạo:</b> nguyên tử hoặc ion kim loại trung tâm + các phối tử bao quanh bằng liên kết cho – nhận.<br>'
+    + '<b>Phối tử thường gặp:</b> H₂O, NH₃, Cl⁻, OH⁻, CN⁻, SCN⁻ — đều còn cặp electron chưa liên kết.<br>'
+    + '<b>Số phối trí</b> hay gặp là 4 và 6. Trong công thức, phần trong ngoặc vuông là cầu nội.<br>'
+    + '<b>Phản ứng nhận biết quan trọng:</b><br>'
+    + '&nbsp;&nbsp;· Cu²⁺ + NH₃ dư ⇒ [Cu(NH₃)₄]²⁺ <b>xanh lam đậm</b><br>'
+    + '&nbsp;&nbsp;· AgCl + NH₃ dư ⇒ [Ag(NH₃)₂]⁺ <b>tan</b><br>'
+    + '&nbsp;&nbsp;· Fe³⁺ + SCN⁻ ⇒ phức <b>đỏ máu</b><br>'
+    + '&nbsp;&nbsp;· Al(OH)₃, Zn(OH)₂ tan trong NaOH dư (tạo phức hydroxide)',
+  khi: 'Nội dung [MỚI] của Hoá 12 CT 2018, thường hỏi ở phần nhận biết và lí thuyết.',
+  vd: 'Nhỏ NH₃ từ từ tới dư vào dung dịch CuSO₄: đầu tiên có kết tủa xanh, sau đó kết tủa TAN tạo dung dịch xanh đậm.',
+  bay: 'Tạo phức là liên kết CHO – NHẬN nên số oxi hoá của ion trung tâm KHÔNG đổi. Đây không phải phản ứng oxi hoá khử.' },
+
+{ nhom: 'Kỹ thuật', cd: 'Nhiệt động – Tốc độ – Cân bằng', ten: 'Enthalpy, tốc độ và cân bằng — ba công cụ lớp 10–11', cap: 3,
+  ct: '<b>Enthalpy:</b> Δ_rH = ΣΔ_fH(sản phẩm) − ΣΔ_fH(chất đầu). Theo năng lượng liên kết thì NGƯỢC LẠI: '
+    + 'Δ_rH = ΣE_lk(chất đầu) − ΣE_lk(sản phẩm).<br>'
+    + '&nbsp;&nbsp;Δ_rH &lt; 0 toả nhiệt · Δ_rH &gt; 0 thu nhiệt · Δ_fH của đơn chất bền = 0<br>'
+    + '<b>Tốc độ phản ứng</b> tăng khi tăng: nồng độ · nhiệt độ · áp suất khí · diện tích bề mặt · dùng xúc tác.<br>'
+    + '<b>Cân bằng hoá học:</b> K_C chỉ chứa chất khí và chất tan, KHÔNG chứa chất rắn và dung môi.<br>'
+    + '&nbsp;&nbsp;Le Chatelier: tăng nhiệt độ ⇒ chuyển theo chiều THU nhiệt · tăng áp suất ⇒ chuyển theo chiều '
+    + 'GIẢM số mol khí · xúc tác KHÔNG làm chuyển dịch cân bằng.',
+  khi: 'Câu lí thuyết định lượng và bài toán năng lượng nhiên liệu.',
+  vd: 'N₂ + 3H₂ ⇌ 2NH₃ toả nhiệt và giảm số mol khí ⇒ tăng áp suất và giảm nhiệt độ đều làm tăng hiệu suất.',
+  bay: 'Toả nhiệt nói về NĂNG LƯỢNG, nhanh hay chậm nói về TỐC ĐỘ — hai chuyện khác nhau. '
+     + 'Than cháy toả nhiệt rất mạnh nhưng vẫn cần mồi lửa.' }
+]);
+
+them('sinh_ct', [
+{ nhom: 'II. Di truyền NST', cd: 'Di truyền người', ten: 'Di truyền người — phương pháp và bệnh thường gặp', cap: 3,
+  ct: '<b>Ba phương pháp nghiên cứu:</b> phả hệ · trẻ đồng sinh · nghiên cứu tế bào (bộ nhiễm sắc thể).<br>'
+    + '<b>Đọc phả hệ:</b><br>'
+    + '&nbsp;&nbsp;· Bố mẹ bình thường sinh con bệnh ⇒ gene LẶN, bố mẹ đều dị hợp<br>'
+    + '&nbsp;&nbsp;· Bệnh chủ yếu ở nam ⇒ gene lặn trên X · Bố bệnh truyền cho TẤT CẢ con gái ⇒ gene trội trên X<br>'
+    + '&nbsp;&nbsp;· Chỉ truyền theo dòng mẹ ⇒ gene trong ti thể<br>'
+    + '<b>Bệnh và hội chứng phải nhớ:</b> Down (ba nhiễm sắc thể 21) · Turner (XO) · Klinefelter (XXY) · '
+    + 'mù màu và máu khó đông (gene lặn trên X) · phenylketone niệu (lặn trên NST thường, hạn chế được bằng ăn kiêng).',
+  khi: 'Bài phả hệ và câu lí thuyết về di truyền y học.',
+  vd: 'Bố mẹ bình thường sinh con bệnh ⇒ cả hai đều Aa; người con BÌNH THƯỜNG có xác suất 2/3 là Aa (đã loại aa).',
+  bay: 'Người dị hợp là người LÀNH MANG GENE — không biểu hiện bệnh nhưng vẫn truyền allele bệnh cho con.' },
+
+{ nhom: 'II. Di truyền NST', cd: 'Công nghệ di truyền', ten: 'Công nghệ gene và công nghệ tế bào', cap: 3,
+  ct: '<b>Công nghệ gene — ba khâu:</b> ① tạo DNA tái tổ hợp ② đưa vào tế bào nhận ③ phân lập dòng tế bào chứa DNA tái tổ hợp.<br>'
+    + '&nbsp;&nbsp;· <b>Thể truyền:</b> plasmid hoặc virus đã biến đổi, phải tự nhân đôi được trong tế bào nhận<br>'
+    + '&nbsp;&nbsp;· <b>Enzyme cắt giới hạn</b> cắt tại trình tự đặc hiệu; <b>ligase</b> nối lại. Gene và thể truyền phải '
+    + 'cắt bằng CÙNG một loại enzyme để đầu dính khớp nhau<br>'
+    + '&nbsp;&nbsp;· Tế bào nhận phổ biến là E. coli vì sinh sản nhanh, dễ nuôi<br>'
+    + '<b>Công nghệ tế bào:</b> nuôi cấy mô (thực vật) · dung hợp tế bào trần (lai xa) · nhân bản vô tính bằng '
+    + 'chuyển nhân tế bào sinh dưỡng · cấy truyền phôi.<br>'
+    + '<b>PCR</b> nhân một đoạn DNA lên hàng triệu bản trong vài giờ.',
+  khi: 'Câu lí thuyết về ứng dụng di truyền học — luôn có trong đề.',
+  vd: 'Insulin cho người tiểu đường hiện được sản xuất bằng vi khuẩn mang gene người, rẻ và an toàn hơn chiết từ tuỵ động vật.',
+  bay: 'Cá thể nhân bản vô tính chỉ giống về gene trong NHÂN; gene ti thể đến từ trứng và kiểu hình vẫn chịu ảnh hưởng môi trường.' }
+]);
+
+them('su_ct', [
+{ nhom: 'B. Việt Nam', cd: 'Chiến tranh bảo vệ Tổ quốc', ten: 'Chiến tranh bảo vệ Tổ quốc sau năm 1975', cap: 3,
+  ct: '<b>Biên giới Tây Nam (1975 – 1979):</b> tập đoàn Pol Pot xâm lấn biên giới; quân dân ta phản công tự vệ, '
+    + 'sau đó quân tình nguyện Việt Nam giúp nhân dân Campuchia thoát khỏi hoạ diệt chủng.<br>'
+    + '<b>Biên giới phía Bắc (2/1979):</b> quân dân sáu tỉnh biên giới chiến đấu kiên cường bảo vệ lãnh thổ.<br>'
+    + '<b>Tính chất:</b> cả hai đều là chiến tranh CHÍNH NGHĨA, TỰ VỆ — Việt Nam ở thế bị tấn công.<br>'
+    + '<b>Ý nghĩa:</b> giữ vững độc lập chủ quyền, ổn định biên giới, tạo tiền đề cho công cuộc Đổi mới.<br>'
+    + '<b>Bài học:</b> luôn cảnh giác · xây dựng nền quốc phòng toàn dân gắn với phát triển kinh tế · '
+    + 'kết hợp sức mạnh dân tộc với sức mạnh thời đại.',
+  khi: 'Chủ đề "Cách mạng tháng Tám, chiến tranh giải phóng và chiến tranh bảo vệ Tổ quốc" của Lịch sử 12.',
+  vd: 'Câu hỏi về tính chất các cuộc chiến này ⇒ đáp án luôn là chính nghĩa, tự vệ, không phải chủ động gây chiến.',
+  bay: 'Nhiều bạn tưởng sau 1975 là hoà bình hoàn toàn. Thực tế ta phải chiến đấu bảo vệ biên giới ngay sau khi vừa thống nhất.' },
+
+{ nhom: 'B. Việt Nam', cd: 'Chiến tranh bảo vệ Tổ quốc', ten: 'Quốc phòng Việt Nam trong thời bình', cap: 2,
+  ct: '<b>Chính sách quốc phòng "bốn không":</b> không tham gia liên minh quân sự · không liên kết với nước này '
+    + 'chống nước kia · không cho nước ngoài đặt căn cứ quân sự · không dùng vũ lực hoặc đe doạ dùng vũ lực.<br>'
+    + '<b>Nền quốc phòng toàn dân</b> gắn với thế trận an ninh nhân dân — mọi người dân là một phần của thế trận.<br>'
+    + '<b>Nghĩa vụ quân sự</b> là trách nhiệm vẻ vang của công dân.<br>'
+    + '<b>Nội hàm mở rộng:</b> ngày nay bảo vệ Tổ quốc còn gồm bảo vệ chủ quyền biển đảo, an ninh mạng, '
+    + 'an ninh kinh tế và an ninh văn hoá.',
+  khi: 'Câu vận dụng liên hệ lịch sử với hiện tại.',
+  vd: 'Bình thường hoá quan hệ với các nước láng giềng sau xung đột thể hiện phương châm "khép lại quá khứ, hướng tới tương lai".',
+  bay: 'Quốc phòng "bốn không" là chính sách HOÀ BÌNH, TỰ VỆ — không phải trung lập thụ động hay từ bỏ khả năng phòng thủ.' }
+]);
+
+them('dia_ct', [
+{ nhom: 'B. Kinh tế', cd: 'Kinh tế biển đảo', ten: 'Phát triển tổng hợp kinh tế biển đảo', cap: 3,
+  ct: '<b>Tiềm năng:</b> vùng biển rộng khoảng 1 triệu km² (gấp ba lần đất liền) · bờ biển dài 3260 km · '
+    + '28 tỉnh, thành phố giáp biển.<br>'
+    + '<b>Bốn ngành mũi nhọn:</b><br>'
+    + '&nbsp;&nbsp;· <b>Thuỷ sản</b> — nuôi trồng đã vượt khai thác; đẩy mạnh khai thác XA BỜ<br>'
+    + '&nbsp;&nbsp;· <b>Dầu khí</b> — thềm lục địa phía Nam, bể Cửu Long và Nam Côn Sơn<br>'
+    + '&nbsp;&nbsp;· <b>Du lịch biển đảo</b> — vịnh Hạ Long, Cát Bà là di sản thiên nhiên thế giới<br>'
+    + '&nbsp;&nbsp;· <b>Giao thông vận tải biển</b> — đảm nhận phần lớn hàng hoá xuất nhập khẩu<br>'
+    + '<b>Hướng mới:</b> điện gió ngoài khơi, cảng nước sâu và khu kinh tế ven biển.<br>'
+    + '<b>Thách thức:</b> ô nhiễm biển · suy giảm nguồn lợi · nước biển dâng và xói lở bờ.',
+  khi: 'Chủ đề kinh tế biển đảo của Địa lí 12 — luôn có câu hỏi trong đề.',
+  vd: 'Đẩy mạnh khai thác xa bờ vừa giảm áp lực lên nguồn lợi ven bờ vừa khẳng định sự hiện diện trên biển.',
+  bay: 'Phát triển TỔNG HỢP nghĩa là các ngành hỗ trợ nhau, không phải phát triển riêng lẻ từng ngành. '
+     + 'Và luôn phải gắn với bảo vệ chủ quyền cùng môi trường biển.' },
+
+{ nhom: 'B. Kinh tế', cd: 'Kinh tế biển đảo', ten: 'Đảo, quần đảo và vai trò kép', cap: 2,
+  ct: '<b>Vai trò kinh tế:</b> là cơ sở hậu cần cho khai thác biển, nơi neo đậu tránh bão, điểm phát triển du lịch.<br>'
+    + '<b>Vai trò quốc phòng:</b> là điểm tựa để khẳng định chủ quyền, tạo thành tuyến phòng thủ từ xa.<br>'
+    + '<b>Các huyện đảo cần nhớ:</b> Vân Đồn và Cô Tô (Quảng Ninh) · Cát Hải và Bạch Long Vĩ (Hải Phòng) · '
+    + 'Cồn Cỏ (Quảng Trị) · Hoàng Sa (Đà Nẵng) · Lý Sơn (Quảng Ngãi) · Trường Sa (Khánh Hoà) · '
+    + 'Phú Quý (Bình Thuận) · Côn Đảo (Bà Rịa – Vũng Tàu) · Kiên Hải và Phú Quốc (Kiên Giang).<br>'
+    + '<b>Rừng ngập mặn</b> ven biển chắn sóng, chống xói lở và là nơi sinh sản của nhiều loài thuỷ sản.',
+  khi: 'Câu hỏi về hệ thống đảo và ý nghĩa của chúng.',
+  vd: 'Phá rừng ngập mặn để nuôi tôm làm tăng xói lở bờ và giảm chính nguồn lợi thuỷ sản mà người dân sống nhờ.',
+  bay: 'Đảo và quần đảo có vai trò KÉP — vừa kinh tế vừa quốc phòng. Câu hỏi thường yêu cầu nêu đủ cả hai mặt.' }
+]);
+
+them('gdkt_ct', [
+{ nhom: 'A. Kinh tế', cd: 'Lập kế hoạch kinh doanh', ten: 'Kế hoạch kinh doanh — cấu trúc và công cụ', cap: 3,
+  ct: '<b>Năm phần của một kế hoạch:</b> ý tưởng · mục tiêu · phân tích thị trường · kế hoạch tài chính · kế hoạch nhân sự.<br>'
+    + '<b>Mục tiêu SMART:</b> cụ thể · đo lường được · khả thi · phù hợp · có thời hạn.<br>'
+    + '<b>Phân tích SWOT:</b> Điểm mạnh và Điểm yếu là yếu tố BÊN TRONG; Cơ hội và Thách thức là yếu tố BÊN NGOÀI.<br>'
+    + '<b>Kế hoạch tài chính</b> phải có: vốn đầu tư ban đầu · chi phí vận hành · doanh thu dự kiến · điểm hoà vốn.<br>'
+    + '<b>Nguồn vốn:</b> vốn tự có · vay ngân hàng · gọi vốn nhà đầu tư · huy động cộng đồng.<br>'
+    + '<b>Bốn nhóm rủi ro:</b> thị trường · tài chính · pháp lí · vận hành.',
+  khi: 'Bài "Lập kế hoạch kinh doanh" của GDKT&PL 12.',
+  vd: 'Điểm hoà vốn là mức doanh thu mà tại đó tổng doanh thu vừa đúng bằng tổng chi phí.',
+  bay: 'Doanh thu cao chưa chắc lợi nhuận lớn — lợi nhuận bằng doanh thu TRỪ chi phí. '
+     + 'Và kế hoạch phải điều chỉnh theo thị trường, cứng nhắc là rủi ro.' },
+
+{ nhom: 'A. Kinh tế', cd: 'Trách nhiệm xã hội của doanh nghiệp', ten: 'Bốn cấp độ trách nhiệm xã hội', cap: 3,
+  ct: '<b>① Kinh tế</b> — làm ăn có lãi, tồn tại được thì mới thực hiện được các trách nhiệm khác. Đây là NỀN TẢNG.<br>'
+    + '<b>② Pháp lí</b> — tuân thủ pháp luật về thuế, lao động, môi trường, cạnh tranh. Đây là mức TỐI THIỂU bắt buộc.<br>'
+    + '<b>③ Đạo đức</b> — trung thực trong quảng cáo, bảo vệ quyền lợi người tiêu dùng, đối xử công bằng với người lao động.<br>'
+    + '<b>④ Nhân văn</b> — đóng góp cho cộng đồng, từ thiện, hỗ trợ giáo dục và y tế.<br>'
+    + '<b>Các bên liên quan:</b> cổ đông · người lao động · khách hàng · nhà cung cấp · cộng đồng · Nhà nước.<br>'
+    + '<b>Lợi ích:</b> nâng uy tín thương hiệu · giữ chân nhân sự · huy động vốn dễ hơn.',
+  khi: 'Bài "Trách nhiệm xã hội của doanh nghiệp" của GDKT&PL 12 và các câu tình huống.',
+  vd: 'Sản xuất xanh và tiết kiệm năng lượng vừa giảm chi phí vừa thể hiện trách nhiệm với môi trường — '
+    + 'ví dụ rõ nhất cho việc trách nhiệm và lợi nhuận đi cùng nhau.',
+  bay: 'Trách nhiệm xã hội KHÔNG chỉ là từ thiện. Nộp thuế đủ, trả lương đúng hạn, không xả thải trái phép '
+     + 'mới là phần cốt lõi — và áp dụng cho mọi quy mô doanh nghiệp.' }
+]);
+
+them('hoa_ct', [
+{ nhom: 'Kỹ thuật', cd: 'Phức chất', ten: 'Kim loại chuyển tiếp — vì sao dễ tạo phức và có màu', cap: 3,
+  ct: '<b>Đặc điểm chung:</b> có orbital d chưa bão hoà nên có nhiều số oxi hoá, hợp chất thường có màu, '
+    + 'dễ tạo phức chất và nhiều kim loại có tính xúc tác tốt.<br>'
+    + '<b>Vì sao tạo phức dễ:</b> orbital d còn TRỐNG để nhận cặp electron của phối tử qua liên kết cho – nhận.<br>'
+    + '<b>Vì sao có màu:</b> phức hấp thụ một phần ánh sáng nhìn thấy do chênh lệch mức năng lượng của orbital d; '
+    + 'màu quan sát được là màu bù của phần bị hấp thụ.<br>'
+    + '<b>Màu phụ thuộc cả hai:</b> ion trung tâm và loại phối tử. Cùng Cu²⁺ nhưng phức với H₂O xanh nhạt, '
+    + 'với NH₃ xanh đậm hơn hẳn.<br>'
+    + '<b>Vai trò sinh học:</b> hemoglobin là phức của Fe, chlorophyll là phức của Mg.',
+  khi: 'Câu lí thuyết về kim loại chuyển tiếp và phức chất.',
+  vd: 'Dung dịch muối Fe³⁺ có màu vàng nâu; nhỏ KSCN vào chuyển ngay sang đỏ máu do đổi phối tử.',
+  bay: 'Kim loại nhóm IA, IIA tạo phức rất kém vì không có orbital d thích hợp. '
+     + 'Nói "mọi kim loại đều tạo phức bền như nhau" là sai.' },
+
+{ nhom: 'Kỹ thuật', cd: 'Nhiệt động – Tốc độ – Cân bằng', ten: 'Bài toán năng lượng nhiên liệu và hiệu suất', cap: 4,
+  ct: '<b>Nhiệt lượng toả ra:</b> Q = n × |Δ_cH| với n là số mol nhiên liệu.<br>'
+    + '<b>Nhiệt lượng nước nhận:</b> Q = m·c·Δt (c của nước = 4200 J/(kg·K)).<br>'
+    + '<b>Có hiệu suất H:</b> Q<sub>toả</sub> = Q<sub>ích</sub> ÷ (H/100) — hiệu suất nằm ở MẪU khi tính lượng đầu vào.<br>'
+    + '<b>Điều kiện chuẩn của CT 2018:</b> 25 °C và 1 bar ⇒ 1 mol khí chiếm <b>24,79 lít</b>, KHÔNG phải 22,4 lít.<br>'
+    + '<b>Enthalpy đốt cháy cần nhớ:</b> CH₄ −890,3 kJ/mol · C₂H₅OH −1366,9 · C₃H₈ −2220.',
+  khi: 'Bài toán thực tế nối Hoá với năng lượng — dạng ưa thích của đề CT 2018.',
+  vd: 'Đun 2 lít nước từ 20 °C lên 100 °C cần 672 kJ; bếp hiệu suất 50% thì nhiên liệu phải toả 1344 kJ.',
+  bay: 'Điều kiện chuẩn mới dùng 24,79 L/mol. Dùng 22,4 L/mol là lệch khoảng 10% — đủ để trượt đáp án.' }
+]);
+
+them('sinh_ct', [
+{ nhom: 'II. Di truyền NST', cd: 'Di truyền người', ten: 'Bài toán xác suất trong phả hệ', cap: 4,
+  ct: '<b>Bước 1 — xác định quy luật:</b> đọc phả hệ để biết gene trội hay lặn, nằm trên NST thường hay X.<br>'
+    + '<b>Bước 2 — suy kiểu gene của từng người</b>, chú ý người BÌNH THƯỜNG trong gia đình có người bệnh:<br>'
+    + '&nbsp;&nbsp;· Bố mẹ Aa × Aa, người con bình thường ⇒ xác suất là Aa bằng <b>2/3</b> (đã loại aa nên mẫu số từ 4 xuống 3)<br>'
+    + '<b>Bước 3 — người ngoài lấy từ quần thể cân bằng:</b><br>'
+    + '&nbsp;&nbsp;· Xác suất người bình thường đó là Aa bằng <b>2pq/(p² + 2pq)</b>, không phải 2pq<br>'
+    + '<b>Bước 4 — nhân các xác suất độc lập</b>; với "có ít nhất một" thì lấy 1 trừ xác suất "không có ai".<br>'
+    + '<b>Với n người con:</b> đều bệnh là (1/4)ⁿ · đúng một người bệnh là C¹ₙ × (1/4) × (3/4)ⁿ⁻¹.',
+  khi: 'Câu vận dụng cao của phần di truyền — hầu như đề nào cũng có.',
+  vd: 'Câu "sinh 2 con đều bình thường" phải cộng cả trường hợp bố mẹ KHÔNG cùng dị hợp, '
+    + 'vì khi đó mọi con đều bình thường.',
+  bay: 'Hai chỗ đổi mẫu số (người bình thường trong nhà, người bình thường trong quần thể) là nơi mất điểm nhiều nhất.' },
+
+{ nhom: 'II. Di truyền NST', cd: 'Công nghệ di truyền', ten: 'Ứng dụng và mặt trái của công nghệ di truyền', cap: 3,
+  ct: '<b>Ứng dụng trong y học:</b> sản xuất insulin, hormone sinh trưởng, vaccine tái tổ hợp; '
+    + 'xét nghiệm gene và liệu pháp gene.<br>'
+    + '<b>Trong nông nghiệp:</b> giống kháng sâu bệnh, chịu hạn, chịu mặn, tăng hàm lượng dinh dưỡng.<br>'
+    + '<b>Trong pháp y:</b> giám định ADN xác định huyết thống và truy tìm thủ phạm.<br>'
+    + '<b>Ưu điểm so với chọn giống truyền thống:</b> nhanh hơn nhiều, chuyển được gene giữa các loài xa nhau, '
+    + 'kiểm soát được đặc tính muốn có.<br>'
+    + '<b>Vấn đề đặt ra:</b> an toàn sinh học (phát tán gene ra tự nhiên) · đa dạng sinh học · '
+    + 'đạo đức sinh học · quyền sở hữu giống.',
+  khi: 'Câu lí thuyết và câu liên hệ thực tiễn về ứng dụng di truyền học.',
+  vd: 'Gây đột biến nhân tạo hiệu quả cao ở vi sinh vật và thực vật nhưng ít dùng cho động vật vì dễ gây tử vong.',
+  bay: 'Sinh vật biến đổi gene KHÔNG nhất thiết phải nhận gene từ loài khác — có thể chỉ là bất hoạt hoặc '
+     + 'tăng cường biểu hiện một gene sẵn có của chính loài đó.' }
+]);
+
+them('gdkt_ct', [
+{ nhom: 'A. Kinh tế', cd: 'Lập kế hoạch kinh doanh', ten: 'Ý tưởng, cơ hội kinh doanh và năng lực người kinh doanh', cap: 3,
+  ct: '<b>Ý tưởng kinh doanh tốt</b> xuất phát từ một nhu cầu chưa được đáp ứng hoặc một vấn đề chưa được giải quyết tốt. '
+    + 'Mới lạ chưa đủ — phải có người sẵn sàng trả tiền.<br>'
+    + '<b>Nguồn hình thành ý tưởng:</b> lợi thế nội tại (kĩ năng, quan hệ, vốn) và cơ hội bên ngoài '
+    + '(nhu cầu thị trường, chính sách mới, công nghệ mới).<br>'
+    + '<b>Bốn năng lực cốt lõi:</b> nắm bắt cơ hội · quản lí tài chính · giao tiếp và thuyết phục · '
+    + 'chấp nhận rủi ro CÓ TÍNH TOÁN.<br>'
+    + '<b>Lợi thế cạnh tranh</b> đến từ giá, chất lượng, dịch vụ, công nghệ hoặc thương hiệu — '
+    + 'phải trả lời được "vì sao khách hàng chọn mình chứ không chọn đối thủ".',
+  khi: 'Câu tình huống về khởi nghiệp và năng lực kinh doanh.',
+  vd: 'Nhận thấy khu trọ sinh viên thiếu chỗ giặt sấy giá rẻ ⇒ đó là một cơ hội kinh doanh từ nhu cầu chưa được đáp ứng.',
+  bay: 'Chấp nhận rủi ro KHÁC liều lĩnh: phải dựa trên đánh giá và có phương án dự phòng. '
+     + 'Và cố phục vụ tất cả mọi người thường dẫn tới không phục vụ tốt cho ai.' },
+
+{ nhom: 'A. Kinh tế', cd: 'Trách nhiệm xã hội của doanh nghiệp', ten: 'Tình huống trách nhiệm xã hội hay ra đề', cap: 4,
+  ct: '<b>Cách giải một tình huống:</b> ① hành vi thuộc cấp độ trách nhiệm nào ② có vi phạm pháp luật không '
+    + '③ hậu quả với bên liên quan nào ④ doanh nghiệp nên làm gì.<br>'
+    + '<b>Các tình huống điển hình:</b><br>'
+    + '&nbsp;&nbsp;· Xả thải chưa xử lí ⇒ vi phạm pháp lí về môi trường, bị xử phạt và buộc bồi thường<br>'
+    + '&nbsp;&nbsp;· Quảng cáo sai sự thật ⇒ vi phạm pháp luật và huỷ hoại niềm tin lâu dài<br>'
+    + '&nbsp;&nbsp;· Trốn đóng bảo hiểm cho người lao động ⇒ vi phạm pháp luật lao động<br>'
+    + '&nbsp;&nbsp;· Ép tăng ca quá quy định ⇒ vi phạm về thời giờ làm việc<br>'
+    + '&nbsp;&nbsp;· Bán phá giá, nói xấu đối thủ ⇒ cạnh tranh không lành mạnh, bị pháp luật cấm<br>'
+    + '&nbsp;&nbsp;· Tài trợ học bổng, trồng cây ⇒ trách nhiệm nhân văn, khuyến khích chứ không bắt buộc',
+  khi: 'Câu tình huống và câu đúng/sai của phần kinh tế.',
+  vd: 'Doanh nghiệp xả thải chưa xử lí ra sông ⇒ vừa vi phạm hành chính vừa phải bồi thường dân sự; '
+    + 'nếu gây hậu quả nghiêm trọng có thể bị truy cứu hình sự.',
+  bay: 'Làm từ thiện nhiều KHÔNG bù được cho việc vi phạm pháp luật. '
+     + 'Trách nhiệm pháp lí là mức tối thiểu bắt buộc, không đánh đổi bằng trách nhiệm nhân văn được.' }
+]);
+
 })();

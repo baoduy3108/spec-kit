@@ -1,5 +1,10 @@
 /* ============================================================
    TIẾNG ANH — MẪU ĐỀ BÀI TẬP TỰ SINH
+   Bám cấu trúc đề TỪ NĂM 2025: 40 câu / 50 phút, gồm điền từ – cụm ngắn
+   (12 câu), sắp xếp câu (5), điền câu – cụm dài (5) và đọc hiểu (18).
+   Các dạng NGỮ ÂM, TRỌNG ÂM, TÌM LỖI SAI, VIẾT LẠI CÂU, chọn từ đồng
+   nghĩa – trái nghĩa và hoàn thành hội thoại ĐÃ BỊ LOẠI khỏi đề, nên
+   không dựng mẫu đề cho chúng nữa.
    Ba nguồn: kho 1000+ từ vựng · kho collocation · các bảng ngữ pháp
    dựng riêng cho từng chuyên đề (thì, điều kiện, bị động, tường thuật,
    mệnh đề quan hệ, đảo ngữ, word form, ngữ âm, trọng âm, tìm lỗi sai).
@@ -23,7 +28,16 @@ const nhieuTu = (R, x, lay) => {
   if (bo.length < 3) bo = (TD.KHO_TU || []).filter(y => y.w !== x.w && y.l === x.l && y.n !== x.n);
   if (bo.length < 3) bo = (TD.KHO_TU || []).filter(y => y.w !== x.w && y.n !== x.n);
   if (bo.length < 3) return null;
-  return R.chonNhieu(bo, 3).map(lay);
+  /* Kho hơn 2000 từ nên có những từ khác nhau mà nghĩa tiếng Việt trùng nhau.
+     Phải lọc để bốn phương án đôi một khác nhau, nếu không câu hỏi có hai đáp án đúng. */
+  const ra = [], daCo = { [lay(x)]: 1 };
+  for (const y of TD.xaoR(R, bo)) {
+    const v = lay(y);
+    if (daCo[v]) continue;
+    daCo[v] = 1; ra.push(v);
+    if (ra.length === 3) return ra;
+  }
+  return null;
 };
 
 TD.GEN.anh = (TD.GEN.anh || []).concat([
@@ -63,6 +77,39 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
         + `make/do/take/have là bốn động từ đi kèm rất nhiều danh từ khác nhau, phải học thuộc theo cụm.` },
       'make thiên về TẠO RA cái mới (a decision, progress); do thiên về THỰC HIỆN công việc '
       + '(homework, research); take thiên về NHẬN/CHIẾM (part in, care of, place).');
+  } },
+
+{ ma: 'anh-colloc-cum', chuong: 'Ngữ pháp khác', muc: 3, dang: 'mc',
+  tao(R) {
+    /* mọi nhóm collocation trừ hai nhóm đã có mẫu riêng */
+    const kho = (TD.KHO_COLLOC || []).filter(x =>
+      x.nhom !== 'make / do / take / have' &&
+      x.nhom.indexOf('giới từ') < 0);
+    if (kho.length < 8) return null;
+    const x = R.chon(kho);
+    const cung = kho.filter(y => y.nhom === x.nhom && y.tu !== x.tu && y.cum !== x.cum);
+    if (cung.length < 3) return null;
+    const s = R.chonNhieu(cung, 3).map(y => y.tu);
+    if (new Set(s.concat([x.tu])).size !== 4) return null;
+    return MC(R, `Chọn từ đúng để hoàn thành cụm: "____ ${x.cum}" (${x.n})`,
+      { d: x.tu, s: s, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.\nNhóm: ${x.nhom}.` },
+      'Collocation là chỗ người Việt hay dịch từng chữ rồi ghép sai. '
+      + 'Học theo CỤM và theo NHÓM, đừng học từng từ rời.');
+  } },
+
+{ ma: 'anh-colloc-nghia', chuong: 'Ngữ pháp khác', muc: 2, dang: 'mc',
+  tao(R) {
+    const kho = TD.KHO_COLLOC || [];
+    if (kho.length < 8) return null;
+    const x = R.chon(kho);
+    const khac = kho.filter(y => y.n !== x.n);
+    if (khac.length < 3) return null;
+    const s = R.chonNhieu(khac, 3).map(y => y.n);
+    if (new Set(s.concat([x.n])).size !== 4) return null;
+    return MC(R, `Cụm "<b>${x.tu} ${x.cum}</b>" có nghĩa là gì?`,
+      { d: x.n, s: s, v: `${x.tu} ${x.cum} = ${x.n}. Nhóm: ${x.nhom}.` },
+      'Biết nghĩa của cụm mới dùng đúng trong bài điền từ. '
+      + 'Nhiều cụm nghĩa không suy ra được từ nghĩa các từ thành phần.');
   } },
 
 { ma: 'anh-gioitu', chuong: 'Ngữ pháp khác', muc: 2, dang: 'mc',
@@ -291,74 +338,6 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
       + 'sau mạo từ hoặc tính từ sở hữu ⇒ danh từ · sau modal ⇒ động từ nguyên thể.');
   } },
 
-{ ma: 'anh-trongam', chuong: 'Ngữ âm – Trọng âm', muc: 2, dang: 'mc',
-  tao(R) {
-    const it = R.chon([
-      { d: 'engineer', s: ['hospital', 'family', 'beautiful'], v: '"engineer" trọng âm âm tiết CUỐI (en-gi-NEER); ba từ còn lại trọng âm âm tiết ĐẦU.' },
-      { d: 'develop', s: ['organise', 'estimate', 'demonstrate'], v: '"develop" trọng âm âm tiết THỨ HAI (de-VE-lop); ba từ còn lại trọng âm âm tiết đầu.' },
-      { d: 'economic', s: ['comfortable', 'interesting', 'necessary'], v: 'Hậu tố -ic kéo trọng âm về âm tiết ngay trước nó (e-co-NO-mic); ba từ kia trọng âm âm tiết đầu.' },
-      { d: 'photograph', s: ['photographer', 'photography', 'geography'], v: '"photograph" trọng âm âm tiết ĐẦU (PHO-to-graph); ba từ còn lại đều trọng âm âm tiết THỨ HAI (pho-TOG-ra-pher, pho-TOG-ra-phy, ge-OG-ra-phy).' },
-      { d: 'polite', s: ['careful', 'happy', 'silent'], v: 'Tính từ hai âm tiết "polite" trọng âm âm tiết thứ hai (po-LITE); ba từ kia trọng âm âm tiết đầu.' },
-      { d: 'volunteer', s: ['gentleman', 'furniture', 'atmosphere'], v: 'Hậu tố -eer luôn nhận trọng âm (vo-lun-TEER).' },
-      { d: 'Japanese', s: ['difficult', 'popular', 'accurate'], v: 'Hậu tố -ese luôn nhận trọng âm (Ja-pa-NESE); ba từ còn lại trọng âm âm tiết đầu.' },
-      { d: 'employee', s: ['employer', 'important', 'develop'], v: 'Hậu tố -ee nhận trọng âm (em-ploy-EE); ba từ còn lại trọng âm âm tiết THỨ HAI.' }
-    ]);
-    return MC(R, `Chọn từ có vị trí trọng âm KHÁC với ba từ còn lại:`, it,
-      'Quy tắc nhanh: hậu tố -ic, -ical, -ion, -ity, -ive kéo trọng âm về âm tiết NGAY TRƯỚC nó. '
-      + 'Hậu tố -ee, -eer, -ese, -ique tự nhận trọng âm. Danh từ hai âm tiết thường trọng âm đầu, '
-      + 'động từ hai âm tiết thường trọng âm sau.');
-  } },
-
-{ ma: 'anh-phatam', chuong: 'Ngữ âm – Trọng âm', muc: 2, dang: 'mc',
-  tao(R) {
-    const it = R.chon([
-      { h: 'đuôi -ed', d: 'wanted', s: ['worked', 'stopped', 'watched'], v: '"wanted" đuôi -ed đọc /ɪd/ (sau /t/); ba từ kia đọc /t/ vì đứng sau âm vô thanh.' },
-      { h: 'đuôi -ed', d: 'needed', s: ['laughed', 'washed', 'helped'], v: '"needed" đọc /ɪd/ (sau /d/); ba từ kia đọc /t/.' },
-      { h: 'đuôi -ed', d: 'played', s: ['asked', 'missed', 'looked'], v: '"played" đọc /d/ (sau âm hữu thanh); ba từ kia đọc /t/.' },
-      { h: 'đuôi -es', d: 'watches', s: ['books', 'cats', 'maps'], v: '"watches" đuôi -es đọc /ɪz/ (sau âm xuýt /tʃ/); ba từ kia đọc /s/.' },
-      { h: 'đuôi -es', d: 'boxes', s: ['lamps', 'hats', 'shops'], v: '"boxes" đọc /ɪz/ (sau /ks/); ba từ kia đọc /s/.' },
-      { h: 'đuôi -s', d: 'dogs', s: ['ships', 'cakes', 'roofs'], v: '"dogs" đọc /z/ (sau âm hữu thanh /g/); ba từ kia đọc /s/.' },
-      { h: 'chữ ch', d: 'chemistry', s: ['children', 'church', 'cheese'], v: '"chemistry" có "ch" đọc /k/; ba từ kia đọc /tʃ/.' },
-      { h: 'chữ th', d: 'thought', s: ['though', 'these', 'those'], v: '"thought" có "th" đọc vô thanh /θ/; ba từ kia đọc hữu thanh /ð/.' }
-    ]);
-    return MC(R, `Chọn từ có <b>${it.h}</b> được phát âm KHÁC với ba từ còn lại:`, it,
-      'Đuôi -ed: /ɪd/ sau /t/ và /d/ · /t/ sau âm vô thanh · /d/ sau âm hữu thanh. '
-      + 'Đuôi -s/-es: /ɪz/ sau âm xuýt · /s/ sau âm vô thanh · /z/ sau âm hữu thanh.');
-  } },
-
-{ ma: 'anh-timloi', chuong: 'Cấu trúc – Chiến thuật', muc: 3, dang: 'mc',
-  tao(R) {
-    const it = R.chon([
-      { q: 'The number of students <b>are</b> increasing every year.', d: '"are" phải là "is"',
-        s: ['"number" phải là "numbers"', '"increasing" phải là "increased"', '"every" phải là "each"'],
-        v: '"The number of + N số nhiều" luôn đi với động từ SỐ ÍT. (Còn "A number of" mới đi với số nhiều.)' },
-      { q: 'She is one of the <b>most tallest</b> girls in her class.', d: '"most tallest" phải là "tallest"',
-        s: ['"one of" phải là "one in"', '"girls" phải là "girl"', '"her" phải là "his"'],
-        v: 'Không dùng đồng thời "most" và đuôi "-est". Tính từ ngắn chỉ cần thêm -est.' },
-      { q: 'Despite <b>it was raining</b>, we went out.', d: '"it was raining" phải là "the rain"',
-        s: ['"Despite" phải là "Although"', '"went" phải là "go"', '"out" phải là "outside"'],
-        v: 'Sau "Despite / In spite of" dùng DANH TỪ hoặc V-ing, không dùng mệnh đề. (Đổi "Despite" thành "Although" cũng đúng nhưng đề gạch chân vế sau.)' },
-      { q: 'He suggested <b>to go</b> to the cinema.', d: '"to go" phải là "going"',
-        s: ['"suggested" phải là "suggest"', '"the cinema" phải là "cinema"', '"He" phải là "Him"'],
-        v: 'Sau "suggest" dùng V-ing hoặc "that + S + (should) + V", không dùng to V.' },
-      { q: 'If I <b>will have</b> time, I will visit you.', d: '"will have" phải là "have"',
-        s: ['"will visit" phải là "visit"', '"If" phải là "Unless"', '"you" phải là "your"'],
-        v: 'Mệnh đề "if" của điều kiện loại 1 dùng hiện tại đơn, không dùng "will".' },
-      { q: 'The book <b>who</b> I borrowed from the library is very useful.', d: '"who" phải là "which"',
-        s: ['"borrowed" phải là "borrow"', '"is" phải là "are"', '"useful" phải là "usefully"'],
-        v: '"The book" là VẬT nên phải dùng "which" hoặc "that", không dùng "who".' },
-      { q: 'Each of the students <b>have</b> a laptop.', d: '"have" phải là "has"',
-        s: ['"students" phải là "student"', '"Each" phải là "Every"', '"a laptop" phải là "laptops"'],
-        v: '"Each of + N số nhiều" đi với động từ SỐ ÍT.' },
-      { q: 'She has been working here <b>since</b> five years.', d: '"since" phải là "for"',
-        s: ['"has been" phải là "was"', '"working" phải là "worked"', '"here" phải là "there"'],
-        v: '"since" đi với MỐC thời gian, "for" đi với KHOẢNG thời gian. "five years" là khoảng.' }
-    ]);
-    return MC(R, `Tìm lỗi sai trong câu sau và chọn cách sửa đúng:\n\n${it.q}`, it,
-      'Bốn ổ lỗi hay bị gài: sự hoà hợp CHỦ NGỮ – ĐỘNG TỪ · THÌ của động từ · '
-      + 'đại từ quan hệ người/vật · giới từ và dạng từ theo sau.');
-  } },
-
 { ma: 'anh-soanh', chuong: 'Ngữ pháp khác', muc: 2, dang: 'mc',
   tao(R) {
     const it = R.chon([
@@ -378,6 +357,166 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     return MC(R, `Chọn phương án đúng:\n\n${it.q}`, it,
       'Đếm ÂM TIẾT trước: 1–2 âm tiết dùng -er/-est; từ 3 âm tiết trở lên dùng more/the most. '
       + 'Bất quy tắc: good–better–best, bad–worse–worst, far–further–furthest.');
+  } }
+
+]);
+
+/* ==========================================================
+   BA DẠNG BÀI MỚI CỦA ĐỀ TỪ NĂM 2025
+   Cấu trúc 40 câu / 50 phút: điền từ – cụm ngắn 12 · sắp xếp câu 5 ·
+   điền câu – cụm dài 5 · đọc hiểu 18.
+   Các dạng ngữ âm, trọng âm, tìm lỗi sai, viết lại câu đã bị loại bỏ.
+   ========================================================== */
+TD.GEN.anh = (TD.GEN.anh || []).concat([
+
+{ ma: 'anh-sapxep', chuong: 'Cấu trúc – Chiến thuật', muc: 3, dang: 'mc',
+  tao(R) {
+    const bo = R.chon([
+      { t: 'một lá thư xin việc', c: [
+        'a. Dear Sir or Madam,',
+        'b. I am writing to apply for the position of sales assistant advertised on your website.',
+        'c. I have worked part-time in a bookshop for two years, so I am used to dealing with customers.',
+        'd. I would be grateful if you could consider my application.',
+        'e. Yours faithfully, Nam Tran'],
+        v: 'Thư trang trọng đi theo trình tự: lời chào → nêu lí do viết → trình bày kinh nghiệm → đề nghị → kí tên. '
+         + '"Dear Sir or Madam" luôn đi cặp với "Yours faithfully".' },
+      { t: 'một đoạn văn về rác thải nhựa', c: [
+        'a. Plastic waste has become one of the most serious problems of our time.',
+        'b. Every year, millions of tonnes of plastic end up in the ocean.',
+        'c. As a result, sea animals mistake plastic bags for food and die.',
+        'd. To deal with this, many countries have banned single-use plastic bags.',
+        'e. However, real change will only come when each of us reduces what we throw away.'],
+        v: 'Cấu trúc chuẩn: nêu vấn đề → dẫn chứng số liệu → hậu quả (As a result) → giải pháp (To deal with this) → '
+         + 'kết luận phản biện (However).' },
+      { t: 'một đoạn văn về học trực tuyến', c: [
+        'a. Online learning has grown rapidly over the past few years.',
+        'b. It allows students to study at their own pace and save travelling time.',
+        'c. On the other hand, it requires a high level of self-discipline.',
+        'd. Many learners give up simply because no one is there to remind them.',
+        'e. Therefore, the best approach seems to be a combination of online and classroom lessons.'],
+        v: 'Nêu hiện tượng → ưu điểm → nhược điểm (On the other hand) → giải thích nhược điểm → kết luận (Therefore).' },
+      { t: 'một đoạn văn về thói quen đọc sách', c: [
+        'a. Reading is one of the cheapest ways to broaden your mind.',
+        'b. A single book can take you to places you will never visit in person.',
+        'c. Unfortunately, fewer and fewer young people read for pleasure nowadays.',
+        'd. Most of them spend their free time scrolling through short videos instead.',
+        'e. Setting aside just fifteen minutes a day would be enough to change that habit.'],
+        v: 'Khẳng định lợi ích → mở rộng lợi ích → nêu thực trạng trái ngược (Unfortunately) → giải thích → đề xuất.' },
+      { t: 'một email mời bạn đi chơi', c: [
+        'a. Hi Mai,',
+        'b. How have you been? I have not heard from you for ages.',
+        'c. I am writing to invite you to my birthday party this Saturday.',
+        'd. It will start at six in the evening at my house, and a few of our old classmates are coming.',
+        'e. Let me know if you can make it. Love, Linh'],
+        v: 'Email thân mật: chào → hỏi thăm → nêu mục đích → chi tiết thời gian địa điểm → đề nghị phản hồi và kí tên.' },
+      { t: 'một đoạn văn về làm thêm khi còn đi học', c: [
+        'a. More and more students take part-time jobs while studying at university.',
+        'b. Such jobs teach them how to manage money and communicate with people.',
+        'c. Nevertheless, working too many hours can affect their academic results.',
+        'd. Some students even fail their exams because they are simply too tired to study.',
+        'e. The key, then, is to keep a sensible balance between earning and learning.'],
+        v: 'Hiện tượng → lợi ích → mặt trái (Nevertheless) → hậu quả cụ thể → kết luận cân bằng.' }
+    ]);
+    /* thứ tự đúng là a-b-c-d-e; ba phương án nhiễu là các hoán vị sai rõ ràng */
+    const dung = 'a – b – c – d – e';
+    const s = ['a – c – b – e – d', 'b – a – d – c – e', 'a – d – b – c – e'];
+    return MC(R, `Sắp xếp các câu sau thành ${bo.t} hoàn chỉnh:\n\n${bo.c.join('\n')}`,
+      { d: dung, s: s, v: bo.v }, 
+      'Bốn mỏ neo để sắp xếp: ① câu chào hoặc câu nêu chủ đề đứng ĐẦU ② từ nối (As a result, However, Therefore) '
+      + 'chỉ chỗ đặt câu ③ đại từ (it, this, such) phải có danh từ đứng trước ④ câu kí tên hoặc câu kết luận đứng CUỐI.');
+  } },
+
+{ ma: 'anh-chencau', chuong: 'Cấu trúc – Chiến thuật', muc: 4, dang: 'mc',
+  tao(R) {
+    const bo = R.chon([
+      { doan: 'Many cities are now building separate lanes for bicycles. [1] Cycling produces no emissions and '
+            + 'costs almost nothing to run. [2] It also keeps people healthier than sitting in a car. [3] '
+            + 'Yet in heavy rain or extreme heat, cycling becomes far less attractive. [4]',
+        cau: 'For this reason, some cities have begun to cover their busiest bicycle lanes.',
+        d: 'Vị trí [4]',
+        v: 'Câu cần chèn bắt đầu bằng "For this reason" nên phải đứng NGAY SAU lí do — chính là câu nói mưa và nắng '
+         + 'làm việc đạp xe kém hấp dẫn. Vậy chèn vào [4].',
+        s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
+      { doan: 'Homework has been part of school life for over a century. [1] Supporters argue that it helps '
+            + 'students revise what they have learnt. [2] Critics reply that it eats into the time children '
+            + 'need for sport and family. [3] Recent studies suggest that short, focused tasks work best. [4]',
+        cau: 'Both sides, however, agree that the amount matters more than the existence of homework itself.',
+        d: 'Vị trí [3]',
+        v: 'Câu chứa "Both sides" nên phải đứng SAU khi đã nêu đủ CẢ HAI phía (supporters và critics) và TRƯỚC câu '
+         + 'nói về nghiên cứu. Vậy chèn vào [3].',
+        s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [4]'] },
+      { doan: 'Street food is a familiar part of life in Vietnamese cities. [1] A bowl of noodles on the pavement '
+            + 'often costs less than a coffee in a chain café. [2] Tourists love it because it lets them taste '
+            + 'the city the way local people do. [3] Hygiene, on the other hand, is not always guaranteed. [4]',
+        cau: 'Choosing a stall that is crowded with local customers is usually the safest bet.',
+        d: 'Vị trí [4]',
+        v: 'Câu này đưa ra CÁCH XỬ LÍ cho vấn đề vệ sinh vừa nêu, nên phải đứng ngay sau câu về hygiene ⇒ [4].',
+        s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
+      { doan: 'Learning a second language changes the way you think. [1] Bilingual people often switch between '
+            + 'two sets of cultural habits without noticing. [2] Research also links bilingualism to a later '
+            + 'onset of memory problems in old age. [3] None of these benefits, though, appear overnight. [4]',
+        cau: 'They take years of steady, everyday practice.',
+        d: 'Vị trí [4]',
+        v: 'Đại từ "They" thay cho "these benefits" ở câu trước nên phải đứng NGAY SAU câu đó ⇒ [4].',
+        s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
+      { doan: 'Volunteering is becoming popular among Vietnamese teenagers. [1] Some spend their summer teaching '
+            + 'children in remote villages. [2] Others join clean-up campaigns along rivers and beaches. [3] '
+            + 'What they gain is often more than what they give. [4]',
+        cau: 'Such experiences build confidence and teach them how to work with strangers.',
+        d: 'Vị trí [4]',
+        v: '"Such experiences" thay cho hai hoạt động vừa liệt kê (dạy học, dọn rác) và câu này giải thích cho '
+         + 'câu "gain more than they give" nên đặt ở [4] là hợp mạch nhất.',
+        s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] }
+    ]);
+    return MC(R, `Chọn vị trí thích hợp nhất để chèn câu cho sẵn vào đoạn văn.\n\n`
+      + `<b>Câu cần chèn:</b> "${bo.cau}"\n\n<b>Đoạn văn:</b> ${bo.doan}`, bo,
+      'Ba dấu hiệu quyết định vị trí: ① TỪ NỐI đầu câu (For this reason, However, Therefore) chỉ quan hệ với câu '
+      + 'liền trước ② ĐẠI TỪ (they, this, such) phải có danh từ tương ứng ở câu ngay trước ③ câu chèn vào không được '
+      + 'cắt đứt mạch giữa hai câu vốn dính nhau.');
+  } },
+
+{ ma: 'anh-tomtat', chuong: 'Cấu trúc – Chiến thuật', muc: 4, dang: 'mc',
+  tao(R) {
+    const bo = R.chon([
+      { doan: '電... ',
+        skip: true },
+      { doan: 'Fast fashion offers cheap, trendy clothes that are replaced every few weeks. Shoppers enjoy the low '
+            + 'prices, but the industry now produces more textile waste than almost any other. Some brands have '
+            + 'started take-back schemes, yet the volume they recycle is tiny compared with what they sell.',
+        d: 'Fast fashion is popular because it is cheap, but it creates huge waste that current recycling efforts barely reduce.',
+        v: 'Bản tóm tắt phải gồm CẢ BA ý của đoạn: rẻ và hợp mốt · gây rác thải lớn · nỗ lực tái chế chưa đáng kể. '
+         + 'Ba phương án còn lại chỉ lấy MỘT ý hoặc nói sai kết luận.',
+        s: ['Fast fashion brands have successfully solved the problem of textile waste through take-back schemes.',
+            'Shoppers should stop buying clothes altogether in order to protect the environment.',
+            'Clothes today are cheaper than they have ever been in history.'] },
+      { doan: 'Working from home saves commuting time and lets employees plan their own day. Managers, however, '
+            + 'report that new staff learn much more slowly when they never sit beside experienced colleagues. '
+            + 'Most companies have therefore settled on a mix of office and home days.',
+        d: 'Remote work brings flexibility but slows down the training of new staff, so most firms now combine both ways of working.',
+        v: 'Đoạn có ba tầng: ưu điểm → nhược điểm cụ thể → giải pháp thoả hiệp. Tóm tắt đúng phải giữ đủ ba tầng.',
+        s: ['Working from home is better than working in an office in every respect.',
+            'New employees are no longer needed in companies that allow remote work.',
+            'Managers dislike remote work because they cannot control their staff.'] },
+      { doan: 'Electric cars produce no exhaust fumes on the road, which makes city air cleaner. Producing their '
+            + 'batteries, however, requires mining rare metals and a great deal of energy. Whether they are truly '
+            + 'greener depends on how the electricity that charges them is generated.',
+        d: 'Electric cars clean up city air but their overall benefit depends on how batteries are made and how the electricity is produced.',
+        v: 'Đoạn không kết luận xe điện tốt hay xấu mà đặt điều kiện. Tóm tắt phải giữ chữ "depends on".',
+        s: ['Electric cars are completely harmless to the environment.',
+            'Electric cars pollute more than petrol cars in every situation.',
+            'Mining rare metals is the only environmental issue worth discussing.'] },
+      { doan: 'Social media lets people keep in touch across long distances and share news in seconds. At the same '
+            + 'time, constantly comparing your life with carefully edited photographs can damage self-esteem. '
+            + 'Researchers suggest that how long you spend online matters less than what you do while you are there.',
+        d: 'Social media connects people but can harm self-esteem, and researchers say the way it is used matters more than the time spent on it.',
+        v: 'Ý chốt của đoạn nằm ở câu cuối: CÁCH dùng quan trọng hơn THỜI LƯỢNG. Tóm tắt bỏ ý này là mất trọng tâm.',
+        s: ['Social media should be banned for young people because it harms self-esteem.',
+            'The longer people stay online, the more damage social media does.',
+            'Social media is only useful for keeping in touch with distant friends.'] }
+    ].filter(x => !x.skip));
+    return MC(R, `Đọc đoạn văn rồi chọn câu TÓM TẮT đúng nhất.\n\n${bo.doan}`, bo,
+      'Tóm tắt đúng phải bao được MỌI ý chính của đoạn, không thêm ý ngoài và không đổi mức độ khẳng định. '
+      + 'Phương án chứa "completely", "every", "only", "should be banned" thường quá mạnh so với giọng điệu của bài.');
   } }
 
 ]);

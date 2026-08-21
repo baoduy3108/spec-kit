@@ -301,11 +301,17 @@ TD.BAN_DO_CD = {
     [/\bsat\b|fe2|fe3|feo|crom|\bcr\b|gang|thep|quy doi hon hop/, 'Sắt – Crom'],
     [/nhom|al2o3|kiem tho|nuoc cung|thach cao|boxit|natri|kali|canxi|magnesium|\bco2\b|\bso2\b/, 'IA – IIA – Nhôm'],
     [/hno3|h2so4|nh3|nito|phosphor|photpho|luu huynh|halogen|\bclo\b|phan bon|\bph\b|acid|base|phi kim/, 'Phi kim – Vô cơ'],
+    [/phuc chat|phoi tu|so phoi tri|cau noi|cau ngoai/, 'Phức chất'],
+    [/enthalpy|nhiet phan ung|toc do phan ung|can bang hoa hoc|le chatelier|hang so can bang/, 'Nhiệt động – Tốc độ – Cân bằng'],
     [/dung dich|can bang trong dung dich|chuan do|nong do/, 'Phi kim – Vô cơ'],
     [/kim loai|dien hoa|hop kim|dieu che|bao toan electron|tang giam khoi luong/, 'Đại cương kim loại'],
     [/huu co|dong phan|danh phap|cong thuc phan tu|bat bao hoa|hydrocarbon|alkane|alkene|alkyne|arene|benzen|alcohol|phenol|aldehyde|ketone|carboxylic|\bir\b|pho khoi|dot chay/, 'Đại cương hữu cơ']
   ],
   toan: [
+    [/luong giac|cung goc|radian/, 'Lượng giác'],
+    [/gioi han|lien tuc|vo dinh/, 'Giới hạn – Liên tục'],
+    [/vecto|he thuc luong|dinh li cosin|dinh li sin|trung tuyen|tich vo huong/, 'Vecto và hệ thức lượng'],
+    [/bat phuong trinh|tam thuc|xet dau|viete|mien nghiem|toi uu tuyen tinh/, 'Bất phương trình bậc hai'],
     [/thong ke|xac suat|ghep nhom|trung vi|tu phan vi|phuong sai|do lech chuan|bayes|to hop|chinh hop|hoan vi|nhi thuc/, 'Thống kê – Xác suất'],
     [/tich phan|nguyen ham|dien tich hinh phang|the tich tron xoay|ung dung tich phan/, 'Nguyên hàm – Tích phân'],
     [/oxyz|mat phang|mat cau|vecto|toa do/, 'Oxyz'],
@@ -315,6 +321,7 @@ TD.BAN_DO_CD = {
     [/dao ham|khao sat|don dieu|cuc tri|tiem can|tuong giao|gtln|gtnn|bang bien thien|tiep tuyen|ham so/, 'Đạo hàm – Khảo sát']
   ],
   dia: [
+    [/bien dao|kinh te bien|dao va quan dao|dau khi|thuy san|cang bien/, 'Kinh tế biển đảo'],
     [/bieu do|so lieu|atlat|tinh toan|nhan xet|xu li/, 'Kỹ năng'],
     [/khi hau|gio mua|bao|mua |nhiet do/, 'Khí hậu'],
     [/dan cu|do thi|lao dong|dan so/, 'Dân cư'],
@@ -324,6 +331,8 @@ TD.BAN_DO_CD = {
     [/vi tri|lanh tho|bien dong/, 'Vị trí địa lí']
   ],
   gdkt: [
+    [/ke hoach kinh doanh|swot|diem hoa von|y tuong kinh doanh|khach hang muc tieu/, 'Lập kế hoạch kinh doanh'],
+    [/trach nhiem xa hoi/, 'Trách nhiệm xã hội của doanh nghiệp'],
     [/thue|doanh nghiep|kinh doanh/, 'Doanh nghiệp – Thuế'],
     [/bao hiem|an sinh/, 'Bảo hiểm – An sinh'],
     [/thu chi|tai chinh ca nhan|tiet kiem|ke hoach chi tieu/, 'Quản lí thu chi'],
@@ -342,6 +351,8 @@ TD.BAN_DO_CD = {
   sinh: [
     [/dna|adn|arn|rna|gene|phien ma|dich ma|nhan doi|codon|nucleotide|dot bien gene|ma di truyen/, 'Di truyền phân tử'],
     [/mendel|hoan vi|lien ket gene|nhiem sac the|\bnst\b|gioi tinh|tuong tac gene|pha he|kieu gen/, 'Di truyền NST'],
+    [/di truyen nguoi|pha he|hoi chung down|turner|klinefelter|tu van di truyen|benh di truyen/, 'Di truyền người'],
+    [/cong nghe gene|cong nghe te bao|plasmid|the truyen|nhan ban vo tinh|cay truyen phoi|nuoi cay mo|bien doi gene/, 'Công nghệ di truyền'],
     [/quan the|hardy|weinberg|tan so allele|tu thu|ngau phoi/, 'Di truyền quần thể'],
     [/tien hoa|chon loc|hinh thanh loai|nhan to tien hoa|di nhap gen/, 'Tiến hoá'],
     [/sinh thai|quan xa|he sinh thai|chuoi thuc an|thap sinh thai|dien the|hieu suat sinh thai/, 'Sinh thái học'],
@@ -349,7 +360,7 @@ TD.BAN_DO_CD = {
   ],
   anh: [
     [/word form|tu loai|hau to|tien to|duoi tu/, 'Từ loại'],
-    [/ngu am|trong am|phat am/, 'Ngữ âm – Trọng âm'],
+    [/dang bai|chien thuat 2025|sap xep cau|chen cau|tom tat|doc hieu/, 'Dạng bài & chiến thuật 2025'],
     [/dieu kien|conditional|wish/, 'Câu điều kiện'],
     [/bi dong|tuong thuat|passive|reported/, 'Bị động – Tường thuật'],
     [/menh de quan he|relative/, 'Mệnh đề quan hệ'],

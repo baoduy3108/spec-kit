@@ -282,7 +282,7 @@ custom|n|phong tục
 delayed|adj|bị hoãn, bị trễ
 departure|n|sự khởi hành
 destination|n|điểm đến
-diverse|adj|đa dạng
+diverse range|phr|phạm vi đa dạng
 festival|n|lễ hội
 guided tour|n|chuyến tham quan có hướng dẫn
 heritage|n|di sản
@@ -1122,6 +1122,1084 @@ utilise|v|tận dụng
 validate|v|xác nhận tính đúng đắn
 `);
 
+
+nap('Kĩ năng thế kỉ 21', `
+adaptability|n|khả năng thích ứng
+analytical|adj|có tính phân tích
+autonomy|n|quyền tự chủ
+brainstorm|v|động não tìm ý tưởng
+collaborate|v|cộng tác
+commitment|n|sự cam kết
+communication skill|n|kĩ năng giao tiếp
+competence|n|năng lực chuyên môn
+critical thinking|n|tư duy phản biện
+delegate|v|giao việc, uỷ quyền
+digital skill|n|kĩ năng số
+empathy|n|sự thấu cảm
+entrepreneurial|adj|có tinh thần khởi nghiệp
+initiative|n|tính chủ động, sáng kiến
+interpersonal|adj|thuộc quan hệ giữa người với người
+leadership|n|khả năng lãnh đạo
+mindset|n|lối tư duy
+multitask|v|làm nhiều việc cùng lúc
+negotiation|n|sự thương lượng
+networking|n|việc xây dựng quan hệ
+problem-solving|n|khả năng giải quyết vấn đề
+proactive|adj|chủ động đi trước
+resilience|n|khả năng phục hồi sau khó khăn
+self-discipline|n|tính tự kỉ luật
+teamwork skill|n|kĩ năng làm việc nhóm
+time management|n|quản lí thời gian
+versatile|adj|đa năng, linh hoạt
+work ethic|n|đạo đức nghề nghiệp
+`);
+
+nap('Trí tuệ nhân tạo & dữ liệu', `
+algorithm|n|thuật toán
+automate|v|tự động hoá
+big data|n|dữ liệu lớn
+bias|n|thiên lệch, định kiến trong dữ liệu
+chatbot|n|phần mềm trò chuyện tự động
+cloud computing|n|điện toán đám mây
+cybersecurity|n|an ninh mạng
+database|n|cơ sở dữ liệu
+digital divide|n|khoảng cách số
+encryption|n|sự mã hoá
+facial recognition|n|nhận diện khuôn mặt
+hardware|n|phần cứng
+machine learning|n|học máy
+misinformation|n|thông tin sai lệch
+personal data|n|dữ liệu cá nhân
+processing power|n|năng lực xử lí
+prompt|n|câu lệnh đưa cho máy
+self-driving|adj|tự lái
+simulation|n|sự mô phỏng
+smart device|n|thiết bị thông minh
+streaming|n|truyền phát trực tuyến
+surveillance|n|sự giám sát
+transparency|n|tính minh bạch
+troubleshoot|v|khắc phục sự cố
+`);
+
+nap('Vũ trụ & khám phá', `
+asteroid|n|tiểu hành tinh
+astronaut|n|phi hành gia
+astronomy|n|thiên văn học
+atmosphere layer|phr|tầng khí quyển
+comet|n|sao chổi
+constellation|n|chòm sao
+eclipse|n|hiện tượng nhật thực, nguyệt thực
+expedition|n|cuộc thám hiểm
+galaxy|n|thiên hà
+gravity|n|trọng lực
+launch pad|n|bệ phóng
+lunar|adj|thuộc mặt trăng
+meteor|n|sao băng
+orbit|n|quỹ đạo
+planet|n|hành tinh
+probe|n|tàu thăm dò
+rocket|n|tên lửa
+solar system|n|hệ mặt trời
+spacecraft|n|tàu vũ trụ
+telescope|n|kính thiên văn
+universe|n|vũ trụ
+weightlessness|n|trạng thái không trọng lượng
+`);
+
+nap('Lịch sử & khảo cổ', `
+ancient|adj|cổ đại
+archaeologist|n|nhà khảo cổ
+artefact|n|hiện vật khảo cổ
+century|n|thế kỉ
+civilisation|n|nền văn minh
+colonial|adj|thuộc địa
+decade|n|thập niên
+dynasty|n|triều đại
+empire|n|đế chế
+excavate|v|khai quật
+heritage site|n|di tích di sản
+independence day|n|ngày độc lập
+inscription|n|dòng chữ khắc
+manuscript|n|bản chép tay
+medieval|adj|thuộc thời trung cổ
+monument|n|đài tưởng niệm
+preserve relics|phr|bảo tồn di vật
+prehistoric|adj|tiền sử
+restore|v|phục dựng, trùng tu
+ruins|n|phế tích
+temple|n|đền, chùa
+tomb|n|lăng mộ
+`);
+
+nap('Động vật & thực vật', `
+adapt to habitat|phr|thích nghi với môi trường sống
+amphibian|n|động vật lưỡng cư
+breed in captivity|phr|nhân giống trong điều kiện nuôi nhốt
+camouflage|n|sự nguỵ trang
+carnivore|n|động vật ăn thịt
+extinct|adj|đã tuyệt chủng
+herbivore|n|động vật ăn cỏ
+hibernate|v|ngủ đông
+insect|n|côn trùng
+mammal|n|động vật có vú
+migrate|v|di cư
+nocturnal|adj|hoạt động về đêm
+poach|v|săn trộm
+predator|n|động vật săn mồi
+prey|n|con mồi
+reptile|n|bò sát
+sanctuary|n|khu bảo tồn
+species diversity|phr|sự đa dạng loài
+survival rate|n|tỉ lệ sống sót
+tropical forest|n|rừng nhiệt đới
+vegetation|n|thảm thực vật
+`);
+
+nap('Kinh doanh & khởi nghiệp', `
+budget plan|n|kế hoạch ngân sách
+client|n|khách hàng doanh nghiệp
+competitor|n|đối thủ cạnh tranh
+corporation|n|tập đoàn
+cost-effective|adj|hiệu quả về chi phí
+customer service|n|dịch vụ khách hàng
+deal|n|thoả thuận
+entrepreneur|n|doanh nhân khởi nghiệp
+expand the market|phr|mở rộng thị trường
+franchise|n|nhượng quyền thương mại
+launch a product|phr|tung ra sản phẩm
+merger|n|sự sáp nhập
+partnership|n|quan hệ đối tác
+productivity|n|năng suất
+profit margin|n|biên lợi nhuận
+promotion campaign|n|chiến dịch khuyến mãi
+prototype|n|mẫu thử
+stakeholder|n|bên liên quan
+start-up|n|công ty khởi nghiệp
+strategy|n|chiến lược
+supply chain|n|chuỗi cung ứng
+target audience|n|đối tượng khách hàng mục tiêu
+turnover|n|doanh thu; tỉ lệ thay nhân sự
+venture|n|dự án mạo hiểm
+`);
+
+nap('Nghệ thuật & âm nhạc', `
+album|n|đĩa nhạc
+audience reaction|phr|phản ứng của khán giả
+composer|n|nhà soạn nhạc
+craft|n|nghề thủ công
+exhibition|n|triển lãm
+gallery|n|phòng trưng bày
+handicraft|n|đồ thủ công mĩ nghệ
+instrument|n|nhạc cụ
+lyrics|n|lời bài hát
+masterpiece|n|kiệt tác
+melody|n|giai điệu
+mural|n|tranh tường
+painting|n|bức tranh
+perform live|phr|biểu diễn trực tiếp
+poetry|n|thơ ca
+portrait|n|chân dung
+rehearse|v|tập dượt
+sculpture|n|tác phẩm điêu khắc
+stage|n|sân khấu
+talent show|n|chương trình tìm kiếm tài năng
+traditional music|n|nhạc truyền thống
+`);
+
+nap('Kiến trúc & đô thị bền vững', `
+blueprint|n|bản thiết kế
+brick and mortar|phr|cửa hàng vật lí
+carbon neutral|adj|trung hoà carbon
+demolish|v|phá dỡ
+energy-efficient|adj|tiết kiệm năng lượng
+green building|n|công trình xanh
+green space|n|không gian xanh
+insulation|n|lớp cách nhiệt
+landmark building|n|công trình biểu tượng
+public housing|n|nhà ở xã hội
+renovate|v|cải tạo
+roof garden|n|vườn trên mái
+smart city|n|thành phố thông minh
+solar panel|n|tấm pin mặt trời
+sustainable design|n|thiết kế bền vững
+urban planning|n|quy hoạch đô thị
+walkable|adj|thuận tiện đi bộ
+waste sorting|n|phân loại rác
+water recycling|n|tái chế nước
+zoning|n|phân khu chức năng
+`);
+
+
+nap('Sức khoẻ tinh thần & lối sống', `
+anxiety disorder|n|rối loạn lo âu
+burnout|n|tình trạng kiệt sức
+cope with stress|phr|đối phó với căng thẳng
+counselling|n|việc tư vấn tâm lí
+depression|n|trầm cảm
+emotional support|n|sự hỗ trợ tinh thần
+loneliness|n|sự cô đơn
+meditation|n|thiền định
+mindfulness|n|sự chú tâm
+peer pressure|n|áp lực từ bạn bè
+positive thinking|n|suy nghĩ tích cực
+recharge|v|nạp lại năng lượng
+relaxation|n|sự thư giãn
+self-esteem|n|lòng tự trọng
+sleep quality|n|chất lượng giấc ngủ
+social isolation|n|sự cô lập xã hội
+therapy|n|liệu pháp điều trị
+work-related stress|n|căng thẳng do công việc
+`);
+
+nap('Nông nghiệp & lương thực bền vững', `
+crop rotation|n|luân canh cây trồng
+drip irrigation|n|tưới nhỏ giọt
+famine|n|nạn đói
+food security|n|an ninh lương thực
+genetically modified|adj|biến đổi gene
+greenhouse|n|nhà kính
+harvest season|n|mùa thu hoạch
+hydroponics|n|thuỷ canh
+malnutrition|n|suy dinh dưỡng
+organic farming|n|canh tác hữu cơ
+pest control|n|kiểm soát sâu bệnh
+salinity|n|độ mặn
+seedling|n|cây giống
+soil fertility|n|độ phì nhiêu của đất
+subsistence farming|n|canh tác tự cung tự cấp
+surplus|n|phần dư thừa
+sustainable yield|n|sản lượng bền vững
+`);
+
+nap('Giao thông đô thị & di chuyển', `
+bus lane|n|làn dành cho xe buýt
+car park|n|bãi đỗ xe
+carpool|v|đi chung xe
+congestion charge|n|phí chống ùn tắc
+electric vehicle|n|xe điện
+emission standard|n|tiêu chuẩn khí thải
+ferry|n|phà
+freight|n|hàng hoá vận chuyển
+infrastructure project|n|dự án hạ tầng
+metro system|n|hệ thống tàu điện ngầm
+mobility|n|khả năng di chuyển
+pedestrian zone|n|khu vực đi bộ
+ride-hailing|n|dịch vụ gọi xe
+road safety|n|an toàn giao thông
+toll|n|phí cầu đường
+transit|n|sự trung chuyển
+`);
+
+nap('Truyền thông số & mạng xã hội', `
+algorithm feed|n|dòng tin do thuật toán chọn
+clickbait|n|tiêu đề câu view
+content creator|n|người sáng tạo nội dung
+digital footprint|n|dấu vết số
+echo chamber|n|buồng vọng thông tin
+engagement rate|n|tỉ lệ tương tác
+fake news|n|tin giả
+follower|n|người theo dõi
+go viral|phr|lan truyền chóng mặt
+hashtag|n|thẻ chủ đề
+influencer|n|người có sức ảnh hưởng
+livestream|n|buổi phát trực tiếp
+online reputation|n|danh tiếng trên mạng
+podcast|n|chương trình âm thanh
+scroll|v|lướt màn hình
+screen addiction|n|nghiện màn hình
+share widely|phr|chia sẻ rộng rãi
+trending topic|n|chủ đề đang thịnh hành
+`);
+
+nap('Tình nguyện & cộng đồng', `
+awareness campaign|n|chiến dịch nâng cao nhận thức
+charity event|n|sự kiện từ thiện
+civic duty|n|nghĩa vụ công dân
+community service|n|hoạt động phục vụ cộng đồng
+disadvantaged|adj|thiệt thòi, khó khăn
+fundraise|v|gây quỹ
+grassroots|adj|từ cơ sở, từ người dân
+homeless|adj|vô gia cư
+humanitarian|adj|nhân đạo
+local authority|n|chính quyền địa phương
+non-profit|adj|phi lợi nhuận
+orphanage|n|trại trẻ mồ côi
+outreach|n|hoạt động tiếp cận cộng đồng
+philanthropy|n|hoạt động từ thiện
+solidarity|n|tình đoàn kết
+sponsor|v|tài trợ
+underprivileged|adj|kém may mắn
+welfare|n|phúc lợi
+`);
+
+nap('Động từ học thuật mở rộng', `
+accumulate|v|tích luỹ
+address an issue|phr|giải quyết một vấn đề
+advocate|v|ủng hộ, cổ vũ cho
+alleviate|v|làm giảm nhẹ
+attribute to|phr|quy cho, cho là do
+augment|v|làm tăng thêm
+clarify|v|làm rõ
+compile|v|biên soạn, tổng hợp
+comprise|v|bao gồm
+conceive|v|hình dung, nghĩ ra
+condense|v|cô đọng lại
+confront|v|đối mặt
+consolidate|v|củng cố
+contradict|v|mâu thuẫn với
+convert|v|chuyển đổi
+curb|v|kiềm chế
+deduce|v|suy ra
+depict|v|khắc hoạ, mô tả
+deploy|v|triển khai
+devise|v|nghĩ ra, thiết kế
+differentiate|v|phân biệt
+disrupt|v|làm gián đoạn
+distort|v|bóp méo
+diversify|v|đa dạng hoá
+dominate|v|chiếm ưu thế
+enforce a rule|phr|thi hành một quy định
+enrich|v|làm giàu thêm
+entail|v|kéo theo, đòi hỏi
+evaluate|v|đánh giá
+exaggerate|v|phóng đại
+foster|v|nuôi dưỡng, thúc đẩy
+generalise|v|khái quát hoá
+highlight|v|làm nổi bật
+hinder|v|cản trở
+implement a policy|phr|thực thi một chính sách
+impose|v|áp đặt
+induce|v|gây ra, dẫn tới
+integrate into|phr|hoà nhập vào
+interpret data|phr|diễn giải dữ liệu
+intervene early|phr|can thiệp sớm
+monitor|v|theo dõi, giám sát
+outweigh|v|lớn hơn, vượt trội
+prioritise|v|ưu tiên
+prohibit strictly|phr|nghiêm cấm
+pursue|v|theo đuổi
+reinforce|v|củng cố
+resolve a conflict|phr|giải quyết xung đột
+restrain|v|kìm giữ
+retain|v|giữ lại
+speculate|v|suy đoán
+stimulate|v|kích thích
+streamline|v|tinh gọn
+subsidise|v|trợ cấp
+supplement|v|bổ sung
+tackle|v|xử lí, đương đầu
+transmit|v|truyền đi
+undermine|v|làm suy yếu
+unify|v|thống nhất
+verify|v|kiểm chứng
+withstand|v|chịu đựng được
+`);
+
+nap('Tính từ mô tả mở rộng', `
+accessible|adj|dễ tiếp cận
+accurate data|phr|dữ liệu chính xác
+ambiguous|adj|mơ hồ, đa nghĩa
+apparent|adj|rõ ràng, có vẻ như
+arbitrary|adj|tuỳ tiện
+authentic experience|phr|trải nghiệm chân thực
+beneficial effect|phr|tác động có lợi
+challenging|adj|đầy thử thách
+coherent|adj|mạch lạc
+compulsory subject|phr|môn học bắt buộc
+consistent|adj|nhất quán
+controversial|adj|gây tranh cãi
+credible|adj|đáng tin
+crucial role|phr|vai trò then chốt
+cumulative|adj|tích luỹ dần
+deliberate|adj|có chủ ý
+distinct|adj|khác biệt rõ rệt
+diverse|adj|đa dạng
+dramatic increase|phr|sự tăng mạnh
+dynamic|adj|năng động
+elaborate plan|phr|kế hoạch công phu
+enormous|adj|khổng lồ
+excessive|adj|quá mức
+explicit|adj|rõ ràng, tường minh
+feasible|adj|khả thi
+fundamental|adj|căn bản
+genuine|adj|thật, chân thành
+gradual decline|phr|sự giảm dần
+implicit|adj|ngầm hiểu
+inadequate|adj|không đầy đủ
+inevitable outcome|phr|kết cục tất yếu
+innovative|adj|mang tính đổi mới
+intense|adj|dữ dội, mãnh liệt
+irrelevant|adj|không liên quan
+marginal|adj|không đáng kể
+moderate|adj|vừa phải
+mutual|adj|lẫn nhau
+notable|adj|đáng chú ý
+outstanding|adj|xuất sắc, nổi bật
+persistent problem|phr|vấn đề dai dẳng
+plausible|adj|nghe có lí
+precise|adj|chính xác đến từng chi tiết
+prevalent|adj|phổ biến, thịnh hành
+profound|adj|sâu sắc
+radical|adj|triệt để, cấp tiến
+remarkable|adj|đáng kinh ngạc
+robust|adj|vững chắc
+severe|adj|nghiêm trọng
+subsequent|adj|tiếp theo sau
+subtle|adj|tinh tế, khó nhận ra
+superficial|adj|hời hợt
+transparent process|phr|quy trình minh bạch
+unprecedented|adj|chưa từng có
+viable|adj|có thể thực hiện được
+vulnerable|adj|dễ bị tổn thương
+`);
+
+nap('Cụm động từ mở rộng', `
+account for|phr|chiếm tỉ lệ; giải thích cho
+add up to|phr|cộng lại thành
+back up|phr|sao lưu; ủng hộ
+bring up a topic|phr|nêu một chủ đề
+call for|phr|kêu gọi, đòi hỏi
+carry on|phr|tiếp tục
+catch up on|phr|bù lại phần bị chậm
+come up with|phr|nghĩ ra
+count on|phr|trông cậy vào
+cut off|phr|cắt đứt, ngắt
+do away with|phr|xoá bỏ
+drop by|phr|ghé qua
+end up|phr|rốt cuộc lại
+fall behind|phr|tụt lại phía sau
+get along|phr|hoà hợp
+get rid of|phr|loại bỏ
+give in|phr|nhượng bộ
+go through|phr|trải qua
+hold back|phr|kìm lại
+keep track of|phr|theo dõi sát
+lay off|phr|cho thôi việc
+live up to|phr|sống xứng với kì vọng
+look after children|phr|trông nom trẻ
+make up for|phr|bù đắp cho
+opt for|phr|chọn lấy
+pass on|phr|truyền lại
+pick up a skill|phr|học lỏm một kĩ năng
+point out|phr|chỉ ra
+put forward|phr|đề xuất
+result in failure|phr|dẫn tới thất bại
+rule out|phr|loại trừ
+set aside|phr|dành riêng ra
+sort out|phr|sắp xếp, giải quyết
+stand for|phr|viết tắt của; ủng hộ
+stick to|phr|bám sát, kiên trì với
+take over|phr|tiếp quản
+turn out|phr|hoá ra là
+wear off|phr|nhạt dần, hết tác dụng
+`);
+
+
+nap('Họ từ — gốc từ và các dạng phái sinh', `
+analyse|v|phân tích
+analysis|n|sự phân tích
+analyst|n|nhà phân tích
+apply|v|áp dụng; nộp đơn
+application|n|đơn xin; ứng dụng
+applicable|adj|có thể áp dụng
+argument|n|lập luận, cuộc tranh cãi
+argumentative|adj|hay tranh cãi
+competitive|adj|có tính cạnh tranh
+competitor company|phr|công ty đối thủ
+conclude|v|kết luận
+conclusion|n|kết luận
+conclusive|adj|có tính quyết định
+create|v|tạo ra
+creation|n|sự sáng tạo, tác phẩm
+creator|n|người sáng tạo
+decide|v|quyết định
+decisive|adj|dứt khoát, quyết định
+depend on|phr|phụ thuộc vào
+dependent|adj|phụ thuộc
+independent thinking|phr|tư duy độc lập
+differ|v|khác nhau
+difference|n|sự khác biệt
+differently|adv|một cách khác biệt
+educate|v|giáo dục
+education|n|nền giáo dục
+educational|adj|thuộc giáo dục
+educator|n|nhà giáo dục
+employ|v|thuê làm việc
+employment|n|việc làm
+unemployed|adj|thất nghiệp
+environment|n|môi trường
+environmental|adj|thuộc môi trường
+environmentalist|n|nhà hoạt động môi trường
+examine closely|phr|xem xét kĩ
+examination|n|kì thi, sự kiểm tra
+explain|v|giải thích
+explanation|n|lời giải thích
+explanatory|adj|có tính giải thích
+inform|v|thông báo
+information|n|thông tin
+informative|adj|nhiều thông tin
+introduction|n|phần mở đầu
+introductory|adj|nhập môn
+invent|v|phát minh
+inventor|n|nhà phát minh
+inventive|adj|giàu sáng chế
+know|v|biết
+knowledgeable|adj|hiểu biết rộng
+maintain quality|phr|duy trì chất lượng
+maintenance cost|phr|chi phí bảo trì
+observe carefully|phr|quan sát cẩn thận
+observation|n|sự quan sát
+observant|adj|tinh ý
+produce|v|sản xuất
+production|n|sự sản xuất
+productive|adj|hiệu quả, năng suất
+protection|n|sự bảo vệ
+protective|adj|có tính bảo vệ
+receive|v|nhận
+reception|n|sự tiếp nhận, quầy lễ tân
+recipient|n|người nhận
+reduce waste|phr|giảm rác thải
+reduction|n|sự cắt giảm
+succeed|v|thành công
+successfully|adv|một cách thành công
+suggestion box|phr|hộp góp ý
+vary widely|phr|khác nhau rất nhiều
+variety|n|sự đa dạng
+variation|n|sự biến thiên
+`);
+
+nap('Danh từ trừu tượng thường gặp', `
+achievement gap|n|khoảng cách thành tích
+adaptation|n|sự thích nghi
+alternative solution|n|giải pháp thay thế
+assumption|n|giả định
+awareness|n|nhận thức
+barrier|n|rào cản
+benefit package|n|gói phúc lợi
+burden|n|gánh nặng
+capacity|n|sức chứa, năng lực
+consensus|n|sự đồng thuận
+consequence of action|phr|hệ quả của hành động
+constraint|n|ràng buộc
+context|n|bối cảnh
+contradiction|n|sự mâu thuẫn
+controversy|n|cuộc tranh cãi
+criterion|n|tiêu chí
+dilemma|n|tình thế tiến thoái lưỡng nan
+disparity|n|sự chênh lệch
+dominance|n|sự thống trị
+efficiency|n|hiệu suất
+emphasis|n|sự nhấn mạnh
+equivalent value|phr|giá trị tương đương
+exception|n|ngoại lệ
+expectation|n|kì vọng
+exposure|n|sự tiếp xúc, phơi nhiễm
+framework|n|khung khổ
+implication|n|hàm ý, hệ quả
+incentive|n|động lực khuyến khích
+indicator|n|chỉ số, dấu hiệu
+inequality|n|sự bất bình đẳng
+influence on|phr|ảnh hưởng tới
+insight|n|sự thấu hiểu sâu sắc
+integrity|n|sự chính trực
+interference|n|sự can thiệp, nhiễu
+limitation|n|hạn chế
+mechanism|n|cơ chế
+norm|n|chuẩn mực
+obligation|n|nghĩa vụ
+occurrence|n|sự xuất hiện
+perception|n|nhận thức, cảm nhận
+phenomenon of nature|phr|hiện tượng tự nhiên
+preference|n|sự ưa thích hơn
+prevalence|n|mức độ phổ biến
+procedure|n|thủ tục, quy trình
+proportion|n|tỉ lệ
+recognition|n|sự công nhận
+regulation of traffic|phr|việc điều tiết giao thông
+requirement|n|yêu cầu bắt buộc
+restriction|n|sự hạn chế
+significance|n|tầm quan trọng
+stability|n|sự ổn định
+standard of living|n|mức sống
+sustainability|n|tính bền vững
+tendency to|phr|xu hướng làm gì
+threshold|n|ngưỡng
+transition|n|sự chuyển tiếp
+variable|n|biến số
+`);
+
+nap('Cụm giới từ và cụm cố định', `
+at first glance|phr|thoạt nhìn
+at the expense of|phr|với cái giá phải trả là
+at the mercy of|phr|phó mặc cho
+by and large|phr|nhìn chung
+by means of|phr|bằng cách
+for the sake of|phr|vì lợi ích của
+in accordance with|phr|phù hợp với
+in addition to|phr|ngoài ra còn
+in charge of|phr|phụ trách
+in comparison with|phr|so với
+in contrast to|phr|trái ngược với
+in favour of|phr|ủng hộ
+in general|phr|nói chung
+in light of|phr|xét theo, dựa trên
+in line with|phr|phù hợp với
+in need of|phr|đang cần
+in order that|phr|để mà
+in particular|phr|đặc biệt là
+in place of|phr|thay cho
+in response to|phr|để đáp lại
+in return for|phr|đổi lại
+in search of|phr|đi tìm
+in spite of the fact that|phr|mặc dù thực tế là
+in terms of quality|phr|xét về chất lượng
+in the event of|phr|trong trường hợp
+in the long term|phr|về dài hạn
+in the short term|phr|trong ngắn hạn
+on account of|phr|vì, do bởi
+on behalf of|phr|thay mặt cho
+on condition that|phr|với điều kiện là
+on the contrary|phr|trái lại
+on the grounds that|phr|với lí do rằng
+on the increase|phr|đang gia tăng
+on the verge of|phr|bên bờ vực của
+regardless of cost|phr|bất kể chi phí
+subject to change|phr|có thể thay đổi
+with regard to|phr|liên quan tới
+with respect to|phr|xét về
+`);
+
+nap('Mô tả số liệu và xu hướng', `
+account for a share|phr|chiếm một tỉ lệ
+climb steadily|phr|tăng đều đặn
+decline sharply|phr|giảm mạnh
+double|v|tăng gấp đôi
+drop dramatically|phr|giảm đột ngột
+fluctuate around|phr|dao động quanh mức
+gradual rise|phr|sự tăng dần
+halve|v|giảm một nửa
+hit a peak|phr|đạt đỉnh
+level off|phr|đi ngang, chững lại
+majority|n|đa số
+minority|n|thiểu số
+outnumber|v|nhiều hơn về số lượng
+overall trend|phr|xu hướng chung
+peak at|phr|đạt cực đại ở mức
+plummet|v|lao dốc
+proportionately|adv|một cách tương ứng
+quadruple|v|tăng gấp bốn
+ratio|n|tỉ số
+remain stable|phr|giữ ổn định
+rise steadily|phr|tăng ổn định
+roughly|adv|khoảng chừng
+significant gap|phr|khoảng cách đáng kể
+soar|v|tăng vọt
+steady decline|phr|sự giảm đều
+substantially|adv|một cách đáng kể
+surge|v|tăng vọt đột ngột
+triple|v|tăng gấp ba
+`);
+
+nap('Trạng từ và từ nối mở rộng', `
+accordingly|adv|theo đó
+admittedly|adv|phải thừa nhận rằng
+alternatively|adv|hoặc là, cách khác
+arguably|adv|có thể cho rằng
+basically|adv|về cơ bản
+briefly|adv|một cách ngắn gọn
+conversely|adv|ngược lại
+deliberately|adv|một cách cố ý
+essentially|adv|về bản chất
+explicitly|adv|một cách rõ ràng
+finally|adv|cuối cùng
+firstly|adv|thứ nhất
+genuinely|adv|một cách chân thành
+hence|adv|do đó
+ideally|adv|lí tưởng nhất là
+inevitably|adv|không tránh khỏi
+initially|adv|ban đầu
+largely|adv|phần lớn là
+literally|adv|theo nghĩa đen
+mainly|adv|chủ yếu
+merely|adv|chỉ đơn thuần
+mostly|adv|hầu hết
+naturally|adv|một cách tự nhiên
+notably|adv|đáng chú ý là
+overall|adv|nhìn chung
+partly|adv|một phần
+precisely|adv|một cách chính xác
+presumably|adv|có lẽ là
+primarily|adv|trước hết là
+rapidly|adv|một cách nhanh chóng
+readily|adv|sẵn sàng, dễ dàng
+regularly|adv|đều đặn
+respectively|adv|theo thứ tự tương ứng
+secondly|adv|thứ hai
+significantly higher|phr|cao hơn đáng kể
+simultaneously|adv|đồng thời
+specifically|adv|cụ thể là
+steadily|adv|đều đặn
+strictly|adv|nghiêm ngặt
+subsequently|adv|sau đó
+surprisingly|adv|đáng ngạc nhiên là
+typically|adv|thường thì
+ultimately|adv|rốt cuộc
+undoubtedly|adv|không nghi ngờ gì
+virtually|adv|hầu như
+widely|adv|rộng rãi
+`);
+
+nap('Từ vựng lễ hội và văn hoá Việt Nam', `
+altar|n|bàn thờ
+ancestor worship|n|tục thờ cúng tổ tiên
+bamboo|n|cây tre
+banh chung|n|bánh chưng
+calligraphy|n|thư pháp
+ceremony|n|buổi lễ
+conical hat|n|nón lá
+craft village|n|làng nghề
+dragon dance|n|múa rồng
+firecracker|n|pháo
+folk song|n|dân ca
+generosity|n|lòng hào phóng
+harvest festival|n|lễ hội mùa màng
+incense|n|hương, nhang
+lantern|n|đèn lồng
+lion dance|n|múa lân
+lunar new year|n|Tết Nguyên đán
+offering|n|đồ cúng lễ
+pagoda|n|ngôi chùa
+paddy|n|lúa nước
+red envelope|n|bao lì xì
+reunion dinner|n|bữa cơm đoàn viên
+rice cake|n|bánh làm từ gạo
+ritual ceremony|phr|nghi lễ
+superstition|n|sự mê tín
+tray of five fruits|phr|mâm ngũ quả
+worship|v|thờ cúng
+`);
+
+nap('Từ vựng trường học và du học', `
+academic year|n|năm học
+admission|n|việc nhận vào học
+alumni|n|cựu học sinh, cựu sinh viên
+application form|n|đơn đăng kí
+boarding school|n|trường nội trú
+career guidance|n|hướng nghiệp
+class monitor|n|lớp trưởng
+coursework|n|bài tập trong khoá học
+credit transfer|n|chuyển đổi tín chỉ
+cultural shock|n|sốc văn hoá
+deadline extension|n|gia hạn nộp bài
+dissertation|n|luận văn
+exchange programme|n|chương trình trao đổi
+extracurricular activity|n|hoạt động ngoại khoá
+final exam|n|kì thi cuối kì
+grading system|n|hệ thống chấm điểm
+homesick|adj|nhớ nhà
+intake|n|đợt tuyển sinh
+internship|n|kì thực tập
+learning outcome|n|chuẩn đầu ra
+mentor|n|người hướng dẫn
+oral presentation|n|bài thuyết trình
+pass mark|n|điểm đạt
+placement test|n|bài kiểm tra xếp lớp
+research paper|n|bài nghiên cứu
+scholarship recipient|n|người nhận học bổng
+student loan|n|khoản vay sinh viên
+study abroad|phr|du học
+timetable clash|n|trùng lịch học
+tuition waiver|n|miễn học phí
+`);
+
+
+nap('Từ thông dụng trong bài đọc', `
+according|adj|theo như
+achieve a goal|phr|đạt được mục tiêu
+afterwards|adv|sau đó
+aim at|phr|nhắm tới
+allow access|phr|cho phép tiếp cận
+amount|n|lượng, số lượng
+appear|v|xuất hiện, có vẻ
+arise|v|nảy sinh
+avoid mistakes|phr|tránh sai sót
+belong|v|thuộc về
+benefit from|phr|hưởng lợi từ
+carry out research|phr|tiến hành nghiên cứu
+cause|n|nguyên nhân
+choice|n|sự lựa chọn
+connect|v|kết nối
+contain|v|chứa đựng
+continue|v|tiếp tục
+control|v|kiểm soát
+cover|v|bao gồm, che phủ
+decrease sharply|phr|giảm mạnh
+degree of change|phr|mức độ thay đổi
+demand|n|nhu cầu
+design|v|thiết kế
+detail|n|chi tiết
+develop skills|phr|phát triển kĩ năng
+discovery|n|khám phá
+divide|v|chia
+effort to change|phr|nỗ lực thay đổi
+encourage students|phr|khuyến khích học sinh
+ensure|v|bảo đảm
+example|n|ví dụ
+exist|v|tồn tại
+expect|v|mong đợi
+experiment with|phr|thử nghiệm với
+face difficulties|phr|đối mặt khó khăn
+figure|n|con số; hình vẽ
+follow|v|theo sau, tuân theo
+form|v|hình thành
+gain experience|phr|tích luỹ kinh nghiệm
+happen|v|xảy ra
+hold a meeting|phr|tổ chức cuộc họp
+image|n|hình ảnh
+include|v|bao gồm
+increase gradually|phr|tăng dần
+issue|n|vấn đề
+item|n|món, mục
+keep records|phr|lưu hồ sơ
+lack|n|sự thiếu hụt
+lead a team|phr|dẫn dắt một nhóm
+level|n|mức độ
+limit|v|giới hạn
+link|n|mối liên hệ
+manner|n|cách thức
+matter|v|có ý nghĩa quan trọng
+measure|v|đo lường
+mention briefly|phr|nhắc qua
+note|v|ghi nhận
+notice|v|nhận thấy
+offer|v|đề nghị, cung cấp
+operate|v|vận hành
+order|n|thứ tự; đơn hàng
+own|v|sở hữu
+period|n|giai đoạn
+place|n|nơi chốn
+point|n|điểm, luận điểm
+position|n|vị trí
+prepare for|phr|chuẩn bị cho
+present|v|trình bày
+prevent damage|phr|ngăn thiệt hại
+process|n|quá trình
+produce goods|phr|sản xuất hàng hoá
+provide support|phr|cung cấp hỗ trợ
+raise a question|phr|đặt ra một câu hỏi
+range|n|phạm vi
+reach agreement|phr|đạt được thoả thuận
+realise|v|nhận ra
+receive feedback|phr|nhận phản hồi
+record|v|ghi lại
+refer to|phr|nhắc tới, quy chiếu
+reflect|v|phản ánh
+regard as|phr|coi như là
+relate to|phr|liên quan tới
+remain|v|vẫn còn
+remove|v|loại bỏ
+report|v|báo cáo
+represent a group|phr|đại diện cho một nhóm
+require effort|phr|đòi hỏi nỗ lực
+respond quickly|phr|phản hồi nhanh
+return|v|trở lại
+select|v|lựa chọn
+sense|n|giác quan; ý nghĩa
+serve|v|phục vụ
+show|v|cho thấy
+similar to|phr|tương tự như
+source of energy|phr|nguồn năng lượng
+spread|v|lan rộng
+state|v|phát biểu, nêu rõ
+step|n|bước
+structure|n|cấu trúc
+suffer damage|phr|chịu thiệt hại
+supply water|phr|cung cấp nước
+support the view|phr|ủng hộ quan điểm
+suppose|v|cho rằng
+system|n|hệ thống
+test|v|kiểm tra
+treat|v|đối xử, xử lí
+type|n|loại
+view|n|quan điểm
+whole|adj|toàn bộ
+`);
+
+nap('Cặp từ và sắc thái nghĩa', `
+affordable|adj|có giá phải chăng
+ancient tradition|phr|truyền thống lâu đời
+brand-new|adj|hoàn toàn mới
+compulsory attendance|phr|việc đi học bắt buộc
+countless|adj|vô số
+crowded|adj|đông đúc
+current situation|phr|tình hình hiện tại
+daily routine|phr|thói quen hằng ngày
+dense|adj|dày đặc
+distant|adj|xa xôi
+early stage|phr|giai đoạn đầu
+elderly people|phr|người cao tuổi
+endless|adj|vô tận
+fragile|adj|mong manh, dễ vỡ
+gigantic|adj|khổng lồ
+harsh|adj|khắc nghiệt
+identical|adj|giống hệt
+immediate|adj|tức thời
+inexpensive option|phr|lựa chọn không tốn kém
+lengthy|adj|dài dòng
+lifelong|adj|suốt đời
+massive|adj|đồ sộ
+minor|adj|nhỏ, thứ yếu
+modest|adj|khiêm tốn
+numerous|adj|nhiều
+ongoing|adj|đang diễn ra
+optional|adj|không bắt buộc
+ordinary|adj|bình thường
+overwhelming|adj|áp đảo, choáng ngợp
+peaceful|adj|yên bình
+permanent job|phr|công việc lâu dài
+potential risk|phr|rủi ro tiềm ẩn
+previous experience|phr|kinh nghiệm trước đó
+private|adj|riêng tư
+recent survey|phr|khảo sát gần đây
+relevant information|phr|thông tin liên quan
+reliable source|phr|nguồn đáng tin
+scarce|adj|khan hiếm
+sensible choice|phr|lựa chọn khôn ngoan
+sheer|adj|thuần tuý, hoàn toàn
+sudden|adj|đột ngột
+temporary solution|phr|giải pháp tạm thời
+tiny|adj|tí hon
+tremendous|adj|to lớn
+unexpected|adj|bất ngờ
+unfamiliar|adj|xa lạ
+unique feature|phr|đặc điểm độc nhất
+unlikely|adj|khó xảy ra
+urgent|adj|khẩn cấp
+worthwhile|adj|đáng công sức
+`);
+
+
+nap('Từ vựng bổ sung cuối', `
+abolish|v|bãi bỏ
+abundance|n|sự dồi dào
+accelerate growth|phr|đẩy nhanh tăng trưởng
+accommodate|v|chứa được, đáp ứng
+acknowledge|v|thừa nhận
+acquire knowledge|phr|thu nhận kiến thức
+adhere to|phr|tuân thủ
+adjacent|adj|kề bên
+affluent|adj|giàu có
+aggregate|n|tổng hợp
+allocate resources|phr|phân bổ nguồn lực
+ambiguity|n|sự mơ hồ
+amend|v|sửa đổi
+anonymous|adj|ẩn danh
+appraisal|n|sự đánh giá
+apprehension|n|sự lo ngại
+articulate|v|diễn đạt rõ ràng
+ascertain|v|xác định chắc chắn
+aspiration|n|khát vọng
+assemble|v|tập hợp, lắp ráp
+assert|v|khẳng định
+assign a task|phr|giao một nhiệm vụ
+attain|v|đạt tới
+attribute|n|thuộc tính
+authorise|v|cho phép chính thức
+bilateral|adj|song phương
+biodegradable|adj|phân huỷ sinh học được
+boost morale|phr|nâng cao tinh thần
+brevity|n|sự ngắn gọn
+capitalise on|phr|tận dụng lợi thế
+census|n|cuộc tổng điều tra dân số
+certify|v|chứng nhận
+cite a source|phr|trích dẫn nguồn
+coincidence|n|sự trùng hợp
+collective|adj|tập thể
+commence|v|bắt đầu
+compensate for|phr|bù đắp cho
+compile data|phr|tổng hợp dữ liệu
+comply|v|tuân thủ
+comprehend|v|hiểu thấu
+concede|v|nhượng bộ, thừa nhận
+conform to|phr|tuân theo
+confine|v|giới hạn trong
+conserve|v|bảo tồn
+contemplate|v|ngẫm nghĩ
+contemporary|adj|đương đại
+convey a message|phr|truyền tải thông điệp
+correspond to|phr|tương ứng với
+counterpart|n|người, vật tương đương
+credibility|n|độ tin cậy
+cultivate a habit|phr|nuôi dưỡng một thói quen
+deficiency|n|sự thiếu hụt
+delegate authority|phr|phân quyền
+deteriorating|adj|đang xấu đi
+deterrent|n|yếu tố răn đe
+discrepancy|n|sự sai lệch
+disseminate|v|phổ biến rộng rãi
+distinguish between|phr|phân biệt giữa
+elicit|v|khơi gợi ra
+eloquent|adj|hùng hồn
+embrace change|phr|đón nhận thay đổi
+eradicate|v|xoá sổ hoàn toàn
+exemplify|v|minh hoạ điển hình
+exert influence|phr|gây ảnh hưởng
+exploit resources|phr|khai thác tài nguyên
+feasibility|n|tính khả thi
+fluctuation|n|sự dao động
+forecast demand|phr|dự báo nhu cầu
+formulate a plan|phr|xây dựng một kế hoạch
+gauge|v|đo lường, đánh giá
+hierarchy|n|hệ thống thứ bậc
+impartial|adj|khách quan, không thiên vị
+imperative|adj|cấp thiết
+inclusive|adj|bao trùm, không loại trừ ai
+incorporate feedback|phr|tiếp thu phản hồi
+incur costs|phr|phát sinh chi phí
+indispensable|adj|không thể thiếu
+inherent|adj|vốn có
+innovate|v|đổi mới sáng tạo
+insufficient|adj|không đủ
+intact|adj|còn nguyên vẹn
+intricate|adj|phức tạp tinh vi
+lucrative|adj|sinh lợi cao
+mandatory|adj|bắt buộc
+mitigate|v|làm giảm nhẹ
+negligible|adj|không đáng kể
+nurture talent|phr|nuôi dưỡng tài năng
+obsolete|adj|lỗi thời
+optimal|adj|tối ưu
+paradox|n|nghịch lí
+persistent effort|phr|nỗ lực bền bỉ
+pinpoint|v|xác định chính xác
+precede|v|đi trước
+predominantly|adv|chủ yếu là
+proponent|n|người ủng hộ
+reciprocal|adj|có đi có lại
+redundant staff|phr|nhân sự dôi dư
+refute|v|bác bỏ
+reluctance|n|sự miễn cưỡng
+render|v|làm cho trở nên
+replicate|v|nhân bản, lặp lại
+resilient|adj|kiên cường, phục hồi tốt
+scrutinise|v|xem xét kĩ lưỡng
+sequential|adj|theo trình tự
+substantiate|v|chứng minh bằng bằng chứng
+surpass|v|vượt qua
+tangible|adj|hữu hình
+thrive|v|phát triển mạnh
+transcend|v|vượt lên trên
+unanimous|adj|nhất trí hoàn toàn
+underestimate|v|đánh giá thấp
+uphold|v|giữ vững, duy trì
+utilise resources|phr|tận dụng nguồn lực
+versatility|n|tính linh hoạt đa năng
+vigorous|adj|mạnh mẽ, hăng hái
+warrant|v|đủ để biện minh cho
+widespread adoption|phr|sự áp dụng rộng rãi
+yield results|phr|mang lại kết quả
+`);
+
 /* ---------- COLLOCATION: động từ + danh từ, tính từ + giới từ ---------- */
 TD.KHO_COLLOC = TD.KHO_COLLOC || [];
 const nc = (nhom, tho) => {
@@ -1232,6 +2310,257 @@ growing|concern|mối lo ngại ngày càng tăng
 major|challenge|thách thức lớn
 significant|improvement|sự cải thiện đáng kể
 valuable|experience|kinh nghiệm quý báu
+`);
+
+nc('Động từ + danh từ', `
+achieve|a goal|đạt được mục tiêu
+break|a promise|thất hứa
+break|a record|phá kỉ lục
+catch|a cold|bị cảm
+cause|damage|gây thiệt hại
+change|one's mind|đổi ý
+commit|a crime|phạm tội
+conduct|a survey|tiến hành khảo sát
+draw|a conclusion|rút ra kết luận
+earn|a living|kiếm sống
+face|a challenge|đối mặt thách thức
+fill in|a form|điền vào mẫu đơn
+follow|instructions|làm theo hướng dẫn
+gain|experience|tích luỹ kinh nghiệm
+give|a speech|đọc diễn văn
+hold|a meeting|tổ chức cuộc họp
+keep|a promise|giữ lời hứa
+keep|a secret|giữ bí mật
+lose|touch|mất liên lạc
+lose|weight|giảm cân
+meet|a deadline|kịp hạn chót
+meet|demand|đáp ứng nhu cầu
+miss|an opportunity|bỏ lỡ cơ hội
+pass|an exam|thi đỗ
+pay|a fine|nộp phạt
+play|a role|đóng vai trò
+raise|awareness|nâng cao nhận thức
+raise|money|gây quỹ
+reach|an agreement|đạt thoả thuận
+run|a business|điều hành doanh nghiệp
+save|energy|tiết kiệm năng lượng
+save|time|tiết kiệm thời gian
+set|a record|lập kỉ lục
+set|an example|làm gương
+solve|a problem|giải quyết vấn đề
+spend|time|dành thời gian
+tell|the truth|nói thật
+throw|a party|tổ chức tiệc
+waste|money|lãng phí tiền
+win|a prize|đoạt giải
+`);
+
+nc('Tính từ + danh từ', `
+bitter|disappointment|nỗi thất vọng cay đắng
+broad|range|phạm vi rộng
+deep|impression|ấn tượng sâu sắc
+extreme|weather|thời tiết khắc nghiệt
+firm|belief|niềm tin vững chắc
+golden|opportunity|cơ hội vàng
+hard|work|sự chăm chỉ
+heavy|smoker|người nghiện thuốc nặng
+high|standard|tiêu chuẩn cao
+keen|interest|sự quan tâm sâu sắc
+long|history|lịch sử lâu đời
+narrow|escape|thoát hiểm trong gang tấc
+outstanding|performance|màn trình diễn xuất sắc
+practical|experience|kinh nghiệm thực tế
+public|opinion|dư luận
+rapid|growth|sự tăng trưởng nhanh
+rough|estimate|ước tính sơ bộ
+severe|shortage|sự thiếu hụt nghiêm trọng
+sharp|rise|sự tăng đột ngột
+strong|evidence|bằng chứng thuyết phục
+tight|schedule|lịch trình chặt
+vital|role|vai trò sống còn
+warm|welcome|sự chào đón nồng nhiệt
+wide|gap|khoảng cách lớn
+`);
+
+nc('Cụm với danh từ trừu tượng', `
+a sense|of belonging|cảm giác thuộc về
+a source|of income|nguồn thu nhập
+a lack|of confidence|sự thiếu tự tin
+a means|of transport|phương tiện đi lại
+a matter|of time|chỉ là vấn đề thời gian
+a piece|of advice|một lời khuyên
+a range|of options|một loạt lựa chọn
+a shortage|of water|sự thiếu nước
+a waste|of time|sự lãng phí thời gian
+an act|of kindness|một hành động tử tế
+in the process|of learning|trong quá trình học
+on the basis|of evidence|dựa trên bằng chứng
+the impact|of technology|tác động của công nghệ
+the level|of pollution|mức độ ô nhiễm
+the risk|of failure|nguy cơ thất bại
+the role|of education|vai trò của giáo dục
+`);
+
+nc('Động từ + trạng từ', `
+apologise|sincerely|xin lỗi chân thành
+behave|responsibly|cư xử có trách nhiệm
+change|dramatically|thay đổi đột ngột
+consider|carefully|cân nhắc kĩ
+cooperate|closely|hợp tác chặt chẽ
+decline|steadily|giảm đều
+depend|heavily|phụ thuộc nặng nề
+differ|slightly|khác nhau đôi chút
+disagree|strongly|phản đối mạnh mẽ
+grow|rapidly|tăng nhanh
+improve|significantly|cải thiện đáng kể
+listen|attentively|lắng nghe chăm chú
+plan|ahead|lên kế hoạch trước
+react|immediately|phản ứng ngay
+speak|fluently|nói trôi chảy
+support|fully|hoàn toàn ủng hộ
+work|efficiently|làm việc hiệu quả
+`);
+
+nc('Cụm học thuật trong bài viết', `
+draw attention|to|thu hút sự chú ý tới
+give rise|to|làm nảy sinh
+have an impact|on|có tác động tới
+lead|to consequences|dẫn tới hệ quả
+place emphasis|on|đặt trọng tâm vào
+play a part|in|góp phần vào
+put pressure|on|gây áp lực lên
+take account|of|tính tới, xét tới
+take advantage|of|tận dụng
+take into consideration|the cost|cân nhắc chi phí
+take responsibility|for|chịu trách nhiệm về
+take steps|to solve|tiến hành các bước để giải quyết
+bear in mind|the risk|ghi nhớ rủi ro
+come to a conclusion|about|đi đến kết luận về
+make a contribution|to|đóng góp cho
+make a difference|to|tạo khác biệt cho
+`);
+
+nc('Cụm thời gian và tần suất', `
+at|the moment|ngay lúc này
+at|the same time|cùng lúc
+by|the end of|vào cuối
+for|the time being|tạm thời
+from|time to time|thỉnh thoảng
+in|advance|trước, sớm
+in|due course|đến lúc thích hợp
+in|no time|rất nhanh
+in|the meantime|trong khi chờ đợi
+on|a daily basis|hằng ngày
+on|a regular basis|thường xuyên
+on|time|đúng giờ
+once|in a while|thi thoảng
+over|the past decade|trong thập niên qua
+sooner|than expected|sớm hơn dự kiến
+up|to now|cho tới nay
+`);
+
+nc('Cụm nguyên nhân – kết quả', `
+as a consequence|of|hậu quả của việc
+be attributed|to|được cho là do
+be responsible|for the rise|chịu trách nhiệm cho sự gia tăng
+bring|about change|mang lại thay đổi
+contribute|to the problem|góp phần vào vấn đề
+give|rise to concern|làm dấy lên lo ngại
+result|in improvement|dẫn tới cải thiện
+stem|from poverty|bắt nguồn từ nghèo đói
+trigger|a reaction|kích hoạt một phản ứng
+arise|from misunderstanding|nảy sinh từ hiểu lầm
+`);
+
+nc('Cụm về vấn đề và giải pháp', `
+address|the root cause|xử lí gốc rễ vấn đề
+alleviate|poverty|xoá đói giảm nghèo
+cope|with pressure|chịu được áp lực
+find|a solution|tìm ra giải pháp
+implement|measures|triển khai biện pháp
+overcome|obstacles|vượt qua trở ngại
+pose|a threat|đặt ra mối đe doạ
+raise|concerns|dấy lên quan ngại
+tackle|climate change|đối phó biến đổi khí hậu
+resolve|the issue|giải quyết vấn đề
+`);
+
+nc('Cụm về học tập và công việc', `
+attend|a course|tham dự một khoá học
+apply|for a scholarship|nộp đơn xin học bổng
+broaden|one's horizons|mở mang tầm mắt
+develop|a strategy|xây dựng chiến lược
+enrol|on a programme|ghi danh một chương trình
+fulfil|requirements|đáp ứng yêu cầu
+gain|qualifications|đạt được bằng cấp
+hand|in an assignment|nộp bài tập
+hold|a degree|có bằng cấp
+meet|expectations|đáp ứng kì vọng
+pursue|a career|theo đuổi sự nghiệp
+sit|an exam|dự thi
+submit|an application|nộp hồ sơ
+take|a gap year|nghỉ một năm trước khi học tiếp
+undertake|research|thực hiện nghiên cứu
+work|under pressure|làm việc dưới áp lực
+`);
+
+nc('Cụm về môi trường và xã hội', `
+combat|pollution|chống ô nhiễm
+conserve|natural resources|bảo tồn tài nguyên
+cut|carbon emissions|cắt giảm khí thải carbon
+promote|sustainability|thúc đẩy phát triển bền vững
+protect|biodiversity|bảo vệ đa dạng sinh học
+reduce|waste|giảm rác thải
+restore|ecosystems|phục hồi hệ sinh thái
+bridge|the gap|thu hẹp khoảng cách
+close|the digital divide|xoá khoảng cách số
+foster|social inclusion|thúc đẩy hoà nhập xã hội
+narrow|inequality|thu hẹp bất bình đẳng
+strengthen|community ties|củng cố gắn kết cộng đồng
+`);
+
+nc('Cụm động từ + danh từ mở rộng', `
+answer|the phone|nghe điện thoại
+book|a ticket|đặt vé
+build|confidence|xây dựng sự tự tin
+carry|the risk|mang theo rủi ro
+cause|concern|gây lo ngại
+create|opportunities|tạo ra cơ hội
+deliver|a service|cung cấp dịch vụ
+develop|a habit|hình thành thói quen
+express|an opinion|bày tỏ ý kiến
+generate|income|tạo ra thu nhập
+grant|permission|cấp phép
+issue|a warning|đưa ra cảnh báo
+launch|a campaign|phát động chiến dịch
+maintain|balance|giữ cân bằng
+offer|assistance|đề nghị giúp đỡ
+provide|evidence|đưa ra bằng chứng
+receive|treatment|được điều trị
+reduce|the risk|giảm rủi ro
+seek|advice|xin lời khuyên
+serve|a purpose|phục vụ một mục đích
+share|responsibility|chia sẻ trách nhiệm
+show|improvement|cho thấy sự tiến bộ
+take|action|hành động
+undergo|training|trải qua đào tạo
+`);
+
+nc('Cụm tính từ + danh từ mở rộng', `
+common|misconception|hiểu lầm phổ biến
+considerable|amount|một lượng đáng kể
+critical|factor|yếu tố then chốt
+essential|requirement|yêu cầu thiết yếu
+growing|demand|nhu cầu ngày càng tăng
+harsh|reality|thực tế phũ phàng
+increasing|awareness|nhận thức ngày càng cao
+limited|resources|nguồn lực hạn chế
+mutual|benefit|lợi ích chung
+potential|consequence|hệ quả tiềm tàng
+primary|concern|mối quan tâm hàng đầu
+serious|consequence|hậu quả nghiêm trọng
+significant|contribution|đóng góp đáng kể
+substantial|evidence|bằng chứng vững chắc
 `);
 
 })();

@@ -620,11 +620,17 @@ TD.BAN_DO_CD = {
     [/\bsat\b|fe2|fe3|feo|crom|\bcr\b|gang|thep|quy doi hon hop/, 'Sắt – Crom'],
     [/nhom|al2o3|kiem tho|nuoc cung|thach cao|boxit|natri|kali|canxi|magnesium|\bco2\b|\bso2\b/, 'IA – IIA – Nhôm'],
     [/hno3|h2so4|nh3|nito|phosphor|photpho|luu huynh|halogen|\bclo\b|phan bon|\bph\b|acid|base|phi kim/, 'Phi kim – Vô cơ'],
+    [/phuc chat|phoi tu|so phoi tri|cau noi|cau ngoai/, 'Phức chất'],
+    [/enthalpy|nhiet phan ung|toc do phan ung|can bang hoa hoc|le chatelier|hang so can bang/, 'Nhiệt động – Tốc độ – Cân bằng'],
     [/dung dich|can bang trong dung dich|chuan do|nong do/, 'Phi kim – Vô cơ'],
     [/kim loai|dien hoa|hop kim|dieu che|bao toan electron|tang giam khoi luong/, 'Đại cương kim loại'],
     [/huu co|dong phan|danh phap|cong thuc phan tu|bat bao hoa|hydrocarbon|alkane|alkene|alkyne|arene|benzen|alcohol|phenol|aldehyde|ketone|carboxylic|\bir\b|pho khoi|dot chay/, 'Đại cương hữu cơ']
   ],
   toan: [
+    [/luong giac|cung goc|radian/, 'Lượng giác'],
+    [/gioi han|lien tuc|vo dinh/, 'Giới hạn – Liên tục'],
+    [/vecto|he thuc luong|dinh li cosin|dinh li sin|trung tuyen|tich vo huong/, 'Vecto và hệ thức lượng'],
+    [/bat phuong trinh|tam thuc|xet dau|viete|mien nghiem|toi uu tuyen tinh/, 'Bất phương trình bậc hai'],
     [/thong ke|xac suat|ghep nhom|trung vi|tu phan vi|phuong sai|do lech chuan|bayes|to hop|chinh hop|hoan vi|nhi thuc/, 'Thống kê – Xác suất'],
     [/tich phan|nguyen ham|dien tich hinh phang|the tich tron xoay|ung dung tich phan/, 'Nguyên hàm – Tích phân'],
     [/oxyz|mat phang|mat cau|vecto|toa do/, 'Oxyz'],
@@ -634,6 +640,7 @@ TD.BAN_DO_CD = {
     [/dao ham|khao sat|don dieu|cuc tri|tiem can|tuong giao|gtln|gtnn|bang bien thien|tiep tuyen|ham so/, 'Đạo hàm – Khảo sát']
   ],
   dia: [
+    [/bien dao|kinh te bien|dao va quan dao|dau khi|thuy san|cang bien/, 'Kinh tế biển đảo'],
     [/bieu do|so lieu|atlat|tinh toan|nhan xet|xu li/, 'Kỹ năng'],
     [/khi hau|gio mua|bao|mua |nhiet do/, 'Khí hậu'],
     [/dan cu|do thi|lao dong|dan so/, 'Dân cư'],
@@ -643,6 +650,8 @@ TD.BAN_DO_CD = {
     [/vi tri|lanh tho|bien dong/, 'Vị trí địa lí']
   ],
   gdkt: [
+    [/ke hoach kinh doanh|swot|diem hoa von|y tuong kinh doanh|khach hang muc tieu/, 'Lập kế hoạch kinh doanh'],
+    [/trach nhiem xa hoi/, 'Trách nhiệm xã hội của doanh nghiệp'],
     [/thue|doanh nghiep|kinh doanh/, 'Doanh nghiệp – Thuế'],
     [/bao hiem|an sinh/, 'Bảo hiểm – An sinh'],
     [/thu chi|tai chinh ca nhan|tiet kiem|ke hoach chi tieu/, 'Quản lí thu chi'],
@@ -661,6 +670,8 @@ TD.BAN_DO_CD = {
   sinh: [
     [/dna|adn|arn|rna|gene|phien ma|dich ma|nhan doi|codon|nucleotide|dot bien gene|ma di truyen/, 'Di truyền phân tử'],
     [/mendel|hoan vi|lien ket gene|nhiem sac the|\bnst\b|gioi tinh|tuong tac gene|pha he|kieu gen/, 'Di truyền NST'],
+    [/di truyen nguoi|pha he|hoi chung down|turner|klinefelter|tu van di truyen|benh di truyen/, 'Di truyền người'],
+    [/cong nghe gene|cong nghe te bao|plasmid|the truyen|nhan ban vo tinh|cay truyen phoi|nuoi cay mo|bien doi gene/, 'Công nghệ di truyền'],
     [/quan the|hardy|weinberg|tan so allele|tu thu|ngau phoi/, 'Di truyền quần thể'],
     [/tien hoa|chon loc|hinh thanh loai|nhan to tien hoa|di nhap gen/, 'Tiến hoá'],
     [/sinh thai|quan xa|he sinh thai|chuoi thuc an|thap sinh thai|dien the|hieu suat sinh thai/, 'Sinh thái học'],
@@ -668,7 +679,7 @@ TD.BAN_DO_CD = {
   ],
   anh: [
     [/word form|tu loai|hau to|tien to|duoi tu/, 'Từ loại'],
-    [/ngu am|trong am|phat am/, 'Ngữ âm – Trọng âm'],
+    [/dang bai|chien thuat 2025|sap xep cau|chen cau|tom tat|doc hieu/, 'Dạng bài & chiến thuật 2025'],
     [/dieu kien|conditional|wish/, 'Câu điều kiện'],
     [/bi dong|tuong thuat|passive|reported/, 'Bị động – Tường thuật'],
     [/menh de quan he|relative/, 'Mệnh đề quan hệ'],
@@ -3723,15 +3734,17 @@ TD.KHO.van_ct = [
 /* ==================== TIẾNG ANH ==================== */
 TD.KHO.anh_ct = [
 { nhom: 'A. Cấu trúc đề', ten: 'Bản đồ đề Tiếng Anh — 40 câu / 50 phút', cap: 1,
-  ct: '<b>Các nhóm câu hỏi (theo format từ 2025):</b><br>' +
-      '&nbsp;&nbsp;• <b>Điền vào thông báo / quảng cáo</b> — ngữ cảnh thực tế<br>' +
-      '&nbsp;&nbsp;• <b>Sắp xếp câu thành đoạn hội thoại / đoạn văn</b> (arrangement) — dạng MỚI<br>' +
-      '&nbsp;&nbsp;• <b>Hoàn thành đoạn văn</b> (cloze test) — điền từ vựng, liên từ, ngữ pháp theo mạch<br>' +
-      '&nbsp;&nbsp;• <b>Đọc hiểu</b> 2 bài — chiếm tỉ trọng lớn nhất<br>' +
-      '&nbsp;&nbsp;• Ngữ âm, trọng âm, đồng nghĩa/trái nghĩa, tìm lỗi sai, câu gần nghĩa nhất<br>' +
-      '<b>Chiến thuật thời gian:</b> câu ngữ pháp/từ vựng <b>≤ 40 giây/câu</b> · đọc hiểu <b>~1,5 phút/câu</b> · chừa <b>5 phút</b> tô đáp án và soát.',
+  ct: '<b>Bốn dạng bài của cấu trúc từ năm 2025 — tổng đúng 40 câu:</b><br>' +
+      '&nbsp;&nbsp;• <b>Điền từ, cụm từ ngắn vào đoạn</b> — <b>12 câu</b> (ngữ pháp và từ vựng đặt trong ngữ cảnh)<br>' +
+      '&nbsp;&nbsp;• <b>Sắp xếp câu</b> thành đoạn văn hoặc lá thư — <b>5 câu</b> (dạng MỚI)<br>' +
+      '&nbsp;&nbsp;• <b>Điền câu, cụm từ dài</b> vào chỗ trống trong đoạn — <b>5 câu</b> (dạng MỚI)<br>' +
+      '&nbsp;&nbsp;• <b>Đọc hiểu</b> — <b>18 câu</b>, gần một nửa toàn đề<br>' +
+      '<b>ĐÃ BỊ LOẠI khỏi đề:</b> ngữ âm, trọng âm, tìm lỗi sai, chọn câu gần nghĩa nhất, ' +
+      'đồng nghĩa – trái nghĩa, hoàn thành hội thoại.<br>' +
+      '<b>Thời gian:</b> 12 câu điền từ ≤ 40 giây/câu · sắp xếp và chèn câu ~1 phút/câu · ' +
+      'đọc hiểu ~1,5 phút/câu · chừa 5 phút tô đáp án và soát.',
   khi: 'Đọc trước khi luyện đề.',
-  vd: 'Đề mới <b>giảm mạnh ngữ pháp thuần</b>, tăng câu đặt trong ngữ cảnh ⇒ phải luyện đọc nhiều hơn học công thức.',
+  vd: 'Riêng đọc hiểu đã 18/40 câu ⇒ luyện đọc quan trọng hơn hẳn việc học thuộc mẹo ngữ pháp lẻ.',
   bay: 'Dạng <b>sắp xếp</b> là dạng mới nhiều bạn mất điểm nhất. Mẹo: tìm câu mở đầu (chào hỏi/nêu chủ đề) rồi lần theo từ nối và đại từ thay thế.' },
 
 { nhom: 'B. Ngữ pháp', ten: 'Hệ thống 12 thì — dấu hiệu nhận biết', cap: 2,
@@ -3786,19 +3799,21 @@ TD.KHO.anh_ct = [
   vd: '"He works ___ (care)" ⇒ sau động từ thường ⇒ trạng từ ⇒ <b>carefully</b>.',
   bay: 'Tính từ đuôi <b>-ing</b> tả tính chất sự vật (interesting book); đuôi <b>-ed</b> tả cảm xúc người (I am interested).' },
 
-{ nhom: 'C. Từ vựng', ten: 'Ngữ âm & trọng âm — quy tắc nhanh', cap: 2,
-  ct: '<b>Phát âm đuôi -s/-es:</b><br>' +
-      '&nbsp;&nbsp;• /ɪz/ sau <b>s, x, z, ch, sh, ge, ce</b> · /s/ sau âm vô thanh (p, t, k, f, θ) · <b>/z/</b> các trường hợp còn lại.<br>' +
-      '<b>Phát âm đuôi -ed:</b><br>' +
-      '&nbsp;&nbsp;• <b>/ɪd/ sau /t/, /d/</b> · /t/ sau âm vô thanh · <b>/d/</b> còn lại.<br>' +
-      '<b>Trọng âm:</b><br>' +
-      '&nbsp;&nbsp;• Từ 2 âm tiết: <b>danh/tính từ → âm 1</b>; <b>động từ → âm 2</b>.<br>' +
-      '&nbsp;&nbsp;• Đuôi <b>-ic, -tion, -sion, -ial, -ian</b> → trọng âm rơi vào âm tiết <b>ngay trước</b> nó.<br>' +
-      '&nbsp;&nbsp;• Đuôi <b>-ate, -ary, -ity, -ify, -graphy, -logy</b> → trọng âm rơi vào âm tiết <b>thứ 3 từ cuối lên</b>.<br>' +
-      '&nbsp;&nbsp;• Các đuôi <b>-ment, -ness, -ful, -less, -er, -or, -ly, -ing, -ed</b> <b>không</b> ảnh hưởng trọng âm.',
-  khi: 'Câu ngữ âm – trọng âm, làm trong 15 giây.',
-  vd: 'eco<b>NO</b>mic (đuôi -ic ⇒ trọng âm trước nó) · <b>RE</b>cord (danh từ) vs re<b>CORD</b> (động từ).',
-  bay: 'Bẫy đuôi -ed: watch<b>ed</b> /t/, want<b>ed</b> /ɪd/, play<b>ed</b> /d/. Chỉ /t/ và /d/ mới cho /ɪd/.' },
+{ nhom: 'D. Chiến thuật', ten: 'Ba dạng bài mới: sắp xếp, chèn câu, tóm tắt', cap: 3,
+  ct: '<b>① Sắp xếp câu (5 câu)</b> — dựng lại một đoạn văn hoặc lá thư.<br>' +
+      '&nbsp;&nbsp;• Tìm câu MỞ ĐẦU: lời chào, câu nêu chủ đề chung nhất, câu không chứa đại từ thay thế.<br>' +
+      '&nbsp;&nbsp;• Tìm câu KẾT: câu kí tên, câu đề nghị phản hồi, câu bắt đầu bằng Therefore hoặc The key is.<br>' +
+      '&nbsp;&nbsp;• Nối phần giữa bằng TỪ NỐI và ĐẠI TỪ.<br>' +
+      '<b>② Chèn câu vào đoạn (5 câu)</b> — đặt một câu cho sẵn vào đúng chỗ.<br>' +
+      '&nbsp;&nbsp;• Từ nối đầu câu (For this reason, However, Therefore) chỉ quan hệ với câu LIỀN TRƯỚC.<br>' +
+      '&nbsp;&nbsp;• Đại từ (they, this, such) phải có danh từ tương ứng ở câu ngay trước.<br>' +
+      '&nbsp;&nbsp;• Câu chèn không được cắt đứt mạch giữa hai câu vốn dính nhau.<br>' +
+      '<b>③ Tóm tắt đoạn văn</b> — nằm trong phần đọc hiểu.<br>' +
+      '&nbsp;&nbsp;• Bản tóm tắt phải bao ĐỦ mọi ý chính, không thêm ý ngoài, không đổi mức độ khẳng định.',
+  khi: 'Ba dạng chiếm tới 10 câu, cộng với câu tóm tắt trong phần đọc hiểu.',
+  vd: 'Câu chèn bắt đầu bằng "For this reason" ⇒ phải đứng ngay sau câu nêu lí do, không đứng ở đầu đoạn.',
+  bay: 'Phương án tóm tắt chứa <b>completely, every, only, should be banned</b> thường quá mạnh so với giọng điệu ' +
+      'thận trọng của bài đọc — loại trước.' },
 
 { nhom: 'D. Chiến thuật', ten: 'Mẹo làm bài đọc hiểu & sắp xếp', cap: 3,
   ct: '<b>Đọc hiểu — quy trình 4 bước:</b><br>' +
@@ -3878,9 +3893,9 @@ TD.KHO.anh_ct.push(
   bay: 'make/do rất dễ lẫn: "do homework" nhưng "make an effort". Học theo cụm, đừng dịch từng từ.' },
 
 { nhom: 'D. Chiến thuật', ten: 'Chiến thuật 40 câu / 50 phút', cap: 1,
-  ct: '<b>Vòng 1 (20 phút):</b> làm ngữ âm, trọng âm, ngữ pháp, từ vựng — câu ngắn, ăn điểm nhanh.<br><b>Vòng 2 (22 phút):</b> làm bài đọc hiểu và điền từ đoạn văn.<br><b>Vòng 3 (8 phút):</b> quay lại câu khó, soát và tô kín đáp án.<br>Nguyên tắc: không câu nào để trống; câu bí thì loại 2 phương án sai rồi chọn.<br>Trung bình <b>75 giây/câu</b> — câu nào quá 2 phút thì đánh dấu và bỏ qua.',
+  ct: '<b>Vòng 1 (~12 phút):</b> làm 12 câu điền từ và cụm ngắn — có ngữ cảnh nhưng vẫn là câu ăn điểm nhanh nhất.<br><b>Vòng 2 (~10 phút):</b> làm 5 câu sắp xếp và 5 câu chèn câu — bám từ nối và đại từ.<br><b>Vòng 3 (~23 phút):</b> làm 18 câu đọc hiểu, đọc câu hỏi trước rồi quét bài.<br><b>Vòng 4 (5 phút):</b> quay lại câu khó, soát và tô kín đáp án.<br>Nguyên tắc: không câu nào để trống vì đề KHÔNG trừ điểm câu sai.<br>Trung bình <b>75 giây/câu</b> — câu nào quá 2 phút thì đánh dấu và bỏ qua.',
   khi: 'Quản lí thời gian phòng thi.',
-  vd: '40 câu / 50 phút ⇒ phải xong 20 câu đầu trong 20 phút mới đủ giờ cho bài đọc.',
+  vd: 'Đọc hiểu 18 câu ngốn gần một nửa thời gian, nên phải xong 22 câu đầu trong khoảng 22 phút.',
   bay: 'Bài đọc dài để cuối cùng dễ bị hết giờ. Nhiều bạn mất trọn 7–8 câu chỉ vì phân bổ thời gian sai.' }
 );
 
@@ -6183,14 +6198,6 @@ TD.KHO_LT.anh = [
 { cd: 'Từ loại', m: 2, a: true,  t: 'Các hậu tố -ise/-ize, -ify, -en thường tạo thành động từ.', v: 'Ví dụ: modernise, simplify, strengthen.' },
 
 /* ========== NGỮ ÂM – TRỌNG ÂM ========== */
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Đuôi -ed đọc là /ɪd/ khi động từ nguyên thể kết thúc bằng âm /t/ hoặc /d/.', v: 'Ví dụ: wanted, needed, decided.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: false, t: 'Đuôi -ed đọc là /ɪd/ khi động từ kết thúc bằng âm /k/ hoặc /p/.', v: 'Kết thúc bằng âm vô thanh như /k/, /p/ thì đuôi -ed đọc là /t/.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Đuôi -s/-es đọc là /ɪz/ sau các âm s, x, z, ch, sh, ge, ce.', v: 'Sau âm vô thanh đọc /s/, còn lại đọc /z/.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Với từ hai âm tiết, danh từ và tính từ thường nhấn âm tiết thứ nhất, động từ thường nhấn âm tiết thứ hai.', v: 'Ví dụ: REcord (danh từ) và reCORD (động từ).' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Các đuôi -ic, -tion, -sion, -ial, -ian kéo trọng âm về âm tiết ngay trước nó.', v: 'Ví dụ: ecoNOmic, inforMAtion, deCIsion.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: false, t: 'Đuôi -ic khiến trọng âm rơi vào chính âm tiết chứa đuôi đó.', v: 'Trọng âm rơi vào âm tiết NGAY TRƯỚC đuôi -ic.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 3, a: true,  t: 'Các đuôi -ment, -ness, -ful, -less, -er, -ly, -ing, -ed không làm thay đổi trọng âm của từ gốc.', v: 'Đó là các hậu tố trung tính về trọng âm.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 3, a: true,  t: 'Các đuôi -ity, -ify, -graphy, -logy thường khiến trọng âm rơi vào âm tiết thứ ba từ cuối đếm lên.', v: 'Ví dụ: aBIlity, phoTOgraphy, biOlogy.' },
 
 /* ========== CẤU TRÚC – CHIẾN THUẬT ========== */
 { cd: 'Cấu trúc – Chiến thuật', m: 1, a: true,  t: 'Đề Tiếng Anh tốt nghiệp THPT gồm 40 câu trắc nghiệm làm trong 50 phút, mỗi câu 0,25 điểm.', v: 'Trung bình chỉ hơn một phút cho mỗi câu.' },
@@ -6254,10 +6261,6 @@ TD.KHO_LT.anh.push(
 { cd: 'Từ loại', m: 3, a: false, t: '"hardly" là dạng trạng từ của tính từ "hard" và có nghĩa là một cách chăm chỉ.', v: '"hardly" nghĩa là HẦU NHƯ KHÔNG. Trạng từ của "hard" chính là "hard".' },
 { cd: 'Từ loại', m: 2, a: true,  t: 'Trong cụm danh từ, trật tự tính từ thường là: ý kiến – kích thước – tuổi – hình dáng – màu sắc – nguồn gốc – chất liệu.', v: 'Ví dụ: a beautiful small old round brown Italian wooden table.' },
 
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Đuôi -s/-es đọc là /s/ sau các âm vô thanh như /p/, /t/, /k/, /f/.', v: 'Ví dụ: books, cats, maps.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 3, a: true,  t: 'Với từ ghép, danh từ ghép thường nhấn ở từ thứ nhất còn tính từ ghép và động từ ghép thường nhấn ở từ thứ hai.', v: 'Ví dụ: BLACKboard (bảng đen) và black BOARD (tấm ván màu đen).' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: false, t: 'Trong tiếng Anh, mọi từ hai âm tiết đều nhấn trọng âm ở âm tiết đầu.', v: 'Danh từ và tính từ thường nhấn âm đầu, nhưng ĐỘNG TỪ thường nhấn âm thứ hai.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 2, a: true,  t: 'Các tiền tố như un-, im-, dis-, re- thường không mang trọng âm chính.', v: 'Trọng âm thường rơi vào phần gốc của từ.' },
 
 { cd: 'Cấu trúc – Chiến thuật', m: 2, a: true,  t: 'Nên dành khoảng 5 phút cuối giờ để soát và tô kín đáp án trên phiếu trả lời trắc nghiệm.', v: 'Tránh tình trạng hết giờ mà chưa kịp tô.' },
 { cd: 'Cấu trúc – Chiến thuật', m: 2, a: true,  t: 'Với câu tìm từ đồng nghĩa hoặc trái nghĩa, nên đoán nghĩa từ ngữ cảnh của cả câu.', v: 'Ngay cả khi không biết chính xác nghĩa của từ được gạch chân.' },
@@ -6305,10 +6308,6 @@ TD.KHO_LT.anh.push(
 { cd: 'Từ loại', m: 4, a: true,  t: 'Tính từ đuôi -ed mô tả cảm xúc của người, còn đuôi -ing mô tả tính chất của sự vật gây ra cảm xúc đó.', v: 'I am bored (tôi thấy chán) khác The film is boring (bộ phim gây chán).' },
 { cd: 'Từ loại', m: 4, a: false, t: 'Sau động từ nối như "seem", "become", "feel" phải dùng trạng từ.', v: 'Sau linking verb dùng TÍNH TỪ: She feels happy, không phải happily.' },
 { cd: 'Từ loại', m: 4, a: true,  t: 'Tiền tố "un-", "in-", "im-", "ir-", "dis-" tạo nghĩa phủ định; "im-" dùng trước các từ bắt đầu bằng m, p.', v: 'impossible, impatient; irregular đứng trước r; illegal đứng trước l.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 4, a: true,  t: 'Từ "record" khi là danh từ trọng âm ở âm tiết đầu, khi là động từ trọng âm ở âm tiết thứ hai.', v: 'Quy tắc chung cho cặp danh–động hai âm tiết: RE-cord (n) / re-CORD (v). Tương tự present, export, increase.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 4, a: true,  t: 'Các hậu tố -ic, -ical, -ion, -ity khiến trọng âm rơi vào âm tiết ngay TRƯỚC hậu tố đó.', v: 'eco-NO-mic, in-for-MA-tion, a-BI-li-ty.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 4, a: false, t: 'Đuôi -ed sau các âm vô thanh như /p/, /k/, /f/ được phát âm là /id/.', v: 'Sau âm vô thanh (trừ /t/) đuôi -ed đọc là /t/. Chỉ sau /t/ và /d/ mới đọc /id/.' },
-{ cd: 'Ngữ âm – Trọng âm', m: 4, a: true,  t: 'Đuôi -s/-es được phát âm là /iz/ sau các âm gió và âm xuýt như /s/, /z/, /ʃ/, /tʃ/, /dʒ/.', v: 'watches /iz/, boxes /iz/. Sau âm vô thanh khác đọc /s/, sau âm hữu thanh đọc /z/.' },
 { cd: 'Cấu trúc – Chiến thuật', m: 4, a: true,  t: 'Với câu hỏi dạng "The word it in line 5 refers to…", phải tìm danh từ gần nhất phía trước phù hợp cả về nghĩa lẫn về số.', v: 'Cách kiểm tra: thay danh từ đó vào vị trí đại từ, câu vẫn hợp nghĩa thì đúng.' },
 { cd: 'Cấu trúc – Chiến thuật', m: 4, a: true,  t: 'Câu hỏi "Which of the following is NOT mentioned" cần đối chiếu từng phương án với bài đọc để loại dần.', v: 'Ba phương án sẽ tìm được trong bài, phương án còn lại là đáp án. Đừng chọn theo cảm tính.' },
 { cd: 'Cấu trúc – Chiến thuật', m: 4, a: true,  t: 'Với bài điền từ vào đoạn văn, nên đọc trọn câu chứa chỗ trống và cả câu liền trước để nắm mạch nghĩa.', v: 'Nhiều chỗ trống là từ nối (however, therefore, moreover) chỉ chọn đúng khi hiểu quan hệ giữa hai câu.' },
@@ -8629,6 +8628,123 @@ TD.KHO.anh_cam = (TD.KHO.anh_cam || []).concat([
   bay: 'Học theo CẶP chứ đừng học lẻ từng vế — đề luôn cho vế này rồi bắt điền vế kia.' }
 ]);
 
+/* ---------------- CASIO: PHÍM BẤM THEO TỪNG ĐỜI MÁY ---------------- */
+TD.KHO.toan_cam = (TD.KHO.toan_cam || []).concat([
+{ nhom: '⌨️ Casio', ten: 'Bảng phím đối chiếu fx-570VN Plus ↔ fx-580VN X', cap: 1, cd: '*',
+  ct: 'Cả hai máy đều được mang vào phòng thi. Khác nhau lớn nhất: <b>570 dùng phím MODE + số</b>, '
+    + '<b>580 dùng phím MENU</b> và hiện tên chế độ bằng tiếng Việt.<br><br>'
+    + '<table style="width:100%;border-collapse:collapse;font-size:13px">'
+    + '<tr style="color:var(--kim)"><td><b>Cần làm gì</b></td><td><b>fx-570VN Plus</b></td><td><b>fx-580VN X</b></td></tr>'
+    + '<tr><td>Tính toán thường</td><td>MODE 1 (COMP)</td><td>MENU → <i>Tính toán</i></td></tr>'
+    + '<tr><td>Thống kê một biến</td><td>MODE 3 → 1 (1-VAR)</td><td>MENU → <i>Thống kê</i> → 1-Biến</td></tr>'
+    + '<tr><td>Giải phương trình, hệ</td><td>MODE 5 (EQN)</td><td>MENU → <i>Phương trình/Hàm số</i></td></tr>'
+    + '<tr><td>Lập bảng giá trị</td><td><b>MODE 7</b> (TABLE)</td><td>MENU → <i>Bảng số</i></td></tr>'
+    + '<tr><td>Vectơ</td><td>MODE 8 (VECTOR)</td><td>MENU → <i>Vectơ</i></td></tr>'
+    + '<tr><td>Ma trận</td><td>MODE 6 (MATRIX)</td><td>MENU → <i>Ma trận</i></td></tr>'
+    + '</table><br>'
+    + '<b>Giống hệt nhau trên cả hai máy:</b> <b>SHIFT + CALC = SOLVE</b> · phím <b>∫dx</b> tính tích phân · '
+    + '<b>SHIFT + ∫dx = d/dx</b> tính đạo hàm tại một điểm · <b>nCr, nPr</b> · <b>SHIFT + STO</b> lưu vào biến A…F · '
+    + '<b>ALPHA</b> gọi lại biến · <b>AC</b> xoá màn hình mà không mất biến đã lưu.',
+  khi: 'Đọc một lần trước khi luyện đề để khỏi loay hoay tìm phím trong phòng thi.',
+  vd: 'Muốn lập bảng giá trị: máy 570 bấm MODE 7, máy 580 bấm MENU rồi chọn dòng "Bảng số".',
+  bay: 'Số thứ tự trong MENU của máy 580 có thể lệch giữa các đời phần mềm, nên hãy chọn theo <b>TÊN</b> hiện trên '
+     + 'màn hình chứ đừng học vẹt con số. Máy 570 thì số MODE cố định.' },
+
+{ nhom: '⌨️ Casio', ten: 'Dãy phím cụ thể cho sáu dạng bài hay gặp', cap: 2, cd: '*',
+  ct: '<b>① Thử một giá trị vào biểu thức</b><br>'
+    + '&nbsp;&nbsp;Nhập biểu thức có X (bấm ALPHA rồi phím ")" để ra X) → <b>CALC</b> → nhập giá trị → <b>=</b><br>'
+    + '<b>② Dò nghiệm phương trình</b><br>'
+    + '&nbsp;&nbsp;Nhập <i>vế trái − vế phải</i> → <b>SHIFT + CALC</b> (SOLVE) → nhập giá trị khởi tạo → <b>=</b><br>'
+    + '&nbsp;&nbsp;Đổi giá trị khởi tạo (−5, 0, 5…) rồi SOLVE lại để gom đủ nghiệm.<br>'
+    + '<b>③ Lập bảng giá trị tìm GTLN – GTNN hoặc đếm nghiệm</b><br>'
+    + '&nbsp;&nbsp;570: <b>MODE 7</b> · 580: <b>MENU → Bảng số</b> → nhập f(X) → Start, End, Step → dò cột f(X)<br>'
+    + '<b>④ Tích phân và đạo hàm</b><br>'
+    + '&nbsp;&nbsp;Tích phân: phím <b>∫dx</b> → nhập hàm, cận dưới, cận trên → <b>=</b><br>'
+    + '&nbsp;&nbsp;Đạo hàm tại điểm: <b>SHIFT + ∫dx</b> → nhập hàm và giá trị x → <b>=</b><br>'
+    + '<b>⑤ Giải hệ phương trình (bài hỗn hợp Hoá, bài tương giao Toán)</b><br>'
+    + '&nbsp;&nbsp;570: <b>MODE 5</b> → chọn 1 (hệ 2 ẩn) hoặc 2 (hệ 3 ẩn) → nhập hệ số<br>'
+    + '&nbsp;&nbsp;580: <b>MENU → Phương trình/Hàm số</b> → chọn hệ phương trình bậc nhất → chọn số ẩn<br>'
+    + '<b>⑥ Trung bình và độ lệch chuẩn của bảng tần số</b><br>'
+    + '&nbsp;&nbsp;Bật cột tần số trước: <b>SHIFT + MODE</b> (570) hoặc <b>SHIFT + MENU</b> (580) → <b>Statistics/Tần số → ON</b><br>'
+    + '&nbsp;&nbsp;Rồi vào chế độ thống kê, nhập cột x và cột FREQ, bấm <b>AC</b> → <b>SHIFT + 1</b> để lấy x̄, σ, Σx, Σx².',
+  khi: 'Mọi bài tính toán của Toán, Lý, Hoá, Sinh.',
+  vd: 'Tìm GTLN của y = x³ − 3x trên [0; 2]: vào bảng giá trị, Start 0, End 2, Step 0,1 rồi dò cột f(X).',
+  bay: 'Nếu bảng tần số nhập vào mà máy không hiện cột FREQ thì là do CHƯA BẬT tần số trong SETUP. '
+     + 'Rất nhiều bạn tính sai độ lệch chuẩn chỉ vì quên bước này.' },
+
+{ nhom: '⌨️ Casio', ten: 'Bốn thói quen bấm máy tránh sai vặt', cap: 2, cd: '*',
+  ct: '<b>① Luôn kiểm tra đơn vị góc.</b> Bài lượng giác dùng radian thì phải bật <b>R</b>; bài hình học dùng độ thì bật '
+    + '<b>D</b>. Bấm <b>SHIFT + MODE</b> (570) hoặc <b>SHIFT + MENU</b> (580) để đổi. Sai chế độ là sai toàn bộ đáp số.<br>'
+    + '<b>② Nhập luỹ thừa 10 bằng phím ×10ˣ</b>, đừng gõ "× 10 ^". Gõ tay dễ sai thứ tự ưu tiên.<br>'
+    + '<b>③ Lưu số trung gian vào biến</b> bằng <b>SHIFT + STO + A</b> thay vì chép tay ra nháp rồi nhập lại — '
+    + 'chép tay là nguồn sai số và sai chữ số phổ biến nhất.<br>'
+    + '<b>④ Đọc lại biểu thức trên màn hình trước khi bấm "="</b>, đặc biệt chú ý dấu ngoặc của phân số và căn. '
+    + 'Máy hiển thị đúng dạng toán học nên nhìn là thấy ngay chỗ thiếu ngoặc.',
+  khi: 'Suốt buổi thi, nhất là những bài nhiều bước.',
+  vd: 'Tính sin(π/6): ở chế độ D máy trả 0,0091 (sai); ở chế độ R mới trả 0,5 (đúng).',
+  bay: 'Bấm <b>AC</b> chỉ xoá màn hình, KHÔNG xoá biến đã lưu. Muốn xoá hết biến phải dùng '
+     + '<b>SHIFT + 9 → Clear Memory</b> — đừng làm giữa chừng khi đang cần biến.' }
+]);
+
+/* ---------------- TIẾNG ANH: THÊM MẸO NHÌN ---------------- */
+TD.KHO.anh_cam = (TD.KHO.anh_cam || []).concat([
+{ nhom: '👁️ Nhìn là biết', ten: 'Dạng sắp xếp câu: bốn mỏ neo giải trong 40 giây', cap: 3, cd: '*',
+  ct: '<b>① Tìm câu ĐẦU</b> — câu chào (Dear…, Hi…), hoặc câu khái quát nhất, hoặc câu KHÔNG chứa đại từ thay thế '
+    + 'và không chứa từ nối.<br>'
+    + '<b>② Tìm câu CUỐI</b> — câu kí tên (Yours faithfully, Love…), câu đề nghị phản hồi, hoặc câu bắt đầu bằng '
+    + 'Therefore, The key is, In short.<br>'
+    + '<b>③ Nối phần giữa bằng TỪ NỐI</b> — However và On the other hand đứng sau ý thuận; As a result và '
+    + 'Therefore đứng sau nguyên nhân; Moreover đứng sau ý cùng chiều.<br>'
+    + '<b>④ Kiểm tra ĐẠI TỪ</b> — it, they, this, such, these benefits luôn phải có danh từ tương ứng ở câu ngay trước.<br>'
+    + 'Chỉ cần chốt được câu đầu và câu cuối là thường loại được ba trong bốn phương án.',
+  khi: '5 câu dạng sắp xếp trong đề — dạng mới nên nhiều bạn mất điểm oan.',
+  vd: '"Dear Sir or Madam" mở đầu thì câu kí tên bắt buộc là "Yours faithfully" — hai cụm này luôn đi cặp.',
+  bay: 'Đừng dịch từng câu rồi đoán mạch. Bám DẤU HIỆU HÌNH THỨC (chào, kí tên, từ nối, đại từ) nhanh hơn nhiều '
+     + 'và ít sai hơn.' },
+
+{ nhom: '👁️ Nhìn là biết', ten: 'Sáu loại câu hỏi đọc hiểu và cách xử lí từng loại', cap: 3, cd: '*',
+  ct: '<b>① Ý chính (main idea)</b> — đọc câu ĐẦU và câu CUỐI của bài; loại phương án quá chi tiết.<br>'
+    + '<b>② Chi tiết (According to…)</b> — quét tìm từ khoá trong bài, đáp án nằm nguyên trong đó.<br>'
+    + '<b>③ Từ vựng (closest in meaning)</b> — đọc TRỌN câu chứa từ, đoán theo ngữ cảnh; thử thay từng phương án vào.<br>'
+    + '<b>④ Quy chiếu (refers to)</b> — lùi lên tìm danh từ gần nhất khớp cả nghĩa lẫn số ít – số nhiều.<br>'
+    + '<b>⑤ Suy luận (can be inferred)</b> — đáp án KHÔNG có sẵn; chọn điều bài ngầm cho phép kết luận, '
+    + 'không chọn điều bài nói thẳng.<br>'
+    + '<b>⑥ NOT mentioned</b> — đối chiếu từng phương án, ba cái tìm được thì cái còn lại là đáp án.<br>'
+    + 'Làm theo THỨ TỰ: ② và ④ trước (nhanh nhất), ① và ③ sau, ⑤ và ⑥ cuối cùng.',
+  khi: '18 câu đọc hiểu — gần một nửa toàn đề.',
+  vd: 'Câu "The word yields is closest in meaning to" trong bài về nông nghiệp ⇒ nghĩa là SẢN LƯỢNG, '
+    + 'không phải nghĩa "nhường đường" quen thuộc.',
+  bay: 'Câu ⑤ suy luận hay bị chọn nhầm sang phương án bài NÓI THẲNG. Đã nói thẳng thì đó là chi tiết, '
+     + 'không phải suy luận.' },
+
+{ nhom: '👁️ Nhìn là biết', ten: 'Đọc chỗ trống trước, đoán loại từ rồi mới nhìn phương án', cap: 2, cd: '*',
+  ct: 'Với 12 câu điền từ trong đoạn, quy trình ba bước nhanh hơn hẳn việc thử từng phương án:<br>'
+    + '<b>① Che phương án lại</b>, đọc trọn câu chứa chỗ trống và cả câu liền trước.<br>'
+    + '<b>② Tự đoán</b> chỗ trống cần LOẠI TỪ gì (danh, động, tính, trạng, giới từ, từ nối) và mang nghĩa gì.<br>'
+    + '<b>③ Mở phương án ra</b>, chọn cái khớp với dự đoán; nếu hai phương án cùng loại từ thì phân biệt bằng nghĩa '
+    + 'hoặc bằng cụm cố định.<br>'
+    + 'Nếu chỗ trống là <b>từ nối</b> thì phải xác định quan hệ giữa hai câu: cùng chiều, trái chiều, nhân quả '
+    + 'hay điều kiện phủ định.',
+  khi: '12 câu điền từ và cụm ngắn — phần ăn điểm nhanh nhất của đề.',
+  vd: 'Chỗ trống sau "a" và trước "of students" ⇒ chắc chắn cần DANH TỪ, loại ngay mọi phương án là tính từ hay động từ.',
+  bay: 'Nhìn phương án trước rồi mới đọc câu là cách làm chậm nhất và dễ bị phương án nhiễu dẫn dắt nhất.' },
+
+{ nhom: '👁️ Nhìn là biết', ten: 'Những gì KHÔNG còn trong đề — đừng ôn phí thời gian', cap: 1, cd: '*',
+  ct: 'Từ năm 2025, đề Tiếng Anh tốt nghiệp THPT <b>đã loại bỏ</b> các dạng sau:<br>'
+    + '&nbsp;&nbsp;• Ngữ âm (chọn từ có phần gạch chân phát âm khác)<br>'
+    + '&nbsp;&nbsp;• Trọng âm (chọn từ có trọng âm khác)<br>'
+    + '&nbsp;&nbsp;• Tìm lỗi sai<br>'
+    + '&nbsp;&nbsp;• Chọn câu có nghĩa gần nhất và nối hai câu thành một<br>'
+    + '&nbsp;&nbsp;• Chọn từ đồng nghĩa – trái nghĩa hỏi riêng lẻ<br>'
+    + '&nbsp;&nbsp;• Hoàn thành hội thoại ngắn<br>'
+    + 'Rất nhiều tài liệu ôn thi cũ vẫn dạy các dạng này. Học chúng bây giờ là <b>đổi thời gian lấy 0 điểm</b>.<br>'
+    + 'Thay vào đó dồn sức cho: đọc hiểu (18 câu) · điền từ trong đoạn (12 câu) · sắp xếp câu (5) · chèn câu (5).',
+  khi: 'Đọc ngay khi bắt đầu ôn để không chọn nhầm tài liệu.',
+  vd: 'Một cuốn sách luyện đề in trước 2025 thường dành hẳn hai chương cho ngữ âm và trọng âm — bỏ qua hai chương đó.',
+  bay: 'Kiến thức phát âm vẫn có ích cho việc học tiếng Anh nói chung, nhưng KHÔNG được hỏi trong đề. '
+     + 'Đây là chuyện phân bổ thời gian ôn, không phải chuyện kiến thức đúng hay sai.' }
+]);
+
 })();
 
 </script>
@@ -8917,7 +9033,7 @@ custom|n|phong tục
 delayed|adj|bị hoãn, bị trễ
 departure|n|sự khởi hành
 destination|n|điểm đến
-diverse|adj|đa dạng
+diverse range|phr|phạm vi đa dạng
 festival|n|lễ hội
 guided tour|n|chuyến tham quan có hướng dẫn
 heritage|n|di sản
@@ -9757,6 +9873,1084 @@ utilise|v|tận dụng
 validate|v|xác nhận tính đúng đắn
 `);
 
+
+nap('Kĩ năng thế kỉ 21', `
+adaptability|n|khả năng thích ứng
+analytical|adj|có tính phân tích
+autonomy|n|quyền tự chủ
+brainstorm|v|động não tìm ý tưởng
+collaborate|v|cộng tác
+commitment|n|sự cam kết
+communication skill|n|kĩ năng giao tiếp
+competence|n|năng lực chuyên môn
+critical thinking|n|tư duy phản biện
+delegate|v|giao việc, uỷ quyền
+digital skill|n|kĩ năng số
+empathy|n|sự thấu cảm
+entrepreneurial|adj|có tinh thần khởi nghiệp
+initiative|n|tính chủ động, sáng kiến
+interpersonal|adj|thuộc quan hệ giữa người với người
+leadership|n|khả năng lãnh đạo
+mindset|n|lối tư duy
+multitask|v|làm nhiều việc cùng lúc
+negotiation|n|sự thương lượng
+networking|n|việc xây dựng quan hệ
+problem-solving|n|khả năng giải quyết vấn đề
+proactive|adj|chủ động đi trước
+resilience|n|khả năng phục hồi sau khó khăn
+self-discipline|n|tính tự kỉ luật
+teamwork skill|n|kĩ năng làm việc nhóm
+time management|n|quản lí thời gian
+versatile|adj|đa năng, linh hoạt
+work ethic|n|đạo đức nghề nghiệp
+`);
+
+nap('Trí tuệ nhân tạo & dữ liệu', `
+algorithm|n|thuật toán
+automate|v|tự động hoá
+big data|n|dữ liệu lớn
+bias|n|thiên lệch, định kiến trong dữ liệu
+chatbot|n|phần mềm trò chuyện tự động
+cloud computing|n|điện toán đám mây
+cybersecurity|n|an ninh mạng
+database|n|cơ sở dữ liệu
+digital divide|n|khoảng cách số
+encryption|n|sự mã hoá
+facial recognition|n|nhận diện khuôn mặt
+hardware|n|phần cứng
+machine learning|n|học máy
+misinformation|n|thông tin sai lệch
+personal data|n|dữ liệu cá nhân
+processing power|n|năng lực xử lí
+prompt|n|câu lệnh đưa cho máy
+self-driving|adj|tự lái
+simulation|n|sự mô phỏng
+smart device|n|thiết bị thông minh
+streaming|n|truyền phát trực tuyến
+surveillance|n|sự giám sát
+transparency|n|tính minh bạch
+troubleshoot|v|khắc phục sự cố
+`);
+
+nap('Vũ trụ & khám phá', `
+asteroid|n|tiểu hành tinh
+astronaut|n|phi hành gia
+astronomy|n|thiên văn học
+atmosphere layer|phr|tầng khí quyển
+comet|n|sao chổi
+constellation|n|chòm sao
+eclipse|n|hiện tượng nhật thực, nguyệt thực
+expedition|n|cuộc thám hiểm
+galaxy|n|thiên hà
+gravity|n|trọng lực
+launch pad|n|bệ phóng
+lunar|adj|thuộc mặt trăng
+meteor|n|sao băng
+orbit|n|quỹ đạo
+planet|n|hành tinh
+probe|n|tàu thăm dò
+rocket|n|tên lửa
+solar system|n|hệ mặt trời
+spacecraft|n|tàu vũ trụ
+telescope|n|kính thiên văn
+universe|n|vũ trụ
+weightlessness|n|trạng thái không trọng lượng
+`);
+
+nap('Lịch sử & khảo cổ', `
+ancient|adj|cổ đại
+archaeologist|n|nhà khảo cổ
+artefact|n|hiện vật khảo cổ
+century|n|thế kỉ
+civilisation|n|nền văn minh
+colonial|adj|thuộc địa
+decade|n|thập niên
+dynasty|n|triều đại
+empire|n|đế chế
+excavate|v|khai quật
+heritage site|n|di tích di sản
+independence day|n|ngày độc lập
+inscription|n|dòng chữ khắc
+manuscript|n|bản chép tay
+medieval|adj|thuộc thời trung cổ
+monument|n|đài tưởng niệm
+preserve relics|phr|bảo tồn di vật
+prehistoric|adj|tiền sử
+restore|v|phục dựng, trùng tu
+ruins|n|phế tích
+temple|n|đền, chùa
+tomb|n|lăng mộ
+`);
+
+nap('Động vật & thực vật', `
+adapt to habitat|phr|thích nghi với môi trường sống
+amphibian|n|động vật lưỡng cư
+breed in captivity|phr|nhân giống trong điều kiện nuôi nhốt
+camouflage|n|sự nguỵ trang
+carnivore|n|động vật ăn thịt
+extinct|adj|đã tuyệt chủng
+herbivore|n|động vật ăn cỏ
+hibernate|v|ngủ đông
+insect|n|côn trùng
+mammal|n|động vật có vú
+migrate|v|di cư
+nocturnal|adj|hoạt động về đêm
+poach|v|săn trộm
+predator|n|động vật săn mồi
+prey|n|con mồi
+reptile|n|bò sát
+sanctuary|n|khu bảo tồn
+species diversity|phr|sự đa dạng loài
+survival rate|n|tỉ lệ sống sót
+tropical forest|n|rừng nhiệt đới
+vegetation|n|thảm thực vật
+`);
+
+nap('Kinh doanh & khởi nghiệp', `
+budget plan|n|kế hoạch ngân sách
+client|n|khách hàng doanh nghiệp
+competitor|n|đối thủ cạnh tranh
+corporation|n|tập đoàn
+cost-effective|adj|hiệu quả về chi phí
+customer service|n|dịch vụ khách hàng
+deal|n|thoả thuận
+entrepreneur|n|doanh nhân khởi nghiệp
+expand the market|phr|mở rộng thị trường
+franchise|n|nhượng quyền thương mại
+launch a product|phr|tung ra sản phẩm
+merger|n|sự sáp nhập
+partnership|n|quan hệ đối tác
+productivity|n|năng suất
+profit margin|n|biên lợi nhuận
+promotion campaign|n|chiến dịch khuyến mãi
+prototype|n|mẫu thử
+stakeholder|n|bên liên quan
+start-up|n|công ty khởi nghiệp
+strategy|n|chiến lược
+supply chain|n|chuỗi cung ứng
+target audience|n|đối tượng khách hàng mục tiêu
+turnover|n|doanh thu; tỉ lệ thay nhân sự
+venture|n|dự án mạo hiểm
+`);
+
+nap('Nghệ thuật & âm nhạc', `
+album|n|đĩa nhạc
+audience reaction|phr|phản ứng của khán giả
+composer|n|nhà soạn nhạc
+craft|n|nghề thủ công
+exhibition|n|triển lãm
+gallery|n|phòng trưng bày
+handicraft|n|đồ thủ công mĩ nghệ
+instrument|n|nhạc cụ
+lyrics|n|lời bài hát
+masterpiece|n|kiệt tác
+melody|n|giai điệu
+mural|n|tranh tường
+painting|n|bức tranh
+perform live|phr|biểu diễn trực tiếp
+poetry|n|thơ ca
+portrait|n|chân dung
+rehearse|v|tập dượt
+sculpture|n|tác phẩm điêu khắc
+stage|n|sân khấu
+talent show|n|chương trình tìm kiếm tài năng
+traditional music|n|nhạc truyền thống
+`);
+
+nap('Kiến trúc & đô thị bền vững', `
+blueprint|n|bản thiết kế
+brick and mortar|phr|cửa hàng vật lí
+carbon neutral|adj|trung hoà carbon
+demolish|v|phá dỡ
+energy-efficient|adj|tiết kiệm năng lượng
+green building|n|công trình xanh
+green space|n|không gian xanh
+insulation|n|lớp cách nhiệt
+landmark building|n|công trình biểu tượng
+public housing|n|nhà ở xã hội
+renovate|v|cải tạo
+roof garden|n|vườn trên mái
+smart city|n|thành phố thông minh
+solar panel|n|tấm pin mặt trời
+sustainable design|n|thiết kế bền vững
+urban planning|n|quy hoạch đô thị
+walkable|adj|thuận tiện đi bộ
+waste sorting|n|phân loại rác
+water recycling|n|tái chế nước
+zoning|n|phân khu chức năng
+`);
+
+
+nap('Sức khoẻ tinh thần & lối sống', `
+anxiety disorder|n|rối loạn lo âu
+burnout|n|tình trạng kiệt sức
+cope with stress|phr|đối phó với căng thẳng
+counselling|n|việc tư vấn tâm lí
+depression|n|trầm cảm
+emotional support|n|sự hỗ trợ tinh thần
+loneliness|n|sự cô đơn
+meditation|n|thiền định
+mindfulness|n|sự chú tâm
+peer pressure|n|áp lực từ bạn bè
+positive thinking|n|suy nghĩ tích cực
+recharge|v|nạp lại năng lượng
+relaxation|n|sự thư giãn
+self-esteem|n|lòng tự trọng
+sleep quality|n|chất lượng giấc ngủ
+social isolation|n|sự cô lập xã hội
+therapy|n|liệu pháp điều trị
+work-related stress|n|căng thẳng do công việc
+`);
+
+nap('Nông nghiệp & lương thực bền vững', `
+crop rotation|n|luân canh cây trồng
+drip irrigation|n|tưới nhỏ giọt
+famine|n|nạn đói
+food security|n|an ninh lương thực
+genetically modified|adj|biến đổi gene
+greenhouse|n|nhà kính
+harvest season|n|mùa thu hoạch
+hydroponics|n|thuỷ canh
+malnutrition|n|suy dinh dưỡng
+organic farming|n|canh tác hữu cơ
+pest control|n|kiểm soát sâu bệnh
+salinity|n|độ mặn
+seedling|n|cây giống
+soil fertility|n|độ phì nhiêu của đất
+subsistence farming|n|canh tác tự cung tự cấp
+surplus|n|phần dư thừa
+sustainable yield|n|sản lượng bền vững
+`);
+
+nap('Giao thông đô thị & di chuyển', `
+bus lane|n|làn dành cho xe buýt
+car park|n|bãi đỗ xe
+carpool|v|đi chung xe
+congestion charge|n|phí chống ùn tắc
+electric vehicle|n|xe điện
+emission standard|n|tiêu chuẩn khí thải
+ferry|n|phà
+freight|n|hàng hoá vận chuyển
+infrastructure project|n|dự án hạ tầng
+metro system|n|hệ thống tàu điện ngầm
+mobility|n|khả năng di chuyển
+pedestrian zone|n|khu vực đi bộ
+ride-hailing|n|dịch vụ gọi xe
+road safety|n|an toàn giao thông
+toll|n|phí cầu đường
+transit|n|sự trung chuyển
+`);
+
+nap('Truyền thông số & mạng xã hội', `
+algorithm feed|n|dòng tin do thuật toán chọn
+clickbait|n|tiêu đề câu view
+content creator|n|người sáng tạo nội dung
+digital footprint|n|dấu vết số
+echo chamber|n|buồng vọng thông tin
+engagement rate|n|tỉ lệ tương tác
+fake news|n|tin giả
+follower|n|người theo dõi
+go viral|phr|lan truyền chóng mặt
+hashtag|n|thẻ chủ đề
+influencer|n|người có sức ảnh hưởng
+livestream|n|buổi phát trực tiếp
+online reputation|n|danh tiếng trên mạng
+podcast|n|chương trình âm thanh
+scroll|v|lướt màn hình
+screen addiction|n|nghiện màn hình
+share widely|phr|chia sẻ rộng rãi
+trending topic|n|chủ đề đang thịnh hành
+`);
+
+nap('Tình nguyện & cộng đồng', `
+awareness campaign|n|chiến dịch nâng cao nhận thức
+charity event|n|sự kiện từ thiện
+civic duty|n|nghĩa vụ công dân
+community service|n|hoạt động phục vụ cộng đồng
+disadvantaged|adj|thiệt thòi, khó khăn
+fundraise|v|gây quỹ
+grassroots|adj|từ cơ sở, từ người dân
+homeless|adj|vô gia cư
+humanitarian|adj|nhân đạo
+local authority|n|chính quyền địa phương
+non-profit|adj|phi lợi nhuận
+orphanage|n|trại trẻ mồ côi
+outreach|n|hoạt động tiếp cận cộng đồng
+philanthropy|n|hoạt động từ thiện
+solidarity|n|tình đoàn kết
+sponsor|v|tài trợ
+underprivileged|adj|kém may mắn
+welfare|n|phúc lợi
+`);
+
+nap('Động từ học thuật mở rộng', `
+accumulate|v|tích luỹ
+address an issue|phr|giải quyết một vấn đề
+advocate|v|ủng hộ, cổ vũ cho
+alleviate|v|làm giảm nhẹ
+attribute to|phr|quy cho, cho là do
+augment|v|làm tăng thêm
+clarify|v|làm rõ
+compile|v|biên soạn, tổng hợp
+comprise|v|bao gồm
+conceive|v|hình dung, nghĩ ra
+condense|v|cô đọng lại
+confront|v|đối mặt
+consolidate|v|củng cố
+contradict|v|mâu thuẫn với
+convert|v|chuyển đổi
+curb|v|kiềm chế
+deduce|v|suy ra
+depict|v|khắc hoạ, mô tả
+deploy|v|triển khai
+devise|v|nghĩ ra, thiết kế
+differentiate|v|phân biệt
+disrupt|v|làm gián đoạn
+distort|v|bóp méo
+diversify|v|đa dạng hoá
+dominate|v|chiếm ưu thế
+enforce a rule|phr|thi hành một quy định
+enrich|v|làm giàu thêm
+entail|v|kéo theo, đòi hỏi
+evaluate|v|đánh giá
+exaggerate|v|phóng đại
+foster|v|nuôi dưỡng, thúc đẩy
+generalise|v|khái quát hoá
+highlight|v|làm nổi bật
+hinder|v|cản trở
+implement a policy|phr|thực thi một chính sách
+impose|v|áp đặt
+induce|v|gây ra, dẫn tới
+integrate into|phr|hoà nhập vào
+interpret data|phr|diễn giải dữ liệu
+intervene early|phr|can thiệp sớm
+monitor|v|theo dõi, giám sát
+outweigh|v|lớn hơn, vượt trội
+prioritise|v|ưu tiên
+prohibit strictly|phr|nghiêm cấm
+pursue|v|theo đuổi
+reinforce|v|củng cố
+resolve a conflict|phr|giải quyết xung đột
+restrain|v|kìm giữ
+retain|v|giữ lại
+speculate|v|suy đoán
+stimulate|v|kích thích
+streamline|v|tinh gọn
+subsidise|v|trợ cấp
+supplement|v|bổ sung
+tackle|v|xử lí, đương đầu
+transmit|v|truyền đi
+undermine|v|làm suy yếu
+unify|v|thống nhất
+verify|v|kiểm chứng
+withstand|v|chịu đựng được
+`);
+
+nap('Tính từ mô tả mở rộng', `
+accessible|adj|dễ tiếp cận
+accurate data|phr|dữ liệu chính xác
+ambiguous|adj|mơ hồ, đa nghĩa
+apparent|adj|rõ ràng, có vẻ như
+arbitrary|adj|tuỳ tiện
+authentic experience|phr|trải nghiệm chân thực
+beneficial effect|phr|tác động có lợi
+challenging|adj|đầy thử thách
+coherent|adj|mạch lạc
+compulsory subject|phr|môn học bắt buộc
+consistent|adj|nhất quán
+controversial|adj|gây tranh cãi
+credible|adj|đáng tin
+crucial role|phr|vai trò then chốt
+cumulative|adj|tích luỹ dần
+deliberate|adj|có chủ ý
+distinct|adj|khác biệt rõ rệt
+diverse|adj|đa dạng
+dramatic increase|phr|sự tăng mạnh
+dynamic|adj|năng động
+elaborate plan|phr|kế hoạch công phu
+enormous|adj|khổng lồ
+excessive|adj|quá mức
+explicit|adj|rõ ràng, tường minh
+feasible|adj|khả thi
+fundamental|adj|căn bản
+genuine|adj|thật, chân thành
+gradual decline|phr|sự giảm dần
+implicit|adj|ngầm hiểu
+inadequate|adj|không đầy đủ
+inevitable outcome|phr|kết cục tất yếu
+innovative|adj|mang tính đổi mới
+intense|adj|dữ dội, mãnh liệt
+irrelevant|adj|không liên quan
+marginal|adj|không đáng kể
+moderate|adj|vừa phải
+mutual|adj|lẫn nhau
+notable|adj|đáng chú ý
+outstanding|adj|xuất sắc, nổi bật
+persistent problem|phr|vấn đề dai dẳng
+plausible|adj|nghe có lí
+precise|adj|chính xác đến từng chi tiết
+prevalent|adj|phổ biến, thịnh hành
+profound|adj|sâu sắc
+radical|adj|triệt để, cấp tiến
+remarkable|adj|đáng kinh ngạc
+robust|adj|vững chắc
+severe|adj|nghiêm trọng
+subsequent|adj|tiếp theo sau
+subtle|adj|tinh tế, khó nhận ra
+superficial|adj|hời hợt
+transparent process|phr|quy trình minh bạch
+unprecedented|adj|chưa từng có
+viable|adj|có thể thực hiện được
+vulnerable|adj|dễ bị tổn thương
+`);
+
+nap('Cụm động từ mở rộng', `
+account for|phr|chiếm tỉ lệ; giải thích cho
+add up to|phr|cộng lại thành
+back up|phr|sao lưu; ủng hộ
+bring up a topic|phr|nêu một chủ đề
+call for|phr|kêu gọi, đòi hỏi
+carry on|phr|tiếp tục
+catch up on|phr|bù lại phần bị chậm
+come up with|phr|nghĩ ra
+count on|phr|trông cậy vào
+cut off|phr|cắt đứt, ngắt
+do away with|phr|xoá bỏ
+drop by|phr|ghé qua
+end up|phr|rốt cuộc lại
+fall behind|phr|tụt lại phía sau
+get along|phr|hoà hợp
+get rid of|phr|loại bỏ
+give in|phr|nhượng bộ
+go through|phr|trải qua
+hold back|phr|kìm lại
+keep track of|phr|theo dõi sát
+lay off|phr|cho thôi việc
+live up to|phr|sống xứng với kì vọng
+look after children|phr|trông nom trẻ
+make up for|phr|bù đắp cho
+opt for|phr|chọn lấy
+pass on|phr|truyền lại
+pick up a skill|phr|học lỏm một kĩ năng
+point out|phr|chỉ ra
+put forward|phr|đề xuất
+result in failure|phr|dẫn tới thất bại
+rule out|phr|loại trừ
+set aside|phr|dành riêng ra
+sort out|phr|sắp xếp, giải quyết
+stand for|phr|viết tắt của; ủng hộ
+stick to|phr|bám sát, kiên trì với
+take over|phr|tiếp quản
+turn out|phr|hoá ra là
+wear off|phr|nhạt dần, hết tác dụng
+`);
+
+
+nap('Họ từ — gốc từ và các dạng phái sinh', `
+analyse|v|phân tích
+analysis|n|sự phân tích
+analyst|n|nhà phân tích
+apply|v|áp dụng; nộp đơn
+application|n|đơn xin; ứng dụng
+applicable|adj|có thể áp dụng
+argument|n|lập luận, cuộc tranh cãi
+argumentative|adj|hay tranh cãi
+competitive|adj|có tính cạnh tranh
+competitor company|phr|công ty đối thủ
+conclude|v|kết luận
+conclusion|n|kết luận
+conclusive|adj|có tính quyết định
+create|v|tạo ra
+creation|n|sự sáng tạo, tác phẩm
+creator|n|người sáng tạo
+decide|v|quyết định
+decisive|adj|dứt khoát, quyết định
+depend on|phr|phụ thuộc vào
+dependent|adj|phụ thuộc
+independent thinking|phr|tư duy độc lập
+differ|v|khác nhau
+difference|n|sự khác biệt
+differently|adv|một cách khác biệt
+educate|v|giáo dục
+education|n|nền giáo dục
+educational|adj|thuộc giáo dục
+educator|n|nhà giáo dục
+employ|v|thuê làm việc
+employment|n|việc làm
+unemployed|adj|thất nghiệp
+environment|n|môi trường
+environmental|adj|thuộc môi trường
+environmentalist|n|nhà hoạt động môi trường
+examine closely|phr|xem xét kĩ
+examination|n|kì thi, sự kiểm tra
+explain|v|giải thích
+explanation|n|lời giải thích
+explanatory|adj|có tính giải thích
+inform|v|thông báo
+information|n|thông tin
+informative|adj|nhiều thông tin
+introduction|n|phần mở đầu
+introductory|adj|nhập môn
+invent|v|phát minh
+inventor|n|nhà phát minh
+inventive|adj|giàu sáng chế
+know|v|biết
+knowledgeable|adj|hiểu biết rộng
+maintain quality|phr|duy trì chất lượng
+maintenance cost|phr|chi phí bảo trì
+observe carefully|phr|quan sát cẩn thận
+observation|n|sự quan sát
+observant|adj|tinh ý
+produce|v|sản xuất
+production|n|sự sản xuất
+productive|adj|hiệu quả, năng suất
+protection|n|sự bảo vệ
+protective|adj|có tính bảo vệ
+receive|v|nhận
+reception|n|sự tiếp nhận, quầy lễ tân
+recipient|n|người nhận
+reduce waste|phr|giảm rác thải
+reduction|n|sự cắt giảm
+succeed|v|thành công
+successfully|adv|một cách thành công
+suggestion box|phr|hộp góp ý
+vary widely|phr|khác nhau rất nhiều
+variety|n|sự đa dạng
+variation|n|sự biến thiên
+`);
+
+nap('Danh từ trừu tượng thường gặp', `
+achievement gap|n|khoảng cách thành tích
+adaptation|n|sự thích nghi
+alternative solution|n|giải pháp thay thế
+assumption|n|giả định
+awareness|n|nhận thức
+barrier|n|rào cản
+benefit package|n|gói phúc lợi
+burden|n|gánh nặng
+capacity|n|sức chứa, năng lực
+consensus|n|sự đồng thuận
+consequence of action|phr|hệ quả của hành động
+constraint|n|ràng buộc
+context|n|bối cảnh
+contradiction|n|sự mâu thuẫn
+controversy|n|cuộc tranh cãi
+criterion|n|tiêu chí
+dilemma|n|tình thế tiến thoái lưỡng nan
+disparity|n|sự chênh lệch
+dominance|n|sự thống trị
+efficiency|n|hiệu suất
+emphasis|n|sự nhấn mạnh
+equivalent value|phr|giá trị tương đương
+exception|n|ngoại lệ
+expectation|n|kì vọng
+exposure|n|sự tiếp xúc, phơi nhiễm
+framework|n|khung khổ
+implication|n|hàm ý, hệ quả
+incentive|n|động lực khuyến khích
+indicator|n|chỉ số, dấu hiệu
+inequality|n|sự bất bình đẳng
+influence on|phr|ảnh hưởng tới
+insight|n|sự thấu hiểu sâu sắc
+integrity|n|sự chính trực
+interference|n|sự can thiệp, nhiễu
+limitation|n|hạn chế
+mechanism|n|cơ chế
+norm|n|chuẩn mực
+obligation|n|nghĩa vụ
+occurrence|n|sự xuất hiện
+perception|n|nhận thức, cảm nhận
+phenomenon of nature|phr|hiện tượng tự nhiên
+preference|n|sự ưa thích hơn
+prevalence|n|mức độ phổ biến
+procedure|n|thủ tục, quy trình
+proportion|n|tỉ lệ
+recognition|n|sự công nhận
+regulation of traffic|phr|việc điều tiết giao thông
+requirement|n|yêu cầu bắt buộc
+restriction|n|sự hạn chế
+significance|n|tầm quan trọng
+stability|n|sự ổn định
+standard of living|n|mức sống
+sustainability|n|tính bền vững
+tendency to|phr|xu hướng làm gì
+threshold|n|ngưỡng
+transition|n|sự chuyển tiếp
+variable|n|biến số
+`);
+
+nap('Cụm giới từ và cụm cố định', `
+at first glance|phr|thoạt nhìn
+at the expense of|phr|với cái giá phải trả là
+at the mercy of|phr|phó mặc cho
+by and large|phr|nhìn chung
+by means of|phr|bằng cách
+for the sake of|phr|vì lợi ích của
+in accordance with|phr|phù hợp với
+in addition to|phr|ngoài ra còn
+in charge of|phr|phụ trách
+in comparison with|phr|so với
+in contrast to|phr|trái ngược với
+in favour of|phr|ủng hộ
+in general|phr|nói chung
+in light of|phr|xét theo, dựa trên
+in line with|phr|phù hợp với
+in need of|phr|đang cần
+in order that|phr|để mà
+in particular|phr|đặc biệt là
+in place of|phr|thay cho
+in response to|phr|để đáp lại
+in return for|phr|đổi lại
+in search of|phr|đi tìm
+in spite of the fact that|phr|mặc dù thực tế là
+in terms of quality|phr|xét về chất lượng
+in the event of|phr|trong trường hợp
+in the long term|phr|về dài hạn
+in the short term|phr|trong ngắn hạn
+on account of|phr|vì, do bởi
+on behalf of|phr|thay mặt cho
+on condition that|phr|với điều kiện là
+on the contrary|phr|trái lại
+on the grounds that|phr|với lí do rằng
+on the increase|phr|đang gia tăng
+on the verge of|phr|bên bờ vực của
+regardless of cost|phr|bất kể chi phí
+subject to change|phr|có thể thay đổi
+with regard to|phr|liên quan tới
+with respect to|phr|xét về
+`);
+
+nap('Mô tả số liệu và xu hướng', `
+account for a share|phr|chiếm một tỉ lệ
+climb steadily|phr|tăng đều đặn
+decline sharply|phr|giảm mạnh
+double|v|tăng gấp đôi
+drop dramatically|phr|giảm đột ngột
+fluctuate around|phr|dao động quanh mức
+gradual rise|phr|sự tăng dần
+halve|v|giảm một nửa
+hit a peak|phr|đạt đỉnh
+level off|phr|đi ngang, chững lại
+majority|n|đa số
+minority|n|thiểu số
+outnumber|v|nhiều hơn về số lượng
+overall trend|phr|xu hướng chung
+peak at|phr|đạt cực đại ở mức
+plummet|v|lao dốc
+proportionately|adv|một cách tương ứng
+quadruple|v|tăng gấp bốn
+ratio|n|tỉ số
+remain stable|phr|giữ ổn định
+rise steadily|phr|tăng ổn định
+roughly|adv|khoảng chừng
+significant gap|phr|khoảng cách đáng kể
+soar|v|tăng vọt
+steady decline|phr|sự giảm đều
+substantially|adv|một cách đáng kể
+surge|v|tăng vọt đột ngột
+triple|v|tăng gấp ba
+`);
+
+nap('Trạng từ và từ nối mở rộng', `
+accordingly|adv|theo đó
+admittedly|adv|phải thừa nhận rằng
+alternatively|adv|hoặc là, cách khác
+arguably|adv|có thể cho rằng
+basically|adv|về cơ bản
+briefly|adv|một cách ngắn gọn
+conversely|adv|ngược lại
+deliberately|adv|một cách cố ý
+essentially|adv|về bản chất
+explicitly|adv|một cách rõ ràng
+finally|adv|cuối cùng
+firstly|adv|thứ nhất
+genuinely|adv|một cách chân thành
+hence|adv|do đó
+ideally|adv|lí tưởng nhất là
+inevitably|adv|không tránh khỏi
+initially|adv|ban đầu
+largely|adv|phần lớn là
+literally|adv|theo nghĩa đen
+mainly|adv|chủ yếu
+merely|adv|chỉ đơn thuần
+mostly|adv|hầu hết
+naturally|adv|một cách tự nhiên
+notably|adv|đáng chú ý là
+overall|adv|nhìn chung
+partly|adv|một phần
+precisely|adv|một cách chính xác
+presumably|adv|có lẽ là
+primarily|adv|trước hết là
+rapidly|adv|một cách nhanh chóng
+readily|adv|sẵn sàng, dễ dàng
+regularly|adv|đều đặn
+respectively|adv|theo thứ tự tương ứng
+secondly|adv|thứ hai
+significantly higher|phr|cao hơn đáng kể
+simultaneously|adv|đồng thời
+specifically|adv|cụ thể là
+steadily|adv|đều đặn
+strictly|adv|nghiêm ngặt
+subsequently|adv|sau đó
+surprisingly|adv|đáng ngạc nhiên là
+typically|adv|thường thì
+ultimately|adv|rốt cuộc
+undoubtedly|adv|không nghi ngờ gì
+virtually|adv|hầu như
+widely|adv|rộng rãi
+`);
+
+nap('Từ vựng lễ hội và văn hoá Việt Nam', `
+altar|n|bàn thờ
+ancestor worship|n|tục thờ cúng tổ tiên
+bamboo|n|cây tre
+banh chung|n|bánh chưng
+calligraphy|n|thư pháp
+ceremony|n|buổi lễ
+conical hat|n|nón lá
+craft village|n|làng nghề
+dragon dance|n|múa rồng
+firecracker|n|pháo
+folk song|n|dân ca
+generosity|n|lòng hào phóng
+harvest festival|n|lễ hội mùa màng
+incense|n|hương, nhang
+lantern|n|đèn lồng
+lion dance|n|múa lân
+lunar new year|n|Tết Nguyên đán
+offering|n|đồ cúng lễ
+pagoda|n|ngôi chùa
+paddy|n|lúa nước
+red envelope|n|bao lì xì
+reunion dinner|n|bữa cơm đoàn viên
+rice cake|n|bánh làm từ gạo
+ritual ceremony|phr|nghi lễ
+superstition|n|sự mê tín
+tray of five fruits|phr|mâm ngũ quả
+worship|v|thờ cúng
+`);
+
+nap('Từ vựng trường học và du học', `
+academic year|n|năm học
+admission|n|việc nhận vào học
+alumni|n|cựu học sinh, cựu sinh viên
+application form|n|đơn đăng kí
+boarding school|n|trường nội trú
+career guidance|n|hướng nghiệp
+class monitor|n|lớp trưởng
+coursework|n|bài tập trong khoá học
+credit transfer|n|chuyển đổi tín chỉ
+cultural shock|n|sốc văn hoá
+deadline extension|n|gia hạn nộp bài
+dissertation|n|luận văn
+exchange programme|n|chương trình trao đổi
+extracurricular activity|n|hoạt động ngoại khoá
+final exam|n|kì thi cuối kì
+grading system|n|hệ thống chấm điểm
+homesick|adj|nhớ nhà
+intake|n|đợt tuyển sinh
+internship|n|kì thực tập
+learning outcome|n|chuẩn đầu ra
+mentor|n|người hướng dẫn
+oral presentation|n|bài thuyết trình
+pass mark|n|điểm đạt
+placement test|n|bài kiểm tra xếp lớp
+research paper|n|bài nghiên cứu
+scholarship recipient|n|người nhận học bổng
+student loan|n|khoản vay sinh viên
+study abroad|phr|du học
+timetable clash|n|trùng lịch học
+tuition waiver|n|miễn học phí
+`);
+
+
+nap('Từ thông dụng trong bài đọc', `
+according|adj|theo như
+achieve a goal|phr|đạt được mục tiêu
+afterwards|adv|sau đó
+aim at|phr|nhắm tới
+allow access|phr|cho phép tiếp cận
+amount|n|lượng, số lượng
+appear|v|xuất hiện, có vẻ
+arise|v|nảy sinh
+avoid mistakes|phr|tránh sai sót
+belong|v|thuộc về
+benefit from|phr|hưởng lợi từ
+carry out research|phr|tiến hành nghiên cứu
+cause|n|nguyên nhân
+choice|n|sự lựa chọn
+connect|v|kết nối
+contain|v|chứa đựng
+continue|v|tiếp tục
+control|v|kiểm soát
+cover|v|bao gồm, che phủ
+decrease sharply|phr|giảm mạnh
+degree of change|phr|mức độ thay đổi
+demand|n|nhu cầu
+design|v|thiết kế
+detail|n|chi tiết
+develop skills|phr|phát triển kĩ năng
+discovery|n|khám phá
+divide|v|chia
+effort to change|phr|nỗ lực thay đổi
+encourage students|phr|khuyến khích học sinh
+ensure|v|bảo đảm
+example|n|ví dụ
+exist|v|tồn tại
+expect|v|mong đợi
+experiment with|phr|thử nghiệm với
+face difficulties|phr|đối mặt khó khăn
+figure|n|con số; hình vẽ
+follow|v|theo sau, tuân theo
+form|v|hình thành
+gain experience|phr|tích luỹ kinh nghiệm
+happen|v|xảy ra
+hold a meeting|phr|tổ chức cuộc họp
+image|n|hình ảnh
+include|v|bao gồm
+increase gradually|phr|tăng dần
+issue|n|vấn đề
+item|n|món, mục
+keep records|phr|lưu hồ sơ
+lack|n|sự thiếu hụt
+lead a team|phr|dẫn dắt một nhóm
+level|n|mức độ
+limit|v|giới hạn
+link|n|mối liên hệ
+manner|n|cách thức
+matter|v|có ý nghĩa quan trọng
+measure|v|đo lường
+mention briefly|phr|nhắc qua
+note|v|ghi nhận
+notice|v|nhận thấy
+offer|v|đề nghị, cung cấp
+operate|v|vận hành
+order|n|thứ tự; đơn hàng
+own|v|sở hữu
+period|n|giai đoạn
+place|n|nơi chốn
+point|n|điểm, luận điểm
+position|n|vị trí
+prepare for|phr|chuẩn bị cho
+present|v|trình bày
+prevent damage|phr|ngăn thiệt hại
+process|n|quá trình
+produce goods|phr|sản xuất hàng hoá
+provide support|phr|cung cấp hỗ trợ
+raise a question|phr|đặt ra một câu hỏi
+range|n|phạm vi
+reach agreement|phr|đạt được thoả thuận
+realise|v|nhận ra
+receive feedback|phr|nhận phản hồi
+record|v|ghi lại
+refer to|phr|nhắc tới, quy chiếu
+reflect|v|phản ánh
+regard as|phr|coi như là
+relate to|phr|liên quan tới
+remain|v|vẫn còn
+remove|v|loại bỏ
+report|v|báo cáo
+represent a group|phr|đại diện cho một nhóm
+require effort|phr|đòi hỏi nỗ lực
+respond quickly|phr|phản hồi nhanh
+return|v|trở lại
+select|v|lựa chọn
+sense|n|giác quan; ý nghĩa
+serve|v|phục vụ
+show|v|cho thấy
+similar to|phr|tương tự như
+source of energy|phr|nguồn năng lượng
+spread|v|lan rộng
+state|v|phát biểu, nêu rõ
+step|n|bước
+structure|n|cấu trúc
+suffer damage|phr|chịu thiệt hại
+supply water|phr|cung cấp nước
+support the view|phr|ủng hộ quan điểm
+suppose|v|cho rằng
+system|n|hệ thống
+test|v|kiểm tra
+treat|v|đối xử, xử lí
+type|n|loại
+view|n|quan điểm
+whole|adj|toàn bộ
+`);
+
+nap('Cặp từ và sắc thái nghĩa', `
+affordable|adj|có giá phải chăng
+ancient tradition|phr|truyền thống lâu đời
+brand-new|adj|hoàn toàn mới
+compulsory attendance|phr|việc đi học bắt buộc
+countless|adj|vô số
+crowded|adj|đông đúc
+current situation|phr|tình hình hiện tại
+daily routine|phr|thói quen hằng ngày
+dense|adj|dày đặc
+distant|adj|xa xôi
+early stage|phr|giai đoạn đầu
+elderly people|phr|người cao tuổi
+endless|adj|vô tận
+fragile|adj|mong manh, dễ vỡ
+gigantic|adj|khổng lồ
+harsh|adj|khắc nghiệt
+identical|adj|giống hệt
+immediate|adj|tức thời
+inexpensive option|phr|lựa chọn không tốn kém
+lengthy|adj|dài dòng
+lifelong|adj|suốt đời
+massive|adj|đồ sộ
+minor|adj|nhỏ, thứ yếu
+modest|adj|khiêm tốn
+numerous|adj|nhiều
+ongoing|adj|đang diễn ra
+optional|adj|không bắt buộc
+ordinary|adj|bình thường
+overwhelming|adj|áp đảo, choáng ngợp
+peaceful|adj|yên bình
+permanent job|phr|công việc lâu dài
+potential risk|phr|rủi ro tiềm ẩn
+previous experience|phr|kinh nghiệm trước đó
+private|adj|riêng tư
+recent survey|phr|khảo sát gần đây
+relevant information|phr|thông tin liên quan
+reliable source|phr|nguồn đáng tin
+scarce|adj|khan hiếm
+sensible choice|phr|lựa chọn khôn ngoan
+sheer|adj|thuần tuý, hoàn toàn
+sudden|adj|đột ngột
+temporary solution|phr|giải pháp tạm thời
+tiny|adj|tí hon
+tremendous|adj|to lớn
+unexpected|adj|bất ngờ
+unfamiliar|adj|xa lạ
+unique feature|phr|đặc điểm độc nhất
+unlikely|adj|khó xảy ra
+urgent|adj|khẩn cấp
+worthwhile|adj|đáng công sức
+`);
+
+
+nap('Từ vựng bổ sung cuối', `
+abolish|v|bãi bỏ
+abundance|n|sự dồi dào
+accelerate growth|phr|đẩy nhanh tăng trưởng
+accommodate|v|chứa được, đáp ứng
+acknowledge|v|thừa nhận
+acquire knowledge|phr|thu nhận kiến thức
+adhere to|phr|tuân thủ
+adjacent|adj|kề bên
+affluent|adj|giàu có
+aggregate|n|tổng hợp
+allocate resources|phr|phân bổ nguồn lực
+ambiguity|n|sự mơ hồ
+amend|v|sửa đổi
+anonymous|adj|ẩn danh
+appraisal|n|sự đánh giá
+apprehension|n|sự lo ngại
+articulate|v|diễn đạt rõ ràng
+ascertain|v|xác định chắc chắn
+aspiration|n|khát vọng
+assemble|v|tập hợp, lắp ráp
+assert|v|khẳng định
+assign a task|phr|giao một nhiệm vụ
+attain|v|đạt tới
+attribute|n|thuộc tính
+authorise|v|cho phép chính thức
+bilateral|adj|song phương
+biodegradable|adj|phân huỷ sinh học được
+boost morale|phr|nâng cao tinh thần
+brevity|n|sự ngắn gọn
+capitalise on|phr|tận dụng lợi thế
+census|n|cuộc tổng điều tra dân số
+certify|v|chứng nhận
+cite a source|phr|trích dẫn nguồn
+coincidence|n|sự trùng hợp
+collective|adj|tập thể
+commence|v|bắt đầu
+compensate for|phr|bù đắp cho
+compile data|phr|tổng hợp dữ liệu
+comply|v|tuân thủ
+comprehend|v|hiểu thấu
+concede|v|nhượng bộ, thừa nhận
+conform to|phr|tuân theo
+confine|v|giới hạn trong
+conserve|v|bảo tồn
+contemplate|v|ngẫm nghĩ
+contemporary|adj|đương đại
+convey a message|phr|truyền tải thông điệp
+correspond to|phr|tương ứng với
+counterpart|n|người, vật tương đương
+credibility|n|độ tin cậy
+cultivate a habit|phr|nuôi dưỡng một thói quen
+deficiency|n|sự thiếu hụt
+delegate authority|phr|phân quyền
+deteriorating|adj|đang xấu đi
+deterrent|n|yếu tố răn đe
+discrepancy|n|sự sai lệch
+disseminate|v|phổ biến rộng rãi
+distinguish between|phr|phân biệt giữa
+elicit|v|khơi gợi ra
+eloquent|adj|hùng hồn
+embrace change|phr|đón nhận thay đổi
+eradicate|v|xoá sổ hoàn toàn
+exemplify|v|minh hoạ điển hình
+exert influence|phr|gây ảnh hưởng
+exploit resources|phr|khai thác tài nguyên
+feasibility|n|tính khả thi
+fluctuation|n|sự dao động
+forecast demand|phr|dự báo nhu cầu
+formulate a plan|phr|xây dựng một kế hoạch
+gauge|v|đo lường, đánh giá
+hierarchy|n|hệ thống thứ bậc
+impartial|adj|khách quan, không thiên vị
+imperative|adj|cấp thiết
+inclusive|adj|bao trùm, không loại trừ ai
+incorporate feedback|phr|tiếp thu phản hồi
+incur costs|phr|phát sinh chi phí
+indispensable|adj|không thể thiếu
+inherent|adj|vốn có
+innovate|v|đổi mới sáng tạo
+insufficient|adj|không đủ
+intact|adj|còn nguyên vẹn
+intricate|adj|phức tạp tinh vi
+lucrative|adj|sinh lợi cao
+mandatory|adj|bắt buộc
+mitigate|v|làm giảm nhẹ
+negligible|adj|không đáng kể
+nurture talent|phr|nuôi dưỡng tài năng
+obsolete|adj|lỗi thời
+optimal|adj|tối ưu
+paradox|n|nghịch lí
+persistent effort|phr|nỗ lực bền bỉ
+pinpoint|v|xác định chính xác
+precede|v|đi trước
+predominantly|adv|chủ yếu là
+proponent|n|người ủng hộ
+reciprocal|adj|có đi có lại
+redundant staff|phr|nhân sự dôi dư
+refute|v|bác bỏ
+reluctance|n|sự miễn cưỡng
+render|v|làm cho trở nên
+replicate|v|nhân bản, lặp lại
+resilient|adj|kiên cường, phục hồi tốt
+scrutinise|v|xem xét kĩ lưỡng
+sequential|adj|theo trình tự
+substantiate|v|chứng minh bằng bằng chứng
+surpass|v|vượt qua
+tangible|adj|hữu hình
+thrive|v|phát triển mạnh
+transcend|v|vượt lên trên
+unanimous|adj|nhất trí hoàn toàn
+underestimate|v|đánh giá thấp
+uphold|v|giữ vững, duy trì
+utilise resources|phr|tận dụng nguồn lực
+versatility|n|tính linh hoạt đa năng
+vigorous|adj|mạnh mẽ, hăng hái
+warrant|v|đủ để biện minh cho
+widespread adoption|phr|sự áp dụng rộng rãi
+yield results|phr|mang lại kết quả
+`);
+
 /* ---------- COLLOCATION: động từ + danh từ, tính từ + giới từ ---------- */
 TD.KHO_COLLOC = TD.KHO_COLLOC || [];
 const nc = (nhom, tho) => {
@@ -9869,12 +11063,268 @@ significant|improvement|sự cải thiện đáng kể
 valuable|experience|kinh nghiệm quý báu
 `);
 
+nc('Động từ + danh từ', `
+achieve|a goal|đạt được mục tiêu
+break|a promise|thất hứa
+break|a record|phá kỉ lục
+catch|a cold|bị cảm
+cause|damage|gây thiệt hại
+change|one's mind|đổi ý
+commit|a crime|phạm tội
+conduct|a survey|tiến hành khảo sát
+draw|a conclusion|rút ra kết luận
+earn|a living|kiếm sống
+face|a challenge|đối mặt thách thức
+fill in|a form|điền vào mẫu đơn
+follow|instructions|làm theo hướng dẫn
+gain|experience|tích luỹ kinh nghiệm
+give|a speech|đọc diễn văn
+hold|a meeting|tổ chức cuộc họp
+keep|a promise|giữ lời hứa
+keep|a secret|giữ bí mật
+lose|touch|mất liên lạc
+lose|weight|giảm cân
+meet|a deadline|kịp hạn chót
+meet|demand|đáp ứng nhu cầu
+miss|an opportunity|bỏ lỡ cơ hội
+pass|an exam|thi đỗ
+pay|a fine|nộp phạt
+play|a role|đóng vai trò
+raise|awareness|nâng cao nhận thức
+raise|money|gây quỹ
+reach|an agreement|đạt thoả thuận
+run|a business|điều hành doanh nghiệp
+save|energy|tiết kiệm năng lượng
+save|time|tiết kiệm thời gian
+set|a record|lập kỉ lục
+set|an example|làm gương
+solve|a problem|giải quyết vấn đề
+spend|time|dành thời gian
+tell|the truth|nói thật
+throw|a party|tổ chức tiệc
+waste|money|lãng phí tiền
+win|a prize|đoạt giải
+`);
+
+nc('Tính từ + danh từ', `
+bitter|disappointment|nỗi thất vọng cay đắng
+broad|range|phạm vi rộng
+deep|impression|ấn tượng sâu sắc
+extreme|weather|thời tiết khắc nghiệt
+firm|belief|niềm tin vững chắc
+golden|opportunity|cơ hội vàng
+hard|work|sự chăm chỉ
+heavy|smoker|người nghiện thuốc nặng
+high|standard|tiêu chuẩn cao
+keen|interest|sự quan tâm sâu sắc
+long|history|lịch sử lâu đời
+narrow|escape|thoát hiểm trong gang tấc
+outstanding|performance|màn trình diễn xuất sắc
+practical|experience|kinh nghiệm thực tế
+public|opinion|dư luận
+rapid|growth|sự tăng trưởng nhanh
+rough|estimate|ước tính sơ bộ
+severe|shortage|sự thiếu hụt nghiêm trọng
+sharp|rise|sự tăng đột ngột
+strong|evidence|bằng chứng thuyết phục
+tight|schedule|lịch trình chặt
+vital|role|vai trò sống còn
+warm|welcome|sự chào đón nồng nhiệt
+wide|gap|khoảng cách lớn
+`);
+
+nc('Cụm với danh từ trừu tượng', `
+a sense|of belonging|cảm giác thuộc về
+a source|of income|nguồn thu nhập
+a lack|of confidence|sự thiếu tự tin
+a means|of transport|phương tiện đi lại
+a matter|of time|chỉ là vấn đề thời gian
+a piece|of advice|một lời khuyên
+a range|of options|một loạt lựa chọn
+a shortage|of water|sự thiếu nước
+a waste|of time|sự lãng phí thời gian
+an act|of kindness|một hành động tử tế
+in the process|of learning|trong quá trình học
+on the basis|of evidence|dựa trên bằng chứng
+the impact|of technology|tác động của công nghệ
+the level|of pollution|mức độ ô nhiễm
+the risk|of failure|nguy cơ thất bại
+the role|of education|vai trò của giáo dục
+`);
+
+nc('Động từ + trạng từ', `
+apologise|sincerely|xin lỗi chân thành
+behave|responsibly|cư xử có trách nhiệm
+change|dramatically|thay đổi đột ngột
+consider|carefully|cân nhắc kĩ
+cooperate|closely|hợp tác chặt chẽ
+decline|steadily|giảm đều
+depend|heavily|phụ thuộc nặng nề
+differ|slightly|khác nhau đôi chút
+disagree|strongly|phản đối mạnh mẽ
+grow|rapidly|tăng nhanh
+improve|significantly|cải thiện đáng kể
+listen|attentively|lắng nghe chăm chú
+plan|ahead|lên kế hoạch trước
+react|immediately|phản ứng ngay
+speak|fluently|nói trôi chảy
+support|fully|hoàn toàn ủng hộ
+work|efficiently|làm việc hiệu quả
+`);
+
+nc('Cụm học thuật trong bài viết', `
+draw attention|to|thu hút sự chú ý tới
+give rise|to|làm nảy sinh
+have an impact|on|có tác động tới
+lead|to consequences|dẫn tới hệ quả
+place emphasis|on|đặt trọng tâm vào
+play a part|in|góp phần vào
+put pressure|on|gây áp lực lên
+take account|of|tính tới, xét tới
+take advantage|of|tận dụng
+take into consideration|the cost|cân nhắc chi phí
+take responsibility|for|chịu trách nhiệm về
+take steps|to solve|tiến hành các bước để giải quyết
+bear in mind|the risk|ghi nhớ rủi ro
+come to a conclusion|about|đi đến kết luận về
+make a contribution|to|đóng góp cho
+make a difference|to|tạo khác biệt cho
+`);
+
+nc('Cụm thời gian và tần suất', `
+at|the moment|ngay lúc này
+at|the same time|cùng lúc
+by|the end of|vào cuối
+for|the time being|tạm thời
+from|time to time|thỉnh thoảng
+in|advance|trước, sớm
+in|due course|đến lúc thích hợp
+in|no time|rất nhanh
+in|the meantime|trong khi chờ đợi
+on|a daily basis|hằng ngày
+on|a regular basis|thường xuyên
+on|time|đúng giờ
+once|in a while|thi thoảng
+over|the past decade|trong thập niên qua
+sooner|than expected|sớm hơn dự kiến
+up|to now|cho tới nay
+`);
+
+nc('Cụm nguyên nhân – kết quả', `
+as a consequence|of|hậu quả của việc
+be attributed|to|được cho là do
+be responsible|for the rise|chịu trách nhiệm cho sự gia tăng
+bring|about change|mang lại thay đổi
+contribute|to the problem|góp phần vào vấn đề
+give|rise to concern|làm dấy lên lo ngại
+result|in improvement|dẫn tới cải thiện
+stem|from poverty|bắt nguồn từ nghèo đói
+trigger|a reaction|kích hoạt một phản ứng
+arise|from misunderstanding|nảy sinh từ hiểu lầm
+`);
+
+nc('Cụm về vấn đề và giải pháp', `
+address|the root cause|xử lí gốc rễ vấn đề
+alleviate|poverty|xoá đói giảm nghèo
+cope|with pressure|chịu được áp lực
+find|a solution|tìm ra giải pháp
+implement|measures|triển khai biện pháp
+overcome|obstacles|vượt qua trở ngại
+pose|a threat|đặt ra mối đe doạ
+raise|concerns|dấy lên quan ngại
+tackle|climate change|đối phó biến đổi khí hậu
+resolve|the issue|giải quyết vấn đề
+`);
+
+nc('Cụm về học tập và công việc', `
+attend|a course|tham dự một khoá học
+apply|for a scholarship|nộp đơn xin học bổng
+broaden|one's horizons|mở mang tầm mắt
+develop|a strategy|xây dựng chiến lược
+enrol|on a programme|ghi danh một chương trình
+fulfil|requirements|đáp ứng yêu cầu
+gain|qualifications|đạt được bằng cấp
+hand|in an assignment|nộp bài tập
+hold|a degree|có bằng cấp
+meet|expectations|đáp ứng kì vọng
+pursue|a career|theo đuổi sự nghiệp
+sit|an exam|dự thi
+submit|an application|nộp hồ sơ
+take|a gap year|nghỉ một năm trước khi học tiếp
+undertake|research|thực hiện nghiên cứu
+work|under pressure|làm việc dưới áp lực
+`);
+
+nc('Cụm về môi trường và xã hội', `
+combat|pollution|chống ô nhiễm
+conserve|natural resources|bảo tồn tài nguyên
+cut|carbon emissions|cắt giảm khí thải carbon
+promote|sustainability|thúc đẩy phát triển bền vững
+protect|biodiversity|bảo vệ đa dạng sinh học
+reduce|waste|giảm rác thải
+restore|ecosystems|phục hồi hệ sinh thái
+bridge|the gap|thu hẹp khoảng cách
+close|the digital divide|xoá khoảng cách số
+foster|social inclusion|thúc đẩy hoà nhập xã hội
+narrow|inequality|thu hẹp bất bình đẳng
+strengthen|community ties|củng cố gắn kết cộng đồng
+`);
+
+nc('Cụm động từ + danh từ mở rộng', `
+answer|the phone|nghe điện thoại
+book|a ticket|đặt vé
+build|confidence|xây dựng sự tự tin
+carry|the risk|mang theo rủi ro
+cause|concern|gây lo ngại
+create|opportunities|tạo ra cơ hội
+deliver|a service|cung cấp dịch vụ
+develop|a habit|hình thành thói quen
+express|an opinion|bày tỏ ý kiến
+generate|income|tạo ra thu nhập
+grant|permission|cấp phép
+issue|a warning|đưa ra cảnh báo
+launch|a campaign|phát động chiến dịch
+maintain|balance|giữ cân bằng
+offer|assistance|đề nghị giúp đỡ
+provide|evidence|đưa ra bằng chứng
+receive|treatment|được điều trị
+reduce|the risk|giảm rủi ro
+seek|advice|xin lời khuyên
+serve|a purpose|phục vụ một mục đích
+share|responsibility|chia sẻ trách nhiệm
+show|improvement|cho thấy sự tiến bộ
+take|action|hành động
+undergo|training|trải qua đào tạo
+`);
+
+nc('Cụm tính từ + danh từ mở rộng', `
+common|misconception|hiểu lầm phổ biến
+considerable|amount|một lượng đáng kể
+critical|factor|yếu tố then chốt
+essential|requirement|yêu cầu thiết yếu
+growing|demand|nhu cầu ngày càng tăng
+harsh|reality|thực tế phũ phàng
+increasing|awareness|nhận thức ngày càng cao
+limited|resources|nguồn lực hạn chế
+mutual|benefit|lợi ích chung
+potential|consequence|hệ quả tiềm tàng
+primary|concern|mối quan tâm hàng đầu
+serious|consequence|hậu quả nghiêm trọng
+significant|contribution|đóng góp đáng kể
+substantial|evidence|bằng chứng vững chắc
+`);
+
 })();
 
 </script>
 <script>
 /* ============================================================
    TIẾNG ANH — MẪU ĐỀ BÀI TẬP TỰ SINH
+   Bám cấu trúc đề TỪ NĂM 2025: 40 câu / 50 phút, gồm điền từ – cụm ngắn
+   (12 câu), sắp xếp câu (5), điền câu – cụm dài (5) và đọc hiểu (18).
+   Các dạng NGỮ ÂM, TRỌNG ÂM, TÌM LỖI SAI, VIẾT LẠI CÂU, chọn từ đồng
+   nghĩa – trái nghĩa và hoàn thành hội thoại ĐÃ BỊ LOẠI khỏi đề, nên
+   không dựng mẫu đề cho chúng nữa.
    Ba nguồn: kho 1000+ từ vựng · kho collocation · các bảng ngữ pháp
    dựng riêng cho từng chuyên đề (thì, điều kiện, bị động, tường thuật,
    mệnh đề quan hệ, đảo ngữ, word form, ngữ âm, trọng âm, tìm lỗi sai).
@@ -9898,7 +11348,16 @@ const nhieuTu = (R, x, lay) => {
   if (bo.length < 3) bo = (TD.KHO_TU || []).filter(y => y.w !== x.w && y.l === x.l && y.n !== x.n);
   if (bo.length < 3) bo = (TD.KHO_TU || []).filter(y => y.w !== x.w && y.n !== x.n);
   if (bo.length < 3) return null;
-  return R.chonNhieu(bo, 3).map(lay);
+  /* Kho hơn 2000 từ nên có những từ khác nhau mà nghĩa tiếng Việt trùng nhau.
+     Phải lọc để bốn phương án đôi một khác nhau, nếu không câu hỏi có hai đáp án đúng. */
+  const ra = [], daCo = { [lay(x)]: 1 };
+  for (const y of TD.xaoR(R, bo)) {
+    const v = lay(y);
+    if (daCo[v]) continue;
+    daCo[v] = 1; ra.push(v);
+    if (ra.length === 3) return ra;
+  }
+  return null;
 };
 
 TD.GEN.anh = (TD.GEN.anh || []).concat([
@@ -9938,6 +11397,39 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
         + `make/do/take/have là bốn động từ đi kèm rất nhiều danh từ khác nhau, phải học thuộc theo cụm.` },
       'make thiên về TẠO RA cái mới (a decision, progress); do thiên về THỰC HIỆN công việc '
       + '(homework, research); take thiên về NHẬN/CHIẾM (part in, care of, place).');
+  } },
+
+{ ma: 'anh-colloc-cum', chuong: 'Ngữ pháp khác', muc: 3, dang: 'mc',
+  tao(R) {
+    /* mọi nhóm collocation trừ hai nhóm đã có mẫu riêng */
+    const kho = (TD.KHO_COLLOC || []).filter(x =>
+      x.nhom !== 'make / do / take / have' &&
+      x.nhom.indexOf('giới từ') < 0);
+    if (kho.length < 8) return null;
+    const x = R.chon(kho);
+    const cung = kho.filter(y => y.nhom === x.nhom && y.tu !== x.tu && y.cum !== x.cum);
+    if (cung.length < 3) return null;
+    const s = R.chonNhieu(cung, 3).map(y => y.tu);
+    if (new Set(s.concat([x.tu])).size !== 4) return null;
+    return MC(R, `Chọn từ đúng để hoàn thành cụm: "____ ${x.cum}" (${x.n})`,
+      { d: x.tu, s: s, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.\nNhóm: ${x.nhom}.` },
+      'Collocation là chỗ người Việt hay dịch từng chữ rồi ghép sai. '
+      + 'Học theo CỤM và theo NHÓM, đừng học từng từ rời.');
+  } },
+
+{ ma: 'anh-colloc-nghia', chuong: 'Ngữ pháp khác', muc: 2, dang: 'mc',
+  tao(R) {
+    const kho = TD.KHO_COLLOC || [];
+    if (kho.length < 8) return null;
+    const x = R.chon(kho);
+    const khac = kho.filter(y => y.n !== x.n);
+    if (khac.length < 3) return null;
+    const s = R.chonNhieu(khac, 3).map(y => y.n);
+    if (new Set(s.concat([x.n])).size !== 4) return null;
+    return MC(R, `Cụm "<b>${x.tu} ${x.cum}</b>" có nghĩa là gì?`,
+      { d: x.n, s: s, v: `${x.tu} ${x.cum} = ${x.n}. Nhóm: ${x.nhom}.` },
+      'Biết nghĩa của cụm mới dùng đúng trong bài điền từ. '
+      + 'Nhiều cụm nghĩa không suy ra được từ nghĩa các từ thành phần.');
   } },
 
 { ma: 'anh-gioitu', chuong: 'Ngữ pháp khác', muc: 2, dang: 'mc',
@@ -10166,74 +11658,6 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
       + 'sau mạo từ hoặc tính từ sở hữu ⇒ danh từ · sau modal ⇒ động từ nguyên thể.');
   } },
 
-{ ma: 'anh-trongam', chuong: 'Ngữ âm – Trọng âm', muc: 2, dang: 'mc',
-  tao(R) {
-    const it = R.chon([
-      { d: 'engineer', s: ['hospital', 'family', 'beautiful'], v: '"engineer" trọng âm âm tiết CUỐI (en-gi-NEER); ba từ còn lại trọng âm âm tiết ĐẦU.' },
-      { d: 'develop', s: ['organise', 'estimate', 'demonstrate'], v: '"develop" trọng âm âm tiết THỨ HAI (de-VE-lop); ba từ còn lại trọng âm âm tiết đầu.' },
-      { d: 'economic', s: ['comfortable', 'interesting', 'necessary'], v: 'Hậu tố -ic kéo trọng âm về âm tiết ngay trước nó (e-co-NO-mic); ba từ kia trọng âm âm tiết đầu.' },
-      { d: 'photograph', s: ['photographer', 'photography', 'geography'], v: '"photograph" trọng âm âm tiết ĐẦU (PHO-to-graph); ba từ còn lại đều trọng âm âm tiết THỨ HAI (pho-TOG-ra-pher, pho-TOG-ra-phy, ge-OG-ra-phy).' },
-      { d: 'polite', s: ['careful', 'happy', 'silent'], v: 'Tính từ hai âm tiết "polite" trọng âm âm tiết thứ hai (po-LITE); ba từ kia trọng âm âm tiết đầu.' },
-      { d: 'volunteer', s: ['gentleman', 'furniture', 'atmosphere'], v: 'Hậu tố -eer luôn nhận trọng âm (vo-lun-TEER).' },
-      { d: 'Japanese', s: ['difficult', 'popular', 'accurate'], v: 'Hậu tố -ese luôn nhận trọng âm (Ja-pa-NESE); ba từ còn lại trọng âm âm tiết đầu.' },
-      { d: 'employee', s: ['employer', 'important', 'develop'], v: 'Hậu tố -ee nhận trọng âm (em-ploy-EE); ba từ còn lại trọng âm âm tiết THỨ HAI.' }
-    ]);
-    return MC(R, `Chọn từ có vị trí trọng âm KHÁC với ba từ còn lại:`, it,
-      'Quy tắc nhanh: hậu tố -ic, -ical, -ion, -ity, -ive kéo trọng âm về âm tiết NGAY TRƯỚC nó. '
-      + 'Hậu tố -ee, -eer, -ese, -ique tự nhận trọng âm. Danh từ hai âm tiết thường trọng âm đầu, '
-      + 'động từ hai âm tiết thường trọng âm sau.');
-  } },
-
-{ ma: 'anh-phatam', chuong: 'Ngữ âm – Trọng âm', muc: 2, dang: 'mc',
-  tao(R) {
-    const it = R.chon([
-      { h: 'đuôi -ed', d: 'wanted', s: ['worked', 'stopped', 'watched'], v: '"wanted" đuôi -ed đọc /ɪd/ (sau /t/); ba từ kia đọc /t/ vì đứng sau âm vô thanh.' },
-      { h: 'đuôi -ed', d: 'needed', s: ['laughed', 'washed', 'helped'], v: '"needed" đọc /ɪd/ (sau /d/); ba từ kia đọc /t/.' },
-      { h: 'đuôi -ed', d: 'played', s: ['asked', 'missed', 'looked'], v: '"played" đọc /d/ (sau âm hữu thanh); ba từ kia đọc /t/.' },
-      { h: 'đuôi -es', d: 'watches', s: ['books', 'cats', 'maps'], v: '"watches" đuôi -es đọc /ɪz/ (sau âm xuýt /tʃ/); ba từ kia đọc /s/.' },
-      { h: 'đuôi -es', d: 'boxes', s: ['lamps', 'hats', 'shops'], v: '"boxes" đọc /ɪz/ (sau /ks/); ba từ kia đọc /s/.' },
-      { h: 'đuôi -s', d: 'dogs', s: ['ships', 'cakes', 'roofs'], v: '"dogs" đọc /z/ (sau âm hữu thanh /g/); ba từ kia đọc /s/.' },
-      { h: 'chữ ch', d: 'chemistry', s: ['children', 'church', 'cheese'], v: '"chemistry" có "ch" đọc /k/; ba từ kia đọc /tʃ/.' },
-      { h: 'chữ th', d: 'thought', s: ['though', 'these', 'those'], v: '"thought" có "th" đọc vô thanh /θ/; ba từ kia đọc hữu thanh /ð/.' }
-    ]);
-    return MC(R, `Chọn từ có <b>${it.h}</b> được phát âm KHÁC với ba từ còn lại:`, it,
-      'Đuôi -ed: /ɪd/ sau /t/ và /d/ · /t/ sau âm vô thanh · /d/ sau âm hữu thanh. '
-      + 'Đuôi -s/-es: /ɪz/ sau âm xuýt · /s/ sau âm vô thanh · /z/ sau âm hữu thanh.');
-  } },
-
-{ ma: 'anh-timloi', chuong: 'Cấu trúc – Chiến thuật', muc: 3, dang: 'mc',
-  tao(R) {
-    const it = R.chon([
-      { q: 'The number of students <b>are</b> increasing every year.', d: '"are" phải là "is"',
-        s: ['"number" phải là "numbers"', '"increasing" phải là "increased"', '"every" phải là "each"'],
-        v: '"The number of + N số nhiều" luôn đi với động từ SỐ ÍT. (Còn "A number of" mới đi với số nhiều.)' },
-      { q: 'She is one of the <b>most tallest</b> girls in her class.', d: '"most tallest" phải là "tallest"',
-        s: ['"one of" phải là "one in"', '"girls" phải là "girl"', '"her" phải là "his"'],
-        v: 'Không dùng đồng thời "most" và đuôi "-est". Tính từ ngắn chỉ cần thêm -est.' },
-      { q: 'Despite <b>it was raining</b>, we went out.', d: '"it was raining" phải là "the rain"',
-        s: ['"Despite" phải là "Although"', '"went" phải là "go"', '"out" phải là "outside"'],
-        v: 'Sau "Despite / In spite of" dùng DANH TỪ hoặc V-ing, không dùng mệnh đề. (Đổi "Despite" thành "Although" cũng đúng nhưng đề gạch chân vế sau.)' },
-      { q: 'He suggested <b>to go</b> to the cinema.', d: '"to go" phải là "going"',
-        s: ['"suggested" phải là "suggest"', '"the cinema" phải là "cinema"', '"He" phải là "Him"'],
-        v: 'Sau "suggest" dùng V-ing hoặc "that + S + (should) + V", không dùng to V.' },
-      { q: 'If I <b>will have</b> time, I will visit you.', d: '"will have" phải là "have"',
-        s: ['"will visit" phải là "visit"', '"If" phải là "Unless"', '"you" phải là "your"'],
-        v: 'Mệnh đề "if" của điều kiện loại 1 dùng hiện tại đơn, không dùng "will".' },
-      { q: 'The book <b>who</b> I borrowed from the library is very useful.', d: '"who" phải là "which"',
-        s: ['"borrowed" phải là "borrow"', '"is" phải là "are"', '"useful" phải là "usefully"'],
-        v: '"The book" là VẬT nên phải dùng "which" hoặc "that", không dùng "who".' },
-      { q: 'Each of the students <b>have</b> a laptop.', d: '"have" phải là "has"',
-        s: ['"students" phải là "student"', '"Each" phải là "Every"', '"a laptop" phải là "laptops"'],
-        v: '"Each of + N số nhiều" đi với động từ SỐ ÍT.' },
-      { q: 'She has been working here <b>since</b> five years.', d: '"since" phải là "for"',
-        s: ['"has been" phải là "was"', '"working" phải là "worked"', '"here" phải là "there"'],
-        v: '"since" đi với MỐC thời gian, "for" đi với KHOẢNG thời gian. "five years" là khoảng.' }
-    ]);
-    return MC(R, `Tìm lỗi sai trong câu sau và chọn cách sửa đúng:\n\n${it.q}`, it,
-      'Bốn ổ lỗi hay bị gài: sự hoà hợp CHỦ NGỮ – ĐỘNG TỪ · THÌ của động từ · '
-      + 'đại từ quan hệ người/vật · giới từ và dạng từ theo sau.');
-  } },
-
 { ma: 'anh-soanh', chuong: 'Ngữ pháp khác', muc: 2, dang: 'mc',
   tao(R) {
     const it = R.chon([
@@ -10253,6 +11677,166 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     return MC(R, `Chọn phương án đúng:\n\n${it.q}`, it,
       'Đếm ÂM TIẾT trước: 1–2 âm tiết dùng -er/-est; từ 3 âm tiết trở lên dùng more/the most. '
       + 'Bất quy tắc: good–better–best, bad–worse–worst, far–further–furthest.');
+  } }
+
+]);
+
+/* ==========================================================
+   BA DẠNG BÀI MỚI CỦA ĐỀ TỪ NĂM 2025
+   Cấu trúc 40 câu / 50 phút: điền từ – cụm ngắn 12 · sắp xếp câu 5 ·
+   điền câu – cụm dài 5 · đọc hiểu 18.
+   Các dạng ngữ âm, trọng âm, tìm lỗi sai, viết lại câu đã bị loại bỏ.
+   ========================================================== */
+TD.GEN.anh = (TD.GEN.anh || []).concat([
+
+{ ma: 'anh-sapxep', chuong: 'Cấu trúc – Chiến thuật', muc: 3, dang: 'mc',
+  tao(R) {
+    const bo = R.chon([
+      { t: 'một lá thư xin việc', c: [
+        'a. Dear Sir or Madam,',
+        'b. I am writing to apply for the position of sales assistant advertised on your website.',
+        'c. I have worked part-time in a bookshop for two years, so I am used to dealing with customers.',
+        'd. I would be grateful if you could consider my application.',
+        'e. Yours faithfully, Nam Tran'],
+        v: 'Thư trang trọng đi theo trình tự: lời chào → nêu lí do viết → trình bày kinh nghiệm → đề nghị → kí tên. '
+         + '"Dear Sir or Madam" luôn đi cặp với "Yours faithfully".' },
+      { t: 'một đoạn văn về rác thải nhựa', c: [
+        'a. Plastic waste has become one of the most serious problems of our time.',
+        'b. Every year, millions of tonnes of plastic end up in the ocean.',
+        'c. As a result, sea animals mistake plastic bags for food and die.',
+        'd. To deal with this, many countries have banned single-use plastic bags.',
+        'e. However, real change will only come when each of us reduces what we throw away.'],
+        v: 'Cấu trúc chuẩn: nêu vấn đề → dẫn chứng số liệu → hậu quả (As a result) → giải pháp (To deal with this) → '
+         + 'kết luận phản biện (However).' },
+      { t: 'một đoạn văn về học trực tuyến', c: [
+        'a. Online learning has grown rapidly over the past few years.',
+        'b. It allows students to study at their own pace and save travelling time.',
+        'c. On the other hand, it requires a high level of self-discipline.',
+        'd. Many learners give up simply because no one is there to remind them.',
+        'e. Therefore, the best approach seems to be a combination of online and classroom lessons.'],
+        v: 'Nêu hiện tượng → ưu điểm → nhược điểm (On the other hand) → giải thích nhược điểm → kết luận (Therefore).' },
+      { t: 'một đoạn văn về thói quen đọc sách', c: [
+        'a. Reading is one of the cheapest ways to broaden your mind.',
+        'b. A single book can take you to places you will never visit in person.',
+        'c. Unfortunately, fewer and fewer young people read for pleasure nowadays.',
+        'd. Most of them spend their free time scrolling through short videos instead.',
+        'e. Setting aside just fifteen minutes a day would be enough to change that habit.'],
+        v: 'Khẳng định lợi ích → mở rộng lợi ích → nêu thực trạng trái ngược (Unfortunately) → giải thích → đề xuất.' },
+      { t: 'một email mời bạn đi chơi', c: [
+        'a. Hi Mai,',
+        'b. How have you been? I have not heard from you for ages.',
+        'c. I am writing to invite you to my birthday party this Saturday.',
+        'd. It will start at six in the evening at my house, and a few of our old classmates are coming.',
+        'e. Let me know if you can make it. Love, Linh'],
+        v: 'Email thân mật: chào → hỏi thăm → nêu mục đích → chi tiết thời gian địa điểm → đề nghị phản hồi và kí tên.' },
+      { t: 'một đoạn văn về làm thêm khi còn đi học', c: [
+        'a. More and more students take part-time jobs while studying at university.',
+        'b. Such jobs teach them how to manage money and communicate with people.',
+        'c. Nevertheless, working too many hours can affect their academic results.',
+        'd. Some students even fail their exams because they are simply too tired to study.',
+        'e. The key, then, is to keep a sensible balance between earning and learning.'],
+        v: 'Hiện tượng → lợi ích → mặt trái (Nevertheless) → hậu quả cụ thể → kết luận cân bằng.' }
+    ]);
+    /* thứ tự đúng là a-b-c-d-e; ba phương án nhiễu là các hoán vị sai rõ ràng */
+    const dung = 'a – b – c – d – e';
+    const s = ['a – c – b – e – d', 'b – a – d – c – e', 'a – d – b – c – e'];
+    return MC(R, `Sắp xếp các câu sau thành ${bo.t} hoàn chỉnh:\n\n${bo.c.join('\n')}`,
+      { d: dung, s: s, v: bo.v }, 
+      'Bốn mỏ neo để sắp xếp: ① câu chào hoặc câu nêu chủ đề đứng ĐẦU ② từ nối (As a result, However, Therefore) '
+      + 'chỉ chỗ đặt câu ③ đại từ (it, this, such) phải có danh từ đứng trước ④ câu kí tên hoặc câu kết luận đứng CUỐI.');
+  } },
+
+{ ma: 'anh-chencau', chuong: 'Cấu trúc – Chiến thuật', muc: 4, dang: 'mc',
+  tao(R) {
+    const bo = R.chon([
+      { doan: 'Many cities are now building separate lanes for bicycles. [1] Cycling produces no emissions and '
+            + 'costs almost nothing to run. [2] It also keeps people healthier than sitting in a car. [3] '
+            + 'Yet in heavy rain or extreme heat, cycling becomes far less attractive. [4]',
+        cau: 'For this reason, some cities have begun to cover their busiest bicycle lanes.',
+        d: 'Vị trí [4]',
+        v: 'Câu cần chèn bắt đầu bằng "For this reason" nên phải đứng NGAY SAU lí do — chính là câu nói mưa và nắng '
+         + 'làm việc đạp xe kém hấp dẫn. Vậy chèn vào [4].',
+        s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
+      { doan: 'Homework has been part of school life for over a century. [1] Supporters argue that it helps '
+            + 'students revise what they have learnt. [2] Critics reply that it eats into the time children '
+            + 'need for sport and family. [3] Recent studies suggest that short, focused tasks work best. [4]',
+        cau: 'Both sides, however, agree that the amount matters more than the existence of homework itself.',
+        d: 'Vị trí [3]',
+        v: 'Câu chứa "Both sides" nên phải đứng SAU khi đã nêu đủ CẢ HAI phía (supporters và critics) và TRƯỚC câu '
+         + 'nói về nghiên cứu. Vậy chèn vào [3].',
+        s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [4]'] },
+      { doan: 'Street food is a familiar part of life in Vietnamese cities. [1] A bowl of noodles on the pavement '
+            + 'often costs less than a coffee in a chain café. [2] Tourists love it because it lets them taste '
+            + 'the city the way local people do. [3] Hygiene, on the other hand, is not always guaranteed. [4]',
+        cau: 'Choosing a stall that is crowded with local customers is usually the safest bet.',
+        d: 'Vị trí [4]',
+        v: 'Câu này đưa ra CÁCH XỬ LÍ cho vấn đề vệ sinh vừa nêu, nên phải đứng ngay sau câu về hygiene ⇒ [4].',
+        s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
+      { doan: 'Learning a second language changes the way you think. [1] Bilingual people often switch between '
+            + 'two sets of cultural habits without noticing. [2] Research also links bilingualism to a later '
+            + 'onset of memory problems in old age. [3] None of these benefits, though, appear overnight. [4]',
+        cau: 'They take years of steady, everyday practice.',
+        d: 'Vị trí [4]',
+        v: 'Đại từ "They" thay cho "these benefits" ở câu trước nên phải đứng NGAY SAU câu đó ⇒ [4].',
+        s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
+      { doan: 'Volunteering is becoming popular among Vietnamese teenagers. [1] Some spend their summer teaching '
+            + 'children in remote villages. [2] Others join clean-up campaigns along rivers and beaches. [3] '
+            + 'What they gain is often more than what they give. [4]',
+        cau: 'Such experiences build confidence and teach them how to work with strangers.',
+        d: 'Vị trí [4]',
+        v: '"Such experiences" thay cho hai hoạt động vừa liệt kê (dạy học, dọn rác) và câu này giải thích cho '
+         + 'câu "gain more than they give" nên đặt ở [4] là hợp mạch nhất.',
+        s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] }
+    ]);
+    return MC(R, `Chọn vị trí thích hợp nhất để chèn câu cho sẵn vào đoạn văn.\n\n`
+      + `<b>Câu cần chèn:</b> "${bo.cau}"\n\n<b>Đoạn văn:</b> ${bo.doan}`, bo,
+      'Ba dấu hiệu quyết định vị trí: ① TỪ NỐI đầu câu (For this reason, However, Therefore) chỉ quan hệ với câu '
+      + 'liền trước ② ĐẠI TỪ (they, this, such) phải có danh từ tương ứng ở câu ngay trước ③ câu chèn vào không được '
+      + 'cắt đứt mạch giữa hai câu vốn dính nhau.');
+  } },
+
+{ ma: 'anh-tomtat', chuong: 'Cấu trúc – Chiến thuật', muc: 4, dang: 'mc',
+  tao(R) {
+    const bo = R.chon([
+      { doan: '電... ',
+        skip: true },
+      { doan: 'Fast fashion offers cheap, trendy clothes that are replaced every few weeks. Shoppers enjoy the low '
+            + 'prices, but the industry now produces more textile waste than almost any other. Some brands have '
+            + 'started take-back schemes, yet the volume they recycle is tiny compared with what they sell.',
+        d: 'Fast fashion is popular because it is cheap, but it creates huge waste that current recycling efforts barely reduce.',
+        v: 'Bản tóm tắt phải gồm CẢ BA ý của đoạn: rẻ và hợp mốt · gây rác thải lớn · nỗ lực tái chế chưa đáng kể. '
+         + 'Ba phương án còn lại chỉ lấy MỘT ý hoặc nói sai kết luận.',
+        s: ['Fast fashion brands have successfully solved the problem of textile waste through take-back schemes.',
+            'Shoppers should stop buying clothes altogether in order to protect the environment.',
+            'Clothes today are cheaper than they have ever been in history.'] },
+      { doan: 'Working from home saves commuting time and lets employees plan their own day. Managers, however, '
+            + 'report that new staff learn much more slowly when they never sit beside experienced colleagues. '
+            + 'Most companies have therefore settled on a mix of office and home days.',
+        d: 'Remote work brings flexibility but slows down the training of new staff, so most firms now combine both ways of working.',
+        v: 'Đoạn có ba tầng: ưu điểm → nhược điểm cụ thể → giải pháp thoả hiệp. Tóm tắt đúng phải giữ đủ ba tầng.',
+        s: ['Working from home is better than working in an office in every respect.',
+            'New employees are no longer needed in companies that allow remote work.',
+            'Managers dislike remote work because they cannot control their staff.'] },
+      { doan: 'Electric cars produce no exhaust fumes on the road, which makes city air cleaner. Producing their '
+            + 'batteries, however, requires mining rare metals and a great deal of energy. Whether they are truly '
+            + 'greener depends on how the electricity that charges them is generated.',
+        d: 'Electric cars clean up city air but their overall benefit depends on how batteries are made and how the electricity is produced.',
+        v: 'Đoạn không kết luận xe điện tốt hay xấu mà đặt điều kiện. Tóm tắt phải giữ chữ "depends on".',
+        s: ['Electric cars are completely harmless to the environment.',
+            'Electric cars pollute more than petrol cars in every situation.',
+            'Mining rare metals is the only environmental issue worth discussing.'] },
+      { doan: 'Social media lets people keep in touch across long distances and share news in seconds. At the same '
+            + 'time, constantly comparing your life with carefully edited photographs can damage self-esteem. '
+            + 'Researchers suggest that how long you spend online matters less than what you do while you are there.',
+        d: 'Social media connects people but can harm self-esteem, and researchers say the way it is used matters more than the time spent on it.',
+        v: 'Ý chốt của đoạn nằm ở câu cuối: CÁCH dùng quan trọng hơn THỜI LƯỢNG. Tóm tắt bỏ ý này là mất trọng tâm.',
+        s: ['Social media should be banned for young people because it harms self-esteem.',
+            'The longer people stay online, the more damage social media does.',
+            'Social media is only useful for keeping in touch with distant friends.'] }
+    ].filter(x => !x.skip));
+    return MC(R, `Đọc đoạn văn rồi chọn câu TÓM TẮT đúng nhất.\n\n${bo.doan}`, bo,
+      'Tóm tắt đúng phải bao được MỌI ý chính của đoạn, không thêm ý ngoài và không đổi mức độ khẳng định. '
+      + 'Phương án chứa "completely", "every", "only", "should be banned" thường quá mạnh so với giọng điệu của bài.');
   } }
 
 ]);
@@ -12326,47 +13910,6 @@ TD.GEN.van = (TD.GEN.van || []).concat([
 
 TD.GEN.anh = (TD.GEN.anh || []).concat([
 
-{ ma: 'anh-vdc-vietlai', chuong: 'Ngữ pháp khác', muc: 4, dang: 'mc',
-  tao(R) {
-    const it = R.chon([
-      { q: 'It was not until 1990 that she started her career.',
-        d: 'Not until 1990 did she start her career.',
-        s: ['Not until 1990 she started her career.', 'Not until 1990 she did start her career.', 'Not until 1990 started she her career.'],
-        v: 'Đưa "Not until + mốc thời gian" lên đầu thì mệnh đề chính phải ĐẢO NGỮ: trợ động từ + S + V nguyên thể.' },
-      { q: 'I regret not studying harder for the exam.',
-        d: 'I wish I had studied harder for the exam.',
-        s: ['I wish I studied harder for the exam.', 'I wish I would study harder for the exam.', 'I wish I have studied harder for the exam.'],
-        v: 'Nuối tiếc về QUÁ KHỨ dùng "wish + had + V3". Câu gốc "regret not V-ing" chỉ điều đã không làm.' },
-      { q: 'She is too young to watch this film.',
-        d: 'She is not old enough to watch this film.',
-        s: ['She is enough old to watch this film.', 'She is so young to watch this film.', 'She is not too old to watch this film.'],
-        v: '"too + adj + to V" ⇔ "not + adj trái nghĩa + enough + to V". Lưu ý "enough" đứng SAU tính từ.' },
-      { q: 'People believe that the company will expand next year.',
-        d: 'The company is believed to expand next year.',
-        s: ['The company is believed expanding next year.', 'The company believes to expand next year.', 'The company is believed that will expand next year.'],
-        v: 'Bị động kép: S + be + V3 (believe) + to V. Vì hành động ở tương lai và cùng thì với động từ chính nên dùng "to V".' },
-      { q: 'Although he was tired, he finished the report.',
-        d: 'Despite his tiredness, he finished the report.',
-        s: ['Despite he was tired, he finished the report.', 'Despite of his tiredness, he finished the report.', 'Although his tiredness, he finished the report.'],
-        v: 'Sau "Despite" dùng DANH TỪ hoặc V-ing, không có "of" và không dùng mệnh đề.' },
-      { q: 'The last time I saw him was five years ago.',
-        d: 'I have not seen him for five years.',
-        s: ['I did not see him for five years.', 'I have not seen him since five years.', 'I had not seen him for five years.'],
-        v: '"The last time … was X ago" ⇔ "have not + V3 + for X". "for" đi với KHOẢNG thời gian, "since" đi với mốc.' },
-      { q: 'He said, "Why did you leave so early?"',
-        d: 'He asked me why I had left so early.',
-        s: ['He asked me why did I leave so early.', 'He asked me why I left so early.', 'He asked me that why I had left so early.'],
-        v: 'Câu hỏi tường thuật trở về trật tự KHẲNG ĐỊNH, bỏ trợ động từ "did" và lùi thì (quá khứ đơn → quá khứ hoàn thành).' },
-      { q: 'If you do not leave now, you will miss the last bus.',
-        d: 'Unless you leave now, you will miss the last bus.',
-        s: ['Unless you do not leave now, you will miss the last bus.', 'Unless you left now, you would miss the last bus.', 'Unless you will leave now, you will miss the last bus.'],
-        v: '"Unless" đã mang sẵn nghĩa phủ định (= if not) nên mệnh đề đi kèm phải ở dạng KHẲNG ĐỊNH.' }
-    ]);
-    return MC2(R, `Chọn câu có nghĩa GẦN NHẤT với câu sau:\n\n"${it.q}"`, it,
-      'Câu viết lại luôn ghép hai điểm ngữ pháp cùng lúc. Làm hai bước: ① nhận ra CẤU TRÚC bị đổi '
-      + '② kiểm tra lại THÌ và trật tự từ của phương án. Ba phương án nhiễu thường đúng cấu trúc nhưng sai thì hoặc sai trật tự.');
-  } },
-
 { ma: 'anh-vdc-cloze', chuong: 'Cấu trúc – Chiến thuật', muc: 4, dang: 'mc',
   tao(R) {
     const it = R.chon([
@@ -12522,6 +14065,250 @@ bu('su', [
 { cd: 'Biển Đông', m: 3, a: false, t: 'Việc một quốc gia chiếm đóng bằng vũ lực có thể tạo ra cơ sở pháp lí về chủ quyền lãnh thổ.', v: 'Luật pháp quốc tế hiện đại KHÔNG thừa nhận việc thụ đắc lãnh thổ bằng vũ lực.' },
 { cd: 'Biển Đông', m: 4, a: true,  t: 'Biển Đông có vị trí chiến lược vì là tuyến hàng hải huyết mạch và giàu tài nguyên dầu khí, thuỷ sản.', v: 'Khoảng một phần ba lượng hàng hoá thương mại đường biển của thế giới đi qua Biển Đông.' },
 { cd: 'Biển Đông', m: 4, a: true,  t: 'Phát triển kinh tế biển gắn với bảo vệ chủ quyền là chủ trương nhất quán của Việt Nam.', v: 'Ngư dân bám biển vừa là hoạt động kinh tế vừa góp phần khẳng định sự hiện diện dân sự trên vùng biển của ta.' }
+]);
+
+/* Chuyên đề mới thay cho Ngữ âm – Trọng âm (đã bị loại khỏi đề từ 2025) */
+bu('anh', [
+{ cd: 'Dạng bài & chiến thuật 2025', m: 1, a: true,  t: 'Đề Tiếng Anh tốt nghiệp THPT từ năm 2025 gồm 40 câu trắc nghiệm làm trong 50 phút, mỗi câu 0,25 điểm.', v: 'Không còn phần tự luận và không có câu trả lời ngắn; tất cả đều là trắc nghiệm bốn phương án.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 1, a: false, t: 'Đề Tiếng Anh từ năm 2025 vẫn có phần hỏi về ngữ âm và trọng âm.', v: 'Dạng ngữ âm và trọng âm ĐÃ BỊ LOẠI khỏi cấu trúc đề từ năm 2025. Ôn phần này là mất thời gian vô ích.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 1, a: false, t: 'Dạng tìm lỗi sai và dạng chọn câu gần nghĩa nhất vẫn nằm trong đề Tiếng Anh từ 2025.', v: 'Cả hai dạng đó đều đã bị loại, cùng với dạng chọn từ đồng nghĩa – trái nghĩa và hoàn thành hội thoại.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 2, a: true,  t: 'Phần đọc hiểu chiếm 18 trên 40 câu, gần một nửa toàn bộ đề.', v: 'Vì vậy luyện kĩ năng đọc quan trọng hơn hẳn việc học thuộc mẹo ngữ pháp lẻ.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 2, a: true,  t: 'Đề có dạng bài sắp xếp các câu cho sẵn thành một đoạn văn hoặc một lá thư hoàn chỉnh.', v: 'Đây là dạng MỚI xuất hiện từ 2025, chiếm khoảng 5 câu.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 2, a: true,  t: 'Đề có dạng bài chèn một câu cho sẵn vào vị trí thích hợp trong đoạn văn.', v: 'Dạng mới, khoảng 5 câu; kiểm tra khả năng nắm mạch lạc và liên kết của đoạn.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 2, a: true,  t: 'Ngữ pháp và từ vựng vẫn được kiểm tra nhưng đặt trong ĐOẠN VĂN chứ không hỏi bằng câu rời.', v: 'Phần điền từ và cụm ngắn khoảng 12 câu, luôn nằm trong một đoạn có ngữ cảnh.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 3, a: true,  t: 'Trong dạng sắp xếp câu, câu chứa lời chào hoặc câu nêu chủ đề luôn đứng đầu, câu kí tên hoặc câu kết luận luôn đứng cuối.', v: 'Xác định được đầu và cuối là đã khoanh vùng được phần lớn thứ tự.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 3, a: true,  t: 'Đại từ như it, they, this, such phải có danh từ tương ứng xuất hiện ở câu ĐỨNG TRƯỚC.', v: 'Đây là mỏ neo mạnh nhất để sắp xếp câu và để chèn câu vào đúng vị trí.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 3, a: true,  t: 'Từ nối đầu câu như However, Therefore, As a result, For this reason cho biết quan hệ với câu liền trước.', v: 'Trái chiều dùng However; nhân quả dùng Therefore hoặc As a result; bổ sung dùng Moreover.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 3, a: false, t: 'Trong bài đọc hiểu, câu hỏi "According to the passage" cho phép suy luận thêm ngoài bài.', v: '"According to the passage" đòi hỏi đáp án nằm NGUYÊN trong bài. Chỉ câu "can be inferred" mới cần suy luận.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 3, a: true,  t: 'Câu hỏi dạng "The word ... is closest in meaning to" phải đoán nghĩa theo ngữ cảnh của bài chứ không theo nghĩa quen thuộc nhất của từ.', v: 'Nhiều từ có nhiều nghĩa; đề luôn chọn từ mà nghĩa trong bài khác nghĩa thông dụng.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 3, a: true,  t: 'Câu hỏi "The word it/they refers to" giải bằng cách tìm danh từ gần nhất phía trước khớp cả nghĩa lẫn số ít – số nhiều.', v: 'Thử thay danh từ đó vào vị trí đại từ, nếu câu vẫn hợp nghĩa thì đúng.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 4, a: true,  t: 'Câu tóm tắt đoạn văn phải bao được mọi ý chính, không thêm ý ngoài và không đổi mức độ khẳng định của bài.', v: 'Phương án chứa completely, every, only, should be banned thường quá mạnh so với giọng điệu thận trọng của bài đọc.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 4, a: false, t: 'Phương án đúng cho câu ý chính thường là phương án có nhiều chi tiết cụ thể nhất.', v: 'Ý chính phải KHÁI QUÁT cả bài. Phương án quá chi tiết chỉ đúng một đoạn nên là bẫy.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 4, a: true,  t: 'Với câu hỏi "Which of the following is NOT mentioned", phải đối chiếu từng phương án với bài để loại dần.', v: 'Ba phương án tìm được trong bài, phương án còn lại chính là đáp án. Không được chọn theo cảm tính.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 2, a: true,  t: 'Trung bình mỗi câu chỉ có 75 giây, nên câu nào quá hai phút thì nên đánh dấu và bỏ qua để quay lại sau.', v: '40 câu trong 50 phút. Sa đà một câu khó là mất nhiều câu dễ ở phía sau.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 2, a: true,  t: 'Nên đọc câu hỏi trước rồi mới quét bài đọc để tìm thông tin, thay vì đọc kĩ toàn bài từ đầu.', v: 'Kĩ năng skimming và scanning giúp tiết kiệm thời gian ở phần đọc hiểu 18 câu.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 1, a: false, t: 'Nếu không biết đáp án thì nên bỏ trống để tránh bị trừ điểm.', v: 'Bài thi KHÔNG trừ điểm câu sai. Bỏ trống là chắc chắn mất điểm, còn đoán vẫn có 25% cơ hội.' },
+{ cd: 'Dạng bài & chiến thuật 2025', m: 3, a: true,  t: 'Trong bài điền từ vào đoạn văn, nhiều chỗ trống là TỪ NỐI nên phải hiểu quan hệ giữa hai câu mới chọn đúng.', v: 'Đọc trọn câu chứa chỗ trống và cả câu liền trước, đừng chỉ nhìn vài từ quanh chỗ trống.' }
+]);
+
+/* ===== TOÁN: năm mảng kiến thức lớp 10–11 vẫn nằm trong phạm vi thi ===== */
+bu('toan', [
+{ cd: 'Lượng giác', m: 1, a: true,  t: 'Với mọi số thực x luôn có sin²x + cos²x = 1.', v: 'Hệ thức cơ bản nhất, suy ra 1 + tan²x = 1/cos²x và 1 + cot²x = 1/sin²x.' },
+{ cd: 'Lượng giác', m: 1, a: false, t: 'Hàm số y = sin x có tập giá trị là toàn bộ tập số thực.', v: 'Tập giá trị của sin x và cos x đều là đoạn [−1; 1], không phải toàn bộ ℝ.' },
+{ cd: 'Lượng giác', m: 2, a: true,  t: 'Hàm số y = sin x và y = cos x đều tuần hoàn với chu kì 2π, còn y = tan x tuần hoàn với chu kì π.', v: 'Chu kì của y = sin(ax + b) là 2π/|a|; của y = tan(ax + b) là π/|a|.' },
+{ cd: 'Lượng giác', m: 2, a: true,  t: 'Phương trình sin x = m có nghiệm khi và chỉ khi −1 ≤ m ≤ 1.', v: 'Ngoài khoảng đó phương trình vô nghiệm vì vượt tập giá trị của hàm sin.' },
+{ cd: 'Lượng giác', m: 2, a: false, t: 'Phương trình cos x = 2 có hai nghiệm phân biệt trong khoảng (0; 2π).', v: 'Vô nghiệm vì 2 nằm ngoài đoạn [−1; 1].' },
+{ cd: 'Lượng giác', m: 2, a: true,  t: 'Nghiệm của phương trình sin x = sin α là x = α + k2π hoặc x = π − α + k2π.', v: 'Còn cos x = cos α cho x = ±α + k2π; tan x = tan α cho x = α + kπ.' },
+{ cd: 'Lượng giác', m: 3, a: true,  t: 'Công thức nhân đôi cho cos2a có ba dạng tương đương: cos²a − sin²a, 2cos²a − 1 và 1 − 2sin²a.', v: 'Ba dạng này là nguồn của công thức hạ bậc, dùng nhiều khi tính tích phân lượng giác.' },
+{ cd: 'Lượng giác', m: 3, a: true,  t: 'Công thức hạ bậc sin²a = (1 − cos2a)/2 giúp đưa bậc hai về bậc nhất để lấy tích phân.', v: 'Tương tự cos²a = (1 + cos2a)/2. Không hạ bậc thì không lấy nguyên hàm trực tiếp được.' },
+{ cd: 'Lượng giác', m: 3, a: false, t: 'Công thức cộng góc cho cos(a + b) = cos a·cos b + sin a·sin b.', v: 'Dấu bị ngược: cos(a + b) = cos a·cos b − sin a·sin b. Chỉ cos(a − b) mới mang dấu cộng.' },
+{ cd: 'Lượng giác', m: 3, a: true,  t: 'Phương trình a·sin x + b·cos x = c có nghiệm khi và chỉ khi a² + b² ≥ c².', v: 'Vì vế trái viết được thành √(a²+b²)·sin(x + φ), có tập giá trị [−√(a²+b²); √(a²+b²)].' },
+{ cd: 'Lượng giác', m: 3, a: true,  t: 'Hàm số y = sin x là hàm lẻ còn y = cos x là hàm chẵn.', v: 'sin(−x) = −sin x nên đồ thị đối xứng qua gốc toạ độ; cos(−x) = cos x nên đối xứng qua trục tung.' },
+{ cd: 'Lượng giác', m: 4, a: true,  t: 'Giá trị lớn nhất của biểu thức 3sin x + 4cos x bằng 5.', v: 'Vì 3sin x + 4cos x = 5·sin(x + φ) với √(3² + 4²) = 5, mà sin không vượt quá 1.' },
+{ cd: 'Lượng giác', m: 4, a: false, t: 'Số nghiệm của phương trình sin x = 1/2 trên đoạn [0; 2π] là bốn.', v: 'Chỉ có hai nghiệm là π/6 và 5π/6. Muốn đếm nghiệm phải vẽ đường tròn lượng giác hoặc thay k lần lượt.' },
+{ cd: 'Lượng giác', m: 4, a: true,  t: 'Khi giải phương trình lượng giác có mẫu số hoặc chứa tan, cot thì phải đặt điều kiện xác định trước.', v: 'Ví dụ tan x đòi hỏi cos x ≠ 0, tức x ≠ π/2 + kπ. Bỏ qua điều kiện là nhận nghiệm ngoại lai.' },
+{ cd: 'Lượng giác', m: 2, a: true,  t: 'Một cung lượng giác có số đo 1 radian ứng với cung có độ dài bằng bán kính đường tròn.', v: 'Đổi đơn vị: π radian = 180°, nên 1 rad ≈ 57,3°.' },
+{ cd: 'Lượng giác', m: 2, a: false, t: 'Trên máy tính, chế độ độ và chế độ radian cho cùng một kết quả khi tính sin.', v: 'Khác hoàn toàn: sin(π/6) ở chế độ R là 0,5 nhưng ở chế độ D chỉ khoảng 0,0091. Chọn sai chế độ là sai cả bài.' },
+
+{ cd: 'Giới hạn – Liên tục', m: 1, a: true,  t: 'Dãy số (qⁿ) có giới hạn bằng 0 khi và chỉ khi |q| < 1.', v: 'Nếu |q| > 1 thì dãy phân kì; q = 1 cho dãy hằng bằng 1; q = −1 thì dãy không có giới hạn.' },
+{ cd: 'Giới hạn – Liên tục', m: 1, a: true,  t: 'lim(1/nᵏ) = 0 với mọi k > 0 khi n tiến tới vô cực.', v: 'Đây là giới hạn nền để tính mọi giới hạn phân thức bằng cách chia cho luỹ thừa bậc cao nhất.' },
+{ cd: 'Giới hạn – Liên tục', m: 2, a: true,  t: 'Khi x tiến tới vô cực, giới hạn của phân thức hữu tỉ phụ thuộc vào việc so bậc của tử với bậc của mẫu.', v: 'Bậc tử nhỏ hơn cho 0; bằng nhau cho tỉ số hệ số cao nhất; lớn hơn cho vô cực.' },
+{ cd: 'Giới hạn – Liên tục', m: 2, a: true,  t: 'Với dạng vô định 0/0 của phân thức, cách xử lí là phân tích thành nhân tử rồi rút gọn.', v: 'Nếu chứa căn thì nhân liên hợp để khử dạng vô định.' },
+{ cd: 'Giới hạn – Liên tục', m: 2, a: false, t: 'Mọi hàm số đều liên tục tại mọi điểm thuộc tập xác định của nó.', v: 'Hàm cho bởi nhiều công thức có thể gián đoạn tại điểm nối dù điểm đó vẫn thuộc tập xác định.' },
+{ cd: 'Giới hạn – Liên tục', m: 3, a: true,  t: 'Hàm số f liên tục tại x₀ khi và chỉ khi giới hạn của f khi x tiến tới x₀ tồn tại và bằng f(x₀).', v: 'Phải đủ ba điều: f(x₀) xác định · giới hạn tồn tại · hai giá trị đó bằng nhau.' },
+{ cd: 'Giới hạn – Liên tục', m: 3, a: true,  t: 'Với hàm cho bởi nhiều công thức, muốn xét liên tục tại điểm nối phải tính cả giới hạn trái và giới hạn phải.', v: 'Hai giới hạn một bên phải bằng nhau và bằng giá trị hàm tại điểm đó.' },
+{ cd: 'Giới hạn – Liên tục', m: 3, a: true,  t: 'Nếu f liên tục trên đoạn [a; b] và f(a)·f(b) < 0 thì phương trình f(x) = 0 có ít nhất một nghiệm trong khoảng (a; b).', v: 'Đây là hệ quả của định lí giá trị trung gian, dùng để chứng minh phương trình có nghiệm.' },
+{ cd: 'Giới hạn – Liên tục', m: 3, a: false, t: 'Nếu f(a)·f(b) > 0 thì chắc chắn phương trình f(x) = 0 vô nghiệm trên (a; b).', v: 'Không suy ra được. Hàm có thể cắt trục hoành hai lần rồi quay lại, ví dụ parabol.' },
+{ cd: 'Giới hạn – Liên tục', m: 3, a: true,  t: 'Hàm đa thức liên tục trên toàn bộ tập số thực.', v: 'Hàm phân thức hữu tỉ liên tục trên tập xác định, tức trừ các điểm làm mẫu bằng 0.' },
+{ cd: 'Giới hạn – Liên tục', m: 4, a: true,  t: 'Giới hạn một bên khác nhau tại một điểm chứng tỏ hàm số không có giới hạn tại điểm đó.', v: 'Đó cũng là dấu hiệu của điểm gián đoạn loại nhảy, hay gặp ở hàm chứa dấu giá trị tuyệt đối.' },
+{ cd: 'Giới hạn – Liên tục', m: 4, a: true,  t: 'Đường thẳng x = x₀ là tiệm cận đứng của đồ thị khi ít nhất một giới hạn một bên tại x₀ bằng vô cực.', v: 'Đây là cầu nối giữa chương giới hạn với bài toán tiệm cận trong khảo sát hàm số.' },
+{ cd: 'Giới hạn – Liên tục', m: 4, a: false, t: 'Mẫu số triệt tiêu tại x₀ thì chắc chắn đồ thị có tiệm cận đứng x = x₀.', v: 'Nếu tử cũng triệt tiêu thì phải rút gọn trước; sau khi rút gọn có thể không còn tiệm cận đứng nữa.' },
+{ cd: 'Giới hạn – Liên tục', m: 2, a: true,  t: 'Tổng của cấp số nhân lùi vô hạn chính là một giới hạn và bằng u₁/(1 − q) khi |q| < 1.', v: 'Đây là chỗ chương giới hạn nối với chương dãy số.' },
+{ cd: 'Giới hạn – Liên tục', m: 2, a: false, t: 'Giới hạn của một tổng luôn bằng tổng các giới hạn trong mọi trường hợp.', v: 'Chỉ đúng khi từng giới hạn tồn tại hữu hạn. Với dạng vô định ∞ − ∞ thì quy tắc này không áp dụng được.' },
+{ cd: 'Giới hạn – Liên tục', m: 3, a: true,  t: 'Có thể dùng chức năng lập bảng giá trị của máy tính để dự đoán giới hạn bằng cách cho x tiến dần tới điểm cần xét.', v: 'Cho x = 1,9 · 1,99 · 1,999 để dự đoán giới hạn khi x tiến tới 2 từ bên trái.' },
+
+{ cd: 'Vecto và hệ thức lượng', m: 1, a: true,  t: 'Hai vecto bằng nhau khi chúng cùng hướng và cùng độ dài.', v: 'Vecto không phụ thuộc điểm đặt, nên hai vecto bằng nhau có thể nằm ở hai vị trí khác nhau.' },
+{ cd: 'Vecto và hệ thức lượng', m: 1, a: true,  t: 'Quy tắc ba điểm cho AB→ + BC→ = AC→ với ba điểm A, B, C bất kì.', v: 'Kèm quy tắc trừ: AB→ − AC→ = CB→.' },
+{ cd: 'Vecto và hệ thức lượng', m: 2, a: true,  t: 'Điểm I là trung điểm của AB khi và chỉ khi với mọi điểm M có MA→ + MB→ = 2MI→.', v: 'Với trọng tâm G của tam giác ABC thì MA→ + MB→ + MC→ = 3MG→.' },
+{ cd: 'Vecto và hệ thức lượng', m: 2, a: true,  t: 'Tích vô hướng của hai vecto bằng tích độ dài nhân với cosin góc giữa chúng.', v: 'u→·v→ = |u||v|cos(u,v) = x₁x₂ + y₁y₂ trong toạ độ. Hai vecto vuông góc khi tích vô hướng bằng 0.' },
+{ cd: 'Vecto và hệ thức lượng', m: 2, a: false, t: 'Tích vô hướng của hai vecto là một vecto.', v: 'Tích vô hướng là một SỐ. Chỉ tích có hướng trong không gian mới cho ra một vecto.' },
+{ cd: 'Vecto và hệ thức lượng', m: 2, a: true,  t: 'Định lí cosin cho a² = b² + c² − 2bc·cos A trong tam giác ABC.', v: 'Dùng khi biết hai cạnh và góc XEN GIỮA, hoặc biết cả ba cạnh để tìm góc.' },
+{ cd: 'Vecto và hệ thức lượng', m: 2, a: true,  t: 'Định lí sin cho a/sin A = b/sin B = c/sin C = 2R với R là bán kính đường tròn ngoại tiếp.', v: 'Dùng khi biết một cạnh và góc ĐỐI DIỆN nó.' },
+{ cd: 'Vecto và hệ thức lượng', m: 3, a: true,  t: 'Diện tích tam giác tính được bằng nhiều cách: ½ab·sin C, abc/4R, pr và công thức Heron.', v: 'Chọn công thức theo dữ kiện đề cho; p là nửa chu vi, r là bán kính đường tròn nội tiếp.' },
+{ cd: 'Vecto và hệ thức lượng', m: 3, a: true,  t: 'Công thức đường trung tuyến cho m_a² = (2b² + 2c² − a²)/4.', v: 'Hay dùng trong bài toán thực tế đo khoảng cách gián tiếp.' },
+{ cd: 'Vecto và hệ thức lượng', m: 3, a: false, t: 'Định lí cosin chỉ áp dụng được cho tam giác vuông.', v: 'Áp dụng cho MỌI tam giác. Với góc A vuông thì cos A = 0 và công thức trở về định lí Pythagore.' },
+{ cd: 'Vecto và hệ thức lượng', m: 3, a: true,  t: 'Ba điểm A, B, C thẳng hàng khi và chỉ khi hai vecto AB→ và AC→ cùng phương.', v: 'Trong toạ độ, cùng phương nghĩa là x₁y₂ − x₂y₁ = 0.' },
+{ cd: 'Vecto và hệ thức lượng', m: 4, a: true,  t: 'Bài toán đo chiều cao hoặc khoảng cách không tới được thường giải bằng định lí sin kết hợp định lí cosin.', v: 'Đây là dạng bài thực tế được chương trình mới rất ưa dùng.' },
+{ cd: 'Vecto và hệ thức lượng', m: 4, a: true,  t: 'Trong không gian, tích có hướng của hai vecto vuông góc với cả hai vecto đó và có độ dài bằng diện tích hình bình hành dựng trên chúng.', v: 'Nhờ vậy diện tích tam giác bằng nửa độ dài tích có hướng của hai vecto cạnh.' },
+{ cd: 'Vecto và hệ thức lượng', m: 2, a: false, t: 'Vecto AB→ và vecto BA→ là hai vecto bằng nhau.', v: 'Chúng ngược hướng: AB→ = −BA→. Nhầm chiều là sai dấu toàn bộ phép tính về sau.' },
+{ cd: 'Vecto và hệ thức lượng', m: 3, a: true,  t: 'Góc giữa hai vecto luôn nằm trong đoạn từ 0° đến 180°.', v: 'Khác với góc giữa hai đường thẳng vốn chỉ nằm trong khoảng từ 0° đến 90°.' },
+{ cd: 'Vecto và hệ thức lượng', m: 2, a: true,  t: 'Trong tam giác vuông, hệ thức lượng cho b² = a·b′ và h² = b′·c′ với b′, c′ là hình chiếu hai cạnh góc vuông lên cạnh huyền.', v: 'Kèm hệ thức 1/h² = 1/b² + 1/c² dùng nhiều trong hình không gian.' },
+
+{ cd: 'Bất phương trình bậc hai', m: 1, a: true,  t: 'Tam thức bậc hai f(x) = ax² + bx + c với Δ < 0 luôn cùng dấu với hệ số a trên toàn bộ tập số thực.', v: 'Đây là nền của mọi bài "tìm m để biểu thức luôn dương" hoặc "luôn âm".' },
+{ cd: 'Bất phương trình bậc hai', m: 1, a: true,  t: 'Khi Δ > 0, tam thức bậc hai trái dấu với a giữa hai nghiệm và cùng dấu với a ngoài khoảng hai nghiệm.', v: 'Câu thần chú quen thuộc: "trong trái, ngoài cùng".' },
+{ cd: 'Bất phương trình bậc hai', m: 2, a: true,  t: 'Bất phương trình ax² + bx + c > 0 nghiệm đúng với mọi x khi a > 0 và Δ < 0.', v: 'Nếu đề cho "nghiệm đúng với mọi x" thì phải xét thêm trường hợp a = 0.' },
+{ cd: 'Bất phương trình bậc hai', m: 2, a: false, t: 'Bất phương trình ax² + bx + c ≥ 0 nghiệm đúng với mọi x khi a > 0 và Δ > 0.', v: 'Phải là Δ ≤ 0. Khi Δ > 0 tam thức đổi dấu nên không thể luôn không âm.' },
+{ cd: 'Bất phương trình bậc hai', m: 2, a: true,  t: 'Khi Δ = 0, tam thức bậc hai cùng dấu với a với mọi x khác nghiệm kép và bằng 0 tại nghiệm kép.', v: 'Vì vậy bất phương trình ngặt "> 0" không nghiệm đúng với mọi x, nhưng "≥ 0" thì có.' },
+{ cd: 'Bất phương trình bậc hai', m: 3, a: true,  t: 'Muốn giải bất phương trình bậc hai, ta tìm nghiệm của tam thức rồi lập bảng xét dấu.', v: 'Lập bảng xét dấu vẫn nhanh và ít sai hơn nhẩm miệng, nhất là khi hệ số a âm.' },
+{ cd: 'Bất phương trình bậc hai', m: 3, a: true,  t: 'Bất phương trình chứa căn thức luôn phải đặt điều kiện xác định trước khi bình phương hai vế.', v: 'Bình phương khi chưa biết dấu hai vế là nguồn nghiệm ngoại lai phổ biến nhất.' },
+{ cd: 'Bất phương trình bậc hai', m: 3, a: false, t: 'Nhân hai vế bất phương trình với một biểu thức chứa ẩn thì giữ nguyên chiều bất phương trình.', v: 'Chỉ giữ nguyên chiều khi biểu thức đó DƯƠNG. Biểu thức âm thì phải đổi chiều, chưa biết dấu thì phải chia trường hợp.' },
+{ cd: 'Bất phương trình bậc hai', m: 3, a: true,  t: 'Phương trình bậc hai có hai nghiệm trái dấu khi và chỉ khi a·c < 0.', v: 'Suy từ định lí Viète: tích hai nghiệm bằng c/a nên âm khi a và c trái dấu.' },
+{ cd: 'Bất phương trình bậc hai', m: 3, a: true,  t: 'Định lí Viète cho tổng hai nghiệm bằng −b/a và tích hai nghiệm bằng c/a.', v: 'Dùng để tính biểu thức đối xứng của hai nghiệm mà không cần giải phương trình.' },
+{ cd: 'Bất phương trình bậc hai', m: 4, a: true,  t: 'Phương trình bậc hai có hai nghiệm dương phân biệt khi Δ > 0, tổng hai nghiệm dương và tích hai nghiệm dương.', v: 'Ba điều kiện phải đồng thời. Thiếu điều kiện Δ > 0 là hay quên nhất.' },
+{ cd: 'Bất phương trình bậc hai', m: 4, a: false, t: 'Nếu tích hai nghiệm dương thì cả hai nghiệm đều dương.', v: 'Tích dương chỉ nghĩa là hai nghiệm CÙNG dấu; muốn cả hai dương thì tổng cũng phải dương.' },
+{ cd: 'Bất phương trình bậc hai', m: 2, a: true,  t: 'Bất phương trình bậc nhất hai ẩn có miền nghiệm là một nửa mặt phẳng giới hạn bởi đường thẳng tương ứng.', v: 'Xác định nửa mặt phẳng bằng cách thay toạ độ một điểm bất kì không nằm trên đường thẳng, thường lấy gốc O.' },
+{ cd: 'Bất phương trình bậc hai', m: 3, a: true,  t: 'Bài toán tối ưu tuyến tính tìm giá trị lớn nhất, nhỏ nhất của biểu thức trên miền đa giác đạt cực trị tại ĐỈNH của miền.', v: 'Nên chỉ cần thay toạ độ các đỉnh vào rồi so sánh, không phải quét toàn miền.' },
+{ cd: 'Bất phương trình bậc hai', m: 2, a: false, t: 'Miền nghiệm của hệ bất phương trình bậc nhất hai ẩn luôn là một đa giác bị chặn.', v: 'Có thể là miền không bị chặn, khi đó biểu thức tối ưu có thể không có giá trị lớn nhất.' },
+{ cd: 'Bất phương trình bậc hai', m: 4, a: true,  t: 'Khi cô lập tham số m về dạng m ≥ f(x) đúng với mọi x thuộc D, ta cần m ≥ giá trị LỚN NHẤT của f trên D.', v: 'Ngược lại, m ≥ f(x) có nghiệm thì chỉ cần m ≥ giá trị NHỎ NHẤT. Phân biệt "với mọi" và "tồn tại" là chỗ mất điểm nhiều nhất.' }
+]);
+
+/* ===== HOÁ: hai mảng còn thiếu ===== */
+bu('hoa', [
+{ cd: 'Phức chất', m: 1, a: true,  t: 'Phức chất gồm một nguyên tử hoặc ion kim loại trung tâm liên kết với các phối tử bao quanh.', v: 'Liên kết giữa nguyên tử trung tâm và phối tử là liên kết cho – nhận.' },
+{ cd: 'Phức chất', m: 1, a: true,  t: 'Phối tử là phân tử hoặc anion còn cặp electron chưa liên kết, ví dụ H₂O, NH₃, Cl⁻, CN⁻, OH⁻.', v: 'Cặp electron đó được cho vào orbital trống của ion kim loại trung tâm.' },
+{ cd: 'Phức chất', m: 2, a: true,  t: 'Số phối trí là số liên kết cho – nhận giữa nguyên tử trung tâm và các phối tử.', v: 'Số phối trí thường gặp là 4 (tứ diện hoặc vuông phẳng) và 6 (bát diện).' },
+{ cd: 'Phức chất', m: 2, a: true,  t: 'Ion [Cu(H₂O)₆]²⁺ trong dung dịch có màu xanh lam đặc trưng.', v: 'Đây là dạng tồn tại thật của ion Cu²⁺ trong nước, giải thích màu xanh của dung dịch muối đồng.' },
+{ cd: 'Phức chất', m: 2, a: true,  t: 'Cho dung dịch NH₃ dư vào dung dịch muối Cu²⁺ thu được phức [Cu(NH₃)₄]²⁺ màu xanh lam đậm.', v: 'Kết tủa Cu(OH)₂ tạo ra ban đầu tan trở lại trong NH₃ dư nhờ tạo phức tan.' },
+{ cd: 'Phức chất', m: 2, a: false, t: 'Kết tủa Cu(OH)₂ không tan trong dung dịch NH₃ dư.', v: 'Cu(OH)₂ TAN trong NH₃ dư tạo phức xanh lam đậm. Đây là phản ứng nhận biết ion Cu²⁺.' },
+{ cd: 'Phức chất', m: 3, a: true,  t: 'Kim loại chuyển tiếp dễ tạo phức chất vì có orbital d trống để nhận cặp electron của phối tử.', v: 'Đó cũng là lí do hợp chất của chúng thường có màu và có nhiều số oxi hoá.' },
+{ cd: 'Phức chất', m: 3, a: true,  t: 'Màu của phức chất phụ thuộc vào ion kim loại trung tâm và cả loại phối tử bao quanh nó.', v: 'Cùng ion Cu²⁺ nhưng phức với H₂O màu xanh nhạt còn phức với NH₃ màu xanh đậm hơn hẳn.' },
+{ cd: 'Phức chất', m: 3, a: true,  t: 'AgCl không tan trong nước nhưng tan trong dung dịch NH₃ dư nhờ tạo phức [Ag(NH₃)₂]⁺.', v: 'Ứng dụng trong phản ứng tráng bạc và trong việc tách bạc.' },
+{ cd: 'Phức chất', m: 3, a: false, t: 'Mọi kim loại đều tạo được phức chất bền như nhau.', v: 'Kim loại chuyển tiếp tạo phức dễ và bền hơn hẳn kim loại nhóm IA, IIA vì có orbital d.' },
+{ cd: 'Phức chất', m: 4, a: true,  t: 'Phức chất có vai trò quan trọng trong sinh học: hemoglobin là phức của sắt, còn chlorophyll là phức của magnesium.', v: 'Hemoglobin vận chuyển oxygen; chlorophyll hấp thụ ánh sáng cho quang hợp.' },
+{ cd: 'Phức chất', m: 4, a: true,  t: 'Trong công nghiệp, phức chất được dùng để tách và tinh chế kim loại, làm chất xúc tác và làm chất tạo màu.', v: 'Ví dụ dùng phức cyanide để tách vàng, dùng phức làm xúc tác trong tổng hợp hữu cơ.' },
+{ cd: 'Phức chất', m: 3, a: true,  t: 'Trong công thức phức chất, phần nằm trong dấu ngoặc vuông là cầu nội, phần ngoài ngoặc là cầu ngoại.', v: 'Ví dụ K₃[Fe(CN)₆] có cầu nội là [Fe(CN)₆]³⁻ và cầu ngoại là ba ion K⁺.' },
+{ cd: 'Phức chất', m: 2, a: true,  t: 'Điện tích của ion phức bằng tổng điện tích của ion trung tâm và của các phối tử.', v: 'Với [Cu(NH₃)₄]²⁺: Cu²⁺ mang +2, NH₃ trung hoà nên ion phức mang +2.' },
+{ cd: 'Phức chất', m: 4, a: false, t: 'Khi tạo phức, số oxi hoá của ion kim loại trung tâm thay đổi.', v: 'Tạo phức là liên kết CHO – NHẬN, không phải phản ứng oxi hoá khử, nên số oxi hoá giữ nguyên.' },
+{ cd: 'Phức chất', m: 3, a: true,  t: 'Nhận biết ion Fe³⁺ bằng dung dịch KSCN cho phức màu đỏ máu.', v: 'Phản ứng rất nhạy, dùng phổ biến trong phân tích định tính.' },
+
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 1, a: true,  t: 'Phản ứng toả nhiệt có biến thiên enthalpy chuẩn mang dấu âm.', v: 'Δ_rH° < 0 là toả nhiệt; Δ_rH° > 0 là thu nhiệt.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 1, a: true,  t: 'Enthalpy tạo thành chuẩn của đơn chất bền nhất ở trạng thái chuẩn bằng 0.', v: 'Ví dụ Δ_fH° của O₂(g), N₂(g), C(graphite) đều bằng 0.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 2, a: true,  t: 'Biến thiên enthalpy của phản ứng bằng tổng enthalpy tạo thành của sản phẩm trừ tổng của chất đầu.', v: 'Δ_rH = ΣΔ_fH(sản phẩm) − ΣΔ_fH(chất đầu).' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 2, a: false, t: 'Tính theo năng lượng liên kết thì cũng lấy tổng của sản phẩm trừ tổng của chất đầu.', v: 'NGƯỢC lại: theo năng lượng liên kết thì lấy tổng chất ĐẦU trừ tổng sản phẩm. Hai công thức ngược chiều nhau.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 2, a: true,  t: 'Phản ứng đốt cháy nhiên liệu luôn là phản ứng toả nhiệt.', v: 'Đó là lí do nhiên liệu được dùng để cung cấp năng lượng.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 2, a: true,  t: 'Tốc độ phản ứng tăng khi tăng nồng độ, tăng nhiệt độ, tăng áp suất chất khí, tăng diện tích bề mặt hoặc dùng chất xúc tác.', v: 'Năm yếu tố này là câu hỏi lí thuyết quen thuộc.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 3, a: true,  t: 'Chất xúc tác làm tăng tốc độ phản ứng nhưng không bị tiêu hao sau phản ứng.', v: 'Xúc tác hạ năng lượng hoạt hoá, làm cả chiều thuận và chiều nghịch nhanh lên như nhau.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 3, a: false, t: 'Chất xúc tác làm cân bằng hoá học chuyển dịch theo chiều thuận.', v: 'Xúc tác KHÔNG làm chuyển dịch cân bằng, chỉ giúp hệ đạt cân bằng nhanh hơn.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 3, a: true,  t: 'Cân bằng hoá học là cân bằng động: phản ứng thuận và nghịch vẫn xảy ra nhưng với tốc độ bằng nhau.', v: 'Nồng độ các chất không đổi chứ không phải phản ứng dừng lại.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 3, a: true,  t: 'Theo nguyên lí Le Chatelier, tăng nhiệt độ làm cân bằng chuyển dịch theo chiều thu nhiệt.', v: 'Hệ luôn chuyển dịch theo chiều CHỐNG LẠI tác động từ bên ngoài.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 3, a: true,  t: 'Tăng áp suất làm cân bằng chuyển dịch theo chiều làm giảm số mol khí.', v: 'Nếu hai vế có số mol khí bằng nhau thì áp suất không ảnh hưởng tới cân bằng.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 3, a: false, t: 'Trong biểu thức hằng số cân bằng có mặt cả chất rắn và dung môi.', v: 'Chất rắn và dung môi KHÔNG xuất hiện trong biểu thức hằng số cân bằng vì nồng độ của chúng coi như không đổi.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 4, a: true,  t: 'Với phản ứng tổng hợp ammonia toả nhiệt và giảm số mol khí, muốn tăng hiệu suất phải tăng áp suất và giảm nhiệt độ.', v: 'Thực tế vẫn phải giữ nhiệt độ khá cao để tốc độ đủ nhanh — đó là sự đánh đổi giữa hiệu suất và tốc độ.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 4, a: true,  t: 'Hằng số cân bằng chỉ phụ thuộc bản chất phản ứng và nhiệt độ, không phụ thuộc nồng độ ban đầu.', v: 'Đổi nồng độ ban đầu chỉ đổi vị trí cân bằng chứ không đổi giá trị K.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 2, a: true,  t: 'Nhiệt lượng toả ra khi đốt cháy hoàn toàn một lượng chất tính bằng tích số mol với trị tuyệt đối của enthalpy đốt cháy.', v: 'Q = n × |Δ_cH|. Đây là cầu nối giữa Hoá và bài toán năng lượng thực tế.' },
+{ cd: 'Nhiệt động – Tốc độ – Cân bằng', m: 4, a: false, t: 'Phản ứng có Δ_rH âm thì luôn xảy ra nhanh ở điều kiện thường.', v: 'Toả nhiệt nói về mặt NĂNG LƯỢNG, còn xảy ra nhanh hay chậm là chuyện TỐC ĐỘ. Than cháy toả nhiệt mạnh nhưng vẫn cần mồi lửa.' }
+]);
+
+/* ===== SINH: hai mảng còn thiếu ===== */
+bu('sinh', [
+{ cd: 'Di truyền người', m: 1, a: true,  t: 'Nghiên cứu di truyền người gặp khó khăn vì người sinh sản chậm, ít con và không thể áp dụng phương pháp lai hay gây đột biến.', v: 'Vì vậy phải dùng các phương pháp gián tiếp như phả hệ, trẻ đồng sinh và di truyền tế bào.' },
+{ cd: 'Di truyền người', m: 2, a: true,  t: 'Phương pháp phả hệ dùng để xác định gene gây bệnh là trội hay lặn và nằm trên nhiễm sắc thể thường hay giới tính.', v: 'Bố mẹ bình thường sinh con bệnh thì bệnh do gene lặn; bệnh chủ yếu ở nam thì gene lặn nằm trên X.' },
+{ cd: 'Di truyền người', m: 2, a: true,  t: 'Hội chứng Down do thừa một nhiễm sắc thể số 21, tức có ba chiếc thay vì hai.', v: 'Đây là thể ba nhiễm, phát hiện được bằng phương pháp nghiên cứu nhiễm sắc thể.' },
+{ cd: 'Di truyền người', m: 2, a: true,  t: 'Hội chứng Turner có bộ nhiễm sắc thể giới tính XO còn hội chứng Klinefelter là XXY.', v: 'Cả hai đều là đột biến số lượng nhiễm sắc thể giới tính.' },
+{ cd: 'Di truyền người', m: 2, a: false, t: 'Bệnh mù màu và bệnh máu khó đông do gene trội nằm trên nhiễm sắc thể X quy định.', v: 'Do gene LẶN trên X. Vì thế nam giới chỉ cần một allele lặn đã biểu hiện bệnh.' },
+{ cd: 'Di truyền người', m: 3, a: true,  t: 'Bệnh phenylketone niệu là bệnh do đột biến gene lặn trên nhiễm sắc thể thường, có thể hạn chế tác hại bằng chế độ ăn kiêng.', v: 'Ví dụ điển hình cho thấy kiểu hình là kết quả tương tác giữa kiểu gene và môi trường.' },
+{ cd: 'Di truyền người', m: 3, a: true,  t: 'Trẻ đồng sinh cùng trứng có kiểu gene giống hệt nhau nên khác biệt giữa chúng chủ yếu do môi trường.', v: 'Nghiên cứu trẻ đồng sinh giúp tách vai trò của kiểu gene và môi trường lên từng tính trạng.' },
+{ cd: 'Di truyền người', m: 3, a: true,  t: 'Tư vấn di truyền giúp các cặp vợ chồng dự đoán nguy cơ sinh con mắc bệnh di truyền.', v: 'Dựa trên phả hệ, xét nghiệm gene và các chỉ số sàng lọc trước sinh.' },
+{ cd: 'Di truyền người', m: 3, a: false, t: 'Mọi bệnh di truyền đều biểu hiện ngay từ khi mới sinh.', v: 'Nhiều bệnh chỉ biểu hiện ở tuổi trưởng thành, ví dụ bệnh Huntington.' },
+{ cd: 'Di truyền người', m: 4, a: true,  t: 'Kết hôn gần huyết thống làm tăng nguy cơ sinh con mắc bệnh di truyền lặn.', v: 'Vì làm tăng khả năng hai allele lặn hiếm cùng gặp nhau trong một hợp tử.' },
+{ cd: 'Di truyền người', m: 4, a: true,  t: 'Sàng lọc trước sinh và sàng lọc sơ sinh giúp phát hiện sớm để can thiệp kịp thời.', v: 'Chọc ối và sinh thiết tua nhau thai cho phép phân tích bộ nhiễm sắc thể của thai nhi.' },
+{ cd: 'Di truyền người', m: 4, a: true,  t: 'Trong phả hệ, nếu bố bị bệnh mà tất cả con gái đều bị bệnh còn con trai bình thường thì gene bệnh là trội trên nhiễm sắc thể X.', v: 'Bố truyền X cho toàn bộ con gái và truyền Y cho toàn bộ con trai.' },
+{ cd: 'Di truyền người', m: 3, a: true,  t: 'Bệnh chỉ truyền theo dòng mẹ là dấu hiệu của gene nằm trong ti thể.', v: 'Hợp tử nhận ti thể gần như hoàn toàn từ trứng của mẹ.' },
+{ cd: 'Di truyền người', m: 2, a: true,  t: 'Ung thư là bệnh do đột biến ở các gene kiểm soát chu kì tế bào, phần lớn là đột biến ở tế bào sinh dưỡng nên không di truyền cho đời sau.', v: 'Chỉ một tỉ lệ nhỏ ung thư mang yếu tố di truyền qua tế bào sinh dục.' },
+{ cd: 'Di truyền người', m: 4, a: false, t: 'Xét nghiệm gene có thể khẳng định chắc chắn một người sẽ mắc mọi bệnh mà họ mang allele nguy cơ.', v: 'Nhiều bệnh là đa gene và chịu ảnh hưởng môi trường, nên xét nghiệm chỉ cho biết NGUY CƠ chứ không khẳng định.' },
+{ cd: 'Di truyền người', m: 2, a: false, t: 'Người mang gene bệnh lặn ở trạng thái dị hợp thì luôn biểu hiện bệnh.', v: 'Người dị hợp là người LÀNH MANG GENE, không biểu hiện nhưng vẫn truyền allele bệnh cho con.' },
+
+{ cd: 'Công nghệ di truyền', m: 1, a: true,  t: 'Công nghệ gene là quy trình chuyển gene từ tế bào cho sang tế bào nhận nhằm tạo sinh vật biến đổi gene.', v: 'Ba khâu chính: tạo DNA tái tổ hợp, đưa vào tế bào nhận, phân lập dòng tế bào chứa DNA tái tổ hợp.' },
+{ cd: 'Công nghệ di truyền', m: 2, a: true,  t: 'Thể truyền thường dùng là plasmid của vi khuẩn hoặc virus đã được biến đổi.', v: 'Thể truyền phải tự nhân đôi được trong tế bào nhận và mang dấu chuẩn để nhận biết.' },
+{ cd: 'Công nghệ di truyền', m: 2, a: true,  t: 'Enzyme cắt giới hạn cắt DNA tại trình tự nhận biết đặc hiệu còn enzyme ligase nối các đoạn DNA lại.', v: 'Cả gene cần chuyển và thể truyền đều được cắt bằng CÙNG một loại enzyme để đầu dính khớp nhau.' },
+{ cd: 'Công nghệ di truyền', m: 2, a: false, t: 'Enzyme ligase có chức năng cắt phân tử DNA thành các đoạn nhỏ.', v: 'Ligase NỐI, còn enzyme cắt giới hạn mới cắt. Hai enzyme có chức năng ngược nhau.' },
+{ cd: 'Công nghệ di truyền', m: 3, a: true,  t: 'Vi khuẩn E. coli được dùng phổ biến làm tế bào nhận vì sinh sản rất nhanh và dễ nuôi cấy.', v: 'Nhờ vậy sản xuất được insulin, hormone sinh trưởng và nhiều protein người với giá rẻ.' },
+{ cd: 'Công nghệ di truyền', m: 3, a: true,  t: 'Nhân bản vô tính động vật bằng cách chuyển nhân tế bào sinh dưỡng vào trứng đã loại bỏ nhân.', v: 'Cừu Dolly là ví dụ nổi tiếng nhất; con sinh ra có kiểu gene nhân giống hệt cá thể cho nhân.' },
+{ cd: 'Công nghệ di truyền', m: 3, a: true,  t: 'Cấy truyền phôi cho phép tạo nhiều cá thể có cùng kiểu gene từ một phôi ban đầu.', v: 'Ứng dụng để nhân nhanh giống vật nuôi quý.' },
+{ cd: 'Công nghệ di truyền', m: 3, a: true,  t: 'Nuôi cấy mô tế bào thực vật tạo ra hàng loạt cây con đồng nhất về kiểu gene từ một mô ban đầu.', v: 'Dựa trên tính toàn năng của tế bào thực vật.' },
+{ cd: 'Công nghệ di truyền', m: 3, a: true,  t: 'Dung hợp tế bào trần cho phép lai xa giữa hai loài mà lai hữu tính thông thường không thực hiện được.', v: 'Phải loại bỏ thành cellulose trước khi cho hai tế bào dung hợp.' },
+{ cd: 'Công nghệ di truyền', m: 3, a: false, t: 'Sinh vật biến đổi gene luôn nhận thêm gene mới từ loài khác.', v: 'Có thể là làm bất hoạt một gene có sẵn hoặc tăng cường biểu hiện gene của chính loài đó, không nhất thiết nhận gene ngoại lai.' },
+{ cd: 'Công nghệ di truyền', m: 4, a: true,  t: 'Ưu điểm của công nghệ gene là tạo được giống có đặc tính mong muốn trong thời gian ngắn hơn hẳn chọn giống truyền thống.', v: 'Chọn giống truyền thống phải qua nhiều thế hệ lai và chọn lọc.' },
+{ cd: 'Công nghệ di truyền', m: 4, a: true,  t: 'Việc tạo và sử dụng sinh vật biến đổi gene đặt ra các vấn đề về an toàn sinh học và đạo đức sinh học.', v: 'Cần đánh giá tác động lên hệ sinh thái, lên sức khoẻ và tuân thủ quy định pháp lí.' },
+{ cd: 'Công nghệ di truyền', m: 2, a: true,  t: 'Insulin dùng cho người bệnh tiểu đường hiện nay chủ yếu được sản xuất bằng vi khuẩn mang gene người.', v: 'Trước đây phải chiết từ tuỵ động vật, vừa đắt vừa dễ gây dị ứng.' },
+{ cd: 'Công nghệ di truyền', m: 4, a: false, t: 'Cá thể nhân bản vô tính giống hệt cá thể cho nhân về mọi mặt.', v: 'Giống về kiểu gene NHÂN, nhưng gene ti thể đến từ trứng và kiểu hình còn chịu ảnh hưởng môi trường.' },
+{ cd: 'Công nghệ di truyền', m: 3, a: true,  t: 'Kĩ thuật PCR cho phép nhân bản một đoạn DNA lên hàng triệu bản chỉ trong vài giờ.', v: 'Ứng dụng trong xét nghiệm bệnh, giám định gene và nghiên cứu.' },
+{ cd: 'Công nghệ di truyền', m: 2, a: true,  t: 'Gây đột biến nhân tạo bằng tác nhân vật lí hoặc hoá học là phương pháp tạo giống có hiệu quả cao ở vi sinh vật và thực vật.', v: 'Ít dùng cho động vật vì dễ gây rối loạn sinh lí và tử vong.' }
+]);
+
+/* ===== SỬ, ĐỊA, GDKT ===== */
+bu('su', [
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 1, a: true,  t: 'Sau năm 1975, nhân dân ta còn phải tiến hành hai cuộc chiến tranh bảo vệ Tổ quốc ở biên giới Tây Nam và biên giới phía Bắc.', v: 'Đó là sự tiếp nối của truyền thống giữ nước ngay sau khi vừa thống nhất đất nước.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 2, a: true,  t: 'Cuộc chiến tranh bảo vệ biên giới Tây Nam diễn ra từ năm 1975 đến năm 1979 trước hành động xâm lấn của tập đoàn Pol Pot.', v: 'Quân tình nguyện Việt Nam sau đó giúp nhân dân Campuchia thoát khỏi hoạ diệt chủng.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 2, a: true,  t: 'Cuộc chiến đấu bảo vệ biên giới phía Bắc bùng nổ tháng 2 năm 1979.', v: 'Quân dân các tỉnh biên giới đã chiến đấu kiên cường bảo vệ từng tấc đất Tổ quốc.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 2, a: true,  t: 'Các cuộc chiến tranh bảo vệ Tổ quốc sau 1975 đều mang tính chất chính nghĩa, tự vệ.', v: 'Việt Nam buộc phải cầm súng để bảo vệ độc lập, chủ quyền và toàn vẹn lãnh thổ.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 3, a: true,  t: 'Thắng lợi trong các cuộc chiến tranh bảo vệ Tổ quốc đã giữ vững độc lập chủ quyền và tạo điều kiện cho công cuộc Đổi mới sau này.', v: 'Ổn định biên giới là tiền đề để tập trung phát triển kinh tế.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 3, a: true,  t: 'Bài học lớn nhất rút ra là phải luôn cảnh giác, xây dựng thế trận quốc phòng toàn dân gắn với phát triển kinh tế.', v: 'Không được lơ là nhiệm vụ bảo vệ Tổ quốc ngay cả trong thời bình.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 3, a: false, t: 'Sau khi thống nhất năm 1975, đất nước ta bước vào thời kì hoà bình hoàn toàn, không còn phải chiến đấu bảo vệ biên giới.', v: 'Ngay sau 1975 ta đã phải tiến hành chiến tranh bảo vệ biên giới Tây Nam rồi biên giới phía Bắc.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 3, a: true,  t: 'Trong lịch sử, các cuộc kháng chiến chống ngoại xâm của dân tộc đều dựa trên sức mạnh đoàn kết toàn dân và nghệ thuật lấy nhỏ đánh lớn.', v: 'Từ Bạch Đằng, Chi Lăng tới Điện Biên Phủ đều thể hiện truyền thống này.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 4, a: true,  t: 'Ngày nay bảo vệ Tổ quốc không chỉ là bảo vệ lãnh thổ mà còn gồm bảo vệ chủ quyền biển đảo, an ninh mạng và an ninh kinh tế.', v: 'Khái niệm bảo vệ Tổ quốc đã mở rộng theo bối cảnh mới.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 4, a: true,  t: 'Việt Nam kiên trì đường lối quốc phòng hoà bình, tự vệ và chủ trương không tham gia liên minh quân sự chống lại nước khác.', v: 'Đây là nội dung cốt lõi của chính sách quốc phòng "bốn không".' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 2, a: true,  t: 'Nghĩa vụ quân sự là trách nhiệm vẻ vang của công dân trong sự nghiệp bảo vệ Tổ quốc.', v: 'Gắn quyền lợi với nghĩa vụ, là biểu hiện cụ thể của lòng yêu nước trong thời bình.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 3, a: true,  t: 'Chiến thắng biên giới Tây Nam mang ý nghĩa quốc tế vì đã góp phần cứu nhân dân Campuchia khỏi chế độ diệt chủng.', v: 'Đó là hành động nhân đạo được nhiều nước ghi nhận.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 2, a: false, t: 'Việt Nam chủ động phát động các cuộc chiến tranh ở biên giới sau năm 1975.', v: 'Việt Nam ở thế BỊ TẤN CÔNG và buộc phải tự vệ. Đây là điểm mấu chốt về tính chất của các cuộc chiến này.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 4, a: true,  t: 'Kết hợp sức mạnh dân tộc với sức mạnh thời đại là bài học xuyên suốt của lịch sử giữ nước Việt Nam.', v: 'Vừa dựa vào nội lực vừa tranh thủ sự ủng hộ của dư luận tiến bộ thế giới.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 3, a: true,  t: 'Việc bình thường hoá quan hệ với các nước láng giềng sau các cuộc xung đột thể hiện chính sách đối ngoại hoà hiếu của Việt Nam.', v: 'Khép lại quá khứ, hướng tới tương lai là phương châm nhất quán.' },
+{ cd: 'Chiến tranh bảo vệ Tổ quốc', m: 2, a: true,  t: 'Xây dựng nền quốc phòng toàn dân gắn với thế trận an ninh nhân dân là chủ trương lâu dài của Đảng và Nhà nước.', v: 'Mọi người dân đều là một phần của thế trận bảo vệ Tổ quốc.' }
+]);
+
+bu('dia', [
+{ cd: 'Kinh tế biển đảo', m: 1, a: true,  t: 'Vùng biển nước ta rộng khoảng một triệu km², gấp khoảng ba lần diện tích đất liền.', v: 'Đường bờ biển dài 3260 km với 28 tỉnh, thành phố giáp biển.' },
+{ cd: 'Kinh tế biển đảo', m: 2, a: true,  t: 'Các ngành kinh tế biển chủ yếu gồm khai thác và nuôi trồng thuỷ sản, khai thác dầu khí, du lịch biển đảo và giao thông vận tải biển.', v: 'Bốn ngành này được xác định là mũi nhọn trong chiến lược phát triển kinh tế biển.' },
+{ cd: 'Kinh tế biển đảo', m: 2, a: true,  t: 'Dầu khí nước ta tập trung chủ yếu ở thềm lục địa phía Nam, thuộc các bể trầm tích Cửu Long và Nam Côn Sơn.', v: 'Các mỏ tiêu biểu là Bạch Hổ, Rồng, Đại Hùng.' },
+{ cd: 'Kinh tế biển đảo', m: 2, a: true,  t: 'Du lịch biển đảo là thế mạnh nhờ có nhiều bãi biển đẹp và hai di sản thiên nhiên thế giới là vịnh Hạ Long và quần đảo Cát Bà.', v: 'Du lịch biển chiếm tỉ trọng lớn trong tổng lượt khách du lịch cả nước.' },
+{ cd: 'Kinh tế biển đảo', m: 2, a: false, t: 'Nuôi trồng thuỷ sản nước ta hiện vẫn chiếm tỉ trọng nhỏ hơn khai thác.', v: 'Nuôi trồng đã VƯỢT khai thác về sản lượng và tiếp tục tăng nhanh hơn.' },
+{ cd: 'Kinh tế biển đảo', m: 3, a: true,  t: 'Các đảo và quần đảo có vai trò vừa là cơ sở để khai thác biển vừa là căn cứ bảo vệ chủ quyền.', v: 'Hệ thống đảo tạo thành tuyến phòng thủ và là điểm tựa cho ngư dân bám biển.' },
+{ cd: 'Kinh tế biển đảo', m: 3, a: true,  t: 'Phát triển tổng hợp kinh tế biển giúp khai thác hiệu quả hơn và hạn chế suy thoái tài nguyên so với phát triển riêng lẻ từng ngành.', v: 'Vì các ngành kinh tế biển có quan hệ chặt chẽ, phát triển một ngành hỗ trợ các ngành còn lại.' },
+{ cd: 'Kinh tế biển đảo', m: 3, a: true,  t: 'Cảng nước sâu và các khu kinh tế ven biển là động lực thu hút đầu tư cho vùng duyên hải.', v: 'Ví dụ Dung Quất, Nghi Sơn, Vũng Áng gắn với công nghiệp lọc hoá dầu và luyện kim.' },
+{ cd: 'Kinh tế biển đảo', m: 3, a: false, t: 'Khai thác thuỷ sản xa bờ kém hiệu quả hơn khai thác ven bờ nên cần hạn chế.', v: 'Ngược lại, phải đẩy mạnh khai thác XA BỜ để giảm áp lực lên nguồn lợi ven bờ vốn đã cạn kiệt, đồng thời khẳng định sự hiện diện trên biển.' },
+{ cd: 'Kinh tế biển đảo', m: 4, a: true,  t: 'Thách thức lớn của kinh tế biển là ô nhiễm môi trường biển, suy giảm nguồn lợi thuỷ sản và tác động của biến đổi khí hậu.', v: 'Nước biển dâng và axit hoá đại dương ảnh hưởng trực tiếp tới nuôi trồng và hệ sinh thái rạn san hô.' },
+{ cd: 'Kinh tế biển đảo', m: 4, a: true,  t: 'Phát triển kinh tế biển phải gắn chặt với bảo vệ chủ quyền và giữ gìn môi trường biển.', v: 'Đây là quan điểm xuyên suốt của Chiến lược phát triển bền vững kinh tế biển Việt Nam.' },
+{ cd: 'Kinh tế biển đảo', m: 2, a: true,  t: 'Giao thông vận tải biển đảm nhận phần lớn khối lượng hàng hoá xuất nhập khẩu của nước ta.', v: 'Nhờ giá cước rẻ, khối lượng lớn và bờ biển dài với nhiều cảng.' },
+{ cd: 'Kinh tế biển đảo', m: 3, a: true,  t: 'Nghề làm muối phát triển mạnh ở ven biển Nam Trung Bộ nhờ nắng nhiều, ít mưa và độ mặn nước biển cao.', v: 'Cà Ná và Sa Huỳnh là hai vùng muối nổi tiếng.' },
+{ cd: 'Kinh tế biển đảo', m: 2, a: true,  t: 'Rừng ngập mặn ven biển vừa chắn sóng, chống xói lở vừa là nơi sinh sản của nhiều loài thuỷ sản.', v: 'Phá rừng ngập mặn để nuôi tôm là nguyên nhân làm tăng xói lở và giảm nguồn lợi.' },
+{ cd: 'Kinh tế biển đảo', m: 4, a: true,  t: 'Điện gió ngoài khơi là hướng phát triển mới của kinh tế biển nhờ tiềm năng gió lớn ở vùng biển Nam Trung Bộ và Nam Bộ.', v: 'Góp phần chuyển dịch cơ cấu năng lượng theo hướng sạch và bền vững.' },
+{ cd: 'Kinh tế biển đảo', m: 2, a: false, t: 'Toàn bộ 63 tỉnh, thành phố của nước ta đều giáp biển.', v: 'Chỉ có 28 tỉnh, thành phố giáp biển. Tây Nguyên là vùng duy nhất không có tỉnh nào giáp biển.' }
+]);
+
+bu('gdkt', [
+{ cd: 'Lập kế hoạch kinh doanh', m: 1, a: true,  t: 'Kế hoạch kinh doanh là bản mô tả mục tiêu, chiến lược và các bước triển khai hoạt động kinh doanh.', v: 'Nó vừa là công cụ định hướng cho chủ doanh nghiệp vừa là cơ sở để thuyết phục nhà đầu tư.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 2, a: true,  t: 'Một kế hoạch kinh doanh cơ bản gồm ý tưởng, mục tiêu, phân tích thị trường, kế hoạch tài chính và kế hoạch nhân sự.', v: 'Thiếu phần tài chính thì kế hoạch chỉ là mong muốn chứ không khả thi.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 2, a: true,  t: 'Phân tích SWOT xem xét điểm mạnh, điểm yếu, cơ hội và thách thức của hoạt động kinh doanh.', v: 'Điểm mạnh và điểm yếu là yếu tố BÊN TRONG; cơ hội và thách thức là yếu tố BÊN NGOÀI.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 2, a: false, t: 'Trong phân tích SWOT, cơ hội và thách thức là các yếu tố thuộc nội bộ doanh nghiệp.', v: 'Cơ hội và thách thức đến từ MÔI TRƯỜNG BÊN NGOÀI như thị trường, chính sách, đối thủ.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 3, a: true,  t: 'Mục tiêu kinh doanh tốt phải cụ thể, đo lường được, khả thi, phù hợp và có thời hạn rõ ràng.', v: 'Đây chính là nguyên tắc SMART.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 3, a: true,  t: 'Nghiên cứu thị trường giúp xác định khách hàng mục tiêu, nhu cầu của họ và mức độ cạnh tranh.', v: 'Bỏ qua bước này là nguyên nhân thất bại phổ biến nhất của người mới khởi nghiệp.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 3, a: true,  t: 'Kế hoạch tài chính phải dự tính được vốn đầu tư ban đầu, chi phí vận hành, doanh thu dự kiến và điểm hoà vốn.', v: 'Điểm hoà vốn là mức doanh thu mà tại đó tổng doanh thu bằng tổng chi phí.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 3, a: false, t: 'Kế hoạch kinh doanh một khi đã lập thì không nên thay đổi để giữ tính nhất quán.', v: 'Kế hoạch phải được rà soát và điều chỉnh theo biến động thị trường; cứng nhắc là rủi ro.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 4, a: true,  t: 'Ý tưởng kinh doanh tốt thường xuất phát từ một nhu cầu chưa được đáp ứng hoặc một vấn đề chưa được giải quyết tốt.', v: 'Không phải cứ mới lạ là tốt; phải có người sẵn sàng trả tiền cho giải pháp đó.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 4, a: true,  t: 'Người kinh doanh cần các năng lực cốt lõi: nắm bắt cơ hội, quản lí tài chính, giao tiếp và chấp nhận rủi ro có tính toán.', v: 'Chấp nhận rủi ro khác hẳn liều lĩnh: phải dựa trên đánh giá và có phương án dự phòng.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 2, a: true,  t: 'Khách hàng mục tiêu là nhóm khách hàng mà doanh nghiệp tập trung phục vụ.', v: 'Cố phục vụ tất cả mọi người thường dẫn tới không phục vụ tốt cho ai.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 3, a: true,  t: 'Lợi thế cạnh tranh là điều doanh nghiệp làm tốt hơn hoặc khác biệt so với đối thủ.', v: 'Có thể đến từ giá, chất lượng, dịch vụ, công nghệ hoặc thương hiệu.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 4, a: false, t: 'Chỉ cần sản phẩm tốt là hoạt động kinh doanh sẽ thành công.', v: 'Sản phẩm tốt là điều kiện cần. Còn phải có kênh phân phối, giá phù hợp và cách tiếp cận đúng khách hàng.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 2, a: true,  t: 'Vốn kinh doanh có thể huy động từ vốn tự có, vay ngân hàng, gọi vốn từ nhà đầu tư hoặc huy động cộng đồng.', v: 'Mỗi nguồn có chi phí và ràng buộc khác nhau, cần cân nhắc theo giai đoạn phát triển.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 3, a: true,  t: 'Rủi ro trong kinh doanh cần được nhận diện và có phương án ứng phó ngay trong kế hoạch.', v: 'Rủi ro thị trường, rủi ro tài chính, rủi ro pháp lí và rủi ro vận hành là bốn nhóm cơ bản.' },
+{ cd: 'Lập kế hoạch kinh doanh', m: 2, a: false, t: 'Doanh thu càng cao thì lợi nhuận chắc chắn càng lớn.', v: 'Lợi nhuận bằng doanh thu trừ chi phí. Doanh thu tăng mà chi phí tăng nhanh hơn thì lợi nhuận vẫn giảm.' },
+
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 1, a: true,  t: 'Trách nhiệm xã hội của doanh nghiệp là cam kết đóng góp vào sự phát triển bền vững của cộng đồng và xã hội.', v: 'Không chỉ là làm từ thiện mà là cách doanh nghiệp vận hành hằng ngày.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 2, a: true,  t: 'Trách nhiệm xã hội gồm bốn cấp độ: kinh tế, pháp lí, đạo đức và nhân văn.', v: 'Trách nhiệm kinh tế là nền tảng vì doanh nghiệp phải tồn tại được mới thực hiện được các trách nhiệm còn lại.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 2, a: true,  t: 'Trách nhiệm pháp lí đòi hỏi doanh nghiệp tuân thủ pháp luật về thuế, lao động, môi trường và cạnh tranh.', v: 'Đây là mức tối thiểu bắt buộc, không phải sự lựa chọn.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 2, a: false, t: 'Trách nhiệm xã hội của doanh nghiệp chỉ là hoạt động từ thiện và tài trợ.', v: 'Từ thiện chỉ là một phần ở cấp độ nhân văn. Trả lương đúng hạn, nộp thuế đầy đủ, không xả thải trái phép mới là phần cốt lõi.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 3, a: true,  t: 'Thực hiện tốt trách nhiệm xã hội giúp doanh nghiệp nâng cao uy tín thương hiệu và giữ chân người lao động.', v: 'Lợi ích dài hạn thường lớn hơn chi phí ngắn hạn bỏ ra.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 3, a: true,  t: 'Doanh nghiệp có trách nhiệm bảo đảm an toàn lao động và điều kiện làm việc cho người lao động.', v: 'Đây vừa là trách nhiệm pháp lí vừa là trách nhiệm đạo đức.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 3, a: true,  t: 'Doanh nghiệp phải xử lí chất thải đạt chuẩn trước khi thải ra môi trường.', v: 'Xả thải trái phép có thể bị xử phạt hành chính, buộc bồi thường và trong trường hợp nghiêm trọng bị truy cứu hình sự.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 3, a: false, t: 'Doanh nghiệp chỉ cần chịu trách nhiệm với cổ đông, không cần quan tâm tới cộng đồng.', v: 'Doanh nghiệp có nhiều bên liên quan: cổ đông, người lao động, khách hàng, nhà cung cấp, cộng đồng và Nhà nước.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 4, a: true,  t: 'Trách nhiệm xã hội và lợi nhuận không đối lập mà có thể hỗ trợ nhau trong dài hạn.', v: 'Doanh nghiệp có uy tín thu hút được khách hàng, nhân sự giỏi và vốn đầu tư rẻ hơn.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 4, a: true,  t: 'Trung thực trong quảng cáo và bảo vệ quyền lợi người tiêu dùng là biểu hiện của trách nhiệm đạo đức.', v: 'Quảng cáo sai sự thật vừa vi phạm pháp luật vừa huỷ hoại niềm tin lâu dài.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 2, a: true,  t: 'Nộp thuế đầy đủ và đúng hạn là trách nhiệm pháp lí cơ bản nhất của doanh nghiệp với Nhà nước.', v: 'Thuế là nguồn thu để Nhà nước chi cho giáo dục, y tế, hạ tầng và an sinh xã hội.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 3, a: true,  t: 'Doanh nghiệp cần tôn trọng quyền lợi của người lao động về tiền lương, thời giờ làm việc và bảo hiểm.', v: 'Ép tăng ca quá quy định hoặc trốn đóng bảo hiểm là vi phạm pháp luật lao động.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 4, a: false, t: 'Doanh nghiệp nhỏ thì không cần thực hiện trách nhiệm xã hội.', v: 'Trách nhiệm xã hội áp dụng cho mọi quy mô; chỉ khác nhau ở mức độ và hình thức thực hiện.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 2, a: true,  t: 'Cạnh tranh lành mạnh là một biểu hiện của trách nhiệm xã hội trong hoạt động kinh doanh.', v: 'Cạnh tranh không lành mạnh như bán phá giá, nói xấu đối thủ đều bị pháp luật cấm.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 3, a: true,  t: 'Sản xuất xanh và tiết kiệm năng lượng vừa giảm chi phí vừa thể hiện trách nhiệm với môi trường.', v: 'Đây là ví dụ rõ nhất cho việc trách nhiệm xã hội và lợi ích kinh tế đi cùng nhau.' },
+{ cd: 'Trách nhiệm xã hội của doanh nghiệp', m: 2, a: false, t: 'Doanh nghiệp thực hiện trách nhiệm xã hội thì được miễn hoàn toàn nghĩa vụ thuế.', v: 'Không có quy định nào như vậy. Nộp thuế là nghĩa vụ pháp lí độc lập.' }
 ]);
 
 })();
@@ -13116,6 +14903,241 @@ them('anh_ct', [
   vd: 'It is so hot that we cannot go out ⇔ It is TOO hot for us TO go out ⇔ It is NOT cool ENOUGH for us to go out.',
   bay: 'Cặp bẫy số một: because + MỆNH ĐỀ, because of + DANH TỪ. Tương tự although + mệnh đề, despite + danh từ. '
      + 'Đề luôn cho một vế rồi bắt điền vế kia.' }
+]);
+
+/* ===== THẺ CHO CÁC CHUYÊN ĐỀ VỪA BỔ SUNG ===== */
+them('toan_ct', [
+{ nhom: 'VII. Dãy số', cd: 'Giới hạn – Liên tục', ten: 'Giới hạn — bảng quy tắc xử lí dạng vô định', cap: 3,
+  ct: '<b>Dạng ∞/∞ (phân thức khi x → ∞):</b> chia cả tử và mẫu cho luỹ thừa bậc cao nhất của mẫu.<br>'
+    + '&nbsp;&nbsp;· bậc tử &lt; bậc mẫu ⇒ giới hạn 0 · bậc bằng nhau ⇒ tỉ số hệ số cao nhất · bậc tử &gt; bậc mẫu ⇒ ±∞<br>'
+    + '<b>Dạng 0/0:</b> phân tích thành nhân tử rồi rút gọn; nếu có căn thì nhân liên hợp.<br>'
+    + '<b>Dạng ∞ − ∞:</b> nhân liên hợp hoặc quy đồng để đưa về hai dạng trên.<br>'
+    + '<b>Giới hạn nền:</b> lim(1/nᵏ) = 0 · lim qⁿ = 0 khi |q| &lt; 1 · tổng cấp số nhân lùi vô hạn u₁/(1 − q).',
+  khi: 'Câu giới hạn và câu tìm tiệm cận của đồ thị.',
+  vd: 'lim (√(x²+1) − x) khi x → +∞: nhân liên hợp được 1/(√(x²+1) + x) → 0.',
+  bay: 'Với x → −∞ thì √(x²) = |x| = −x chứ không phải x. Quên dấu ở đây là sai ngay từ bước đầu.' }
+]);
+
+them('hoa_ct', [
+{ nhom: 'Kỹ thuật', cd: 'Phức chất', ten: 'Phức chất — cấu tạo và phản ứng nhận biết', cap: 2,
+  ct: '<b>Cấu tạo:</b> nguyên tử hoặc ion kim loại trung tâm + các phối tử bao quanh bằng liên kết cho – nhận.<br>'
+    + '<b>Phối tử thường gặp:</b> H₂O, NH₃, Cl⁻, OH⁻, CN⁻, SCN⁻ — đều còn cặp electron chưa liên kết.<br>'
+    + '<b>Số phối trí</b> hay gặp là 4 và 6. Trong công thức, phần trong ngoặc vuông là cầu nội.<br>'
+    + '<b>Phản ứng nhận biết quan trọng:</b><br>'
+    + '&nbsp;&nbsp;· Cu²⁺ + NH₃ dư ⇒ [Cu(NH₃)₄]²⁺ <b>xanh lam đậm</b><br>'
+    + '&nbsp;&nbsp;· AgCl + NH₃ dư ⇒ [Ag(NH₃)₂]⁺ <b>tan</b><br>'
+    + '&nbsp;&nbsp;· Fe³⁺ + SCN⁻ ⇒ phức <b>đỏ máu</b><br>'
+    + '&nbsp;&nbsp;· Al(OH)₃, Zn(OH)₂ tan trong NaOH dư (tạo phức hydroxide)',
+  khi: 'Nội dung [MỚI] của Hoá 12 CT 2018, thường hỏi ở phần nhận biết và lí thuyết.',
+  vd: 'Nhỏ NH₃ từ từ tới dư vào dung dịch CuSO₄: đầu tiên có kết tủa xanh, sau đó kết tủa TAN tạo dung dịch xanh đậm.',
+  bay: 'Tạo phức là liên kết CHO – NHẬN nên số oxi hoá của ion trung tâm KHÔNG đổi. Đây không phải phản ứng oxi hoá khử.' },
+
+{ nhom: 'Kỹ thuật', cd: 'Nhiệt động – Tốc độ – Cân bằng', ten: 'Enthalpy, tốc độ và cân bằng — ba công cụ lớp 10–11', cap: 3,
+  ct: '<b>Enthalpy:</b> Δ_rH = ΣΔ_fH(sản phẩm) − ΣΔ_fH(chất đầu). Theo năng lượng liên kết thì NGƯỢC LẠI: '
+    + 'Δ_rH = ΣE_lk(chất đầu) − ΣE_lk(sản phẩm).<br>'
+    + '&nbsp;&nbsp;Δ_rH &lt; 0 toả nhiệt · Δ_rH &gt; 0 thu nhiệt · Δ_fH của đơn chất bền = 0<br>'
+    + '<b>Tốc độ phản ứng</b> tăng khi tăng: nồng độ · nhiệt độ · áp suất khí · diện tích bề mặt · dùng xúc tác.<br>'
+    + '<b>Cân bằng hoá học:</b> K_C chỉ chứa chất khí và chất tan, KHÔNG chứa chất rắn và dung môi.<br>'
+    + '&nbsp;&nbsp;Le Chatelier: tăng nhiệt độ ⇒ chuyển theo chiều THU nhiệt · tăng áp suất ⇒ chuyển theo chiều '
+    + 'GIẢM số mol khí · xúc tác KHÔNG làm chuyển dịch cân bằng.',
+  khi: 'Câu lí thuyết định lượng và bài toán năng lượng nhiên liệu.',
+  vd: 'N₂ + 3H₂ ⇌ 2NH₃ toả nhiệt và giảm số mol khí ⇒ tăng áp suất và giảm nhiệt độ đều làm tăng hiệu suất.',
+  bay: 'Toả nhiệt nói về NĂNG LƯỢNG, nhanh hay chậm nói về TỐC ĐỘ — hai chuyện khác nhau. '
+     + 'Than cháy toả nhiệt rất mạnh nhưng vẫn cần mồi lửa.' }
+]);
+
+them('sinh_ct', [
+{ nhom: 'II. Di truyền NST', cd: 'Di truyền người', ten: 'Di truyền người — phương pháp và bệnh thường gặp', cap: 3,
+  ct: '<b>Ba phương pháp nghiên cứu:</b> phả hệ · trẻ đồng sinh · nghiên cứu tế bào (bộ nhiễm sắc thể).<br>'
+    + '<b>Đọc phả hệ:</b><br>'
+    + '&nbsp;&nbsp;· Bố mẹ bình thường sinh con bệnh ⇒ gene LẶN, bố mẹ đều dị hợp<br>'
+    + '&nbsp;&nbsp;· Bệnh chủ yếu ở nam ⇒ gene lặn trên X · Bố bệnh truyền cho TẤT CẢ con gái ⇒ gene trội trên X<br>'
+    + '&nbsp;&nbsp;· Chỉ truyền theo dòng mẹ ⇒ gene trong ti thể<br>'
+    + '<b>Bệnh và hội chứng phải nhớ:</b> Down (ba nhiễm sắc thể 21) · Turner (XO) · Klinefelter (XXY) · '
+    + 'mù màu và máu khó đông (gene lặn trên X) · phenylketone niệu (lặn trên NST thường, hạn chế được bằng ăn kiêng).',
+  khi: 'Bài phả hệ và câu lí thuyết về di truyền y học.',
+  vd: 'Bố mẹ bình thường sinh con bệnh ⇒ cả hai đều Aa; người con BÌNH THƯỜNG có xác suất 2/3 là Aa (đã loại aa).',
+  bay: 'Người dị hợp là người LÀNH MANG GENE — không biểu hiện bệnh nhưng vẫn truyền allele bệnh cho con.' },
+
+{ nhom: 'II. Di truyền NST', cd: 'Công nghệ di truyền', ten: 'Công nghệ gene và công nghệ tế bào', cap: 3,
+  ct: '<b>Công nghệ gene — ba khâu:</b> ① tạo DNA tái tổ hợp ② đưa vào tế bào nhận ③ phân lập dòng tế bào chứa DNA tái tổ hợp.<br>'
+    + '&nbsp;&nbsp;· <b>Thể truyền:</b> plasmid hoặc virus đã biến đổi, phải tự nhân đôi được trong tế bào nhận<br>'
+    + '&nbsp;&nbsp;· <b>Enzyme cắt giới hạn</b> cắt tại trình tự đặc hiệu; <b>ligase</b> nối lại. Gene và thể truyền phải '
+    + 'cắt bằng CÙNG một loại enzyme để đầu dính khớp nhau<br>'
+    + '&nbsp;&nbsp;· Tế bào nhận phổ biến là E. coli vì sinh sản nhanh, dễ nuôi<br>'
+    + '<b>Công nghệ tế bào:</b> nuôi cấy mô (thực vật) · dung hợp tế bào trần (lai xa) · nhân bản vô tính bằng '
+    + 'chuyển nhân tế bào sinh dưỡng · cấy truyền phôi.<br>'
+    + '<b>PCR</b> nhân một đoạn DNA lên hàng triệu bản trong vài giờ.',
+  khi: 'Câu lí thuyết về ứng dụng di truyền học — luôn có trong đề.',
+  vd: 'Insulin cho người tiểu đường hiện được sản xuất bằng vi khuẩn mang gene người, rẻ và an toàn hơn chiết từ tuỵ động vật.',
+  bay: 'Cá thể nhân bản vô tính chỉ giống về gene trong NHÂN; gene ti thể đến từ trứng và kiểu hình vẫn chịu ảnh hưởng môi trường.' }
+]);
+
+them('su_ct', [
+{ nhom: 'B. Việt Nam', cd: 'Chiến tranh bảo vệ Tổ quốc', ten: 'Chiến tranh bảo vệ Tổ quốc sau năm 1975', cap: 3,
+  ct: '<b>Biên giới Tây Nam (1975 – 1979):</b> tập đoàn Pol Pot xâm lấn biên giới; quân dân ta phản công tự vệ, '
+    + 'sau đó quân tình nguyện Việt Nam giúp nhân dân Campuchia thoát khỏi hoạ diệt chủng.<br>'
+    + '<b>Biên giới phía Bắc (2/1979):</b> quân dân sáu tỉnh biên giới chiến đấu kiên cường bảo vệ lãnh thổ.<br>'
+    + '<b>Tính chất:</b> cả hai đều là chiến tranh CHÍNH NGHĨA, TỰ VỆ — Việt Nam ở thế bị tấn công.<br>'
+    + '<b>Ý nghĩa:</b> giữ vững độc lập chủ quyền, ổn định biên giới, tạo tiền đề cho công cuộc Đổi mới.<br>'
+    + '<b>Bài học:</b> luôn cảnh giác · xây dựng nền quốc phòng toàn dân gắn với phát triển kinh tế · '
+    + 'kết hợp sức mạnh dân tộc với sức mạnh thời đại.',
+  khi: 'Chủ đề "Cách mạng tháng Tám, chiến tranh giải phóng và chiến tranh bảo vệ Tổ quốc" của Lịch sử 12.',
+  vd: 'Câu hỏi về tính chất các cuộc chiến này ⇒ đáp án luôn là chính nghĩa, tự vệ, không phải chủ động gây chiến.',
+  bay: 'Nhiều bạn tưởng sau 1975 là hoà bình hoàn toàn. Thực tế ta phải chiến đấu bảo vệ biên giới ngay sau khi vừa thống nhất.' },
+
+{ nhom: 'B. Việt Nam', cd: 'Chiến tranh bảo vệ Tổ quốc', ten: 'Quốc phòng Việt Nam trong thời bình', cap: 2,
+  ct: '<b>Chính sách quốc phòng "bốn không":</b> không tham gia liên minh quân sự · không liên kết với nước này '
+    + 'chống nước kia · không cho nước ngoài đặt căn cứ quân sự · không dùng vũ lực hoặc đe doạ dùng vũ lực.<br>'
+    + '<b>Nền quốc phòng toàn dân</b> gắn với thế trận an ninh nhân dân — mọi người dân là một phần của thế trận.<br>'
+    + '<b>Nghĩa vụ quân sự</b> là trách nhiệm vẻ vang của công dân.<br>'
+    + '<b>Nội hàm mở rộng:</b> ngày nay bảo vệ Tổ quốc còn gồm bảo vệ chủ quyền biển đảo, an ninh mạng, '
+    + 'an ninh kinh tế và an ninh văn hoá.',
+  khi: 'Câu vận dụng liên hệ lịch sử với hiện tại.',
+  vd: 'Bình thường hoá quan hệ với các nước láng giềng sau xung đột thể hiện phương châm "khép lại quá khứ, hướng tới tương lai".',
+  bay: 'Quốc phòng "bốn không" là chính sách HOÀ BÌNH, TỰ VỆ — không phải trung lập thụ động hay từ bỏ khả năng phòng thủ.' }
+]);
+
+them('dia_ct', [
+{ nhom: 'B. Kinh tế', cd: 'Kinh tế biển đảo', ten: 'Phát triển tổng hợp kinh tế biển đảo', cap: 3,
+  ct: '<b>Tiềm năng:</b> vùng biển rộng khoảng 1 triệu km² (gấp ba lần đất liền) · bờ biển dài 3260 km · '
+    + '28 tỉnh, thành phố giáp biển.<br>'
+    + '<b>Bốn ngành mũi nhọn:</b><br>'
+    + '&nbsp;&nbsp;· <b>Thuỷ sản</b> — nuôi trồng đã vượt khai thác; đẩy mạnh khai thác XA BỜ<br>'
+    + '&nbsp;&nbsp;· <b>Dầu khí</b> — thềm lục địa phía Nam, bể Cửu Long và Nam Côn Sơn<br>'
+    + '&nbsp;&nbsp;· <b>Du lịch biển đảo</b> — vịnh Hạ Long, Cát Bà là di sản thiên nhiên thế giới<br>'
+    + '&nbsp;&nbsp;· <b>Giao thông vận tải biển</b> — đảm nhận phần lớn hàng hoá xuất nhập khẩu<br>'
+    + '<b>Hướng mới:</b> điện gió ngoài khơi, cảng nước sâu và khu kinh tế ven biển.<br>'
+    + '<b>Thách thức:</b> ô nhiễm biển · suy giảm nguồn lợi · nước biển dâng và xói lở bờ.',
+  khi: 'Chủ đề kinh tế biển đảo của Địa lí 12 — luôn có câu hỏi trong đề.',
+  vd: 'Đẩy mạnh khai thác xa bờ vừa giảm áp lực lên nguồn lợi ven bờ vừa khẳng định sự hiện diện trên biển.',
+  bay: 'Phát triển TỔNG HỢP nghĩa là các ngành hỗ trợ nhau, không phải phát triển riêng lẻ từng ngành. '
+     + 'Và luôn phải gắn với bảo vệ chủ quyền cùng môi trường biển.' },
+
+{ nhom: 'B. Kinh tế', cd: 'Kinh tế biển đảo', ten: 'Đảo, quần đảo và vai trò kép', cap: 2,
+  ct: '<b>Vai trò kinh tế:</b> là cơ sở hậu cần cho khai thác biển, nơi neo đậu tránh bão, điểm phát triển du lịch.<br>'
+    + '<b>Vai trò quốc phòng:</b> là điểm tựa để khẳng định chủ quyền, tạo thành tuyến phòng thủ từ xa.<br>'
+    + '<b>Các huyện đảo cần nhớ:</b> Vân Đồn và Cô Tô (Quảng Ninh) · Cát Hải và Bạch Long Vĩ (Hải Phòng) · '
+    + 'Cồn Cỏ (Quảng Trị) · Hoàng Sa (Đà Nẵng) · Lý Sơn (Quảng Ngãi) · Trường Sa (Khánh Hoà) · '
+    + 'Phú Quý (Bình Thuận) · Côn Đảo (Bà Rịa – Vũng Tàu) · Kiên Hải và Phú Quốc (Kiên Giang).<br>'
+    + '<b>Rừng ngập mặn</b> ven biển chắn sóng, chống xói lở và là nơi sinh sản của nhiều loài thuỷ sản.',
+  khi: 'Câu hỏi về hệ thống đảo và ý nghĩa của chúng.',
+  vd: 'Phá rừng ngập mặn để nuôi tôm làm tăng xói lở bờ và giảm chính nguồn lợi thuỷ sản mà người dân sống nhờ.',
+  bay: 'Đảo và quần đảo có vai trò KÉP — vừa kinh tế vừa quốc phòng. Câu hỏi thường yêu cầu nêu đủ cả hai mặt.' }
+]);
+
+them('gdkt_ct', [
+{ nhom: 'A. Kinh tế', cd: 'Lập kế hoạch kinh doanh', ten: 'Kế hoạch kinh doanh — cấu trúc và công cụ', cap: 3,
+  ct: '<b>Năm phần của một kế hoạch:</b> ý tưởng · mục tiêu · phân tích thị trường · kế hoạch tài chính · kế hoạch nhân sự.<br>'
+    + '<b>Mục tiêu SMART:</b> cụ thể · đo lường được · khả thi · phù hợp · có thời hạn.<br>'
+    + '<b>Phân tích SWOT:</b> Điểm mạnh và Điểm yếu là yếu tố BÊN TRONG; Cơ hội và Thách thức là yếu tố BÊN NGOÀI.<br>'
+    + '<b>Kế hoạch tài chính</b> phải có: vốn đầu tư ban đầu · chi phí vận hành · doanh thu dự kiến · điểm hoà vốn.<br>'
+    + '<b>Nguồn vốn:</b> vốn tự có · vay ngân hàng · gọi vốn nhà đầu tư · huy động cộng đồng.<br>'
+    + '<b>Bốn nhóm rủi ro:</b> thị trường · tài chính · pháp lí · vận hành.',
+  khi: 'Bài "Lập kế hoạch kinh doanh" của GDKT&PL 12.',
+  vd: 'Điểm hoà vốn là mức doanh thu mà tại đó tổng doanh thu vừa đúng bằng tổng chi phí.',
+  bay: 'Doanh thu cao chưa chắc lợi nhuận lớn — lợi nhuận bằng doanh thu TRỪ chi phí. '
+     + 'Và kế hoạch phải điều chỉnh theo thị trường, cứng nhắc là rủi ro.' },
+
+{ nhom: 'A. Kinh tế', cd: 'Trách nhiệm xã hội của doanh nghiệp', ten: 'Bốn cấp độ trách nhiệm xã hội', cap: 3,
+  ct: '<b>① Kinh tế</b> — làm ăn có lãi, tồn tại được thì mới thực hiện được các trách nhiệm khác. Đây là NỀN TẢNG.<br>'
+    + '<b>② Pháp lí</b> — tuân thủ pháp luật về thuế, lao động, môi trường, cạnh tranh. Đây là mức TỐI THIỂU bắt buộc.<br>'
+    + '<b>③ Đạo đức</b> — trung thực trong quảng cáo, bảo vệ quyền lợi người tiêu dùng, đối xử công bằng với người lao động.<br>'
+    + '<b>④ Nhân văn</b> — đóng góp cho cộng đồng, từ thiện, hỗ trợ giáo dục và y tế.<br>'
+    + '<b>Các bên liên quan:</b> cổ đông · người lao động · khách hàng · nhà cung cấp · cộng đồng · Nhà nước.<br>'
+    + '<b>Lợi ích:</b> nâng uy tín thương hiệu · giữ chân nhân sự · huy động vốn dễ hơn.',
+  khi: 'Bài "Trách nhiệm xã hội của doanh nghiệp" của GDKT&PL 12 và các câu tình huống.',
+  vd: 'Sản xuất xanh và tiết kiệm năng lượng vừa giảm chi phí vừa thể hiện trách nhiệm với môi trường — '
+    + 'ví dụ rõ nhất cho việc trách nhiệm và lợi nhuận đi cùng nhau.',
+  bay: 'Trách nhiệm xã hội KHÔNG chỉ là từ thiện. Nộp thuế đủ, trả lương đúng hạn, không xả thải trái phép '
+     + 'mới là phần cốt lõi — và áp dụng cho mọi quy mô doanh nghiệp.' }
+]);
+
+them('hoa_ct', [
+{ nhom: 'Kỹ thuật', cd: 'Phức chất', ten: 'Kim loại chuyển tiếp — vì sao dễ tạo phức và có màu', cap: 3,
+  ct: '<b>Đặc điểm chung:</b> có orbital d chưa bão hoà nên có nhiều số oxi hoá, hợp chất thường có màu, '
+    + 'dễ tạo phức chất và nhiều kim loại có tính xúc tác tốt.<br>'
+    + '<b>Vì sao tạo phức dễ:</b> orbital d còn TRỐNG để nhận cặp electron của phối tử qua liên kết cho – nhận.<br>'
+    + '<b>Vì sao có màu:</b> phức hấp thụ một phần ánh sáng nhìn thấy do chênh lệch mức năng lượng của orbital d; '
+    + 'màu quan sát được là màu bù của phần bị hấp thụ.<br>'
+    + '<b>Màu phụ thuộc cả hai:</b> ion trung tâm và loại phối tử. Cùng Cu²⁺ nhưng phức với H₂O xanh nhạt, '
+    + 'với NH₃ xanh đậm hơn hẳn.<br>'
+    + '<b>Vai trò sinh học:</b> hemoglobin là phức của Fe, chlorophyll là phức của Mg.',
+  khi: 'Câu lí thuyết về kim loại chuyển tiếp và phức chất.',
+  vd: 'Dung dịch muối Fe³⁺ có màu vàng nâu; nhỏ KSCN vào chuyển ngay sang đỏ máu do đổi phối tử.',
+  bay: 'Kim loại nhóm IA, IIA tạo phức rất kém vì không có orbital d thích hợp. '
+     + 'Nói "mọi kim loại đều tạo phức bền như nhau" là sai.' },
+
+{ nhom: 'Kỹ thuật', cd: 'Nhiệt động – Tốc độ – Cân bằng', ten: 'Bài toán năng lượng nhiên liệu và hiệu suất', cap: 4,
+  ct: '<b>Nhiệt lượng toả ra:</b> Q = n × |Δ_cH| với n là số mol nhiên liệu.<br>'
+    + '<b>Nhiệt lượng nước nhận:</b> Q = m·c·Δt (c của nước = 4200 J/(kg·K)).<br>'
+    + '<b>Có hiệu suất H:</b> Q<sub>toả</sub> = Q<sub>ích</sub> ÷ (H/100) — hiệu suất nằm ở MẪU khi tính lượng đầu vào.<br>'
+    + '<b>Điều kiện chuẩn của CT 2018:</b> 25 °C và 1 bar ⇒ 1 mol khí chiếm <b>24,79 lít</b>, KHÔNG phải 22,4 lít.<br>'
+    + '<b>Enthalpy đốt cháy cần nhớ:</b> CH₄ −890,3 kJ/mol · C₂H₅OH −1366,9 · C₃H₈ −2220.',
+  khi: 'Bài toán thực tế nối Hoá với năng lượng — dạng ưa thích của đề CT 2018.',
+  vd: 'Đun 2 lít nước từ 20 °C lên 100 °C cần 672 kJ; bếp hiệu suất 50% thì nhiên liệu phải toả 1344 kJ.',
+  bay: 'Điều kiện chuẩn mới dùng 24,79 L/mol. Dùng 22,4 L/mol là lệch khoảng 10% — đủ để trượt đáp án.' }
+]);
+
+them('sinh_ct', [
+{ nhom: 'II. Di truyền NST', cd: 'Di truyền người', ten: 'Bài toán xác suất trong phả hệ', cap: 4,
+  ct: '<b>Bước 1 — xác định quy luật:</b> đọc phả hệ để biết gene trội hay lặn, nằm trên NST thường hay X.<br>'
+    + '<b>Bước 2 — suy kiểu gene của từng người</b>, chú ý người BÌNH THƯỜNG trong gia đình có người bệnh:<br>'
+    + '&nbsp;&nbsp;· Bố mẹ Aa × Aa, người con bình thường ⇒ xác suất là Aa bằng <b>2/3</b> (đã loại aa nên mẫu số từ 4 xuống 3)<br>'
+    + '<b>Bước 3 — người ngoài lấy từ quần thể cân bằng:</b><br>'
+    + '&nbsp;&nbsp;· Xác suất người bình thường đó là Aa bằng <b>2pq/(p² + 2pq)</b>, không phải 2pq<br>'
+    + '<b>Bước 4 — nhân các xác suất độc lập</b>; với "có ít nhất một" thì lấy 1 trừ xác suất "không có ai".<br>'
+    + '<b>Với n người con:</b> đều bệnh là (1/4)ⁿ · đúng một người bệnh là C¹ₙ × (1/4) × (3/4)ⁿ⁻¹.',
+  khi: 'Câu vận dụng cao của phần di truyền — hầu như đề nào cũng có.',
+  vd: 'Câu "sinh 2 con đều bình thường" phải cộng cả trường hợp bố mẹ KHÔNG cùng dị hợp, '
+    + 'vì khi đó mọi con đều bình thường.',
+  bay: 'Hai chỗ đổi mẫu số (người bình thường trong nhà, người bình thường trong quần thể) là nơi mất điểm nhiều nhất.' },
+
+{ nhom: 'II. Di truyền NST', cd: 'Công nghệ di truyền', ten: 'Ứng dụng và mặt trái của công nghệ di truyền', cap: 3,
+  ct: '<b>Ứng dụng trong y học:</b> sản xuất insulin, hormone sinh trưởng, vaccine tái tổ hợp; '
+    + 'xét nghiệm gene và liệu pháp gene.<br>'
+    + '<b>Trong nông nghiệp:</b> giống kháng sâu bệnh, chịu hạn, chịu mặn, tăng hàm lượng dinh dưỡng.<br>'
+    + '<b>Trong pháp y:</b> giám định ADN xác định huyết thống và truy tìm thủ phạm.<br>'
+    + '<b>Ưu điểm so với chọn giống truyền thống:</b> nhanh hơn nhiều, chuyển được gene giữa các loài xa nhau, '
+    + 'kiểm soát được đặc tính muốn có.<br>'
+    + '<b>Vấn đề đặt ra:</b> an toàn sinh học (phát tán gene ra tự nhiên) · đa dạng sinh học · '
+    + 'đạo đức sinh học · quyền sở hữu giống.',
+  khi: 'Câu lí thuyết và câu liên hệ thực tiễn về ứng dụng di truyền học.',
+  vd: 'Gây đột biến nhân tạo hiệu quả cao ở vi sinh vật và thực vật nhưng ít dùng cho động vật vì dễ gây tử vong.',
+  bay: 'Sinh vật biến đổi gene KHÔNG nhất thiết phải nhận gene từ loài khác — có thể chỉ là bất hoạt hoặc '
+     + 'tăng cường biểu hiện một gene sẵn có của chính loài đó.' }
+]);
+
+them('gdkt_ct', [
+{ nhom: 'A. Kinh tế', cd: 'Lập kế hoạch kinh doanh', ten: 'Ý tưởng, cơ hội kinh doanh và năng lực người kinh doanh', cap: 3,
+  ct: '<b>Ý tưởng kinh doanh tốt</b> xuất phát từ một nhu cầu chưa được đáp ứng hoặc một vấn đề chưa được giải quyết tốt. '
+    + 'Mới lạ chưa đủ — phải có người sẵn sàng trả tiền.<br>'
+    + '<b>Nguồn hình thành ý tưởng:</b> lợi thế nội tại (kĩ năng, quan hệ, vốn) và cơ hội bên ngoài '
+    + '(nhu cầu thị trường, chính sách mới, công nghệ mới).<br>'
+    + '<b>Bốn năng lực cốt lõi:</b> nắm bắt cơ hội · quản lí tài chính · giao tiếp và thuyết phục · '
+    + 'chấp nhận rủi ro CÓ TÍNH TOÁN.<br>'
+    + '<b>Lợi thế cạnh tranh</b> đến từ giá, chất lượng, dịch vụ, công nghệ hoặc thương hiệu — '
+    + 'phải trả lời được "vì sao khách hàng chọn mình chứ không chọn đối thủ".',
+  khi: 'Câu tình huống về khởi nghiệp và năng lực kinh doanh.',
+  vd: 'Nhận thấy khu trọ sinh viên thiếu chỗ giặt sấy giá rẻ ⇒ đó là một cơ hội kinh doanh từ nhu cầu chưa được đáp ứng.',
+  bay: 'Chấp nhận rủi ro KHÁC liều lĩnh: phải dựa trên đánh giá và có phương án dự phòng. '
+     + 'Và cố phục vụ tất cả mọi người thường dẫn tới không phục vụ tốt cho ai.' },
+
+{ nhom: 'A. Kinh tế', cd: 'Trách nhiệm xã hội của doanh nghiệp', ten: 'Tình huống trách nhiệm xã hội hay ra đề', cap: 4,
+  ct: '<b>Cách giải một tình huống:</b> ① hành vi thuộc cấp độ trách nhiệm nào ② có vi phạm pháp luật không '
+    + '③ hậu quả với bên liên quan nào ④ doanh nghiệp nên làm gì.<br>'
+    + '<b>Các tình huống điển hình:</b><br>'
+    + '&nbsp;&nbsp;· Xả thải chưa xử lí ⇒ vi phạm pháp lí về môi trường, bị xử phạt và buộc bồi thường<br>'
+    + '&nbsp;&nbsp;· Quảng cáo sai sự thật ⇒ vi phạm pháp luật và huỷ hoại niềm tin lâu dài<br>'
+    + '&nbsp;&nbsp;· Trốn đóng bảo hiểm cho người lao động ⇒ vi phạm pháp luật lao động<br>'
+    + '&nbsp;&nbsp;· Ép tăng ca quá quy định ⇒ vi phạm về thời giờ làm việc<br>'
+    + '&nbsp;&nbsp;· Bán phá giá, nói xấu đối thủ ⇒ cạnh tranh không lành mạnh, bị pháp luật cấm<br>'
+    + '&nbsp;&nbsp;· Tài trợ học bổng, trồng cây ⇒ trách nhiệm nhân văn, khuyến khích chứ không bắt buộc',
+  khi: 'Câu tình huống và câu đúng/sai của phần kinh tế.',
+  vd: 'Doanh nghiệp xả thải chưa xử lí ra sông ⇒ vừa vi phạm hành chính vừa phải bồi thường dân sự; '
+    + 'nếu gây hậu quả nghiêm trọng có thể bị truy cứu hình sự.',
+  bay: 'Làm từ thiện nhiều KHÔNG bù được cho việc vi phạm pháp luật. '
+     + 'Trách nhiệm pháp lí là mức tối thiểu bắt buộc, không đánh đổi bằng trách nhiệm nhân văn được.' }
 ]);
 
 })();
