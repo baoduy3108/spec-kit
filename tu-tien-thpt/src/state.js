@@ -966,13 +966,21 @@ TD.deThiThat = function (mon, seed, cap) {
   for (let k = 0; daCap < tongCau; k++, daCap++) quota[[2, 3, 1, 4][k % 4]]++;
 
   const daDung = {};
+  /* Mẫu đề TỰ SINH dùng lại lần thứ hai vẫn ra một bài KHÁC (hạt giống khác ⇒ số liệu
+     khác), nên khi hạn ngạch câu khó không đủ thì cho phép lấy lại — đúng như đề thật
+     vẫn có hai câu cùng một chuyên đề. Câu dựng thẳng từ một mệnh đề thì KHÔNG, vì
+     lấy lại là ra y hệt câu cũ. */
+  const choLapLai = it => !!(it.g || it.dsy !== undefined);
+
   /* thuTu: thứ tự ưu tiên tiêu hạn ngạch. Phần III lấy câu khó trước, Phần I lấy câu dễ trước. */
   const rut = (bo, n, thuTu) => {
     const ra = [];
     if (!n || !bo.length) return ra;
-    const them = x => {
-      if (daDung[x.khoa]) return false;
-      daDung[x.khoa] = 1; ra.push(x.it); return true;
+    const them = (x, tran) => {
+      const da = daDung[x.khoa] || 0;
+      const toiDa = (tran === 2 && choLapLai(x.it)) ? 2 : 1;
+      if (da >= toiDa) return false;
+      daDung[x.khoa] = da + 1; ra.push(x.it); return true;
     };
     const theoMuc = { 1: [], 2: [], 3: [], 4: [] };
     TD.xaoR(R, bo).forEach(x => (theoMuc[x.muc] || theoMuc[2]).push(x));
@@ -988,11 +996,14 @@ TD.deThiThat = function (mon, seed, cap) {
        câu nhận biết ở cuối. */
     if (ra.length < n) {
       const uuTienVet = [1, 2, 3, 4].sort((a, b) => (K.tong[b] || 0) - (K.tong[a] || 0));
-      for (const m of uuTienVet)
-        for (const x of theoMuc[m]) {
-          if (ra.length >= n) break;
-          if (them(x)) quota[m] = Math.max(0, quota[m] - 1);
-        }
+      /* Vòng 1: cố lấp bằng mẫu chưa dùng, theo đúng khuynh hướng của cấp lôi kiếp.
+         Vòng 2: chấp nhận lấy lại mẫu tự sinh lần thứ hai — vẫn ra bài khác. */
+      for (const tran of [1, 2])
+        for (const m of uuTienVet)
+          for (const x of theoMuc[m]) {
+            if (ra.length >= n) break;
+            if (them(x, tran)) quota[m] = Math.max(0, quota[m] - 1);
+          }
     }
     return ra;
   };

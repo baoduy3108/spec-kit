@@ -37,9 +37,9 @@ TD.KIEP = [
   { cap: 3, ten: 'Ngũ Trọng Lôi Kiếp', tuId: 5, nhan: 'cỡ đề thi thử trường chuyên',
     tong: { 1: 0.28, 2: 0.30, 3: 0.27, 4: 0.15 }, gio: 0.92, nguong: 8.5 },
   { cap: 4, ten: 'Thất Trọng Lôi Kiếp', tuId: 7, nhan: 'đề phân hoá để lấy 9+',
-    tong: { 1: 0.16, 2: 0.28, 3: 0.32, 4: 0.24 }, gio: 0.85, nguong: 9.0 },
+    tong: { 1: 0.10, 2: 0.22, 3: 0.33, 4: 0.35 }, gio: 0.85, nguong: 9.0 },
   { cap: 5, ten: 'Cửu Trọng Lôi Kiếp', tuId: 9, nhan: 'cỡ đề học sinh giỏi, không có câu cho không',
-    tong: { 1: 0.05, 2: 0.20, 3: 0.38, 4: 0.37 }, gio: 0.78, nguong: 9.5 }
+    tong: { 1: 0.00, 2: 0.10, 3: 0.35, 4: 0.55 }, gio: 0.78, nguong: 9.5 }
 ];
 
 /* Cấp lôi kiếp mặc định ứng với cảnh giới hiện tại */
