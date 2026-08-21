@@ -690,12 +690,36 @@ TD.cauTuMenhDe = function (mon, chiSo, chieu, seed) {
   const nhieu = R.chonNhieu(nguon, 3);
 
   const opts = TD.xaoR(R, [goc].concat(nhieu));
+
+  /* Đề thật không hỏi trống trơn "Phát biểu nào sau đây đúng?" hai mươi câu liền —
+     câu hỏi luôn khoanh vùng chủ đề. Chỉ nêu tên chủ đề khi CẢ BỐN phương án cùng
+     thuộc chủ đề đó, nếu không thì tên chủ đề lại thành gợi ý loại trừ. */
+  const cungChuDe = nhieu.every(x => x.cd === goc.cd) && goc.cd;
+  const MAU_HOI = {
+    d: cungChuDe
+      ? [`Nội dung nào sau đây <b>phản ánh đúng</b> về <b>${goc.cd}</b>?`,
+         `Nhận định nào sau đây về <b>${goc.cd}</b> là <b>đúng</b>?`,
+         `Phát biểu nào sau đây <b>đúng</b> khi nói về <b>${goc.cd}</b>?`,
+         `Khi tìm hiểu về <b>${goc.cd}</b>, nội dung nào sau đây là <b>chính xác</b>?`]
+      : ['Phát biểu nào sau đây <b>đúng</b>?',
+         'Nội dung nào sau đây <b>phản ánh đúng</b> thực tế?',
+         'Nhận định nào sau đây là <b>đúng</b>?'],
+    s: cungChuDe
+      ? [`Nội dung nào sau đây <b>không đúng</b> về <b>${goc.cd}</b>?`,
+         `Nhận định nào sau đây về <b>${goc.cd}</b> là <b>sai</b>?`,
+         `Phát biểu nào sau đây <b>sai</b> khi nói về <b>${goc.cd}</b>?`,
+         `Khi tìm hiểu về <b>${goc.cd}</b>, nội dung nào sau đây <b>không chính xác</b>?`]
+      : ['Phát biểu nào sau đây <b>sai</b>?',
+         'Nội dung nào sau đây <b>không đúng</b>?',
+         'Nhận định nào sau đây là <b>sai</b>?']
+  };
+
   return {
     chuong: goc.cd || 'Lý thuyết trọng điểm',
     muc: TD.mucLT(mon, goc.m),
     dang: 'mc',
     _lt: true,
-    q: chieu === 'd' ? 'Phát biểu nào sau đây <b>đúng</b>?' : 'Phát biểu nào sau đây <b>sai</b>?',
+    q: R.chon(MAU_HOI[chieu === 'd' ? 'd' : 's']),
     opts: opts.map(x => x.t),
     ans: opts.indexOf(goc),
     giai: `Đáp án: ${goc.t}\n→ ${goc.v}\n\nCác phát biểu còn lại:\n`
