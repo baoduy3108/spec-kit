@@ -172,25 +172,34 @@ export function imagePromptFor(room) {
   const ledgeCount = platforms(room).length;
   if (ledgeCount) bits.push(`${ledgeCount} walkable stone ledges stand off the wall at different heights above the floor — broken masonry, rock shelves and fallen beams, part of the structure and never floating slabs.`);
   if (props.length) {
-    // English, and counted rather than repeated: the first version listed the
-    // Vietnamese label twice — "xích+vòng cổ, xích+vòng cổ" — to a model that
-    // reads neither Vietnamese nor repetition as emphasis.
+    // English, counted rather than repeated, and never naming the focal object
+    // a second time: it was already called the most important thing in the
+    // picture, and repeating it lower down reads as a second, different object.
     const seen = new Map();
+    const focalLabel = focal ? (focal[4] || focal[3]) : null;
     for (const [, , , vi, en] of props) {
       const label = en || vi;
+      if (label === focalLabel) continue;
       seen.set(label, (seen.get(label) || 0) + 1);
     }
     const listed = [...seen].map(([label, k]) => (k > 1 ? `${label} (${k} of them)` : label));
-    bits.push(`In the room: ${listed.join('; ')}.`);
+    if (listed.length) bits.push(`Also in the room: ${listed.join('; ')}.`);
   }
+  // Where the light comes from decides its colour, and the last version told a
+  // cold daylit cell to use firelight because it named the fire palette
+  // unconditionally.
+  const hasFire = room.kind === 'bonfire' || room.light === 'warm' || carriers.length > 0;
   bits.push(lightM === 0
     ? (carriers.length
       ? 'The only light is carried by a figure holding a burning brand — small, low, and moving; everything it touches is warm and everything else is not.'
       : 'There is no light source at all here — only just enough to read shapes and the wet shine on stone. This is among the darkest pictures in the game; do not brighten it to make it readable.')
-    : 'One light source only, with a small lit pool around it falling off quickly into dark. Ninety per cent of the frame sits in deep shadow, and every shadow points away from that one light.');
-  bits.push(`Colour: dominant cool desaturated slate blue-grey, almost neutral in the shadows (${p.ink}, ${p.dark}, ${p.mid}, ${p.far}), with exactly one warm accent — rust ${p.accent}${lightM > 0 || carriers.length ? ', and firelight #a8300f through #ffb04a to #fff6d8' : ''}. Shadows shift cooler, lit surfaces shift warmer. Never let the walls go purple or green.`);
+    : hasFire
+      ? 'One fire is the only light, low and on the floor, with a small warm pool around it falling off quickly into dark. Ninety per cent of the frame sits in deep shadow and every shadow points away from it.'
+      : 'The only light is one cold shaft of daylight falling from a hole high up and to the left — a visible beam with dust turning in it, landing in a single pale pool on the floor. No fire anywhere. Ninety per cent of the frame sits in deep shadow.');
+  bits.push(`Colour: dominant cool desaturated slate blue-grey, almost neutral in the shadows (${p.ink}, ${p.dark}, ${p.mid}, ${p.far}), with exactly one warm accent — rust ${p.accent}${hasFire ? ', and firelight #a8300f through #ffb04a to #fff6d8' : ''}. Shadows shift cooler, lit surfaces shift warmer. Never let the walls go purple or green.`);
   bits.push('Painterly, atmospheric, abandoned, high contrast between the small lit area and the dark, dust in the air. Deliberate empty space — do not fill every corner. Broken, dirty, irregular; no straight lines or clean geometry.');
-  bits.push('No text, no people, no characters, no UI, no logo. Wide horizontal composition.');
+  bits.push(`The room is ${ROOM_M} metres wide and ${ROOM_H_M} tall, so compose it as a long horizontal strip about ${(ROOM_M / ROOM_H_M).toFixed(1)} times wider than it is high — a panorama, not a framed picture. A two-metre human would be a twentieth of the width.`);
+  bits.push('No text, no people, no characters, no UI, no logo, no border.');
   return bits.join(' ');
 }
 
