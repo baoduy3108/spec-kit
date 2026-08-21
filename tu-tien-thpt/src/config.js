@@ -21,6 +21,33 @@ TD.CANH_GIOI = [
   { id: 11, ten: 'Phi Thăng',   tang: 'Thượng Giới',         exp: 55000, mau: '#ffd700', mo_ta: 'Đăng khoa. Chúc mừng đạo hữu.' }
 ];
 
+/* ---------- 1b. CẤP ĐỘ LÔI KIẾP ----------
+   Cảnh giới càng cao thì thiên kiếp càng nặng: đề dồn về vận dụng
+   và vận dụng cao, thời gian bị rút ngắn, ngưỡng vượt kiếp nâng lên.
+   CẤP 2 là mốc chuẩn — đúng độ khó và đúng thời gian của đề thi thật;
+   các cấp trên là đề phân hoá, cấp dưới là đề làm quen.
+   ts: trọng số mức độ cho Phần I · gio: hệ số thời gian · nguong: điểm vượt kiếp */
+TD.KIEP = [
+  { cap: 1, ten: 'Nhất Trọng Lôi Kiếp', tuId: 0, nhan: 'đề làm quen, nhẹ hơn đề thật',
+    ts: { 1: 0.40, 2: 0.42, 3: 0.16, 4: 0.02 }, tln: { 3: 0.75, 4: 0.25 }, gio: 1.15, nguong: 6.5 },
+  { cap: 2, ten: 'Tam Trọng Lôi Kiếp', tuId: 3, nhan: 'đúng độ khó & thời gian đề thi thật',
+    ts: { 1: 0.30, 2: 0.40, 3: 0.24, 4: 0.06 }, tln: { 3: 0.50, 4: 0.50 }, gio: 1.00, nguong: 8.0 },
+  { cap: 3, ten: 'Ngũ Trọng Lôi Kiếp', tuId: 5, nhan: 'cỡ đề thi thử trường chuyên',
+    ts: { 1: 0.18, 2: 0.36, 3: 0.34, 4: 0.12 }, tln: { 3: 0.34, 4: 0.66 }, gio: 0.92, nguong: 8.5 },
+  { cap: 4, ten: 'Thất Trọng Lôi Kiếp', tuId: 7, nhan: 'đề phân hoá để lấy 9+',
+    ts: { 1: 0.08, 2: 0.28, 3: 0.40, 4: 0.24 }, tln: { 3: 0.17, 4: 0.83 }, gio: 0.85, nguong: 9.0 },
+  { cap: 5, ten: 'Cửu Trọng Lôi Kiếp', tuId: 9, nhan: 'cỡ đề học sinh giỏi, không có câu cho không',
+    ts: { 1: 0.00, 2: 0.18, 3: 0.44, 4: 0.38 }, tln: { 3: 0.00, 4: 1.00 }, gio: 0.78, nguong: 9.5 }
+];
+
+/* Cấp lôi kiếp mặc định ứng với cảnh giới hiện tại */
+TD.kiepTheoCanhGioi = function (exp) {
+  const id = TD.canhGioi(exp).id;
+  let ra = TD.KIEP[0];
+  for (const k of TD.KIEP) if (id >= k.tuId) ra = k;
+  return ra;
+};
+
 /* ---------- 2. MÔN THI & CẤU TRÚC ĐỀ (TN THPT — CT 2018) ---------- */
 /* p1: trắc nghiệm 4 lựa chọn (0,25đ/câu)
    p2: đúng/sai, mỗi câu 4 ý — 1 ý đúng 0,1 | 2 ý 0,25 | 3 ý 0,5 | 4 ý 1,0

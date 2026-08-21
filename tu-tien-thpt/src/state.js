@@ -32,6 +32,10 @@ TD.macDinhTrangThai = function () {
     tui: { thien_co: 2, hoi_xuan: 1, ngo_dao: 0, truy_hon: 1 },
     /* số câu còn lại đang được Ngộ Đạo Trà nhân đôi linh khí */
     ngo_dao_con: 0,
+    /* cấp lôi kiếp người chơi tự chọn; null = theo cảnh giới hiện tại */
+    kiep_chon: null,
+    /* số biến thể đề Ngữ văn đã làm của từng ngữ liệu */
+    van_lam: {},
     chuoi: 0, chuoi_max: 0,
     ngay_lien_tiep: 0, ngay_cuoi: null
   };
@@ -852,9 +856,11 @@ TD.TRONG_SO_DE = {
   tln: { 1: 0.00, 2: 0.00, 3: 0.50, 4: 0.50 }
 };
 
-TD.deThiThat = function (mon, seed) {
+TD.deThiThat = function (mon, seed, cap) {
   const M = TD.MON[mon];
   if (!M) return { p1: [], p2: [], p3: [], ds: [] };
+  /* cấp lôi kiếp quyết định đề nặng hay nhẹ; không truyền thì lấy theo cảnh giới */
+  const K = (TD.KIEP || []).find(k => k.cap === cap) || TD.kiepTheoCanhGioi(TD.S ? TD.S.exp : 0);
   const R = TD.rng(seed === undefined ? (Math.random() * 4294967295) >>> 0 : (seed >>> 0));
   const kho = TD.KHO[mon] || [], lt = TD.KHO_LT[mon] || [];
   /* _tuLT là mẫu đề sinh ra TỪ kho mệnh đề — bỏ ra kẻo trùng với nguồn mệnh đề bên dưới */
@@ -926,9 +932,11 @@ TD.deThiThat = function (mon, seed) {
     return ra;
   };
 
-  const p1 = chot(rut(be.mc, M.p1, TD.TRONG_SO_DE.mc));
-  const p2 = chot(rut(be.ds, M.p2, TD.TRONG_SO_DE.ds));
-  const p3 = chot(rut(be.tln, M.p3, TD.TRONG_SO_DE.tln));
+  /* Phần II bám theo Phần I nhưng luôn nặng hơn một bậc, đúng như đề thật */
+  const tsDS = { 1: 0, 2: K.ts[2] * 0.6, 3: K.ts[3] + K.ts[1] * 0.5, 4: K.ts[4] + K.ts[1] * 0.5 };
+  const p1 = chot(rut(be.mc, M.p1, K.ts));
+  const p2 = chot(rut(be.ds, M.p2, tsDS));
+  const p3 = chot(rut(be.tln, M.p3, K.tln));
   /* thứ tự làm bài khuyến nghị: Phần I → Phần III → Phần II */
-  return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2) };
+  return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2), kiep: K };
 };

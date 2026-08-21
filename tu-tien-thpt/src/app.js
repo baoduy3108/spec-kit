@@ -575,17 +575,26 @@ TD.ketThucPhien = function () {
   if (p.cheDo === 'dokiep') {
     const M = TD.MON[p.mon];
     const diem10 = Math.round(p.diem * 10) / 10;
-    const dat = diem10 >= 8;
+    const K = p.kiep || TD.kiepTheoCanhGioi(TD.S.exp);
+    const dat = diem10 >= K.nguong;
     tieuDe = dat ? '⚡ VƯỢT KIẾP THÀNH CÔNG' : '☁ Kiếp chưa qua';
     TD.S.do_kiep[p.mon] = TD.S.do_kiep[p.mon] || [];
-    TD.S.do_kiep[p.mon].push({ ngay: TD.homNay(), diem: diem10 });
+    TD.S.do_kiep[p.mon].push({ ngay: TD.homNay(), diem: diem10, cap: K.cap });
+    const capSau = (TD.KIEP || []).find(k => k.cap === K.cap + 1);
     them = `<div class="giua tren12">
       <div class="so-to" style="font-size:52px;color:${dat ? 'var(--dung)' : 'var(--kim)'}">${diem10}</div>
-      <div class="so-nhan">điểm / 10 · môn ${M.ten}</div>
+      <div class="so-nhan">điểm / 10 · môn ${M.ten} · ${K.ten}</div>
       <p style="color:var(--chu2);margin-top:10px">${dat
-        ? 'Bạn đã vượt qua thiên kiếp môn này. Giữ vững phong độ và nâng dần độ khó.'
-        : 'Chưa đạt 8,0. Xem lại các câu sai ở màn Tâm Ma Kiếp rồi thử lại.'}</p></div>`;
-    if (dat) { TD.S.linh_thach += 100; TD.bao('💎 +100 linh thạch vượt kiếp!', 'kim'); }
+        ? `Vượt qua ${K.ten} (ngưỡng ${TD.soVN(K.nguong, 1)}).${capSau
+            ? ` Muốn nặng hơn thì chọn <b>${capSau.ten}</b> — ${capSau.nhan}.`
+            : ' Đây đã là tầng kiếp nặng nhất — không còn gì để sợ ở phòng thi.'}`
+        : `Chưa đạt ngưỡng ${TD.soVN(K.nguong, 1)} của ${K.ten}. Xem lại các câu sai ở màn Tâm Ma Kiếp rồi thử lại${
+            K.cap > 1 ? `, hoặc hạ xuống cấp ${K.cap - 1} cho chắc nền` : ''}.`}</p></div>`;
+    if (dat) {
+      const thuong = 60 + K.cap * 40;
+      TD.S.linh_thach += thuong;
+      TD.bao('💎 +' + thuong + ' linh thạch vượt ' + K.ten + '!', 'kim');
+    }
   }
 
   c.appendChild(el('div', 'the vien-kim', `<h3>${tieuDe}</h3>${them}
@@ -786,9 +795,37 @@ TD.moThe = function (khoa, i) {
    MÀN 5 — ĐỘ KIẾP (đề mô phỏng đúng cấu trúc, bấm giờ)
    ============================================================ */
 TD.man_dokiep = function (c) {
+  const mac = TD.kiepTheoCanhGioi(TD.S.exp);
+  const K = (TD.KIEP || []).find(k => k.cap === TD.S.kiep_chon) || mac;
+  const cg = TD.canhGioi(TD.S.exp);
+
   c.appendChild(el('div', 'the vien-lua', `<h3>⚡ Độ Kiếp — thi thử đúng cấu trúc</h3>
-    <p class="mo-nhat">Đề được dựng theo <b>đúng cấu trúc và thang điểm thật</b> của kỳ thi tốt nghiệp THPT,
-    có bấm giờ. Đạt <b>8,0 trở lên</b> là vượt kiếp. Đây là nơi kiểm tra xem bạn có thật sự sẵn sàng hay không.</p>`));
+    <p class="mo-nhat">Đề dựng theo <b>đúng cấu trúc và thang điểm thật</b> của kỳ thi tốt nghiệp THPT, có bấm giờ.
+    Nhưng thiên kiếp thì <b>nặng dần theo cảnh giới</b>: lên cảnh giới mới là đề dồn về vận dụng cao,
+    thời gian bị rút, ngưỡng vượt kiếp nâng lên.</p>`));
+
+  const bang = TD.KIEP.map(k => {
+    const dangChon = k.cap === K.cap;
+    const moKhoa = k.cap <= mac.cap;
+    return `<button class="nut ${dangChon ? 'lua' : 'phu'}" style="padding:7px 12px;font-size:12.4px;text-align:left"
+      onclick="TD.S.kiep_chon=${k.cap};TD.luu();TD.di('dokiep')">
+      🌩 Cấp ${k.cap} · ${k.ten}${moKhoa ? '' : ' <span class="mo-nhat">(vượt cấp)</span>'}</button>`;
+  }).join('');
+
+  c.appendChild(el('div', 'the', `
+    <div style="font-size:13.4px">Cảnh giới <b style="color:${cg.mau}">${cg.ten}</b> ⇒ thiên kiếp mặc định là
+      <b style="color:var(--kim)">${mac.ten}</b> <span class="mo-nhat">(cấp ${mac.cap}/5)</span></div>
+    <div class="hang-nut" style="margin-top:9px">${bang}</div>
+    <table class="kq" style="margin-top:12px">
+      <tr><th>Cấp</th><th>Độ khó</th><th>Vận dụng + VDC ở Phần I</th><th>Thời gian</th><th>Ngưỡng</th></tr>
+      ${TD.KIEP.map(k => `<tr${k.cap === K.cap ? ' style="background:rgba(243,156,18,.12)"' : ''}>
+        <td>${k.cap}</td><td>${k.nhan}</td>
+        <td>${Math.round((k.ts[3] + k.ts[4]) * 100)}%</td>
+        <td>${Math.round(k.gio * 100)}%</td>
+        <td><b>${TD.soVN(k.nguong, 1)}</b></td></tr>`).join('')}
+    </table>
+    <p class="mo-nhat tren12">Đang chọn: <b style="color:var(--kim)">${K.ten}</b> — ${K.nhan}.
+    ${TD.S.kiep_chon ? `<a href="javascript:void(0)" onclick="TD.S.kiep_chon=null;TD.luu();TD.di('dokiep')">Trả về mặc định theo cảnh giới</a>` : 'Muốn thử nặng hơn thì bấm chọn cấp cao hơn.'}</p>`));
 
   const luoi = el('div', 'luoi');
   TD.THU_TU_MON.forEach(m => {
@@ -814,7 +851,7 @@ TD.man_dokiep = function (c) {
              : '⚠ Ngân hàng câu hỏi chưa đủ để dựng đề đầy đủ'}
       </div>`);
     t.style.setProperty('--m', M.mau);
-    t.onclick = () => TD.dungDe(m);
+    t.onclick = () => TD.dungDe(m, K.cap);
     luoi.appendChild(t);
   });
   c.appendChild(luoi);
@@ -838,8 +875,7 @@ TD.theDoKiepVan = function (M) {
       Đọc hiểu 4,0đ (5 câu) · Viết 6,0đ (đoạn 200 chữ + bài 600 chữ)
     </div>
     <div style="font-size:12px;color:var(--chu3)">
-      ${ls.length ? `Đã vượt kiếp ${ls.length} lần${caoNhat !== null ? ` · cao nhất <b style="color:var(--kim)">${caoNhat}</b>` : ''}`
-                  : `${(TD.DE_VAN || []).length} bộ đề · chấm theo biểu điểm chính thức`}
+      ${TD.soDeVan()} bộ đề${ls.length ? ` · đã vượt kiếp ${ls.length} lần${caoNhat !== null ? ` · cao nhất <b style="color:var(--kim)">${caoNhat}</b>` : ''}` : ' · chấm theo biểu điểm chính thức'}
     </div>`);
   t.style.setProperty('--m', M.mau);
   t.onclick = () => TD.chonDeVan();
@@ -856,14 +892,27 @@ TD.chonDeVan = function () {
     <p class="mo-nhat">Viết ra giấy hoặc gõ thẳng vào ô trong đề. Hết giờ mới được mở đáp án — mở sớm thì
     không còn là độ kiếp nữa. Chấm xong tự cho điểm theo biểu điểm, máy ghi vào sổ giúp.</p>`));
 
+  TD.S.van_lam = TD.S.van_lam || {};
+  const nut0 = el('div', 'hang-nut', '');
+  const boc = el('button', 'nut kim', '🎲 Bốc ngẫu nhiên một bộ đề');
+  boc.onclick = () => TD.thiVan(Math.floor(Math.random() * TD.soDeVan()));
+  nut0.appendChild(boc);
+  c.appendChild(el('div', 'the', `<p style="font-size:13.4px;color:var(--chu2);margin:0 0 4px">
+    <b>${bo.length}</b> ngữ liệu × <b>${TD.SO_DE_MOI_NGU_LIEU}</b> biến thể câu nghị luận xã hội =
+    <b style="color:var(--kim)">${TD.soDeVan()}</b> bộ đề khác nhau. Làm lại cùng một ngữ liệu vẫn ra
+    câu 2 mới, nên đọc hiểu thì quen dần mà phần Viết thì luôn lạ.</p>`)).appendChild(nut0);
+
   const luoi = el('div', 'luoi');
   bo.forEach((d, i) => {
+    const daLam = TD.S.van_lam[i] || 0;
     const t = el('div', 'the mon-the', `
-      <div class="mon-ten">Đề số ${i + 1}</div>
-      <div style="font-size:12.6px;color:var(--chu2);margin:6px 0">${d.ten}</div>
-      <div style="font-size:11.8px;color:var(--chu3)">${d.loai}</div>`);
+      <div class="mon-ten" style="font-size:14.5px">${d.ten}</div>
+      <div style="font-size:11.8px;color:var(--chu3);margin:5px 0">${d.loai}</div>
+      <div style="font-size:11.6px;color:var(--chu2)">${daLam
+        ? `đã làm <b>${daLam}</b>/${TD.SO_DE_MOI_NGU_LIEU} biến thể`
+        : `${TD.SO_DE_MOI_NGU_LIEU} biến thể · chưa làm`}</div>`);
     t.style.setProperty('--m', TD.MON.van.mau);
-    t.onclick = () => TD.thiVan(i);
+    t.onclick = () => TD.thiVan(i + bo.length * (daLam % TD.SO_DE_MOI_NGU_LIEU));
     luoi.appendChild(t);
   });
   c.appendChild(luoi);
@@ -872,16 +921,19 @@ TD.chonDeVan = function () {
 };
 
 TD.thiVan = function (i) {
-  const d = (TD.DE_VAN || [])[i]; if (!d) return;
+  const d = TD.deVan(i); if (!d) return;
+  const K = (TD.KIEP || []).find(k => k.cap === TD.S.kiep_chon) || TD.kiepTheoCanhGioi(TD.S.exp);
+  const phut = Math.max(30, Math.round(TD.MON.van.phut * K.gio));
   const c = $('#noidung'); c.innerHTML = '';
-  TD.phien = { mon: 'van', cheDo: 'dokiep', batDau: Date.now(), gioiHan: TD.MON.van.phut * 60000, deVan: i };
+  TD.phien = { mon: 'van', cheDo: 'dokiep', batDau: Date.now(), gioiHan: phut * 60000, deVan: i, kiep: K };
 
   c.appendChild(el('div', 'the vien-lua', `
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
       <b>📖 ĐỀ THI THỬ NGỮ VĂN — ĐỀ SỐ ${i + 1}</b>
       <span class="nhan" id="dongho">--:--</span>
     </div>
-    <p class="mo-nhat" style="margin-top:6px">Thời gian làm bài: 120 phút, không kể thời gian phát đề.</p>`));
+    <p class="mo-nhat" style="margin-top:6px">Ngữ liệu: <b>${d.ten}</b> · biến thể ${d.bienThe}/${TD.SO_DE_MOI_NGU_LIEU}
+    · 🌩 ${K.ten} — thời gian <b>${phut} phút</b>, ngưỡng vượt kiếp <b>${TD.soVN(K.nguong, 1)}</b>.</p>`));
 
   /* --- Phần I: Đọc hiểu --- */
   const p1 = el('div', 'the', `<h3>I. ĐỌC HIỂU (4,0 điểm)</h3>
@@ -935,13 +987,14 @@ TD.thiVan = function (i) {
 };
 
 TD.chamVan = function (i) {
-  const d = (TD.DE_VAN || [])[i]; if (!d) return;
+  const d = TD.deVan(i); if (!d) return;
+  const K = (TD.phien && TD.phien.kiep) || TD.kiepTheoCanhGioi(TD.S.exp);
   clearInterval(TD.dhTimer);
   const phut = TD.phien ? Math.round((Date.now() - TD.phien.batDau) / 60000) : 0;
   const c = $('#noidung'); c.innerHTML = '';
 
   c.appendChild(el('div', 'the vien-kim', `<h3>📕 Đáp án & biểu điểm — Đề số ${i + 1}</h3>
-    <p class="mo-nhat">Làm bài trong <b>${phut} phút</b>. Đọc kĩ đáp án, đối chiếu từng ý rồi tự cho điểm
+    <p class="mo-nhat">Ngữ liệu <b>${d.ten}</b> · làm bài trong <b>${phut} phút</b>. Đọc kĩ đáp án, đối chiếu từng ý rồi tự cho điểm
     thật thà bên dưới — chấm rộng tay với chính mình là tự lừa mình.</p>`));
 
   const oDiem = [];
@@ -994,16 +1047,22 @@ TD.chamVan = function (i) {
     if (thieu) { TD.bao('Còn câu chưa chấm điểm.', 'lua'); return; }
     tong = TD.lamTron(tong, 2);
     TD.S.do_kiep.van = TD.S.do_kiep.van || [];
-    TD.S.do_kiep.van.push({ ngay: TD.homNay(), diem: tong });
+    TD.S.do_kiep.van.push({ ngay: TD.homNay(), diem: tong, cap: K.cap });
+    /* ghi nhận đã làm ngữ liệu này để lần sau đổi sang biến thể khác */
+    TD.S.van_lam = TD.S.van_lam || {};
+    const iNL = i % (TD.NGU_LIEU_VAN || []).length;
+    TD.S.van_lam[iNL] = Math.max(TD.S.van_lam[iNL] || 0, d.bienThe);
     /* thưởng linh khí theo điểm, đúng tinh thần cày cuốc của các môn khác */
     const exp = Math.round(tong * 12);
     TD.themExp(exp);
     TD.S.linh_thach += Math.round(exp / 5);
     TD.luu();
     $('#van-tong').innerHTML = `<div style="font-size:26px;font-weight:800;color:var(--kim)">${TD.soVN(tong, 2)} / 10</div>
-      <p style="font-size:13.6px;color:var(--chu2)">${tong >= 8 ? '⚡ Vượt kiếp thành công!'
-        : tong >= 6.5 ? 'Khá rồi, nhưng chưa đủ để gọi là vượt kiếp — cày tiếp phần Viết.'
-        : 'Chưa qua. Đọc lại dàn ý, viết lại câu 2 một lần nữa ngay hôm nay.'}</p>
+      <p style="font-size:13.6px;color:var(--chu2)">${tong >= K.nguong
+        ? `⚡ Vượt ${K.ten} (ngưỡng ${TD.soVN(K.nguong, 1)}) thành công!`
+        : tong >= K.nguong - 1.5
+          ? `Khá rồi, còn thiếu ${TD.soVN(K.nguong - tong, 2)} điểm nữa mới qua ${K.ten} — cày tiếp phần Viết.`
+          : 'Chưa qua. Đọc lại dàn ý, viết lại câu 2 một lần nữa ngay hôm nay.'}</p>
       <span class="nhan" style="color:var(--ngoc);border-color:var(--ngoc)">+${exp} linh khí</span>`;
     chot.disabled = true;
     TD.veHud();
@@ -1018,27 +1077,44 @@ TD.chamVan = function (i) {
 };
 
 /* Dựng đề theo cấu trúc; nếu ngân hàng thiếu thì rút gọn tỉ lệ nhưng GIỮ ĐÚNG trọng số điểm */
-TD.dungDe = function (mon) {
+TD.dungDe = function (mon, cap) {
   const M = TD.MON[mon];
-  const de = TD.deThiThat(mon);
-  const p1 = de.p1, p2 = de.p2, p3 = de.p3, ds = de.ds;
+  const de = TD.deThiThat(mon, undefined, cap || TD.S.kiep_chon);
+  const p1 = de.p1, p2 = de.p2, p3 = de.p3, ds = de.ds, K = de.kiep;
 
   if (!ds.length) { TD.bao('Chưa đủ câu hỏi để dựng đề môn này.', 'lua'); return; }
 
   const c = $('#noidung'); c.innerHTML = '';
   /* thời gian rút gọn tương ứng tỉ lệ số câu thực tế */
   const tiLe = ds.length / Math.max(1, M.p1 + M.p2 + M.p3);
-  const phut = Math.max(5, Math.round(M.phut * tiLe));
+  const phut = Math.max(5, Math.round(M.phut * tiLe * K.gio));
+  const demMuc = d => { const o = { 1: 0, 2: 0, 3: 0, 4: 0 }; d.forEach(it => { const q = TD.layCau(it); if (q) o[q.muc]++; }); return o; };
+  const mucAll = demMuc(ds);
 
   c.appendChild(el('div', 'the vien-lua', `<h3>⚡ ${M.icon} Độ Kiếp môn ${M.ten}</h3>
+    <div class="the" style="background:rgba(243,156,18,.08);border-color:rgba(243,156,18,.35);margin-bottom:12px">
+      <b style="color:var(--kim)">🌩 ${K.ten} — cấp ${K.cap}/5</b>
+      <span class="mo-nhat"> · ${K.nhan}</span>
+      <div style="font-size:12.6px;color:var(--chu2);margin-top:6px">
+        Phân bố mức độ của đề này:
+        <span class="nhan m1">Nhận biết ${mucAll[1]}</span>
+        <span class="nhan m2">Thông hiểu ${mucAll[2]}</span>
+        <span class="nhan m3">Vận dụng ${mucAll[3]}</span>
+        <span class="nhan m4">Vận dụng cao ${mucAll[4]}</span>
+      </div>
+      <div style="font-size:12.6px;color:var(--chu2);margin-top:5px">
+        Ngưỡng vượt kiếp: <b style="color:var(--kim)">${TD.soVN(K.nguong, 1)}</b> điểm
+        ${K.gio !== 1 ? ` · thời gian ${K.gio < 1 ? 'bị rút còn' : 'được nới thành'} <b>${Math.round(K.gio * 100)}%</b>` : ''}
+      </div>
+    </div>
     <table class="kq">
       <tr><th>Phần</th><th>Số câu</th><th>Điểm mỗi câu</th><th>Tổng</th></tr>
       <tr><td>I — Nhiều lựa chọn</td><td>${p1.length}</td><td>${M.d1}</td><td>${(p1.length * M.d1).toFixed(2)}</td></tr>
       ${p2.length ? `<tr><td>II — Đúng/Sai (4 ý)</td><td>${p2.length}</td><td>tối đa 1,00</td><td>${p2.length.toFixed(2)}</td></tr>` : ''}
       ${p3.length ? `<tr><td>III — Trả lời ngắn</td><td>${p3.length}</td><td>${M.d3}</td><td>${(p3.length * M.d3).toFixed(2)}</td></tr>` : ''}
     </table>
-    <p style="font-size:13.4px;color:var(--chu2)">Thời gian: <b>${phut} phút</b>${tiLe < 0.99
-      ? ` <span class="mo-nhat">(đề rút gọn theo ngân hàng hiện có — điểm vẫn quy về thang 10)</span>` : ''}</p>
+    <p style="font-size:13.4px;color:var(--chu2)">Thời gian: <b>${phut} phút</b>
+      <span class="mo-nhat">(đề thật ${M.phut} phút)</span></p>
     <div class="the" style="background:rgba(231,76,60,.07);border-color:rgba(231,76,60,.3);margin-top:12px">
       <b>⚠ Quy tắc vượt kiếp:</b>
       <ul style="margin:7px 0;padding-left:19px;font-size:13.6px">
@@ -1055,6 +1131,7 @@ TD.dungDe = function (mon) {
 
   $('#dk-batdau').onclick = () => {
     TD.batDauPhien(mon, null, 'dokiep', ds, phut);
+    TD.phien.kiep = K;
     /* quy đổi điểm về thang 10 khi kết thúc */
     const tong = p1.length * M.d1 + p2.length * 1 + p3.length * M.d3;
     TD.phien.heSo = tong > 0 ? 10 / tong : 1;
