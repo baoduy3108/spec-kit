@@ -211,7 +211,8 @@ TD.GEN.hoa = [
           + `    ⇒ 3a = 2b + ${S(T(3 * nNO, 3))}\n`
           + `Giải hệ: a = ${S(a)} ; b = ${S(b)}\n`
           + `Bảo toàn nguyên tố N: n(HNO₃) = n(NO₃⁻ trong muối) + n(NO) = 3a + n(NO)\n`
-          + `= ${S(T(3 * a, 3))} + ${S(nNO)} = ${S(nHNO3)} mol.`,
+          + `= ${S(T(3 * a, 3))} + ${S(nNO)} = ${S(nHNO3)} mol.`
+        + `\nBước cuối — kiểm chứng: khối lượng hỗn hợp quy đổi phải bằng đúng khối lượng đề cho, và số mol electron nhường phải bằng số mol electron nhận.\nChỗ dễ sai: quy đổi xong quên rằng oxi trong oxit cũng NHẬN electron, nên phải trừ phần electron này ra trước khi tính lượng chất oxi hoá còn lại.`,
       meo: 'Quy đổi mọi hỗn hợp oxit sắt về {Fe; O} rồi ghép bảo toàn khối lượng + bảo toàn electron. Nhớ O nhận 2e.'
     };
   } },
@@ -339,7 +340,8 @@ TD.GEN.hoa = [
     };
   } },
 
-{ ma: 'hoa-chatbeo-btkl', chuong: 'Chất béo', muc: 4, dang: 'tln',
+/* Bảo toàn khối lượng một bước ⇒ vận dụng, không phải vận dụng cao. */
+{ ma: 'hoa-chatbeo-btkl', chuong: 'Chất béo', muc: 3, dang: 'tln',
   tao(R) {
     const cb = R.chon([
       { t: 'tristearin', M: 890 }, { t: 'triolein', M: 884 },
@@ -397,7 +399,8 @@ TD.GEN.hoa = [
     };
   } },
 
-{ ma: 'hoa-peptide-naoh', chuong: 'Peptide', muc: 4, dang: 'tln',
+/* Bảo toàn khối lượng một bước ⇒ vận dụng, không phải vận dụng cao. */
+{ ma: 'hoa-peptide-naoh', chuong: 'Peptide', muc: 3, dang: 'tln',
   tao(R) {
     const aa = { Gly: 75, Ala: 89, Val: 117 };
     const k = R.nguyen(3, 5);

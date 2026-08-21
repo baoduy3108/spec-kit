@@ -264,7 +264,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
       giai: `Bước 1 — không gian mẫu: chọn ${S(chon)} bạn bất kì trong ${S(tong)} bạn.\n`
         + `  n(Ω) = C(${tong}, ${chon}) = ${S(tongCach)}\n`
         + `Bước 2 — đếm số cách thuận lợi.\n${buoc}\n`
-        + `Bước 3 — P = ${S(thuan)}/${S(tongCach)} = ${(thuan / g)}/${(tongCach / g)}.`,
+        + `Bước 3 — P = ${S(thuan)}/${S(tongCach)} = ${(thuan / g)}/${(tongCach / g)}.`
+        + `\nBước 4 — kiểm chứng: xác suất phải nằm trong khoảng (0; 1) và tử số phải nhỏ hơn n(Ω).\nChỗ dễ sai: ① dùng chỉnh hợp A thay vì tổ hợp C khi việc chọn KHÔNG phân biệt thứ tự ② đếm trùng khi chia trường hợp (một cách chọn bị đếm hai lần ở hai trường hợp khác nhau) — đây chính là lí do nên dùng phần bù thay vì liệt kê.`,
       meo: 'Thấy chữ "ít nhất" hoặc "có cả… lẫn…" thì gần như chắc chắn phải dùng PHẦN BÙ — '
         + 'đếm biến cố đối rồi lấy tổng trừ đi, nhanh hơn nhiều so với chia trường hợp. '
         + 'Casio 570VN Plus và 580VN X bấm tổ hợp bằng SHIFT + ÷ (nCr): gõ 12 SHIFT ÷ 5 = ra C(12;5).'

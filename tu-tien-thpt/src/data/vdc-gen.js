@@ -60,7 +60,8 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
         + `Bước 2 — năng lượng hoá học tích luỹ được (phản ứng thu nhiệt nên cần cấp vào):\n`
         + `  Q<sub>ích</sub> = ${S(n, 4)} × 2803 = ${S(n * 2803, 2)} kJ\n`
         + `Bước 3 — hiệu suất ${S(H)}% ⇒ năng lượng ánh sáng phải hấp thụ:\n`
-        + `  E = ${S(n * 2803, 2)} ÷ ${S(H / 100)} = ${D(E, 1)} kJ.`,
+        + `  E = ${S(n * 2803, 2)} ÷ ${S(H / 100)} = ${D(E, 1)} kJ.`
+        + `\nBước 4 — kiểm chứng: hiệu suất nhỏ hơn 100% nên năng lượng ánh sáng phải LỚN HƠN nhiệt lượng tích luỹ. Nếu ra số nhỏ hơn là đã nhân thay vì chia cho hiệu suất.\nChỗ dễ sai: nhầm chiều hiệu suất (nhân 0,2 thay vì chia 0,2) — đây là bẫy phổ biến nhất của mọi bài có hiệu suất.`,
       meo: 'Δ<sub>r</sub>H > 0 nghĩa là phản ứng THU nhiệt — quang hợp tích trữ năng lượng. '
         + 'Hiệu suất luôn nằm ở MẪU khi tính lượng đầu vào, ở TỬ khi tính lượng đầu ra.'
     };
@@ -94,7 +95,8 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
         + `Bước 3 — n(nhiên liệu) = ${S(Q / (H / 100), 2)} ÷ ${S(nl.dH)} = ${S(n, 4)} mol\n`
         + `Bước 4 — ${nl.khi
             ? `V = ${S(n, 4)} × 24,79 = ${D(kq, 2)} lít.`
-            : `m = ${S(n, 4)} × ${S(nl.M)} = ${D(kq, 2)} gam.`}`,
+            : `m = ${S(n, 4)} × ${S(nl.M)} = ${D(kq, 2)} gam.`}`
+        + `\nBước cuối — kiểm chứng: nhiệt lượng nhiên liệu phải cấp luôn lớn hơn nhiệt lượng nước nhận được, phần chênh là thất thoát ra môi trường.\nChỗ dễ sai: ① quên đổi khối lượng nước sang kg khi nhiệt dung riêng tính theo J/(kg·K) ② nhân hiệu suất thay vì chia ③ nhầm nhiệt lượng toả ra khi ĐỐT với nhiệt tạo thành.`,
       meo: 'Chương trình mới dùng điều kiện chuẩn 25 °C, 1 bar ⇒ 1 mol khí chiếm 24,79 lít, KHÔNG phải 22,4 lít. '
         + 'Đây là bẫy chuyển tiếp giữa hai chương trình.'
     };
@@ -160,7 +162,8 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
         + `Bước 2 — khối lượng ${kl.kh} cần bám: m = V·D = ${S(Scm * d * 1e-4, 5)} × ${S(kl.D)} = ${S(m, 4)} gam.\n`
         + `Bước 3 — ${kl.kh}<sup>${kl.n}+</sup> + ${kl.n}e → ${kl.kh}:\n`
         + `  n<sub>e</sub> = (${S(m, 4)}/${S(kl.M)}) × ${S(kl.n)} = ${S(ne, 5)} mol\n`
-        + `Bước 4 — t = n<sub>e</sub>·F/(I·H) = ${S(ne, 5)}×96500/(${S(I)}×${S(H / 100)}) = ${D(t, 0)} giây.`,
+        + `Bước 4 — t = n<sub>e</sub>·F/(I·H) = ${S(ne, 5)}×96500/(${S(I)}×${S(H / 100)}) = ${D(t, 0)} giây.`
+        + `\nBước cuối — kiểm chứng: khối lượng kim loại mạ tính ra phải khớp với tích thể tích lớp mạ nhân khối lượng riêng. Hai con đường tính phải cho cùng một số.\nChỗ dễ sai: quên đổi đơn vị diện tích và bề dày về cùng hệ (cm² với cm) trước khi nhân thành thể tích; và quên rằng mỗi ion kim loại hoá trị n cần đúng n electron.`,
       meo: '1 μm = 10⁻⁴ cm. Đổi sai đơn vị bề dày là lệch cả vạn lần — kiểm tra lại trước khi tô đáp án.'
     };
   } },
@@ -216,7 +219,8 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
         + `  ${S(p.he * 100, 2)}% — tức 100 kg phân nguyên chất chứa ${S(p.he * 100, 2)} kg ${p.ngto}.\n`
         + `Bước 2 — khối lượng phân NGUYÊN CHẤT cần: ${S(dt)} ÷ ${S(p.he, 4)} = ${S(dt / p.he, 2)} kg\n`
         + `Bước 3 — phân thương phẩm chỉ đạt ${S(tc)}% tinh khiết:\n`
-        + `  m = ${S(dt / p.he, 2)} ÷ ${S(tc / 100)} = ${D(m, 2)} kg.`,
+        + `  m = ${S(dt / p.he, 2)} ÷ ${S(tc / 100)} = ${D(m, 2)} kg.`
+        + `\nBước cuối — kiểm chứng: độ dinh dưỡng luôn nhỏ hơn 100% và nhỏ hơn phần trăm khối lượng của muối trong phân bón.\nChỗ dễ sai: độ dinh dưỡng của phân kali quy về %K₂O, phân lân quy về %P₂O₅, phân đạm quy về %N — quy nhầm chất là sai toàn bộ. Đây là chỗ mất điểm nhiều nhất của chuyên đề phân bón.`,
       meo: 'Độ dinh dưỡng đạm quy về %N, lân quy về %P₂O₅, kali quy về %K₂O — không phải phần trăm của cả phân tử muối.'
     };
   } },
@@ -282,7 +286,8 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
     return TD.dsTu(R, `Thiết lập pin Galvani ${c.a}–${c.b} ở điều kiện chuẩn, biết `
       + `E°(${c.a}<sup>n+</sup>/${c.a}) = ${S(c.ea)} V và E°(${c.b}<sup>n+</sup>/${c.b}) = ${S(c.eb)} V. `
       + `Xét tính đúng/sai của các phát biểu sau:`, kho,
-      'Nhớ một câu: "Anot Âm — Oxi hoá; Catot dương — Khử". Đúng cho pin điện; điện phân thì dấu điện cực ngược lại.');
+      'Nhớ một câu: "Anot Âm — Oxi hoá; Catot dương — Khử". Đúng cho pin điện; điện phân thì dấu điện cực ngược lại.',
+      'Cách làm chắc nhất: viết trước hai bán phản ứng kèm thế điện cực chuẩn của từng cặp, rồi mới xét từng ý. Ba điều luôn đúng với mọi pin điện hoá: cực có E° NHỎ hơn là anode (cực âm, bị oxi hoá); electron đi từ anode sang cathode qua dây dẫn; E°pin = E°(cathode) − E°(anode) và luôn dương.');
   } }
 
 ]);
@@ -337,7 +342,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
         + `Bước 2 — hoá hơi ${S(x)} kg ở 100 °C: Q₂ = L·x = 2,26·10⁶×${S(x)} = ${S(x * 2.26e6)} J\n`
         + `Bước 3 — tổng nhiệt CÓ ÍCH: Q = ${S(Q)} J\n`
         + `Bước 4 — ấm chỉ đạt hiệu suất ${S(H)}% nên công suất có ích là ${S(P)}×${S(H / 100)} = ${S(P * H / 100)} W\n`
-        + `  t = ${S(Q)} / ${S(P * H / 100)} = ${D(t, 1)} giây.`,
+        + `  t = ${S(Q)} / ${S(P * H / 100)} = ${D(t, 1)} giây.`
+        + `\nBước 4 — kiểm chứng: hiệu suất phải nhỏ hơn 100%; nhiệt lượng ấm toả ra luôn lớn hơn nhiệt lượng nước thực nhận vì một phần thất thoát ra môi trường và làm nóng vỏ ấm.\nChỗ dễ sai: quên đổi khối lượng nước ra kilôgam hoặc quên rằng 1 lít nước ứng với 1 kg.`,
       meo: 'Nhiệt hoá hơi riêng của nước lớn gấp gần 7 lần nhiệt nóng chảy — chỉ bay hơi vài lạng nước '
         + 'đã tốn nhiều năng lượng hơn cả việc đun cả ấm từ nguội tới sôi.'
     };
@@ -364,7 +370,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
         + `Bước 2 — tỉ lệ khí còn lại:\n`
         + `  n₂/n₁ = (p₂/T₂)/(p₁/T₁) = (${S(p2)}/${S(T2)}) ÷ (${S(p1)}/${S(T1)}) = ${S(ti, 4)}\n`
         + `Bước 3 — phần trăm khí đã thoát:\n`
-        + `  (1 − ${S(ti, 4)}) × 100 = ${D(pct, 2)}%.`,
+        + `  (1 − ${S(ti, 4)}) × 100 = ${D(pct, 2)}%.`
+        + `\nBước 4 — kiểm chứng dấu: nếu áp suất tăng mà thể tích không đổi thì nhiệt độ phải TĂNG, và ngược lại. Chiều biến thiên tính ra phải khớp với dữ kiện đề.\nChỗ dễ sai: quên đổi °C sang Kelvin. Mọi định luật chất khí đều dùng nhiệt độ tuyệt đối T(K) = t(°C) + 273, thay nhầm là sai toàn bộ bài.`,
       meo: 'Bài rò rỉ khí thì SỐ MOL thay đổi nên không được dùng p₁V₁/T₁ = p₂V₂/T₂ (công thức đó chỉ đúng khi n không đổi). '
         + 'Phải quay về pV = nRT.'
     };
@@ -402,7 +409,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
       giai: `Bước 1 — lập tỉ số hạt nhân còn lại:\n${buoc}`
         + `Bước 2 — định luật phóng xạ N = N₀·2^(−t/T) ⇒ 2^(−t/T) = ${S(ti, 4)}\n`
         + `  ⇒ t = T·log₂(1/${S(ti, 4)}) = ${dv.T > 1e6 ? S(dv.T / 1e9) + '·10⁹' : S(dv.T)} × ${S(Math.log(1 / ti) / Math.LN2, 4)}\n`
-        + `Bước 3 — t ≈ ${D(kq, dv.T > 1e6 ? 3 : 0)} ${donvi}.`,
+        + `Bước 3 — t ≈ ${D(kq, dv.T > 1e6 ? 3 : 0)} ${donvi}.`
+        + `\nBước 4 — kiểm chứng: còn lại 49% tức là chưa tới một nửa vừa qua, nên t phải XẤP XỈ nhưng lớn hơn một chu kì bán rã T. Kết quả tính ra đúng nằm quanh T ⇒ hợp lí.\nChỗ dễ sai: đảo ngược tỉ số thành N₀/N rồi ra t âm; hoặc dùng độ phóng xạ ban đầu H₀ mà quên rằng H tỉ lệ THUẬN với N nên tỉ số H/H₀ cũng chính là N/N₀.`,
       meo: 'Tỉ số hạt CON trên hạt MẸ bằng 2^(t/T) − 1, không phải 2^(t/T). Nhớ trừ 1 là qua được bẫy quen nhất của dạng này.'
     };
   } },
@@ -453,7 +461,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
         + `Bước 2 — hiệu suất H = 1 − ΔP/P ⇒ phần hao phí (1 − H) cũng tỉ lệ nghịch với U²:\n`
         + `  (1 − H₁)/(1 − H₂) = U₂²/U₁²\n`
         + `Bước 3 — thay số: (1 − ${S(H1 / 100)})/(1 − ${S(H2 / 100)}) = ${S((1 - H1 / 100) / (1 - H2 / 100), 4)}\n`
-        + `  U₂ = ${S(U1)} × √${S((1 - H1 / 100) / (1 - H2 / 100), 4)} = ${D(U2, 3)} kV.`,
+        + `  U₂ = ${S(U1)} × √${S((1 - H1 / 100) / (1 - H2 / 100), 4)} = ${D(U2, 3)} kV.`
+        + `\nBước 4 — kiểm chứng: công suất hao phí phải nhỏ hơn nhiều so với công suất truyền đi, nếu tỉ lệ hao phí vượt quá vài chục phần trăm là đã tính nhầm.\nChỗ dễ sai: nhớ ΔP tỉ lệ NGHỊCH với BÌNH PHƯƠNG hiệu điện thế — tăng U lên 10 lần thì hao phí giảm 100 lần, không phải 10 lần.`,
       meo: 'Đừng lập tỉ lệ với H mà phải lập tỉ lệ với (1 − H) — chính phần HAO PHÍ mới tỉ lệ nghịch với U². '
         + 'Nhầm chỗ này là ra đáp án sai mà vẫn thấy "hợp lí".'
     };
@@ -480,7 +489,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
         + `  W(Z) = ${S(A3)} × ${S(e3, 1)} = ${S(A3 * e3, 2)} MeV; W(n) = 0\n`
         + `Bước 2 — năng lượng toả ra = tổng năng lượng liên kết SAU trừ TRƯỚC:\n`
         + `  ΔE = ${S(A3 * e3, 2)} − (${S(A1 * e1, 2)} + ${S(A2 * e2, 2)}) = ${D(dE, 3)} MeV.\n`
-        + `Kết quả dương ⇒ phản ứng toả năng lượng, sản phẩm bền vững hơn các hạt ban đầu.`,
+        + `Kết quả dương ⇒ phản ứng toả năng lượng, sản phẩm bền vững hơn các hạt ban đầu.`
+        + `\nBước 4 — kiểm chứng: năng lượng toả ra của một phản ứng hạt nhân thường vào cỡ vài MeV đến vài trăm MeV; ra tới hàng nghìn MeV cho một phản ứng là dấu hiệu tính sai.\nChỗ dễ sai: ① lẫn chiều Δm (phải lấy khối lượng TRƯỚC trừ khối lượng SAU) ② quên đổi u sang MeV/c² với 1u = 931,5 MeV/c².`,
       meo: 'Với năng lượng LIÊN KẾT thì lấy sau trừ trước; với KHỐI LƯỢNG thì lấy trước trừ sau. '
         + 'Hai công thức ngược chiều nhau nhưng cùng cho một kết quả.'
     };
@@ -547,7 +557,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
       + `Đồ thị nhiệt độ theo thời gian gồm một đoạn đi lên (chất tăng thêm 100 °C trong ${S(t1)} giây), `
       + `rồi một đoạn nằm ngang kéo dài ${S(t2)} giây. Bỏ qua mọi hao phí. Xét các phát biểu sau:`, kho,
       'Đồ thị nhiệt độ – thời gian: đoạn NGHIÊNG là mcΔt, đoạn NGANG là λm hoặc Lm. '
-      + 'Đọc được hai đoạn đó là giải được mọi câu của dạng này.');
+      + 'Đọc được hai đoạn đó là giải được mọi câu của dạng này.',
+      'Cách làm chắc nhất: quy hết về một hệ đơn vị (J, kg, K) trước khi xét bất kì ý nào. Ba chỗ đề hay cài bẫy: ① nhầm nhiệt dung riêng với nhiệt nóng chảy riêng ② quên rằng trong quá trình chuyển thể nhiệt độ KHÔNG đổi dù vẫn thu nhiệt ③ nhầm dấu quy ước của công và nhiệt trong nguyên lí I.');
   } }
 
 ]);
@@ -598,7 +609,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
         + `  S = πr² + 2πrh = πr² + 2·${S(V, 1)}/r\n`
         + `Bước 3 — S′ = 2πr − 2·${S(V, 1)}/r² = 0 ⇒ r³ = ${S(V, 1)}/π ⇒ r = ${S(r, 5)} m\n`
         + `Bước 4 — khi đó h = r và S<sub>min</sub> = 3πr² = ${S(Smin, 4)} m²\n`
-        + `Đáp án: ${D(hoiR ? r : Smin, 3)} ${hoiR ? 'm' : 'm²'}.`,
+        + `Đáp án: ${D(hoiR ? r : Smin, 3)} ${hoiR ? 'm' : 'm²'}.`
+        + `\nBước 5 — kiểm chứng bằng kết quả lí thuyết: thùng trụ HỞ một đáy tốn ít vật liệu nhất khi h = r; thay r vừa tìm vào V = πr²h phải ra đúng thể tích đề cho.\nChỗ dễ sai: dùng nhầm công thức của thùng KÍN hai đáy (h = 2r) — hai bài chỉ khác nhau một chữ "không nắp".`,
       meo: 'Kết quả đẹp cần nhớ: thùng trụ KHÔNG nắp tốn ít vật liệu nhất khi h = r, khi đó S = 3πr². '
         + 'Thùng CÓ nắp thì h = 2r. Nhớ hai kết quả này để kiểm tra lại ngay.'
     };
@@ -620,7 +632,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
         + `Bước 2 — công thức trả góp đều: m = P·r·(1+r)ⁿ / [(1+r)ⁿ − 1]\n`
         + `Bước 3 — (1 + ${S(r, 3)})^${S(n)} = ${S(Math.pow(1 + r, n), 6)}\n`
         + `Bước 4 — m = ${S(P)} × ${S(r, 3)} × ${S(Math.pow(1 + r, n), 6)} / (${S(Math.pow(1 + r, n), 6)} − 1) = ${D(m, 3)} triệu đồng.\n`
-        + `Tổng phải trả sau ${S(nam)} năm là ${S(m * n, 2)} triệu, tức tiền lãi ${S(m * n - P, 2)} triệu.`,
+        + `Tổng phải trả sau ${S(nam)} năm là ${S(m * n, 2)} triệu, tức tiền lãi ${S(m * n - P, 2)} triệu.`
+        + `\nBước 4 — kiểm chứng: tổng số tiền trả trong cả kì phải LỚN HƠN số vay ban đầu, phần chênh chính là tiền lãi. Nếu ra nhỏ hơn hoặc bằng thì đã quên nhân lãi.\nChỗ dễ sai: ① đổi lãi suất năm sang tháng bằng cách chia 12 (sai, phải dùng đúng lãi suất tháng đề cho) ② đếm thiếu số kì n ③ bấm máy không đóng ngoặc đủ ở mẫu số (1 + r)ⁿ − 1.`,
       meo: 'Ba công thức khác nhau: GỬI một lần A = P(1+r)ⁿ · GỬI GÓP đều · TRẢ GÓP đều. '
         + 'Đề luôn cho lãi theo THÁNG còn thời hạn theo NĂM — nhớ đổi n ra tháng.'
     };
@@ -645,7 +658,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
         + `  P(H) = ${S(p1 / 100, 2)}×${S(d1 / 100, 2)} + ${S(p2 / 100, 2)}×${S(d2 / 100, 2)} + ${S(p3 / 100, 2)}×${S(d3 / 100, 2)} = ${S(P, 6)}\n`
         + `Bước 2 — xác suất bóng vừa do A sản xuất vừa hỏng:\n`
         + `  P(A ∩ H) = ${S(p1 / 100, 2)} × ${S(d1 / 100, 2)} = ${S(p1 * d1 / 10000, 6)}\n`
-        + `Bước 3 — Bayes: P(A|H) = P(A ∩ H)/P(H) = ${S(p1 * d1 / 10000, 6)} / ${S(P, 6)} = ${D(hau, 4)}.`,
+        + `Bước 3 — Bayes: P(A|H) = P(A ∩ H)/P(H) = ${S(p1 * d1 / 10000, 6)} / ${S(P, 6)} = ${D(hau, 4)}.`
+        + `\nBước 4 — kiểm chứng: cộng xác suất hậu nghiệm của cả ba phân xưởng phải bằng đúng 1.\nChỗ dễ sai: nhiều bạn lấy thẳng tỉ lệ phế phẩm của phân xưởng A làm đáp án. Đó là P(H|A) — xác suất XUÔI, còn đề hỏi P(A|H) là chiều NGƯỢC lại. Hai số này khác nhau vì còn phải cân theo tỉ trọng sản lượng của từng phân xưởng.`,
       meo: 'Vẽ SƠ ĐỒ HÌNH CÂY: nhánh 1 là nguyên nhân (nhà máy), nhánh 2 là kết quả (hỏng hay không). '
         + 'Bayes chính là đi NGƯỢC cây: biết kết quả, hỏi nguyên nhân.'
     };
@@ -670,7 +684,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
       giai: `Bước 1 — giá trị đại diện mỗi nhóm là TRUNG ĐIỂM: ${c.map(v => S(v, 1)).join(' · ')}\n`
         + `Bước 2 — số trung bình: x̄ = Σnᵢcᵢ/n = ${S(tong, 1)}/${S(n)} = ${S(tb, 4)}\n`
         + `Bước 3 — phương sai: s² = Σnᵢ(cᵢ − x̄)²/n = ${S(s2, 4)}\n`
-        + `Bước 4 — độ lệch chuẩn: s = √${S(s2, 4)} = ${D(sd, 2)} giờ.`,
+        + `Bước 4 — độ lệch chuẩn: s = √${S(s2, 4)} = ${D(sd, 2)} giờ.`
+        + `\nBước 5 — kiểm chứng: độ lệch chuẩn phải nhỏ hơn nửa bề rộng toàn bộ mẫu, nếu lớn hơn là tính sai.\nChỗ dễ sai: ① lấy đầu mút nhóm thay vì TRUNG ĐIỂM ② quên nhân tần số nᵢ khi cộng bình phương độ lệch ③ chia cho n − 1 (phương sai mẫu hiệu chỉnh) trong khi chương trình phổ thông dùng chia cho n.`,
       meo: 'Giá trị đại diện là TRUNG ĐIỂM nhóm, không phải đầu mút trái — sai bước này là hỏng cả bài. '
         + 'Độ lệch chuẩn cùng đơn vị với số liệu, phương sai thì không.'
     };
@@ -697,7 +712,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
         + `  d(I,(P)) = |A·x₀ + B·y₀ + C·z₀ + D| / √(A²+B²+C²) = ${S(d, 5)}\n`
         + `Bước 2 — vì ${S(d, 3)} > R = ${S(Rb)} nên mặt cầu nằm hẳn một phía, không cắt (P).\n`
         + `Bước 3 — M chạy trên mặt cầu nên khoảng cách tới (P) nằm trong đoạn [d − R; d + R]:\n`
-        + `  lớn nhất = d + R = ${S(d, 5)} + ${S(Rb)} = ${D(xa, 3)}.`,
+        + `  lớn nhất = d + R = ${S(d, 5)} + ${S(Rb)} = ${D(xa, 3)}.`
+        + `\nBước 5 — kiểm chứng: khoảng cách NHỎ NHẤT từ điểm trên mặt cầu tới mặt phẳng bằng d − R, lớn nhất bằng d + R; hai số này chênh nhau đúng 2R.\nChỗ dễ sai: quên kiểm tra d > R (mặt phẳng không cắt mặt cầu). Nếu d < R thì mặt phẳng cắt mặt cầu, khoảng cách nhỏ nhất bằng 0 chứ không phải d − R.`,
       meo: 'Điểm xa nhất và gần nhất đều nằm trên đường thẳng qua I và VUÔNG GÓC với (P). '
         + 'Xa nhất d + R, gần nhất |d − R|. Nếu d < R thì mặt cầu cắt (P) và khoảng cách nhỏ nhất bằng 0.'
     };
@@ -721,7 +737,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
         + `  |∫₀^${S(p)} v dt| = ${S(Math.abs(F(p) - F(0)), 4)} m\n`
         + `  |∫_${S(p)}^${S(q)} v dt| = ${S(Math.abs(F(q) - F(p)), 4)} m\n`
         + `  |∫_${S(q)}^${S(Tc)} v dt| = ${S(Math.abs(F(Tc) - F(q)), 4)} m\n`
-        + `Bước 3 — cộng lại: s = ${D(kq, 3)} m.`,
+        + `Bước 3 — cộng lại: s = ${D(kq, 3)} m.`
+        + `\nBước 4 — kiểm chứng: quãng đường luôn LỚN HƠN HOẶC BẰNG độ dịch chuyển (là ∫v dt không lấy trị tuyệt đối). Nếu hai số bằng nhau nghĩa là vật không đổi chiều — trái với việc v có nghiệm trong khoảng đang xét.\nChỗ dễ sai: tính thẳng ∫₀ᵀ v dt rồi lấy trị tuyệt đối ở CUỐI. Phải tách tại mọi nghiệm của v rồi mới cộng.`,
       meo: 'QUÃNG ĐƯỜNG dùng ∫|v|dt, ĐỘ DỊCH CHUYỂN dùng ∫v dt (có thể âm). '
         + 'Không tách tại nghiệm của v là mất phần vật đi ngược, kết quả nhỏ hơn thực tế.'
     };
@@ -744,7 +761,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
       giai: `Bước 1 — tìm k từ hai mốc đã biết:\n`
         + `  ${S(N1, 4)} = ${S(N0, 1)}·e^(k·${S(nam1)}) ⇒ k = ln(${S(N1, 4)}/${S(N0, 1)}) ÷ ${S(nam1)} = ${S(k, 5)}\n`
         + `Bước 2 — thay k vừa tìm vào để giải t:\n`
-        + `  ${S(nguong, 2)} = ${S(N0, 1)}·e^(${S(k, 5)}·t) ⇒ t = ln(${S(nguong, 2)}/${S(N0, 1)}) ÷ ${S(k, 5)} = ${D(kq, 2)} năm.`,
+        + `  ${S(nguong, 2)} = ${S(N0, 1)}·e^(${S(k, 5)}·t) ⇒ t = ln(${S(nguong, 2)}/${S(N0, 1)}) ÷ ${S(k, 5)} = ${D(kq, 2)} năm.`
+        + `\nBước 3 — kiểm chứng: thay t vừa tìm ngược lại vào công thức phải ra đúng dân số đề cho.\nChỗ dễ sai: hằng số k phải giữ ĐỦ chữ số khi tính tiếp; làm tròn k sớm là lệch kết quả cả năm. Trên Casio hãy lưu k vào ô nhớ A (SHIFT RCL (−)) rồi gọi lại, đừng chép tay.`,
       meo: 'Dạng hai bước: dùng dữ kiện thứ nhất TÌM HẰNG SỐ, rồi mới dùng hằng số đó trả lời câu hỏi. '
         + 'Lao vào giải ngay câu hỏi khi chưa có k là bế tắc.'
     };
@@ -778,7 +796,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
     return TD.dsTu(R, `Cho hàm số bậc ba y = f(x) có đạo hàm f′(x) = ${S(3 * a)}(x − ${S(p)})(x − ${S(q)}). `
       + `Xét tính đúng/sai của các phát biểu sau:`, kho,
       'Đọc DẤU của a trước: a > 0 thì y′ "âm ở giữa, dương hai bên"; a < 0 thì ngược lại. '
-      + 'Mọi kết luận về đồng biến, nghịch biến, cực đại, cực tiểu đều suy ra từ đó.');
+      + 'Mọi kết luận về đồng biến, nghịch biến, cực đại, cực tiểu đều suy ra từ đó.',
+      'Cách làm chắc nhất: lập bảng biến thiên MỘT LẦN ra nháp rồi soi cả bốn ý vào đó, đừng tính lại từ đầu cho từng ý. Một bảng biến thiên trả lời được đồng thời: số cực trị, khoảng đồng biến – nghịch biến, giá trị cực trị, toạ độ điểm uốn và số nghiệm của phương trình f(x) = m.');
   } }
 
 ]);
@@ -907,13 +926,15 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
         + `Bước 3 — nhân đôi ${S(k)} lần tạo 2^${S(k)} = ${S(Math.pow(2, k))} gene con, hệ số cần dùng là 2^k − 1 = ${S(he)}:\n`
         + (hoi === 0
             ? `  A môi trường cung cấp = ${S(A)} × ${S(he)} = ${D(A * he, 0)}`
-            : `  Liên kết hydrogen bị phá vỡ = ${S(H)} × ${S(he)} = ${D(H * he, 0)}`),
+            : `  Liên kết hydrogen bị phá vỡ = ${S(H)} × ${S(he)} = ${D(H * he, 0)}`)
+        + `\nBước cuối — kiểm chứng: số phân tử DNA con hoàn toàn mới luôn bằng 2ᵏ − 2, vì theo nguyên tắc bán bảo toàn luôn có đúng 2 phân tử còn giữ một mạch của DNA mẹ.\nChỗ dễ sai: nhầm giữa số NUCLEOTIDE môi trường cung cấp (tính theo 2ᵏ − 1) với số phân tử DNA con (2ᵏ).`,
       meo: 'Hệ số luôn là (2^k − 1) chứ không phải 2^k, vì hai mạch của gene mẹ ban đầu không do môi trường cung cấp. '
         + 'Nhớ A + G = 50% để suy G từ A trong DNA mạch kép.'
     };
   } },
 
-{ ma: 'sinh-vdc-nangluong', chuong: 'Sinh thái học', muc: 4, dang: 'tln', duong: true,
+/* Nhân ba hiệu suất liên tiếp ⇒ vận dụng. Câu VDC sinh thái nằm ở sinh-vdc-thapsinhthai. */
+{ ma: 'sinh-vdc-nangluong', chuong: 'Sinh thái học', muc: 3, dang: 'tln', duong: true,
   tao(R) {
     const E0 = R.nguyen(1, 9) * 1e6;
     const hs = [R.nguyen(8, 15), R.nguyen(8, 15), R.nguyen(8, 15)];
@@ -965,7 +986,8 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
     return TD.dsTu(R, `Đem lai phân tích một cơ thể dị hợp tử đều về hai cặp gene cùng nằm trên một cặp nhiễm sắc `
       + `thể thường, đời con thu được ${S(f)}% cá thể mang kiểu hình tái tổ hợp. Xét các phát biểu sau:`, kho,
       'Trục xương của mọi bài hoán vị: ① lai phân tích ⇒ tỉ lệ tái tổ hợp = f ② giao tử liên kết (1−f)/2, '
-      + 'hoán vị f/2 ③ aabb = (ab)² ④ A-B- = 0,5 + aabb.');
+      + 'hoán vị f/2 ③ aabb = (ab)² ④ A-B- = 0,5 + aabb.',
+      'Cách làm chắc nhất: viết kiểu gene bố mẹ và sơ đồ lai ra nháp MỘT LẦN, tính đủ tỉ lệ giao tử, rồi soi cả bốn ý vào cùng sơ đồ đó. Hai bẫy thường gặp: ① tần số hoán vị gene luôn ≤ 50% ② tỉ lệ kiểu hình khác tỉ lệ kiểu gene — đề hỏi cái nào phải trả lời đúng cái đó.');
   } }
 
 ]);
@@ -978,8 +1000,12 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
    ========================================================== */
 const MC2 = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
+  const loai = opts.filter(x => x !== it.d)
+    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không thoả yêu cầu của đề.'}`)
+    .join('\n');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
-    giai: `Đáp án: ${it.d}\n${it.v}`, meo: meo };
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
+    meo: meo };
 };
 
 TD.GEN.su = (TD.GEN.su || []).concat([
@@ -1080,7 +1106,8 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
         + `  ${S(sl2, 1)}·10⁶ × 1 000 ÷ ${S(dan2, 1)}·10⁶ = ${S(bq2, 3)} kg/người\n`
         + `Bước 3 — mức thay đổi = ${S(bq2, 3)} − ${S(bq1, 3)} = ${D(chenh, 2)} kg/người `
         + `(${chenh > 0 ? 'TĂNG' : 'GIẢM'}).\n`
-        + `Lưu ý: sản lượng tăng nhưng nếu dân số tăng NHANH HƠN thì bình quân vẫn giảm.`,
+        + `Lưu ý: sản lượng tăng nhưng nếu dân số tăng NHANH HƠN thì bình quân vẫn giảm.`
+        + `\nBước cuối — kiểm chứng: nếu sản lượng tăng nhanh hơn dân số thì bình quân đầu người phải TĂNG, và ngược lại. Chiều biến thiên tính ra phải khớp với hai tốc độ tăng đó.\nChỗ dễ sai: so sánh trực tiếp hai con số bình quân của hai năm mà quên rằng đơn vị phải đồng nhất (kg/người hay tấn/người) — lệch một nghìn lần là chuyện thường gặp.`,
       meo: 'Dạng hai bước kinh điển của Địa: phải tính chỉ tiêu cho CẢ HAI năm rồi mới so sánh. '
         + 'Nhìn riêng sản lượng tăng mà kết luận bình quân tăng là mắc bẫy.'
     };
@@ -1159,7 +1186,8 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
     ]);
     return TD.dsTu(R, `Về vùng ${v.t}, xét tính đúng/sai của các phát biểu sau:`, v.kho,
       'Mỗi vùng nhớ theo ba trục: THẾ MẠNH nổi bật · HẠN CHẾ lớn nhất · HƯỚNG giải quyết. '
-      + 'Phương án sai thường là thế mạnh của vùng KHÁC bị gán nhầm sang.');
+      + 'Phương án sai thường là thế mạnh của vùng KHÁC bị gán nhầm sang.',
+      'Cách làm chắc nhất: tính hết các con số cần thiết từ bảng ra nháp trước, rồi mới đọc từng ý. Hai bẫy quen thuộc: ① ý nói về TỈ TRỌNG nhưng ta lại so giá trị tuyệt đối (hoặc ngược lại) ② chữ "tăng nhanh nhất" phải so tốc độ tăng trưởng tính bằng %, không so lượng tăng thêm.');
   } }
 
 ]);
@@ -1319,6 +1347,23 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
 
 { ma: 'anh-vdc-cloze', chuong: 'Cấu trúc – Chiến thuật', muc: 4, dang: 'mc',
   tao(R) {
+    /* Mỗi từ nối có một quan hệ logic cố định — tra bảng này ra ngay lí do loại */
+    const NGHIA = {
+      'However': 'nối hai ý TRÁI CHIỀU, trong khi hai câu ở đây không mâu thuẫn nhau',
+      'Nevertheless': 'cũng là từ nối tương phản, mạnh hơn "however", không hợp mạch ý ở đây',
+      'On the contrary': 'dùng để bác bỏ điều vừa nói ("trái lại"), quá mạnh so với quan hệ giữa hai câu',
+      'On the other hand': 'nêu MẶT KHÁC đối lập, chỉ đúng khi hai vế thật sự trái chiều',
+      'Therefore': 'chỉ quan hệ NHÂN – QUẢ, mà câu sau ở đây không phải là kết quả của câu trước',
+      'As a result': 'cũng chỉ kết quả trực tiếp, không đúng với quan hệ giữa hai câu này',
+      'Moreover': 'BỔ SUNG thêm ý cùng chiều, trong khi hai câu ở đây không cùng chiều',
+      'In addition': 'cũng là từ nối bổ sung cùng chiều nên không hợp',
+      'For example': 'dẫn ví dụ minh hoạ, mà câu sau không phải ví dụ của câu trước',
+      'Similarly': 'nêu điểm TƯƠNG ĐỒNG, không đúng với quan hệ giữa hai câu',
+      'In contrast': 'nêu sự đối lập trực tiếp giữa hai đối tượng, không đúng ở đây',
+      'Otherwise': 'nghĩa "nếu không thì", chỉ dùng khi câu trước là một lời khuyên hoặc điều kiện',
+      'Although': 'là LIÊN TỪ phụ thuộc, phải nối hai mệnh đề trong cùng một câu, không đứng một mình rồi chấm phẩy',
+      'Despite': 'là GIỚI TỪ, phía sau phải là danh từ hoặc V-ing, không đứng đầu câu độc lập như vậy'
+    };
     const it = R.chon([
       { q: 'Many students find it hard to concentrate in class. ____, schools are now limiting the use of phones during lessons.',
         d: 'Therefore', s: ['However', 'Although', 'Despite'],
@@ -1339,6 +1384,8 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
         d: 'On the other hand', s: ['As a result', 'For example', 'In addition'],
         v: 'Vế sau nêu MẶT KHÁC, đối lập với lợi ích ở vế trước ⇒ "On the other hand".' }
     ]);
+    it.sv = {};
+    it.s.forEach(x => { it.sv[x] = NGHIA[x] || 'không diễn tả đúng quan hệ logic giữa hai câu.'; });
     return MC2(R, `Chọn từ nối phù hợp nhất để điền vào chỗ trống:\n\n${it.q}`, it,
       'Bài điền từ đoạn văn phần lớn là TỪ NỐI. Xác định quan hệ giữa hai câu trước: '
       + 'cùng chiều (moreover, in addition) · trái chiều (however, on the other hand) · '
@@ -1360,27 +1407,54 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
         v: 'Đoạn văn nêu cả ưu điểm lẫn phê phán rồi chốt bằng câu cuối: nó không thay thế được nông nghiệp truyền thống nhưng làm thành phố xanh hơn — đó chính là ý bao trùm.',
         s: ['Urban farming will soon replace traditional agriculture in big cities',
             'Growing vegetables on rooftops is the cheapest way to produce food',
-            'City soil is too polluted for any kind of farming to succeed'] },
+            'City soil is too polluted for any kind of farming to succeed'],
+        sv: { 'Urban farming will soon replace traditional agriculture in big cities':
+                'trái hẳn với câu cuối — bài viết nói rõ "will NOT replace traditional agriculture"',
+              'Growing vegetables on rooftops is the cheapest way to produce food':
+                'bài không hề so sánh chi phí, đây là thông tin tự suy ra ngoài văn bản',
+              'City soil is too polluted for any kind of farming to succeed':
+                'đúng là bài có nhắc đất bị ô nhiễm, nhưng đó chỉ là MỘT ý của phe phê phán, không phải ý bao trùm — bẫy "lấy chi tiết làm ý chính"' } },
       { q: 'According to the passage, which is a benefit of urban farming?',
         d: 'It reduces the emissions produced by transporting food',
         v: 'Câu thứ ba nêu rõ "cuts transport emissions" — rút ngắn quãng đường vận chuyển thực phẩm.',
         s: ['It produces enough food to feed an entire city',
             'It completely removes contamination from urban soil',
-            'It lowers the price of land in the city centre'] },
+            'It lowers the price of land in the city centre'],
+        sv: { 'It produces enough food to feed an entire city':
+                'ngược với văn bản — bài viết nói sản lượng "far too small to feed a whole city"',
+              'It completely removes contamination from urban soil':
+                'bài nêu đất ô nhiễm là NHƯỢC ĐIỂM, không hề nói canh tác đô thị xử lí được ô nhiễm',
+              'It lowers the price of land in the city centre':
+                'giá đất không được nhắc tới ở bất kì câu nào trong đoạn' } },
       { q: 'The word "yields" in the passage is closest in meaning to ____.',
         d: 'amounts of crops produced',
-        v: '"Yield" ở đây là danh từ chỉ SẢN LƯỢNG thu hoạch; ngữ cảnh "far too small to feed a whole city" xác nhận nghĩa này.',
-        s: ['profits from selling land', 'numbers of people involved', 'kinds of vegetables grown'] },
+        v: '"Yield" ở đây là DANH TỪ chỉ sản lượng thu hoạch được trên một đơn vị diện tích. '
+         + 'Cách xác định: nhìn cụm đi kèm "the yields are far too small to feed a whole city" — thứ có thể "quá nhỏ để nuôi cả thành phố" '
+         + 'chỉ có thể là lượng nông sản. Lưu ý "yield" còn là ĐỘNG TỪ nghĩa "nhường đường / mang lại", đừng lẫn.',
+        s: ['profits from selling land', 'numbers of people involved', 'kinds of vegetables grown'],
+        sv: { 'profits from selling land': 'bài không nói gì tới bán đất hay lợi nhuận; đây là nghĩa suy diễn ngoài văn bản',
+              'numbers of people involved': 'số người tham gia không liên quan tới việc "nuôi được cả thành phố hay không"',
+              'kinds of vegetables grown': 'nói về CHỦNG LOẠI, trong khi "far too small" là nói về SỐ LƯỢNG' } },
       { q: 'What can be inferred about the author\'s attitude?',
         d: 'Balanced — the author presents both support and criticism without taking an extreme side',
-        v: 'Tác giả dùng "Supporters say…" rồi "Critics, however, point out…" và kết bằng "Most experts agree" — giọng điệu trung lập, cân bằng.',
+        v: 'Tác giả trình bày lần lượt "Supporters say…" rồi "Critics, however, point out…", không hề dùng từ ngữ khen chê mạnh, '
+         + 'và kết bằng "Most experts agree" — mượn ý kiến chung thay vì áp đặt quan điểm riêng. '
+         + 'Dạng câu hỏi thái độ tác giả phải căn cứ vào TỪ NGỮ ĐÁNH GIÁ chứ không phải vào nội dung thông tin.',
         s: ['Strongly opposed to urban farming',
             'Completely convinced that urban farming solves food shortages',
-            'Uninterested in the topic and merely listing facts'] },
+            'Uninterested in the topic and merely listing facts'],
+        sv: { 'Strongly opposed to urban farming': 'nếu phản đối mạnh thì tác giả đã không dành nguyên một câu liệt kê ưu điểm',
+              'Completely convinced that urban farming solves food shortages': 'trái với câu "will not replace traditional agriculture"',
+              'Uninterested in the topic and merely listing facts': 'tác giả có kết luận riêng ở câu cuối nên không phải chỉ liệt kê vô cảm' } },
       { q: 'Which of the following is NOT mentioned as a place for urban farming?',
         d: 'School playgrounds',
-        v: 'Đoạn văn nhắc tới rooftops, balconies và abandoned lots. "School playgrounds" không hề xuất hiện.',
-        s: ['Rooftops', 'Balconies', 'Abandoned lots'] }
+        v: 'Câu thứ hai liệt kê đúng ba nơi: "rooftops, balconies and even in abandoned lots". '
+         + 'Với dạng NOT mentioned, cách làm chắc nhất là gạch chân từng phương án trong bài rồi loại dần — '
+         + 'phương án nào không gạch được chính là đáp án. Sân trường (school playgrounds) không hề xuất hiện.',
+        s: ['Rooftops', 'Balconies', 'Abandoned lots'],
+        sv: { Rooftops: 'có trong bài — "grow vegetables on rooftops"',
+              Balconies: 'có trong bài — "on rooftops, balconies"',
+              'Abandoned lots': 'có trong bài — "and even in abandoned lots"' } }
     ]);
     return MC2(R, `Read the passage and answer the question.\n\n${bai.t}\n\n${it.q}`, it,
       'Bài đọc hiểu: ① câu ý chính phải KHÁI QUÁT cả bài, phương án quá chi tiết là bẫy '

@@ -14,8 +14,12 @@ window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
 (function () {
 const MC = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
+  const loai = opts.filter(x => x !== it.d)
+    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không thoả yêu cầu của đề.'}`)
+    .join('\n');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
-    giai: `Đáp án: ${it.d}\n${it.v}`, meo: meo };
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
+    meo: meo };
 };
 
 /* ---------- 1. Từ vựng: từ → nghĩa và nghĩa → từ ---------- */
@@ -296,17 +300,41 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
   tao(R) {
     const it = R.chon([
       { q: 'No sooner had he left ____ the phone rang.', d: 'than', s: ['when', 'then', 'as'],
-        v: '"No sooner … THAN" là cặp cố định. Đừng lẫn với "Hardly … WHEN".' },
+        v: '"No sooner + had + S + V3 … THAN + S + V2" là cặp cố định, nghĩa "vừa mới … thì đã …". '
+         + 'Vế đầu dùng quá khứ hoàn thành cho việc xảy ra TRƯỚC, vế sau dùng quá khứ đơn.',
+        sv: { when: 'đi với "Hardly/Scarcely", không đi với "No sooner" — đây chính là cặp bẫy đề hay dùng nhất',
+              then: 'là trạng từ chỉ thời gian ("sau đó"), không phải liên từ nên không nối được hai mệnh đề',
+              as: 'nghĩa "khi/trong lúc", không tạo được sắc thái "vừa mới … thì đã …" của cấu trúc này' } },
       { q: 'Hardly had she sat down ____ the bell rang.', d: 'when', s: ['than', 'then', 'that'],
-        v: '"Hardly/Scarcely … WHEN" là cặp cố định.' },
+        v: '"Hardly/Scarcely + had + S + V3 … WHEN + S + V2" là cặp cố định. '
+         + 'Nhớ đối chiếu: No sooner đi với THAN, còn Hardly/Scarcely đi với WHEN.',
+        sv: { than: 'chỉ dùng với "No sooner", đây là bẫy đảo cặp mà đề ra gần như năm nào cũng có',
+              then: 'là trạng từ, không nối được hai mệnh đề',
+              that: 'chỉ dùng trong cấu trúc nhấn mạnh "It was … that …", không dùng ở đây' } },
       { q: 'Not only ____ well, but he also writes beautifully.', d: 'does he speak', s: ['he speaks', 'speaks he', 'he does speak'],
-        v: 'Sau "Not only" đầu câu phải đảo ngữ: trợ động từ + S + V nguyên thể.' },
+        v: 'Khi "Not only" đứng ĐẦU CÂU, mệnh đề sau nó phải đảo ngữ: trợ động từ + S + V nguyên thể. '
+         + 'Vế sau giữ trật tự bình thường và thường có "but … also".',
+        sv: { 'he speaks': 'giữ nguyên trật tự thường, tức là không đảo ngữ — sai ngay quy tắc cơ bản của cấu trúc này',
+              'speaks he': 'đảo động từ THƯỜNG lên trước chủ ngữ; tiếng Anh chỉ đảo TRỢ động từ',
+              'he does speak': 'đúng là có trợ động từ nhưng vẫn đứng sau chủ ngữ nên chưa phải đảo ngữ' } },
       { q: 'Only when the sun set ____ home.', d: 'did they go', s: ['they went', 'went they', 'they did go'],
-        v: 'Sau "Only when + mệnh đề" thì MỆNH ĐỀ CHÍNH mới đảo ngữ.' },
+        v: 'Với "Only when + mệnh đề", phần đảo ngữ nằm ở MỆNH ĐỀ CHÍNH chứ không phải mệnh đề sau "when". '
+         + 'Đây là chỗ nhiều bạn đảo nhầm ngay trong mệnh đề "when".',
+        sv: { 'they went': 'không đảo ngữ, trong khi "Only when" đầu câu bắt buộc mệnh đề chính phải đảo',
+              'went they': 'đảo động từ thường, sai quy tắc — phải mượn trợ động từ "did"',
+              'they did go': 'có "did" nhưng đặt sau chủ ngữ nên vẫn là trật tự thường' } },
       { q: 'Never ____ such a beautiful sunset.', d: 'have I seen', s: ['I have seen', 'I saw', 'saw I'],
-        v: 'Trạng từ phủ định "Never" đầu câu ⇒ đảo trợ động từ lên trước chủ ngữ.' },
+        v: 'Trạng từ phủ định "Never" đứng đầu câu ⇒ đảo trợ động từ lên trước chủ ngữ. '
+         + 'Ngữ cảnh "chưa từng thấy tính đến bây giờ" nên dùng hiện tại hoàn thành "have seen".',
+        sv: { 'I have seen': 'đúng thì nhưng KHÔNG đảo ngữ, mà "Never" đầu câu thì bắt buộc phải đảo',
+              'I saw': 'vừa không đảo ngữ vừa sai thì — quá khứ đơn không diễn tả trải nghiệm tính đến hiện tại',
+              'saw I': 'đảo động từ thường lên trước chủ ngữ; tiếng Anh chỉ đảo trợ động từ' } },
       { q: 'Under no circumstances ____ this door.', d: 'should you open', s: ['you should open', 'open you should', 'you open should'],
-        v: 'Cụm phủ định "Under no circumstances" đầu câu ⇒ đảo ngữ: modal + S + V.' }
+        v: 'Cụm phủ định "Under no circumstances" (tuyệt đối không được) đứng đầu câu ⇒ đảo ngữ: '
+         + 'modal + S + V nguyên thể. Cùng nhóm với "On no account", "At no time", "In no way".',
+        sv: { 'you should open': 'trật tự thường, không đảo ngữ',
+              'open you should': 'đảo lung tung, không đúng bất kì cấu trúc nào',
+              'you open should': 'sai trật tự cơ bản của tiếng Anh' } }
     ]);
     return MC(R, `Chọn phương án đúng:\n\n${it.q}`, it,
       'Đảo ngữ là câu phân loại điểm 9–10. Nhớ hai cặp bẫy: No sooner … THAN và Hardly … WHEN. '
@@ -468,6 +496,16 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
          + 'câu "gain more than they give" nên đặt ở [4] là hợp mạch nhất.',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] }
     ]);
+    /* Nêu luôn nội dung câu đứng ngay trước từng vị trí bị loại — học sinh thấy được
+       vì sao mạch ý không nối vào đó được, thay vì chỉ biết "đáp án là [4]". */
+    const cau = bo.doan.split(/\[\d\]/).map(x => x.trim()).filter(Boolean);
+    bo.sv = {};
+    bo.s.forEach(x => {
+      const n = parseInt(x.replace(/\D/g, ''), 10);
+      const truoc = cau[n - 1] || '';
+      bo.sv[x] = `đứng ngay sau câu "${truoc.slice(0, 70)}${truoc.length > 70 ? '…' : ''}" — `
+        + `nội dung câu đó không phải là điều mà câu cần chèn đang nối tiếp, nên mạch ý bị đứt.`;
+    });
     return MC(R, `Chọn vị trí thích hợp nhất để chèn câu cho sẵn vào đoạn văn.\n\n`
       + `<b>Câu cần chèn:</b> "${bo.cau}"\n\n<b>Đoạn văn:</b> ${bo.doan}`, bo,
       'Ba dấu hiệu quyết định vị trí: ① TỪ NỐI đầu câu (For this reason, However, Therefore) chỉ quan hệ với câu '

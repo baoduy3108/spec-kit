@@ -990,6 +990,19 @@ TD.deTaDao = function (mon, so, loai) {
   return TD.xaoR(R, ra);
 };
 
+/* ---------- TRẦN MỨC CHO CÂU LÝ THUYẾT ----------
+   Ở Toán – Lý – Hoá – Sinh, vận dụng cao là BÀI TẬP nhiều bước, không phải
+   câu nhận định. Nếu để mệnh đề mức 4 sinh câu trắc nghiệm thì mức "Vận dụng
+   cao" ở Luyện Công, Tà Đạo và Độ Kiếp đều ra câu một dòng — đúng như học
+   sinh phàn nàn "sao lời giải ngắn thế".
+   Môn xã hội thì ngược lại: nhận định – so sánh – đánh giá CHÍNH LÀ vận dụng
+   cao, nên giữ nguyên mức 4.
+   Đặt ở đây để mọi nơi dựng câu đều dùng chung một quy ước. */
+TD.TRAN_MUC_LT = { toan: 3, ly: 3, hoa: 3, sinh: 3 };
+TD.mucLT = function (mon, m) {
+  return Math.min(TD.TRAN_MUC_LT[mon] || 4, m || 2);
+};
+
 /* Dựng câu Đúng/Sai 4 ý từ bốn mệnh đề trong kho */
 TD.cauDsTuMenhDe = function (mon, chiSos, cd, seed) {
   const kho = TD.KHO_LT[mon] || [];
@@ -999,7 +1012,7 @@ TD.cauDsTuMenhDe = function (mon, chiSos, cd, seed) {
   const t = TD.xaoR(R, y);
   return {
     chuong: cd || 'Lý thuyết trọng điểm',
-    muc: Math.max.apply(null, t.map(x => x.m || 2)),
+    muc: TD.mucLT(mon, Math.max.apply(null, t.map(x => x.m || 2))),
     dang: 'ds',
     _lt: true,
     q: `Về chủ đề <b>${cd}</b>, xét tính đúng/sai của từng phát biểu sau:`,
@@ -1028,7 +1041,7 @@ TD.cauTuMenhDe = function (mon, chiSo, chieu, seed) {
   const opts = TD.xaoR(R, [goc].concat(nhieu));
   return {
     chuong: goc.cd || 'Lý thuyết trọng điểm',
-    muc: goc.m || 2,
+    muc: TD.mucLT(mon, goc.m),
     dang: 'mc',
     _lt: true,
     q: chieu === 'd' ? 'Phát biểu nào sau đây <b>đúng</b>?' : 'Phát biểu nào sau đây <b>sai</b>?',
@@ -1080,9 +1093,17 @@ TD.dangKyMauTuMenhDe = function () {
     .replace(/[đĐ]/g, 'd').replace(/[^A-Za-z0-9]+/g, '-')
     .replace(/^-|-$/g, '').toLowerCase().slice(0, 26);
 
+  /* Với môn tự nhiên, một câu HỎI LÝ THUYẾT không thể là vận dụng cao:
+     vận dụng cao ở Toán – Lý – Hoá – Sinh là bài tập nhiều bước, phải ghép
+     nhiều mảng kiến thức. Nếu để mệnh đề mức 4 sinh câu trắc nghiệm thì
+     màn "Vận dụng cao" của Luyện Công sẽ toàn câu nhận định một dòng.
+     ⇒ Ở bốn môn này, câu từ mệnh đề bị chặn trần ở mức 3.
+     Môn xã hội thì ngược lại: vận dụng cao chính là nhận định, so sánh,
+     đánh giá — nên giữ nguyên mức 4. */
   for (const mon of Object.keys(TD.KHO_LT)) {
     const kho = TD.KHO_LT[mon];
     if (!Array.isArray(kho) || kho.length < 8) continue;
+    const tran = TD.TRAN_MUC_LT[mon] || 4;
     const gDung = kho.filter(x => x.a).length, gSai = kho.length - gDung;
 
     const theoCD = {};
@@ -1095,9 +1116,11 @@ TD.dangKyMauTuMenhDe = function () {
 
       /* Đăng ký RIÊNG cho từng mức độ — nếu gộp lại rồi lấy mức trung bình
          thì mức 1 và mức 4 sẽ trống, người học không luyện riêng được. */
-      for (let muc = 1; muc <= 4; muc++) {
-        const dungM = idx.filter(i2 => kho[i2].a && (kho[i2].m || 2) === muc);
-        const saiM = idx.filter(i2 => !kho[i2].a && (kho[i2].m || 2) === muc);
+      for (let muc = 1; muc <= tran; muc++) {
+        /* mệnh đề vượt trần thì dồn vào mức trần chứ không bỏ đi */
+        const hop = i2 => TD.mucLT(mon, kho[i2].m) === muc;
+        const dungM = idx.filter(i2 => kho[i2].a && hop(i2));
+        const saiM = idx.filter(i2 => !kho[i2].a && hop(i2));
 
         if (dungM.length >= 1 && gSai >= 3) TD.GEN[mon].push({
           ma: mon + '-ltd' + muc + '-' + ma, chuong: cd, muc: muc, dang: 'mc', _tuLT: true,
@@ -1111,7 +1134,7 @@ TD.dangKyMauTuMenhDe = function () {
 
       /* Câu đúng/sai 4 ý xếp ở mức cao nhất trong chủ đề — phải soi 4 ý một lúc */
       if (idx.length >= 6) {
-        const mucDS = Math.min(4, Math.max.apply(null, idx.map(i2 => kho[i2].m || 2)));
+        const mucDS = Math.min(tran, Math.max.apply(null, idx.map(i2 => kho[i2].m || 2)));
         TD.GEN[mon].push({
           ma: mon + '-ltds-' + ma, chuong: cd, muc: mucDS, dang: 'ds', _tuLT: true,
           tao(R) { return TD.cauDsTuMenhDe(mon, R.chonNhieu(idx, 4), cd, (R() * 4294967295) >>> 0); }
@@ -1246,14 +1269,15 @@ TD.deThiThat = function (mon, seed, cap) {
      nên TD.idThe chưa đọc ra được chủ đề, để nó tự đoán là cả bể dính chung một khoá. */
   kho.forEach((q, i) => { if (be[q.dang]) be[q.dang].push({ khoa: mon + '#' + i, muc: q.muc || 2, it: { mon: mon, i: i } }); });
   gen.forEach(t => { if (be[t.dang]) be[t.dang].push({ khoa: mon + '@' + t.ma, muc: t.muc || 2, it: { mon: mon, g: t.ma, s: 0 } }); });
-  lt.forEach((x, i) => be.mc.push({ khoa: mon + '$' + i, muc: x.m || 2, it: { mon: mon, lt: i, c: x.a ? 'd' : 's', s: 0 } }));
+  lt.forEach((x, i) => be.mc.push({ khoa: mon + '$' + i, muc: TD.mucLT(mon, x.m),
+    it: { mon: mon, lt: i, c: x.a ? 'd' : 's', s: 0 } }));
 
   const theoCD = {};
   lt.forEach((x, i) => { const c = x.cd || 'Khác'; (theoCD[c] = theoCD[c] || []).push(i); });
   Object.keys(theoCD).forEach(c => {
     if (theoCD[c].length < 4) return;
     /* mức của câu 4 ý lấy theo ý khó nhất trong chủ đề */
-    const m = Math.max.apply(null, theoCD[c].map(i => lt[i].m || 2));
+    const m = TD.mucLT(mon, Math.max.apply(null, theoCD[c].map(i => lt[i].m || 2)));
     be.ds.push({ khoa: mon + '\u00A7' + c, muc: m, it: { mon: mon, dsy: null, cd: c, s: 0 } });
   });
 
@@ -6516,7 +6540,10 @@ TD.mcTu = function (R, de, khoDung, khoSai, meo) {
 };
 
 /* Mỗi phần tử kho: { t: 'mệnh đề', a: true/false, v: 'giải thích' } */
-TD.dsTu = function (R, de, kho, meo) {
+/* chienThuat: đoạn kết thêm vào lời giải, nói cách xử lí gọn cả bốn ý cùng lúc.
+   Câu đúng/sai 4 ý là câu phân hoá, giải xong bốn ý rời rạc vẫn chưa đủ — học sinh
+   cần biết cách dựng MỘT bảng/sơ đồ rồi soi cả bốn ý vào đó. */
+TD.dsTu = function (R, de, kho, meo, chienThuat) {
   /* cố gắng lấy cả ý đúng lẫn ý sai cho cân, nhưng vẫn ngẫu nhiên */
   const dung = kho.filter(x => x.a), sai = kho.filter(x => !x.a);
   let c;
@@ -6532,7 +6559,8 @@ TD.dsTu = function (R, de, kho, meo) {
   return {
     q: de,
     items: c.map(x => ({ t: x.t, a: x.a })),
-    giai: c.map((x, i) => `Ý ${'abcd'[i]}) ${x.a ? 'ĐÚNG' : 'SAI'} — ${x.v}`).join('\n'),
+    giai: c.map((x, i) => `Ý ${'abcd'[i]}) ${x.a ? 'ĐÚNG' : 'SAI'} — ${x.v}`).join('\n')
+        + (chienThuat ? '\n\n' + chienThuat : ''),
     meo: meo
   };
 };
@@ -6812,7 +6840,8 @@ TD.GEN.hoa = [
           + `    ⇒ 3a = 2b + ${S(T(3 * nNO, 3))}\n`
           + `Giải hệ: a = ${S(a)} ; b = ${S(b)}\n`
           + `Bảo toàn nguyên tố N: n(HNO₃) = n(NO₃⁻ trong muối) + n(NO) = 3a + n(NO)\n`
-          + `= ${S(T(3 * a, 3))} + ${S(nNO)} = ${S(nHNO3)} mol.`,
+          + `= ${S(T(3 * a, 3))} + ${S(nNO)} = ${S(nHNO3)} mol.`
+        + `\nBước cuối — kiểm chứng: khối lượng hỗn hợp quy đổi phải bằng đúng khối lượng đề cho, và số mol electron nhường phải bằng số mol electron nhận.\nChỗ dễ sai: quy đổi xong quên rằng oxi trong oxit cũng NHẬN electron, nên phải trừ phần electron này ra trước khi tính lượng chất oxi hoá còn lại.`,
       meo: 'Quy đổi mọi hỗn hợp oxit sắt về {Fe; O} rồi ghép bảo toàn khối lượng + bảo toàn electron. Nhớ O nhận 2e.'
     };
   } },
@@ -6940,7 +6969,8 @@ TD.GEN.hoa = [
     };
   } },
 
-{ ma: 'hoa-chatbeo-btkl', chuong: 'Chất béo', muc: 4, dang: 'tln',
+/* Bảo toàn khối lượng một bước ⇒ vận dụng, không phải vận dụng cao. */
+{ ma: 'hoa-chatbeo-btkl', chuong: 'Chất béo', muc: 3, dang: 'tln',
   tao(R) {
     const cb = R.chon([
       { t: 'tristearin', M: 890 }, { t: 'triolein', M: 884 },
@@ -6998,7 +7028,8 @@ TD.GEN.hoa = [
     };
   } },
 
-{ ma: 'hoa-peptide-naoh', chuong: 'Peptide', muc: 4, dang: 'tln',
+/* Bảo toàn khối lượng một bước ⇒ vận dụng, không phải vận dụng cao. */
+{ ma: 'hoa-peptide-naoh', chuong: 'Peptide', muc: 3, dang: 'tln',
   tao(R) {
     const aa = { Gly: 75, Ala: 89, Val: 117 };
     const k = R.nguyen(3, 5);
@@ -7411,7 +7442,9 @@ TD.GEN.toan = [
     };
   } },
 
-{ ma: 'toan-bayes', chuong: 'Xác suất có điều kiện', muc: 4, dang: 'tln',
+/* Bayes hai hộp chỉ là thay số vào một công thức ⇒ đây là VẬN DỤNG, không phải
+   vận dụng cao. Câu VDC của chuyên đề này là toan-vdc-bayes3 (ba nguồn, có sàng lọc). */
+{ ma: 'toan-bayes', chuong: 'Xác suất có điều kiện', muc: 3, dang: 'tln',
   tao(R) {
     const d1 = R.nguyen(1, 6), x1 = R.nguyen(1, 6);
     const d2 = R.nguyen(1, 6), x2 = R.nguyen(1, 6);
@@ -8174,7 +8207,8 @@ TD.GEN.sinh = [
           + `⇒ Giao tử hoán vị: ${deu ? 'Ab và aB' : 'AB và ab'}\n`
           + `Tổng giao tử hoán vị = f = ${f}% ⇒ mỗi loại = ${f}/2 = ${S(gtHV)}%\n`
           + `Tổng giao tử liên kết = 100% − ${f}% = ${100 - f}% ⇒ mỗi loại = ${S(gtLK)}%\n`
-          + `Giao tử ${loaiHoi} là giao tử ${laHoanVi ? 'HOÁN VỊ' : 'LIÊN KẾT'} ⇒ tỉ lệ = ${S(kq)}%.`,
+          + `Giao tử ${loaiHoi} là giao tử ${laHoanVi ? 'HOÁN VỊ' : 'LIÊN KẾT'} ⇒ tỉ lệ = ${S(kq)}%.`
+        + `\nBước cuối — kiểm chứng: tần số hoán vị gene luôn nằm trong khoảng 0% đến 50%. Ra số lớn hơn 50% nghĩa là đã lấy nhầm nhóm giao tử liên kết làm giao tử hoán vị.\nChỗ dễ sai: giao tử hoán vị luôn là nhóm có tỉ lệ NHỎ hơn; hai loại giao tử hoán vị bằng nhau và hai loại giao tử liên kết bằng nhau, nên f = tổng hai loại nhỏ.`,
       meo: 'Phải xác định đúng dị hợp ĐỀU hay CHÉO mới biết loại nào là giao tử hoán vị. f ≤ 50%.'
     };
   } },
@@ -11547,8 +11581,12 @@ window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
 (function () {
 const MC = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
+  const loai = opts.filter(x => x !== it.d)
+    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không thoả yêu cầu của đề.'}`)
+    .join('\n');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
-    giai: `Đáp án: ${it.d}\n${it.v}`, meo: meo };
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
+    meo: meo };
 };
 
 /* ---------- 1. Từ vựng: từ → nghĩa và nghĩa → từ ---------- */
@@ -11829,17 +11867,41 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
   tao(R) {
     const it = R.chon([
       { q: 'No sooner had he left ____ the phone rang.', d: 'than', s: ['when', 'then', 'as'],
-        v: '"No sooner … THAN" là cặp cố định. Đừng lẫn với "Hardly … WHEN".' },
+        v: '"No sooner + had + S + V3 … THAN + S + V2" là cặp cố định, nghĩa "vừa mới … thì đã …". '
+         + 'Vế đầu dùng quá khứ hoàn thành cho việc xảy ra TRƯỚC, vế sau dùng quá khứ đơn.',
+        sv: { when: 'đi với "Hardly/Scarcely", không đi với "No sooner" — đây chính là cặp bẫy đề hay dùng nhất',
+              then: 'là trạng từ chỉ thời gian ("sau đó"), không phải liên từ nên không nối được hai mệnh đề',
+              as: 'nghĩa "khi/trong lúc", không tạo được sắc thái "vừa mới … thì đã …" của cấu trúc này' } },
       { q: 'Hardly had she sat down ____ the bell rang.', d: 'when', s: ['than', 'then', 'that'],
-        v: '"Hardly/Scarcely … WHEN" là cặp cố định.' },
+        v: '"Hardly/Scarcely + had + S + V3 … WHEN + S + V2" là cặp cố định. '
+         + 'Nhớ đối chiếu: No sooner đi với THAN, còn Hardly/Scarcely đi với WHEN.',
+        sv: { than: 'chỉ dùng với "No sooner", đây là bẫy đảo cặp mà đề ra gần như năm nào cũng có',
+              then: 'là trạng từ, không nối được hai mệnh đề',
+              that: 'chỉ dùng trong cấu trúc nhấn mạnh "It was … that …", không dùng ở đây' } },
       { q: 'Not only ____ well, but he also writes beautifully.', d: 'does he speak', s: ['he speaks', 'speaks he', 'he does speak'],
-        v: 'Sau "Not only" đầu câu phải đảo ngữ: trợ động từ + S + V nguyên thể.' },
+        v: 'Khi "Not only" đứng ĐẦU CÂU, mệnh đề sau nó phải đảo ngữ: trợ động từ + S + V nguyên thể. '
+         + 'Vế sau giữ trật tự bình thường và thường có "but … also".',
+        sv: { 'he speaks': 'giữ nguyên trật tự thường, tức là không đảo ngữ — sai ngay quy tắc cơ bản của cấu trúc này',
+              'speaks he': 'đảo động từ THƯỜNG lên trước chủ ngữ; tiếng Anh chỉ đảo TRỢ động từ',
+              'he does speak': 'đúng là có trợ động từ nhưng vẫn đứng sau chủ ngữ nên chưa phải đảo ngữ' } },
       { q: 'Only when the sun set ____ home.', d: 'did they go', s: ['they went', 'went they', 'they did go'],
-        v: 'Sau "Only when + mệnh đề" thì MỆNH ĐỀ CHÍNH mới đảo ngữ.' },
+        v: 'Với "Only when + mệnh đề", phần đảo ngữ nằm ở MỆNH ĐỀ CHÍNH chứ không phải mệnh đề sau "when". '
+         + 'Đây là chỗ nhiều bạn đảo nhầm ngay trong mệnh đề "when".',
+        sv: { 'they went': 'không đảo ngữ, trong khi "Only when" đầu câu bắt buộc mệnh đề chính phải đảo',
+              'went they': 'đảo động từ thường, sai quy tắc — phải mượn trợ động từ "did"',
+              'they did go': 'có "did" nhưng đặt sau chủ ngữ nên vẫn là trật tự thường' } },
       { q: 'Never ____ such a beautiful sunset.', d: 'have I seen', s: ['I have seen', 'I saw', 'saw I'],
-        v: 'Trạng từ phủ định "Never" đầu câu ⇒ đảo trợ động từ lên trước chủ ngữ.' },
+        v: 'Trạng từ phủ định "Never" đứng đầu câu ⇒ đảo trợ động từ lên trước chủ ngữ. '
+         + 'Ngữ cảnh "chưa từng thấy tính đến bây giờ" nên dùng hiện tại hoàn thành "have seen".',
+        sv: { 'I have seen': 'đúng thì nhưng KHÔNG đảo ngữ, mà "Never" đầu câu thì bắt buộc phải đảo',
+              'I saw': 'vừa không đảo ngữ vừa sai thì — quá khứ đơn không diễn tả trải nghiệm tính đến hiện tại',
+              'saw I': 'đảo động từ thường lên trước chủ ngữ; tiếng Anh chỉ đảo trợ động từ' } },
       { q: 'Under no circumstances ____ this door.', d: 'should you open', s: ['you should open', 'open you should', 'you open should'],
-        v: 'Cụm phủ định "Under no circumstances" đầu câu ⇒ đảo ngữ: modal + S + V.' }
+        v: 'Cụm phủ định "Under no circumstances" (tuyệt đối không được) đứng đầu câu ⇒ đảo ngữ: '
+         + 'modal + S + V nguyên thể. Cùng nhóm với "On no account", "At no time", "In no way".',
+        sv: { 'you should open': 'trật tự thường, không đảo ngữ',
+              'open you should': 'đảo lung tung, không đúng bất kì cấu trúc nào',
+              'you open should': 'sai trật tự cơ bản của tiếng Anh' } }
     ]);
     return MC(R, `Chọn phương án đúng:\n\n${it.q}`, it,
       'Đảo ngữ là câu phân loại điểm 9–10. Nhớ hai cặp bẫy: No sooner … THAN và Hardly … WHEN. '
@@ -12001,6 +12063,16 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
          + 'câu "gain more than they give" nên đặt ở [4] là hợp mạch nhất.',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] }
     ]);
+    /* Nêu luôn nội dung câu đứng ngay trước từng vị trí bị loại — học sinh thấy được
+       vì sao mạch ý không nối vào đó được, thay vì chỉ biết "đáp án là [4]". */
+    const cau = bo.doan.split(/\[\d\]/).map(x => x.trim()).filter(Boolean);
+    bo.sv = {};
+    bo.s.forEach(x => {
+      const n = parseInt(x.replace(/\D/g, ''), 10);
+      const truoc = cau[n - 1] || '';
+      bo.sv[x] = `đứng ngay sau câu "${truoc.slice(0, 70)}${truoc.length > 70 ? '…' : ''}" — `
+        + `nội dung câu đó không phải là điều mà câu cần chèn đang nối tiếp, nên mạch ý bị đứt.`;
+    });
     return MC(R, `Chọn vị trí thích hợp nhất để chèn câu cho sẵn vào đoạn văn.\n\n`
       + `<b>Câu cần chèn:</b> "${bo.cau}"\n\n<b>Đoạn văn:</b> ${bo.doan}`, bo,
       'Ba dấu hiệu quyết định vị trí: ① TỪ NỐI đầu câu (For this reason, However, Therefore) chỉ quan hệ với câu '
@@ -12073,10 +12145,18 @@ const T = TD.lamTron;
 const D = TD.dapSo;
 
 /* Khuôn trắc nghiệm 1 đúng + 3 nhiễu riêng của từng câu */
+/* Khuôn trắc nghiệm khối xã hội.
+   Lời giải phải nêu CẢ phương án đúng lẫn lí do loại từng phương án còn lại —
+   câu vận dụng cao mà chỉ ghi "đáp án là A" thì học sinh không học được gì.
+   it.sv (nếu có) là lí do riêng cho từng phương án nhiễu. */
 const MC = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
+  const loai = opts.filter(x => x !== it.d)
+    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không phù hợp với dữ kiện đề đưa ra.'}`)
+    .join('\n');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
-    giai: `Đáp án: ${it.d}\n${it.v}`, meo: meo };
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
+    meo: meo };
 };
 
 /* ==========================================================
@@ -12388,7 +12468,8 @@ TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
         + `  Bậc 1: ${S(b1, 1)} × 5% = ${S(b1 * 0.05, 4)} triệu\n`
         + (b2 > 0 ? `  Bậc 2: ${S(b2, 1)} × 10% = ${S(b2 * 0.10, 4)} triệu\n` : '')
         + (b3 > 0 ? `  Bậc 3: ${S(b3, 1)} × 15% = ${S(b3 * 0.15, 4)} triệu\n` : '')
-        + `  Tổng thuế = ${D(kq, 3)} triệu đồng.`,
+        + `  Tổng thuế = ${D(kq, 3)} triệu đồng.`
+        + `\nBước cuối — kiểm chứng: số thuế phải nộp luôn nhỏ hơn phần thu nhập tính thuế, và thuế suất thực tế phải nằm giữa bậc thấp nhất và bậc cao nhất đã dùng.\nChỗ dễ sai: thuế thu nhập cá nhân tính theo BẬC LUỸ TIẾN TỪNG PHẦN — chỉ phần thu nhập vượt ngưỡng mới chịu thuế suất cao hơn, không phải lấy toàn bộ thu nhập nhân với thuế suất của bậc cao nhất.`,
       meo: 'Bẫy lớn nhất: lấy TOÀN BỘ thu nhập nhân với thuế suất của bậc cao nhất. '
         + 'Luỹ tiến TỪNG PHẦN chỉ đánh thuế phần vượt vào mỗi bậc.'
     };
@@ -12888,7 +12969,8 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
         + `Bước 2 — năng lượng hoá học tích luỹ được (phản ứng thu nhiệt nên cần cấp vào):\n`
         + `  Q<sub>ích</sub> = ${S(n, 4)} × 2803 = ${S(n * 2803, 2)} kJ\n`
         + `Bước 3 — hiệu suất ${S(H)}% ⇒ năng lượng ánh sáng phải hấp thụ:\n`
-        + `  E = ${S(n * 2803, 2)} ÷ ${S(H / 100)} = ${D(E, 1)} kJ.`,
+        + `  E = ${S(n * 2803, 2)} ÷ ${S(H / 100)} = ${D(E, 1)} kJ.`
+        + `\nBước 4 — kiểm chứng: hiệu suất nhỏ hơn 100% nên năng lượng ánh sáng phải LỚN HƠN nhiệt lượng tích luỹ. Nếu ra số nhỏ hơn là đã nhân thay vì chia cho hiệu suất.\nChỗ dễ sai: nhầm chiều hiệu suất (nhân 0,2 thay vì chia 0,2) — đây là bẫy phổ biến nhất của mọi bài có hiệu suất.`,
       meo: 'Δ<sub>r</sub>H > 0 nghĩa là phản ứng THU nhiệt — quang hợp tích trữ năng lượng. '
         + 'Hiệu suất luôn nằm ở MẪU khi tính lượng đầu vào, ở TỬ khi tính lượng đầu ra.'
     };
@@ -12922,7 +13004,8 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
         + `Bước 3 — n(nhiên liệu) = ${S(Q / (H / 100), 2)} ÷ ${S(nl.dH)} = ${S(n, 4)} mol\n`
         + `Bước 4 — ${nl.khi
             ? `V = ${S(n, 4)} × 24,79 = ${D(kq, 2)} lít.`
-            : `m = ${S(n, 4)} × ${S(nl.M)} = ${D(kq, 2)} gam.`}`,
+            : `m = ${S(n, 4)} × ${S(nl.M)} = ${D(kq, 2)} gam.`}`
+        + `\nBước cuối — kiểm chứng: nhiệt lượng nhiên liệu phải cấp luôn lớn hơn nhiệt lượng nước nhận được, phần chênh là thất thoát ra môi trường.\nChỗ dễ sai: ① quên đổi khối lượng nước sang kg khi nhiệt dung riêng tính theo J/(kg·K) ② nhân hiệu suất thay vì chia ③ nhầm nhiệt lượng toả ra khi ĐỐT với nhiệt tạo thành.`,
       meo: 'Chương trình mới dùng điều kiện chuẩn 25 °C, 1 bar ⇒ 1 mol khí chiếm 24,79 lít, KHÔNG phải 22,4 lít. '
         + 'Đây là bẫy chuyển tiếp giữa hai chương trình.'
     };
@@ -12988,7 +13071,8 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
         + `Bước 2 — khối lượng ${kl.kh} cần bám: m = V·D = ${S(Scm * d * 1e-4, 5)} × ${S(kl.D)} = ${S(m, 4)} gam.\n`
         + `Bước 3 — ${kl.kh}<sup>${kl.n}+</sup> + ${kl.n}e → ${kl.kh}:\n`
         + `  n<sub>e</sub> = (${S(m, 4)}/${S(kl.M)}) × ${S(kl.n)} = ${S(ne, 5)} mol\n`
-        + `Bước 4 — t = n<sub>e</sub>·F/(I·H) = ${S(ne, 5)}×96500/(${S(I)}×${S(H / 100)}) = ${D(t, 0)} giây.`,
+        + `Bước 4 — t = n<sub>e</sub>·F/(I·H) = ${S(ne, 5)}×96500/(${S(I)}×${S(H / 100)}) = ${D(t, 0)} giây.`
+        + `\nBước cuối — kiểm chứng: khối lượng kim loại mạ tính ra phải khớp với tích thể tích lớp mạ nhân khối lượng riêng. Hai con đường tính phải cho cùng một số.\nChỗ dễ sai: quên đổi đơn vị diện tích và bề dày về cùng hệ (cm² với cm) trước khi nhân thành thể tích; và quên rằng mỗi ion kim loại hoá trị n cần đúng n electron.`,
       meo: '1 μm = 10⁻⁴ cm. Đổi sai đơn vị bề dày là lệch cả vạn lần — kiểm tra lại trước khi tô đáp án.'
     };
   } },
@@ -13044,7 +13128,8 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
         + `  ${S(p.he * 100, 2)}% — tức 100 kg phân nguyên chất chứa ${S(p.he * 100, 2)} kg ${p.ngto}.\n`
         + `Bước 2 — khối lượng phân NGUYÊN CHẤT cần: ${S(dt)} ÷ ${S(p.he, 4)} = ${S(dt / p.he, 2)} kg\n`
         + `Bước 3 — phân thương phẩm chỉ đạt ${S(tc)}% tinh khiết:\n`
-        + `  m = ${S(dt / p.he, 2)} ÷ ${S(tc / 100)} = ${D(m, 2)} kg.`,
+        + `  m = ${S(dt / p.he, 2)} ÷ ${S(tc / 100)} = ${D(m, 2)} kg.`
+        + `\nBước cuối — kiểm chứng: độ dinh dưỡng luôn nhỏ hơn 100% và nhỏ hơn phần trăm khối lượng của muối trong phân bón.\nChỗ dễ sai: độ dinh dưỡng của phân kali quy về %K₂O, phân lân quy về %P₂O₅, phân đạm quy về %N — quy nhầm chất là sai toàn bộ. Đây là chỗ mất điểm nhiều nhất của chuyên đề phân bón.`,
       meo: 'Độ dinh dưỡng đạm quy về %N, lân quy về %P₂O₅, kali quy về %K₂O — không phải phần trăm của cả phân tử muối.'
     };
   } },
@@ -13110,7 +13195,8 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
     return TD.dsTu(R, `Thiết lập pin Galvani ${c.a}–${c.b} ở điều kiện chuẩn, biết `
       + `E°(${c.a}<sup>n+</sup>/${c.a}) = ${S(c.ea)} V và E°(${c.b}<sup>n+</sup>/${c.b}) = ${S(c.eb)} V. `
       + `Xét tính đúng/sai của các phát biểu sau:`, kho,
-      'Nhớ một câu: "Anot Âm — Oxi hoá; Catot dương — Khử". Đúng cho pin điện; điện phân thì dấu điện cực ngược lại.');
+      'Nhớ một câu: "Anot Âm — Oxi hoá; Catot dương — Khử". Đúng cho pin điện; điện phân thì dấu điện cực ngược lại.',
+      'Cách làm chắc nhất: viết trước hai bán phản ứng kèm thế điện cực chuẩn của từng cặp, rồi mới xét từng ý. Ba điều luôn đúng với mọi pin điện hoá: cực có E° NHỎ hơn là anode (cực âm, bị oxi hoá); electron đi từ anode sang cathode qua dây dẫn; E°pin = E°(cathode) − E°(anode) và luôn dương.');
   } }
 
 ]);
@@ -13165,7 +13251,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
         + `Bước 2 — hoá hơi ${S(x)} kg ở 100 °C: Q₂ = L·x = 2,26·10⁶×${S(x)} = ${S(x * 2.26e6)} J\n`
         + `Bước 3 — tổng nhiệt CÓ ÍCH: Q = ${S(Q)} J\n`
         + `Bước 4 — ấm chỉ đạt hiệu suất ${S(H)}% nên công suất có ích là ${S(P)}×${S(H / 100)} = ${S(P * H / 100)} W\n`
-        + `  t = ${S(Q)} / ${S(P * H / 100)} = ${D(t, 1)} giây.`,
+        + `  t = ${S(Q)} / ${S(P * H / 100)} = ${D(t, 1)} giây.`
+        + `\nBước 4 — kiểm chứng: hiệu suất phải nhỏ hơn 100%; nhiệt lượng ấm toả ra luôn lớn hơn nhiệt lượng nước thực nhận vì một phần thất thoát ra môi trường và làm nóng vỏ ấm.\nChỗ dễ sai: quên đổi khối lượng nước ra kilôgam hoặc quên rằng 1 lít nước ứng với 1 kg.`,
       meo: 'Nhiệt hoá hơi riêng của nước lớn gấp gần 7 lần nhiệt nóng chảy — chỉ bay hơi vài lạng nước '
         + 'đã tốn nhiều năng lượng hơn cả việc đun cả ấm từ nguội tới sôi.'
     };
@@ -13192,7 +13279,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
         + `Bước 2 — tỉ lệ khí còn lại:\n`
         + `  n₂/n₁ = (p₂/T₂)/(p₁/T₁) = (${S(p2)}/${S(T2)}) ÷ (${S(p1)}/${S(T1)}) = ${S(ti, 4)}\n`
         + `Bước 3 — phần trăm khí đã thoát:\n`
-        + `  (1 − ${S(ti, 4)}) × 100 = ${D(pct, 2)}%.`,
+        + `  (1 − ${S(ti, 4)}) × 100 = ${D(pct, 2)}%.`
+        + `\nBước 4 — kiểm chứng dấu: nếu áp suất tăng mà thể tích không đổi thì nhiệt độ phải TĂNG, và ngược lại. Chiều biến thiên tính ra phải khớp với dữ kiện đề.\nChỗ dễ sai: quên đổi °C sang Kelvin. Mọi định luật chất khí đều dùng nhiệt độ tuyệt đối T(K) = t(°C) + 273, thay nhầm là sai toàn bộ bài.`,
       meo: 'Bài rò rỉ khí thì SỐ MOL thay đổi nên không được dùng p₁V₁/T₁ = p₂V₂/T₂ (công thức đó chỉ đúng khi n không đổi). '
         + 'Phải quay về pV = nRT.'
     };
@@ -13230,7 +13318,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
       giai: `Bước 1 — lập tỉ số hạt nhân còn lại:\n${buoc}`
         + `Bước 2 — định luật phóng xạ N = N₀·2^(−t/T) ⇒ 2^(−t/T) = ${S(ti, 4)}\n`
         + `  ⇒ t = T·log₂(1/${S(ti, 4)}) = ${dv.T > 1e6 ? S(dv.T / 1e9) + '·10⁹' : S(dv.T)} × ${S(Math.log(1 / ti) / Math.LN2, 4)}\n`
-        + `Bước 3 — t ≈ ${D(kq, dv.T > 1e6 ? 3 : 0)} ${donvi}.`,
+        + `Bước 3 — t ≈ ${D(kq, dv.T > 1e6 ? 3 : 0)} ${donvi}.`
+        + `\nBước 4 — kiểm chứng: còn lại 49% tức là chưa tới một nửa vừa qua, nên t phải XẤP XỈ nhưng lớn hơn một chu kì bán rã T. Kết quả tính ra đúng nằm quanh T ⇒ hợp lí.\nChỗ dễ sai: đảo ngược tỉ số thành N₀/N rồi ra t âm; hoặc dùng độ phóng xạ ban đầu H₀ mà quên rằng H tỉ lệ THUẬN với N nên tỉ số H/H₀ cũng chính là N/N₀.`,
       meo: 'Tỉ số hạt CON trên hạt MẸ bằng 2^(t/T) − 1, không phải 2^(t/T). Nhớ trừ 1 là qua được bẫy quen nhất của dạng này.'
     };
   } },
@@ -13281,7 +13370,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
         + `Bước 2 — hiệu suất H = 1 − ΔP/P ⇒ phần hao phí (1 − H) cũng tỉ lệ nghịch với U²:\n`
         + `  (1 − H₁)/(1 − H₂) = U₂²/U₁²\n`
         + `Bước 3 — thay số: (1 − ${S(H1 / 100)})/(1 − ${S(H2 / 100)}) = ${S((1 - H1 / 100) / (1 - H2 / 100), 4)}\n`
-        + `  U₂ = ${S(U1)} × √${S((1 - H1 / 100) / (1 - H2 / 100), 4)} = ${D(U2, 3)} kV.`,
+        + `  U₂ = ${S(U1)} × √${S((1 - H1 / 100) / (1 - H2 / 100), 4)} = ${D(U2, 3)} kV.`
+        + `\nBước 4 — kiểm chứng: công suất hao phí phải nhỏ hơn nhiều so với công suất truyền đi, nếu tỉ lệ hao phí vượt quá vài chục phần trăm là đã tính nhầm.\nChỗ dễ sai: nhớ ΔP tỉ lệ NGHỊCH với BÌNH PHƯƠNG hiệu điện thế — tăng U lên 10 lần thì hao phí giảm 100 lần, không phải 10 lần.`,
       meo: 'Đừng lập tỉ lệ với H mà phải lập tỉ lệ với (1 − H) — chính phần HAO PHÍ mới tỉ lệ nghịch với U². '
         + 'Nhầm chỗ này là ra đáp án sai mà vẫn thấy "hợp lí".'
     };
@@ -13308,7 +13398,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
         + `  W(Z) = ${S(A3)} × ${S(e3, 1)} = ${S(A3 * e3, 2)} MeV; W(n) = 0\n`
         + `Bước 2 — năng lượng toả ra = tổng năng lượng liên kết SAU trừ TRƯỚC:\n`
         + `  ΔE = ${S(A3 * e3, 2)} − (${S(A1 * e1, 2)} + ${S(A2 * e2, 2)}) = ${D(dE, 3)} MeV.\n`
-        + `Kết quả dương ⇒ phản ứng toả năng lượng, sản phẩm bền vững hơn các hạt ban đầu.`,
+        + `Kết quả dương ⇒ phản ứng toả năng lượng, sản phẩm bền vững hơn các hạt ban đầu.`
+        + `\nBước 4 — kiểm chứng: năng lượng toả ra của một phản ứng hạt nhân thường vào cỡ vài MeV đến vài trăm MeV; ra tới hàng nghìn MeV cho một phản ứng là dấu hiệu tính sai.\nChỗ dễ sai: ① lẫn chiều Δm (phải lấy khối lượng TRƯỚC trừ khối lượng SAU) ② quên đổi u sang MeV/c² với 1u = 931,5 MeV/c².`,
       meo: 'Với năng lượng LIÊN KẾT thì lấy sau trừ trước; với KHỐI LƯỢNG thì lấy trước trừ sau. '
         + 'Hai công thức ngược chiều nhau nhưng cùng cho một kết quả.'
     };
@@ -13375,7 +13466,8 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
       + `Đồ thị nhiệt độ theo thời gian gồm một đoạn đi lên (chất tăng thêm 100 °C trong ${S(t1)} giây), `
       + `rồi một đoạn nằm ngang kéo dài ${S(t2)} giây. Bỏ qua mọi hao phí. Xét các phát biểu sau:`, kho,
       'Đồ thị nhiệt độ – thời gian: đoạn NGHIÊNG là mcΔt, đoạn NGANG là λm hoặc Lm. '
-      + 'Đọc được hai đoạn đó là giải được mọi câu của dạng này.');
+      + 'Đọc được hai đoạn đó là giải được mọi câu của dạng này.',
+      'Cách làm chắc nhất: quy hết về một hệ đơn vị (J, kg, K) trước khi xét bất kì ý nào. Ba chỗ đề hay cài bẫy: ① nhầm nhiệt dung riêng với nhiệt nóng chảy riêng ② quên rằng trong quá trình chuyển thể nhiệt độ KHÔNG đổi dù vẫn thu nhiệt ③ nhầm dấu quy ước của công và nhiệt trong nguyên lí I.');
   } }
 
 ]);
@@ -13426,7 +13518,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
         + `  S = πr² + 2πrh = πr² + 2·${S(V, 1)}/r\n`
         + `Bước 3 — S′ = 2πr − 2·${S(V, 1)}/r² = 0 ⇒ r³ = ${S(V, 1)}/π ⇒ r = ${S(r, 5)} m\n`
         + `Bước 4 — khi đó h = r và S<sub>min</sub> = 3πr² = ${S(Smin, 4)} m²\n`
-        + `Đáp án: ${D(hoiR ? r : Smin, 3)} ${hoiR ? 'm' : 'm²'}.`,
+        + `Đáp án: ${D(hoiR ? r : Smin, 3)} ${hoiR ? 'm' : 'm²'}.`
+        + `\nBước 5 — kiểm chứng bằng kết quả lí thuyết: thùng trụ HỞ một đáy tốn ít vật liệu nhất khi h = r; thay r vừa tìm vào V = πr²h phải ra đúng thể tích đề cho.\nChỗ dễ sai: dùng nhầm công thức của thùng KÍN hai đáy (h = 2r) — hai bài chỉ khác nhau một chữ "không nắp".`,
       meo: 'Kết quả đẹp cần nhớ: thùng trụ KHÔNG nắp tốn ít vật liệu nhất khi h = r, khi đó S = 3πr². '
         + 'Thùng CÓ nắp thì h = 2r. Nhớ hai kết quả này để kiểm tra lại ngay.'
     };
@@ -13448,7 +13541,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
         + `Bước 2 — công thức trả góp đều: m = P·r·(1+r)ⁿ / [(1+r)ⁿ − 1]\n`
         + `Bước 3 — (1 + ${S(r, 3)})^${S(n)} = ${S(Math.pow(1 + r, n), 6)}\n`
         + `Bước 4 — m = ${S(P)} × ${S(r, 3)} × ${S(Math.pow(1 + r, n), 6)} / (${S(Math.pow(1 + r, n), 6)} − 1) = ${D(m, 3)} triệu đồng.\n`
-        + `Tổng phải trả sau ${S(nam)} năm là ${S(m * n, 2)} triệu, tức tiền lãi ${S(m * n - P, 2)} triệu.`,
+        + `Tổng phải trả sau ${S(nam)} năm là ${S(m * n, 2)} triệu, tức tiền lãi ${S(m * n - P, 2)} triệu.`
+        + `\nBước 4 — kiểm chứng: tổng số tiền trả trong cả kì phải LỚN HƠN số vay ban đầu, phần chênh chính là tiền lãi. Nếu ra nhỏ hơn hoặc bằng thì đã quên nhân lãi.\nChỗ dễ sai: ① đổi lãi suất năm sang tháng bằng cách chia 12 (sai, phải dùng đúng lãi suất tháng đề cho) ② đếm thiếu số kì n ③ bấm máy không đóng ngoặc đủ ở mẫu số (1 + r)ⁿ − 1.`,
       meo: 'Ba công thức khác nhau: GỬI một lần A = P(1+r)ⁿ · GỬI GÓP đều · TRẢ GÓP đều. '
         + 'Đề luôn cho lãi theo THÁNG còn thời hạn theo NĂM — nhớ đổi n ra tháng.'
     };
@@ -13473,7 +13567,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
         + `  P(H) = ${S(p1 / 100, 2)}×${S(d1 / 100, 2)} + ${S(p2 / 100, 2)}×${S(d2 / 100, 2)} + ${S(p3 / 100, 2)}×${S(d3 / 100, 2)} = ${S(P, 6)}\n`
         + `Bước 2 — xác suất bóng vừa do A sản xuất vừa hỏng:\n`
         + `  P(A ∩ H) = ${S(p1 / 100, 2)} × ${S(d1 / 100, 2)} = ${S(p1 * d1 / 10000, 6)}\n`
-        + `Bước 3 — Bayes: P(A|H) = P(A ∩ H)/P(H) = ${S(p1 * d1 / 10000, 6)} / ${S(P, 6)} = ${D(hau, 4)}.`,
+        + `Bước 3 — Bayes: P(A|H) = P(A ∩ H)/P(H) = ${S(p1 * d1 / 10000, 6)} / ${S(P, 6)} = ${D(hau, 4)}.`
+        + `\nBước 4 — kiểm chứng: cộng xác suất hậu nghiệm của cả ba phân xưởng phải bằng đúng 1.\nChỗ dễ sai: nhiều bạn lấy thẳng tỉ lệ phế phẩm của phân xưởng A làm đáp án. Đó là P(H|A) — xác suất XUÔI, còn đề hỏi P(A|H) là chiều NGƯỢC lại. Hai số này khác nhau vì còn phải cân theo tỉ trọng sản lượng của từng phân xưởng.`,
       meo: 'Vẽ SƠ ĐỒ HÌNH CÂY: nhánh 1 là nguyên nhân (nhà máy), nhánh 2 là kết quả (hỏng hay không). '
         + 'Bayes chính là đi NGƯỢC cây: biết kết quả, hỏi nguyên nhân.'
     };
@@ -13498,7 +13593,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
       giai: `Bước 1 — giá trị đại diện mỗi nhóm là TRUNG ĐIỂM: ${c.map(v => S(v, 1)).join(' · ')}\n`
         + `Bước 2 — số trung bình: x̄ = Σnᵢcᵢ/n = ${S(tong, 1)}/${S(n)} = ${S(tb, 4)}\n`
         + `Bước 3 — phương sai: s² = Σnᵢ(cᵢ − x̄)²/n = ${S(s2, 4)}\n`
-        + `Bước 4 — độ lệch chuẩn: s = √${S(s2, 4)} = ${D(sd, 2)} giờ.`,
+        + `Bước 4 — độ lệch chuẩn: s = √${S(s2, 4)} = ${D(sd, 2)} giờ.`
+        + `\nBước 5 — kiểm chứng: độ lệch chuẩn phải nhỏ hơn nửa bề rộng toàn bộ mẫu, nếu lớn hơn là tính sai.\nChỗ dễ sai: ① lấy đầu mút nhóm thay vì TRUNG ĐIỂM ② quên nhân tần số nᵢ khi cộng bình phương độ lệch ③ chia cho n − 1 (phương sai mẫu hiệu chỉnh) trong khi chương trình phổ thông dùng chia cho n.`,
       meo: 'Giá trị đại diện là TRUNG ĐIỂM nhóm, không phải đầu mút trái — sai bước này là hỏng cả bài. '
         + 'Độ lệch chuẩn cùng đơn vị với số liệu, phương sai thì không.'
     };
@@ -13525,7 +13621,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
         + `  d(I,(P)) = |A·x₀ + B·y₀ + C·z₀ + D| / √(A²+B²+C²) = ${S(d, 5)}\n`
         + `Bước 2 — vì ${S(d, 3)} > R = ${S(Rb)} nên mặt cầu nằm hẳn một phía, không cắt (P).\n`
         + `Bước 3 — M chạy trên mặt cầu nên khoảng cách tới (P) nằm trong đoạn [d − R; d + R]:\n`
-        + `  lớn nhất = d + R = ${S(d, 5)} + ${S(Rb)} = ${D(xa, 3)}.`,
+        + `  lớn nhất = d + R = ${S(d, 5)} + ${S(Rb)} = ${D(xa, 3)}.`
+        + `\nBước 5 — kiểm chứng: khoảng cách NHỎ NHẤT từ điểm trên mặt cầu tới mặt phẳng bằng d − R, lớn nhất bằng d + R; hai số này chênh nhau đúng 2R.\nChỗ dễ sai: quên kiểm tra d > R (mặt phẳng không cắt mặt cầu). Nếu d < R thì mặt phẳng cắt mặt cầu, khoảng cách nhỏ nhất bằng 0 chứ không phải d − R.`,
       meo: 'Điểm xa nhất và gần nhất đều nằm trên đường thẳng qua I và VUÔNG GÓC với (P). '
         + 'Xa nhất d + R, gần nhất |d − R|. Nếu d < R thì mặt cầu cắt (P) và khoảng cách nhỏ nhất bằng 0.'
     };
@@ -13549,7 +13646,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
         + `  |∫₀^${S(p)} v dt| = ${S(Math.abs(F(p) - F(0)), 4)} m\n`
         + `  |∫_${S(p)}^${S(q)} v dt| = ${S(Math.abs(F(q) - F(p)), 4)} m\n`
         + `  |∫_${S(q)}^${S(Tc)} v dt| = ${S(Math.abs(F(Tc) - F(q)), 4)} m\n`
-        + `Bước 3 — cộng lại: s = ${D(kq, 3)} m.`,
+        + `Bước 3 — cộng lại: s = ${D(kq, 3)} m.`
+        + `\nBước 4 — kiểm chứng: quãng đường luôn LỚN HƠN HOẶC BẰNG độ dịch chuyển (là ∫v dt không lấy trị tuyệt đối). Nếu hai số bằng nhau nghĩa là vật không đổi chiều — trái với việc v có nghiệm trong khoảng đang xét.\nChỗ dễ sai: tính thẳng ∫₀ᵀ v dt rồi lấy trị tuyệt đối ở CUỐI. Phải tách tại mọi nghiệm của v rồi mới cộng.`,
       meo: 'QUÃNG ĐƯỜNG dùng ∫|v|dt, ĐỘ DỊCH CHUYỂN dùng ∫v dt (có thể âm). '
         + 'Không tách tại nghiệm của v là mất phần vật đi ngược, kết quả nhỏ hơn thực tế.'
     };
@@ -13572,7 +13670,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
       giai: `Bước 1 — tìm k từ hai mốc đã biết:\n`
         + `  ${S(N1, 4)} = ${S(N0, 1)}·e^(k·${S(nam1)}) ⇒ k = ln(${S(N1, 4)}/${S(N0, 1)}) ÷ ${S(nam1)} = ${S(k, 5)}\n`
         + `Bước 2 — thay k vừa tìm vào để giải t:\n`
-        + `  ${S(nguong, 2)} = ${S(N0, 1)}·e^(${S(k, 5)}·t) ⇒ t = ln(${S(nguong, 2)}/${S(N0, 1)}) ÷ ${S(k, 5)} = ${D(kq, 2)} năm.`,
+        + `  ${S(nguong, 2)} = ${S(N0, 1)}·e^(${S(k, 5)}·t) ⇒ t = ln(${S(nguong, 2)}/${S(N0, 1)}) ÷ ${S(k, 5)} = ${D(kq, 2)} năm.`
+        + `\nBước 3 — kiểm chứng: thay t vừa tìm ngược lại vào công thức phải ra đúng dân số đề cho.\nChỗ dễ sai: hằng số k phải giữ ĐỦ chữ số khi tính tiếp; làm tròn k sớm là lệch kết quả cả năm. Trên Casio hãy lưu k vào ô nhớ A (SHIFT RCL (−)) rồi gọi lại, đừng chép tay.`,
       meo: 'Dạng hai bước: dùng dữ kiện thứ nhất TÌM HẰNG SỐ, rồi mới dùng hằng số đó trả lời câu hỏi. '
         + 'Lao vào giải ngay câu hỏi khi chưa có k là bế tắc.'
     };
@@ -13606,7 +13705,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
     return TD.dsTu(R, `Cho hàm số bậc ba y = f(x) có đạo hàm f′(x) = ${S(3 * a)}(x − ${S(p)})(x − ${S(q)}). `
       + `Xét tính đúng/sai của các phát biểu sau:`, kho,
       'Đọc DẤU của a trước: a > 0 thì y′ "âm ở giữa, dương hai bên"; a < 0 thì ngược lại. '
-      + 'Mọi kết luận về đồng biến, nghịch biến, cực đại, cực tiểu đều suy ra từ đó.');
+      + 'Mọi kết luận về đồng biến, nghịch biến, cực đại, cực tiểu đều suy ra từ đó.',
+      'Cách làm chắc nhất: lập bảng biến thiên MỘT LẦN ra nháp rồi soi cả bốn ý vào đó, đừng tính lại từ đầu cho từng ý. Một bảng biến thiên trả lời được đồng thời: số cực trị, khoảng đồng biến – nghịch biến, giá trị cực trị, toạ độ điểm uốn và số nghiệm của phương trình f(x) = m.');
   } }
 
 ]);
@@ -13735,13 +13835,15 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
         + `Bước 3 — nhân đôi ${S(k)} lần tạo 2^${S(k)} = ${S(Math.pow(2, k))} gene con, hệ số cần dùng là 2^k − 1 = ${S(he)}:\n`
         + (hoi === 0
             ? `  A môi trường cung cấp = ${S(A)} × ${S(he)} = ${D(A * he, 0)}`
-            : `  Liên kết hydrogen bị phá vỡ = ${S(H)} × ${S(he)} = ${D(H * he, 0)}`),
+            : `  Liên kết hydrogen bị phá vỡ = ${S(H)} × ${S(he)} = ${D(H * he, 0)}`)
+        + `\nBước cuối — kiểm chứng: số phân tử DNA con hoàn toàn mới luôn bằng 2ᵏ − 2, vì theo nguyên tắc bán bảo toàn luôn có đúng 2 phân tử còn giữ một mạch của DNA mẹ.\nChỗ dễ sai: nhầm giữa số NUCLEOTIDE môi trường cung cấp (tính theo 2ᵏ − 1) với số phân tử DNA con (2ᵏ).`,
       meo: 'Hệ số luôn là (2^k − 1) chứ không phải 2^k, vì hai mạch của gene mẹ ban đầu không do môi trường cung cấp. '
         + 'Nhớ A + G = 50% để suy G từ A trong DNA mạch kép.'
     };
   } },
 
-{ ma: 'sinh-vdc-nangluong', chuong: 'Sinh thái học', muc: 4, dang: 'tln', duong: true,
+/* Nhân ba hiệu suất liên tiếp ⇒ vận dụng. Câu VDC sinh thái nằm ở sinh-vdc-thapsinhthai. */
+{ ma: 'sinh-vdc-nangluong', chuong: 'Sinh thái học', muc: 3, dang: 'tln', duong: true,
   tao(R) {
     const E0 = R.nguyen(1, 9) * 1e6;
     const hs = [R.nguyen(8, 15), R.nguyen(8, 15), R.nguyen(8, 15)];
@@ -13793,7 +13895,8 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
     return TD.dsTu(R, `Đem lai phân tích một cơ thể dị hợp tử đều về hai cặp gene cùng nằm trên một cặp nhiễm sắc `
       + `thể thường, đời con thu được ${S(f)}% cá thể mang kiểu hình tái tổ hợp. Xét các phát biểu sau:`, kho,
       'Trục xương của mọi bài hoán vị: ① lai phân tích ⇒ tỉ lệ tái tổ hợp = f ② giao tử liên kết (1−f)/2, '
-      + 'hoán vị f/2 ③ aabb = (ab)² ④ A-B- = 0,5 + aabb.');
+      + 'hoán vị f/2 ③ aabb = (ab)² ④ A-B- = 0,5 + aabb.',
+      'Cách làm chắc nhất: viết kiểu gene bố mẹ và sơ đồ lai ra nháp MỘT LẦN, tính đủ tỉ lệ giao tử, rồi soi cả bốn ý vào cùng sơ đồ đó. Hai bẫy thường gặp: ① tần số hoán vị gene luôn ≤ 50% ② tỉ lệ kiểu hình khác tỉ lệ kiểu gene — đề hỏi cái nào phải trả lời đúng cái đó.');
   } }
 
 ]);
@@ -13806,8 +13909,12 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
    ========================================================== */
 const MC2 = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
+  const loai = opts.filter(x => x !== it.d)
+    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không thoả yêu cầu của đề.'}`)
+    .join('\n');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
-    giai: `Đáp án: ${it.d}\n${it.v}`, meo: meo };
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
+    meo: meo };
 };
 
 TD.GEN.su = (TD.GEN.su || []).concat([
@@ -13908,7 +14015,8 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
         + `  ${S(sl2, 1)}·10⁶ × 1 000 ÷ ${S(dan2, 1)}·10⁶ = ${S(bq2, 3)} kg/người\n`
         + `Bước 3 — mức thay đổi = ${S(bq2, 3)} − ${S(bq1, 3)} = ${D(chenh, 2)} kg/người `
         + `(${chenh > 0 ? 'TĂNG' : 'GIẢM'}).\n`
-        + `Lưu ý: sản lượng tăng nhưng nếu dân số tăng NHANH HƠN thì bình quân vẫn giảm.`,
+        + `Lưu ý: sản lượng tăng nhưng nếu dân số tăng NHANH HƠN thì bình quân vẫn giảm.`
+        + `\nBước cuối — kiểm chứng: nếu sản lượng tăng nhanh hơn dân số thì bình quân đầu người phải TĂNG, và ngược lại. Chiều biến thiên tính ra phải khớp với hai tốc độ tăng đó.\nChỗ dễ sai: so sánh trực tiếp hai con số bình quân của hai năm mà quên rằng đơn vị phải đồng nhất (kg/người hay tấn/người) — lệch một nghìn lần là chuyện thường gặp.`,
       meo: 'Dạng hai bước kinh điển của Địa: phải tính chỉ tiêu cho CẢ HAI năm rồi mới so sánh. '
         + 'Nhìn riêng sản lượng tăng mà kết luận bình quân tăng là mắc bẫy.'
     };
@@ -13987,7 +14095,8 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
     ]);
     return TD.dsTu(R, `Về vùng ${v.t}, xét tính đúng/sai của các phát biểu sau:`, v.kho,
       'Mỗi vùng nhớ theo ba trục: THẾ MẠNH nổi bật · HẠN CHẾ lớn nhất · HƯỚNG giải quyết. '
-      + 'Phương án sai thường là thế mạnh của vùng KHÁC bị gán nhầm sang.');
+      + 'Phương án sai thường là thế mạnh của vùng KHÁC bị gán nhầm sang.',
+      'Cách làm chắc nhất: tính hết các con số cần thiết từ bảng ra nháp trước, rồi mới đọc từng ý. Hai bẫy quen thuộc: ① ý nói về TỈ TRỌNG nhưng ta lại so giá trị tuyệt đối (hoặc ngược lại) ② chữ "tăng nhanh nhất" phải so tốc độ tăng trưởng tính bằng %, không so lượng tăng thêm.');
   } }
 
 ]);
@@ -14147,6 +14256,23 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
 
 { ma: 'anh-vdc-cloze', chuong: 'Cấu trúc – Chiến thuật', muc: 4, dang: 'mc',
   tao(R) {
+    /* Mỗi từ nối có một quan hệ logic cố định — tra bảng này ra ngay lí do loại */
+    const NGHIA = {
+      'However': 'nối hai ý TRÁI CHIỀU, trong khi hai câu ở đây không mâu thuẫn nhau',
+      'Nevertheless': 'cũng là từ nối tương phản, mạnh hơn "however", không hợp mạch ý ở đây',
+      'On the contrary': 'dùng để bác bỏ điều vừa nói ("trái lại"), quá mạnh so với quan hệ giữa hai câu',
+      'On the other hand': 'nêu MẶT KHÁC đối lập, chỉ đúng khi hai vế thật sự trái chiều',
+      'Therefore': 'chỉ quan hệ NHÂN – QUẢ, mà câu sau ở đây không phải là kết quả của câu trước',
+      'As a result': 'cũng chỉ kết quả trực tiếp, không đúng với quan hệ giữa hai câu này',
+      'Moreover': 'BỔ SUNG thêm ý cùng chiều, trong khi hai câu ở đây không cùng chiều',
+      'In addition': 'cũng là từ nối bổ sung cùng chiều nên không hợp',
+      'For example': 'dẫn ví dụ minh hoạ, mà câu sau không phải ví dụ của câu trước',
+      'Similarly': 'nêu điểm TƯƠNG ĐỒNG, không đúng với quan hệ giữa hai câu',
+      'In contrast': 'nêu sự đối lập trực tiếp giữa hai đối tượng, không đúng ở đây',
+      'Otherwise': 'nghĩa "nếu không thì", chỉ dùng khi câu trước là một lời khuyên hoặc điều kiện',
+      'Although': 'là LIÊN TỪ phụ thuộc, phải nối hai mệnh đề trong cùng một câu, không đứng một mình rồi chấm phẩy',
+      'Despite': 'là GIỚI TỪ, phía sau phải là danh từ hoặc V-ing, không đứng đầu câu độc lập như vậy'
+    };
     const it = R.chon([
       { q: 'Many students find it hard to concentrate in class. ____, schools are now limiting the use of phones during lessons.',
         d: 'Therefore', s: ['However', 'Although', 'Despite'],
@@ -14167,6 +14293,8 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
         d: 'On the other hand', s: ['As a result', 'For example', 'In addition'],
         v: 'Vế sau nêu MẶT KHÁC, đối lập với lợi ích ở vế trước ⇒ "On the other hand".' }
     ]);
+    it.sv = {};
+    it.s.forEach(x => { it.sv[x] = NGHIA[x] || 'không diễn tả đúng quan hệ logic giữa hai câu.'; });
     return MC2(R, `Chọn từ nối phù hợp nhất để điền vào chỗ trống:\n\n${it.q}`, it,
       'Bài điền từ đoạn văn phần lớn là TỪ NỐI. Xác định quan hệ giữa hai câu trước: '
       + 'cùng chiều (moreover, in addition) · trái chiều (however, on the other hand) · '
@@ -14188,27 +14316,54 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
         v: 'Đoạn văn nêu cả ưu điểm lẫn phê phán rồi chốt bằng câu cuối: nó không thay thế được nông nghiệp truyền thống nhưng làm thành phố xanh hơn — đó chính là ý bao trùm.',
         s: ['Urban farming will soon replace traditional agriculture in big cities',
             'Growing vegetables on rooftops is the cheapest way to produce food',
-            'City soil is too polluted for any kind of farming to succeed'] },
+            'City soil is too polluted for any kind of farming to succeed'],
+        sv: { 'Urban farming will soon replace traditional agriculture in big cities':
+                'trái hẳn với câu cuối — bài viết nói rõ "will NOT replace traditional agriculture"',
+              'Growing vegetables on rooftops is the cheapest way to produce food':
+                'bài không hề so sánh chi phí, đây là thông tin tự suy ra ngoài văn bản',
+              'City soil is too polluted for any kind of farming to succeed':
+                'đúng là bài có nhắc đất bị ô nhiễm, nhưng đó chỉ là MỘT ý của phe phê phán, không phải ý bao trùm — bẫy "lấy chi tiết làm ý chính"' } },
       { q: 'According to the passage, which is a benefit of urban farming?',
         d: 'It reduces the emissions produced by transporting food',
         v: 'Câu thứ ba nêu rõ "cuts transport emissions" — rút ngắn quãng đường vận chuyển thực phẩm.',
         s: ['It produces enough food to feed an entire city',
             'It completely removes contamination from urban soil',
-            'It lowers the price of land in the city centre'] },
+            'It lowers the price of land in the city centre'],
+        sv: { 'It produces enough food to feed an entire city':
+                'ngược với văn bản — bài viết nói sản lượng "far too small to feed a whole city"',
+              'It completely removes contamination from urban soil':
+                'bài nêu đất ô nhiễm là NHƯỢC ĐIỂM, không hề nói canh tác đô thị xử lí được ô nhiễm',
+              'It lowers the price of land in the city centre':
+                'giá đất không được nhắc tới ở bất kì câu nào trong đoạn' } },
       { q: 'The word "yields" in the passage is closest in meaning to ____.',
         d: 'amounts of crops produced',
-        v: '"Yield" ở đây là danh từ chỉ SẢN LƯỢNG thu hoạch; ngữ cảnh "far too small to feed a whole city" xác nhận nghĩa này.',
-        s: ['profits from selling land', 'numbers of people involved', 'kinds of vegetables grown'] },
+        v: '"Yield" ở đây là DANH TỪ chỉ sản lượng thu hoạch được trên một đơn vị diện tích. '
+         + 'Cách xác định: nhìn cụm đi kèm "the yields are far too small to feed a whole city" — thứ có thể "quá nhỏ để nuôi cả thành phố" '
+         + 'chỉ có thể là lượng nông sản. Lưu ý "yield" còn là ĐỘNG TỪ nghĩa "nhường đường / mang lại", đừng lẫn.',
+        s: ['profits from selling land', 'numbers of people involved', 'kinds of vegetables grown'],
+        sv: { 'profits from selling land': 'bài không nói gì tới bán đất hay lợi nhuận; đây là nghĩa suy diễn ngoài văn bản',
+              'numbers of people involved': 'số người tham gia không liên quan tới việc "nuôi được cả thành phố hay không"',
+              'kinds of vegetables grown': 'nói về CHỦNG LOẠI, trong khi "far too small" là nói về SỐ LƯỢNG' } },
       { q: 'What can be inferred about the author\'s attitude?',
         d: 'Balanced — the author presents both support and criticism without taking an extreme side',
-        v: 'Tác giả dùng "Supporters say…" rồi "Critics, however, point out…" và kết bằng "Most experts agree" — giọng điệu trung lập, cân bằng.',
+        v: 'Tác giả trình bày lần lượt "Supporters say…" rồi "Critics, however, point out…", không hề dùng từ ngữ khen chê mạnh, '
+         + 'và kết bằng "Most experts agree" — mượn ý kiến chung thay vì áp đặt quan điểm riêng. '
+         + 'Dạng câu hỏi thái độ tác giả phải căn cứ vào TỪ NGỮ ĐÁNH GIÁ chứ không phải vào nội dung thông tin.',
         s: ['Strongly opposed to urban farming',
             'Completely convinced that urban farming solves food shortages',
-            'Uninterested in the topic and merely listing facts'] },
+            'Uninterested in the topic and merely listing facts'],
+        sv: { 'Strongly opposed to urban farming': 'nếu phản đối mạnh thì tác giả đã không dành nguyên một câu liệt kê ưu điểm',
+              'Completely convinced that urban farming solves food shortages': 'trái với câu "will not replace traditional agriculture"',
+              'Uninterested in the topic and merely listing facts': 'tác giả có kết luận riêng ở câu cuối nên không phải chỉ liệt kê vô cảm' } },
       { q: 'Which of the following is NOT mentioned as a place for urban farming?',
         d: 'School playgrounds',
-        v: 'Đoạn văn nhắc tới rooftops, balconies và abandoned lots. "School playgrounds" không hề xuất hiện.',
-        s: ['Rooftops', 'Balconies', 'Abandoned lots'] }
+        v: 'Câu thứ hai liệt kê đúng ba nơi: "rooftops, balconies and even in abandoned lots". '
+         + 'Với dạng NOT mentioned, cách làm chắc nhất là gạch chân từng phương án trong bài rồi loại dần — '
+         + 'phương án nào không gạch được chính là đáp án. Sân trường (school playgrounds) không hề xuất hiện.',
+        s: ['Rooftops', 'Balconies', 'Abandoned lots'],
+        sv: { Rooftops: 'có trong bài — "grow vegetables on rooftops"',
+              Balconies: 'có trong bài — "on rooftops, balconies"',
+              'Abandoned lots': 'có trong bài — "and even in abandoned lots"' } }
     ]);
     return MC2(R, `Read the passage and answer the question.\n\n${bai.t}\n\n${it.q}`, it,
       'Bài đọc hiểu: ① câu ý chính phải KHÁI QUÁT cả bài, phương án quá chi tiết là bẫy '
@@ -14488,7 +14643,8 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
       giai: `Bước 1 — không gian mẫu: chọn ${S(chon)} bạn bất kì trong ${S(tong)} bạn.\n`
         + `  n(Ω) = C(${tong}, ${chon}) = ${S(tongCach)}\n`
         + `Bước 2 — đếm số cách thuận lợi.\n${buoc}\n`
-        + `Bước 3 — P = ${S(thuan)}/${S(tongCach)} = ${(thuan / g)}/${(tongCach / g)}.`,
+        + `Bước 3 — P = ${S(thuan)}/${S(tongCach)} = ${(thuan / g)}/${(tongCach / g)}.`
+        + `\nBước 4 — kiểm chứng: xác suất phải nằm trong khoảng (0; 1) và tử số phải nhỏ hơn n(Ω).\nChỗ dễ sai: ① dùng chỉnh hợp A thay vì tổ hợp C khi việc chọn KHÔNG phân biệt thứ tự ② đếm trùng khi chia trường hợp (một cách chọn bị đếm hai lần ở hai trường hợp khác nhau) — đây chính là lí do nên dùng phần bù thay vì liệt kê.`,
       meo: 'Thấy chữ "ít nhất" hoặc "có cả… lẫn…" thì gần như chắc chắn phải dùng PHẦN BÙ — '
         + 'đếm biến cố đối rồi lấy tổng trừ đi, nhanh hơn nhiều so với chia trường hợp. '
         + 'Casio 570VN Plus và 580VN X bấm tổ hợp bằng SHIFT + ÷ (nCr): gõ 12 SHIFT ÷ 5 = ra C(12;5).'
@@ -14496,6 +14652,351 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
   } }
 
 ]);
+})();
+
+</script>
+<script>
+/* ============================================================
+   VẬN DỤNG CAO KHỐI XÃ HỘI — ĐÚNG BA DẠNG ĐỀ THẬT HAY RA
+   Trước đây mức 4 của Sử – Địa – GDKT gần như chỉ là câu "phát biểu
+   nào đúng", tức vẫn là nhận biết một mệnh đề. Đề thật thì khác:
+     · Lịch sử  — cho một đoạn TƯ LIỆU rồi hỏi rút ra được điều gì
+     · Địa lí   — cho BẢNG SỐ LIỆU, phải tính rồi mới nhận xét được,
+                  hoặc hỏi dạng biểu đồ thích hợp nhất
+     · GDKT&PL  — TÌNH HUỐNG nhiều chủ thể, phải xác định ai vi phạm
+   Ba dạng này bắt xử lí thông tin mới chứ không nhớ lại kiến thức cũ.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const S = TD.soVN;
+const T = TD.lamTron;
+const D = TD.dapSo;
+/* Khuôn trắc nghiệm dùng chung của khối xã hội: một phương án đúng + ba nhiễu đã soạn sẵn */
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  const loai = opts.filter(x => x !== it.d)
+    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không phù hợp với dữ kiện đề đưa ra.'}`)
+    .join('\n');
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
+    meo: meo };
+};
+
+/* ==========================================================
+   LỊCH SỬ — ĐỌC TƯ LIỆU RÚT RA NHẬN ĐỊNH
+   ========================================================== */
+const TU_LIEU = [
+  { cd: 'Cách mạng tháng Tám',
+    tl: '"Nước Việt Nam có quyền hưởng tự do và độc lập, và sự thật đã thành một nước tự do độc lập. '
+      + 'Toàn thể dân tộc Việt Nam quyết đem tất cả tinh thần và lực lượng, tính mạng và của cải để giữ vững quyền tự do, độc lập ấy."',
+    ng: '(Hồ Chí Minh, <i>Tuyên ngôn Độc lập</i>, 2 – 9 – 1945)',
+    d: 'Khẳng định nền độc lập là kết quả tất yếu của lịch sử, đồng thời tuyên bố quyết tâm bảo vệ nền độc lập ấy',
+    s: ['Kêu gọi các nước lớn công nhận Việt Nam là thành viên của Liên hợp quốc',
+        'Xác định con đường đi lên chủ nghĩa xã hội ở miền Bắc sau năm 1954',
+        'Tuyên bố xoá bỏ hoàn toàn chế độ phong kiến và chia lại ruộng đất cho nông dân',
+        'Mở đầu cuộc kháng chiến chống thực dân Pháp trên phạm vi cả nước'],
+    v: 'Câu "sự thật đã thành một nước tự do độc lập" khẳng định độc lập là một THỰC TẾ đã giành được, '
+      + 'còn vế sau là lời tuyên bố quyết tâm GIỮ VỮNG nền độc lập đó. Hai vế gộp lại chính là tư tưởng cốt lõi của bản Tuyên ngôn.' },
+
+  { cd: 'Kháng chiến chống Pháp',
+    tl: '"Chúng ta muốn hoà bình, chúng ta phải nhân nhượng. Nhưng chúng ta càng nhân nhượng, thực dân Pháp càng lấn tới, '
+      + 'vì chúng quyết tâm cướp nước ta lần nữa! Không! Chúng ta thà hi sinh tất cả, chứ nhất định không chịu mất nước, nhất định không chịu làm nô lệ."',
+    ng: '(Hồ Chí Minh, <i>Lời kêu gọi toàn quốc kháng chiến</i>, 19 – 12 – 1946)',
+    d: 'Kháng chiến là lựa chọn bắt buộc sau khi mọi nỗ lực hoà bình đã bị phía Pháp khước từ',
+    s: ['Ta chủ trương dùng bạo lực cách mạng ngay từ đầu để giành chính quyền',
+        'Việt Nam từ chối mọi hình thức thương lượng với các nước phương Tây',
+        'Cuộc kháng chiến bùng nổ do sức ép của phong trào giải phóng dân tộc thế giới',
+        'Ta phát động kháng chiến để hưởng ứng lời kêu gọi của Liên hợp quốc'],
+    v: 'Trình tự lập luận trong tư liệu rất rõ: muốn hoà bình → đã nhân nhượng → Pháp lấn tới → buộc phải đứng lên. '
+      + 'Đó là cách khẳng định tính CHÍNH NGHĨA và tính BẤT ĐẮC DĨ của cuộc kháng chiến.' },
+
+  { cd: 'Công cuộc Đổi mới',
+    tl: '"Đảng phải luôn luôn xuất phát từ thực tế, tôn trọng và hành động theo quy luật khách quan. '
+      + 'Năng lực nhận thức và hành động theo quy luật là điều kiện bảo đảm sự lãnh đạo đúng đắn của Đảng."',
+    ng: '(Văn kiện Đại hội đại biểu toàn quốc lần thứ VI của Đảng, 12 – 1986)',
+    d: 'Thừa nhận sai lầm chủ quan, duy ý chí trước đó và xác lập nguyên tắc nhìn thẳng vào sự thật khi hoạch định đường lối',
+    s: ['Chủ trương xoá bỏ vai trò lãnh đạo của Đảng đối với nền kinh tế',
+        'Quyết định chuyển hẳn sang nền kinh tế thị trường tự do không có quản lí của Nhà nước',
+        'Đặt mục tiêu hoàn thành công nghiệp hoá ngay trong kế hoạch 5 năm 1986 – 1990',
+        'Khẳng định ưu tiên phát triển công nghiệp nặng làm khâu đột phá'],
+    v: 'Cụm "xuất phát từ thực tế", "theo quy luật khách quan" là lời phê phán gián tiếp bệnh chủ quan, duy ý chí — '
+      + 'nguyên nhân của khủng hoảng kinh tế – xã hội trước Đổi mới. Đây chính là bài học đầu tiên mà Đại hội VI rút ra.' },
+
+  { cd: 'Liên hợp quốc',
+    tl: '"Mọi thành viên giải quyết các tranh chấp quốc tế của họ bằng biện pháp hoà bình, sao cho không tổn hại đến hoà bình, '
+      + 'an ninh quốc tế và công lí."',
+    ng: '(Trích Điều 2, <i>Hiến chương Liên hợp quốc</i>, 1945)',
+    d: 'Xác lập giải quyết tranh chấp bằng biện pháp hoà bình thành một nguyên tắc bắt buộc của quan hệ quốc tế',
+    s: ['Cho phép các nước lớn can thiệp vào công việc nội bộ của nước nhỏ khi cần giữ hoà bình',
+        'Trao cho Đại hội đồng quyền quyết định mọi vấn đề an ninh quốc tế',
+        'Quy định các nước thành viên phải từ bỏ hoàn toàn lực lượng vũ trang',
+        'Thừa nhận chiến tranh là công cụ hợp pháp để thay đổi biên giới quốc gia'],
+    v: 'Đây là một trong các nguyên tắc hoạt động cơ bản của Liên hợp quốc. '
+      + 'Nó biến việc "giải quyết hoà bình" từ mong muốn đạo đức thành nghĩa vụ pháp lí của quốc gia thành viên — '
+      + 'cũng chính là cơ sở để Việt Nam đấu tranh bảo vệ chủ quyền ở Biển Đông bằng luật pháp quốc tế.' },
+
+  { cd: 'ASEAN',
+    tl: '"Các quốc gia thành viên tôn trọng độc lập, chủ quyền, bình đẳng, toàn vẹn lãnh thổ và bản sắc dân tộc của tất cả các quốc gia; '
+      + 'không can thiệp vào công việc nội bộ của nhau; giải quyết bất đồng bằng biện pháp hoà bình."',
+    ng: '(Trích <i>Hiệp ước Bali</i> – Hiệp ước Thân thiện và Hợp tác ở Đông Nam Á, 1976)',
+    d: 'Đặt nền tảng pháp lí cho quan hệ giữa các nước Đông Nam Á, mở đường cho ASEAN phát triển thành tổ chức khu vực vững mạnh',
+    s: ['Thành lập một liên minh quân sự chung của các nước Đông Nam Á',
+        'Chấm dứt hoàn toàn ảnh hưởng của các nước lớn tại khu vực Đông Nam Á',
+        'Kết nạp ngay lập tức toàn bộ mười nước Đông Nam Á vào tổ chức ASEAN',
+        'Thống nhất đồng tiền chung và xoá bỏ hàng rào thuế quan trong khu vực'],
+    v: 'Hiệp ước Bali 1976 xác lập các nguyên tắc cơ bản trong quan hệ giữa các nước ASEAN. '
+      + 'Nhờ có bộ nguyên tắc này mà ASEAN từ chỗ còn nghi kị nhau đã trở thành tổ chức hợp tác toàn diện; '
+      + 'ba trụ cột của Cộng đồng ASEAN 2015 đều kế thừa tinh thần đó.' },
+
+  { cd: 'Kháng chiến chống Mỹ',
+    tl: '"Hoa Kỳ và các nước khác tôn trọng độc lập, chủ quyền, thống nhất, toàn vẹn lãnh thổ của nước Việt Nam. '
+      + 'Hoa Kỳ rút hết quân đội của mình và quân các nước đồng minh… ra khỏi miền Nam Việt Nam."',
+    ng: '(Trích <i>Hiệp định Pari về chấm dứt chiến tranh, lập lại hoà bình ở Việt Nam</i>, 27 – 1 – 1973)',
+    d: 'Tạo ra thời cơ chiến lược khi so sánh lực lượng trên chiến trường thay đổi có lợi cho cách mạng miền Nam',
+    s: ['Chấm dứt ngay lập tức sự tồn tại của chính quyền Sài Gòn',
+        'Thống nhất đất nước về mặt nhà nước ngay trong năm 1973',
+        'Buộc Hoa Kỳ bồi thường toàn bộ thiệt hại chiến tranh cho Việt Nam',
+        'Quy định tổ chức tổng tuyển cử tự do trên cả nước dưới sự giám sát của Liên hợp quốc'],
+    v: 'Hiệp định Pari buộc Mỹ rút quân nhưng KHÔNG xoá bỏ chính quyền Sài Gòn. '
+      + 'Vì thế ý nghĩa lớn nhất của nó là làm thay đổi tương quan lực lượng — "Mỹ cút" mở đường cho "nguỵ nhào" — '
+      + 'tạo thời cơ để ta tiến hành Tổng tiến công mùa Xuân 1975.' }
+];
+
+TD.GEN.su = (TD.GEN.su || []).concat([
+
+{ ma: 'su-vdc-tulieu', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'mc',
+  tao(R) {
+    const x = R.chon(TU_LIEU);
+    const q = MC(R, `Đọc đoạn tư liệu sau:<br><div class="giai" style="font-style:italic">${x.tl}<br>`
+      + `<span style="font-style:normal;font-size:12.6px;color:var(--chu3)">${x.ng}</span></div>`
+      + `Nội dung nào sau đây <b>phản ánh đúng nhất</b> ý nghĩa của đoạn tư liệu trên?`,
+      { d: x.d, s: R.chonNhieu(x.s, 3), v: x.v },
+      'Dạng câu tư liệu: KHÔNG được chọn theo trí nhớ về sự kiện, phải bám vào chính chữ trong đoạn trích. '
+      + 'Phương án sai thường đúng về lịch sử nhưng KHÔNG có trong tư liệu — đó là bẫy phổ biến nhất.');
+    return q ? Object.assign(q, { chuong: x.cd }) : null;
+  } },
+
+{ ma: 'su-vdc-tulieu-ds', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'ds',
+  tao(R) {
+    const x = R.chon(TU_LIEU);
+    const khac = TU_LIEU.filter(y => y.cd !== x.cd);
+    if (khac.length < 2) return null;
+    const y1 = R.chon(khac);
+    const ta = [
+      { t: `Đoạn tư liệu trên ${x.d.charAt(0).toLowerCase() + x.d.slice(1)}.`, a: true,
+        v: x.v },
+      { t: `Nội dung tư liệu cho thấy ${R.chon(x.s).charAt(0).toLowerCase() + R.chon(x.s).slice(1)}.`, a: false,
+        v: 'Nội dung này không hề xuất hiện trong đoạn trích — đây là kiểu phương án "đúng ở đâu đó nhưng sai ở đây".' },
+      { t: `Đoạn tư liệu này gắn với chủ đề <b>${x.cd}</b> trong chương trình Lịch sử 12.`, a: true,
+        v: `Xuất xứ ${x.ng.replace(/[()]/g, '')} cho biết tư liệu thuộc chủ đề ${x.cd}.` },
+      { t: `Đoạn tư liệu này được trích từ ${y1.ng.replace(/[()]/g, '').split(',')[0].replace('Trích ', '')}.`, a: false,
+        v: `Sai xuất xứ. Tư liệu đúng là ${x.ng.replace(/[()]/g, '')}.` }
+    ];
+    const t = TD.xaoR(R, ta);
+    return {
+      chuong: x.cd,
+      q: `Đọc đoạn tư liệu sau:<br><div class="giai" style="font-style:italic">${x.tl}<br>`
+        + `<span style="font-style:normal;font-size:12.6px;color:var(--chu3)">${x.ng}</span></div>`
+        + `Xét tính đúng/sai của từng nhận định:`,
+      items: t.map(z => ({ t: z.t, a: z.a })),
+      giai: t.map((z, i) => `Ý ${'abcd'[i]}) ${z.a ? 'ĐÚNG' : 'SAI'} — ${z.v}`).join('\n'),
+      meo: 'Câu đúng/sai về tư liệu luôn có ít nhất một ý sai về XUẤT XỨ và một ý sai vì "nói điều tư liệu không nói". '
+        + 'Đọc tư liệu hai lần trước khi xét bất kì ý nào.'
+    };
+  } }
+
+]);
+
+/* ==========================================================
+   ĐỊA LÍ — BẢNG SỐ LIỆU: tính rồi mới nhận xét được
+   ========================================================== */
+const BANG = [
+  { ten: 'Giá trị xuất khẩu một số mặt hàng của nước ta', dv: 'triệu USD',
+    doi: ['Hàng dệt may', 'Giày dép', 'Thuỷ sản', 'Gỗ và sản phẩm gỗ'], min: 2000, max: 40000 },
+  { ten: 'Sản lượng một số cây công nghiệp lâu năm của nước ta', dv: 'nghìn tấn',
+    doi: ['Cà phê', 'Cao su', 'Hồ tiêu', 'Điều'], min: 100, max: 2000 },
+  { ten: 'Số dân thành thị của một số vùng', dv: 'nghìn người',
+    doi: ['Đồng bằng sông Hồng', 'Đông Nam Bộ', 'Đồng bằng sông Cửu Long', 'Bắc Trung Bộ'], min: 2000, max: 12000 },
+  { ten: 'Sản lượng điện phân theo nguồn của nước ta', dv: 'triệu kWh',
+    doi: ['Thuỷ điện', 'Nhiệt điện than', 'Điện khí', 'Năng lượng tái tạo'], min: 5000, max: 130000 },
+  { ten: 'Giá trị sản xuất một số ngành công nghiệp', dv: 'tỉ đồng',
+    doi: ['Khai khoáng', 'Chế biến – chế tạo', 'Sản xuất điện', 'Cấp nước – xử lí rác'], min: 20000, max: 900000 }
+];
+
+TD.GEN.dia = (TD.GEN.dia || []).concat([
+
+{ ma: 'dia-vdc-bangsolieu', chuong: 'Kỹ năng', muc: 4, dang: 'tln',
+  tao(R) {
+    const b = R.chon(BANG);
+    const n1 = R.nguyen(2010, 2016), n2 = n1 + R.chon([5, 6, 7, 8]);
+    const buoc = Math.max(1, Math.round((b.max - b.min) / 40));
+    const a = b.doi.map(() => R.nguyen(Math.round(b.min / buoc), Math.round(b.max / buoc)) * buoc);
+    const tang = b.doi.map((_, i) => T(a[i] * (1 + R.nguyen(-25, 160) / 100), 0));
+    if (tang.some((v, i) => v <= 0 || v === a[i])) return null;
+    /* hỏi tốc độ tăng trưởng của một đối tượng, lấy năm đầu = 100% */
+    const k = R.nguyen(0, b.doi.length - 1);
+    const td = T(tang[k] / a[k] * 100, 2);
+    const bang = `<div class="cuon-ngang"><table class="kq">
+      <tr><th>Đối tượng</th><th>Năm ${n1}</th><th>Năm ${n2}</th></tr>`
+      + b.doi.map((d, i) => `<tr><td>${d}</td><td>${S(a[i])}</td><td>${S(tang[i])}</td></tr>`).join('')
+      + `</table></div>`;
+    return {
+      q: `Cho bảng số liệu: <b>${b.ten}</b> <i>(Đơn vị: ${b.dv})</i>${bang}`
+        + `Lấy năm ${n1} = 100%, tính tốc độ tăng trưởng của <b>${b.doi[k]}</b> năm ${n2}. `
+        + `(đơn vị %, làm tròn đến hàng phần trăm)`,
+      ans: D(td, 2),
+      giai: `Bước 1 — công thức tốc độ tăng trưởng khi lấy năm gốc = 100%:\n`
+        + `  Tốc độ tăng trưởng (%) = (giá trị năm sau ÷ giá trị năm gốc) × 100\n`
+        + `Bước 2 — thay số cho ${b.doi[k]}:\n`
+        + `  = ${S(tang[k])} ÷ ${S(a[k])} × 100 = ${D(td, 2)}%\n`
+        + `Bước 3 — đọc kết quả: ${td > 100
+            ? `lớn hơn 100% nên ${b.doi[k]} TĂNG ${S(T(td - 100, 2))}% so với năm ${n1}.`
+            : `nhỏ hơn 100% nên ${b.doi[k]} GIẢM ${S(T(100 - td, 2))}% so với năm ${n1}.`}\n`
+        + `Đối chiếu cả bảng: ${b.doi.map((d, i) => `${d} ${S(T(tang[i] / a[i] * 100, 1))}%`).join(' · ')}`,
+      meo: 'Phân biệt hai con số dễ nhầm: TỐC ĐỘ TĂNG TRƯỞNG lấy năm gốc = 100% (kết quả 145% nghĩa là tăng 45%), '
+        + 'còn TỐC ĐỘ TĂNG lấy năm gốc = 0% (kết quả 45%). Đề hỏi kiểu nào thì trả lời kiểu đó. '
+        + 'Bấm nhanh trên Casio: nhập giá trị năm sau ÷ giá trị năm gốc × 100 = , rồi dùng phím ▲ sửa số cho các dòng còn lại.'
+    };
+  } },
+
+{ ma: 'dia-vdc-chonbieudo', chuong: 'Kỹ năng', muc: 4, dang: 'mc',
+  tao(R) {
+    const b = R.chon(BANG);
+    const n = R.chon([[2, 'hai'], [3, 'ba'], [4, 'bốn']]);
+    const nam = []; let y = R.nguyen(2010, 2015);
+    for (let i = 0; i < n[0]; i++) { nam.push(y); y += R.chon([2, 3, 5]); }
+    const yeuCau = R.chon([
+      { t: 'thể hiện <b>quy mô và cơ cấu</b>', d: nam.length <= 3 ? 'Biểu đồ tròn' : 'Biểu đồ miền',
+        v: 'Đề yêu cầu QUY MÔ và CƠ CẤU, lại chỉ có ' + nam.length + ' mốc thời gian ⇒ '
+          + (nam.length <= 3 ? 'biểu đồ TRÒN (mỗi năm một hình tròn, bán kính khác nhau thể hiện quy mô).'
+                             : 'biểu đồ MIỀN vì từ 4 mốc trở lên tròn sẽ rối.') },
+      { t: 'thể hiện <b>sự chuyển dịch cơ cấu</b>', d: 'Biểu đồ miền',
+        v: 'Từ khoá CHUYỂN DỊCH CƠ CẤU qua nhiều năm ⇒ biểu đồ MIỀN. Nếu chỉ có 1–3 năm mới dùng tròn.' },
+      { t: 'thể hiện <b>tốc độ tăng trưởng</b>', d: 'Biểu đồ đường',
+        v: 'Từ khoá TỐC ĐỘ TĂNG TRƯỞNG ⇒ biểu đồ ĐƯỜNG, số liệu phải quy về % với năm gốc = 100%.' },
+      { t: 'so sánh <b>giá trị tuyệt đối</b> giữa các đối tượng', d: 'Biểu đồ cột',
+        v: 'So sánh độ lớn giữa các đối tượng qua vài mốc năm ⇒ biểu đồ CỘT (cột ghép).' }
+    ]);
+    const VISAO = {
+      'Biểu đồ tròn': 'chỉ dùng khi thể hiện cơ cấu ở 1–3 mốc thời gian; nhiều mốc hơn thì hình tròn chồng chất, không đọc được xu hướng',
+      'Biểu đồ miền': 'dành riêng cho SỰ CHUYỂN DỊCH cơ cấu qua nhiều năm (từ 4 mốc trở lên), tổng luôn quy về 100%',
+      'Biểu đồ đường': 'dành cho TỐC ĐỘ TĂNG TRƯỞNG hoặc diễn biến theo thời gian, số liệu phải quy về % với năm gốc = 100%',
+      'Biểu đồ cột': 'dùng để SO SÁNH độ lớn giữa các đối tượng, không thể hiện được cơ cấu hay tỉ trọng',
+      'Biểu đồ kết hợp cột và đường': 'chỉ dùng khi bảng có HAI đơn vị đo khác nhau cần vẽ chung một hệ trục'
+    };
+    const moi = ['Biểu đồ tròn', 'Biểu đồ miền', 'Biểu đồ đường', 'Biểu đồ cột', 'Biểu đồ kết hợp cột và đường']
+      .filter(x => x !== yeuCau.d);
+    return Object.assign(
+      MC(R, `Cho bảng số liệu về <b>${b.ten}</b> của nước ta trong ${n[1]} năm ${nam.join(', ')} `
+        + `<i>(Đơn vị: ${b.dv})</i>, gồm các đối tượng: ${b.doi.join(', ')}.<br>`
+        + `Theo bảng số liệu, để ${yeuCau.t} ${b.ten.toLowerCase()} giai đoạn ${nam[0]} – ${nam[nam.length - 1]}, `
+        + `dạng biểu đồ nào sau đây là <b>thích hợp nhất</b>?`,
+        { d: yeuCau.d, s: R.chonNhieu(moi, 3), v: yeuCau.v, sv: VISAO },
+        'Câu chọn biểu đồ ăn điểm bằng TỪ KHOÁ, không cần nhìn số: '
+        + '"cơ cấu / tỉ trọng" + 1–3 năm → TRÒN · "chuyển dịch cơ cấu" nhiều năm → MIỀN · '
+        + '"tốc độ tăng trưởng / tốc độ phát triển" → ĐƯỜNG · "so sánh / tình hình" → CỘT · '
+        + 'hai đơn vị khác nhau → KẾT HỢP.'),
+      { chuong: 'Kỹ năng' });
+  } }
+
+]);
+
+/* ==========================================================
+   GDKT & PHÁP LUẬT — TÌNH HUỐNG NHIỀU CHỦ THỂ
+   ========================================================== */
+const TINH_HUONG = [
+  { cd: 'Quyền & nghĩa vụ',
+    mo: 'Anh K là chủ một cửa hàng điện máy. Nghi ngờ chị H lấy trộm hàng, anh K giữ chị H trong kho suốt ba giờ để tra hỏi. '
+      + 'Bà M là mẹ chị H biết chuyện liền đến chửi bới và đập vỡ tủ kính cửa hàng. Anh P là bảo vệ đứng nhìn, không can ngăn.',
+    hoi: 'Những ai sau đây <b>vừa vi phạm quyền bất khả xâm phạm về thân thể, vừa phải chịu trách nhiệm pháp lí</b>?',
+    d: 'Chỉ anh K',
+    s: ['Anh K và bà M', 'Anh K, bà M và anh P', 'Bà M và anh P', 'Chỉ bà M'],
+    v: 'Chỉ anh K giữ người trái pháp luật ⇒ xâm phạm quyền bất khả xâm phạm về thân thể của chị H. '
+      + 'Bà M có vi phạm nhưng là xâm phạm TÀI SẢN (đập vỡ tủ kính) chứ không phải thân thể. '
+      + 'Anh P không hành động nên không phải chủ thể vi phạm quyền này.' },
+
+  { cd: 'Quyền & nghĩa vụ',
+    mo: 'Chị T thuê nhà của ông S. Do chị T chậm trả tiền thuê một tháng, ông S tự ý mở khoá vào nhà, chuyển hết đồ đạc của chị T ra sân '
+      + 'và thay ổ khoá mới. Chị T nhờ anh D là em trai đến, anh D đã đe doạ đánh ông S nếu không mở cửa.',
+    hoi: 'Trong tình huống trên, hành vi của ông S <b>trực tiếp xâm phạm</b> quyền nào sau đây của công dân?',
+    d: 'Quyền bất khả xâm phạm về chỗ ở',
+    s: ['Quyền bất khả xâm phạm về thân thể', 'Quyền được pháp luật bảo hộ về tính mạng, sức khoẻ',
+        'Quyền tự do ngôn luận', 'Quyền được bảo đảm an toàn và bí mật thư tín'],
+    v: 'Ông S tự ý vào nhà đang cho thuê và thay khoá ⇒ xâm phạm quyền bất khả xâm phạm về CHỖ Ở. '
+      + 'Tranh chấp hợp đồng thuê phải giải quyết bằng con đường dân sự, không được tự xử. '
+      + 'Anh D đe doạ là hành vi vi phạm riêng, không làm thay đổi bản chất vi phạm của ông S.' },
+
+  { cd: 'Doanh nghiệp – Thuế',
+    mo: 'Công ty X kê khai doanh thu thấp hơn thực tế để giảm số thuế phải nộp. Kế toán trưởng là chị N biết nhưng vẫn kí xác nhận. '
+      + 'Anh V, nhân viên công ty, phát hiện và tố giác với cơ quan thuế.',
+    hoi: 'Hành vi của Công ty X và chị N thể hiện điều gì?',
+    d: 'Vi phạm nghĩa vụ nộp thuế của người nộp thuế và phải chịu trách nhiệm pháp lí',
+    s: ['Chỉ là vi phạm đạo đức kinh doanh, không bị xử lí theo pháp luật',
+        'Quyền tự chủ trong kê khai tài chính của doanh nghiệp',
+        'Hành vi hợp pháp vì doanh nghiệp được quyền tối ưu hoá chi phí thuế',
+        'Vi phạm hợp đồng lao động giữa công ty và người lao động'],
+    v: 'Kê khai sai để giảm thuế là hành vi TRỐN THUẾ — vi phạm nghĩa vụ nộp thuế đầy đủ, đúng hạn. '
+      + 'Cần phân biệt với việc tối ưu thuế hợp pháp (áp dụng đúng ưu đãi, khấu trừ). '
+      + 'Anh V thực hiện quyền tố cáo, được pháp luật bảo vệ.' },
+
+  { cd: 'Bảo hiểm – An sinh',
+    mo: 'Anh Q làm việc theo hợp đồng lao động 24 tháng tại công ty Y nhưng công ty không đóng bảo hiểm xã hội cho anh với lí do '
+      + '"anh Q đã có bảo hiểm y tế hộ gia đình". Anh Q khiếu nại lên ban giám đốc nhưng không được giải quyết.',
+    hoi: 'Nhận định nào sau đây là <b>đúng</b> về tình huống trên?',
+    d: 'Công ty Y vi phạm pháp luật vì bảo hiểm xã hội bắt buộc áp dụng với hợp đồng lao động từ đủ 1 tháng trở lên',
+    s: ['Công ty Y làm đúng vì người lao động chỉ cần một loại bảo hiểm',
+        'Anh Q phải tự đóng bảo hiểm xã hội vì đó là quyền lợi cá nhân',
+        'Bảo hiểm xã hội chỉ bắt buộc với hợp đồng không xác định thời hạn',
+        'Việc đóng bảo hiểm xã hội do hai bên tự thoả thuận trong hợp đồng'],
+    v: 'Bảo hiểm xã hội bắt buộc là NGHĨA VỤ của cả người sử dụng lao động lẫn người lao động, không phải thoả thuận. '
+      + 'Bảo hiểm y tế hộ gia đình là loại hình khác, không thay thế được. '
+      + 'Anh Q có quyền khiếu nại tiếp lên cơ quan quản lí lao động hoặc khởi kiện.' },
+
+  { cd: 'Quản lí thu chi',
+    mo: 'Gia đình anh B có thu nhập 25 triệu đồng/tháng. Anh B vay tiêu dùng để mua ô tô, mỗi tháng phải trả góp 12 triệu đồng, '
+      + 'chi phí sinh hoạt cố định 10 triệu đồng. Anh B không lập quỹ dự phòng vì cho rằng thu nhập ổn định.',
+    hoi: 'Rủi ro lớn nhất trong kế hoạch tài chính của gia đình anh B là gì?',
+    d: 'Tỉ lệ trả nợ chiếm gần một nửa thu nhập và không có quỹ dự phòng nên mất khả năng chi trả khi thu nhập gián đoạn',
+    s: ['Mua ô tô là quyết định sai vì tài sản này luôn mất giá',
+        'Chi phí sinh hoạt 10 triệu đồng là quá cao so với thu nhập',
+        'Gia đình chưa tham gia bất kì kênh đầu tư sinh lời nào',
+        'Vay tiêu dùng luôn là hành vi trái với nguyên tắc quản lí tài chính'],
+    v: 'Tính ra: 12 + 10 = 22 triệu, chỉ còn dư 3 triệu/tháng, tức tỉ lệ trả nợ 48% thu nhập (khuyến nghị dưới 30–35%). '
+      + 'Nguy hiểm nhất là KHÔNG có quỹ dự phòng — chuẩn mực là 3–6 tháng chi phí thiết yếu. '
+      + 'Chỉ cần mất thu nhập một tháng là kế hoạch đổ vỡ.' },
+
+  { cd: 'Tăng trưởng – Phát triển',
+    mo: 'Tỉnh Z có tốc độ tăng GDP 9%/năm nhờ mở rộng khai thác khoáng sản và xây dựng nhiều khu công nghiệp. '
+      + 'Cùng lúc đó, diện tích rừng giảm 12%, ba con sông trong tỉnh bị ô nhiễm nặng, và khoảng cách thu nhập giữa nhóm giàu nhất '
+      + 'với nhóm nghèo nhất tăng gấp đôi trong 5 năm.',
+    hoi: 'Nhận định nào sau đây <b>đúng nhất</b> về tình hình của tỉnh Z?',
+    d: 'Tỉnh Z có tăng trưởng kinh tế nhưng chưa đạt phát triển bền vững vì thiếu cả trụ cột xã hội lẫn môi trường',
+    s: ['Tỉnh Z đã đạt phát triển bền vững vì GDP tăng liên tục ở mức cao',
+        'Tăng trưởng kinh tế và phát triển bền vững là hai khái niệm đồng nhất nên tỉnh Z đã phát triển',
+        'Tỉnh Z chỉ cần khắc phục vấn đề môi trường là đạt phát triển bền vững',
+        'Bất bình đẳng thu nhập là hệ quả tất yếu nên không ảnh hưởng tới đánh giá phát triển'],
+    v: 'Phát triển bền vững đứng trên BA trụ cột: kinh tế – xã hội – môi trường. '
+      + 'Tỉnh Z chỉ đạt trụ cột kinh tế; rừng giảm và sông ô nhiễm là hỏng trụ cột môi trường, '
+      + 'khoảng cách giàu nghèo tăng gấp đôi là hỏng trụ cột xã hội. '
+      + 'Tăng trưởng chỉ là điều kiện CẦN, không phải điều kiện ĐỦ của phát triển.' }
+];
+
+TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
+
+{ ma: 'gdkt-vdc-tinhhuong-nhieu', chuong: 'Tình huống pháp luật', muc: 4, dang: 'mc',
+  tao(R) {
+    const x = R.chon(TINH_HUONG);
+    const q = MC(R, `<div class="giai" style="font-style:normal">${x.mo}</div>${x.hoi}`,
+      { d: x.d, s: R.chonNhieu(x.s, 3), v: x.v },
+      'Câu tình huống nhiều chủ thể: gạch chân TỪNG NGƯỜI và hành vi của họ ra nháp trước, '
+      + 'rồi mới đối chiếu với câu hỏi. Đề luôn cài thêm người có vi phạm nhưng vi phạm quyền KHÁC '
+      + 'với quyền mà câu hỏi đang nhắc tới.');
+    return q ? Object.assign(q, { chuong: x.cd }) : null;
+  } }
+
+]);
+
 })();
 
 </script>

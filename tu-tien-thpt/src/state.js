@@ -633,6 +633,19 @@ TD.deTaDao = function (mon, so, loai) {
   return TD.xaoR(R, ra);
 };
 
+/* ---------- TRẦN MỨC CHO CÂU LÝ THUYẾT ----------
+   Ở Toán – Lý – Hoá – Sinh, vận dụng cao là BÀI TẬP nhiều bước, không phải
+   câu nhận định. Nếu để mệnh đề mức 4 sinh câu trắc nghiệm thì mức "Vận dụng
+   cao" ở Luyện Công, Tà Đạo và Độ Kiếp đều ra câu một dòng — đúng như học
+   sinh phàn nàn "sao lời giải ngắn thế".
+   Môn xã hội thì ngược lại: nhận định – so sánh – đánh giá CHÍNH LÀ vận dụng
+   cao, nên giữ nguyên mức 4.
+   Đặt ở đây để mọi nơi dựng câu đều dùng chung một quy ước. */
+TD.TRAN_MUC_LT = { toan: 3, ly: 3, hoa: 3, sinh: 3 };
+TD.mucLT = function (mon, m) {
+  return Math.min(TD.TRAN_MUC_LT[mon] || 4, m || 2);
+};
+
 /* Dựng câu Đúng/Sai 4 ý từ bốn mệnh đề trong kho */
 TD.cauDsTuMenhDe = function (mon, chiSos, cd, seed) {
   const kho = TD.KHO_LT[mon] || [];
@@ -642,7 +655,7 @@ TD.cauDsTuMenhDe = function (mon, chiSos, cd, seed) {
   const t = TD.xaoR(R, y);
   return {
     chuong: cd || 'Lý thuyết trọng điểm',
-    muc: Math.max.apply(null, t.map(x => x.m || 2)),
+    muc: TD.mucLT(mon, Math.max.apply(null, t.map(x => x.m || 2))),
     dang: 'ds',
     _lt: true,
     q: `Về chủ đề <b>${cd}</b>, xét tính đúng/sai của từng phát biểu sau:`,
@@ -671,7 +684,7 @@ TD.cauTuMenhDe = function (mon, chiSo, chieu, seed) {
   const opts = TD.xaoR(R, [goc].concat(nhieu));
   return {
     chuong: goc.cd || 'Lý thuyết trọng điểm',
-    muc: goc.m || 2,
+    muc: TD.mucLT(mon, goc.m),
     dang: 'mc',
     _lt: true,
     q: chieu === 'd' ? 'Phát biểu nào sau đây <b>đúng</b>?' : 'Phát biểu nào sau đây <b>sai</b>?',
@@ -723,9 +736,17 @@ TD.dangKyMauTuMenhDe = function () {
     .replace(/[đĐ]/g, 'd').replace(/[^A-Za-z0-9]+/g, '-')
     .replace(/^-|-$/g, '').toLowerCase().slice(0, 26);
 
+  /* Với môn tự nhiên, một câu HỎI LÝ THUYẾT không thể là vận dụng cao:
+     vận dụng cao ở Toán – Lý – Hoá – Sinh là bài tập nhiều bước, phải ghép
+     nhiều mảng kiến thức. Nếu để mệnh đề mức 4 sinh câu trắc nghiệm thì
+     màn "Vận dụng cao" của Luyện Công sẽ toàn câu nhận định một dòng.
+     ⇒ Ở bốn môn này, câu từ mệnh đề bị chặn trần ở mức 3.
+     Môn xã hội thì ngược lại: vận dụng cao chính là nhận định, so sánh,
+     đánh giá — nên giữ nguyên mức 4. */
   for (const mon of Object.keys(TD.KHO_LT)) {
     const kho = TD.KHO_LT[mon];
     if (!Array.isArray(kho) || kho.length < 8) continue;
+    const tran = TD.TRAN_MUC_LT[mon] || 4;
     const gDung = kho.filter(x => x.a).length, gSai = kho.length - gDung;
 
     const theoCD = {};
@@ -738,9 +759,11 @@ TD.dangKyMauTuMenhDe = function () {
 
       /* Đăng ký RIÊNG cho từng mức độ — nếu gộp lại rồi lấy mức trung bình
          thì mức 1 và mức 4 sẽ trống, người học không luyện riêng được. */
-      for (let muc = 1; muc <= 4; muc++) {
-        const dungM = idx.filter(i2 => kho[i2].a && (kho[i2].m || 2) === muc);
-        const saiM = idx.filter(i2 => !kho[i2].a && (kho[i2].m || 2) === muc);
+      for (let muc = 1; muc <= tran; muc++) {
+        /* mệnh đề vượt trần thì dồn vào mức trần chứ không bỏ đi */
+        const hop = i2 => TD.mucLT(mon, kho[i2].m) === muc;
+        const dungM = idx.filter(i2 => kho[i2].a && hop(i2));
+        const saiM = idx.filter(i2 => !kho[i2].a && hop(i2));
 
         if (dungM.length >= 1 && gSai >= 3) TD.GEN[mon].push({
           ma: mon + '-ltd' + muc + '-' + ma, chuong: cd, muc: muc, dang: 'mc', _tuLT: true,
@@ -754,7 +777,7 @@ TD.dangKyMauTuMenhDe = function () {
 
       /* Câu đúng/sai 4 ý xếp ở mức cao nhất trong chủ đề — phải soi 4 ý một lúc */
       if (idx.length >= 6) {
-        const mucDS = Math.min(4, Math.max.apply(null, idx.map(i2 => kho[i2].m || 2)));
+        const mucDS = Math.min(tran, Math.max.apply(null, idx.map(i2 => kho[i2].m || 2)));
         TD.GEN[mon].push({
           ma: mon + '-ltds-' + ma, chuong: cd, muc: mucDS, dang: 'ds', _tuLT: true,
           tao(R) { return TD.cauDsTuMenhDe(mon, R.chonNhieu(idx, 4), cd, (R() * 4294967295) >>> 0); }
@@ -889,14 +912,15 @@ TD.deThiThat = function (mon, seed, cap) {
      nên TD.idThe chưa đọc ra được chủ đề, để nó tự đoán là cả bể dính chung một khoá. */
   kho.forEach((q, i) => { if (be[q.dang]) be[q.dang].push({ khoa: mon + '#' + i, muc: q.muc || 2, it: { mon: mon, i: i } }); });
   gen.forEach(t => { if (be[t.dang]) be[t.dang].push({ khoa: mon + '@' + t.ma, muc: t.muc || 2, it: { mon: mon, g: t.ma, s: 0 } }); });
-  lt.forEach((x, i) => be.mc.push({ khoa: mon + '$' + i, muc: x.m || 2, it: { mon: mon, lt: i, c: x.a ? 'd' : 's', s: 0 } }));
+  lt.forEach((x, i) => be.mc.push({ khoa: mon + '$' + i, muc: TD.mucLT(mon, x.m),
+    it: { mon: mon, lt: i, c: x.a ? 'd' : 's', s: 0 } }));
 
   const theoCD = {};
   lt.forEach((x, i) => { const c = x.cd || 'Khác'; (theoCD[c] = theoCD[c] || []).push(i); });
   Object.keys(theoCD).forEach(c => {
     if (theoCD[c].length < 4) return;
     /* mức của câu 4 ý lấy theo ý khó nhất trong chủ đề */
-    const m = Math.max.apply(null, theoCD[c].map(i => lt[i].m || 2));
+    const m = TD.mucLT(mon, Math.max.apply(null, theoCD[c].map(i => lt[i].m || 2)));
     be.ds.push({ khoa: mon + '\u00A7' + c, muc: m, it: { mon: mon, dsy: null, cd: c, s: 0 } });
   });
 

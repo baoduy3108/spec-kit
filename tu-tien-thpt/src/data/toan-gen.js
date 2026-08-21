@@ -220,7 +220,9 @@ TD.GEN.toan = [
     };
   } },
 
-{ ma: 'toan-bayes', chuong: 'Xác suất có điều kiện', muc: 4, dang: 'tln',
+/* Bayes hai hộp chỉ là thay số vào một công thức ⇒ đây là VẬN DỤNG, không phải
+   vận dụng cao. Câu VDC của chuyên đề này là toan-vdc-bayes3 (ba nguồn, có sàng lọc). */
+{ ma: 'toan-bayes', chuong: 'Xác suất có điều kiện', muc: 3, dang: 'tln',
   tao(R) {
     const d1 = R.nguyen(1, 6), x1 = R.nguyen(1, 6);
     const d2 = R.nguyen(1, 6), x2 = R.nguyen(1, 6);

@@ -23,7 +23,10 @@ TD.mcTu = function (R, de, khoDung, khoSai, meo) {
 };
 
 /* Mỗi phần tử kho: { t: 'mệnh đề', a: true/false, v: 'giải thích' } */
-TD.dsTu = function (R, de, kho, meo) {
+/* chienThuat: đoạn kết thêm vào lời giải, nói cách xử lí gọn cả bốn ý cùng lúc.
+   Câu đúng/sai 4 ý là câu phân hoá, giải xong bốn ý rời rạc vẫn chưa đủ — học sinh
+   cần biết cách dựng MỘT bảng/sơ đồ rồi soi cả bốn ý vào đó. */
+TD.dsTu = function (R, de, kho, meo, chienThuat) {
   /* cố gắng lấy cả ý đúng lẫn ý sai cho cân, nhưng vẫn ngẫu nhiên */
   const dung = kho.filter(x => x.a), sai = kho.filter(x => !x.a);
   let c;
@@ -39,7 +42,8 @@ TD.dsTu = function (R, de, kho, meo) {
   return {
     q: de,
     items: c.map(x => ({ t: x.t, a: x.a })),
-    giai: c.map((x, i) => `Ý ${'abcd'[i]}) ${x.a ? 'ĐÚNG' : 'SAI'} — ${x.v}`).join('\n'),
+    giai: c.map((x, i) => `Ý ${'abcd'[i]}) ${x.a ? 'ĐÚNG' : 'SAI'} — ${x.v}`).join('\n')
+        + (chienThuat ? '\n\n' + chienThuat : ''),
     meo: meo
   };
 };

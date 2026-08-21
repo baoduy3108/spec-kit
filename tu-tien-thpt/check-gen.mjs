@@ -57,6 +57,31 @@ for (const mon of Object.keys(TD.GEN)) {
       if (!q.q || !q.giai) { bao(mau.ma, 'thiếu đề hoặc lời giải', q); break; }
       if (q.muc < 1 || q.muc > 4) { bao(mau.ma, 'mức độ không hợp lệ'); break; }
 
+      /* ---- Hai luật áp cho MỌI dạng câu, phải chạy trước khi rẽ nhánh ---- */
+
+      /* Vận dụng cao phải là bài nhiều bước, không phải thay số vào một công thức.
+         Đo bằng độ dài và số dòng của lời giải — mẫu nào không đạt thì hoặc phải
+         viết sâu thêm, hoặc phải hạ về mức 3 cho đúng bản chất. */
+      if (mau.muc === 4) {
+        const gi = String(q.giai || '');
+        const dong = gi.split('\n').filter(x => x.trim()).length;
+        /* Bài tập tính toán phải thấy được nhiều BƯỚC; câu lập luận thì chiều sâu
+           nằm ở phần giải thích nên chỉ đo độ dài. */
+        if (mau.dang === 'tln' && (gi.length < 320 || dong < 5))
+          { bao(mau.ma, `mức 4 nhưng lời giải quá mỏng (${gi.length} ký tự / ${dong} dòng, cần ≥ 320 và ≥ 5 bước)`, q); break; }
+        if (mau.dang !== 'tln' && gi.length < 340)
+          { bao(mau.ma, `mức 4 nhưng phần giải thích quá ngắn (${gi.length} ký tự, cần ≥ 340)`, q); break; }
+      }
+
+      /* Trình bày phải giống đề thật: không có 0x, 1x, "+ -3", gạch nối ASCII làm dấu trừ… */
+      {
+        const vb = [q.q, (q.opts || []).join(' § '), (q.items || []).map(y => y.t).join(' § '),
+                    q.giai || '', q.meo || ''].join('\n');
+        let dinh = null;
+        for (const [re, ten] of LUAT_TRINH_BAY) if (re.test(vb)) { dinh = ten; break; }
+        if (dinh) { bao(mau.ma, dinh, q); break; }
+      }
+
       if (q.dang === 'tln') {
         if (q.ans === undefined || String(q.ans).trim() === '') { bao(mau.ma, 'đáp án rỗng', q); break; }
         /* đáp án phải xuất hiện nguyên vẹn trong lời giải */
@@ -89,15 +114,6 @@ for (const mon of Object.keys(TD.GEN)) {
       } else if (q.dang === 'mc') {
         if (!Array.isArray(q.opts) || q.opts.length !== 4) { bao(mau.ma, 'không đủ 4 phương án', q); break; }
         if (new Set(q.opts).size !== 4) { bao(mau.ma, 'có phương án trùng nhau', q); break; }
-        /* Trình bày phải giống đề thật: không có 0x, 1x, "+ -3", gạch nối ASCII làm dấu trừ… */
-        {
-          const vb = [q.q, (q.opts || []).join(' § '), (q.items || []).map(y => y.t).join(' § '),
-                      q.giai || '', q.meo || ''].join('\n');
-          let dinh = null;
-          for (const [re, ten] of LUAT_TRINH_BAY) if (re.test(vb)) { dinh = ten; break; }
-          if (dinh) { bao(mau.ma, dinh, q); break; }
-        }
-
         if (typeof q.ans !== 'number' || q.ans < 0 || q.ans > 3) { bao(mau.ma, 'chỉ số đáp án sai', q); break; }
       } else if (q.dang === 'ds') {
         if (!Array.isArray(q.items) || q.items.length !== 4) { bao(mau.ma, 'câu đúng/sai không đủ 4 ý', q); break; }

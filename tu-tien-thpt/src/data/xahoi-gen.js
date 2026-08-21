@@ -13,10 +13,18 @@ const T = TD.lamTron;
 const D = TD.dapSo;
 
 /* Khuôn trắc nghiệm 1 đúng + 3 nhiễu riêng của từng câu */
+/* Khuôn trắc nghiệm khối xã hội.
+   Lời giải phải nêu CẢ phương án đúng lẫn lí do loại từng phương án còn lại —
+   câu vận dụng cao mà chỉ ghi "đáp án là A" thì học sinh không học được gì.
+   it.sv (nếu có) là lí do riêng cho từng phương án nhiễu. */
 const MC = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
+  const loai = opts.filter(x => x !== it.d)
+    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không phù hợp với dữ kiện đề đưa ra.'}`)
+    .join('\n');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
-    giai: `Đáp án: ${it.d}\n${it.v}`, meo: meo };
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
+    meo: meo };
 };
 
 /* ==========================================================
@@ -328,7 +336,8 @@ TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
         + `  Bậc 1: ${S(b1, 1)} × 5% = ${S(b1 * 0.05, 4)} triệu\n`
         + (b2 > 0 ? `  Bậc 2: ${S(b2, 1)} × 10% = ${S(b2 * 0.10, 4)} triệu\n` : '')
         + (b3 > 0 ? `  Bậc 3: ${S(b3, 1)} × 15% = ${S(b3 * 0.15, 4)} triệu\n` : '')
-        + `  Tổng thuế = ${D(kq, 3)} triệu đồng.`,
+        + `  Tổng thuế = ${D(kq, 3)} triệu đồng.`
+        + `\nBước cuối — kiểm chứng: số thuế phải nộp luôn nhỏ hơn phần thu nhập tính thuế, và thuế suất thực tế phải nằm giữa bậc thấp nhất và bậc cao nhất đã dùng.\nChỗ dễ sai: thuế thu nhập cá nhân tính theo BẬC LUỸ TIẾN TỪNG PHẦN — chỉ phần thu nhập vượt ngưỡng mới chịu thuế suất cao hơn, không phải lấy toàn bộ thu nhập nhân với thuế suất của bậc cao nhất.`,
       meo: 'Bẫy lớn nhất: lấy TOÀN BỘ thu nhập nhân với thuế suất của bậc cao nhất. '
         + 'Luỹ tiến TỪNG PHẦN chỉ đánh thuế phần vượt vào mỗi bậc.'
     };

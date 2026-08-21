@@ -165,7 +165,8 @@ TD.GEN.sinh = [
           + `⇒ Giao tử hoán vị: ${deu ? 'Ab và aB' : 'AB và ab'}\n`
           + `Tổng giao tử hoán vị = f = ${f}% ⇒ mỗi loại = ${f}/2 = ${S(gtHV)}%\n`
           + `Tổng giao tử liên kết = 100% − ${f}% = ${100 - f}% ⇒ mỗi loại = ${S(gtLK)}%\n`
-          + `Giao tử ${loaiHoi} là giao tử ${laHoanVi ? 'HOÁN VỊ' : 'LIÊN KẾT'} ⇒ tỉ lệ = ${S(kq)}%.`,
+          + `Giao tử ${loaiHoi} là giao tử ${laHoanVi ? 'HOÁN VỊ' : 'LIÊN KẾT'} ⇒ tỉ lệ = ${S(kq)}%.`
+        + `\nBước cuối — kiểm chứng: tần số hoán vị gene luôn nằm trong khoảng 0% đến 50%. Ra số lớn hơn 50% nghĩa là đã lấy nhầm nhóm giao tử liên kết làm giao tử hoán vị.\nChỗ dễ sai: giao tử hoán vị luôn là nhóm có tỉ lệ NHỎ hơn; hai loại giao tử hoán vị bằng nhau và hai loại giao tử liên kết bằng nhau, nên f = tổng hai loại nhỏ.`,
       meo: 'Phải xác định đúng dị hợp ĐỀU hay CHÉO mới biết loại nào là giao tử hoán vị. f ≤ 50%.'
     };
   } },
