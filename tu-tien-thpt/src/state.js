@@ -30,6 +30,8 @@ TD.macDinhTrangThai = function () {
     /* tiến độ đang dở của bộ đề Tà Đạo */
     ta_dao_tien: {},
     tui: { thien_co: 2, hoi_xuan: 1, ngo_dao: 0, truy_hon: 1 },
+    /* số câu còn lại đang được Ngộ Đạo Trà nhân đôi linh khí */
+    ngo_dao_con: 0,
     chuoi: 0, chuoi_max: 0,
     ngay_lien_tiep: 0, ngay_cuoi: null
   };
@@ -141,23 +143,26 @@ TD.SRS = {
 };
 
 /* ---------- THỐNG KÊ ---------- */
-TD.ghiNhan = function (mon, muc, dung) {
+TD.ghiNhan = function (mon, muc, dung, khongTinh) {
+  const h = TD.homNay();
+  TD.S.nhat_ky[h] = (TD.S.nhat_ky[h] || 0) + 1;
+  TD.diemDanh();
+
+  /* câu đã soi Truy Hồn Kính: vẫn tính là có học, nhưng không đụng vào
+     thống kê độ chính xác lẫn chuỗi liên kích cho khỏi ảo điểm */
+  if (khongTinh) return;
+
   TD.S.thong_ke[mon] = TD.S.thong_ke[mon] || {};
   const o = TD.S.thong_ke[mon][muc] = TD.S.thong_ke[mon][muc] || { dung: 0, tong: 0 };
   o.tong++; if (dung) o.dung++;
 
-  const h = TD.homNay();
-  TD.S.nhat_ky[h] = (TD.S.nhat_ky[h] || 0) + 1;
-
   if (dung) {
     TD.S.chuoi++;
     if (TD.S.chuoi > TD.S.chuoi_max) TD.S.chuoi_max = TD.S.chuoi;
-  } else if (TD.S.tui.hoi_xuan > 0 && TD.S.chuoi >= 5) {
+  } else if (TD.S.tui.hoi_xuan > 0 && TD.S.chuoi >= 1) {
     TD.S.tui.hoi_xuan--;                       /* Hồi Xuân Đan tự động giữ chuỗi */
-    TD.bao('💊 Hồi Xuân Đan đã giữ lại chuỗi liên kích ' + TD.S.chuoi + '!', 'kim');
+    TD.bao('💊 Hồi Xuân Đan đã giữ lại chuỗi liên kích ' + TD.S.chuoi + '! (còn ' + TD.S.tui.hoi_xuan + ' viên)', 'kim');
   } else TD.S.chuoi = 0;
-
-  TD.diemDanh();
 };
 
 /* Độ chính xác tổng của một môn (0–100) */
@@ -828,4 +833,102 @@ TD.khopTLN = function (nhap, dung) {
   const x = so(a), y = so(b);
   if (!isNaN(x) && !isNaN(y) && b.indexOf(';') < 0) return Math.abs(x - y) < 1e-6;
   return false;
+};
+
+/* ============================================================
+   ĐỘ KIẾP — DỰNG ĐỀ THI THỬ ĐÚNG CẤU TRÚC CHÍNH THỨC
+   Bản cũ chỉ rút từ TD.KHO (câu cố định) cộng mỗi mẫu đề đúng một
+   câu, nên môn nào cũng hụt: Sinh 2/18 câu Phần I, Anh 27/40…
+   Bản này gộp cả ba nguồn — câu cố định · mẫu đề tự sinh · kho
+   mệnh đề trọng điểm — nên môn nào cũng đủ p1 + p2 + p3 câu,
+   và chia mức độ đúng chỗ:
+     Phần I  (nhiều lựa chọn) nghiêng về nhận biết – thông hiểu
+     Phần II (đúng/sai 4 ý)   thông hiểu – vận dụng
+     Phần III(trả lời ngắn)   toàn bộ là vận dụng & vận dụng cao
+   ============================================================ */
+TD.TRONG_SO_DE = {
+  mc:  { 1: 0.30, 2: 0.40, 3: 0.24, 4: 0.06 },
+  ds:  { 1: 0.00, 2: 0.25, 3: 0.45, 4: 0.30 },
+  tln: { 1: 0.00, 2: 0.00, 3: 0.50, 4: 0.50 }
+};
+
+TD.deThiThat = function (mon, seed) {
+  const M = TD.MON[mon];
+  if (!M) return { p1: [], p2: [], p3: [], ds: [] };
+  const R = TD.rng(seed === undefined ? (Math.random() * 4294967295) >>> 0 : (seed >>> 0));
+  const kho = TD.KHO[mon] || [], lt = TD.KHO_LT[mon] || [];
+  /* _tuLT là mẫu đề sinh ra TỪ kho mệnh đề — bỏ ra kẻo trùng với nguồn mệnh đề bên dưới */
+  const gen = (TD.GEN[mon] || []).filter(t => !t._tuLT);
+
+  /* ---- gom bể câu theo dạng, mỗi mục kèm mức độ để chia cho đúng ---- */
+  const be = { mc: [], ds: [], tln: [] };
+  /* khoá chống trùng phải tự khai báo: mục đúng/sai lúc này chưa chọn 4 ý
+     nên TD.idThe chưa đọc ra được chủ đề, để nó tự đoán là cả bể dính chung một khoá. */
+  kho.forEach((q, i) => { if (be[q.dang]) be[q.dang].push({ khoa: mon + '#' + i, muc: q.muc || 2, it: { mon: mon, i: i } }); });
+  gen.forEach(t => { if (be[t.dang]) be[t.dang].push({ khoa: mon + '@' + t.ma, muc: t.muc || 2, it: { mon: mon, g: t.ma, s: 0 } }); });
+  lt.forEach((x, i) => be.mc.push({ khoa: mon + '$' + i, muc: x.m || 2, it: { mon: mon, lt: i, c: x.a ? 'd' : 's', s: 0 } }));
+
+  const theoCD = {};
+  lt.forEach((x, i) => { const c = x.cd || 'Khác'; (theoCD[c] = theoCD[c] || []).push(i); });
+  Object.keys(theoCD).forEach(c => {
+    if (theoCD[c].length < 4) return;
+    /* mức của câu 4 ý lấy theo ý khó nhất trong chủ đề */
+    const m = Math.max.apply(null, theoCD[c].map(i => lt[i].m || 2));
+    be.ds.push({ khoa: mon + '\u00A7' + c, muc: m, it: { mon: mon, dsy: null, cd: c, s: 0 } });
+  });
+
+  /* ---- rút n câu theo chỉ tiêu mức độ, không trùng thẻ ---- */
+  const daDung = {};
+  const rut = (bo, n, trongSo) => {
+    const ra = [];
+    if (!n || !bo.length) return ra;
+    const them = x => {
+      if (daDung[x.khoa]) return false;
+      daDung[x.khoa] = 1; ra.push(x.it); return true;
+    };
+    const theoMuc = { 1: [], 2: [], 3: [], 4: [] };
+    TD.xaoR(R, bo).forEach(x => theoMuc[x.muc] ? theoMuc[x.muc].push(x) : theoMuc[2].push(x));
+
+    const chiTieu = {}; let da = 0;
+    for (const m of [1, 2, 3, 4]) { chiTieu[m] = Math.floor(n * (trongSo[m] || 0)); da += chiTieu[m]; }
+    const uuTien = [2, 3, 1, 4];
+    for (let k = 0; da < n; k++, da++) chiTieu[uuTien[k % 4]]++;
+
+    for (const m of [1, 2, 3, 4])
+      for (const x of theoMuc[m]) {
+        if (chiTieu[m] <= 0) break;
+        if (them(x)) chiTieu[m]--;
+      }
+    /* thiếu thì vét mức khác cho bằng đủ — đề thi thật không được hụt câu */
+    if (ra.length < n)
+      for (const x of TD.xaoR(R, bo)) { if (ra.length >= n) break; them(x); }
+    return ra;
+  };
+
+  /* ---- chốt hạt giống: mẫu đề nào từ chối hạt giống thì đổi, chịu thua thì bỏ ---- */
+  const chot = ds => {
+    const ra = [];
+    for (const it0 of ds) {
+      const it = Object.assign({}, it0);
+      if (it.dsy === null) it.dsy = R.chonNhieu(theoCD[it.cd], 4);
+      if (it.s !== undefined) it.s = R.nguyen(1, 2147483646) >>> 0;
+      if (it.g) {
+        const mau = TD.timMau(mon, it.g);
+        let duoc = false;
+        for (let l = 0; l < 40 && mau; l++) {
+          if (TD.sinhCau(mau, it.s)) { duoc = true; break; }
+          it.s = R.nguyen(1, 2147483646) >>> 0;
+        }
+        if (!duoc) continue;
+      } else if (!TD.layCau(it)) continue;
+      ra.push(it);
+    }
+    return ra;
+  };
+
+  const p1 = chot(rut(be.mc, M.p1, TD.TRONG_SO_DE.mc));
+  const p2 = chot(rut(be.ds, M.p2, TD.TRONG_SO_DE.ds));
+  const p3 = chot(rut(be.tln, M.p3, TD.TRONG_SO_DE.tln));
+  /* thứ tự làm bài khuyến nghị: Phần I → Phần III → Phần II */
+  return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2) };
 };

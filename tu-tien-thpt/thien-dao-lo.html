@@ -201,6 +201,15 @@ hr.mo{border:0;border-top:1px solid var(--vien);margin:16px 0}
   table.kq.small{font-size:11.4px}
 }
 
+/* ---- Thanh pháp bảo trong lúc làm bài ---- */
+.tui-phap-bao{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px;padding-top:12px;border-top:1px dashed var(--vien)}
+.phap-bao{font-size:12.5px;padding:7px 12px;margin:0}
+.phap-bao:disabled{opacity:.34;cursor:not-allowed}
+.phap-bao-bi-dong{color:var(--kim);border-color:rgba(212,175,55,.45)}
+
+/* ---- Đề tự luận Ngữ văn ---- */
+textarea.o-nhap{font-family:inherit;font-size:14.5px;line-height:1.6;resize:vertical;min-height:60px}
+
 </style>
 </head>
 <body>
@@ -297,9 +306,9 @@ TD.MAC_DINH = {
 /* ---------- 5. VẬT PHẨM ---------- */
 TD.VAT_PHAM = {
   thien_co:   { ten: 'Thiên Cơ Phù',  icon: '🔮', gia: 30,  mo_ta: 'Loại bỏ 2 đáp án sai.' },
-  hoi_xuan:   { ten: 'Hồi Xuân Đan',  icon: '💊', gia: 60,  mo_ta: 'Giữ nguyên chuỗi liên kích khi trả lời sai 1 câu.' },
+  hoi_xuan:   { ten: 'Hồi Xuân Đan',  icon: '💊', gia: 60,  mo_ta: 'Bị động: tự nổ khi trả lời sai để giữ nguyên chuỗi liên kích.' },
   ngo_dao:    { ten: 'Ngộ Đạo Trà',   icon: '🍵', gia: 80,  mo_ta: 'Nhân đôi linh khí nhận được trong 10 câu kế.' },
-  truy_hon:   { ten: 'Truy Hồn Kính', icon: '🪞', gia: 45,  mo_ta: 'Xem ngay lời giải + mẹo mà không mất linh khí.' }
+  truy_hon:   { ten: 'Truy Hồn Kính', icon: '🪞', gia: 45,  mo_ta: 'Soi lời giải + mẹo trước khi trả lời (câu đó không tính linh khí).' }
 };
 
 /* ---------- 6. THANG QUY ĐỔI ĐIỂM ---------- */
@@ -349,6 +358,8 @@ TD.macDinhTrangThai = function () {
     /* tiến độ đang dở của bộ đề Tà Đạo */
     ta_dao_tien: {},
     tui: { thien_co: 2, hoi_xuan: 1, ngo_dao: 0, truy_hon: 1 },
+    /* số câu còn lại đang được Ngộ Đạo Trà nhân đôi linh khí */
+    ngo_dao_con: 0,
     chuoi: 0, chuoi_max: 0,
     ngay_lien_tiep: 0, ngay_cuoi: null
   };
@@ -460,23 +471,26 @@ TD.SRS = {
 };
 
 /* ---------- THỐNG KÊ ---------- */
-TD.ghiNhan = function (mon, muc, dung) {
+TD.ghiNhan = function (mon, muc, dung, khongTinh) {
+  const h = TD.homNay();
+  TD.S.nhat_ky[h] = (TD.S.nhat_ky[h] || 0) + 1;
+  TD.diemDanh();
+
+  /* câu đã soi Truy Hồn Kính: vẫn tính là có học, nhưng không đụng vào
+     thống kê độ chính xác lẫn chuỗi liên kích cho khỏi ảo điểm */
+  if (khongTinh) return;
+
   TD.S.thong_ke[mon] = TD.S.thong_ke[mon] || {};
   const o = TD.S.thong_ke[mon][muc] = TD.S.thong_ke[mon][muc] || { dung: 0, tong: 0 };
   o.tong++; if (dung) o.dung++;
 
-  const h = TD.homNay();
-  TD.S.nhat_ky[h] = (TD.S.nhat_ky[h] || 0) + 1;
-
   if (dung) {
     TD.S.chuoi++;
     if (TD.S.chuoi > TD.S.chuoi_max) TD.S.chuoi_max = TD.S.chuoi;
-  } else if (TD.S.tui.hoi_xuan > 0 && TD.S.chuoi >= 5) {
+  } else if (TD.S.tui.hoi_xuan > 0 && TD.S.chuoi >= 1) {
     TD.S.tui.hoi_xuan--;                       /* Hồi Xuân Đan tự động giữ chuỗi */
-    TD.bao('💊 Hồi Xuân Đan đã giữ lại chuỗi liên kích ' + TD.S.chuoi + '!', 'kim');
+    TD.bao('💊 Hồi Xuân Đan đã giữ lại chuỗi liên kích ' + TD.S.chuoi + '! (còn ' + TD.S.tui.hoi_xuan + ' viên)', 'kim');
   } else TD.S.chuoi = 0;
-
-  TD.diemDanh();
 };
 
 /* Độ chính xác tổng của một môn (0–100) */
@@ -1147,6 +1161,104 @@ TD.khopTLN = function (nhap, dung) {
   const x = so(a), y = so(b);
   if (!isNaN(x) && !isNaN(y) && b.indexOf(';') < 0) return Math.abs(x - y) < 1e-6;
   return false;
+};
+
+/* ============================================================
+   ĐỘ KIẾP — DỰNG ĐỀ THI THỬ ĐÚNG CẤU TRÚC CHÍNH THỨC
+   Bản cũ chỉ rút từ TD.KHO (câu cố định) cộng mỗi mẫu đề đúng một
+   câu, nên môn nào cũng hụt: Sinh 2/18 câu Phần I, Anh 27/40…
+   Bản này gộp cả ba nguồn — câu cố định · mẫu đề tự sinh · kho
+   mệnh đề trọng điểm — nên môn nào cũng đủ p1 + p2 + p3 câu,
+   và chia mức độ đúng chỗ:
+     Phần I  (nhiều lựa chọn) nghiêng về nhận biết – thông hiểu
+     Phần II (đúng/sai 4 ý)   thông hiểu – vận dụng
+     Phần III(trả lời ngắn)   toàn bộ là vận dụng & vận dụng cao
+   ============================================================ */
+TD.TRONG_SO_DE = {
+  mc:  { 1: 0.30, 2: 0.40, 3: 0.24, 4: 0.06 },
+  ds:  { 1: 0.00, 2: 0.25, 3: 0.45, 4: 0.30 },
+  tln: { 1: 0.00, 2: 0.00, 3: 0.50, 4: 0.50 }
+};
+
+TD.deThiThat = function (mon, seed) {
+  const M = TD.MON[mon];
+  if (!M) return { p1: [], p2: [], p3: [], ds: [] };
+  const R = TD.rng(seed === undefined ? (Math.random() * 4294967295) >>> 0 : (seed >>> 0));
+  const kho = TD.KHO[mon] || [], lt = TD.KHO_LT[mon] || [];
+  /* _tuLT là mẫu đề sinh ra TỪ kho mệnh đề — bỏ ra kẻo trùng với nguồn mệnh đề bên dưới */
+  const gen = (TD.GEN[mon] || []).filter(t => !t._tuLT);
+
+  /* ---- gom bể câu theo dạng, mỗi mục kèm mức độ để chia cho đúng ---- */
+  const be = { mc: [], ds: [], tln: [] };
+  /* khoá chống trùng phải tự khai báo: mục đúng/sai lúc này chưa chọn 4 ý
+     nên TD.idThe chưa đọc ra được chủ đề, để nó tự đoán là cả bể dính chung một khoá. */
+  kho.forEach((q, i) => { if (be[q.dang]) be[q.dang].push({ khoa: mon + '#' + i, muc: q.muc || 2, it: { mon: mon, i: i } }); });
+  gen.forEach(t => { if (be[t.dang]) be[t.dang].push({ khoa: mon + '@' + t.ma, muc: t.muc || 2, it: { mon: mon, g: t.ma, s: 0 } }); });
+  lt.forEach((x, i) => be.mc.push({ khoa: mon + '$' + i, muc: x.m || 2, it: { mon: mon, lt: i, c: x.a ? 'd' : 's', s: 0 } }));
+
+  const theoCD = {};
+  lt.forEach((x, i) => { const c = x.cd || 'Khác'; (theoCD[c] = theoCD[c] || []).push(i); });
+  Object.keys(theoCD).forEach(c => {
+    if (theoCD[c].length < 4) return;
+    /* mức của câu 4 ý lấy theo ý khó nhất trong chủ đề */
+    const m = Math.max.apply(null, theoCD[c].map(i => lt[i].m || 2));
+    be.ds.push({ khoa: mon + '\u00A7' + c, muc: m, it: { mon: mon, dsy: null, cd: c, s: 0 } });
+  });
+
+  /* ---- rút n câu theo chỉ tiêu mức độ, không trùng thẻ ---- */
+  const daDung = {};
+  const rut = (bo, n, trongSo) => {
+    const ra = [];
+    if (!n || !bo.length) return ra;
+    const them = x => {
+      if (daDung[x.khoa]) return false;
+      daDung[x.khoa] = 1; ra.push(x.it); return true;
+    };
+    const theoMuc = { 1: [], 2: [], 3: [], 4: [] };
+    TD.xaoR(R, bo).forEach(x => theoMuc[x.muc] ? theoMuc[x.muc].push(x) : theoMuc[2].push(x));
+
+    const chiTieu = {}; let da = 0;
+    for (const m of [1, 2, 3, 4]) { chiTieu[m] = Math.floor(n * (trongSo[m] || 0)); da += chiTieu[m]; }
+    const uuTien = [2, 3, 1, 4];
+    for (let k = 0; da < n; k++, da++) chiTieu[uuTien[k % 4]]++;
+
+    for (const m of [1, 2, 3, 4])
+      for (const x of theoMuc[m]) {
+        if (chiTieu[m] <= 0) break;
+        if (them(x)) chiTieu[m]--;
+      }
+    /* thiếu thì vét mức khác cho bằng đủ — đề thi thật không được hụt câu */
+    if (ra.length < n)
+      for (const x of TD.xaoR(R, bo)) { if (ra.length >= n) break; them(x); }
+    return ra;
+  };
+
+  /* ---- chốt hạt giống: mẫu đề nào từ chối hạt giống thì đổi, chịu thua thì bỏ ---- */
+  const chot = ds => {
+    const ra = [];
+    for (const it0 of ds) {
+      const it = Object.assign({}, it0);
+      if (it.dsy === null) it.dsy = R.chonNhieu(theoCD[it.cd], 4);
+      if (it.s !== undefined) it.s = R.nguyen(1, 2147483646) >>> 0;
+      if (it.g) {
+        const mau = TD.timMau(mon, it.g);
+        let duoc = false;
+        for (let l = 0; l < 40 && mau; l++) {
+          if (TD.sinhCau(mau, it.s)) { duoc = true; break; }
+          it.s = R.nguyen(1, 2147483646) >>> 0;
+        }
+        if (!duoc) continue;
+      } else if (!TD.layCau(it)) continue;
+      ra.push(it);
+    }
+    return ra;
+  };
+
+  const p1 = chot(rut(be.mc, M.p1, TD.TRONG_SO_DE.mc));
+  const p2 = chot(rut(be.ds, M.p2, TD.TRONG_SO_DE.ds));
+  const p3 = chot(rut(be.tln, M.p3, TD.TRONG_SO_DE.tln));
+  /* thứ tự làm bài khuyến nghị: Phần I → Phần III → Phần II */
+  return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2) };
 };
 
 </script>
@@ -13986,6 +14098,622 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
 })();
 
 </script>
+<script>
+/* ============================================================
+   VẬN DỤNG CAO — BỔ SUNG CHO CÁC CHUYÊN ĐỀ CÒN HỞ
+   Rà lại toàn bộ mẫu đề thấy vài chuyên đề chỉ dừng ở mức thông
+   hiểu: Khối tròn xoay (Toán), Dung dịch và Cân bằng trong dung
+   dịch (Hoá), Đột biến NST và Nguyên phân – Giảm phân (Sinh).
+   Đây là những chỗ đề thật hay đặt câu khó, nên bù mẫu mức 4.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const S = TD.soVN;
+const T = TD.lamTron;
+const D = TD.dapSo;
+
+/* ==========================================================
+   TOÁN — KHỐI TRÒN XOAY: bài toán tối ưu vật liệu
+   ========================================================== */
+TD.GEN.toan = (TD.GEN.toan || []).concat([
+
+{ ma: 'toan-vdc-lonsua', chuong: 'Khối tròn xoay', muc: 4, dang: 'tln',
+  tao(R) {
+    const V = R.chon([180, 200, 240, 250, 270, 300, 330, 360, 400, 450,
+                      500, 540, 600, 660, 700, 750, 800, 900, 1000, 1200, 1250, 1500]);
+    const kin = R.chon([true, false]);
+    const doVat = R.chon([
+      { ten: 'lon nước ngọt', vl: 'hợp kim nhôm' },
+      { ten: 'hộp sữa đặc', vl: 'thép tráng thiếc' },
+      { ten: 'thùng sơn nhỏ', vl: 'tôn mạ kẽm' }
+    ]);
+    /* kín hai đáy: S = 2πr² + 2V/r ⇒ r³ = V/(2π) · hở một đáy: S = πr² + 2V/r ⇒ r³ = V/π */
+    const heSo = kin ? 2 : 1;
+    const r = Math.cbrt(V / (heSo * Math.PI));
+    const h = V / (Math.PI * r * r);
+    const Stp = heSo * Math.PI * r * r + 2 * V / r;
+    const hoiR = R.chon([true, false]);
+    const dapAn = hoiR ? r : h;
+    return {
+      q: `Một nhà máy cần dập ${doVat.ten} dạng <b>hình trụ ${kin ? 'kín hai đáy' : 'hở miệng (chỉ có một đáy)'}</b> `
+        + `có thể tích ${S(V)} cm³. Vỏ làm từ cùng một loại ${doVat.vl} nên chi phí tỉ lệ thuận với diện tích phần vật liệu. `
+        + `Hỏi ${hoiR ? '<b>bán kính đáy</b>' : '<b>chiều cao</b>'} bằng bao nhiêu xentimét thì tốn ít vật liệu nhất? `
+        + `(làm tròn đến hàng phần trăm)`,
+      ans: D(dapAn, 2),
+      giai: `Bước 1 — đặt bán kính đáy là r, chiều cao h. Ràng buộc thể tích:\n`
+        + `  πr²h = ${S(V)} ⇒ h = ${S(V)}/(πr²)\n`
+        + `Bước 2 — diện tích vật liệu (${kin ? 'thân + 2 đáy' : 'thân + 1 đáy'}) chỉ còn phụ thuộc r:\n`
+        + `  S(r) = ${heSo}πr² + 2πrh = ${heSo}πr² + ${S(2 * V)}/r\n`
+        + `Bước 3 — đạo hàm rồi cho bằng 0:\n`
+        + `  S′(r) = ${2 * heSo}πr − ${S(2 * V)}/r² = 0 ⇒ r³ = ${S(V)}/(${heSo === 1 ? '' : heSo}π)\n`
+        + `  r = ${S(r, 4)} cm ⇒ h = ${S(V)}/(π·r²) = ${S(h, 4)} cm\n`
+        + `Bước 4 — S″(r) = ${2 * heSo}π + ${S(4 * V)}/r³ > 0 nên đây là cực TIỂU, đúng là chỗ tốn ít vật liệu nhất.\n`
+        + `Đáp số: ${hoiR ? 'r' : 'h'} ≈ ${D(dapAn, 2)} cm (khi đó S = ${S(Stp, 1)} cm²).\n`
+        + `Kiểm chứng nhanh: h/r = ${S(h / r, 2)} — đúng bằng ${kin ? '2' : '1'} như lí thuyết.`,
+      meo: 'Nhớ luôn hai kết quả đẹp này: hình trụ KÍN hai đáy tốn ít vật liệu nhất khi <b>h = 2r</b> '
+        + '(chiều cao bằng đường kính); hình trụ HỞ một đáy thì <b>h = r</b>. Thuộc rồi thì thay thẳng vào V = πr²h ra r ngay, khỏi đạo hàm. '
+        + 'Bấm ∛ trên Casio: SHIFT + x³ (570VN Plus) hoặc phím ∛☐ trong bảng mẫu (580VN X).'
+    };
+  } }
+
+]);
+
+/* ==========================================================
+   HOÁ — DUNG DỊCH & CÂN BẰNG TRONG DUNG DỊCH
+   ========================================================== */
+TD.GEN.hoa = (TD.GEN.hoa || []).concat([
+
+/* --- Pha loãng acid yếu rồi tính pH: phải thấy Ka không đổi --- */
+{ ma: 'hoa-vdc-phaloang-ph', chuong: 'Cân bằng trong dung dịch', muc: 4, dang: 'tln',
+  tao(R) {
+    const c = R.chon([0.1, 0.2, 0.4, 0.5, 1]);
+    const V1 = R.chon([20, 25, 40, 50]);
+    const k = R.chon([2, 4, 5, 10]);
+    const V2 = V1 * k;
+    const Ka = 1.75e-5;
+    const c2 = c * V1 / V2;
+    const H = Math.sqrt(Ka * c2);
+    const pH = -Math.log10(H);
+    return {
+      q: `Acetic acid là acid yếu có K<sub>a</sub> = 1,75·10⁻⁵ ở 25 °C. `
+        + `Lấy ${S(V1)} mL dung dịch CH₃COOH ${S(c)} M rồi thêm nước cất cho tới khi thu được ${S(V2)} mL dung dịch. `
+        + `Tính pH của dung dịch sau khi pha loãng. (làm tròn đến hàng phần trăm)`,
+      ans: D(pH, 2),
+      giai: `Bước 1 — pha loãng KHÔNG làm đổi số mol chất tan, chỉ đổi nồng độ:\n`
+        + `  C₂ = C₁·V₁/V₂ = ${S(c)} × ${S(V1)}/${S(V2)} = ${S(c2, 4)} M\n`
+        + `Bước 2 — acid yếu, dùng cân bằng CH₃COOH ⇌ H⁺ + CH₃COO⁻:\n`
+        + `  K<sub>a</sub> = x²/(C₂ − x) ≈ x²/C₂ (vì x ≪ C₂)\n`
+        + `  x = [H⁺] = √(K<sub>a</sub>·C₂) = √(1,75·10⁻⁵ × ${S(c2, 4)}) = ${H.toExponential(3).replace('.', ',')} M\n`
+        + `Bước 3 — pH = −log[H⁺] = ${D(pH, 2)}.\n`
+        + `Nhận xét: pha loãng ${S(k)} lần chỉ làm pH tăng khoảng ${S(0.5 * Math.log10(k), 2)} đơn vị, `
+        + `chứ KHÔNG tăng đúng log${S(k)} như acid mạnh — vì acid yếu điện li mạnh hơn khi loãng.`,
+      meo: 'Acid MẠNH pha loãng 10 lần thì pH tăng đúng 1; acid YẾU pha loãng 10 lần pH chỉ tăng ≈ 0,5 '
+        + 'vì [H⁺] = √(Ka·C) chỉ tỉ lệ với căn của C. Thấy đề cho Ka là biết ngay phải dùng công thức căn.'
+    };
+  } },
+
+/* --- Pha dung dịch từ acid đặc, đi ngược từ pH --- */
+{ ma: 'hoa-vdc-pha-h2so4', chuong: 'Dung dịch', muc: 4, dang: 'tln',
+  tao(R) {
+    const A = R.chon([
+      { ten: 'sulfuric acid', ct: 'H₂SO₄', M: 98, pc: 98, D: 1.84, nac: 2, ion: 'H₂SO₄ → 2H⁺ + SO₄²⁻', ngto: 'H = 1; S = 32; O = 16' },
+      { ten: 'hydrochloric acid', ct: 'HCl', M: 36.5, pc: 36.5, D: 1.18, nac: 1, ion: 'HCl → H⁺ + Cl⁻', ngto: 'H = 1; Cl = 35,5' },
+      { ten: 'nitric acid', ct: 'HNO₃', M: 63, pc: 63, D: 1.40, nac: 1, ion: 'HNO₃ → H⁺ + NO₃⁻', ngto: 'H = 1; N = 14; O = 16' }
+    ]);
+    const pH = R.chon([0.5, 1, 1.5, 2, 2.5]);
+    const V = R.chon([250, 500, 750, 1000, 1500, 2000, 2500, 5000]);
+    const H = Math.pow(10, -pH);
+    const cA = H / A.nac;
+    const n = cA * V / 1000;
+    const mCt = A.M * n;
+    const mDd = mCt / (A.pc / 100);
+    const Vdac = mDd / A.D;
+    const mu = x => x.toExponential(3).replace('.', ',');
+    return {
+      q: `Trong phòng thí nghiệm có ${A.ten} đặc nồng độ ${S(A.pc)}% (khối lượng riêng D = ${S(A.D, 2)} g/mL). `
+        + `Cần lấy bao nhiêu mililít acid đặc này để pha thành ${S(V)} mL dung dịch ${A.ct} có pH = ${S(pH)}? `
+        + `(coi ${A.ct} điện li hoàn toàn; ${A.ngto}; làm tròn đến hàng phần trăm)`,
+      ans: D(Vdac, 2),
+      giai: `Bước 1 — từ pH suy ra nồng độ H⁺:\n`
+        + `  [H⁺] = 10^(−${S(pH)}) = ${mu(H)} M\n`
+        + `Bước 2 — ${A.ion} nên 1 mol acid cho ${S(A.nac)} mol H⁺:\n`
+        + `  C(${A.ct}) = ${mu(H)}/${S(A.nac)} = ${mu(cA)} M\n`
+        + `Bước 3 — số mol và khối lượng acid nguyên chất cần có:\n`
+        + `  n = ${mu(cA)} × ${S(V / 1000, 3)} = ${S(n, 5)} mol\n`
+        + `  m(${A.ct}) = ${S(A.M, 1)} × ${S(n, 5)} = ${S(mCt, 4)} g\n`
+        + `Bước 4 — quy về khối lượng dung dịch đặc rồi đổi sang thể tích:\n`
+        + `  m(dd đặc) = ${S(mCt, 4)}/${S(A.pc / 100, 3)} = ${S(mDd, 4)} g\n`
+        + `  V(dd đặc) = ${S(mDd, 4)}/${S(A.D, 2)} = ${D(Vdac, 2)} mL.`,
+      meo: 'Bẫy kinh điển: acid ĐA NẤC như H₂SO₄ cho 2 H⁺, nếu lấy luôn [H⁺] làm nồng độ acid là sai gấp đôi. '
+        + 'Chuỗi biến đổi cần thuộc: pH → [H⁺] → C(acid) → n → m chất tan → m dung dịch (chia C%) → V (chia D). '
+        + 'Và luôn nhớ quy tắc an toàn: rót acid đặc VÀO nước, tuyệt đối không đổ nước vào acid đặc.'
+    };
+  } }
+
+]);
+
+/* ==========================================================
+   SINH — ĐỘT BIẾN NST & NGUYÊN PHÂN – GIẢM PHÂN
+   ========================================================== */
+TD.GEN.sinh = (TD.GEN.sinh || []).concat([
+
+/* --- Lai cây thể ba: phải lập được tỉ lệ giao tử của 2n+1 --- */
+{ ma: 'sinh-vdc-lechboi-lai', chuong: 'Đột biến NST', muc: 4, dang: 'tln',
+  tao(R) {
+    const bo = R.chon(['AAa', 'Aaa']);
+    const me = R.chon(['Aa', 'aa']);
+    const n2 = R.chon([14, 18, 20, 24, 32, 38]);
+    const TT = R.chon([
+      { loai: 'thực vật', troi: 'hoa đỏ', lan: 'hoa trắng' },
+      { loai: 'thực vật', troi: 'quả tròn', lan: 'quả dài' },
+      { loai: 'thực vật', troi: 'thân cao', lan: 'thân thấp' },
+      { loai: 'thực vật', troi: 'hạt vàng', lan: 'hạt xanh' }
+    ]);
+    const hoiLan = R.chon([true, false]);
+    /* giao tử của thể ba: 3 NST ⇒ 3 cách lấy 1 chiếc (n) + 3 cách lấy 2 chiếc (n+1), đều 1/6 */
+    const gt = bo === 'AAa'
+      ? { mo: 'A (1/6 + 1/6 = 2/6), a (1/6), AA (1/6), Aa (1/6 + 1/6 = 2/6)', khongA: 1 / 6 }
+      : { mo: 'A (1/6), a (1/6 + 1/6 = 2/6), Aa (1/6 + 1/6 = 2/6), aa (1/6)', khongA: 3 / 6 };
+    const p2 = me === 'Aa' ? 0.5 : 1;
+    const lan = gt.khongA * p2 * 100;
+    const dapAn = hoiLan ? lan : 100 - lan;
+    return {
+      q: `Ở một loài ${TT.loai} lưỡng bội 2n = ${S(n2)}, allele A quy định ${TT.troi} trội hoàn toàn so với allele a quy định ${TT.lan}. `
+        + `Người ta lấy một cây <b>thể ba</b> (2n + 1) ở cặp NST mang gene này, kiểu gene <b>${bo}</b>, `
+        + `đem lai với một cây lưỡng bội bình thường kiểu gene <b>${me}</b>. `
+        + `Biết mọi loại giao tử đều được tạo ra với xác suất như nhau và đều có khả năng thụ tinh, `
+        + `không xảy ra đột biến mới. Theo lí thuyết, ở đời con tỉ lệ cây <b>${hoiLan ? TT.lan : TT.troi}</b> chiếm bao nhiêu phần trăm? `
+        + `(làm tròn đến hàng phần trăm)`,
+      ans: D(dapAn, 2),
+      giai: `Bước 1 — cây thể ba ${bo} mang 3 chiếc NST của cặp đó. Khi giảm phân, 3 chiếc này chia ngẫu nhiên `
+        + `thành một bên 1 chiếc, một bên 2 chiếc ⇒ có 3 cách lấy 1 chiếc và 3 cách lấy 2 chiếc, tổng 6 khả năng bằng nhau:\n`
+        + `  ${gt.mo}\n`
+        + `Bước 2 — kiểu hình ${TT.lan} chỉ xuất hiện khi hợp tử KHÔNG nhận allele A nào. Xác suất giao tử của cây ${bo} không chứa A:\n`
+        + `  P₁ = ${S(gt.khongA * 6)}/6 = ${S(gt.khongA, 4)}\n`
+        + `Bước 3 — cây ${me} cho giao tử a với xác suất P₂ = ${S(p2, 2)}.\n`
+        + `Bước 4 — tỉ lệ ${TT.lan} = P₁ × P₂ = ${S(gt.khongA, 4)} × ${S(p2, 2)} = ${S(lan / 100, 4)} = ${S(lan, 2)}%.\n`
+        + (hoiLan ? `Đáp số: ${D(dapAn, 2)}%.`
+                  : `Bước 5 — đề hỏi ${TT.troi} nên lấy phần bù: 100% − ${S(lan, 2)}% = ${D(dapAn, 2)}%.`),
+      meo: 'Chìa khoá là tỉ lệ giao tử của thể ba: KHÔNG phải 1:1 mà phải đếm theo tổ hợp chập 1 và chập 2 của 3 chiếc NST '
+        + '⇒ luôn có mẫu số 6. Nhớ nhanh: Aaa → 1A : 2a : 2Aa : 1aa; AAa → 2A : 1a : 1AA : 2Aa. '
+        + 'Kiểu hình lặn thì chỉ cần đếm giao tử KHÔNG mang A, nhanh hơn kẻ bảng 4×4; hỏi kiểu hình trội thì lấy 100% trừ đi.'
+    };
+  } },
+
+/* --- Nguyên phân nối tiếp giảm phân: tổng NST môi trường cung cấp --- */
+{ ma: 'sinh-vdc-nst-moitruong', chuong: 'Nguyên phân – Giảm phân', muc: 4, dang: 'tln',
+  tao(R) {
+    const n2 = R.chon([8, 14, 24, 38, 40, 44]);
+    const a = R.nguyen(2, 6);
+    const k = R.nguyen(3, 6);
+    const tbCon = a * Math.pow(2, k);
+    const np = a * n2 * (Math.pow(2, k) - 1);
+    const gp = tbCon * n2;
+    const tong = np + gp;
+    return {
+      q: `Ở một loài động vật có bộ NST lưỡng bội 2n = ${S(n2)}. Có ${S(a)} tế bào sinh dục sơ khai đực `
+        + `nguyên phân liên tiếp ${S(k)} lần, toàn bộ tế bào con tạo ra đều bước vào giảm phân tạo tinh trùng. `
+        + `Tính TỔNG số NST đơn mà môi trường nội bào phải cung cấp cho cả quá trình nguyên phân và giảm phân nói trên.`,
+      ans: D(tong, 0),
+      giai: `Bước 1 — giai đoạn nguyên phân ${S(k)} lần:\n`
+        + `  Số tế bào con = ${S(a)} × 2^${S(k)} = ${S(tbCon)} tế bào\n`
+        + `  NST môi trường cấp = ${S(a)} × ${S(n2)} × (2^${S(k)} − 1) = ${S(a)} × ${S(n2)} × ${S(Math.pow(2, k) - 1)} = ${S(np)}\n`
+        + `Bước 2 — giai đoạn giảm phân: mỗi tế bào con phải nhân đôi NST đúng MỘT lần trước khi giảm phân, `
+        + `nên mỗi tế bào cần thêm ${S(n2)} NST đơn:\n`
+        + `  NST môi trường cấp = ${S(tbCon)} × ${S(n2)} = ${S(gp)}\n`
+        + `Bước 3 — tổng cộng = ${S(np)} + ${S(gp)} = ${S(tong)} NST đơn.\n`
+        + `Gộp lại thành một công thức: a·2n·(2^(k+1) − 1) = ${S(a)} × ${S(n2)} × ${S(Math.pow(2, k + 1) - 1)} = ${S(tong)}.`,
+      meo: 'Đừng quên giảm phân cũng có kì trung gian nhân đôi NST — rất nhiều bạn chỉ tính phần nguyên phân rồi mất điểm. '
+        + 'Công thức gộp đáng thuộc: <b>a·2n·(2^(k+1) − 1)</b>. Số tinh trùng tạo ra là a·2^k·4, còn trứng thì chỉ a·2^k·1.'
+    };
+  } }
+
+]);
+
+})();
+
+</script>
+<script>
+/* ============================================================
+   ĐỀ THI THỬ NGỮ VĂN — TỰ LUẬN 120 PHÚT
+   Cấu trúc chính thức áp dụng từ 2025:
+     Phần I. ĐỌC HIỂU  4,0 điểm — 5 câu, ngữ liệu NGOÀI sách giáo khoa
+     Phần II. VIẾT     6,0 điểm
+       Câu 1 (2,0đ) — đoạn văn NGHỊ LUẬN VĂN HỌC khoảng 200 chữ,
+                       bàn một khía cạnh của chính ngữ liệu đọc hiểu
+       Câu 2 (4,0đ) — bài văn NGHỊ LUẬN XÃ HỘI khoảng 600 chữ
+   Máy không chấm được văn, nên mỗi đề đi kèm ĐÁP ÁN + DÀN Ý + BIỂU ĐIỂM
+   chi tiết để tự chấm — chấm xong mới tính là vượt kiếp.
+   ============================================================ */
+window.TD = window.TD || {};
+
+TD.DE_VAN = [
+
+/* ---------------------------------------------------------- 1 */
+{
+  ten: 'Thu điếu — Nguyễn Khuyến',
+  loai: 'Thơ trữ tình',
+  nguLieu: `Ao thu lạnh lẽo nước trong veo,
+Một chiếc thuyền câu bé tẻo teo.
+Sóng biếc theo làn hơi gợn tí,
+Lá vàng trước gió khẽ đưa vèo.
+Tầng mây lơ lửng trời xanh ngắt,
+Ngõ trúc quanh co khách vắng teo.
+Tựa gối buông cần lâu chẳng được,
+Cá đâu đớp động dưới chân bèo.`,
+  xuatXu: '(Nguyễn Khuyến, <i>Thu điếu</i>, in trong <i>Thơ văn Nguyễn Khuyến</i>, NXB Văn học)',
+  doc: [
+    { d: 0.5, q: 'Xác định thể thơ của văn bản.',
+      a: 'Thất ngôn bát cú Đường luật (8 câu, mỗi câu 7 chữ, gieo vần chân ở các câu 1, 2, 4, 6, 8).' },
+    { d: 0.5, q: 'Chỉ ra những từ ngữ, hình ảnh miêu tả màu sắc trong bài thơ.',
+      a: 'Các từ ngữ, hình ảnh chỉ màu sắc: nước <i>trong veo</i>, sóng <i>biếc</i>, lá <i>vàng</i>, trời <i>xanh ngắt</i>. '
+       + 'Chỉ cần nêu đúng 3 trong 4 hình ảnh là được trọn điểm.' },
+    { d: 1.0, q: 'Nêu tác dụng của cách gieo vần "eo" được sử dụng xuyên suốt bài thơ.',
+      a: 'Vần "eo" (veo – teo – vèo – teo – bèo) là vần hẹp, âm khép. Tác dụng:\n'
+       + '· Gợi không gian thu bị thu nhỏ, co lại, tĩnh lặng đến mức gần như ngưng đọng;\n'
+       + '· Tạo âm hưởng man mác, hiu hắt, thấm vào cảnh và vào lòng người;\n'
+       + '· Góp phần diễn tả tâm trạng cô đơn, u uất và nỗi niềm thời thế thầm kín của nhà thơ.' },
+    { d: 1.0, q: 'Phân tích hiệu quả nghệ thuật của biện pháp tu từ trong hai câu: "Tầng mây lơ lửng trời xanh ngắt / Ngõ trúc quanh co khách vắng teo."',
+      a: 'Biện pháp: phép đối (tầng mây ↔ ngõ trúc; lơ lửng ↔ quanh co; trời xanh ngắt ↔ khách vắng teo), '
+       + 'kết hợp từ láy gợi hình (lơ lửng, quanh co) và đảo trật tự cú pháp.\n'
+       + 'Hiệu quả: mở ra không gian ba chiều — chiều cao vô tận của bầu trời đối lập với chiều sâu hun hút, quanh co của ngõ trúc; '
+       + 'cả hai chiều đều dẫn tới cùng một điểm là sự VẮNG. Cảnh càng rộng, càng đẹp thì con người càng nhỏ bé, cô độc. '
+       + 'Nhờ vậy hai câu luận vừa vẽ được thần thái mùa thu Bắc Bộ, vừa hé lộ tâm sự u ẩn của một nhà nho ở ẩn.' },
+    { d: 1.0, q: 'Từ nhan đề "Thu điếu" (mùa thu câu cá) và hai câu kết, anh/chị hiểu gì về tâm thế của nhân vật trữ tình? Trả lời trong 5–7 dòng.',
+      a: 'Gợi ý: Nhan đề nói chuyện câu cá nhưng toàn bài không hề nói tới cá. "Tựa gối buông cần lâu chẳng được" — '
+       + 'tư thế buông, chờ đợi, bất động; "Cá đâu đớp động dưới chân bèo" — một tiếng động rất khẽ đủ làm giật mình, '
+       + 'chứng tỏ nhà thơ đang chìm rất sâu trong suy tưởng.\n'
+       + '⇒ Câu cá chỉ là cái cớ. Tâm thế nhân vật trữ tình là tâm thế của người trí thức lánh đời nhưng KHÔNG thoát được đời: '
+       + 'bề ngoài nhàn tản, bên trong nặng trĩu nỗi niềm trước cảnh nước mất nhà tan. '
+       + 'Đó là cái tĩnh của mặt nước che giấu cái động của lòng người.' }
+  ],
+  nlvh: {
+    q: 'Viết đoạn văn nghị luận (khoảng 200 chữ) phân tích bức tranh mùa thu trong bài thơ <i>Thu điếu</i> của Nguyễn Khuyến.',
+    dan: '· Mở đoạn: giới thiệu bài thơ và ấn tượng chung — một mùa thu rất Việt Nam, rất đồng bằng Bắc Bộ.\n'
+       + '· Thân đoạn:\n'
+       + '   – Điểm nhìn di động: từ ao thu → mặt sóng → tầng mây → ngõ trúc → trở lại chân bèo, tạo không gian nhiều tầng.\n'
+       + '   – Màu sắc thanh đạm mà tinh tế: trong veo, biếc, vàng, xanh ngắt — gam lạnh chủ đạo.\n'
+       + '   – Đường nét, chuyển động cực nhỏ: "hơi gợn tí", "khẽ đưa vèo", "đớp động" — lấy động tả tĩnh.\n'
+       + '   – Vần "eo" và các từ láy làm không gian như co lại, thấm lạnh.\n'
+       + '   – Cảnh đẹp nhưng buồn: cái đẹp của một tâm hồn yêu quê hương mà nặng nỗi thời thế.\n'
+       + '· Kết đoạn: khẳng định Nguyễn Khuyến xứng danh "nhà thơ của làng cảnh Việt Nam".',
+    diem: '0,25 hình thức đoạn · 0,25 xác định đúng vấn đề · 1,0 triển khai (dẫn chứng + phân tích) · 0,25 chính tả, ngữ pháp · 0,25 sáng tạo'
+  },
+  nlxh: {
+    q: 'Viết bài văn nghị luận (khoảng 600 chữ) trình bày suy nghĩ của anh/chị về ý nghĩa của những khoảng lặng trong đời sống của con người hiện đại.',
+    dan: '· Mở bài: dẫn dắt từ nhịp sống gấp gáp hôm nay → nêu vấn đề: giá trị của khoảng lặng.\n'
+       + '· Giải thích: "khoảng lặng" là những quãng ngưng chủ động — tạm rời công việc, mạng xã hội, đám đông để ở một mình với chính mình.\n'
+       + '· Bàn luận:\n'
+       + '   – Khoảng lặng giúp phục hồi năng lượng, tránh kiệt sức.\n'
+       + '   – Là lúc con người nhìn lại, tự đánh giá, nhận ra mình thật sự muốn gì.\n'
+       + '   – Nuôi dưỡng chiều sâu tâm hồn, khả năng đồng cảm và sáng tạo (dẫn chứng: nhiều phát kiến, tác phẩm ra đời trong tĩnh lặng).\n'
+       + '   – Phản đề: khoảng lặng KHÁC với trốn tránh, thụ động, buông xuôi; im lặng trước cái sai là đồng loã.\n'
+       + '· Bài học và liên hệ bản thân: chủ động tạo khoảng lặng mỗi ngày; cân bằng giữa tĩnh và động.\n'
+       + '· Kết bài: khẳng định lại — biết dừng đúng lúc mới đi được xa.',
+    diem: '0,25 hình thức bài · 0,5 xác định đúng vấn đề · 2,5 triển khai luận điểm + lí lẽ + dẫn chứng · 0,25 chính tả, ngữ pháp · 0,5 sáng tạo'
+  }
+},
+
+/* ---------------------------------------------------------- 2 */
+{
+  ten: 'Thương vợ — Trần Tế Xương',
+  loai: 'Thơ trữ tình',
+  nguLieu: `Quanh năm buôn bán ở mom sông,
+Nuôi đủ năm con với một chồng.
+Lặn lội thân cò khi quãng vắng,
+Eo sèo mặt nước buổi đò đông.
+Một duyên hai nợ âu đành phận,
+Năm nắng mười mưa dám quản công.
+Cha mẹ thói đời ăn ở bạc,
+Có chồng hờ hững cũng như không.`,
+  xuatXu: '(Trần Tế Xương, <i>Thương vợ</i>, in trong <i>Thơ Tú Xương</i>, NXB Văn học)',
+  doc: [
+    { d: 0.5, q: 'Xác định nhân vật trữ tình và đối tượng được nói tới trong bài thơ.',
+      a: 'Nhân vật trữ tình là tác giả — người chồng (Tú Xương), ẩn sau lời thơ. Đối tượng được nói tới là bà Tú, người vợ tần tảo buôn bán nuôi cả gia đình.' },
+    { d: 0.5, q: 'Chỉ ra thành ngữ dân gian được vận dụng trong bài thơ.',
+      a: 'Hai thành ngữ: "một duyên hai nợ" và "năm nắng mười mưa". Có thể kể thêm hình ảnh "thân cò" lấy từ ca dao.' },
+    { d: 1.0, q: 'Phân tích tác dụng của cách nói "Nuôi đủ năm con với một chồng".',
+      a: 'Cách nói tách "một chồng" ra khỏi "năm con", đặt sau chữ "với" như thêm một miệng ăn nữa.\n'
+       + 'Tác dụng: · làm bật gánh nặng của bà Tú — nuôi sáu người, trong đó có cả người chồng đáng lẽ phải là trụ cột; '
+       + '· giọng thơ tự trào chua chát, ông Tú tự nhận mình là kẻ ăn bám; '
+       + '· qua đó thể hiện lòng biết ơn và cả sự day dứt của tác giả.' },
+    { d: 1.0, q: 'Nêu hiệu quả nghệ thuật của hình ảnh "thân cò" trong câu "Lặn lội thân cò khi quãng vắng".',
+      a: 'Hình ảnh "thân cò" lấy từ ca dao ("Con cò lặn lội bờ sông..."), lại được đảo lên đầu câu.\n'
+       + 'Hiệu quả: · gợi dáng người nhỏ bé, gầy guộc, đơn độc giữa không gian vắng; '
+       + '· "thân" chứ không phải "con" nên nhấn vào thân phận, kiếp người chứ không chỉ là hình ảnh loài vật; '
+       + '· nối bà Tú với số phận chung của bao người phụ nữ Việt Nam lam lũ, khiến cái riêng hoá thành cái chung.' },
+    { d: 1.0, q: 'Anh/chị hiểu như thế nào về tiếng chửi ở hai câu kết? Trả lời trong 5–7 dòng.',
+      a: 'Gợi ý: "Cha mẹ thói đời ăn ở bạc" — chửi thói đời bạc bẽo, chửi cái xã hội đẩy người phụ nữ vào cảnh gồng gánh; '
+       + 'nhưng "Có chồng hờ hững cũng như không" thì đích thị là ông Tú tự chửi mình.\n'
+       + '⇒ Tiếng chửi vừa hướng ra ngoài vừa quay vào trong. Đó là lời tự phán của một nhân cách trung thực: '
+       + 'biết mình vô dụng trước gánh nặng của vợ mà bất lực. Chính sự tự nhận lỗi ấy làm nên chiều sâu nhân văn của bài thơ, '
+       + 'khiến bài thơ thương vợ trở thành bài thơ tự trách mình.' }
+  ],
+  nlvh: {
+    q: 'Viết đoạn văn nghị luận (khoảng 200 chữ) phân tích hình tượng bà Tú trong bài thơ <i>Thương vợ</i> của Trần Tế Xương.',
+    dan: '· Mở đoạn: giới thiệu bài thơ và hình tượng bà Tú — người vợ tần tảo tiêu biểu trong thơ trung đại.\n'
+       + '· Thân đoạn:\n'
+       + '   – Công việc: "quanh năm buôn bán ở mom sông" — thời gian triền miên, không gian chênh vênh, đầy bất trắc.\n'
+       + '   – Gánh nặng: "nuôi đủ năm con với một chồng" — chữ "đủ" vừa là đủ số miệng ăn vừa là đủ đầy, không để ai thiếu.\n'
+       + '   – Thân phận: "thân cò", "quãng vắng", "buổi đò đông" — vừa cô độc vừa phải chen chúc giành giật.\n'
+       + '   – Phẩm chất: đức hi sinh, cam chịu mà không oán ("âu đành phận", "dám quản công").\n'
+       + '   – Nghệ thuật: vận dụng thành ngữ, ca dao; đảo ngữ; phép đối; giọng tự trào.\n'
+       + '· Kết đoạn: bà Tú là kết tinh vẻ đẹp truyền thống của người phụ nữ Việt Nam, được dựng lên bằng tình thương và sự ân hận của chính người chồng.',
+    diem: '0,25 hình thức đoạn · 0,25 xác định đúng vấn đề · 1,0 triển khai (dẫn chứng + phân tích) · 0,25 chính tả, ngữ pháp · 0,25 sáng tạo'
+  },
+  nlxh: {
+    q: 'Viết bài văn nghị luận (khoảng 600 chữ) trình bày suy nghĩ của anh/chị về sự hi sinh thầm lặng của những người thân trong gia đình.',
+    dan: '· Mở bài: từ hình ảnh người mẹ, người cha thường ngày → nêu vấn đề.\n'
+       + '· Giải thích: hi sinh thầm lặng là cho đi mà không kể công, không đòi hỏi được ghi nhận.\n'
+       + '· Bàn luận:\n'
+       + '   – Biểu hiện: bữa cơm, đồng tiền chắt bóp, giấc ngủ ngắn, những mong ước bị gác lại.\n'
+       + '   – Ý nghĩa: là nền móng nuôi dưỡng nhân cách; dạy con biết yêu thương bằng hành động chứ không bằng lời.\n'
+       + '   – Vì sao thầm lặng dễ bị lãng quên: vì nó quen thuộc; con cái coi là hiển nhiên.\n'
+       + '   – Phản đề: hi sinh KHÔNG đồng nghĩa với chịu đựng vô điều kiện hay hi sinh cả bản thân mình; '
+       + 'yêu thương lành mạnh cần cả sự sẻ chia hai chiều.\n'
+       + '· Bài học: nhận ra, biết ơn và đáp lại bằng việc làm cụ thể ngay hôm nay.\n'
+       + '· Kết bài: khẳng định giá trị bền vững của những hi sinh không tên.',
+    diem: '0,25 hình thức bài · 0,5 xác định đúng vấn đề · 2,5 triển khai luận điểm + lí lẽ + dẫn chứng · 0,25 chính tả, ngữ pháp · 0,5 sáng tạo'
+  }
+},
+
+/* ---------------------------------------------------------- 3 */
+{
+  ten: 'Đây thôn Vĩ Dạ — Hàn Mặc Tử',
+  loai: 'Thơ trữ tình',
+  nguLieu: `Sao anh không về chơi thôn Vĩ?
+Nhìn nắng hàng cau nắng mới lên.
+Vườn ai mướt quá xanh như ngọc
+Lá trúc che ngang mặt chữ điền.
+
+Gió theo lối gió, mây đường mây,
+Dòng nước buồn thiu, hoa bắp lay...
+Thuyền ai đậu bến sông trăng đó,
+Có chở trăng về kịp tối nay?`,
+  xuatXu: '(Hàn Mặc Tử, <i>Đây thôn Vĩ Dạ</i>, in trong <i>Thơ Hàn Mặc Tử</i>, NXB Văn học)',
+  doc: [
+    { d: 0.5, q: 'Xác định phương thức biểu đạt chính của văn bản.',
+      a: 'Phương thức biểu đạt chính: biểu cảm (có kết hợp miêu tả). Dấu hiệu: bài thơ trữ tình, mạch văn bản là dòng cảm xúc, tả cảnh chỉ để bộc lộ tình.' },
+    { d: 0.5, q: 'Chỉ ra hai hình ảnh thiên nhiên xứ Huế được nhắc tới trong đoạn thơ.',
+      a: 'Có thể nêu bất kì hai hình ảnh: nắng hàng cau, vườn xanh như ngọc, lá trúc, dòng nước, hoa bắp, sông trăng, con thuyền.' },
+    { d: 1.0, q: 'Phân tích tác dụng của câu hỏi tu từ mở đầu: "Sao anh không về chơi thôn Vĩ?"',
+      a: 'Là câu hỏi tu từ, đồng thời là lời phân thân — vừa như lời mời trách móc dịu dàng của người thôn Vĩ, '
+       + 'vừa như chính nhà thơ tự hỏi mình.\n'
+       + 'Tác dụng: · mở ra mạch hồi tưởng tự nhiên; · gợi nỗi khát khao trở về mà không thể (nhà thơ đang lâm trọng bệnh, bị cách li); '
+       + '· chữ "chơi" thân tình hơn "thăm", làm giọng thơ tha thiết mà không nặng nề. Câu hỏi vì thế thành nỗi day dứt suốt bài.' },
+    { d: 1.0, q: 'Nhận xét về sự vận động của mạch cảm xúc từ khổ một sang khổ hai.',
+      a: 'Khổ một: cảnh sáng — nắng mới, vườn ngọc, con người thấp thoáng; cảm xúc ấm áp, náo nức, hướng ngoại.\n'
+       + 'Khổ hai: cảnh chia lìa — "gió theo lối gió, mây đường mây" ngược quy luật tự nhiên; dòng nước "buồn thiu"; '
+       + 'không gian chuyển sang đêm trăng huyền ảo; cảm xúc trở nên hoang mang, khắc khoải, hướng nội.\n'
+       + '⇒ Mạch cảm xúc vận động từ HI VỌNG sang PHẤP PHỎNG, từ hiện thực tươi sáng sang mặc cảm chia lìa. '
+       + 'Chữ "kịp" cuối khổ hai hé lộ tâm thế của người đang chạy đua với thời gian sống.' },
+    { d: 1.0, q: 'Từ đoạn thơ, anh/chị hãy nêu suy nghĩ về khát vọng sống của con người trong nghịch cảnh. Trả lời trong 5–7 dòng.',
+      a: 'Gợi ý: Hàn Mặc Tử viết bài thơ khi đang mắc bệnh nan y, sống cách biệt. Vậy mà thơ ông không hề tuyệt vọng: '
+       + 'vẫn "nắng mới lên", vẫn "xanh như ngọc", vẫn khắc khoải hỏi "có chở trăng về kịp tối nay?".\n'
+       + '⇒ Nghịch cảnh có thể lấy đi sức khoẻ, tự do, thậm chí tương lai, nhưng không lấy được khát vọng gắn bó với cuộc đời. '
+       + 'Chính khát vọng ấy biến đau thương thành cái đẹp. Bài học cho mỗi người: khi hoàn cảnh không thể thay đổi, '
+       + 'điều còn lại trong tầm tay là thái độ sống — vẫn yêu, vẫn hướng về ánh sáng.' }
+  ],
+  nlvh: {
+    q: 'Viết đoạn văn nghị luận (khoảng 200 chữ) phân tích bức tranh thiên nhiên trong khổ thơ đầu của đoạn trích trên.',
+    dan: '· Mở đoạn: giới thiệu đoạn trích và ấn tượng về khổ một — bức tranh thôn Vĩ trong trẻo, tinh khôi.\n'
+       + '· Thân đoạn:\n'
+       + '   – Ánh sáng: điệp từ "nắng" ("nắng hàng cau nắng mới lên") — thứ nắng đầu ngày tinh khiết, chiếu dọc thân cau.\n'
+       + '   – Màu sắc: "mướt quá xanh như ngọc" — so sánh khiến khu vườn vừa mượt mà vừa trong suốt, lấp lánh.\n'
+       + '   – Từ cảm thán "mướt quá" và đại từ phiếm chỉ "vườn ai" gợi giọng trầm trồ mà xa cách.\n'
+       + '   – Con người: "lá trúc che ngang mặt chữ điền" — thiên nhiên và con người hoà hợp, kín đáo, phúc hậu.\n'
+       + '   – Tất cả hiện lên qua HỒI TƯỞNG nên đẹp một cách đầy tiếc nuối.\n'
+       + '· Kết đoạn: khổ thơ là kết tinh tình yêu tha thiết với xứ Huế và với cuộc đời của Hàn Mặc Tử.',
+    diem: '0,25 hình thức đoạn · 0,25 xác định đúng vấn đề · 1,0 triển khai (dẫn chứng + phân tích) · 0,25 chính tả, ngữ pháp · 0,25 sáng tạo'
+  },
+  nlxh: {
+    q: 'Viết bài văn nghị luận (khoảng 600 chữ) trình bày suy nghĩ của anh/chị về ý nghĩa của việc giữ niềm tin trước những nghịch cảnh của cuộc sống.',
+    dan: '· Mở bài: nêu vấn đề — nghịch cảnh là điều không ai tránh khỏi, thái độ mới quyết định kết cục.\n'
+       + '· Giải thích: niềm tin là sự xác tín rằng cố gắng hôm nay có ý nghĩa, rằng ngày mai còn đáng sống.\n'
+       + '· Bàn luận:\n'
+       + '   – Niềm tin giữ cho con người không gục ngã, duy trì khả năng hành động.\n'
+       + '   – Niềm tin làm thay đổi cách nhìn: coi khó khăn là thử thách chứ không phải dấu chấm hết.\n'
+       + '   – Dẫn chứng: Hàn Mặc Tử làm thơ trong bệnh tật; Nguyễn Ngọc Ký viết bằng chân; những người vượt qua biến cố lớn.\n'
+       + '   – Phản đề: niềm tin phải đi cùng hành động và tỉnh táo; tin mù quáng, ảo tưởng là tự huyễn hoặc.\n'
+       + '· Bài học: rèn niềm tin bằng những thành công nhỏ mỗi ngày; biết tìm điểm tựa từ người thân, tri thức.\n'
+       + '· Kết bài: khẳng định — mất niềm tin là mất tất cả, còn niềm tin là còn cơ hội.',
+    diem: '0,25 hình thức bài · 0,5 xác định đúng vấn đề · 2,5 triển khai luận điểm + lí lẽ + dẫn chứng · 0,25 chính tả, ngữ pháp · 0,5 sáng tạo'
+  }
+},
+
+/* ---------------------------------------------------------- 4 */
+{
+  ten: 'Đọc sách trong thời đại lướt màn hình',
+  loai: 'Văn bản nghị luận',
+  nguLieu: `      Có một nghịch lí đang diễn ra: chưa bao giờ con người đọc nhiều chữ như bây giờ, và cũng chưa bao giờ con người đọc ít sách như bây giờ. Mỗi ngày, một người dùng điện thoại trung bình lướt qua hàng vạn kí tự — tiêu đề, bình luận, chú thích, dòng trạng thái. Nhưng đó là cái đọc của con mắt, không phải cái đọc của tư duy.
+      Đọc sách khác. Sách buộc người ta phải đi theo một mạch lập luận dài, phải nhớ điều đã đọc ở trang trước để hiểu điều đang đọc ở trang này. Nó rèn cho ta khả năng chú ý bền bỉ — thứ năng lực đang bị bào mòn nhanh nhất trong thời đại thông báo dồn dập. Một cuốn sách hay không cho ta câu trả lời tức thì; nó cho ta những câu hỏi ở lại rất lâu.
+      Vì vậy, khi ta than phiền rằng mình không còn thời gian đọc sách, có lẽ sự thật lại ngược lại: chính vì không đọc sách nữa mà ta đánh mất khả năng ngồi yên đủ lâu với một suy nghĩ. Cái chúng ta thiếu không phải là thời gian, mà là sức chú ý.`,
+  xuatXu: '(Bài viết dùng làm ngữ liệu ôn tập)',
+  doc: [
+    { d: 0.5, q: 'Xác định luận đề của văn bản.',
+      a: 'Luận đề: giá trị riêng của việc đọc sách trong thời đại con người tiếp nhận thông tin vụn vặt trên màn hình — '
+       + 'đọc sách rèn sức chú ý bền bỉ mà cách đọc lướt không thể thay thế.' },
+    { d: 0.5, q: 'Theo tác giả, điểm khác biệt căn bản giữa "đọc chữ trên màn hình" và "đọc sách" là gì?',
+      a: 'Đọc chữ trên màn hình là "cái đọc của con mắt" — rời rạc, tức thời; còn đọc sách là "cái đọc của tư duy" — '
+       + 'buộc người đọc theo một mạch lập luận dài, phải ghi nhớ và liên kết.' },
+    { d: 1.0, q: 'Chỉ ra và nêu tác dụng của biện pháp tu từ trong câu: "Một cuốn sách hay không cho ta câu trả lời tức thì; nó cho ta những câu hỏi ở lại rất lâu."',
+      a: 'Biện pháp: phép đối/tương phản kết hợp điệp cấu trúc ("không cho ta… nó cho ta…") và cách nói nghịch lí '
+       + '(giá trị của sách nằm ở câu HỎI chứ không phải câu TRẢ LỜI).\n'
+       + 'Tác dụng: · làm nổi bật đặc trưng của tri thức thật — gợi mở, kích thích tư duy chứ không đóng khung; '
+       + '· tạo ấn tượng mạnh, dễ nhớ, giàu tính triết lí; · thuyết phục người đọc rằng đọc sách là đầu tư dài hạn cho trí tuệ.' },
+    { d: 1.0, q: 'Anh/chị hiểu như thế nào về câu: "Cái chúng ta thiếu không phải là thời gian, mà là sức chú ý."?',
+      a: 'Câu văn lật ngược lí do quen thuộc "không có thời gian". Tác giả cho rằng thời gian vẫn còn đó — '
+       + 'bằng chứng là ta vẫn dành hàng giờ lướt màn hình. Thứ thật sự cạn kiệt là khả năng tập trung liên tục vào một việc.\n'
+       + '⇒ Câu văn vừa là lời cảnh tỉnh về thói quen tiêu thụ thông tin vụn vặt, vừa chỉ ra gốc rễ của vấn đề: '
+       + 'muốn đọc lại được sách thì phải phục hồi sức chú ý, chứ không phải chờ tới lúc "rảnh".' },
+    { d: 1.0, q: 'Anh/chị có đồng tình với quan điểm của tác giả không? Vì sao? Trả lời trong 5–7 dòng.',
+      a: 'Học sinh được tự do bày tỏ, miễn là lí giải hợp lí, thuyết phục. Gợi ý hướng ĐỒNG TÌNH: '
+       + 'thực tế cho thấy thói quen lướt ngắn khiến nhiều người khó đọc hết một chương sách; sức chú ý đúng là năng lực có thể rèn và có thể mất.\n'
+       + 'Gợi ý hướng ĐỒNG TÌNH MỘT PHẦN: với nhiều người, hạn chế thời gian là có thật (lao động nhiều giờ, áp lực học tập); '
+       + 'ngoài ra sách nói, sách điện tử cũng là cách đọc hợp thời, không nhất thiết phải là sách giấy. '
+       + 'Điều quan trọng là chủ động chọn nội dung có chiều sâu và duy trì thói quen đọc dài.' }
+  ],
+  nlvh: {
+    q: 'Viết đoạn văn nghị luận (khoảng 200 chữ) phân tích nghệ thuật lập luận của tác giả trong văn bản trên.',
+    dan: '· Mở đoạn: nêu ấn tượng — một văn bản nghị luận ngắn nhưng lập luận chặt, sắc.\n'
+       + '· Thân đoạn:\n'
+       + '   – Mở đầu bằng NGHỊCH LÍ ("đọc nhiều chữ nhất — đọc ít sách nhất") gây chú ý và nêu vấn đề.\n'
+       + '   – Lập luận so sánh: đối chiếu đọc màn hình / đọc sách trên cùng tiêu chí là cách vận hành của tư duy.\n'
+       + '   – Dùng lí lẽ kèm bằng chứng đời thường (hàng vạn kí tự mỗi ngày) nên gần gũi, dễ đồng tình.\n'
+       + '   – Kết bằng thao tác BÁC BỎ: lật lại lí do "không có thời gian" để chỉ ra nguyên nhân thật là sức chú ý.\n'
+       + '   – Giọng điệu điềm tĩnh, câu văn ngắn xen dài, nhiều cặp đối lập tạo nhịp rắn rỏi.\n'
+       + '· Kết đoạn: nhờ cách lập luận ấy, vấn đề tưởng cũ trở nên mới và có sức thuyết phục.',
+    diem: '0,25 hình thức đoạn · 0,25 xác định đúng vấn đề · 1,0 triển khai (dẫn chứng + phân tích) · 0,25 chính tả, ngữ pháp · 0,25 sáng tạo'
+  },
+  nlxh: {
+    q: 'Viết bài văn nghị luận (khoảng 600 chữ) trình bày suy nghĩ của anh/chị về việc rèn luyện khả năng tập trung của người trẻ hiện nay.',
+    dan: '· Mở bài: từ hình ảnh quen thuộc — vừa học vừa liếc điện thoại → nêu vấn đề.\n'
+       + '· Giải thích: tập trung là khả năng giữ sự chú ý vào một việc đủ lâu để đi tới chiều sâu.\n'
+       + '· Thực trạng: thông báo dồn dập, nội dung ngắn gây nghiện, thói quen làm nhiều việc cùng lúc.\n'
+       + '· Bàn luận:\n'
+       + '   – Vì sao tập trung quyết định kết quả: học sâu, làm việc chất lượng, sáng tạo đều cần thời gian liên tục.\n'
+       + '   – Hệ quả của mất tập trung: học nhiều mà không nhớ, lo âu, kiệt sức, cảm giác bận rộn nhưng trống rỗng.\n'
+       + '   – Giải pháp: học theo khối thời gian, tắt thông báo, đọc sách dài, tập thể dục, ngủ đủ.\n'
+       + '   – Phản đề: không cực đoan bài trừ công nghệ — vấn đề là ai điều khiển ai.\n'
+       + '· Liên hệ bản thân: một thói quen cụ thể sẽ bắt đầu từ hôm nay.\n'
+       + '· Kết bài: trong thời đại ai cũng bị phân tán, người biết tập trung là người có lợi thế lớn nhất.',
+    diem: '0,25 hình thức bài · 0,5 xác định đúng vấn đề · 2,5 triển khai luận điểm + lí lẽ + dẫn chứng · 0,25 chính tả, ngữ pháp · 0,5 sáng tạo'
+  }
+},
+
+/* ---------------------------------------------------------- 5 */
+{
+  ten: 'Người máy và nghề nghiệp của ngày mai',
+  loai: 'Văn bản thông tin – nghị luận',
+  nguLieu: `      Trong vòng mười năm trở lại đây, trí tuệ nhân tạo đã đi từ phòng thí nghiệm ra tới bàn làm việc của hàng trăm triệu người. Nó viết được báo cáo, dịch được tài liệu, vẽ được hình minh hoạ, thậm chí viết được cả những dòng mã lập trình. Không ít người trẻ nhìn vào đó và tự hỏi: liệu còn nghề nào dành cho mình?
+      Lịch sử đã trả lời câu hỏi ấy nhiều lần. Máy dệt từng khiến thợ dệt thủ công lo sợ; máy tính điện tử từng khiến hàng vạn nhân viên tính toán mất việc. Nhưng mỗi lần như thế, công việc không biến mất — nó dịch chuyển. Cái bị thay thế là những thao tác lặp lại; cái được đề cao là những gì máy khó chạm tới: khả năng đặt câu hỏi đúng, óc phán đoán trong tình huống mơ hồ, sự thấu cảm với con người, và trách nhiệm với hậu quả của quyết định.
+      Vì vậy, câu hỏi đáng giá không phải là "máy có làm được việc của tôi không", mà là "tôi đang bồi đắp năng lực nào mà máy chưa làm thay được". Người thua cuộc trong cuộc chuyển dịch này thường không phải người thiếu kĩ năng, mà là người ngừng học.`,
+  xuatXu: '(Bài viết dùng làm ngữ liệu ôn tập)',
+  doc: [
+    { d: 0.5, q: 'Xác định vấn đề chính được bàn luận trong văn bản.',
+      a: 'Vấn đề: tác động của trí tuệ nhân tạo tới nghề nghiệp và cách người trẻ cần chuẩn bị — '
+       + 'tập trung bồi đắp những năng lực mà máy khó thay thế, và không ngừng học.' },
+    { d: 0.5, q: 'Theo tác giả, những năng lực nào của con người mà máy móc khó chạm tới?',
+      a: 'Khả năng đặt câu hỏi đúng; óc phán đoán trong tình huống mơ hồ; sự thấu cảm với con người; '
+       + 'và trách nhiệm với hậu quả của quyết định.' },
+    { d: 1.0, q: 'Chỉ ra và nêu tác dụng của những bằng chứng lịch sử mà tác giả sử dụng.',
+      a: 'Bằng chứng: máy dệt khiến thợ dệt thủ công lo sợ; máy tính điện tử khiến nhân viên tính toán mất việc.\n'
+       + 'Tác dụng: · tạo cơ sở thực tế cho lập luận, cho thấy nỗi lo hiện nay không phải là mới; '
+       + '· làm nổi bật quy luật "công việc dịch chuyển chứ không biến mất"; '
+       + '· trấn an người đọc đồng thời dẫn dắt tự nhiên tới thông điệp phải chủ động thích ứng.' },
+    { d: 1.0, q: 'Anh/chị hiểu như thế nào về câu: "Người thua cuộc trong cuộc chuyển dịch này thường không phải người thiếu kĩ năng, mà là người ngừng học."?',
+      a: 'Câu văn phân biệt hai thứ: vốn kĩ năng ở một thời điểm và khả năng tự làm mới mình theo thời gian. '
+       + 'Trong một thế giới đổi thay nhanh, kĩ năng nào rồi cũng lỗi thời, nên lợi thế bền vững nằm ở thói quen học suốt đời.\n'
+       + '⇒ Câu văn vừa cảnh báo sự tự mãn của người đang giỏi, vừa mở đường cho người đang yếu: '
+       + 'điểm xuất phát không quyết định bằng tốc độ học.' },
+    { d: 1.0, q: 'Từ văn bản, anh/chị hãy nêu một năng lực mà bản thân thấy cần rèn luyện nhất để thích ứng với tương lai. Lí giải trong 5–7 dòng.',
+      a: 'Học sinh tự chọn và lí giải, miễn hợp lí. Bài làm tốt cần: nêu rõ năng lực (ví dụ tư duy phản biện, '
+       + 'khả năng tự học, kĩ năng giao tiếp, đạo đức nghề nghiệp khi dùng công nghệ); '
+       + 'giải thích vì sao nó khó bị thay thế; gắn với hoàn cảnh, dự định cụ thể của bản thân; '
+       + 'nêu cách rèn luyện thiết thực chứ không nói chung chung.' }
+  ],
+  nlvh: {
+    q: 'Viết đoạn văn nghị luận (khoảng 200 chữ) phân tích cách tác giả xây dựng và triển khai luận điểm trong văn bản trên.',
+    dan: '· Mở đoạn: nhận định chung — văn bản đi từ nỗi lo có thật tới một lối nghĩ chủ động.\n'
+       + '· Thân đoạn:\n'
+       + '   – Mở đầu nêu hiện tượng cụ thể, có số liệu và dẫn chứng đời sống ⇒ tạo tính thời sự.\n'
+       + '   – Đặt một câu hỏi trực tiếp ("liệu còn nghề nào dành cho mình?") để chạm đúng tâm lí người đọc trẻ.\n'
+       + '   – Dùng lập luận quy nạp từ hai bằng chứng lịch sử để rút ra quy luật chung.\n'
+       + '   – Chuyển hướng bằng thao tác thay thế câu hỏi: từ "máy có làm được việc của tôi không" sang '
+       + '"tôi đang bồi đắp năng lực nào" — chuyển thế bị động thành chủ động.\n'
+       + '   – Kết bằng một mệnh đề ngắn, đối lập, dễ nhớ.\n'
+       + '· Kết đoạn: nhờ bố cục ba bước hiện tượng – quy luật – giải pháp, văn bản vừa chặt chẽ vừa truyền cảm hứng.',
+    diem: '0,25 hình thức đoạn · 0,25 xác định đúng vấn đề · 1,0 triển khai (dẫn chứng + phân tích) · 0,25 chính tả, ngữ pháp · 0,25 sáng tạo'
+  },
+  nlxh: {
+    q: 'Viết bài văn nghị luận (khoảng 600 chữ) trình bày suy nghĩ của anh/chị về tinh thần học tập suốt đời của con người trong thời đại công nghệ.',
+    dan: '· Mở bài: từ tốc độ thay đổi của công nghệ → nêu vấn đề học tập suốt đời.\n'
+       + '· Giải thích: học suốt đời là chủ động cập nhật tri thức, kĩ năng và cách nghĩ trong suốt cuộc đời, '
+       + 'không giới hạn ở trường lớp hay bằng cấp.\n'
+       + '· Bàn luận:\n'
+       + '   – Vì sao cần: tri thức lỗi thời nhanh; nghề nghiệp dịch chuyển; công nghệ thay thế thao tác lặp lại.\n'
+       + '   – Ý nghĩa: giữ được giá trị nghề nghiệp, mở rộng cơ hội, nuôi dưỡng sự tự tin và niềm vui sống.\n'
+       + '   – Điều kiện: biết tự học, biết chọn lọc nguồn, biết đặt câu hỏi thay vì chỉ tiếp nhận.\n'
+       + '   – Phản đề: học suốt đời không phải chạy theo mọi trào lưu, gom bằng cấp hình thức; '
+       + 'cũng cần nền tảng đạo đức để dùng tri thức đúng chỗ.\n'
+       + '· Liên hệ bản thân: kế hoạch học cụ thể của một học sinh cuối cấp.\n'
+       + '· Kết bài: trong thời đại máy học rất nhanh, con người càng phải học không ngừng — và học cả những điều máy không học được.',
+    diem: '0,25 hình thức bài · 0,5 xác định đúng vấn đề · 2,5 triển khai luận điểm + lí lẽ + dẫn chứng · 0,25 chính tả, ngữ pháp · 0,5 sáng tạo'
+  }
+},
+
+/* ---------------------------------------------------------- 6 */
+{
+  ten: 'Thề non nước — Tản Đà',
+  loai: 'Thơ trữ tình',
+  nguLieu: `Nước non nặng một lời thề,
+Nước đi đi mãi không về cùng non.
+Nhớ lời nguyện nước thề non,
+Nước đi chưa lại, non còn đứng không.
+Non cao những ngóng cùng trông,
+Suối khô dòng lệ chờ mong tháng ngày.
+Xương mai một nắm hao gầy,
+Tóc mây một mái đã đầy tuyết sương.`,
+  xuatXu: '(Tản Đà, <i>Thề non nước</i>, in trong <i>Tản Đà toàn tập</i>, NXB Văn học)',
+  doc: [
+    { d: 0.5, q: 'Xác định thể thơ của đoạn trích.',
+      a: 'Thể thơ lục bát. Dấu hiệu: các câu luân phiên 6 chữ – 8 chữ, tiếng thứ sáu câu lục hiệp vần với tiếng thứ sáu câu bát.' },
+    { d: 0.5, q: 'Chỉ ra hai hình tượng trung tâm được xây dựng trong đoạn trích.',
+      a: 'Hai hình tượng trung tâm: NƯỚC và NON (núi) — được nhân hoá thành đôi lứa gắn bó bởi một lời thề.' },
+    { d: 1.0, q: 'Nêu tác dụng của biện pháp nhân hoá được sử dụng xuyên suốt đoạn trích.',
+      a: 'Nhân hoá: nước "thề", "đi", "chưa lại"; non "đứng không", "ngóng", "trông", có "xương mai hao gầy", "tóc mây đầy tuyết sương".\n'
+       + 'Tác dụng: · biến cảnh vật thành hai con người đang yêu và đang chờ đợi, khiến thiên nhiên có linh hồn và số phận; '
+       + '· diễn tả nỗi nhớ mòn mỏi, sự thuỷ chung đến hao gầy; '
+       + '· tạo lớp nghĩa hàm ẩn — non nước còn là non sông đất nước, lời thề còn là nghĩa vụ với Tổ quốc, '
+       + 'nên bài thơ vượt khỏi chuyện tình riêng.' },
+    { d: 1.0, q: 'Phân tích hiệu quả nghệ thuật của hai câu: "Xương mai một nắm hao gầy, / Tóc mây một mái đã đầy tuyết sương."',
+      a: 'Biện pháp: ẩn dụ kết hợp đối xứng ("xương mai" ↔ "tóc mây"; "một nắm" ↔ "một mái"; "hao gầy" ↔ "đầy tuyết sương").\n'
+       + 'Hiệu quả: · "xương mai" gợi dáng cành mai khẳng khiu, cũng là dáng người gầy guộc vì chờ đợi; '
+       + '· "tuyết sương" vừa tả sương phủ đỉnh núi vừa tả mái tóc bạc theo năm tháng; '
+       + '· hai câu dồn nén cả một đời chờ đợi vào hai hình ảnh, khiến thời gian trở nên hữu hình. '
+       + 'Lòng thuỷ chung càng bền thì sự tàn phai càng rõ — đó là bi kịch đẹp của bài thơ.' },
+    { d: 1.0, q: 'Theo anh/chị, lời thề trong đoạn trích gợi nhắc điều gì về giá trị của sự thuỷ chung? Trả lời trong 5–7 dòng.',
+      a: 'Gợi ý: Lời thề non nước được giữ ngay cả khi người kia "đi mãi không về" — nghĩa là thuỷ chung không phải sự trao đổi có qua có lại, '
+       + 'mà là lựa chọn của nhân cách.\n'
+       + '⇒ Giá trị của thuỷ chung nằm ở chỗ nó neo con người vào một điều bền vững giữa cuộc đời đổi thay: '
+       + 'với người thân, với lời hứa, với quê hương xứ sở. Mở rộng: trong bối cảnh Tản Đà viết bài thơ, '
+       + 'sự thuỷ chung của "non" còn là lời nhắn kín đáo về lòng yêu nước, về việc không quên cội nguồn '
+       + 'giữa buổi giao thời nhiều biến động.' }
+  ],
+  nlvh: {
+    q: 'Viết đoạn văn nghị luận (khoảng 200 chữ) phân tích hình tượng "non" trong đoạn trích <i>Thề non nước</i> của Tản Đà.',
+    dan: '· Mở đoạn: giới thiệu đoạn trích và hình tượng "non" — hiện thân của lòng thuỷ chung.\n'
+       + '· Thân đoạn:\n'
+       + '   – "Non còn đứng không": tư thế bất động, trơ trọi, đối lập với "nước đi đi mãi".\n'
+       + '   – "Những ngóng cùng trông": điệp ý, dồn từ chỉ hoạt động chờ đợi, thời gian kéo dài vô hạn.\n'
+       + '   – "Suối khô dòng lệ": ẩn dụ — nước mắt cạn thành dòng suối khô, nỗi đau đã hoá thành cảnh vật.\n'
+       + '   – "Xương mai hao gầy", "tóc mây đầy tuyết sương": ẩn dụ sự tàn phai của một đời chờ đợi.\n'
+       + '   – Thể lục bát mềm mại cùng nhịp đôi đều đặn tô đậm sự bền bỉ, dai dẳng.\n'
+       + '   – Lớp nghĩa hàm ẩn: "non" còn là non sông, là tấm lòng người ở lại giữ gìn cội nguồn.\n'
+       + '· Kết đoạn: hình tượng "non" khiến bài thơ vừa là tình ca vừa là tâm sự yêu nước kín đáo.',
+    diem: '0,25 hình thức đoạn · 0,25 xác định đúng vấn đề · 1,0 triển khai (dẫn chứng + phân tích) · 0,25 chính tả, ngữ pháp · 0,25 sáng tạo'
+  },
+  nlxh: {
+    q: 'Viết bài văn nghị luận (khoảng 600 chữ) trình bày suy nghĩ của anh/chị về giá trị của việc giữ lời hứa trong cuộc sống.',
+    dan: '· Mở bài: từ một lời hứa nhỏ thường ngày → nêu vấn đề.\n'
+       + '· Giải thích: giữ lời hứa là làm đúng điều đã cam kết, kể cả khi hoàn cảnh đổi thay hoặc không ai giám sát.\n'
+       + '· Bàn luận:\n'
+       + '   – Với bản thân: rèn tính kỉ luật, tự trọng; lời hứa với chính mình là gốc của mọi tiến bộ.\n'
+       + '   – Với người khác: là nền của lòng tin — thứ mất một lần rất khó xây lại.\n'
+       + '   – Với xã hội: hợp đồng, pháp luật, thương hiệu đều đứng trên chữ tín.\n'
+       + '   – Dẫn chứng: người giữ chữ tín trong kinh doanh; ngược lại là những vụ bội tín gây hậu quả lớn.\n'
+       + '   – Phản đề: cần cân nhắc trước khi hứa; hứa bừa rồi cố giữ bằng mọi giá có khi gây hại. '
+       + 'Nếu buộc phải thất hứa thì phải báo sớm và chịu trách nhiệm.\n'
+       + '· Liên hệ bản thân: bắt đầu từ những cam kết nhỏ với việc học.\n'
+       + '· Kết bài: giữ lời hứa là cách con người tự làm cho mình đáng tin — tài sản không ai lấy được.',
+    diem: '0,25 hình thức bài · 0,5 xác định đúng vấn đề · 2,5 triển khai luận điểm + lí lẽ + dẫn chứng · 0,25 chính tả, ngữ pháp · 0,5 sáng tạo'
+  }
+}
+
+];
+
+</script>
 
 <!-- bổ sung Tàng Kinh Các: phải nạp SAU các file gốc vì nó nối thêm vào cùng mảng -->
 <script>
@@ -15714,6 +16442,8 @@ TD.veCau = function () {
   else if (q.dang === 'ds') TD.veDS(q, vung, m);
   else TD.veTLN(q, vung, m);
 
+  TD.veTui(q, vung, than);
+
   if (p.gioiHan) TD.chayDongHo();
 };
 
@@ -15732,6 +16462,68 @@ TD.chayDongHo = function () {
   }, 500);
 };
 
+/* ---------- THANH PHÁP BẢO ----------
+   Mọi pháp bảo mua ở Động Phủ đều dùng được ngay tại đây.
+   Thiên Cơ Phù chỉ hợp với câu 4 lựa chọn; Hồi Xuân Đan là bị động nên chỉ hiện trạng thái. */
+TD.veTui = function (q, vung, than) {
+  TD.S.tui = TD.S.tui || {};
+  const tui = TD.S.tui;
+  const thanh = el('div', 'tui-phap-bao', '');
+
+  const nutPB = (khoa, dungDuoc, viSao, chay) => {
+    const v = TD.VAT_PHAM[khoa], so = tui[khoa] || 0;
+    const b = el('button', 'nut phu phap-bao', `${v.icon} ${v.ten} <span class="mo-nhat">×${so}</span>`);
+    b.title = so <= 0 ? 'Hết — ra Động Phủ mua thêm' : (dungDuoc ? v.mo_ta : viSao);
+    if (so <= 0 || !dungDuoc) b.disabled = true;
+    else b.onclick = () => chay(b);
+    thanh.appendChild(b);
+    return b;
+  };
+
+  /* 🔮 Thiên Cơ Phù — loại 2 đáp án sai */
+  nutPB('thien_co', q.dang === 'mc', 'Chỉ dùng được cho câu trắc nghiệm 4 lựa chọn.', b => {
+    tui.thien_co--;
+    const sai = [0, 1, 2, 3].filter(i => i !== q.ans);
+    TD.xao(sai).slice(0, 2).forEach(i => {
+      const x = vung.querySelectorAll('.dapan')[i];
+      if (x) { x.classList.add('mo'); x.disabled = true; }
+    });
+    b.remove(); TD.luu();
+    TD.bao('🔮 Thiên Cơ Phù đã xoá 2 đáp án nhiễu.', 'tim');
+  });
+
+  /* 🪞 Truy Hồn Kính — soi lời giải trước khi trả lời */
+  nutPB('truy_hon', !!(q.giai || q.meo), 'Câu này không có lời giải chi tiết.', b => {
+    tui.truy_hon--;
+    q._soiGuong = true;
+    b.remove(); TD.luu();
+    than.appendChild(el('div', 'the vien-tim', `
+      <b style="color:var(--tim)">🪞 Truy Hồn Kính — soi thấu câu này</b>
+      ${q.giai ? `<div class="giai">${q.giai}</div>` : ''}
+      ${q.meo ? `<div class="meo">${q.meo}</div>` : ''}
+      <p class="mo-nhat tren12">Đã soi gương nên câu này không tính linh khí, và vẫn bị xếp lại lịch ôn.</p>`));
+  });
+
+  /* 🍵 Ngộ Đạo Trà — nhân đôi linh khí 10 câu */
+  const conTra = TD.S.ngo_dao_con || 0;
+  const bTra = nutPB('ngo_dao', conTra <= 0, `Đang có hiệu lực — còn ${conTra} câu.`, b => {
+    tui.ngo_dao--;
+    TD.S.ngo_dao_con = 10;
+    b.disabled = true;
+    b.innerHTML = `🍵 Ngộ Đạo Trà <span class="mo-nhat">còn 10 câu</span>`;
+    TD.luu();
+    TD.bao('🍵 Ngộ Đạo Trà — linh khí ×2 trong 10 câu kế!', 'ngoc');
+  });
+  if (conTra > 0) bTra.innerHTML = `🍵 Ngộ Đạo Trà <span class="mo-nhat">còn ${conTra} câu</span>`;
+
+  /* 💊 Hồi Xuân Đan — bị động, tự nổ khi trả lời sai */
+  const soDan = tui.hoi_xuan || 0;
+  thanh.appendChild(el('span', 'nhan phap-bao-bi-dong',
+    `💊 Hồi Xuân Đan ×${soDan}${soDan > 0 ? ' · tự giữ chuỗi khi sai' : ''}`));
+
+  than.appendChild(thanh);
+};
+
 /* ---------- DẠNG 1: TRẮC NGHIỆM 4 LỰA CHỌN ---------- */
 TD.veMC = function (q, vung, mon) {
   const KY = ['A', 'B', 'C', 'D'];
@@ -15748,22 +16540,6 @@ TD.veMC = function (q, vung, mon) {
     };
     vung.appendChild(b);
   });
-
-  /* Thiên Cơ Phù — loại bỏ 2 đáp án sai */
-  if (TD.S.tui.thien_co > 0) {
-    const b = el('button', 'nut phu', `🔮 Thiên Cơ Phù (×${TD.S.tui.thien_co}) — loại 2 đáp án sai`);
-    b.style.marginTop = '10px';
-    b.onclick = () => {
-      TD.S.tui.thien_co--;
-      const sai = [0, 1, 2, 3].filter(i => i !== q.ans);
-      TD.xao(sai).slice(0, 2).forEach(i => {
-        const x = vung.querySelectorAll('.dapan')[i];
-        x.classList.add('mo'); x.disabled = true;
-      });
-      b.remove(); TD.luu();
-    };
-    vung.appendChild(b);
-  }
 };
 
 /* ---------- DẠNG 2: ĐÚNG / SAI 4 Ý ---------- */
@@ -15835,20 +16611,30 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
   if (dung) p.dung++;
   p.ketQua.push({ mon: mon, muc: q.muc, chuong: q.chuong, de: q.q, dung: dung, diem: diem });
 
-  TD.ghiNhan(mon, q.muc, dung);
-  TD.SRS.capNhat(TD.idThe(p.ds[p.vt]), dung);
+  /* đã soi Truy Hồn Kính thì không tính là tự làm được */
+  const soi = !!q._soiGuong;
+  document.querySelectorAll('.phap-bao').forEach(b => { b.disabled = true; });
+
+  TD.ghiNhan(mon, q.muc, dung, soi);
+  TD.SRS.capNhat(TD.idThe(p.ds[p.vt]), soi ? false : dung);
 
   /* thưởng linh khí & linh thạch */
-  let exp = 0, ls = 0;
+  let exp = 0, ls = 0, x2 = false;
   if (dung) {
     exp = TD.MUC[q.muc].exp;
     if (p.cheDo === 'tamma') exp = Math.round(exp * 1.5);      /* ôn lại thẻ khó được thưởng thêm */
     if (TD.S.chuoi >= 10) exp = Math.round(exp * 1.2);
-    ls = Math.max(1, Math.round(exp / 5));
-    TD.S.linh_thach += ls;
   } else if (diem > 0) {
     exp = Math.round(TD.MUC[q.muc].exp * diem);                /* câu đúng/sai được điểm một phần */
   }
+  if (soi) exp = 0;                                            /* soi gương thì miễn thưởng */
+  /* 🍵 Ngộ Đạo Trà — nhân đôi linh khí, trừ dần từng câu */
+  if (TD.S.ngo_dao_con > 0) {
+    if (exp) { exp *= 2; x2 = true; }
+    TD.S.ngo_dao_con--;
+    if (TD.S.ngo_dao_con === 0) TD.bao('🍵 Ngộ Đạo Trà đã tan.');
+  }
+  if (exp && dung) { ls = Math.max(1, Math.round(exp / 5)); TD.S.linh_thach += ls; }
   const dotPha = exp ? TD.themExp(exp) : false;
 
   /* khu vực lời giải */
@@ -15858,7 +16644,8 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
       <b style="color:${dung ? 'var(--dung)' : 'var(--lua)'};font-size:16px">
         ${dung ? '✓ Chính xác' : (diem > 0 ? '◐ Đúng một phần' : '✗ Chưa đúng')}</b>
-      <div>${exp ? `<span class="nhan" style="color:var(--ngoc);border-color:var(--ngoc)">+${exp} linh khí</span>` : ''}
+      <div>${exp ? `<span class="nhan" style="color:var(--ngoc);border-color:var(--ngoc)">+${exp} linh khí${x2 ? ' 🍵×2' : ''}</span>` : ''}
+      ${soi ? '<span class="nhan" style="color:var(--tim);border-color:var(--tim)">🪞 đã soi — không tính linh khí</span>' : ''}
       ${ls ? `<span class="nhan" style="color:var(--kim);border-color:var(--kim)">+${ls} 💎</span>` : ''}</div>
     </div>
     ${ghiChu ? `<div style="margin-top:7px">${ghiChu}</div>` : ''}
@@ -16133,7 +16920,7 @@ TD.man_dokiep = function (c) {
   const luoi = el('div', 'luoi');
   TD.THU_TU_MON.forEach(m => {
     const M = TD.MON[m];
-    if (M.tuluan) return;
+    if (M.tuluan) { luoi.appendChild(TD.theDoKiepVan(M)); return; }
     const kho = TD.KHO[m] || [];
     const dem = d => kho.filter(q => q.dang === d).length + (TD.GEN[m] || []).filter(t => t.dang === d).length;
     const co = { mc: dem('mc'), ds: dem('ds'), tln: dem('tln') };
@@ -16160,24 +16947,208 @@ TD.man_dokiep = function (c) {
   c.appendChild(luoi);
 };
 
+/* ============================================================
+   ĐỘ KIẾP MÔN NGỮ VĂN — ĐỀ TỰ LUẬN 120 PHÚT
+   Máy không chấm được văn nên làm đúng cách của thầy cô: phát đề,
+   bấm giờ, thu bài rồi mới mở đáp án và biểu điểm cho tự chấm.
+   Điểm tự chấm vẫn vào sổ do_kiep như mọi môn khác.
+   ============================================================ */
+TD.theDoKiepVan = function (M) {
+  const ls = TD.S.do_kiep.van || [];
+  const caoNhat = ls.length ? Math.max.apply(null, ls.map(x => x.diem)) : null;
+  const t = el('div', 'the mon-the', `
+    <div style="display:flex;gap:11px;align-items:center">
+      <span class="mon-icon">${M.icon}</span>
+      <div><div class="mon-ten">${M.ten}</div><div class="mon-phai">${M.phut} phút · tự luận</div></div>
+    </div>
+    <div style="font-size:12.4px;color:var(--chu2);margin:9px 0">
+      Đọc hiểu 4,0đ (5 câu) · Viết 6,0đ (đoạn 200 chữ + bài 600 chữ)
+    </div>
+    <div style="font-size:12px;color:var(--chu3)">
+      ${ls.length ? `Đã vượt kiếp ${ls.length} lần${caoNhat !== null ? ` · cao nhất <b style="color:var(--kim)">${caoNhat}</b>` : ''}`
+                  : `${(TD.DE_VAN || []).length} bộ đề · chấm theo biểu điểm chính thức`}
+    </div>`);
+  t.style.setProperty('--m', M.mau);
+  t.onclick = () => TD.chonDeVan();
+  return t;
+};
+
+TD.chonDeVan = function () {
+  const c = $('#noidung'); c.innerHTML = '';
+  const bo = TD.DE_VAN || [];
+  c.appendChild(el('div', 'the vien-lua', `<h3>📖 Độ Kiếp môn Ngữ văn</h3>
+    <p style="font-size:13.6px;color:var(--chu2)">Đề tự luận <b>120 phút</b>, đúng cấu trúc chính thức:
+    Phần I Đọc hiểu <b>4,0 điểm</b> (5 câu, ngữ liệu ngoài sách giáo khoa) · Phần II Viết <b>6,0 điểm</b>
+    (câu 1 nghị luận văn học ~200 chữ, câu 2 nghị luận xã hội ~600 chữ).</p>
+    <p class="mo-nhat">Viết ra giấy hoặc gõ thẳng vào ô trong đề. Hết giờ mới được mở đáp án — mở sớm thì
+    không còn là độ kiếp nữa. Chấm xong tự cho điểm theo biểu điểm, máy ghi vào sổ giúp.</p>`));
+
+  const luoi = el('div', 'luoi');
+  bo.forEach((d, i) => {
+    const t = el('div', 'the mon-the', `
+      <div class="mon-ten">Đề số ${i + 1}</div>
+      <div style="font-size:12.6px;color:var(--chu2);margin:6px 0">${d.ten}</div>
+      <div style="font-size:11.8px;color:var(--chu3)">${d.loai}</div>`);
+    t.style.setProperty('--m', TD.MON.van.mau);
+    t.onclick = () => TD.thiVan(i);
+    luoi.appendChild(t);
+  });
+  c.appendChild(luoi);
+  c.appendChild(el('div', 'hang-nut', '')).appendChild(
+    el('button', 'nut phu', '← Quay lại')).onclick = () => TD.di('dokiep');
+};
+
+TD.thiVan = function (i) {
+  const d = (TD.DE_VAN || [])[i]; if (!d) return;
+  const c = $('#noidung'); c.innerHTML = '';
+  TD.phien = { mon: 'van', cheDo: 'dokiep', batDau: Date.now(), gioiHan: TD.MON.van.phut * 60000, deVan: i };
+
+  c.appendChild(el('div', 'the vien-lua', `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <b>📖 ĐỀ THI THỬ NGỮ VĂN — ĐỀ SỐ ${i + 1}</b>
+      <span class="nhan" id="dongho">--:--</span>
+    </div>
+    <p class="mo-nhat" style="margin-top:6px">Thời gian làm bài: 120 phút, không kể thời gian phát đề.</p>`));
+
+  /* --- Phần I: Đọc hiểu --- */
+  const p1 = el('div', 'the', `<h3>I. ĐỌC HIỂU (4,0 điểm)</h3>
+    <p style="font-size:13.5px;color:var(--chu2)">Đọc văn bản sau:</p>
+    <div class="giai" style="white-space:pre-wrap;font-size:14.5px;line-height:1.75">${d.nguLieu}</div>
+    <p style="font-size:12.6px;color:var(--chu3);text-align:right;margin-top:6px">${d.xuatXu}</p>
+    <p style="font-size:13.5px;color:var(--chu2);margin-top:10px">Thực hiện các yêu cầu:</p>`);
+  d.doc.forEach((x, k) => {
+    p1.appendChild(el('div', '', `<div style="margin-top:12px;font-size:14.6px;line-height:1.6">
+      <b>Câu ${k + 1}</b> <span class="nhan">${TD.soVN(x.d, 1)} điểm</span><br>${x.q}</div>`));
+    const o = el('textarea', 'o-nhap'); o.rows = 3; o.placeholder = 'Bài làm câu ' + (k + 1) + '…';
+    o.style.width = '100%'; o.style.marginTop = '7px'; o.id = 'van-doc-' + k;
+    p1.appendChild(o);
+  });
+  c.appendChild(p1);
+
+  /* --- Phần II: Viết --- */
+  const p2 = el('div', 'the', `<h3>II. VIẾT (6,0 điểm)</h3>
+    <div style="margin-top:6px;font-size:14.6px;line-height:1.6">
+      <b>Câu 1</b> <span class="nhan">2,0 điểm</span><br>${d.nlvh.q}</div>`);
+  const o1 = el('textarea', 'o-nhap'); o1.rows = 7; o1.placeholder = 'Đoạn văn khoảng 200 chữ…';
+  o1.style.width = '100%'; o1.style.marginTop = '7px'; o1.id = 'van-nlvh';
+  p2.appendChild(o1);
+  p2.appendChild(el('div', '', `<div style="margin-top:16px;font-size:14.6px;line-height:1.6">
+    <b>Câu 2</b> <span class="nhan">4,0 điểm</span><br>${d.nlxh.q}</div>`));
+  const o2 = el('textarea', 'o-nhap'); o2.rows = 14; o2.placeholder = 'Bài văn khoảng 600 chữ…';
+  o2.style.width = '100%'; o2.style.marginTop = '7px'; o2.id = 'van-nlxh';
+  p2.appendChild(o2);
+
+  /* đếm chữ để canh dung lượng — sai dung lượng là mất điểm hình thức */
+  const dem = el('div', 'mo-nhat', ''); dem.style.marginTop = '7px';
+  const capNhat = () => {
+    const c1 = (o1.value.trim().match(/\S+/g) || []).length;
+    const c2 = (o2.value.trim().match(/\S+/g) || []).length;
+    dem.innerHTML = `Câu 1: <b>${c1}</b> chữ (chuẩn ~200) · Câu 2: <b>${c2}</b> chữ (chuẩn ~600)`;
+  };
+  o1.oninput = capNhat; o2.oninput = capNhat; capNhat();
+  p2.appendChild(dem);
+  c.appendChild(p2);
+
+  const nut = el('div', 'hang-nut', '');
+  const nop = el('button', 'nut lua', 'Nộp bài & mở đáp án');
+  nop.onclick = () => TD.chamVan(i);
+  nut.appendChild(nop);
+  const bo = el('button', 'nut phu', 'Bỏ dở');
+  bo.onclick = () => { clearInterval(TD.dhTimer); TD.phien = null; TD.di('dokiep'); };
+  nut.appendChild(bo);
+  c.appendChild(el('div', 'the', '')).appendChild(nut);
+  TD.chayDongHo();
+  window.scrollTo(0, 0);
+};
+
+TD.chamVan = function (i) {
+  const d = (TD.DE_VAN || [])[i]; if (!d) return;
+  clearInterval(TD.dhTimer);
+  const phut = TD.phien ? Math.round((Date.now() - TD.phien.batDau) / 60000) : 0;
+  const c = $('#noidung'); c.innerHTML = '';
+
+  c.appendChild(el('div', 'the vien-kim', `<h3>📕 Đáp án & biểu điểm — Đề số ${i + 1}</h3>
+    <p class="mo-nhat">Làm bài trong <b>${phut} phút</b>. Đọc kĩ đáp án, đối chiếu từng ý rồi tự cho điểm
+    thật thà bên dưới — chấm rộng tay với chính mình là tự lừa mình.</p>`));
+
+  const oDiem = [];
+  const themO = (nhan, toiDa) => {
+    const o = el('input', 'o-nhap');
+    o.type = 'number'; o.min = '0'; o.max = String(toiDa); o.step = '0.25'; o.value = '';
+    o.placeholder = '0 – ' + TD.soVN(toiDa, 2);
+    o.style.width = '110px'; o.style.marginLeft = '8px';
+    oDiem.push({ o: o, toiDa: toiDa, nhan: nhan });
+    return o;
+  };
+
+  /* --- đáp án đọc hiểu --- */
+  const b1 = el('div', 'the', '<h3>I. ĐỌC HIỂU (4,0 điểm)</h3>');
+  d.doc.forEach((x, k) => {
+    const lam = (document.getElementById('van-doc-' + k) || {}).value;
+    b1.appendChild(el('div', '', `<div style="margin-top:14px;font-size:14.4px">
+      <b>Câu ${k + 1}</b> <span class="nhan">${TD.soVN(x.d, 1)} điểm</span> — ${x.q}</div>
+      <div class="giai" style="white-space:pre-wrap">${x.a}</div>`));
+    const hang = el('div', ''); hang.style.marginTop = '7px';
+    hang.appendChild(el('span', 'mo-nhat', `Tự chấm câu ${k + 1} (tối đa ${TD.soVN(x.d, 1)}):`));
+    hang.appendChild(themO('Đọc hiểu câu ' + (k + 1), x.d));
+    b1.appendChild(hang);
+  });
+  c.appendChild(b1);
+
+  /* --- đáp án phần viết --- */
+  const b2 = el('div', 'the', '<h3>II. VIẾT (6,0 điểm)</h3>');
+  [['Câu 1 — nghị luận văn học (2,0đ)', d.nlvh, 2], ['Câu 2 — nghị luận xã hội (4,0đ)', d.nlxh, 4]].forEach(([ten, x, toiDa]) => {
+    b2.appendChild(el('div', '', `<div style="margin-top:14px;font-size:14.4px"><b>${ten}</b><br>${x.q}</div>
+      <div class="giai" style="white-space:pre-wrap"><b>Dàn ý cần có:</b>\n${x.dan}</div>
+      <div class="meo"><b>Biểu điểm:</b> ${x.diem}</div>`));
+    const hang = el('div', ''); hang.style.marginTop = '7px';
+    hang.appendChild(el('span', 'mo-nhat', `Tự chấm (tối đa ${TD.soVN(toiDa, 1)}):`));
+    hang.appendChild(themO(ten, toiDa));
+    b2.appendChild(hang);
+  });
+  c.appendChild(b2);
+
+  const kq = el('div', 'the vien-lua', '<h3>Tổng kết</h3><div id="van-tong">Nhập điểm từng câu rồi bấm chốt.</div>');
+  const nut = el('div', 'hang-nut', '');
+  const chot = el('button', 'nut kim', 'Chốt điểm & ghi vào sổ');
+  chot.onclick = () => {
+    let tong = 0, thieu = false;
+    oDiem.forEach(x => {
+      const v = parseFloat(String(x.o.value).replace(',', '.'));
+      if (isNaN(v)) { thieu = true; return; }
+      tong += Math.max(0, Math.min(x.toiDa, v));
+    });
+    if (thieu) { TD.bao('Còn câu chưa chấm điểm.', 'lua'); return; }
+    tong = TD.lamTron(tong, 2);
+    TD.S.do_kiep.van = TD.S.do_kiep.van || [];
+    TD.S.do_kiep.van.push({ ngay: TD.homNay(), diem: tong });
+    /* thưởng linh khí theo điểm, đúng tinh thần cày cuốc của các môn khác */
+    const exp = Math.round(tong * 12);
+    TD.themExp(exp);
+    TD.S.linh_thach += Math.round(exp / 5);
+    TD.luu();
+    $('#van-tong').innerHTML = `<div style="font-size:26px;font-weight:800;color:var(--kim)">${TD.soVN(tong, 2)} / 10</div>
+      <p style="font-size:13.6px;color:var(--chu2)">${tong >= 8 ? '⚡ Vượt kiếp thành công!'
+        : tong >= 6.5 ? 'Khá rồi, nhưng chưa đủ để gọi là vượt kiếp — cày tiếp phần Viết.'
+        : 'Chưa qua. Đọc lại dàn ý, viết lại câu 2 một lần nữa ngay hôm nay.'}</p>
+      <span class="nhan" style="color:var(--ngoc);border-color:var(--ngoc)">+${exp} linh khí</span>`;
+    chot.disabled = true;
+    TD.veHud();
+  };
+  nut.appendChild(chot);
+  const ve = el('button', 'nut phu', 'Về Độ Kiếp');
+  ve.onclick = () => { TD.phien = null; TD.di('dokiep'); };
+  nut.appendChild(ve);
+  kq.appendChild(nut);
+  c.appendChild(kq);
+  window.scrollTo(0, 0);
+};
+
 /* Dựng đề theo cấu trúc; nếu ngân hàng thiếu thì rút gọn tỉ lệ nhưng GIỮ ĐÚNG trọng số điểm */
 TD.dungDe = function (mon) {
-  const M = TD.MON[mon], kho = TD.KHO[mon] || [];
-  const lay = (dang, n) => {
-    const tinh = TD.xao(kho.map((q, i) => ({ q: q, i: i })).filter(x => x.q.dang === dang))
-      .map(x => ({ mon: mon, i: x.i }));
-    const mau = TD.xao((TD.GEN[mon] || []).filter(t => t.dang === dang))
-      .map(t => ({ mon: mon, g: t.ma, s: (Math.random() * 4294967295) >>> 0 }));
-    /* ưu tiên trộn đều: lấy xen kẽ câu sinh và câu cố định cho đủ n */
-    const gop = [];
-    for (let k = 0; gop.length < n && (k < tinh.length || k < mau.length); k++) {
-      if (k < mau.length) gop.push(mau[k]);
-      if (gop.length < n && k < tinh.length) gop.push(tinh[k]);
-    }
-    return TD.xao(gop).slice(0, n);
-  };
-  const p1 = lay('mc', M.p1), p2 = lay('ds', M.p2), p3 = lay('tln', M.p3);
-  const ds = p1.concat(p3, p2);           /* thứ tự khuyến nghị: Phần I → III → II */
+  const M = TD.MON[mon];
+  const de = TD.deThiThat(mon);
+  const p1 = de.p1, p2 = de.p2, p3 = de.p3, ds = de.ds;
 
   if (!ds.length) { TD.bao('Chưa đủ câu hỏi để dựng đề môn này.', 'lua'); return; }
 

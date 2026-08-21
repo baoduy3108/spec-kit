@@ -315,6 +315,8 @@ TD.veCau = function () {
   else if (q.dang === 'ds') TD.veDS(q, vung, m);
   else TD.veTLN(q, vung, m);
 
+  TD.veTui(q, vung, than);
+
   if (p.gioiHan) TD.chayDongHo();
 };
 
@@ -333,6 +335,68 @@ TD.chayDongHo = function () {
   }, 500);
 };
 
+/* ---------- THANH PHÁP BẢO ----------
+   Mọi pháp bảo mua ở Động Phủ đều dùng được ngay tại đây.
+   Thiên Cơ Phù chỉ hợp với câu 4 lựa chọn; Hồi Xuân Đan là bị động nên chỉ hiện trạng thái. */
+TD.veTui = function (q, vung, than) {
+  TD.S.tui = TD.S.tui || {};
+  const tui = TD.S.tui;
+  const thanh = el('div', 'tui-phap-bao', '');
+
+  const nutPB = (khoa, dungDuoc, viSao, chay) => {
+    const v = TD.VAT_PHAM[khoa], so = tui[khoa] || 0;
+    const b = el('button', 'nut phu phap-bao', `${v.icon} ${v.ten} <span class="mo-nhat">×${so}</span>`);
+    b.title = so <= 0 ? 'Hết — ra Động Phủ mua thêm' : (dungDuoc ? v.mo_ta : viSao);
+    if (so <= 0 || !dungDuoc) b.disabled = true;
+    else b.onclick = () => chay(b);
+    thanh.appendChild(b);
+    return b;
+  };
+
+  /* 🔮 Thiên Cơ Phù — loại 2 đáp án sai */
+  nutPB('thien_co', q.dang === 'mc', 'Chỉ dùng được cho câu trắc nghiệm 4 lựa chọn.', b => {
+    tui.thien_co--;
+    const sai = [0, 1, 2, 3].filter(i => i !== q.ans);
+    TD.xao(sai).slice(0, 2).forEach(i => {
+      const x = vung.querySelectorAll('.dapan')[i];
+      if (x) { x.classList.add('mo'); x.disabled = true; }
+    });
+    b.remove(); TD.luu();
+    TD.bao('🔮 Thiên Cơ Phù đã xoá 2 đáp án nhiễu.', 'tim');
+  });
+
+  /* 🪞 Truy Hồn Kính — soi lời giải trước khi trả lời */
+  nutPB('truy_hon', !!(q.giai || q.meo), 'Câu này không có lời giải chi tiết.', b => {
+    tui.truy_hon--;
+    q._soiGuong = true;
+    b.remove(); TD.luu();
+    than.appendChild(el('div', 'the vien-tim', `
+      <b style="color:var(--tim)">🪞 Truy Hồn Kính — soi thấu câu này</b>
+      ${q.giai ? `<div class="giai">${q.giai}</div>` : ''}
+      ${q.meo ? `<div class="meo">${q.meo}</div>` : ''}
+      <p class="mo-nhat tren12">Đã soi gương nên câu này không tính linh khí, và vẫn bị xếp lại lịch ôn.</p>`));
+  });
+
+  /* 🍵 Ngộ Đạo Trà — nhân đôi linh khí 10 câu */
+  const conTra = TD.S.ngo_dao_con || 0;
+  const bTra = nutPB('ngo_dao', conTra <= 0, `Đang có hiệu lực — còn ${conTra} câu.`, b => {
+    tui.ngo_dao--;
+    TD.S.ngo_dao_con = 10;
+    b.disabled = true;
+    b.innerHTML = `🍵 Ngộ Đạo Trà <span class="mo-nhat">còn 10 câu</span>`;
+    TD.luu();
+    TD.bao('🍵 Ngộ Đạo Trà — linh khí ×2 trong 10 câu kế!', 'ngoc');
+  });
+  if (conTra > 0) bTra.innerHTML = `🍵 Ngộ Đạo Trà <span class="mo-nhat">còn ${conTra} câu</span>`;
+
+  /* 💊 Hồi Xuân Đan — bị động, tự nổ khi trả lời sai */
+  const soDan = tui.hoi_xuan || 0;
+  thanh.appendChild(el('span', 'nhan phap-bao-bi-dong',
+    `💊 Hồi Xuân Đan ×${soDan}${soDan > 0 ? ' · tự giữ chuỗi khi sai' : ''}`));
+
+  than.appendChild(thanh);
+};
+
 /* ---------- DẠNG 1: TRẮC NGHIỆM 4 LỰA CHỌN ---------- */
 TD.veMC = function (q, vung, mon) {
   const KY = ['A', 'B', 'C', 'D'];
@@ -349,22 +413,6 @@ TD.veMC = function (q, vung, mon) {
     };
     vung.appendChild(b);
   });
-
-  /* Thiên Cơ Phù — loại bỏ 2 đáp án sai */
-  if (TD.S.tui.thien_co > 0) {
-    const b = el('button', 'nut phu', `🔮 Thiên Cơ Phù (×${TD.S.tui.thien_co}) — loại 2 đáp án sai`);
-    b.style.marginTop = '10px';
-    b.onclick = () => {
-      TD.S.tui.thien_co--;
-      const sai = [0, 1, 2, 3].filter(i => i !== q.ans);
-      TD.xao(sai).slice(0, 2).forEach(i => {
-        const x = vung.querySelectorAll('.dapan')[i];
-        x.classList.add('mo'); x.disabled = true;
-      });
-      b.remove(); TD.luu();
-    };
-    vung.appendChild(b);
-  }
 };
 
 /* ---------- DẠNG 2: ĐÚNG / SAI 4 Ý ---------- */
@@ -436,20 +484,30 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
   if (dung) p.dung++;
   p.ketQua.push({ mon: mon, muc: q.muc, chuong: q.chuong, de: q.q, dung: dung, diem: diem });
 
-  TD.ghiNhan(mon, q.muc, dung);
-  TD.SRS.capNhat(TD.idThe(p.ds[p.vt]), dung);
+  /* đã soi Truy Hồn Kính thì không tính là tự làm được */
+  const soi = !!q._soiGuong;
+  document.querySelectorAll('.phap-bao').forEach(b => { b.disabled = true; });
+
+  TD.ghiNhan(mon, q.muc, dung, soi);
+  TD.SRS.capNhat(TD.idThe(p.ds[p.vt]), soi ? false : dung);
 
   /* thưởng linh khí & linh thạch */
-  let exp = 0, ls = 0;
+  let exp = 0, ls = 0, x2 = false;
   if (dung) {
     exp = TD.MUC[q.muc].exp;
     if (p.cheDo === 'tamma') exp = Math.round(exp * 1.5);      /* ôn lại thẻ khó được thưởng thêm */
     if (TD.S.chuoi >= 10) exp = Math.round(exp * 1.2);
-    ls = Math.max(1, Math.round(exp / 5));
-    TD.S.linh_thach += ls;
   } else if (diem > 0) {
     exp = Math.round(TD.MUC[q.muc].exp * diem);                /* câu đúng/sai được điểm một phần */
   }
+  if (soi) exp = 0;                                            /* soi gương thì miễn thưởng */
+  /* 🍵 Ngộ Đạo Trà — nhân đôi linh khí, trừ dần từng câu */
+  if (TD.S.ngo_dao_con > 0) {
+    if (exp) { exp *= 2; x2 = true; }
+    TD.S.ngo_dao_con--;
+    if (TD.S.ngo_dao_con === 0) TD.bao('🍵 Ngộ Đạo Trà đã tan.');
+  }
+  if (exp && dung) { ls = Math.max(1, Math.round(exp / 5)); TD.S.linh_thach += ls; }
   const dotPha = exp ? TD.themExp(exp) : false;
 
   /* khu vực lời giải */
@@ -459,7 +517,8 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
       <b style="color:${dung ? 'var(--dung)' : 'var(--lua)'};font-size:16px">
         ${dung ? '✓ Chính xác' : (diem > 0 ? '◐ Đúng một phần' : '✗ Chưa đúng')}</b>
-      <div>${exp ? `<span class="nhan" style="color:var(--ngoc);border-color:var(--ngoc)">+${exp} linh khí</span>` : ''}
+      <div>${exp ? `<span class="nhan" style="color:var(--ngoc);border-color:var(--ngoc)">+${exp} linh khí${x2 ? ' 🍵×2' : ''}</span>` : ''}
+      ${soi ? '<span class="nhan" style="color:var(--tim);border-color:var(--tim)">🪞 đã soi — không tính linh khí</span>' : ''}
       ${ls ? `<span class="nhan" style="color:var(--kim);border-color:var(--kim)">+${ls} 💎</span>` : ''}</div>
     </div>
     ${ghiChu ? `<div style="margin-top:7px">${ghiChu}</div>` : ''}
@@ -734,7 +793,7 @@ TD.man_dokiep = function (c) {
   const luoi = el('div', 'luoi');
   TD.THU_TU_MON.forEach(m => {
     const M = TD.MON[m];
-    if (M.tuluan) return;
+    if (M.tuluan) { luoi.appendChild(TD.theDoKiepVan(M)); return; }
     const kho = TD.KHO[m] || [];
     const dem = d => kho.filter(q => q.dang === d).length + (TD.GEN[m] || []).filter(t => t.dang === d).length;
     const co = { mc: dem('mc'), ds: dem('ds'), tln: dem('tln') };
@@ -761,24 +820,208 @@ TD.man_dokiep = function (c) {
   c.appendChild(luoi);
 };
 
+/* ============================================================
+   ĐỘ KIẾP MÔN NGỮ VĂN — ĐỀ TỰ LUẬN 120 PHÚT
+   Máy không chấm được văn nên làm đúng cách của thầy cô: phát đề,
+   bấm giờ, thu bài rồi mới mở đáp án và biểu điểm cho tự chấm.
+   Điểm tự chấm vẫn vào sổ do_kiep như mọi môn khác.
+   ============================================================ */
+TD.theDoKiepVan = function (M) {
+  const ls = TD.S.do_kiep.van || [];
+  const caoNhat = ls.length ? Math.max.apply(null, ls.map(x => x.diem)) : null;
+  const t = el('div', 'the mon-the', `
+    <div style="display:flex;gap:11px;align-items:center">
+      <span class="mon-icon">${M.icon}</span>
+      <div><div class="mon-ten">${M.ten}</div><div class="mon-phai">${M.phut} phút · tự luận</div></div>
+    </div>
+    <div style="font-size:12.4px;color:var(--chu2);margin:9px 0">
+      Đọc hiểu 4,0đ (5 câu) · Viết 6,0đ (đoạn 200 chữ + bài 600 chữ)
+    </div>
+    <div style="font-size:12px;color:var(--chu3)">
+      ${ls.length ? `Đã vượt kiếp ${ls.length} lần${caoNhat !== null ? ` · cao nhất <b style="color:var(--kim)">${caoNhat}</b>` : ''}`
+                  : `${(TD.DE_VAN || []).length} bộ đề · chấm theo biểu điểm chính thức`}
+    </div>`);
+  t.style.setProperty('--m', M.mau);
+  t.onclick = () => TD.chonDeVan();
+  return t;
+};
+
+TD.chonDeVan = function () {
+  const c = $('#noidung'); c.innerHTML = '';
+  const bo = TD.DE_VAN || [];
+  c.appendChild(el('div', 'the vien-lua', `<h3>📖 Độ Kiếp môn Ngữ văn</h3>
+    <p style="font-size:13.6px;color:var(--chu2)">Đề tự luận <b>120 phút</b>, đúng cấu trúc chính thức:
+    Phần I Đọc hiểu <b>4,0 điểm</b> (5 câu, ngữ liệu ngoài sách giáo khoa) · Phần II Viết <b>6,0 điểm</b>
+    (câu 1 nghị luận văn học ~200 chữ, câu 2 nghị luận xã hội ~600 chữ).</p>
+    <p class="mo-nhat">Viết ra giấy hoặc gõ thẳng vào ô trong đề. Hết giờ mới được mở đáp án — mở sớm thì
+    không còn là độ kiếp nữa. Chấm xong tự cho điểm theo biểu điểm, máy ghi vào sổ giúp.</p>`));
+
+  const luoi = el('div', 'luoi');
+  bo.forEach((d, i) => {
+    const t = el('div', 'the mon-the', `
+      <div class="mon-ten">Đề số ${i + 1}</div>
+      <div style="font-size:12.6px;color:var(--chu2);margin:6px 0">${d.ten}</div>
+      <div style="font-size:11.8px;color:var(--chu3)">${d.loai}</div>`);
+    t.style.setProperty('--m', TD.MON.van.mau);
+    t.onclick = () => TD.thiVan(i);
+    luoi.appendChild(t);
+  });
+  c.appendChild(luoi);
+  c.appendChild(el('div', 'hang-nut', '')).appendChild(
+    el('button', 'nut phu', '← Quay lại')).onclick = () => TD.di('dokiep');
+};
+
+TD.thiVan = function (i) {
+  const d = (TD.DE_VAN || [])[i]; if (!d) return;
+  const c = $('#noidung'); c.innerHTML = '';
+  TD.phien = { mon: 'van', cheDo: 'dokiep', batDau: Date.now(), gioiHan: TD.MON.van.phut * 60000, deVan: i };
+
+  c.appendChild(el('div', 'the vien-lua', `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <b>📖 ĐỀ THI THỬ NGỮ VĂN — ĐỀ SỐ ${i + 1}</b>
+      <span class="nhan" id="dongho">--:--</span>
+    </div>
+    <p class="mo-nhat" style="margin-top:6px">Thời gian làm bài: 120 phút, không kể thời gian phát đề.</p>`));
+
+  /* --- Phần I: Đọc hiểu --- */
+  const p1 = el('div', 'the', `<h3>I. ĐỌC HIỂU (4,0 điểm)</h3>
+    <p style="font-size:13.5px;color:var(--chu2)">Đọc văn bản sau:</p>
+    <div class="giai" style="white-space:pre-wrap;font-size:14.5px;line-height:1.75">${d.nguLieu}</div>
+    <p style="font-size:12.6px;color:var(--chu3);text-align:right;margin-top:6px">${d.xuatXu}</p>
+    <p style="font-size:13.5px;color:var(--chu2);margin-top:10px">Thực hiện các yêu cầu:</p>`);
+  d.doc.forEach((x, k) => {
+    p1.appendChild(el('div', '', `<div style="margin-top:12px;font-size:14.6px;line-height:1.6">
+      <b>Câu ${k + 1}</b> <span class="nhan">${TD.soVN(x.d, 1)} điểm</span><br>${x.q}</div>`));
+    const o = el('textarea', 'o-nhap'); o.rows = 3; o.placeholder = 'Bài làm câu ' + (k + 1) + '…';
+    o.style.width = '100%'; o.style.marginTop = '7px'; o.id = 'van-doc-' + k;
+    p1.appendChild(o);
+  });
+  c.appendChild(p1);
+
+  /* --- Phần II: Viết --- */
+  const p2 = el('div', 'the', `<h3>II. VIẾT (6,0 điểm)</h3>
+    <div style="margin-top:6px;font-size:14.6px;line-height:1.6">
+      <b>Câu 1</b> <span class="nhan">2,0 điểm</span><br>${d.nlvh.q}</div>`);
+  const o1 = el('textarea', 'o-nhap'); o1.rows = 7; o1.placeholder = 'Đoạn văn khoảng 200 chữ…';
+  o1.style.width = '100%'; o1.style.marginTop = '7px'; o1.id = 'van-nlvh';
+  p2.appendChild(o1);
+  p2.appendChild(el('div', '', `<div style="margin-top:16px;font-size:14.6px;line-height:1.6">
+    <b>Câu 2</b> <span class="nhan">4,0 điểm</span><br>${d.nlxh.q}</div>`));
+  const o2 = el('textarea', 'o-nhap'); o2.rows = 14; o2.placeholder = 'Bài văn khoảng 600 chữ…';
+  o2.style.width = '100%'; o2.style.marginTop = '7px'; o2.id = 'van-nlxh';
+  p2.appendChild(o2);
+
+  /* đếm chữ để canh dung lượng — sai dung lượng là mất điểm hình thức */
+  const dem = el('div', 'mo-nhat', ''); dem.style.marginTop = '7px';
+  const capNhat = () => {
+    const c1 = (o1.value.trim().match(/\S+/g) || []).length;
+    const c2 = (o2.value.trim().match(/\S+/g) || []).length;
+    dem.innerHTML = `Câu 1: <b>${c1}</b> chữ (chuẩn ~200) · Câu 2: <b>${c2}</b> chữ (chuẩn ~600)`;
+  };
+  o1.oninput = capNhat; o2.oninput = capNhat; capNhat();
+  p2.appendChild(dem);
+  c.appendChild(p2);
+
+  const nut = el('div', 'hang-nut', '');
+  const nop = el('button', 'nut lua', 'Nộp bài & mở đáp án');
+  nop.onclick = () => TD.chamVan(i);
+  nut.appendChild(nop);
+  const bo = el('button', 'nut phu', 'Bỏ dở');
+  bo.onclick = () => { clearInterval(TD.dhTimer); TD.phien = null; TD.di('dokiep'); };
+  nut.appendChild(bo);
+  c.appendChild(el('div', 'the', '')).appendChild(nut);
+  TD.chayDongHo();
+  window.scrollTo(0, 0);
+};
+
+TD.chamVan = function (i) {
+  const d = (TD.DE_VAN || [])[i]; if (!d) return;
+  clearInterval(TD.dhTimer);
+  const phut = TD.phien ? Math.round((Date.now() - TD.phien.batDau) / 60000) : 0;
+  const c = $('#noidung'); c.innerHTML = '';
+
+  c.appendChild(el('div', 'the vien-kim', `<h3>📕 Đáp án & biểu điểm — Đề số ${i + 1}</h3>
+    <p class="mo-nhat">Làm bài trong <b>${phut} phút</b>. Đọc kĩ đáp án, đối chiếu từng ý rồi tự cho điểm
+    thật thà bên dưới — chấm rộng tay với chính mình là tự lừa mình.</p>`));
+
+  const oDiem = [];
+  const themO = (nhan, toiDa) => {
+    const o = el('input', 'o-nhap');
+    o.type = 'number'; o.min = '0'; o.max = String(toiDa); o.step = '0.25'; o.value = '';
+    o.placeholder = '0 – ' + TD.soVN(toiDa, 2);
+    o.style.width = '110px'; o.style.marginLeft = '8px';
+    oDiem.push({ o: o, toiDa: toiDa, nhan: nhan });
+    return o;
+  };
+
+  /* --- đáp án đọc hiểu --- */
+  const b1 = el('div', 'the', '<h3>I. ĐỌC HIỂU (4,0 điểm)</h3>');
+  d.doc.forEach((x, k) => {
+    const lam = (document.getElementById('van-doc-' + k) || {}).value;
+    b1.appendChild(el('div', '', `<div style="margin-top:14px;font-size:14.4px">
+      <b>Câu ${k + 1}</b> <span class="nhan">${TD.soVN(x.d, 1)} điểm</span> — ${x.q}</div>
+      <div class="giai" style="white-space:pre-wrap">${x.a}</div>`));
+    const hang = el('div', ''); hang.style.marginTop = '7px';
+    hang.appendChild(el('span', 'mo-nhat', `Tự chấm câu ${k + 1} (tối đa ${TD.soVN(x.d, 1)}):`));
+    hang.appendChild(themO('Đọc hiểu câu ' + (k + 1), x.d));
+    b1.appendChild(hang);
+  });
+  c.appendChild(b1);
+
+  /* --- đáp án phần viết --- */
+  const b2 = el('div', 'the', '<h3>II. VIẾT (6,0 điểm)</h3>');
+  [['Câu 1 — nghị luận văn học (2,0đ)', d.nlvh, 2], ['Câu 2 — nghị luận xã hội (4,0đ)', d.nlxh, 4]].forEach(([ten, x, toiDa]) => {
+    b2.appendChild(el('div', '', `<div style="margin-top:14px;font-size:14.4px"><b>${ten}</b><br>${x.q}</div>
+      <div class="giai" style="white-space:pre-wrap"><b>Dàn ý cần có:</b>\n${x.dan}</div>
+      <div class="meo"><b>Biểu điểm:</b> ${x.diem}</div>`));
+    const hang = el('div', ''); hang.style.marginTop = '7px';
+    hang.appendChild(el('span', 'mo-nhat', `Tự chấm (tối đa ${TD.soVN(toiDa, 1)}):`));
+    hang.appendChild(themO(ten, toiDa));
+    b2.appendChild(hang);
+  });
+  c.appendChild(b2);
+
+  const kq = el('div', 'the vien-lua', '<h3>Tổng kết</h3><div id="van-tong">Nhập điểm từng câu rồi bấm chốt.</div>');
+  const nut = el('div', 'hang-nut', '');
+  const chot = el('button', 'nut kim', 'Chốt điểm & ghi vào sổ');
+  chot.onclick = () => {
+    let tong = 0, thieu = false;
+    oDiem.forEach(x => {
+      const v = parseFloat(String(x.o.value).replace(',', '.'));
+      if (isNaN(v)) { thieu = true; return; }
+      tong += Math.max(0, Math.min(x.toiDa, v));
+    });
+    if (thieu) { TD.bao('Còn câu chưa chấm điểm.', 'lua'); return; }
+    tong = TD.lamTron(tong, 2);
+    TD.S.do_kiep.van = TD.S.do_kiep.van || [];
+    TD.S.do_kiep.van.push({ ngay: TD.homNay(), diem: tong });
+    /* thưởng linh khí theo điểm, đúng tinh thần cày cuốc của các môn khác */
+    const exp = Math.round(tong * 12);
+    TD.themExp(exp);
+    TD.S.linh_thach += Math.round(exp / 5);
+    TD.luu();
+    $('#van-tong').innerHTML = `<div style="font-size:26px;font-weight:800;color:var(--kim)">${TD.soVN(tong, 2)} / 10</div>
+      <p style="font-size:13.6px;color:var(--chu2)">${tong >= 8 ? '⚡ Vượt kiếp thành công!'
+        : tong >= 6.5 ? 'Khá rồi, nhưng chưa đủ để gọi là vượt kiếp — cày tiếp phần Viết.'
+        : 'Chưa qua. Đọc lại dàn ý, viết lại câu 2 một lần nữa ngay hôm nay.'}</p>
+      <span class="nhan" style="color:var(--ngoc);border-color:var(--ngoc)">+${exp} linh khí</span>`;
+    chot.disabled = true;
+    TD.veHud();
+  };
+  nut.appendChild(chot);
+  const ve = el('button', 'nut phu', 'Về Độ Kiếp');
+  ve.onclick = () => { TD.phien = null; TD.di('dokiep'); };
+  nut.appendChild(ve);
+  kq.appendChild(nut);
+  c.appendChild(kq);
+  window.scrollTo(0, 0);
+};
+
 /* Dựng đề theo cấu trúc; nếu ngân hàng thiếu thì rút gọn tỉ lệ nhưng GIỮ ĐÚNG trọng số điểm */
 TD.dungDe = function (mon) {
-  const M = TD.MON[mon], kho = TD.KHO[mon] || [];
-  const lay = (dang, n) => {
-    const tinh = TD.xao(kho.map((q, i) => ({ q: q, i: i })).filter(x => x.q.dang === dang))
-      .map(x => ({ mon: mon, i: x.i }));
-    const mau = TD.xao((TD.GEN[mon] || []).filter(t => t.dang === dang))
-      .map(t => ({ mon: mon, g: t.ma, s: (Math.random() * 4294967295) >>> 0 }));
-    /* ưu tiên trộn đều: lấy xen kẽ câu sinh và câu cố định cho đủ n */
-    const gop = [];
-    for (let k = 0; gop.length < n && (k < tinh.length || k < mau.length); k++) {
-      if (k < mau.length) gop.push(mau[k]);
-      if (gop.length < n && k < tinh.length) gop.push(tinh[k]);
-    }
-    return TD.xao(gop).slice(0, n);
-  };
-  const p1 = lay('mc', M.p1), p2 = lay('ds', M.p2), p3 = lay('tln', M.p3);
-  const ds = p1.concat(p3, p2);           /* thứ tự khuyến nghị: Phần I → III → II */
+  const M = TD.MON[mon];
+  const de = TD.deThiThat(mon);
+  const p1 = de.p1, p2 = de.p2, p3 = de.p3, ds = de.ds;
 
   if (!ds.length) { TD.bao('Chưa đủ câu hỏi để dựng đề môn này.', 'lua'); return; }
 

@@ -77,9 +77,9 @@ TD.MAC_DINH = {
 /* ---------- 5. VẬT PHẨM ---------- */
 TD.VAT_PHAM = {
   thien_co:   { ten: 'Thiên Cơ Phù',  icon: '🔮', gia: 30,  mo_ta: 'Loại bỏ 2 đáp án sai.' },
-  hoi_xuan:   { ten: 'Hồi Xuân Đan',  icon: '💊', gia: 60,  mo_ta: 'Giữ nguyên chuỗi liên kích khi trả lời sai 1 câu.' },
+  hoi_xuan:   { ten: 'Hồi Xuân Đan',  icon: '💊', gia: 60,  mo_ta: 'Bị động: tự nổ khi trả lời sai để giữ nguyên chuỗi liên kích.' },
   ngo_dao:    { ten: 'Ngộ Đạo Trà',   icon: '🍵', gia: 80,  mo_ta: 'Nhân đôi linh khí nhận được trong 10 câu kế.' },
-  truy_hon:   { ten: 'Truy Hồn Kính', icon: '🪞', gia: 45,  mo_ta: 'Xem ngay lời giải + mẹo mà không mất linh khí.' }
+  truy_hon:   { ten: 'Truy Hồn Kính', icon: '🪞', gia: 45,  mo_ta: 'Soi lời giải + mẹo trước khi trả lời (câu đó không tính linh khí).' }
 };
 
 /* ---------- 6. THANG QUY ĐỔI ĐIỂM ---------- */

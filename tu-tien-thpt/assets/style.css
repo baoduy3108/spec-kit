@@ -191,3 +191,12 @@ hr.mo{border:0;border-top:1px solid var(--vien);margin:16px 0}
   table.kq{font-size:12.4px}
   table.kq.small{font-size:11.4px}
 }
+
+/* ---- Thanh pháp bảo trong lúc làm bài ---- */
+.tui-phap-bao{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px;padding-top:12px;border-top:1px dashed var(--vien)}
+.phap-bao{font-size:12.5px;padding:7px 12px;margin:0}
+.phap-bao:disabled{opacity:.34;cursor:not-allowed}
+.phap-bao-bi-dong{color:var(--kim);border-color:rgba(212,175,55,.45)}
+
+/* ---- Đề tự luận Ngữ văn ---- */
+textarea.o-nhap{font-family:inherit;font-size:14.5px;line-height:1.6;resize:vertical;min-height:60px}
