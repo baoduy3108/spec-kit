@@ -147,7 +147,7 @@ TD.man_dongphu = function (c) {
     <h3>📊 Ước lượng điểm tổ hợp</h3>
     <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
       <div class="so-to" style="font-size:38px;color:${uoc.tong >= TD.S.muc_tieu ? 'var(--dung)' : 'var(--kim)'}">${uoc.du ? uoc.tong : '—'}</div>
-      <div><div class="so-nhan">/ 30 điểm · mục tiêu ${TD.MAC_DINH.muc_tieu}</div>
+      <div><div class="so-nhan">/ 30 điểm · mục tiêu ${TD.S.muc_tieu}</div>
       <div style="font-size:12.5px;color:var(--chu2)">${uoc.du ? TD.hamMucTieu(uoc.tong / 3) : 'Làm thêm câu hỏi để có ước lượng'}</div></div>
     </div>
     ${dongMon}
@@ -977,10 +977,10 @@ TD.man_dokiep = function (c) {
       <b style="color:var(--kim)">${mac.ten}</b> <span class="mo-nhat">(cấp ${mac.cap}/5)</span></div>
     <div class="hang-nut" style="margin-top:9px">${bang}</div>
     <table class="kq" style="margin-top:12px">
-      <tr><th>Cấp</th><th>Độ khó</th><th>Vận dụng + VDC ở Phần I</th><th>Thời gian</th><th>Ngưỡng</th></tr>
+      <tr><th>Cấp</th><th>Độ khó</th><th>Vận dụng<br>cả đề</th><th>Thời<br>gian</th><th>Ngưỡng</th></tr>
       ${TD.KIEP.map(k => `<tr${k.cap === K.cap ? ' style="background:rgba(243,156,18,.12)"' : ''}>
         <td>${k.cap}</td><td>${k.nhan}</td>
-        <td>${Math.round((k.ts[3] + k.ts[4]) * 100)}%</td>
+        <td>${Math.round((k.tong[3] + k.tong[4]) * 100)}%</td>
         <td>${Math.round(k.gio * 100)}%</td>
         <td><b>${TD.soVN(k.nguong, 1)}</b></td></tr>`).join('')}
     </table>

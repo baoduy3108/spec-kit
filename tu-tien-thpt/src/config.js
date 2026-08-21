@@ -26,18 +26,20 @@ TD.CANH_GIOI = [
    và vận dụng cao, thời gian bị rút ngắn, ngưỡng vượt kiếp nâng lên.
    CẤP 2 là mốc chuẩn — đúng độ khó và đúng thời gian của đề thi thật;
    các cấp trên là đề phân hoá, cấp dưới là đề làm quen.
-   ts: trọng số mức độ cho Phần I · gio: hệ số thời gian · nguong: điểm vượt kiếp */
+   tong: tỉ lệ mức độ cho CẢ ĐỀ (không phải riêng Phần I) — vì Phần II và Phần III
+   luôn là câu khó, nếu chỉ đặt trọng số cho Phần I thì cả đề bị lệch nặng về phía khó.
+   gio: hệ số thời gian · nguong: điểm vượt kiếp */
 TD.KIEP = [
   { cap: 1, ten: 'Nhất Trọng Lôi Kiếp', tuId: 0, nhan: 'đề làm quen, nhẹ hơn đề thật',
-    ts: { 1: 0.40, 2: 0.42, 3: 0.16, 4: 0.02 }, tln: { 3: 0.75, 4: 0.25 }, gio: 1.15, nguong: 6.5 },
-  { cap: 2, ten: 'Tam Trọng Lôi Kiếp', tuId: 3, nhan: 'đúng độ khó & thời gian đề thi thật',
-    ts: { 1: 0.30, 2: 0.40, 3: 0.24, 4: 0.06 }, tln: { 3: 0.50, 4: 0.50 }, gio: 1.00, nguong: 8.0 },
+    tong: { 1: 0.50, 2: 0.28, 3: 0.18, 4: 0.04 }, gio: 1.15, nguong: 6.5 },
+  { cap: 2, ten: 'Tam Trọng Lôi Kiếp', tuId: 3, nhan: 'đúng tỉ lệ 4:3:3 và thời gian của đề thật',
+    tong: { 1: 0.40, 2: 0.30, 3: 0.21, 4: 0.09 }, gio: 1.00, nguong: 8.0 },
   { cap: 3, ten: 'Ngũ Trọng Lôi Kiếp', tuId: 5, nhan: 'cỡ đề thi thử trường chuyên',
-    ts: { 1: 0.18, 2: 0.36, 3: 0.34, 4: 0.12 }, tln: { 3: 0.34, 4: 0.66 }, gio: 0.92, nguong: 8.5 },
+    tong: { 1: 0.28, 2: 0.30, 3: 0.27, 4: 0.15 }, gio: 0.92, nguong: 8.5 },
   { cap: 4, ten: 'Thất Trọng Lôi Kiếp', tuId: 7, nhan: 'đề phân hoá để lấy 9+',
-    ts: { 1: 0.08, 2: 0.28, 3: 0.40, 4: 0.24 }, tln: { 3: 0.17, 4: 0.83 }, gio: 0.85, nguong: 9.0 },
+    tong: { 1: 0.16, 2: 0.28, 3: 0.32, 4: 0.24 }, gio: 0.85, nguong: 9.0 },
   { cap: 5, ten: 'Cửu Trọng Lôi Kiếp', tuId: 9, nhan: 'cỡ đề học sinh giỏi, không có câu cho không',
-    ts: { 1: 0.00, 2: 0.18, 3: 0.44, 4: 0.38 }, tln: { 3: 0.00, 4: 1.00 }, gio: 0.78, nguong: 9.5 }
+    tong: { 1: 0.05, 2: 0.20, 3: 0.38, 4: 0.37 }, gio: 0.78, nguong: 9.5 }
 ];
 
 /* Cấp lôi kiếp mặc định ứng với cảnh giới hiện tại */
@@ -111,7 +113,10 @@ TD.VAT_PHAM = {
 
 /* ---------- 6. THANG QUY ĐỔI ĐIỂM ---------- */
 /* Ước lượng điểm từ độ chính xác theo mức độ, có trọng số theo cấu trúc đề. */
-TD.TRONG_SO_MUC = { 1: 0.30, 2: 0.30, 3: 0.25, 4: 0.15 };
+/* Bộ GD&ĐT công bố tỉ lệ cấp độ tư duy của đề thi từ 2025 là BIẾT : HIỂU : VẬN DỤNG = 4 : 3 : 3.
+   Khung chính thức chỉ có BA cấp; game vẫn tách mức 3 và mức 4 để luyện riêng phần khó,
+   nhưng cộng lại phải đúng 30% thì ước lượng điểm mới sát thực tế. */
+TD.TRONG_SO_MUC = { 1: 0.40, 2: 0.30, 3: 0.21, 4: 0.09 };
 
 TD.hamMucTieu = function (diem) {
   if (diem >= 9.5) return 'Thủ khoa cấp tỉnh';

@@ -13,6 +13,8 @@ TD.macDinhTrangThai = function () {
     ngay_thi: TD.MAC_DINH.ngay_thi,
     to_hop: TD.MAC_DINH.to_hop.slice(),
     chi_tieu_ngay: TD.MAC_DINH.chi_tieu_ngay,
+    /* điểm mục tiêu của tổ hợp; app.js đọc TD.S.muc_tieu để tô màu ô ước lượng điểm */
+    muc_tieu: TD.MAC_DINH.muc_tieu,
     so_cau_phien: 30,           /* độ dài mỗi phiên Luyện Công */
     bat_dau: TD.homNay(),
     /* thống kê: thong_ke[mon][muc] = {dung, tong} */
@@ -53,6 +55,9 @@ TD.tai = function () {
   if (!s) return md;
   /* bổ sung khoá mới khi nâng cấp phiên bản */
   for (const k in md) if (!(k in s)) s[k] = md[k];
+  /* túi pháp bảo là object lồng: bản lưu cũ chỉ có thien_co nên phải bù
+     từng khoá con, nếu không mấy pháp bảo mới thêm sẽ không hiện ra */
+  s.tui = Object.assign({}, md.tui, s.tui || {});
   return s;
 };
 
@@ -655,7 +660,10 @@ TD.cauDsTuMenhDe = function (mon, chiSos, cd, seed) {
   const t = TD.xaoR(R, y);
   return {
     chuong: cd || 'Lý thuyết trọng điểm',
-    muc: TD.mucLT(mon, Math.max.apply(null, t.map(x => x.m || 2))),
+    /* Mức của câu 4 ý là mức TRUNG BÌNH của bốn ý, không phải ý khó nhất:
+       thang điểm 0,1 – 0,25 – 0,5 – 1,0 chấm từng ý một nên độ khó thực tế
+       của câu là bình quân, và như vậy mới khớp với hạn ngạch mà đề đã cấp phát. */
+    muc: TD.mucLT(mon, Math.round(t.reduce((s2, x) => s2 + (x.m || 2), 0) / t.length)),
     dang: 'ds',
     _lt: true,
     q: `Về chủ đề <b>${cd}</b>, xét tính đúng/sai của từng phát biểu sau:`,
@@ -890,11 +898,6 @@ TD.khopTLN = function (nhap, dung) {
      Phần II (đúng/sai 4 ý)   thông hiểu – vận dụng
      Phần III(trả lời ngắn)   toàn bộ là vận dụng & vận dụng cao
    ============================================================ */
-TD.TRONG_SO_DE = {
-  mc:  { 1: 0.30, 2: 0.40, 3: 0.24, 4: 0.06 },
-  ds:  { 1: 0.00, 2: 0.25, 3: 0.45, 4: 0.30 },
-  tln: { 1: 0.00, 2: 0.00, 3: 0.50, 4: 0.50 }
-};
 
 TD.deThiThat = function (mon, seed, cap) {
   const M = TD.MON[mon];
@@ -919,14 +922,28 @@ TD.deThiThat = function (mon, seed, cap) {
   lt.forEach((x, i) => { const c = x.cd || 'Khác'; (theoCD[c] = theoCD[c] || []).push(i); });
   Object.keys(theoCD).forEach(c => {
     if (theoCD[c].length < 4) return;
-    /* mức của câu 4 ý lấy theo ý khó nhất trong chủ đề */
-    const m = TD.mucLT(mon, Math.max.apply(null, theoCD[c].map(i => lt[i].m || 2)));
+    /* Mức của câu 4 ý lấy theo mức TRUNG BÌNH của chủ đề chứ không phải ý khó nhất:
+       bốn ý được bốc ngẫu nhiên nên lấy ý khó nhất làm đại diện sẽ đẩy cả Phần II
+       lên mức vận dụng, khiến đề nặng hơn tỉ lệ 4:3:3 mà Bộ quy định. */
+    const ds4 = theoCD[c].map(i => lt[i].m || 2);
+    const m = TD.mucLT(mon, Math.round(ds4.reduce((a, b) => a + b, 0) / ds4.length));
     be.ds.push({ khoa: mon + '\u00A7' + c, muc: m, it: { mon: mon, dsy: null, cd: c, s: 0 } });
   });
 
-  /* ---- rút n câu theo chỉ tiêu mức độ, không trùng thẻ ---- */
+  /* ---- HẠN NGẠCH MỨC ĐỘ CHO CẢ ĐỀ ----
+     Bộ GD&ĐT quy định tỉ lệ cấp độ tư duy tính trên TOÀN BỘ đề, không phải riêng Phần I.
+     Phần II và Phần III bản chất đã là câu khó, nên phải cấp phát cho hai phần đó trước,
+     Phần I nhận phần hạn ngạch còn lại. Làm ngược lại thì cả đề lệch nặng về phía khó —
+     đúng lỗi mà bản trước mắc phải (đề "đúng đề thật" của Toán ra tới 57% câu vận dụng
+     trong khi đề thật chỉ có 30%). */
+  const tongCau = M.p1 + M.p2 + M.p3;
+  const quota = {}; let daCap = 0;
+  for (const m of [1, 2, 3, 4]) { quota[m] = Math.floor(tongCau * (K.tong[m] || 0)); daCap += quota[m]; }
+  for (let k = 0; daCap < tongCau; k++, daCap++) quota[[2, 3, 1, 4][k % 4]]++;
+
   const daDung = {};
-  const rut = (bo, n, trongSo) => {
+  /* thuTu: thứ tự ưu tiên tiêu hạn ngạch. Phần III lấy câu khó trước, Phần I lấy câu dễ trước. */
+  const rut = (bo, n, thuTu) => {
     const ra = [];
     if (!n || !bo.length) return ra;
     const them = x => {
@@ -934,21 +951,20 @@ TD.deThiThat = function (mon, seed, cap) {
       daDung[x.khoa] = 1; ra.push(x.it); return true;
     };
     const theoMuc = { 1: [], 2: [], 3: [], 4: [] };
-    TD.xaoR(R, bo).forEach(x => theoMuc[x.muc] ? theoMuc[x.muc].push(x) : theoMuc[2].push(x));
+    TD.xaoR(R, bo).forEach(x => (theoMuc[x.muc] || theoMuc[2]).push(x));
 
-    const chiTieu = {}; let da = 0;
-    for (const m of [1, 2, 3, 4]) { chiTieu[m] = Math.floor(n * (trongSo[m] || 0)); da += chiTieu[m]; }
-    const uuTien = [2, 3, 1, 4];
-    for (let k = 0; da < n; k++, da++) chiTieu[uuTien[k % 4]]++;
-
-    for (const m of [1, 2, 3, 4])
+    for (const m of thuTu)
       for (const x of theoMuc[m]) {
-        if (chiTieu[m] <= 0) break;
-        if (them(x)) chiTieu[m]--;
+        if (ra.length >= n || quota[m] <= 0) break;
+        if (them(x)) quota[m]--;
       }
-    /* thiếu thì vét mức khác cho bằng đủ — đề thi thật không được hụt câu */
+    /* hết hạn ngạch mà vẫn thiếu câu thì vét tiếp — đề thi không được hụt câu */
     if (ra.length < n)
-      for (const x of TD.xaoR(R, bo)) { if (ra.length >= n) break; them(x); }
+      for (const m of thuTu)
+        for (const x of theoMuc[m]) {
+          if (ra.length >= n) break;
+          if (them(x)) quota[m] = Math.max(0, quota[m] - 1);
+        }
     return ra;
   };
 
@@ -973,11 +989,10 @@ TD.deThiThat = function (mon, seed, cap) {
     return ra;
   };
 
-  /* Phần II bám theo Phần I nhưng luôn nặng hơn một bậc, đúng như đề thật */
-  const tsDS = { 1: 0, 2: K.ts[2] * 0.6, 3: K.ts[3] + K.ts[1] * 0.5, 4: K.ts[4] + K.ts[1] * 0.5 };
-  const p1 = chot(rut(be.mc, M.p1, K.ts));
-  const p2 = chot(rut(be.ds, M.p2, tsDS));
-  const p3 = chot(rut(be.tln, M.p3, K.tln));
+  /* Rút theo đúng thứ tự: Phần III (khó nhất) → Phần II → Phần I nhận phần còn lại */
+  const p3 = chot(rut(be.tln, M.p3, [4, 3, 2, 1]));
+  const p2 = chot(rut(be.ds, M.p2, [2, 3, 4, 1]));
+  const p1 = chot(rut(be.mc, M.p1, [1, 2, 3, 4]));
   /* thứ tự làm bài khuyến nghị: Phần I → Phần III → Phần II */
   return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2), kiep: K };
 };
