@@ -26,6 +26,7 @@ TD.moDotPha = function (cg) {
     <button class="nut kim" id="dp-dong">Tiếp tục tu luyện</button>
   </div>`;
   h.classList.add('hien');
+  TD.keu('dotpha');
   $('#dp-dong').onclick = () => h.classList.remove('hien');
   TD.S.linh_thach += 50;
   TD.bao('💎 +50 linh thạch mừng đột phá!', 'kim');
@@ -69,6 +70,7 @@ TD.MAN = [
 ];
 
 TD.di = function (man, tham) {
+  if (TD.man && TD.man !== man) TD.keu('cham');
   TD.man = man; TD.tham = tham || null;
   document.querySelectorAll('nav.tab button').forEach(b =>
     b.classList.toggle('on', b.dataset.m === man));
@@ -171,6 +173,7 @@ TD.mua = function (k) {
   if (TD.S.linh_thach < v.gia) { TD.bao('Không đủ linh thạch. Làm thêm câu hỏi để tích luỹ.', 'lua'); return; }
   TD.S.linh_thach -= v.gia;
   TD.S.tui[k] = (TD.S.tui[k] || 0) + 1;
+  TD.keu('thuong');
   TD.bao(`${v.icon} Đã mua ${v.ten}`, 'kim');
   TD.ve();
 };
@@ -331,6 +334,12 @@ TD.chayDongHo = function () {
       const ph = Math.floor(con / 60000), gi = Math.floor((con % 60000) / 1000);
       o.textContent = '⏱ ' + ph + ':' + String(gi).padStart(2, '0');
       o.style.color = con < 300000 ? 'var(--lua)' : '';
+      /* nhắc một tiếng ở mốc 5 phút, rồi đếm từng giây trong 10 giây cuối */
+      const giay = Math.ceil(con / 1000);
+      if (giay !== p._giayCuoi) {
+        p._giayCuoi = giay;
+        if (giay === 300 || (giay <= 10 && giay > 0)) TD.keu('tich');
+      }
     }
   }, 500);
 };
@@ -361,7 +370,7 @@ TD.veTui = function (q, vung, than) {
       const x = vung.querySelectorAll('.dapan')[i];
       if (x) { x.classList.add('mo'); x.disabled = true; }
     });
-    b.remove(); TD.luu();
+    b.remove(); TD.luu(); TD.keu('phapbao');
     TD.bao('🔮 Thiên Cơ Phù đã xoá 2 đáp án nhiễu.', 'tim');
   });
 
@@ -369,7 +378,7 @@ TD.veTui = function (q, vung, than) {
   nutPB('truy_hon', !!(q.giai || q.meo), 'Câu này không có lời giải chi tiết.', b => {
     tui.truy_hon--;
     q._soiGuong = true;
-    b.remove(); TD.luu();
+    b.remove(); TD.luu(); TD.keu('phapbao');
     than.appendChild(el('div', 'the vien-tim', `
       <b style="color:var(--tim)">🪞 Truy Hồn Kính — soi thấu câu này</b>
       ${q.giai ? `<div class="giai">${q.giai}</div>` : ''}
@@ -384,7 +393,7 @@ TD.veTui = function (q, vung, than) {
     TD.S.ngo_dao_con = 10;
     b.disabled = true;
     b.innerHTML = `🍵 Ngộ Đạo Trà <span class="mo-nhat">còn 10 câu</span>`;
-    TD.luu();
+    TD.luu(); TD.keu('phapbao');
     TD.bao('🍵 Ngộ Đạo Trà — linh khí ×2 trong 10 câu kế!', 'ngoc');
   });
   if (conTra > 0) bTra.innerHTML = `🍵 Ngộ Đạo Trà <span class="mo-nhat">còn ${conTra} câu</span>`;
@@ -491,6 +500,13 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
   TD.ghiNhan(mon, q.muc, dung, soi);
   TD.SRS.capNhat(TD.idThe(p.ds[p.vt]), soi ? false : dung);
 
+  /* tiếng phản hồi: chuỗi càng dài chuông càng cao, mốc 5 câu thì reo hẳn một quãng */
+  if (dung) {
+    if (TD.S.chuoi > 0 && TD.S.chuoi % 5 === 0) TD.keu('chuoi');
+    else TD.keu('dung', TD.S.chuoi);
+  } else if (diem > 0) TD.keu('vua');
+  else TD.keu('sai');
+
   /* thưởng linh khí & linh thạch */
   let exp = 0, ls = 0, x2 = false;
   if (dung) {
@@ -590,6 +606,7 @@ TD.ketThucPhien = function () {
             : ' Đây đã là tầng kiếp nặng nhất — không còn gì để sợ ở phòng thi.'}`
         : `Chưa đạt ngưỡng ${TD.soVN(K.nguong, 1)} của ${K.ten}. Xem lại các câu sai ở màn Tâm Ma Kiếp rồi thử lại${
             K.cap > 1 ? `, hoặc hạ xuống cấp ${K.cap - 1} cho chắc nền` : ''}.`}</p></div>`;
+    TD.keu(dat ? 'thangkiep' : 'batkiep');
     if (dat) {
       const thuong = 60 + K.cap * 40;
       TD.S.linh_thach += thuong;
@@ -946,6 +963,7 @@ TD.moThe = function (khoa, i) {
     if (TD.S.da_khac[id]) { TD.bao('Bạn đã khắc cốt mục này rồi.'); return; }
     TD.S.da_khac[id] = TD.homNay();
     TD.themExp(15); TD.S.linh_thach += 3;
+    TD.keu('khac');
     TD.bao('📜 +15 linh khí · +3 💎 — khắc cốt ghi tâm!', 'kim');
     TD.luu(); TD.di('tangkinh');
   };
@@ -1290,6 +1308,7 @@ TD.dungDe = function (mon, cap) {
     </div>`));
 
   $('#dk-batdau').onclick = () => {
+    TD.keu('sam');
     TD.batDauPhien(mon, null, 'dokiep', ds, phut);
     TD.phien.kiep = K;
     /* quy đổi điểm về thang 10 khi kết thúc */
@@ -1509,11 +1528,38 @@ TD.man_caidat = function (c) {
       <label class="so-nhan">Tổ hợp xét tuyển (chọn 3 môn)</label>
       <div style="margin-top:7px">${oMon}</div>
     </div>
+    <div style="margin-bottom:15px;padding-top:13px;border-top:1px solid rgba(255,255,255,.08)">
+      <label class="so-nhan">Âm thanh</label>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px">
+        <label style="display:inline-flex;gap:7px;align-items:center;cursor:pointer;font-size:13.6px">
+          <input type="checkbox" id="cd-am" ${TD.AM && TD.AM.bat ? 'checked' : ''}>
+          Bật tiếng chuông, sấm và đột phá
+        </label>
+        <span style="display:inline-flex;gap:8px;align-items:center;font-size:13.6px;color:var(--chu2)">
+          🔊 <input type="range" id="cd-amluong" min="0" max="100" step="5"
+            value="${Math.round((TD.AM ? TD.AM.am_luong : 0.5) * 100)}" style="width:130px;vertical-align:middle">
+          <b id="cd-amso" style="color:var(--kim);min-width:38px;display:inline-block">${Math.round((TD.AM ? TD.AM.am_luong : 0.5) * 100)}%</b>
+        </span>
+        <button class="nut phu" id="cd-nghe" style="padding:6px 13px;font-size:13px">Nghe thử</button>
+      </div>
+      <p class="mo-nhat" style="margin-top:6px">Tiếng được tổng hợp ngay trong máy nên không cần mạng.
+      Trình duyệt chỉ cho phát tiếng sau khi bạn chạm vào trang một lần — bấm "Nghe thử" là mở.</p>
+    </div>
     <div class="hang-nut">
       <button class="nut" id="cd-luu">Lưu cài đặt</button>
       <button class="nut phu" id="cd-xuat">Xuất tiến độ</button>
       <button class="nut lua" id="cd-xoa">Xoá toàn bộ tiến độ</button>
     </div>`));
+
+  const oAm = $('#cd-am'), oAL = $('#cd-amluong'), oSo = $('#cd-amso');
+  const dat = () => {
+    TD.datAmThanh(oAm.checked, +oAL.value / 100);
+    oSo.textContent = oAL.value + '%';
+  };
+  oAm.onchange = () => { dat(); if (oAm.checked) TD.keu('dung', 2); };
+  oAL.oninput = dat;
+  oAL.onchange = () => { dat(); TD.keu('dung', 2); };
+  $('#cd-nghe').onclick = () => { dat(); TD.ngheThu(); };
 
   $('#cd-luu').onclick = () => {
     TD.S.ten = $('#cd-ten').value.trim() || 'Đạo hữu';
@@ -1564,6 +1610,7 @@ TD.man_caidat = function (c) {
    ============================================================ */
 TD.khoiDong = function () {
   TD.S = TD.tai();
+  if (TD.AM) { TD.AM.bat = TD.S.am_thanh !== false; TD.AM.am_luong = TD.S.am_luong === undefined ? 0.5 : TD.S.am_luong; }
   TD.dangKyMauTuMenhDe();     /* mọi môn đều có đề tự sinh, kể cả khối xã hội */
   TD.dangKyVdcMc();           /* bản trắc nghiệm của các mẫu vận dụng cao, cho Phần I có câu phân hoá */
 

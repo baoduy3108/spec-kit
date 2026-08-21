@@ -36,6 +36,9 @@ TD.macDinhTrangThai = function () {
     ngo_dao_con: 0,
     /* cấp lôi kiếp người chơi tự chọn; null = theo cảnh giới hiện tại */
     kiep_chon: null,
+    /* âm thanh: bật/tắt và âm lượng 0–1 */
+    am_thanh: true,
+    am_luong: 0.5,
     /* số biến thể đề Ngữ văn đã làm của từng ngữ liệu */
     van_lam: {},
     chuoi: 0, chuoi_max: 0,
