@@ -211,3 +211,65 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
 ]);
 
 })();
+
+/* ==========================================================
+   TOÁN — TỔ HỢP & XÁC SUẤT: bài toán đếm có ràng buộc
+   Chuyên đề này trước chỉ có câu đếm tổ hợp mức thông hiểu,
+   trong khi đề thật hay đặt câu khó ở dạng đếm có điều kiện.
+   ========================================================== */
+(function () {
+const S = TD.soVN;
+const ucln = (a, b) => b ? ucln(b, a % b) : a;
+const toHop = (n, k) => { if (k < 0 || k > n) return 0; let r = 1; for (let i = 1; i <= k; i++) r = r * (n - k + i) / i; return Math.round(r); };
+
+TD.GEN.toan = (TD.GEN.toan || []).concat([
+
+{ ma: 'toan-vdc-tohop-rangbuoc', chuong: 'Tổ hợp – Xác suất', muc: 4, dang: 'tln',
+  tao(R) {
+    const nam = R.nguyen(5, 9), nu = R.nguyen(4, 8);
+    const chon = R.nguyen(4, 5);
+    const tong = nam + nu;
+    if (chon >= tong - 1) return null;
+    const kieu = R.chon(['itNhat1Nu', 'caHaiPhai', 'itNhat2Nam']);
+    const tongCach = toHop(tong, chon);
+    let thuan, mo, buoc;
+    if (kieu === 'itNhat1Nu') {
+      thuan = tongCach - toHop(nam, chon);
+      mo = 'có <b>ít nhất 1 học sinh nữ</b>';
+      buoc = `Dùng phần bù: biến cố đối là "chọn toàn nam".\n`
+           + `  Số cách chọn toàn nam = C(${nam}, ${chon}) = ${S(toHop(nam, chon))}\n`
+           + `  Số cách thuận lợi = ${S(tongCach)} − ${S(toHop(nam, chon))} = ${S(thuan)}`;
+    } else if (kieu === 'caHaiPhai') {
+      thuan = tongCach - toHop(nam, chon) - toHop(nu, chon);
+      mo = 'có <b>cả nam lẫn nữ</b>';
+      buoc = `Dùng phần bù: biến cố đối là "toàn nam" HOẶC "toàn nữ" (hai trường hợp rời nhau).\n`
+           + `  Toàn nam = C(${nam}, ${chon}) = ${S(toHop(nam, chon))}\n`
+           + `  Toàn nữ  = C(${nu}, ${chon}) = ${S(toHop(nu, chon))}\n`
+           + `  Số cách thuận lợi = ${S(tongCach)} − ${S(toHop(nam, chon))} − ${S(toHop(nu, chon))} = ${S(thuan)}`;
+    } else {
+      thuan = tongCach - toHop(nu, chon) - nam * toHop(nu, chon - 1);
+      mo = 'có <b>ít nhất 2 học sinh nam</b>';
+      buoc = `Dùng phần bù: biến cố đối là "không có nam nào" hoặc "đúng 1 nam".\n`
+           + `  Không có nam = C(${nu}, ${chon}) = ${S(toHop(nu, chon))}\n`
+           + `  Đúng 1 nam   = C(${nam}, 1)·C(${nu}, ${chon - 1}) = ${nam}·${S(toHop(nu, chon - 1))} = ${S(nam * toHop(nu, chon - 1))}\n`
+           + `  Số cách thuận lợi = ${S(tongCach)} − ${S(toHop(nu, chon))} − ${S(nam * toHop(nu, chon - 1))} = ${S(thuan)}`;
+    }
+    if (thuan <= 0 || thuan === tongCach) return null;
+    const g = ucln(thuan, tongCach);
+    return {
+      q: `Một lớp có ${S(nam)} học sinh nam và ${S(nu)} học sinh nữ. Giáo viên chọn ngẫu nhiên ${S(chon)} học sinh `
+        + `để lập một đội tham gia hoạt động ngoại khoá. Tính xác suất để đội được chọn ${mo}. `
+        + `Viết kết quả dưới dạng phân số tối giản a/b.`,
+      ans: (thuan / g) + '/' + (tongCach / g),
+      giai: `Bước 1 — không gian mẫu: chọn ${S(chon)} bạn bất kì trong ${S(tong)} bạn.\n`
+        + `  n(Ω) = C(${tong}, ${chon}) = ${S(tongCach)}\n`
+        + `Bước 2 — đếm số cách thuận lợi.\n${buoc}\n`
+        + `Bước 3 — P = ${S(thuan)}/${S(tongCach)} = ${(thuan / g)}/${(tongCach / g)}.`,
+      meo: 'Thấy chữ "ít nhất" hoặc "có cả… lẫn…" thì gần như chắc chắn phải dùng PHẦN BÙ — '
+        + 'đếm biến cố đối rồi lấy tổng trừ đi, nhanh hơn nhiều so với chia trường hợp. '
+        + 'Casio 570VN Plus và 580VN X bấm tổ hợp bằng SHIFT + ÷ (nCr): gõ 12 SHIFT ÷ 5 = ra C(12;5).'
+    };
+  } }
+
+]);
+})();

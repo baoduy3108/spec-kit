@@ -697,6 +697,26 @@ TD.man_tangkinh = function (c) {
     <p class="mo-nhat">Toàn bộ lý thuyết trọng điểm, công thức và mẹo nhớ nhanh. Bấm vào một mục để mở nội dung đầy đủ.</p>
     <div class="hang-nut">${chon}</div>`));
 
+  /* Kho từ vựng chỉ có ở môn Anh và phải tra cứu được, không thể chỉ nằm sau câu hỏi */
+  if (mon === 'anh') {
+    const soTu = (TD.KHO_TU || []).length, soCol = (TD.KHO_COLLOC || []).length;
+    const cdTu = new Set((TD.KHO_TU || []).map(x => x.cd)).size;
+    const boxTV = el('div', 'the vien-kim', `
+      <h3>📚 Kho từ vựng & Collocation</h3>
+      <p style="font-size:13.5px;color:var(--chu2);margin:6px 0 0">
+        <b style="color:var(--kim)">${soTu.toLocaleString('vi-VN')}</b> từ theo
+        <b>${cdTu}</b> chủ đề và <b style="color:var(--kim)">${soCol}</b> collocation —
+        tra được, lọc được, học được, không phải chỉ để sinh câu hỏi.</p>`);
+    const hn = el('div', 'hang-nut', '');
+    const b1 = el('button', 'nut kim', '📖 Mở kho từ vựng');
+    b1.onclick = () => TD.manTuVung('tu');
+    const b2 = el('button', 'nut', '🔗 Mở kho collocation');
+    b2.onclick = () => TD.manTuVung('colloc');
+    hn.appendChild(b1); hn.appendChild(b2);
+    boxTV.appendChild(hn);
+    c.appendChild(boxTV);
+  }
+
   (TD.NGUON_LT[mon] || []).forEach(([khoa, ten]) => {
     const ds = TD.KHO[khoa] || [];
     if (!ds.length) return;
@@ -732,6 +752,146 @@ TD.man_tangkinh = function (c) {
     });
     c.appendChild(box);
   });
+};
+
+/* ============================================================
+   KHO TỪ VỰNG TIẾNG ANH — TRA CỨU & HỌC
+   Hơn hai nghìn từ nên phải có lọc chủ đề, lọc loại từ và ô tìm
+   kiếm; danh sách dài thì cắt trang, bấm mới hiện thêm.
+   ============================================================ */
+TD.TV = { cd: null, loai: null, tim: '', hien: 120, nhom: null };
+
+TD.manTuVung = function (che) {
+  TD.TV.che = che || TD.TV.che || 'tu';
+  const c = $('#noidung'); c.innerHTML = '';
+  const laTu = TD.TV.che === 'tu';
+  const kho = laTu ? (TD.KHO_TU || []) : (TD.KHO_COLLOC || []);
+
+  const dau = el('div', 'the vien-kim', `<h3>${laTu ? '📚 Kho từ vựng Tiếng Anh' : '🔗 Kho Collocation'}</h3>
+    <p class="mo-nhat">${laTu
+      ? 'Từ vựng thường gặp trong đề thi tốt nghiệp, gom theo chủ đề. Gõ tiếng Anh hoặc tiếng Việt đều tìm được.'
+      : 'Những cụm từ đi liền nhau mà đề hay hỏi. Học theo cụm chứ đừng học từ lẻ — đề không bao giờ hỏi từ đứng một mình.'}</p>`);
+  const doiChe = el('div', 'hang-nut', '');
+  [['tu', '📚 Từ vựng'], ['colloc', '🔗 Collocation']].forEach(([k, t]) => {
+    const b = el('button', 'nut ' + (TD.TV.che === k ? 'kim' : 'phu'), t);
+    b.style.padding = '7px 13px'; b.style.fontSize = '12.6px';
+    b.onclick = () => { TD.TV.che = k; TD.TV.cd = null; TD.TV.nhom = null; TD.TV.tim = ''; TD.TV.hien = 120; TD.manTuVung(k); };
+    doiChe.appendChild(b);
+  });
+  dau.appendChild(doiChe);
+  c.appendChild(dau);
+
+  /* ---- bộ lọc ---- */
+  const loc = el('div', 'the', '');
+  const oTim = el('input', 'o-nhap');
+  oTim.placeholder = laTu ? 'Tìm từ hoặc nghĩa tiếng Việt…' : 'Tìm cụm hoặc nghĩa…';
+  oTim.value = TD.TV.tim; oTim.style.width = '100%'; oTim.autocomplete = 'off';
+  loc.appendChild(oTim);
+
+  const nhomKhoa = laTu ? 'cd' : 'nhom';
+  const dsNhom = [];
+  const demNhom = {};
+  kho.forEach(x => { demNhom[x[nhomKhoa]] = (demNhom[x[nhomKhoa]] || 0) + 1; });
+  Object.keys(demNhom).forEach(k => dsNhom.push(k));
+
+  const hangNhom = el('div', 'hang-nut', '');
+  hangNhom.style.marginTop = '10px';
+  const nutNhom = (gt, ten) => {
+    const dangChon = (laTu ? TD.TV.cd : TD.TV.nhom) === gt;
+    const b = el('button', 'nut ' + (dangChon ? 'kim' : 'phu'), ten);
+    b.style.padding = '5px 10px'; b.style.fontSize = '11.8px';
+    b.onclick = () => {
+      if (laTu) TD.TV.cd = gt; else TD.TV.nhom = gt;
+      TD.TV.hien = 120; TD.TV.tim = oTim.value; TD.manTuVung(TD.TV.che);
+    };
+    hangNhom.appendChild(b);
+  };
+  nutNhom(null, `Tất cả (${kho.length})`);
+  dsNhom.forEach(k => nutNhom(k, `${k} (${demNhom[k]})`));
+  loc.appendChild(hangNhom);
+
+  if (laTu) {
+    const hangLoai = el('div', 'hang-nut', '');
+    hangLoai.style.marginTop = '8px';
+    [[null, 'Mọi loại từ'], ['n', 'Danh từ'], ['v', 'Động từ'], ['adj', 'Tính từ'], ['adv', 'Trạng từ'], ['phr', 'Cụm từ']]
+      .forEach(([gt, ten]) => {
+        const b = el('button', 'nut ' + (TD.TV.loai === gt ? 'kim' : 'phu'), ten);
+        b.style.padding = '5px 10px'; b.style.fontSize = '11.8px';
+        b.onclick = () => { TD.TV.loai = gt; TD.TV.hien = 120; TD.TV.tim = oTim.value; TD.manTuVung('tu'); };
+        hangLoai.appendChild(b);
+      });
+    loc.appendChild(hangLoai);
+  }
+  c.appendChild(loc);
+
+  /* ---- danh sách ---- */
+  const ra = el('div', 'the', '');
+  c.appendChild(ra);
+
+  const ve = () => {
+    const q = TD.khongDau(TD.TV.tim.trim());
+    let ds = kho;
+    if (laTu) {
+      if (TD.TV.cd) ds = ds.filter(x => x.cd === TD.TV.cd);
+      if (TD.TV.loai) ds = ds.filter(x => x.l === TD.TV.loai);
+      if (q) ds = ds.filter(x => TD.khongDau(x.w).indexOf(q) >= 0 || TD.khongDau(x.n).indexOf(q) >= 0);
+    } else {
+      if (TD.TV.nhom) ds = ds.filter(x => x.nhom === TD.TV.nhom);
+      if (q) ds = ds.filter(x => TD.khongDau(x.tu + ' ' + x.cum).indexOf(q) >= 0 || TD.khongDau(x.n).indexOf(q) >= 0);
+    }
+    ra.innerHTML = '';
+    ra.appendChild(el('div', 'mo-nhat', `Tìm thấy <b style="color:var(--kim)">${ds.length}</b> mục`
+      + (ds.length > TD.TV.hien ? ` · đang hiện ${TD.TV.hien}` : '')));
+    if (!ds.length) {
+      ra.appendChild(el('p', '', 'Không có mục nào khớp. Thử từ khoá ngắn hơn.'));
+      return;
+    }
+    const bang = el('div', 'bang-tu', '');
+    ds.slice(0, TD.TV.hien).forEach(x => {
+      bang.appendChild(el('div', 'dong-tu', laTu
+        ? `<div><b class="tu-en">${x.w}</b> <span class="nhan loai-tu">${x.l}</span></div>
+           <div class="tu-vi">${x.n}</div>`
+        : `<div><b class="tu-en">${x.tu} ${x.cum}</b></div>
+           <div class="tu-vi">${x.n}</div>`));
+    });
+    ra.appendChild(bang);
+    if (ds.length > TD.TV.hien) {
+      const b = el('button', 'nut phu', `Hiện thêm ${Math.min(200, ds.length - TD.TV.hien)} mục nữa`);
+      b.onclick = () => { TD.TV.hien += 200; ve(); };
+      ra.appendChild(b);
+    }
+  };
+  ve();
+
+  let hen;
+  oTim.oninput = () => {
+    clearTimeout(hen);
+    hen = setTimeout(() => { TD.TV.tim = oTim.value; TD.TV.hien = 120; ve(); }, 180);
+  };
+
+  const cuoi = el('div', 'hang-nut', '');
+  const bKT = el('button', 'nut kim', '📝 Kiểm tra 50 câu từ vựng & collocation');
+  bKT.onclick = () => TD.kiemTraTuVung();
+  cuoi.appendChild(bKT);
+  const bVe = el('button', 'nut phu', '← Về Tàng Kinh Các');
+  bVe.onclick = () => { TD.monTK = 'anh'; TD.di('tangkinh'); };
+  cuoi.appendChild(bVe);
+  c.appendChild(el('div', 'the', '')).appendChild(cuoi);
+  window.scrollTo(0, 0);
+};
+
+/* Kiểm tra nhanh riêng phần từ vựng — chỉ lấy các mẫu đề dùng kho từ */
+TD.kiemTraTuVung = function () {
+  const ma = ['anh-nghia', 'anh-tu', 'anh-wordform', 'anh-colloc', 'anh-colloc-cum', 'anh-colloc-nghia', 'anh-gioitu'];
+  const mau = (TD.GEN.anh || []).filter(t => ma.indexOf(t.ma) >= 0);
+  if (!mau.length) { TD.bao('Chưa có mẫu đề từ vựng.', 'lua'); return; }
+  const ds = [];
+  for (let k = 0; ds.length < 50 && k < 400; k++) {
+    const t = mau[k % mau.length];
+    const s = (Math.random() * 4294967295) >>> 0;
+    if (TD.sinhCau(t, s)) ds.push({ mon: 'anh', g: t.ma, s: s });
+  }
+  TD.batDauPhien('anh', null, 'luyen', TD.xao(ds));
 };
 
 TD.moThe = function (khoa, i) {

@@ -41,13 +41,13 @@ TD.GEN.toan = [
     const tcd = T(-d / c, 3), tcn = T(a / c, 3);
     const hoiDung = R() < 0.5;
     return {
-      q: `Cho hàm số y = (${a === 1 ? '' : a === -1 ? '−' : a}x ${b >= 0 ? '+ ' + b : '− ' + (-b)}) / (${c === 1 ? '' : c}x ${d >= 0 ? '+ ' + d : '− ' + (-d)}). `
+      q: `Cho hàm số y = (${TD.daThuc([[a, 'x'], [b, '']])}) / (${TD.daThuc([[c, 'x'], [d, '']])}). `
        + `Tìm ${hoiDung ? 'hoành độ của tiệm cận đứng' : 'tung độ của tiệm cận ngang'} của đồ thị hàm số.`,
       ans: S(hoiDung ? tcd : tcn),
       giai: hoiDung
-        ? `Tiệm cận đứng là nghiệm của mẫu: ${c === 1 ? '' : c}x ${d >= 0 ? '+ ' + d : '− ' + (-d)} = 0 ⇒ x = ${S(tcd)}.\n`
+        ? `Tiệm cận đứng là nghiệm của mẫu: ${TD.daThuc([[c, 'x'], [d, '']])} = 0 ⇒ x = ${S(tcd)}.\n`
           + `(Kiểm tra tử tại x = ${S(tcd)} khác 0 nên đây đúng là tiệm cận đứng.)`
-        : `Tiệm cận ngang: y = a/c = ${a}/${c} = ${S(tcn)}.\n`
+        : `Tiệm cận ngang: y = a/c = ${TD.so(a)}/${c} = ${S(tcn)}.\n`
           + `Vì bậc tử bằng bậc mẫu nên giới hạn khi x → ±∞ bằng tỉ số hai hệ số bậc nhất.`,
       meo: 'Hàm (ax+b)/(cx+d): tiệm cận đứng x = −d/c, tiệm cận ngang y = a/c.'
     };
@@ -63,7 +63,7 @@ TD.GEN.toan = [
       q: `Tính giá trị của biểu thức log<sub>${a}</sub>${x} − log<sub>${a}</sub>${y}.`,
       ans: String(m),
       giai: `log_${a}${x} − log_${a}${y} = log_${a}(${x}/${y}) = log_${a}${x / y}\n`
-          + `Vì ${x / y} = ${a}^${m} nên log_${a}${x / y} = ${m}.`,
+          + `Vì ${x / y} = ${m === 1 ? String(a) : a + '<sup>' + m + '</sup>'} nên log<sub>${a}</sub>${x / y} = ${m}.`,
       meo: 'Hiệu hai logarit cùng cơ số bằng logarit của THƯƠNG, không phải thương hai logarit.'
     };
   } },
@@ -93,11 +93,11 @@ TD.GEN.toan = [
     const val = a * Math.pow(t, 3) / 3 + b * t * t / 2 + c * t;
     const tu = 2 * a * Math.pow(t, 3) + 3 * b * t * t + 6 * c * t;   /* val = tu/6 */
     return {
-      q: `Tính tích phân I = ∫ từ 0 đến ${t} của (${a}x² ${b ? '+ ' + b + 'x ' : ''}${c ? '+ ' + c : ''})dx. `
+      q: `Tính tích phân I = ∫ từ 0 đến ${t} của (${TD.daThuc([[a, 'x²'], [b, 'x'], [c, '']])})dx. `
        + `Viết kết quả dưới dạng phân số tối giản a/b (nếu là số nguyên thì ghi số nguyên).`,
       ans: phanSo(tu, 6),
-      giai: `Nguyên hàm: F(x) = ${a}x³/3 ${b ? '+ ' + b + 'x²/2 ' : ''}${c ? '+ ' + c + 'x' : ''}\n`
-          + `I = F(${t}) − F(0) = ${a}·${Math.pow(t, 3)}/3 ${b ? '+ ' + b + '·' + t * t + '/2 ' : ''}${c ? '+ ' + c + '·' + t : ''}\n`
+      giai: `Nguyên hàm: F(x) = ${TD.daThuc([[a, 'x³/3'], [b, 'x²/2'], [c, 'x']])}\n`
+          + `I = F(${t}) − F(0) = ${TD.daThuc([[a * Math.pow(t, 3), '/3'], [b * t * t, '/2'], [c * t, '']]).replace(/(\d)\/(\d)/g, '$1/$2')}\n`
           + `= ${S(T(val, 6))} = ${phanSo(tu, 6)}.`,
       meo: '∫xⁿdx = xⁿ⁺¹/(n+1) + C, áp dụng cho từng hạng tử rồi thay cận.'
     };
@@ -112,16 +112,15 @@ TD.GEN.toan = [
     const q = p + R.nguyen(1, 7);
     const a = p + q, b = -p * q;
     const tu = Math.pow(q - p, 3);
-    const dt = (b === 0 ? '' : (b > 0 ? ' + ' + b : ' − ' + (-b)));
-    const duong = a === 0 ? (b === 0 ? '0' : String(b)) : `${a === 1 ? '' : a === -1 ? '−' : a}x${dt}`;
+    const duong = TD.daThuc([[a, 'x'], [b, '']]);
     return {
       q: `Tính diện tích hình phẳng giới hạn bởi parabol y = x² và đường thẳng y = ${duong}. `
        + `Viết kết quả dưới dạng phân số tối giản a/b (nếu là số nguyên thì ghi số nguyên).`,
       ans: phanSo(tu, 6),
-      giai: `Hoành độ giao điểm: x² = ${duong} ⇔ x² − ${a}x ${-b >= 0 ? '+ ' + (-b) : '− ' + b} = 0\n`
-          + `⇔ (x − ${p})(x − ${q}) = 0 ⇒ x = ${p} hoặc x = ${q}.\n`
-          + `Trên đoạn [${p}; ${q}] đường thẳng nằm phía trên parabol.\n`
-          + `S = ∫ từ ${p} đến ${q} của [(${duong}) − x²]dx = (${q} − ${p})³/6 = ${tu}/6 = ${phanSo(tu, 6)}.`,
+      giai: `Hoành độ giao điểm: x² = ${duong} ⇔ ${TD.daThuc([[1, 'x²'], [-a, 'x'], [-b, '']])} = 0\n`
+          + `⇔ ${TD.nhanTu(p)}${TD.nhanTu(q)} = 0 ⇒ x = ${TD.so(p)} hoặc x = ${TD.so(q)}.\n`
+          + `Trên đoạn [${TD.so(p)}; ${TD.so(q)}] đường thẳng nằm phía trên parabol.\n`
+          + `S = ∫ từ ${TD.so(p)} đến ${TD.so(q)} của [(${duong}) − x²]dx = (${TD.so(q)} − (${TD.so(p)}))³/6 = ${tu}/6 = ${phanSo(tu, 6)}.`,
       meo: 'Mẹo: diện tích giữa parabol y = x² và một đường thẳng cắt nó tại x = p, q luôn bằng (q − p)³/6.'
     };
   } },
@@ -136,14 +135,13 @@ TD.GEN.toan = [
     const tu = Math.abs(n[0] * M[0] + n[1] * M[1] + n[2] * M[2] + D);
     if (tu === 0) return null;
     const d = T(tu / do_dai, 4);
-    const he = (h, bien) => (h === 0 ? '' : (h > 0 ? ' + ' : ' − ') + (Math.abs(h) === 1 ? '' : Math.abs(h)) + bien);
-    const pt = `${n[0] === 1 ? 'x' : n[0] === -1 ? '−x' : n[0] + 'x'}${he(n[1], 'y')}${he(n[2], 'z')}${D >= 0 ? ' + ' + D : ' − ' + (-D)} = 0`;
+    const pt = TD.daThuc([[n[0], 'x'], [n[1], 'y'], [n[2], 'z'], [D, '']]) + ' = 0';
     return {
-      q: `Trong không gian Oxyz, tính khoảng cách từ điểm M(${M[0]}; ${M[1]}; ${M[2]}) đến mặt phẳng (P): ${pt}. `
+      q: `Trong không gian Oxyz, tính khoảng cách từ điểm M(${TD.so(M[0])}; ${TD.so(M[1])}; ${TD.so(M[2])}) đến mặt phẳng (P): ${pt}. `
        + `(làm tròn đến hàng phần trăm nếu không phải số nguyên)`,
       ans: S(d),
       giai: `d(M,(P)) = |Ax₀ + By₀ + Cz₀ + D| / √(A² + B² + C²)\n`
-          + `Tử: |${n[0]}·${M[0]} + ${n[1]}·${M[1]} + ${n[2]}·${M[2]} + ${D}| = ${tu}\n`
+          + `Tử: |${TD.so(n[0])}·(${TD.so(M[0])}) + ${TD.so(n[1])}·(${TD.so(M[1])}) + ${TD.so(n[2])}·(${TD.so(M[2])}) + (${TD.so(D)})| = ${tu}\n`
           + `Mẫu: √(${n[0]}² + ${n[1]}² + ${n[2]}²) = √${n[0] * n[0] + n[1] * n[1] + n[2] * n[2]} = ${S(do_dai)}\n`
           + `d = ${tu} / ${S(do_dai)} = ${S(d)}.`,
       meo: 'Nhớ lấy TRỊ TUYỆT ĐỐI ở tử và căn tổng bình phương ba hệ số ở mẫu.'
@@ -155,19 +153,19 @@ TD.GEN.toan = [
     const a = R.nguyen(-5, 5), b = R.nguyen(-5, 5), c = R.nguyen(-5, 5);
     const Rb = R.nguyen(1, 7);
     const d = a * a + b * b + c * c - Rb * Rb;
-    const he = (h, bien) => { const k = -2 * h; return k === 0 ? '' : (k > 0 ? ' + ' : ' − ') + (Math.abs(k) === 1 ? '' : Math.abs(k)) + bien; };
     return {
-      q: `Trong không gian Oxyz, cho mặt cầu (S): x² + y² + z²${he(a, 'x')}${he(b, 'y')}${he(c, 'z')}${d >= 0 ? ' + ' + d : ' − ' + (-d)} = 0. `
+      q: `Trong không gian Oxyz, cho mặt cầu (S): ${TD.daThuc([[1, 'x²'], [1, 'y²'], [1, 'z²'],
+            [-2 * a, 'x'], [-2 * b, 'y'], [-2 * c, 'z'], [d, '']])} = 0. `
        + `Bán kính của mặt cầu bằng bao nhiêu?`,
       ans: String(Rb),
       giai: `Dạng x²+y²+z²−2ax−2by−2cz+d = 0 có tâm I(a; b; c) và R = √(a²+b²+c²−d).\n`
-          + `So sánh hệ số: a = ${a}, b = ${b}, c = ${c}, d = ${d}\n`
-          + `R = √(${a * a} + ${b * b} + ${c * c} − (${d})) = √${Rb * Rb} = ${Rb}.`,
+          + `So sánh hệ số: a = ${TD.so(a)}, b = ${TD.so(b)}, c = ${TD.so(c)}, d = ${TD.so(d)}\n`
+          + `R = √(${a * a} + ${b * b} + ${c * c} − (${TD.so(d)})) = √${Rb * Rb} = ${Rb}.`,
       meo: 'Hệ số của x là −2a nên a = −(hệ số)/2. Điều kiện tồn tại mặt cầu: a²+b²+c²−d > 0.'
     };
   } },
 
-{ ma: 'toan-capso-cong', chuong: 'Cấp số cộng', muc: 2, dang: 'tln',
+{ ma: 'toan-capso-cong', chuong: 'Cấp số cộng & cấp số nhân', muc: 2, dang: 'tln',
   tao(R) {
     const u1 = R.nguyen(-10, 15), d = R.nguyen(-8, 9);
     if (d === 0) return null;
@@ -175,7 +173,7 @@ TD.GEN.toan = [
     const Sn = n * (2 * u1 + (n - 1) * d) / 2;
     if (!Number.isInteger(Sn)) return null;
     return {
-      q: `Cho cấp số cộng (uₙ) có u₁ = ${u1} và công sai d = ${d}. Tính tổng ${n} số hạng đầu tiên S<sub>${n}</sub>.`,
+      q: `Cho cấp số cộng (uₙ) có u₁ = ${TD.so(u1)} và công sai d = ${TD.so(d)}. Tính tổng ${n} số hạng đầu tiên S<sub>${n}</sub>.`,
       ans: String(Sn),
       giai: `Sₙ = n[2u₁ + (n − 1)d]/2\n`
           + `S_${n} = ${n}·[2·${u1} + ${n - 1}·${d}]/2 = ${n}·[${2 * u1} + ${(n - 1) * d}]/2 = ${n}·${2 * u1 + (n - 1) * d}/2 = ${Sn}.`,
@@ -183,17 +181,18 @@ TD.GEN.toan = [
     };
   } },
 
-{ ma: 'toan-capso-nhan', chuong: 'Cấp số nhân', muc: 3, dang: 'tln',
+{ ma: 'toan-capso-nhan', chuong: 'Cấp số cộng & cấp số nhân', muc: 3, dang: 'tln',
   tao(R) {
     const u1 = R.nguyen(1, 6), q = R.chon([2, 3, -2]);
     const n = R.nguyen(4, 9);
     const Sn = u1 * (1 - Math.pow(q, n)) / (1 - q);
     if (!Number.isInteger(Sn) || Math.abs(Sn) > 1e7) return null;
     return {
-      q: `Cho cấp số nhân (uₙ) có u₁ = ${u1} và công bội q = ${q}. Tính tổng ${n} số hạng đầu tiên S<sub>${n}</sub>.`,
+      q: `Cho cấp số nhân (uₙ) có u₁ = ${u1} và công bội q = ${TD.so(q)}. Tính tổng ${n} số hạng đầu tiên S<sub>${n}</sub>.`,
       ans: String(Sn),
       giai: `Sₙ = u₁(1 − qⁿ)/(1 − q) (áp dụng được vì q ≠ 1)\n`
-          + `S_${n} = ${u1}(1 − ${q}^${n})/(1 − ${q}) = ${u1}(1 − ${Math.pow(q, n)})/(${1 - q}) = ${Sn}.`,
+          + `S<sub>${n}</sub> = ${u1}·(1 − (${TD.so(q)})<sup>${n}</sup>) / (1 − (${TD.so(q)}))\n`
+          + `= ${u1}·(1 − ${TD.so(Math.pow(q, n))}) / ${1 - q} = ${TD.so(Sn)}.`,
       meo: 'Công thức này chỉ dùng khi q ≠ 1. Nếu q = 1 thì Sₙ = n·u₁.'
     };
   } },
@@ -334,17 +333,17 @@ TD.GEN.toan = [
     const x0 = R.nguyen(-3, 4);
     const k = 2 * a * x0 + b;                        /* y' = 2ax + b */
     return {
-      q: `Cho hàm số y = ${a === 1 ? '' : a}x² ${b >= 0 ? '+ ' + b : '− ' + (-b)}x ${c >= 0 ? '+ ' + c : '− ' + (-c)}. `
-       + `Tính hệ số góc của tiếp tuyến với đồ thị hàm số tại điểm có hoành độ x₀ = ${x0}.`,
+      q: `Cho hàm số y = ${TD.daThuc([[a, 'x²'], [b, 'x'], [c, '']])}. `
+       + `Tính hệ số góc của tiếp tuyến với đồ thị hàm số tại điểm có hoành độ x₀ = ${TD.so(x0)}.`,
       ans: String(k),
-      giai: `y′ = ${2 * a}x ${b >= 0 ? '+ ' + b : '− ' + (-b)}\n`
+      giai: `y′ = ${TD.daThuc([[2 * a, 'x'], [b, '']])}\n`
           + `Hệ số góc tiếp tuyến tại x₀ chính là y′(x₀):\n`
-          + `k = y′(${x0}) = ${2 * a}·(${x0}) ${b >= 0 ? '+ ' + b : '− ' + (-b)} = ${k}.`,
+          + `k = y′(${TD.so(x0)}) = ${2 * a}·(${TD.so(x0)})${b === 0 ? '' : (b > 0 ? ' + ' + b : ' − ' + (-b))} = ${TD.so(k)}.`,
       meo: 'Hệ số góc tiếp tuyến = đạo hàm tại tiếp điểm. Phương trình: y = f′(x₀)(x − x₀) + y₀.'
     };
   } },
 
-{ ma: 'toan-mu-pt', chuong: 'Phương trình mũ', muc: 2, dang: 'tln',
+{ ma: 'toan-mu-pt', chuong: 'Mũ – Logarit', muc: 2, dang: 'tln',
   tao(R) {
     const a = R.chon([2, 3, 5]);
     const m = R.nguyen(1, 4), p = R.nguyen(1, 5), q = R.nguyen(-4, 4);
@@ -353,11 +352,11 @@ TD.GEN.toan = [
     if (tu % p !== 0) return null;
     const x = tu / p;
     return {
-      q: `Giải phương trình ${a}<sup>${p === 1 ? '' : p}x ${q >= 0 ? '+ ' + q : '− ' + (-q)}</sup> = ${Math.pow(a, m)}. Nghiệm x bằng bao nhiêu?`,
+      q: `Giải phương trình ${a}<sup>${TD.daThuc([[p, 'x'], [q, '']])}</sup> = ${Math.pow(a, m)}. Nghiệm x bằng bao nhiêu?`,
       ans: String(x),
-      giai: `Đưa hai vế về cùng cơ số ${a}: ${Math.pow(a, m)} = ${a}^${m}\n`
-          + `${a}^(${p === 1 ? '' : p}x ${q >= 0 ? '+ ' + q : '− ' + (-q)}) = ${a}^${m}\n`
-          + `⇒ ${p === 1 ? '' : p}x ${q >= 0 ? '+ ' + q : '− ' + (-q)} = ${m} ⇒ x = ${x}.`,
+      giai: `Đưa hai vế về cùng cơ số ${a}: ${Math.pow(a, m)} = ${a}<sup>${m}</sup>\n`
+          + `${a}<sup>${TD.daThuc([[p, 'x'], [q, '']])}</sup> = ${a}<sup>${m}</sup>\n`
+          + `⇒ ${TD.daThuc([[p, 'x'], [q, '']])} = ${m} ⇒ x = ${TD.so(x)}.`,
       meo: 'Cùng cơ số thì bằng số mũ. Nhớ điều kiện 0 < a ≠ 1.'
     };
   } },

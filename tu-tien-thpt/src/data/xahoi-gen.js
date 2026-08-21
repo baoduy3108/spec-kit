@@ -26,16 +26,15 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
 
 { ma: 'dia-matdo', chuong: 'Dân cư', muc: 2, dang: 'tln', duong: true,
   tao(R) {
-    const v = R.chon([
-      { t: 'Đồng bằng sông Hồng', dt: 21278 }, { t: 'Đồng bằng sông Cửu Long', dt: 40816 },
-      { t: 'Đông Nam Bộ', dt: 23552 }, { t: 'Tây Nguyên', dt: 54508 },
-      { t: 'Bắc Trung Bộ', dt: 51455 }, { t: 'Trung du và miền núi Bắc Bộ', dt: 95222 }
-    ]);
+    /* Không gắn số liệu tự sinh vào tên vùng có thật — học sinh sẽ nhớ nhầm
+       số liệu sai. Dùng cách nói phiếm chỉ đúng như đề thi vẫn ra. */
+    const v = { t: R.chon(['Một vùng kinh tế', 'Một tỉnh', 'Một thành phố trực thuộc trung ương',
+                           'Một địa phương', 'Một quốc gia']), dt: R.nguyen(200, 9600) * 10 };
     const dan = R.nguyen(15, 220) / 10;                 /* triệu người */
     const md = T(dan * 1e6 / v.dt, 0);
     return {
-      q: `Vùng ${v.t} có diện tích ${S(v.dt)} km² và số dân ${S(dan, 1)} triệu người. `
-        + `Tính mật độ dân số của vùng (người/km², làm tròn đến hàng đơn vị).`,
+      q: `${v.t} có diện tích ${S(v.dt)} km² và số dân ${S(dan, 1)} triệu người. `
+        + `Tính mật độ dân số (người/km², làm tròn đến hàng đơn vị).`,
       ans: D(md, 0),
       giai: `Mật độ dân số = Số dân ÷ Diện tích\n`
         + `= ${S(dan, 1)}·10⁶ ÷ ${S(v.dt)} = ${D(md, 0)} người/km².`,
@@ -450,6 +449,24 @@ TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
 /* ==========================================================
    LỊCH SỬ — xử lí mốc thời gian, trình tự, ghép sự kiện
    ========================================================== */
+/* Chuyên đề của một sự kiện suy ra từ mốc thời gian và nội dung — mẫu đề
+   bốc sự kiện ngẫu nhiên nên KHÔNG được gắn nhãn chuyên đề cố định,
+   nếu không màn Luyện Công sẽ xếp câu ASEAN vào "Cách mạng tháng Tám". */
+const cdSuKien = (sk) => {
+  const t = sk.t;
+  if (/ASEAN|Đông Nam Á/i.test(t)) return 'ASEAN';
+  if (/Liên hợp quốc|Ianta/i.test(t)) return 'Liên hợp quốc';
+  if (/Chiến tranh lạnh|NATO|Vacsava|Berlin|Liên Xô tan rã|Sputnik|Liên minh châu Âu|EU/i.test(t)) return 'Chiến tranh lạnh';
+  if (/Đổi mới|WTO|gia nhập|bình thường hoá|APEC|Hiến pháp/i.test(t)) return 'Công cuộc Đổi mới';
+  if (/Biển Đông|UNCLOS|Hoàng Sa|Trường Sa/i.test(t)) return 'Biển Đông';
+  if (/Hồ Chí Minh|Nguyễn Ái Quốc|Luận cương/i.test(t)) return 'Hồ Chí Minh';
+  if (sk.n <= 1945) return 'Cách mạng tháng Tám';
+  if (sk.n <= 1954) return 'Kháng chiến chống Pháp';
+  if (sk.n <= 1975) return 'Kháng chiến chống Mỹ';
+  if (sk.n <= 1979) return 'Bảo vệ Tổ quốc sau 1975';
+  return 'Công cuộc Đổi mới';
+};
+
 const SU_KIEN = [
   { n: 1930, t: 'Đảng Cộng sản Việt Nam ra đời', y: 'chấm dứt khủng hoảng về đường lối và giai cấp lãnh đạo cách mạng Việt Nam' },
   { n: 1941, t: 'Mặt trận Việt Minh được thành lập', y: 'tập hợp lực lượng toàn dân tộc, chuẩn bị trực tiếp cho Tổng khởi nghĩa' },
@@ -516,6 +533,7 @@ TD.GEN.su = (TD.GEN.su || []).concat([
   tao(R) {
     const sk = R.chon(SU_KIEN);
     return {
+      chuong: cdSuKien(sk),
       q: `Sự kiện "${sk.t}" diễn ra vào năm nào?`,
       ans: String(sk.n),
       giai: `Năm ${sk.n}: ${sk.t}.\nÝ nghĩa: ${sk.y}.`,
@@ -531,6 +549,7 @@ TD.GEN.su = (TD.GEN.su || []).concat([
     if (a.n === b.n) return null;
     const truoc = a.n < b.n ? a : b, sau = a.n < b.n ? b : a;
     return {
+      chuong: cdSuKien(sau),
       q: `Tính khoảng cách thời gian (số năm) giữa hai sự kiện: "${truoc.t}" và "${sau.t}".`,
       ans: String(sau.n - truoc.n),
       giai: `${truoc.t} — năm ${truoc.n}\n${sau.t} — năm ${sau.n}\n`
@@ -546,10 +565,11 @@ TD.GEN.su = (TD.GEN.su || []).concat([
     if (new Set(bo.map(x => x.n)).size < 4) return null;
     const sapXep = bo.slice().sort((a, b) => a.n - b.n);
     const dung = sapXep[0];
-    return MC(R, `Trong các sự kiện sau, sự kiện nào diễn ra SỚM NHẤT?`,
+    return Object.assign({ chuong: cdSuKien(dung) },
+      MC(R, `Trong các sự kiện sau, sự kiện nào diễn ra SỚM NHẤT?`,
       { d: dung.t, s: sapXep.slice(1).map(x => x.t),
         v: sapXep.map(x => `${x.n} — ${x.t}`).join('\n') },
-      'Câu sắp xếp trình tự chỉ cần nhớ NĂM, không cần nhớ nội dung. Đây là câu dễ ăn điểm nhất của đề Sử.');
+      'Câu sắp xếp trình tự chỉ cần nhớ NĂM, không cần nhớ nội dung. Đây là câu dễ ăn điểm nhất của đề Sử.'));
   } },
 
 { ma: 'su-ynghia', chuong: 'Công cuộc Đổi mới', muc: 3, dang: 'mc',
@@ -557,12 +577,13 @@ TD.GEN.su = (TD.GEN.su || []).concat([
     const bo = R.chonNhieu(SU_KIEN, 4);
     if (new Set(bo.map(x => x.y)).size < 4) return null;
     const dung = bo[0];
-    return MC(R, `Sự kiện "${dung.t}" (năm ${dung.n}) có ý nghĩa lịch sử nào sau đây?`,
+    return Object.assign({ chuong: cdSuKien(dung) },
+      MC(R, `Sự kiện "${dung.t}" (năm ${dung.n}) có ý nghĩa lịch sử nào sau đây?`,
       { d: dung.y.charAt(0).toUpperCase() + dung.y.slice(1),
         s: bo.slice(1).map(x => x.y.charAt(0).toUpperCase() + x.y.slice(1)),
         v: `Năm ${dung.n}: ${dung.t} — ${dung.y}.` },
       'Câu hỏi ý nghĩa thường có một phương án đúng nhưng thuộc về SỰ KIỆN KHÁC. '
-      + 'Đọc kỹ xem ý nghĩa đó gắn với mốc nào.');
+      + 'Đọc kỹ xem ý nghĩa đó gắn với mốc nào.'));
   } },
 
 { ma: 'su-thapnien', chuong: 'Chiến tranh lạnh', muc: 2, dang: 'tln', duong: true,
@@ -570,6 +591,7 @@ TD.GEN.su = (TD.GEN.su || []).concat([
     const sk = R.chon(SU_KIEN);
     const tk = Math.floor(sk.n / 10) * 10;
     return {
+      chuong: cdSuKien(sk),
       q: `Sự kiện "${sk.t}" diễn ra vào thập niên nào của thế kỉ ${sk.n < 2000 ? 'XX' : 'XXI'}? `
         + `(ghi năm mở đầu thập niên, ví dụ 1940)`,
       ans: String(tk),

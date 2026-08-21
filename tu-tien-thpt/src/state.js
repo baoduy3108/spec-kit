@@ -456,11 +456,27 @@ TD.timMau = function (mon, ma) {
 };
 
 /* Dựng một câu hỏi cụ thể từ mẫu đề + hạt giống */
+/* ---------- CHUẨN HOÁ CÁCH TRÌNH BÀY BIỂU THỨC ----------
+   Đề thi in số âm bằng dấu trừ thật (−) chứ không phải gạch nối ASCII,
+   và không bao giờ để "+ -3" hay "− -3". Chuẩn hoá ở một chỗ cho chắc,
+   khỏi phải nhớ trong từng mẫu đề.
+   Chỉ đụng vào phần HIỂN THỊ — đáp án để nguyên vì còn phải so khớp
+   với những gì học sinh gõ vào. */
+TD.chuanDau = function (t) {
+  if (typeof t !== 'string') return t;
+  return t
+    .replace(/([+−])\s*-(\d)/g, (m, d, n) => (d === '+' ? '− ' : '+ ') + n)   /* + -3 → − 3 */
+    .replace(/(^|[=(:;,[\s])-(\d)/g, '$1−$2');                                /* = -3 → = −3 */
+};
+
 TD.sinhCau = function (mau, seed) {
   const R = TD.rng(seed);
   let o;
   try { o = mau.tao(R); } catch (e) { console.warn('Mẫu đề lỗi:', mau.ma, e); return null; }
   if (!o) return null;
+  ['q', 'giai', 'meo', 'ans'].forEach(k => { if (o[k]) o[k] = TD.chuanDau(o[k]); });
+  if (o.opts) o.opts = o.opts.map(TD.chuanDau);
+  if (o.items) o.items = o.items.map(y => Object.assign({}, y, { t: TD.chuanDau(y.t) }));
   return Object.assign({
     chuong: mau.chuong, muc: mau.muc, dang: mau.dang, _ma: mau.ma, _sinh: true
   }, o);
@@ -829,11 +845,12 @@ TD.xao = function (a) {
 /* So khớp đáp án trả lời ngắn: bỏ qua dấu cách, chấp nhận cả dấu , và . */
 TD.khopTLN = function (nhap, dung) {
   const chuan = s => String(s).trim().toLowerCase()
+    .replace(/[−–—]/g, '-')                    /* mọi kiểu dấu trừ đều quy về một */
     .replace(/\s+/g, '').replace(/\./g, ',').replace(/,+$/, '');
   const a = chuan(nhap), b = chuan(dung);
   if (a === b) return true;
   /* so sánh dạng số, cho phép sai số làm tròn nhỏ */
-  const so = s => parseFloat(String(s).replace(/\s/g, '').replace(',', '.'));
+  const so = s => parseFloat(String(s).replace(/[−–—]/g, '-').replace(/\s/g, '').replace(',', '.'));
   const x = so(a), y = so(b);
   if (!isNaN(x) && !isNaN(y) && b.indexOf(';') < 0) return Math.abs(x - y) < 1e-6;
   return false;

@@ -14,6 +14,22 @@ for (const f of (process.argv.length > 2 ? process.argv.slice(2) : THU_TU_INDEX)
   vm.runInContext(fs.readFileSync(path.resolve(ROOT, f), 'utf8'), ctx, { filename: f });
 
 const TD = ctx.TD;
+
+/* Bộ luật trình bày — đề thi không bao giờ in "0x + 3y", "x² − 1x − 12",
+   "(x − -3)" hay dùng gạch nối ASCII thay dấu trừ. */
+const LUAT_TRINH_BAY = [
+  [/(^|[\s(])0[xyzt](?![\w])/,          'in ra hệ số 0 (0x, 0y…)'],
+  [/[+−]\s*0\s*=\s*0/,                  'phương trình còn hạng tử 0 (… + 0 = 0)'],
+  [/(^|[\s(+−])1[xyz](?![\w²³])/,       'in ra hệ số 1 (1x)'],
+  [/\+\s*-\d/,                          'dấu cộng đứng trước số âm (+ -3)'],
+  [/−\s*-\d/,                            'dấu trừ đứng trước số âm (− -3)'],
+  [/[=(;,]\s?-\d/,                       'dùng gạch nối ASCII làm dấu trừ'],
+  [/\bundefined\b|\bNaN\b|\bInfinity\b/, 'lọt undefined / NaN / Infinity'],
+  [/(?<![∫_₀-₉])\^1(?!\d)/,             'in ra luỹ thừa bậc 1'],
+  [/<sub>\s*<\/sub>|<sup>\s*<\/sup>/,  'thẻ sub/sup rỗng'],
+  [/=\s*=|\.\s*\./,                     'lặp dấu (== hoặc ..)']
+];
+
 const LAN = 400;                       /* số biến thể thử mỗi mẫu */
 let loi = 0, tongSinh = 0, tongBienThe = 0;
 
@@ -73,6 +89,15 @@ for (const mon of Object.keys(TD.GEN)) {
       } else if (q.dang === 'mc') {
         if (!Array.isArray(q.opts) || q.opts.length !== 4) { bao(mau.ma, 'không đủ 4 phương án', q); break; }
         if (new Set(q.opts).size !== 4) { bao(mau.ma, 'có phương án trùng nhau', q); break; }
+        /* Trình bày phải giống đề thật: không có 0x, 1x, "+ -3", gạch nối ASCII làm dấu trừ… */
+        {
+          const vb = [q.q, (q.opts || []).join(' § '), (q.items || []).map(y => y.t).join(' § '),
+                      q.giai || '', q.meo || ''].join('\n');
+          let dinh = null;
+          for (const [re, ten] of LUAT_TRINH_BAY) if (re.test(vb)) { dinh = ten; break; }
+          if (dinh) { bao(mau.ma, dinh, q); break; }
+        }
+
         if (typeof q.ans !== 'number' || q.ans < 0 || q.ans > 3) { bao(mau.ma, 'chỉ số đáp án sai', q); break; }
       } else if (q.dang === 'ds') {
         if (!Array.isArray(q.items) || q.items.length !== 4) { bao(mau.ma, 'câu đúng/sai không đủ 4 ý', q); break; }

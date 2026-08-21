@@ -210,6 +210,14 @@ hr.mo{border:0;border-top:1px solid var(--vien);margin:16px 0}
 /* ---- Đề tự luận Ngữ văn ---- */
 textarea.o-nhap{font-family:inherit;font-size:14.5px;line-height:1.6;resize:vertical;min-height:60px}
 
+/* ---- Bảng tra từ vựng Tiếng Anh ---- */
+.bang-tu{margin:10px 0 12px}
+.dong-tu{display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+  padding:7px 2px;border-bottom:1px solid var(--vien);font-size:14px}
+.dong-tu .tu-en{color:var(--ngoc);font-weight:700}
+.dong-tu .tu-vi{color:var(--chu2);text-align:right;flex:1 1 45%;font-size:13.4px}
+.nhan.loai-tu{font-size:10.5px;padding:1px 5px;color:var(--chu3)}
+
 </style>
 </head>
 <body>
@@ -811,11 +819,27 @@ TD.timMau = function (mon, ma) {
 };
 
 /* Dựng một câu hỏi cụ thể từ mẫu đề + hạt giống */
+/* ---------- CHUẨN HOÁ CÁCH TRÌNH BÀY BIỂU THỨC ----------
+   Đề thi in số âm bằng dấu trừ thật (−) chứ không phải gạch nối ASCII,
+   và không bao giờ để "+ -3" hay "− -3". Chuẩn hoá ở một chỗ cho chắc,
+   khỏi phải nhớ trong từng mẫu đề.
+   Chỉ đụng vào phần HIỂN THỊ — đáp án để nguyên vì còn phải so khớp
+   với những gì học sinh gõ vào. */
+TD.chuanDau = function (t) {
+  if (typeof t !== 'string') return t;
+  return t
+    .replace(/([+−])\s*-(\d)/g, (m, d, n) => (d === '+' ? '− ' : '+ ') + n)   /* + -3 → − 3 */
+    .replace(/(^|[=(:;,[\s])-(\d)/g, '$1−$2');                                /* = -3 → = −3 */
+};
+
 TD.sinhCau = function (mau, seed) {
   const R = TD.rng(seed);
   let o;
   try { o = mau.tao(R); } catch (e) { console.warn('Mẫu đề lỗi:', mau.ma, e); return null; }
   if (!o) return null;
+  ['q', 'giai', 'meo', 'ans'].forEach(k => { if (o[k]) o[k] = TD.chuanDau(o[k]); });
+  if (o.opts) o.opts = o.opts.map(TD.chuanDau);
+  if (o.items) o.items = o.items.map(y => Object.assign({}, y, { t: TD.chuanDau(y.t) }));
   return Object.assign({
     chuong: mau.chuong, muc: mau.muc, dang: mau.dang, _ma: mau.ma, _sinh: true
   }, o);
@@ -1184,11 +1208,12 @@ TD.xao = function (a) {
 /* So khớp đáp án trả lời ngắn: bỏ qua dấu cách, chấp nhận cả dấu , và . */
 TD.khopTLN = function (nhap, dung) {
   const chuan = s => String(s).trim().toLowerCase()
+    .replace(/[−–—]/g, '-')                    /* mọi kiểu dấu trừ đều quy về một */
     .replace(/\s+/g, '').replace(/\./g, ',').replace(/,+$/, '');
   const a = chuan(nhap), b = chuan(dung);
   if (a === b) return true;
   /* so sánh dạng số, cho phép sai số làm tròn nhỏ */
-  const so = s => parseFloat(String(s).replace(/\s/g, '').replace(',', '.'));
+  const so = s => parseFloat(String(s).replace(/[−–—]/g, '-').replace(/\s/g, '').replace(',', '.'));
   const x = so(a), y = so(b);
   if (!isNaN(x) && !isNaN(y) && b.indexOf(';') < 0) return Math.abs(x - y) < 1e-6;
   return false;
@@ -6530,6 +6555,54 @@ TD.mcSo = function (R, de, dapAn, nhieu, giai, meo, donVi) {
   };
 };
 
+/* ============================================================
+   ĐỊNH DẠNG BIỂU THỨC TOÁN CHO GIỐNG ĐỀ THẬT
+   Đề thi không bao giờ in "0x + 3y", "x² − 1x − 12" hay "(x − -3)".
+   Mấy hàm dưới đây lo hết chuyện dấu và hệ số 0/1 để mẫu đề chỉ
+   việc đưa số vào.
+   ============================================================ */
+
+/* Số âm phải dùng dấu trừ thật (−, U+2212) chứ không phải gạch nối ASCII */
+TD.so = function (n) {
+  return String(n).replace(/^-/, '−').replace('.', ',');
+};
+
+/* Một hạng tử a·<biến>, trả về '' khi hệ số bằng 0.
+   dau = true ⇒ luôn in dấu ở đầu (dùng cho hạng tử thứ hai trở đi). */
+TD.hangTu = function (a, bien, dau) {
+  if (!a) return '';
+  const am = a < 0, t = Math.abs(a);
+  let so = (t === 1 && bien) ? '' : String(t).replace('.', ',');
+  const than = so + (bien || '');
+  if (dau) return (am ? ' − ' : ' + ') + than;
+  return (am ? '−' : '') + than;
+};
+
+/* Dựng chuỗi đa thức từ danh sách [hệ số, 'biến'].
+   TD.daThuc([[1,'x²'], [-1,'x'], [-12,'']]) ⇒ 'x² − x − 12'
+   Toàn 0 thì trả về '0'. */
+TD.daThuc = function (ds) {
+  let ra = '';
+  for (const [a, bien] of ds) {
+    if (!a) continue;
+    ra += ra ? TD.hangTu(a, bien, true) : TD.hangTu(a, bien, false);
+  }
+  return ra || '0';
+};
+
+/* Nhân tử (x − r): r âm thì đổi thành (x + |r|) */
+TD.nhanTu = function (r, an) {
+  const x = an || 'x';
+  if (r === 0) return x;
+  return r > 0 ? `(${x} − ${String(r).replace('.', ',')})`
+               : `(${x} + ${String(-r).replace('.', ',')})`;
+};
+
+/* Cộng hai số có dấu: TD.cong(5, -3) ⇒ '5 − 3' */
+TD.cong = function (a, b) {
+  return TD.so(a) + (b < 0 ? ' − ' + String(-b).replace('.', ',') : ' + ' + String(b).replace('.', ','));
+};
+
 </script>
 <script>
 /* ============================================================
@@ -7077,7 +7150,7 @@ TD.GEN.hoa = [
     };
   } },
 
-{ ma: 'hoa-pin', chuong: 'Pin điện hoá', muc: 2, dang: 'tln',
+{ ma: 'hoa-pin', chuong: 'Điện phân – Pin điện', muc: 2, dang: 'tln',
   tao(R) {
     const kho = [
       { t: 'Li', E: -3.04 }, { t: 'K', E: -2.93 }, { t: 'Ca', E: -2.87 },
@@ -7165,13 +7238,13 @@ TD.GEN.toan = [
     const tcd = T(-d / c, 3), tcn = T(a / c, 3);
     const hoiDung = R() < 0.5;
     return {
-      q: `Cho hàm số y = (${a === 1 ? '' : a === -1 ? '−' : a}x ${b >= 0 ? '+ ' + b : '− ' + (-b)}) / (${c === 1 ? '' : c}x ${d >= 0 ? '+ ' + d : '− ' + (-d)}). `
+      q: `Cho hàm số y = (${TD.daThuc([[a, 'x'], [b, '']])}) / (${TD.daThuc([[c, 'x'], [d, '']])}). `
        + `Tìm ${hoiDung ? 'hoành độ của tiệm cận đứng' : 'tung độ của tiệm cận ngang'} của đồ thị hàm số.`,
       ans: S(hoiDung ? tcd : tcn),
       giai: hoiDung
-        ? `Tiệm cận đứng là nghiệm của mẫu: ${c === 1 ? '' : c}x ${d >= 0 ? '+ ' + d : '− ' + (-d)} = 0 ⇒ x = ${S(tcd)}.\n`
+        ? `Tiệm cận đứng là nghiệm của mẫu: ${TD.daThuc([[c, 'x'], [d, '']])} = 0 ⇒ x = ${S(tcd)}.\n`
           + `(Kiểm tra tử tại x = ${S(tcd)} khác 0 nên đây đúng là tiệm cận đứng.)`
-        : `Tiệm cận ngang: y = a/c = ${a}/${c} = ${S(tcn)}.\n`
+        : `Tiệm cận ngang: y = a/c = ${TD.so(a)}/${c} = ${S(tcn)}.\n`
           + `Vì bậc tử bằng bậc mẫu nên giới hạn khi x → ±∞ bằng tỉ số hai hệ số bậc nhất.`,
       meo: 'Hàm (ax+b)/(cx+d): tiệm cận đứng x = −d/c, tiệm cận ngang y = a/c.'
     };
@@ -7187,7 +7260,7 @@ TD.GEN.toan = [
       q: `Tính giá trị của biểu thức log<sub>${a}</sub>${x} − log<sub>${a}</sub>${y}.`,
       ans: String(m),
       giai: `log_${a}${x} − log_${a}${y} = log_${a}(${x}/${y}) = log_${a}${x / y}\n`
-          + `Vì ${x / y} = ${a}^${m} nên log_${a}${x / y} = ${m}.`,
+          + `Vì ${x / y} = ${m === 1 ? String(a) : a + '<sup>' + m + '</sup>'} nên log<sub>${a}</sub>${x / y} = ${m}.`,
       meo: 'Hiệu hai logarit cùng cơ số bằng logarit của THƯƠNG, không phải thương hai logarit.'
     };
   } },
@@ -7217,11 +7290,11 @@ TD.GEN.toan = [
     const val = a * Math.pow(t, 3) / 3 + b * t * t / 2 + c * t;
     const tu = 2 * a * Math.pow(t, 3) + 3 * b * t * t + 6 * c * t;   /* val = tu/6 */
     return {
-      q: `Tính tích phân I = ∫ từ 0 đến ${t} của (${a}x² ${b ? '+ ' + b + 'x ' : ''}${c ? '+ ' + c : ''})dx. `
+      q: `Tính tích phân I = ∫ từ 0 đến ${t} của (${TD.daThuc([[a, 'x²'], [b, 'x'], [c, '']])})dx. `
        + `Viết kết quả dưới dạng phân số tối giản a/b (nếu là số nguyên thì ghi số nguyên).`,
       ans: phanSo(tu, 6),
-      giai: `Nguyên hàm: F(x) = ${a}x³/3 ${b ? '+ ' + b + 'x²/2 ' : ''}${c ? '+ ' + c + 'x' : ''}\n`
-          + `I = F(${t}) − F(0) = ${a}·${Math.pow(t, 3)}/3 ${b ? '+ ' + b + '·' + t * t + '/2 ' : ''}${c ? '+ ' + c + '·' + t : ''}\n`
+      giai: `Nguyên hàm: F(x) = ${TD.daThuc([[a, 'x³/3'], [b, 'x²/2'], [c, 'x']])}\n`
+          + `I = F(${t}) − F(0) = ${TD.daThuc([[a * Math.pow(t, 3), '/3'], [b * t * t, '/2'], [c * t, '']]).replace(/(\d)\/(\d)/g, '$1/$2')}\n`
           + `= ${S(T(val, 6))} = ${phanSo(tu, 6)}.`,
       meo: '∫xⁿdx = xⁿ⁺¹/(n+1) + C, áp dụng cho từng hạng tử rồi thay cận.'
     };
@@ -7236,16 +7309,15 @@ TD.GEN.toan = [
     const q = p + R.nguyen(1, 7);
     const a = p + q, b = -p * q;
     const tu = Math.pow(q - p, 3);
-    const dt = (b === 0 ? '' : (b > 0 ? ' + ' + b : ' − ' + (-b)));
-    const duong = a === 0 ? (b === 0 ? '0' : String(b)) : `${a === 1 ? '' : a === -1 ? '−' : a}x${dt}`;
+    const duong = TD.daThuc([[a, 'x'], [b, '']]);
     return {
       q: `Tính diện tích hình phẳng giới hạn bởi parabol y = x² và đường thẳng y = ${duong}. `
        + `Viết kết quả dưới dạng phân số tối giản a/b (nếu là số nguyên thì ghi số nguyên).`,
       ans: phanSo(tu, 6),
-      giai: `Hoành độ giao điểm: x² = ${duong} ⇔ x² − ${a}x ${-b >= 0 ? '+ ' + (-b) : '− ' + b} = 0\n`
-          + `⇔ (x − ${p})(x − ${q}) = 0 ⇒ x = ${p} hoặc x = ${q}.\n`
-          + `Trên đoạn [${p}; ${q}] đường thẳng nằm phía trên parabol.\n`
-          + `S = ∫ từ ${p} đến ${q} của [(${duong}) − x²]dx = (${q} − ${p})³/6 = ${tu}/6 = ${phanSo(tu, 6)}.`,
+      giai: `Hoành độ giao điểm: x² = ${duong} ⇔ ${TD.daThuc([[1, 'x²'], [-a, 'x'], [-b, '']])} = 0\n`
+          + `⇔ ${TD.nhanTu(p)}${TD.nhanTu(q)} = 0 ⇒ x = ${TD.so(p)} hoặc x = ${TD.so(q)}.\n`
+          + `Trên đoạn [${TD.so(p)}; ${TD.so(q)}] đường thẳng nằm phía trên parabol.\n`
+          + `S = ∫ từ ${TD.so(p)} đến ${TD.so(q)} của [(${duong}) − x²]dx = (${TD.so(q)} − (${TD.so(p)}))³/6 = ${tu}/6 = ${phanSo(tu, 6)}.`,
       meo: 'Mẹo: diện tích giữa parabol y = x² và một đường thẳng cắt nó tại x = p, q luôn bằng (q − p)³/6.'
     };
   } },
@@ -7260,14 +7332,13 @@ TD.GEN.toan = [
     const tu = Math.abs(n[0] * M[0] + n[1] * M[1] + n[2] * M[2] + D);
     if (tu === 0) return null;
     const d = T(tu / do_dai, 4);
-    const he = (h, bien) => (h === 0 ? '' : (h > 0 ? ' + ' : ' − ') + (Math.abs(h) === 1 ? '' : Math.abs(h)) + bien);
-    const pt = `${n[0] === 1 ? 'x' : n[0] === -1 ? '−x' : n[0] + 'x'}${he(n[1], 'y')}${he(n[2], 'z')}${D >= 0 ? ' + ' + D : ' − ' + (-D)} = 0`;
+    const pt = TD.daThuc([[n[0], 'x'], [n[1], 'y'], [n[2], 'z'], [D, '']]) + ' = 0';
     return {
-      q: `Trong không gian Oxyz, tính khoảng cách từ điểm M(${M[0]}; ${M[1]}; ${M[2]}) đến mặt phẳng (P): ${pt}. `
+      q: `Trong không gian Oxyz, tính khoảng cách từ điểm M(${TD.so(M[0])}; ${TD.so(M[1])}; ${TD.so(M[2])}) đến mặt phẳng (P): ${pt}. `
        + `(làm tròn đến hàng phần trăm nếu không phải số nguyên)`,
       ans: S(d),
       giai: `d(M,(P)) = |Ax₀ + By₀ + Cz₀ + D| / √(A² + B² + C²)\n`
-          + `Tử: |${n[0]}·${M[0]} + ${n[1]}·${M[1]} + ${n[2]}·${M[2]} + ${D}| = ${tu}\n`
+          + `Tử: |${TD.so(n[0])}·(${TD.so(M[0])}) + ${TD.so(n[1])}·(${TD.so(M[1])}) + ${TD.so(n[2])}·(${TD.so(M[2])}) + (${TD.so(D)})| = ${tu}\n`
           + `Mẫu: √(${n[0]}² + ${n[1]}² + ${n[2]}²) = √${n[0] * n[0] + n[1] * n[1] + n[2] * n[2]} = ${S(do_dai)}\n`
           + `d = ${tu} / ${S(do_dai)} = ${S(d)}.`,
       meo: 'Nhớ lấy TRỊ TUYỆT ĐỐI ở tử và căn tổng bình phương ba hệ số ở mẫu.'
@@ -7279,19 +7350,19 @@ TD.GEN.toan = [
     const a = R.nguyen(-5, 5), b = R.nguyen(-5, 5), c = R.nguyen(-5, 5);
     const Rb = R.nguyen(1, 7);
     const d = a * a + b * b + c * c - Rb * Rb;
-    const he = (h, bien) => { const k = -2 * h; return k === 0 ? '' : (k > 0 ? ' + ' : ' − ') + (Math.abs(k) === 1 ? '' : Math.abs(k)) + bien; };
     return {
-      q: `Trong không gian Oxyz, cho mặt cầu (S): x² + y² + z²${he(a, 'x')}${he(b, 'y')}${he(c, 'z')}${d >= 0 ? ' + ' + d : ' − ' + (-d)} = 0. `
+      q: `Trong không gian Oxyz, cho mặt cầu (S): ${TD.daThuc([[1, 'x²'], [1, 'y²'], [1, 'z²'],
+            [-2 * a, 'x'], [-2 * b, 'y'], [-2 * c, 'z'], [d, '']])} = 0. `
        + `Bán kính của mặt cầu bằng bao nhiêu?`,
       ans: String(Rb),
       giai: `Dạng x²+y²+z²−2ax−2by−2cz+d = 0 có tâm I(a; b; c) và R = √(a²+b²+c²−d).\n`
-          + `So sánh hệ số: a = ${a}, b = ${b}, c = ${c}, d = ${d}\n`
-          + `R = √(${a * a} + ${b * b} + ${c * c} − (${d})) = √${Rb * Rb} = ${Rb}.`,
+          + `So sánh hệ số: a = ${TD.so(a)}, b = ${TD.so(b)}, c = ${TD.so(c)}, d = ${TD.so(d)}\n`
+          + `R = √(${a * a} + ${b * b} + ${c * c} − (${TD.so(d)})) = √${Rb * Rb} = ${Rb}.`,
       meo: 'Hệ số của x là −2a nên a = −(hệ số)/2. Điều kiện tồn tại mặt cầu: a²+b²+c²−d > 0.'
     };
   } },
 
-{ ma: 'toan-capso-cong', chuong: 'Cấp số cộng', muc: 2, dang: 'tln',
+{ ma: 'toan-capso-cong', chuong: 'Cấp số cộng & cấp số nhân', muc: 2, dang: 'tln',
   tao(R) {
     const u1 = R.nguyen(-10, 15), d = R.nguyen(-8, 9);
     if (d === 0) return null;
@@ -7299,7 +7370,7 @@ TD.GEN.toan = [
     const Sn = n * (2 * u1 + (n - 1) * d) / 2;
     if (!Number.isInteger(Sn)) return null;
     return {
-      q: `Cho cấp số cộng (uₙ) có u₁ = ${u1} và công sai d = ${d}. Tính tổng ${n} số hạng đầu tiên S<sub>${n}</sub>.`,
+      q: `Cho cấp số cộng (uₙ) có u₁ = ${TD.so(u1)} và công sai d = ${TD.so(d)}. Tính tổng ${n} số hạng đầu tiên S<sub>${n}</sub>.`,
       ans: String(Sn),
       giai: `Sₙ = n[2u₁ + (n − 1)d]/2\n`
           + `S_${n} = ${n}·[2·${u1} + ${n - 1}·${d}]/2 = ${n}·[${2 * u1} + ${(n - 1) * d}]/2 = ${n}·${2 * u1 + (n - 1) * d}/2 = ${Sn}.`,
@@ -7307,17 +7378,18 @@ TD.GEN.toan = [
     };
   } },
 
-{ ma: 'toan-capso-nhan', chuong: 'Cấp số nhân', muc: 3, dang: 'tln',
+{ ma: 'toan-capso-nhan', chuong: 'Cấp số cộng & cấp số nhân', muc: 3, dang: 'tln',
   tao(R) {
     const u1 = R.nguyen(1, 6), q = R.chon([2, 3, -2]);
     const n = R.nguyen(4, 9);
     const Sn = u1 * (1 - Math.pow(q, n)) / (1 - q);
     if (!Number.isInteger(Sn) || Math.abs(Sn) > 1e7) return null;
     return {
-      q: `Cho cấp số nhân (uₙ) có u₁ = ${u1} và công bội q = ${q}. Tính tổng ${n} số hạng đầu tiên S<sub>${n}</sub>.`,
+      q: `Cho cấp số nhân (uₙ) có u₁ = ${u1} và công bội q = ${TD.so(q)}. Tính tổng ${n} số hạng đầu tiên S<sub>${n}</sub>.`,
       ans: String(Sn),
       giai: `Sₙ = u₁(1 − qⁿ)/(1 − q) (áp dụng được vì q ≠ 1)\n`
-          + `S_${n} = ${u1}(1 − ${q}^${n})/(1 − ${q}) = ${u1}(1 − ${Math.pow(q, n)})/(${1 - q}) = ${Sn}.`,
+          + `S<sub>${n}</sub> = ${u1}·(1 − (${TD.so(q)})<sup>${n}</sup>) / (1 − (${TD.so(q)}))\n`
+          + `= ${u1}·(1 − ${TD.so(Math.pow(q, n))}) / ${1 - q} = ${TD.so(Sn)}.`,
       meo: 'Công thức này chỉ dùng khi q ≠ 1. Nếu q = 1 thì Sₙ = n·u₁.'
     };
   } },
@@ -7458,17 +7530,17 @@ TD.GEN.toan = [
     const x0 = R.nguyen(-3, 4);
     const k = 2 * a * x0 + b;                        /* y' = 2ax + b */
     return {
-      q: `Cho hàm số y = ${a === 1 ? '' : a}x² ${b >= 0 ? '+ ' + b : '− ' + (-b)}x ${c >= 0 ? '+ ' + c : '− ' + (-c)}. `
-       + `Tính hệ số góc của tiếp tuyến với đồ thị hàm số tại điểm có hoành độ x₀ = ${x0}.`,
+      q: `Cho hàm số y = ${TD.daThuc([[a, 'x²'], [b, 'x'], [c, '']])}. `
+       + `Tính hệ số góc của tiếp tuyến với đồ thị hàm số tại điểm có hoành độ x₀ = ${TD.so(x0)}.`,
       ans: String(k),
-      giai: `y′ = ${2 * a}x ${b >= 0 ? '+ ' + b : '− ' + (-b)}\n`
+      giai: `y′ = ${TD.daThuc([[2 * a, 'x'], [b, '']])}\n`
           + `Hệ số góc tiếp tuyến tại x₀ chính là y′(x₀):\n`
-          + `k = y′(${x0}) = ${2 * a}·(${x0}) ${b >= 0 ? '+ ' + b : '− ' + (-b)} = ${k}.`,
+          + `k = y′(${TD.so(x0)}) = ${2 * a}·(${TD.so(x0)})${b === 0 ? '' : (b > 0 ? ' + ' + b : ' − ' + (-b))} = ${TD.so(k)}.`,
       meo: 'Hệ số góc tiếp tuyến = đạo hàm tại tiếp điểm. Phương trình: y = f′(x₀)(x − x₀) + y₀.'
     };
   } },
 
-{ ma: 'toan-mu-pt', chuong: 'Phương trình mũ', muc: 2, dang: 'tln',
+{ ma: 'toan-mu-pt', chuong: 'Mũ – Logarit', muc: 2, dang: 'tln',
   tao(R) {
     const a = R.chon([2, 3, 5]);
     const m = R.nguyen(1, 4), p = R.nguyen(1, 5), q = R.nguyen(-4, 4);
@@ -7477,11 +7549,11 @@ TD.GEN.toan = [
     if (tu % p !== 0) return null;
     const x = tu / p;
     return {
-      q: `Giải phương trình ${a}<sup>${p === 1 ? '' : p}x ${q >= 0 ? '+ ' + q : '− ' + (-q)}</sup> = ${Math.pow(a, m)}. Nghiệm x bằng bao nhiêu?`,
+      q: `Giải phương trình ${a}<sup>${TD.daThuc([[p, 'x'], [q, '']])}</sup> = ${Math.pow(a, m)}. Nghiệm x bằng bao nhiêu?`,
       ans: String(x),
-      giai: `Đưa hai vế về cùng cơ số ${a}: ${Math.pow(a, m)} = ${a}^${m}\n`
-          + `${a}^(${p === 1 ? '' : p}x ${q >= 0 ? '+ ' + q : '− ' + (-q)}) = ${a}^${m}\n`
-          + `⇒ ${p === 1 ? '' : p}x ${q >= 0 ? '+ ' + q : '− ' + (-q)} = ${m} ⇒ x = ${x}.`,
+      giai: `Đưa hai vế về cùng cơ số ${a}: ${Math.pow(a, m)} = ${a}<sup>${m}</sup>\n`
+          + `${a}<sup>${TD.daThuc([[p, 'x'], [q, '']])}</sup> = ${a}<sup>${m}</sup>\n`
+          + `⇒ ${TD.daThuc([[p, 'x'], [q, '']])} = ${m} ⇒ x = ${TD.so(x)}.`,
       meo: 'Cùng cơ số thì bằng số mũ. Nhớ điều kiện 0 < a ≠ 1.'
     };
   } },
@@ -7613,7 +7685,7 @@ TD.GEN.ly = [
       giai: `Định luật I nhiệt động lực học: ΔU = A + Q\n`
           + `Quy ước dấu: nhận nhiệt Q > 0, toả nhiệt Q < 0; nhận công A > 0, sinh công A < 0.\n`
           + `Ở đây Q = ${Q} J và A = ${A} J\n`
-          + `ΔU = ${A} + ${Q} = ${dU} J ⇒ nội năng ${dU > 0 ? 'TĂNG' : dU < 0 ? 'GIẢM' : 'không đổi'}.`,
+          + `ΔU = ${TD.cong(A, Q)} = ${TD.so(dU)} J ⇒ nội năng ${dU > 0 ? 'TĂNG' : dU < 0 ? 'GIẢM' : 'không đổi'}.`,
       meo: 'Quy ước dấu là chỗ mất điểm nhiều nhất. Sinh công thì A ÂM, toả nhiệt thì Q ÂM.'
     };
   } },
@@ -7846,7 +7918,7 @@ TD.GEN.ly = [
        + `(làm tròn đến hàng phần trăm nếu cần)`,
       ans: S(hoiConLai ? conLai : daRa),
       giai: `Định luật phóng xạ: m = m₀·2^(−t/T)\n`
-          + `Với t = ${k}T: m còn lại = ${m0}/2^${k} = ${m0}/${Math.pow(2, k)} = ${S(conLai)} g\n`
+          + `Với t = ${k}T: m còn lại = ${m0}/${k === 1 ? '2' : '2<sup>' + k + '</sup>'} = ${m0}/${Math.pow(2, k)} = ${S(conLai)} g\n`
           + (hoiConLai ? `Vậy khối lượng còn lại là ${S(conLai)} g.`
                        : `Khối lượng đã phân rã = ${m0} − ${S(conLai)} = ${S(daRa)} g.`),
       meo: 'Đọc kỹ đề hỏi CÒN LẠI hay ĐÃ PHÂN RÃ — hai đáp án hoàn toàn khác nhau.'
@@ -8079,7 +8151,7 @@ TD.GEN.sinh = [
        + `theo phần trăm (làm tròn đến hàng phần trăm).`,
       ans: S(kq),
       giai: `Tự thụ phấn chỉ làm biến đổi phần dị hợp; phần đồng hợp ban đầu giữ nguyên và được cộng thêm.\n`
-          + `· Aa sau ${n} thế hệ = ${S(Aa0)}% × (1/2)^${n} = ${S(Aa0)}%/${Math.pow(2, n)} = ${S(T(Aa, 4))}%\n`
+          + `· Aa sau ${n} thế hệ = ${S(Aa0)}% × ${n === 1 ? '1/2' : '(1/2)<sup>' + n + '</sup>'} = ${S(Aa0)}%/${Math.pow(2, n)} = ${S(T(Aa, 4))}%\n`
           + `· Phần dị hợp chuyển thành đồng hợp = ${S(Aa0)}% − ${S(T(Aa, 4))}% = ${S(T(Aa0 - Aa, 4))}%, chia đều cho AA và aa\n`
           + `  ⇒ mỗi bên nhận thêm ${S(T(them, 4))}%\n`
           + `· AA = ${S(AA0)}% + ${S(T(them, 4))}% = ${S(T(AA, 4))}%\n`
@@ -8149,7 +8221,7 @@ TD.GEN.sinh = [
     };
   } },
 
-{ ma: 'sinh-giamphan', chuong: 'Giảm phân', muc: 2, dang: 'tln',
+{ ma: 'sinh-giamphan', chuong: 'Nguyên phân – Giảm phân', muc: 2, dang: 'tln',
   tao(R) {
     const so = R.nguyen(3, 60);
     const laDuc = R() < 0.5;
@@ -8166,7 +8238,7 @@ TD.GEN.sinh = [
     };
   } },
 
-{ ma: 'sinh-nguyenphan', chuong: 'Nguyên phân', muc: 2, dang: 'tln',
+{ ma: 'sinh-nguyenphan', chuong: 'Nguyên phân – Giảm phân', muc: 2, dang: 'tln',
   tao(R) {
     const so = R.nguyen(1, 12);
     const k = R.nguyen(2, 8);
@@ -8198,7 +8270,7 @@ TD.GEN.sinh = [
       ans: S(E),
       giai: `Sinh vật sản xuất là bậc dinh dưỡng cấp 1.\n`
           + `Từ cấp 1 lên cấp ${bac} phải qua ${bac - 1} lần chuyển hoá.\n`
-          + `E = ${S(E0)} × ${S(H)}^${bac - 1} = ${S(E)} kcal.`,
+          + `E = ${S(E0)} × ${bac - 1 === 1 ? S(H) : S(H) + '<sup>' + (bac - 1) + '</sup>'} = ${S(E)} kcal.`,
       meo: 'Sinh vật SẢN XUẤT là bậc dinh dưỡng cấp 1. Từ cấp 1 lên cấp n phải nhân hiệu suất (n−1) lần.'
     };
   } },
@@ -12020,16 +12092,15 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
 
 { ma: 'dia-matdo', chuong: 'Dân cư', muc: 2, dang: 'tln', duong: true,
   tao(R) {
-    const v = R.chon([
-      { t: 'Đồng bằng sông Hồng', dt: 21278 }, { t: 'Đồng bằng sông Cửu Long', dt: 40816 },
-      { t: 'Đông Nam Bộ', dt: 23552 }, { t: 'Tây Nguyên', dt: 54508 },
-      { t: 'Bắc Trung Bộ', dt: 51455 }, { t: 'Trung du và miền núi Bắc Bộ', dt: 95222 }
-    ]);
+    /* Không gắn số liệu tự sinh vào tên vùng có thật — học sinh sẽ nhớ nhầm
+       số liệu sai. Dùng cách nói phiếm chỉ đúng như đề thi vẫn ra. */
+    const v = { t: R.chon(['Một vùng kinh tế', 'Một tỉnh', 'Một thành phố trực thuộc trung ương',
+                           'Một địa phương', 'Một quốc gia']), dt: R.nguyen(200, 9600) * 10 };
     const dan = R.nguyen(15, 220) / 10;                 /* triệu người */
     const md = T(dan * 1e6 / v.dt, 0);
     return {
-      q: `Vùng ${v.t} có diện tích ${S(v.dt)} km² và số dân ${S(dan, 1)} triệu người. `
-        + `Tính mật độ dân số của vùng (người/km², làm tròn đến hàng đơn vị).`,
+      q: `${v.t} có diện tích ${S(v.dt)} km² và số dân ${S(dan, 1)} triệu người. `
+        + `Tính mật độ dân số (người/km², làm tròn đến hàng đơn vị).`,
       ans: D(md, 0),
       giai: `Mật độ dân số = Số dân ÷ Diện tích\n`
         + `= ${S(dan, 1)}·10⁶ ÷ ${S(v.dt)} = ${D(md, 0)} người/km².`,
@@ -12444,6 +12515,24 @@ TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
 /* ==========================================================
    LỊCH SỬ — xử lí mốc thời gian, trình tự, ghép sự kiện
    ========================================================== */
+/* Chuyên đề của một sự kiện suy ra từ mốc thời gian và nội dung — mẫu đề
+   bốc sự kiện ngẫu nhiên nên KHÔNG được gắn nhãn chuyên đề cố định,
+   nếu không màn Luyện Công sẽ xếp câu ASEAN vào "Cách mạng tháng Tám". */
+const cdSuKien = (sk) => {
+  const t = sk.t;
+  if (/ASEAN|Đông Nam Á/i.test(t)) return 'ASEAN';
+  if (/Liên hợp quốc|Ianta/i.test(t)) return 'Liên hợp quốc';
+  if (/Chiến tranh lạnh|NATO|Vacsava|Berlin|Liên Xô tan rã|Sputnik|Liên minh châu Âu|EU/i.test(t)) return 'Chiến tranh lạnh';
+  if (/Đổi mới|WTO|gia nhập|bình thường hoá|APEC|Hiến pháp/i.test(t)) return 'Công cuộc Đổi mới';
+  if (/Biển Đông|UNCLOS|Hoàng Sa|Trường Sa/i.test(t)) return 'Biển Đông';
+  if (/Hồ Chí Minh|Nguyễn Ái Quốc|Luận cương/i.test(t)) return 'Hồ Chí Minh';
+  if (sk.n <= 1945) return 'Cách mạng tháng Tám';
+  if (sk.n <= 1954) return 'Kháng chiến chống Pháp';
+  if (sk.n <= 1975) return 'Kháng chiến chống Mỹ';
+  if (sk.n <= 1979) return 'Bảo vệ Tổ quốc sau 1975';
+  return 'Công cuộc Đổi mới';
+};
+
 const SU_KIEN = [
   { n: 1930, t: 'Đảng Cộng sản Việt Nam ra đời', y: 'chấm dứt khủng hoảng về đường lối và giai cấp lãnh đạo cách mạng Việt Nam' },
   { n: 1941, t: 'Mặt trận Việt Minh được thành lập', y: 'tập hợp lực lượng toàn dân tộc, chuẩn bị trực tiếp cho Tổng khởi nghĩa' },
@@ -12510,6 +12599,7 @@ TD.GEN.su = (TD.GEN.su || []).concat([
   tao(R) {
     const sk = R.chon(SU_KIEN);
     return {
+      chuong: cdSuKien(sk),
       q: `Sự kiện "${sk.t}" diễn ra vào năm nào?`,
       ans: String(sk.n),
       giai: `Năm ${sk.n}: ${sk.t}.\nÝ nghĩa: ${sk.y}.`,
@@ -12525,6 +12615,7 @@ TD.GEN.su = (TD.GEN.su || []).concat([
     if (a.n === b.n) return null;
     const truoc = a.n < b.n ? a : b, sau = a.n < b.n ? b : a;
     return {
+      chuong: cdSuKien(sau),
       q: `Tính khoảng cách thời gian (số năm) giữa hai sự kiện: "${truoc.t}" và "${sau.t}".`,
       ans: String(sau.n - truoc.n),
       giai: `${truoc.t} — năm ${truoc.n}\n${sau.t} — năm ${sau.n}\n`
@@ -12540,10 +12631,11 @@ TD.GEN.su = (TD.GEN.su || []).concat([
     if (new Set(bo.map(x => x.n)).size < 4) return null;
     const sapXep = bo.slice().sort((a, b) => a.n - b.n);
     const dung = sapXep[0];
-    return MC(R, `Trong các sự kiện sau, sự kiện nào diễn ra SỚM NHẤT?`,
+    return Object.assign({ chuong: cdSuKien(dung) },
+      MC(R, `Trong các sự kiện sau, sự kiện nào diễn ra SỚM NHẤT?`,
       { d: dung.t, s: sapXep.slice(1).map(x => x.t),
         v: sapXep.map(x => `${x.n} — ${x.t}`).join('\n') },
-      'Câu sắp xếp trình tự chỉ cần nhớ NĂM, không cần nhớ nội dung. Đây là câu dễ ăn điểm nhất của đề Sử.');
+      'Câu sắp xếp trình tự chỉ cần nhớ NĂM, không cần nhớ nội dung. Đây là câu dễ ăn điểm nhất của đề Sử.'));
   } },
 
 { ma: 'su-ynghia', chuong: 'Công cuộc Đổi mới', muc: 3, dang: 'mc',
@@ -12551,12 +12643,13 @@ TD.GEN.su = (TD.GEN.su || []).concat([
     const bo = R.chonNhieu(SU_KIEN, 4);
     if (new Set(bo.map(x => x.y)).size < 4) return null;
     const dung = bo[0];
-    return MC(R, `Sự kiện "${dung.t}" (năm ${dung.n}) có ý nghĩa lịch sử nào sau đây?`,
+    return Object.assign({ chuong: cdSuKien(dung) },
+      MC(R, `Sự kiện "${dung.t}" (năm ${dung.n}) có ý nghĩa lịch sử nào sau đây?`,
       { d: dung.y.charAt(0).toUpperCase() + dung.y.slice(1),
         s: bo.slice(1).map(x => x.y.charAt(0).toUpperCase() + x.y.slice(1)),
         v: `Năm ${dung.n}: ${dung.t} — ${dung.y}.` },
       'Câu hỏi ý nghĩa thường có một phương án đúng nhưng thuộc về SỰ KIỆN KHÁC. '
-      + 'Đọc kỹ xem ý nghĩa đó gắn với mốc nào.');
+      + 'Đọc kỹ xem ý nghĩa đó gắn với mốc nào.'));
   } },
 
 { ma: 'su-thapnien', chuong: 'Chiến tranh lạnh', muc: 2, dang: 'tln', duong: true,
@@ -12564,6 +12657,7 @@ TD.GEN.su = (TD.GEN.su || []).concat([
     const sk = R.chon(SU_KIEN);
     const tk = Math.floor(sk.n / 10) * 10;
     return {
+      chuong: cdSuKien(sk),
       q: `Sự kiện "${sk.t}" diễn ra vào thập niên nào của thế kỉ ${sk.n < 2000 ? 'XX' : 'XXI'}? `
         + `(ghi năm mở đầu thập niên, ví dụ 1940)`,
       ans: String(tk),
@@ -13426,7 +13520,7 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
     const d = Math.abs(n[0] * I[0] + n[1] * I[1] + n[2] * I[2] + Dp) / dai;
     if (d <= Rb + 0.2) return null;
     const he = (k, b) => (k === 0 ? '' : (k > 0 ? ' + ' : ' − ') + (Math.abs(k) === 1 ? '' : Math.abs(k)) + b);
-    const pt = `${n[0] === 1 ? 'x' : n[0] === -1 ? '−x' : n[0] === 0 ? '' : n[0] + 'x'}${he(n[1], 'y')}${he(n[2], 'z')}${Dp >= 0 ? ' + ' + Dp : ' − ' + (-Dp)} = 0`;
+    const pt = TD.daThuc([[n[0], 'x'], [n[1], 'y'], [n[2], 'z'], [Dp, '']]) + ' = 0';
     const xa = T(d + Rb, 3);
     return {
       q: `Trong không gian Oxyz cho mặt cầu (S) tâm I(${S(I[0])}; ${S(I[1])}; ${S(I[2])}) bán kính ${S(Rb)} `
@@ -13544,10 +13638,10 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
         b: `Phải xét HAI trường hợp:\n`
          + `  · Cả hai đều Aa (xác suất ${S(W, 5)}): mỗi con bình thường với xác suất 3/4\n`
          + `  · Không phải cả hai đều Aa (xác suất ${S(1 - W, 5)}): mọi con đều bình thường\n`
-         + `  P = ${S(W, 5)}×(3/4)^${S(soCon)} + ${S(1 - W, 5)}` },
+         + `  P = ${S(W, 5)}×${soCon === 1 ? '(3/4)' : '(3/4)<sup>' + S(soCon) + '</sup>'} + ${S(1 - W, 5)}` },
       { t: `có ĐÚNG MỘT người con bị bệnh`, v: W * nCr(soCon, 1) * 0.25 * Math.pow(0.75, soCon - 1),
         b: `Chọn vị trí người con bị bệnh trong ${S(soCon)} người con:\n`
-         + `  P = ${S(W, 5)} × C¹<sub>${S(soCon)}</sub> × (1/4) × (3/4)^${S(soCon - 1)}` }
+         + `  P = ${S(W, 5)} × C¹<sub>${S(soCon)}</sub> × (1/4)${soCon - 1 === 0 ? '' : soCon - 1 === 1 ? ' × (3/4)' : ' × (3/4)<sup>' + S(soCon - 1) + '</sup>'}` }
     ]);
     const kq = T(hoi.v, 5);
     return {
@@ -14346,6 +14440,68 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
 
 ]);
 
+})();
+
+/* ==========================================================
+   TOÁN — TỔ HỢP & XÁC SUẤT: bài toán đếm có ràng buộc
+   Chuyên đề này trước chỉ có câu đếm tổ hợp mức thông hiểu,
+   trong khi đề thật hay đặt câu khó ở dạng đếm có điều kiện.
+   ========================================================== */
+(function () {
+const S = TD.soVN;
+const ucln = (a, b) => b ? ucln(b, a % b) : a;
+const toHop = (n, k) => { if (k < 0 || k > n) return 0; let r = 1; for (let i = 1; i <= k; i++) r = r * (n - k + i) / i; return Math.round(r); };
+
+TD.GEN.toan = (TD.GEN.toan || []).concat([
+
+{ ma: 'toan-vdc-tohop-rangbuoc', chuong: 'Tổ hợp – Xác suất', muc: 4, dang: 'tln',
+  tao(R) {
+    const nam = R.nguyen(5, 9), nu = R.nguyen(4, 8);
+    const chon = R.nguyen(4, 5);
+    const tong = nam + nu;
+    if (chon >= tong - 1) return null;
+    const kieu = R.chon(['itNhat1Nu', 'caHaiPhai', 'itNhat2Nam']);
+    const tongCach = toHop(tong, chon);
+    let thuan, mo, buoc;
+    if (kieu === 'itNhat1Nu') {
+      thuan = tongCach - toHop(nam, chon);
+      mo = 'có <b>ít nhất 1 học sinh nữ</b>';
+      buoc = `Dùng phần bù: biến cố đối là "chọn toàn nam".\n`
+           + `  Số cách chọn toàn nam = C(${nam}, ${chon}) = ${S(toHop(nam, chon))}\n`
+           + `  Số cách thuận lợi = ${S(tongCach)} − ${S(toHop(nam, chon))} = ${S(thuan)}`;
+    } else if (kieu === 'caHaiPhai') {
+      thuan = tongCach - toHop(nam, chon) - toHop(nu, chon);
+      mo = 'có <b>cả nam lẫn nữ</b>';
+      buoc = `Dùng phần bù: biến cố đối là "toàn nam" HOẶC "toàn nữ" (hai trường hợp rời nhau).\n`
+           + `  Toàn nam = C(${nam}, ${chon}) = ${S(toHop(nam, chon))}\n`
+           + `  Toàn nữ  = C(${nu}, ${chon}) = ${S(toHop(nu, chon))}\n`
+           + `  Số cách thuận lợi = ${S(tongCach)} − ${S(toHop(nam, chon))} − ${S(toHop(nu, chon))} = ${S(thuan)}`;
+    } else {
+      thuan = tongCach - toHop(nu, chon) - nam * toHop(nu, chon - 1);
+      mo = 'có <b>ít nhất 2 học sinh nam</b>';
+      buoc = `Dùng phần bù: biến cố đối là "không có nam nào" hoặc "đúng 1 nam".\n`
+           + `  Không có nam = C(${nu}, ${chon}) = ${S(toHop(nu, chon))}\n`
+           + `  Đúng 1 nam   = C(${nam}, 1)·C(${nu}, ${chon - 1}) = ${nam}·${S(toHop(nu, chon - 1))} = ${S(nam * toHop(nu, chon - 1))}\n`
+           + `  Số cách thuận lợi = ${S(tongCach)} − ${S(toHop(nu, chon))} − ${S(nam * toHop(nu, chon - 1))} = ${S(thuan)}`;
+    }
+    if (thuan <= 0 || thuan === tongCach) return null;
+    const g = ucln(thuan, tongCach);
+    return {
+      q: `Một lớp có ${S(nam)} học sinh nam và ${S(nu)} học sinh nữ. Giáo viên chọn ngẫu nhiên ${S(chon)} học sinh `
+        + `để lập một đội tham gia hoạt động ngoại khoá. Tính xác suất để đội được chọn ${mo}. `
+        + `Viết kết quả dưới dạng phân số tối giản a/b.`,
+      ans: (thuan / g) + '/' + (tongCach / g),
+      giai: `Bước 1 — không gian mẫu: chọn ${S(chon)} bạn bất kì trong ${S(tong)} bạn.\n`
+        + `  n(Ω) = C(${tong}, ${chon}) = ${S(tongCach)}\n`
+        + `Bước 2 — đếm số cách thuận lợi.\n${buoc}\n`
+        + `Bước 3 — P = ${S(thuan)}/${S(tongCach)} = ${(thuan / g)}/${(tongCach / g)}.`,
+      meo: 'Thấy chữ "ít nhất" hoặc "có cả… lẫn…" thì gần như chắc chắn phải dùng PHẦN BÙ — '
+        + 'đếm biến cố đối rồi lấy tổng trừ đi, nhanh hơn nhiều so với chia trường hợp. '
+        + 'Casio 570VN Plus và 580VN X bấm tổ hợp bằng SHIFT + ÷ (nCr): gõ 12 SHIFT ÷ 5 = ra C(12;5).'
+    };
+  } }
+
+]);
 })();
 
 </script>
@@ -17740,6 +17896,26 @@ TD.man_tangkinh = function (c) {
     <p class="mo-nhat">Toàn bộ lý thuyết trọng điểm, công thức và mẹo nhớ nhanh. Bấm vào một mục để mở nội dung đầy đủ.</p>
     <div class="hang-nut">${chon}</div>`));
 
+  /* Kho từ vựng chỉ có ở môn Anh và phải tra cứu được, không thể chỉ nằm sau câu hỏi */
+  if (mon === 'anh') {
+    const soTu = (TD.KHO_TU || []).length, soCol = (TD.KHO_COLLOC || []).length;
+    const cdTu = new Set((TD.KHO_TU || []).map(x => x.cd)).size;
+    const boxTV = el('div', 'the vien-kim', `
+      <h3>📚 Kho từ vựng & Collocation</h3>
+      <p style="font-size:13.5px;color:var(--chu2);margin:6px 0 0">
+        <b style="color:var(--kim)">${soTu.toLocaleString('vi-VN')}</b> từ theo
+        <b>${cdTu}</b> chủ đề và <b style="color:var(--kim)">${soCol}</b> collocation —
+        tra được, lọc được, học được, không phải chỉ để sinh câu hỏi.</p>`);
+    const hn = el('div', 'hang-nut', '');
+    const b1 = el('button', 'nut kim', '📖 Mở kho từ vựng');
+    b1.onclick = () => TD.manTuVung('tu');
+    const b2 = el('button', 'nut', '🔗 Mở kho collocation');
+    b2.onclick = () => TD.manTuVung('colloc');
+    hn.appendChild(b1); hn.appendChild(b2);
+    boxTV.appendChild(hn);
+    c.appendChild(boxTV);
+  }
+
   (TD.NGUON_LT[mon] || []).forEach(([khoa, ten]) => {
     const ds = TD.KHO[khoa] || [];
     if (!ds.length) return;
@@ -17775,6 +17951,146 @@ TD.man_tangkinh = function (c) {
     });
     c.appendChild(box);
   });
+};
+
+/* ============================================================
+   KHO TỪ VỰNG TIẾNG ANH — TRA CỨU & HỌC
+   Hơn hai nghìn từ nên phải có lọc chủ đề, lọc loại từ và ô tìm
+   kiếm; danh sách dài thì cắt trang, bấm mới hiện thêm.
+   ============================================================ */
+TD.TV = { cd: null, loai: null, tim: '', hien: 120, nhom: null };
+
+TD.manTuVung = function (che) {
+  TD.TV.che = che || TD.TV.che || 'tu';
+  const c = $('#noidung'); c.innerHTML = '';
+  const laTu = TD.TV.che === 'tu';
+  const kho = laTu ? (TD.KHO_TU || []) : (TD.KHO_COLLOC || []);
+
+  const dau = el('div', 'the vien-kim', `<h3>${laTu ? '📚 Kho từ vựng Tiếng Anh' : '🔗 Kho Collocation'}</h3>
+    <p class="mo-nhat">${laTu
+      ? 'Từ vựng thường gặp trong đề thi tốt nghiệp, gom theo chủ đề. Gõ tiếng Anh hoặc tiếng Việt đều tìm được.'
+      : 'Những cụm từ đi liền nhau mà đề hay hỏi. Học theo cụm chứ đừng học từ lẻ — đề không bao giờ hỏi từ đứng một mình.'}</p>`);
+  const doiChe = el('div', 'hang-nut', '');
+  [['tu', '📚 Từ vựng'], ['colloc', '🔗 Collocation']].forEach(([k, t]) => {
+    const b = el('button', 'nut ' + (TD.TV.che === k ? 'kim' : 'phu'), t);
+    b.style.padding = '7px 13px'; b.style.fontSize = '12.6px';
+    b.onclick = () => { TD.TV.che = k; TD.TV.cd = null; TD.TV.nhom = null; TD.TV.tim = ''; TD.TV.hien = 120; TD.manTuVung(k); };
+    doiChe.appendChild(b);
+  });
+  dau.appendChild(doiChe);
+  c.appendChild(dau);
+
+  /* ---- bộ lọc ---- */
+  const loc = el('div', 'the', '');
+  const oTim = el('input', 'o-nhap');
+  oTim.placeholder = laTu ? 'Tìm từ hoặc nghĩa tiếng Việt…' : 'Tìm cụm hoặc nghĩa…';
+  oTim.value = TD.TV.tim; oTim.style.width = '100%'; oTim.autocomplete = 'off';
+  loc.appendChild(oTim);
+
+  const nhomKhoa = laTu ? 'cd' : 'nhom';
+  const dsNhom = [];
+  const demNhom = {};
+  kho.forEach(x => { demNhom[x[nhomKhoa]] = (demNhom[x[nhomKhoa]] || 0) + 1; });
+  Object.keys(demNhom).forEach(k => dsNhom.push(k));
+
+  const hangNhom = el('div', 'hang-nut', '');
+  hangNhom.style.marginTop = '10px';
+  const nutNhom = (gt, ten) => {
+    const dangChon = (laTu ? TD.TV.cd : TD.TV.nhom) === gt;
+    const b = el('button', 'nut ' + (dangChon ? 'kim' : 'phu'), ten);
+    b.style.padding = '5px 10px'; b.style.fontSize = '11.8px';
+    b.onclick = () => {
+      if (laTu) TD.TV.cd = gt; else TD.TV.nhom = gt;
+      TD.TV.hien = 120; TD.TV.tim = oTim.value; TD.manTuVung(TD.TV.che);
+    };
+    hangNhom.appendChild(b);
+  };
+  nutNhom(null, `Tất cả (${kho.length})`);
+  dsNhom.forEach(k => nutNhom(k, `${k} (${demNhom[k]})`));
+  loc.appendChild(hangNhom);
+
+  if (laTu) {
+    const hangLoai = el('div', 'hang-nut', '');
+    hangLoai.style.marginTop = '8px';
+    [[null, 'Mọi loại từ'], ['n', 'Danh từ'], ['v', 'Động từ'], ['adj', 'Tính từ'], ['adv', 'Trạng từ'], ['phr', 'Cụm từ']]
+      .forEach(([gt, ten]) => {
+        const b = el('button', 'nut ' + (TD.TV.loai === gt ? 'kim' : 'phu'), ten);
+        b.style.padding = '5px 10px'; b.style.fontSize = '11.8px';
+        b.onclick = () => { TD.TV.loai = gt; TD.TV.hien = 120; TD.TV.tim = oTim.value; TD.manTuVung('tu'); };
+        hangLoai.appendChild(b);
+      });
+    loc.appendChild(hangLoai);
+  }
+  c.appendChild(loc);
+
+  /* ---- danh sách ---- */
+  const ra = el('div', 'the', '');
+  c.appendChild(ra);
+
+  const ve = () => {
+    const q = TD.khongDau(TD.TV.tim.trim());
+    let ds = kho;
+    if (laTu) {
+      if (TD.TV.cd) ds = ds.filter(x => x.cd === TD.TV.cd);
+      if (TD.TV.loai) ds = ds.filter(x => x.l === TD.TV.loai);
+      if (q) ds = ds.filter(x => TD.khongDau(x.w).indexOf(q) >= 0 || TD.khongDau(x.n).indexOf(q) >= 0);
+    } else {
+      if (TD.TV.nhom) ds = ds.filter(x => x.nhom === TD.TV.nhom);
+      if (q) ds = ds.filter(x => TD.khongDau(x.tu + ' ' + x.cum).indexOf(q) >= 0 || TD.khongDau(x.n).indexOf(q) >= 0);
+    }
+    ra.innerHTML = '';
+    ra.appendChild(el('div', 'mo-nhat', `Tìm thấy <b style="color:var(--kim)">${ds.length}</b> mục`
+      + (ds.length > TD.TV.hien ? ` · đang hiện ${TD.TV.hien}` : '')));
+    if (!ds.length) {
+      ra.appendChild(el('p', '', 'Không có mục nào khớp. Thử từ khoá ngắn hơn.'));
+      return;
+    }
+    const bang = el('div', 'bang-tu', '');
+    ds.slice(0, TD.TV.hien).forEach(x => {
+      bang.appendChild(el('div', 'dong-tu', laTu
+        ? `<div><b class="tu-en">${x.w}</b> <span class="nhan loai-tu">${x.l}</span></div>
+           <div class="tu-vi">${x.n}</div>`
+        : `<div><b class="tu-en">${x.tu} ${x.cum}</b></div>
+           <div class="tu-vi">${x.n}</div>`));
+    });
+    ra.appendChild(bang);
+    if (ds.length > TD.TV.hien) {
+      const b = el('button', 'nut phu', `Hiện thêm ${Math.min(200, ds.length - TD.TV.hien)} mục nữa`);
+      b.onclick = () => { TD.TV.hien += 200; ve(); };
+      ra.appendChild(b);
+    }
+  };
+  ve();
+
+  let hen;
+  oTim.oninput = () => {
+    clearTimeout(hen);
+    hen = setTimeout(() => { TD.TV.tim = oTim.value; TD.TV.hien = 120; ve(); }, 180);
+  };
+
+  const cuoi = el('div', 'hang-nut', '');
+  const bKT = el('button', 'nut kim', '📝 Kiểm tra 50 câu từ vựng & collocation');
+  bKT.onclick = () => TD.kiemTraTuVung();
+  cuoi.appendChild(bKT);
+  const bVe = el('button', 'nut phu', '← Về Tàng Kinh Các');
+  bVe.onclick = () => { TD.monTK = 'anh'; TD.di('tangkinh'); };
+  cuoi.appendChild(bVe);
+  c.appendChild(el('div', 'the', '')).appendChild(cuoi);
+  window.scrollTo(0, 0);
+};
+
+/* Kiểm tra nhanh riêng phần từ vựng — chỉ lấy các mẫu đề dùng kho từ */
+TD.kiemTraTuVung = function () {
+  const ma = ['anh-nghia', 'anh-tu', 'anh-wordform', 'anh-colloc', 'anh-colloc-cum', 'anh-colloc-nghia', 'anh-gioitu'];
+  const mau = (TD.GEN.anh || []).filter(t => ma.indexOf(t.ma) >= 0);
+  if (!mau.length) { TD.bao('Chưa có mẫu đề từ vựng.', 'lua'); return; }
+  const ds = [];
+  for (let k = 0; ds.length < 50 && k < 400; k++) {
+    const t = mau[k % mau.length];
+    const s = (Math.random() * 4294967295) >>> 0;
+    if (TD.sinhCau(t, s)) ds.push({ mon: 'anh', g: t.ma, s: s });
+  }
+  TD.batDauPhien('anh', null, 'luyen', TD.xao(ds));
 };
 
 TD.moThe = function (khoa, i) {

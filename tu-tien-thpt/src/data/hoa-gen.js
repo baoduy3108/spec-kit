@@ -543,7 +543,7 @@ TD.GEN.hoa = [
     };
   } },
 
-{ ma: 'hoa-pin', chuong: 'Pin điện hoá', muc: 2, dang: 'tln',
+{ ma: 'hoa-pin', chuong: 'Điện phân – Pin điện', muc: 2, dang: 'tln',
   tao(R) {
     const kho = [
       { t: 'Li', E: -3.04 }, { t: 'K', E: -2.93 }, { t: 'Ca', E: -2.87 },

@@ -55,3 +55,51 @@ TD.mcSo = function (R, de, dapAn, nhieu, giai, meo, donVi) {
     giai: giai, meo: meo
   };
 };
+
+/* ============================================================
+   ĐỊNH DẠNG BIỂU THỨC TOÁN CHO GIỐNG ĐỀ THẬT
+   Đề thi không bao giờ in "0x + 3y", "x² − 1x − 12" hay "(x − -3)".
+   Mấy hàm dưới đây lo hết chuyện dấu và hệ số 0/1 để mẫu đề chỉ
+   việc đưa số vào.
+   ============================================================ */
+
+/* Số âm phải dùng dấu trừ thật (−, U+2212) chứ không phải gạch nối ASCII */
+TD.so = function (n) {
+  return String(n).replace(/^-/, '−').replace('.', ',');
+};
+
+/* Một hạng tử a·<biến>, trả về '' khi hệ số bằng 0.
+   dau = true ⇒ luôn in dấu ở đầu (dùng cho hạng tử thứ hai trở đi). */
+TD.hangTu = function (a, bien, dau) {
+  if (!a) return '';
+  const am = a < 0, t = Math.abs(a);
+  let so = (t === 1 && bien) ? '' : String(t).replace('.', ',');
+  const than = so + (bien || '');
+  if (dau) return (am ? ' − ' : ' + ') + than;
+  return (am ? '−' : '') + than;
+};
+
+/* Dựng chuỗi đa thức từ danh sách [hệ số, 'biến'].
+   TD.daThuc([[1,'x²'], [-1,'x'], [-12,'']]) ⇒ 'x² − x − 12'
+   Toàn 0 thì trả về '0'. */
+TD.daThuc = function (ds) {
+  let ra = '';
+  for (const [a, bien] of ds) {
+    if (!a) continue;
+    ra += ra ? TD.hangTu(a, bien, true) : TD.hangTu(a, bien, false);
+  }
+  return ra || '0';
+};
+
+/* Nhân tử (x − r): r âm thì đổi thành (x + |r|) */
+TD.nhanTu = function (r, an) {
+  const x = an || 'x';
+  if (r === 0) return x;
+  return r > 0 ? `(${x} − ${String(r).replace('.', ',')})`
+               : `(${x} + ${String(-r).replace('.', ',')})`;
+};
+
+/* Cộng hai số có dấu: TD.cong(5, -3) ⇒ '5 − 3' */
+TD.cong = function (a, b) {
+  return TD.so(a) + (b < 0 ? ' − ' + String(-b).replace('.', ',') : ' + ' + String(b).replace('.', ','));
+};

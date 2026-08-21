@@ -200,3 +200,11 @@ hr.mo{border:0;border-top:1px solid var(--vien);margin:16px 0}
 
 /* ---- Đề tự luận Ngữ văn ---- */
 textarea.o-nhap{font-family:inherit;font-size:14.5px;line-height:1.6;resize:vertical;min-height:60px}
+
+/* ---- Bảng tra từ vựng Tiếng Anh ---- */
+.bang-tu{margin:10px 0 12px}
+.dong-tu{display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+  padding:7px 2px;border-bottom:1px solid var(--vien);font-size:14px}
+.dong-tu .tu-en{color:var(--ngoc);font-weight:700}
+.dong-tu .tu-vi{color:var(--chu2);text-align:right;flex:1 1 45%;font-size:13.4px}
+.nhan.loai-tu{font-size:10.5px;padding:1px 5px;color:var(--chu3)}

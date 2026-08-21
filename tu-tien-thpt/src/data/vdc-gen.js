@@ -686,7 +686,7 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
     const d = Math.abs(n[0] * I[0] + n[1] * I[1] + n[2] * I[2] + Dp) / dai;
     if (d <= Rb + 0.2) return null;
     const he = (k, b) => (k === 0 ? '' : (k > 0 ? ' + ' : ' − ') + (Math.abs(k) === 1 ? '' : Math.abs(k)) + b);
-    const pt = `${n[0] === 1 ? 'x' : n[0] === -1 ? '−x' : n[0] === 0 ? '' : n[0] + 'x'}${he(n[1], 'y')}${he(n[2], 'z')}${Dp >= 0 ? ' + ' + Dp : ' − ' + (-Dp)} = 0`;
+    const pt = TD.daThuc([[n[0], 'x'], [n[1], 'y'], [n[2], 'z'], [Dp, '']]) + ' = 0';
     const xa = T(d + Rb, 3);
     return {
       q: `Trong không gian Oxyz cho mặt cầu (S) tâm I(${S(I[0])}; ${S(I[1])}; ${S(I[2])}) bán kính ${S(Rb)} `
@@ -804,10 +804,10 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
         b: `Phải xét HAI trường hợp:\n`
          + `  · Cả hai đều Aa (xác suất ${S(W, 5)}): mỗi con bình thường với xác suất 3/4\n`
          + `  · Không phải cả hai đều Aa (xác suất ${S(1 - W, 5)}): mọi con đều bình thường\n`
-         + `  P = ${S(W, 5)}×(3/4)^${S(soCon)} + ${S(1 - W, 5)}` },
+         + `  P = ${S(W, 5)}×${soCon === 1 ? '(3/4)' : '(3/4)<sup>' + S(soCon) + '</sup>'} + ${S(1 - W, 5)}` },
       { t: `có ĐÚNG MỘT người con bị bệnh`, v: W * nCr(soCon, 1) * 0.25 * Math.pow(0.75, soCon - 1),
         b: `Chọn vị trí người con bị bệnh trong ${S(soCon)} người con:\n`
-         + `  P = ${S(W, 5)} × C¹<sub>${S(soCon)}</sub> × (1/4) × (3/4)^${S(soCon - 1)}` }
+         + `  P = ${S(W, 5)} × C¹<sub>${S(soCon)}</sub> × (1/4)${soCon - 1 === 0 ? '' : soCon - 1 === 1 ? ' × (3/4)' : ' × (3/4)<sup>' + S(soCon - 1) + '</sup>'}` }
     ]);
     const kq = T(hoi.v, 5);
     return {

@@ -81,7 +81,7 @@ TD.GEN.ly = [
       giai: `Định luật I nhiệt động lực học: ΔU = A + Q\n`
           + `Quy ước dấu: nhận nhiệt Q > 0, toả nhiệt Q < 0; nhận công A > 0, sinh công A < 0.\n`
           + `Ở đây Q = ${Q} J và A = ${A} J\n`
-          + `ΔU = ${A} + ${Q} = ${dU} J ⇒ nội năng ${dU > 0 ? 'TĂNG' : dU < 0 ? 'GIẢM' : 'không đổi'}.`,
+          + `ΔU = ${TD.cong(A, Q)} = ${TD.so(dU)} J ⇒ nội năng ${dU > 0 ? 'TĂNG' : dU < 0 ? 'GIẢM' : 'không đổi'}.`,
       meo: 'Quy ước dấu là chỗ mất điểm nhiều nhất. Sinh công thì A ÂM, toả nhiệt thì Q ÂM.'
     };
   } },
@@ -314,7 +314,7 @@ TD.GEN.ly = [
        + `(làm tròn đến hàng phần trăm nếu cần)`,
       ans: S(hoiConLai ? conLai : daRa),
       giai: `Định luật phóng xạ: m = m₀·2^(−t/T)\n`
-          + `Với t = ${k}T: m còn lại = ${m0}/2^${k} = ${m0}/${Math.pow(2, k)} = ${S(conLai)} g\n`
+          + `Với t = ${k}T: m còn lại = ${m0}/${k === 1 ? '2' : '2<sup>' + k + '</sup>'} = ${m0}/${Math.pow(2, k)} = ${S(conLai)} g\n`
           + (hoiConLai ? `Vậy khối lượng còn lại là ${S(conLai)} g.`
                        : `Khối lượng đã phân rã = ${m0} − ${S(conLai)} = ${S(daRa)} g.`),
       meo: 'Đọc kỹ đề hỏi CÒN LẠI hay ĐÃ PHÂN RÃ — hai đáp án hoàn toàn khác nhau.'

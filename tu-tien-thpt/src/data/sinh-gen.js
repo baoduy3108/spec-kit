@@ -136,7 +136,7 @@ TD.GEN.sinh = [
        + `theo phần trăm (làm tròn đến hàng phần trăm).`,
       ans: S(kq),
       giai: `Tự thụ phấn chỉ làm biến đổi phần dị hợp; phần đồng hợp ban đầu giữ nguyên và được cộng thêm.\n`
-          + `· Aa sau ${n} thế hệ = ${S(Aa0)}% × (1/2)^${n} = ${S(Aa0)}%/${Math.pow(2, n)} = ${S(T(Aa, 4))}%\n`
+          + `· Aa sau ${n} thế hệ = ${S(Aa0)}% × ${n === 1 ? '1/2' : '(1/2)<sup>' + n + '</sup>'} = ${S(Aa0)}%/${Math.pow(2, n)} = ${S(T(Aa, 4))}%\n`
           + `· Phần dị hợp chuyển thành đồng hợp = ${S(Aa0)}% − ${S(T(Aa, 4))}% = ${S(T(Aa0 - Aa, 4))}%, chia đều cho AA và aa\n`
           + `  ⇒ mỗi bên nhận thêm ${S(T(them, 4))}%\n`
           + `· AA = ${S(AA0)}% + ${S(T(them, 4))}% = ${S(T(AA, 4))}%\n`
@@ -206,7 +206,7 @@ TD.GEN.sinh = [
     };
   } },
 
-{ ma: 'sinh-giamphan', chuong: 'Giảm phân', muc: 2, dang: 'tln',
+{ ma: 'sinh-giamphan', chuong: 'Nguyên phân – Giảm phân', muc: 2, dang: 'tln',
   tao(R) {
     const so = R.nguyen(3, 60);
     const laDuc = R() < 0.5;
@@ -223,7 +223,7 @@ TD.GEN.sinh = [
     };
   } },
 
-{ ma: 'sinh-nguyenphan', chuong: 'Nguyên phân', muc: 2, dang: 'tln',
+{ ma: 'sinh-nguyenphan', chuong: 'Nguyên phân – Giảm phân', muc: 2, dang: 'tln',
   tao(R) {
     const so = R.nguyen(1, 12);
     const k = R.nguyen(2, 8);
@@ -255,7 +255,7 @@ TD.GEN.sinh = [
       ans: S(E),
       giai: `Sinh vật sản xuất là bậc dinh dưỡng cấp 1.\n`
           + `Từ cấp 1 lên cấp ${bac} phải qua ${bac - 1} lần chuyển hoá.\n`
-          + `E = ${S(E0)} × ${S(H)}^${bac - 1} = ${S(E)} kcal.`,
+          + `E = ${S(E0)} × ${bac - 1 === 1 ? S(H) : S(H) + '<sup>' + (bac - 1) + '</sup>'} = ${S(E)} kcal.`,
       meo: 'Sinh vật SẢN XUẤT là bậc dinh dưỡng cấp 1. Từ cấp 1 lên cấp n phải nhân hiệu suất (n−1) lần.'
     };
   } },
