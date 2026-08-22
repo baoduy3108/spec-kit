@@ -16,7 +16,7 @@ TD.macDinhTrangThai = function () {
     /* điểm mục tiêu của tổ hợp; app.js đọc TD.S.muc_tieu để tô màu ô ước lượng điểm */
     muc_tieu: TD.MAC_DINH.muc_tieu,
     so_cau_phien: 30,           /* độ dài mỗi phiên Luyện Công */
-    bat_dau: TD.homNay(),
+    bat_dau: TD.ngayBatDauGoiY(),
     /* thống kê: thong_ke[mon][muc] = {dung, tong} */
     thong_ke: {},
     /* nhật ký theo ngày: nhat_ky['2026-08-19'] = số câu đã làm */
@@ -216,6 +216,32 @@ TD.tongDiemToHop = function () {
     if (d === null) du = false; else tong += d;
   }
   return { tong: Math.round(tong * 10) / 10, du: du };
+};
+
+/* Lộ trình dài 20 tuần = 140 ngày. Neo nó vào NGÀY THI chứ không vào ngày
+   mở app: mở app sớm 10 tháng mà bắt đầu đếm tuần ngay thì tuần 20 kết thúc
+   từ nửa năm trước kỳ thi, bảng lộ trình thành vô nghĩa. */
+TD.SO_NGAY_LO_TRINH = 140;
+TD.ngayBatDauGoiY = function (ngayThi) {
+  const t = new Date((ngayThi || TD.MAC_DINH.ngay_thi) + 'T00:00:00');
+  const bd = new Date(t.getTime() - TD.SO_NGAY_LO_TRINH * 86400000);
+  const h = new Date(TD.homNay() + 'T00:00:00');
+  /* đã trễ hơn mốc gợi ý thì bắt đầu ngay hôm nay */
+  return (bd < h ? h : bd).toISOString().slice(0, 10);
+};
+
+/* Lộ trình đang ở trạng thái nào so với hôm nay */
+TD.trangThaiLoTrinh = function () {
+  const bd = new Date(TD.S.bat_dau + 'T00:00:00');
+  const h = new Date(TD.homNay() + 'T00:00:00');
+  const con = TD.ngayConLai();
+  if (con < 0) return { ma: 'daThi', chu: 'Kỳ thi đã qua — đặt lại ngày thi ở Cài Đặt nếu bạn ôn cho kỳ sau.' };
+  const ngay = Math.round((h - bd) / 86400000);
+  if (ngay < 0) return { ma: 'chuaToi', soNgay: -ngay,
+    chu: `Lộ trình 20 tuần sẽ khởi động sau ${-ngay} ngày nữa (${TD.S.bat_dau}). Từ giờ tới đó cứ Luyện Công và Tà Đạo để xây nền.` };
+  if (ngay >= TD.SO_NGAY_LO_TRINH) return { ma: 'daXong', du: con,
+    chu: `Đã đi hết 20 tuần lộ trình mà còn ${con} ngày tới kỳ thi. Giai đoạn này nên lặp lại tuần 17–20: Độ Kiếp đều tay và soi lại câu sai.` };
+  return { ma: 'dangChay', chu: '' };
 };
 
 /* ---------- NGÀY CÒN LẠI ---------- */
@@ -610,6 +636,17 @@ TD.bam = function (chuoi) {
   return h >>> 0;
 };
 
+/* Dấu vân tay của một câu hỏi: gồm cả câu dẫn LẪN phương án.
+   Chỉ so câu dẫn là sai, vì hàng loạt câu sinh từ mệnh đề dùng chung một câu
+   dẫn ("Phát biểu nào sau đây đúng về X?") mà bốn phương án khác hẳn nhau. */
+TD.vanTayCau = function (q) {
+  if (!q) return '';
+  return (String(q.q || '')
+    + '\u00A7' + (q.opts ? q.opts.join('\u00A6') : '')
+    + (q.items ? q.items.map(x => x.t).join('\u00A6') : '')
+    + '\u00A7' + String(q.ans)).replace(/\s+/g, ' ').trim();
+};
+
 /* Dựng một bộ đề Tà Đạo. so = 1..20 · loai = 'lythuyet' | 'baitap' */
 TD.deTaDao = function (mon, so, loai) {
   const R = TD.rng(TD.bam(mon + '|' + loai + '|' + so));
@@ -622,21 +659,31 @@ TD.deTaDao = function (mon, so, loai) {
     /* Rải đều các dạng bài rồi mới xáo, để đề nào cũng phủ hết dạng.
        Một số mẫu đề từ chối vài hạt giống (số liệu ra không đẹp), nên phải
        đổi hạt giống cho tới khi dựng được câu hợp lệ — đề không được có câu trống. */
+    /* Mẫu đề ít biến thể mà phải sinh 120 câu thì rất dễ ra hai câu y hệt nhau,
+       nên phải so nội dung đã sinh chứ không chỉ đổi hạt giống cho có. */
+    const daRa = new Set();
+    const thu = (t, khoaSeed) => {
+      let seed = TD.bam(khoaSeed);
+      for (let lan = 0; lan < 60; lan++) {
+        const q = TD.sinhCau(t, seed);
+        if (q) {
+          const vt = TD.vanTayCau(q);
+          if (!daRa.has(vt)) { daRa.add(vt); return seed; }
+        }
+        seed = TD.bam(khoaSeed + '#' + lan);
+      }
+      return null;
+    };
     for (let k = 0; k < N; k++) {
       const t = mau[k % mau.length];
-      let seed = TD.bam(mon + so + t.ma + k), duoc = false;
-      for (let lan = 0; lan < 40; lan++) {
-        if (TD.sinhCau(t, seed)) { duoc = true; break; }
-        seed = TD.bam(mon + so + t.ma + k + '#' + lan);
-      }
-      if (duoc) ra.push({ mon: mon, g: t.ma, s: seed });
+      const seed = thu(t, mon + so + t.ma + k);
+      if (seed !== null) ra.push({ mon: mon, g: t.ma, s: seed });
     }
-    /* nếu vẫn thiếu (mẫu đề quá kén), bù thêm biến thể của các dạng đã dựng được */
-    for (let k = 0; ra.length && ra.length < N && k < N * 4; k++) {
-      const goc = ra[k % ra.length];
-      const t = TD.timMau(mon, goc.g);
-      const seed = TD.bam(mon + so + goc.g + 'bu' + k);
-      if (t && TD.sinhCau(t, seed)) ra.push({ mon: mon, g: goc.g, s: seed });
+    /* nếu vẫn thiếu (mẫu đề quá kén hoặc đã cạn biến thể), bù bằng dạng khác */
+    for (let k = 0; ra.length && ra.length < N && k < N * 6; k++) {
+      const t = mau[k % mau.length];
+      const seed = thu(t, mon + so + t.ma + 'bu' + k);
+      if (seed !== null) ra.push({ mon: mon, g: t.ma, s: seed });
     }
     return TD.xaoR(R, ra);
   }
@@ -1040,23 +1087,32 @@ TD.deThiThat = function (mon, seed, cap) {
     return ra;
   };
 
-  /* ---- chốt hạt giống: mẫu đề nào từ chối hạt giống thì đổi, chịu thua thì bỏ ---- */
+  /* ---- chốt hạt giống ----
+     Mẫu đề nào từ chối hạt giống thì đổi hạt giống, chịu thua thì bỏ.
+     Quan trọng hơn: một mẫu được phép lấy hai lần trong cùng đề, mà mẫu ít
+     biến thể (mấy bộ ngữ pháp tiếng Anh chỉ có hơn chục câu gốc) thì hai lần
+     rút rất dễ ra y hệt nhau. Nên phải so NỘI DUNG câu đã sinh chứ không chỉ
+     so mã mẫu, và so chung cho cả ba phần của đề. */
+  const daRa = new Set();
+  const vanTay = TD.vanTayCau;
+
   const chot = ds => {
     const ra = [];
     for (const it0 of ds) {
       const it = Object.assign({}, it0);
-      if (it.dsy === null) it.dsy = R.chonNhieu(theoCD[it.cd], 4);
-      if (it.s !== undefined) it.s = R.nguyen(1, 2147483646) >>> 0;
-      if (it.g) {
-        const mau = TD.timMau(mon, it.g);
-        let duoc = false;
-        for (let l = 0; l < 40 && mau; l++) {
-          if (TD.sinhCau(mau, it.s)) { duoc = true; break; }
-          it.s = R.nguyen(1, 2147483646) >>> 0;
+      let duoc = false;
+      /* thử tối đa 40 hạt giống: vừa để mẫu sinh được, vừa để không đụng câu đã có */
+      for (let l = 0; l < 40; l++) {
+        if (it.dsy === null || (l && it0.dsy === null)) it.dsy = R.chonNhieu(theoCD[it.cd], 4);
+        if (it.s !== undefined) it.s = R.nguyen(1, 2147483646) >>> 0;
+        const q = TD.layCau(it);
+        if (q) {
+          const vt = vanTay(q);
+          if (!daRa.has(vt)) { daRa.add(vt); duoc = true; break; }
         }
-        if (!duoc) continue;
-      } else if (!TD.layCau(it)) continue;
-      ra.push(it);
+        if (it.s === undefined && it0.dsy !== null) break;   /* câu cố định: đổi hạt giống cũng vô ích */
+      }
+      if (duoc) ra.push(it);
     }
     return ra;
   };
