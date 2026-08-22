@@ -381,6 +381,10 @@ TD.macDinhTrangThai = function () {
     bat_dau: TD.ngayBatDauGoiY(),
     /* thống kê: thong_ke[mon][muc] = {dung, tong} */
     thong_ke: {},
+    /* thống kê theo chuyên đề: thong_ke_cd[mon][chuyên đề] = {dung, tong} */
+    thong_ke_cd: {},
+    /* mục từ vựng đã được hỏi ít nhất một lần */
+    tu_da_hoi: {},
     /* nhật ký theo ngày: nhat_ky['2026-08-19'] = số câu đã làm */
     nhat_ky: {},
     /* thẻ ôn giãn cách: the[id] = {lan, khoang, de, han, sai} */
@@ -517,7 +521,7 @@ TD.SRS = {
 };
 
 /* ---------- THỐNG KÊ ---------- */
-TD.ghiNhan = function (mon, muc, dung, khongTinh) {
+TD.ghiNhan = function (mon, muc, dung, khongTinh, chuyenDe) {
   const h = TD.homNay();
   TD.S.nhat_ky[h] = (TD.S.nhat_ky[h] || 0) + 1;
   TD.diemDanh();
@@ -530,6 +534,16 @@ TD.ghiNhan = function (mon, muc, dung, khongTinh) {
   const o = TD.S.thong_ke[mon][muc] = TD.S.thong_ke[mon][muc] || { dung: 0, tong: 0 };
   o.tong++; if (dung) o.dung++;
 
+  /* Thống kê theo CHUYÊN ĐỀ: biết mình yếu chỗ nào mới ôn trúng chỗ đó.
+     Thống kê theo mức chỉ nói được "mình kém câu vận dụng", không nói được
+     "kém ở Oxyz hay ở tích phân". */
+  if (chuyenDe) {
+    TD.S.thong_ke_cd = TD.S.thong_ke_cd || {};
+    TD.S.thong_ke_cd[mon] = TD.S.thong_ke_cd[mon] || {};
+    const z = TD.S.thong_ke_cd[mon][chuyenDe] = TD.S.thong_ke_cd[mon][chuyenDe] || { dung: 0, tong: 0 };
+    z.tong++; if (dung) z.dung++;
+  }
+
   if (dung) {
     TD.S.chuoi++;
     if (TD.S.chuoi > TD.S.chuoi_max) TD.S.chuoi_max = TD.S.chuoi;
@@ -537,6 +551,32 @@ TD.ghiNhan = function (mon, muc, dung, khongTinh) {
     TD.S.tui.hoi_xuan--;                       /* Hồi Xuân Đan tự động giữ chuỗi */
     TD.bao('💊 Hồi Xuân Đan đã giữ lại chuỗi liên kích ' + TD.S.chuoi + '! (còn ' + TD.S.tui.hoi_xuan + ' viên)', 'kim');
   } else TD.S.chuoi = 0;
+};
+
+/* Bảng chuyên đề của một môn, xếp từ yếu tới mạnh.
+   Chuyên đề chưa làm đủ 4 câu thì chưa đủ căn cứ nên xếp riêng. */
+TD.bangChuyenDe = function (mon) {
+  const tk = (TD.S.thong_ke_cd || {})[mon] || {};
+  const cds = [...new Set((TD.KHO_LT[mon] || []).map(x => x.cd).filter(Boolean))];
+  (TD.GEN[mon] || []).forEach(t => {
+    const cd = TD.chuDeCuaThe(mon, { nhom: t.chuong });
+    if (cd && cds.indexOf(cd) < 0) cds.push(cd);
+  });
+  const ra = cds.map(cd => {
+    const o = tk[cd] || { dung: 0, tong: 0 };
+    return { cd: cd, dung: o.dung, tong: o.tong,
+      pt: o.tong ? Math.round((o.dung / o.tong) * 100) : null,
+      duCan: o.tong >= 4 };
+  });
+  /* yếu nhất lên đầu; chưa làm đủ căn cứ thì xuống cuối */
+  ra.sort((a, b) => {
+    if (a.duCan !== b.duCan) return a.duCan ? -1 : 1;
+    if (a.pt === null && b.pt === null) return b.tong - a.tong;
+    if (a.pt === null) return 1;
+    if (b.pt === null) return -1;
+    return a.pt - b.pt;
+  });
+  return ra;
 };
 
 /* Độ chính xác tổng của một môn (0–100) */
@@ -882,6 +922,7 @@ TD.sinhCau = function (mau, seed) {
    Mục tĩnh: {mon, i} · Mục sinh: {mon, g: mã mẫu, s: hạt giống} */
 TD.layCau = function (it) {
   if (!it) return null;
+  if (it.cau) return it.cau;          /* câu đã dựng sẵn (kiểm tra từ vựng theo phạm vi) */
   if (it.dsy) return TD.cauDsTuMenhDe(it.mon, it.dsy, it.cd, it.s);
   if (it.lt !== undefined) return TD.cauTuMenhDe(it.mon, it.lt, it.c, it.s);
   if (it.g) {
@@ -895,6 +936,9 @@ TD.layCau = function (it) {
    Với câu sinh tự động, thẻ gắn với MẪU ĐỀ chứ không phải số liệu cụ thể
    — nên khi tâm ma quay lại, bạn gặp một biến thể MỚI của cùng dạng bài. */
 TD.idThe = function (it) {
+  /* câu dựng sẵn cho một MỤC TỪ VỰNG cụ thể: thẻ ôn phải gắn với đúng từ đó,
+     không gắn với mẫu đề, để tâm ma trả lại đúng từ mình đã sai. */
+  if (it.cau) return it.mon + '~' + (it.khoaTu || String(it.cau.q).slice(0, 60));
   if (it.dsy) return it.mon + '\u00A7' + it.cd;
   if (it.lt !== undefined) return it.mon + '$' + it.lt;
   return it.g ? it.mon + '@' + it.g : it.mon + '#' + it.i;
@@ -11727,10 +11771,60 @@ substantial|evidence|bằng chứng vững chắc
 window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
 
 (function () {
+/* Giải thích một phương án tiếng Anh bị loại.
+   "không thoả yêu cầu của đề" là câu nói cho có — học sinh đọc xong không
+   biết thêm gì. Ở đây lần lượt: ① gọi tên DẠNG NGỮ PHÁP nếu phương án là một
+   cụm động từ (đây mới là thứ đề kiểm tra) ② tra kho 2000 từ để cho NGHĨA
+   ③ đoán từ loại theo hậu tố. */
+const DANG_NP = [
+  [/^(has|have)\s+been\s+\w+ing$/i, 'hiện tại hoàn thành tiếp diễn (has/have been + V-ing) — nhấn mạnh quá trình kéo dài tới hiện tại'],
+  [/^had\s+been\s+\w+ing$/i, 'quá khứ hoàn thành tiếp diễn (had been + V-ing) — quá trình kéo dài tới một mốc quá khứ'],
+  [/^will\s+have\s+\w+/i, 'tương lai hoàn thành (will have + V3) — hoàn tất trước một mốc tương lai'],
+  [/^will\s+be\s+\w+ing$/i, 'tương lai tiếp diễn (will be + V-ing) — đang diễn ra tại một mốc tương lai'],
+  [/^(is|are|am)\s+being\s+\w+/i, 'bị động tiếp diễn (is/are being + V3)'],
+  [/^(has|have)\s+been\s+\w+/i, 'bị động hoàn thành (has/have been + V3)'],
+  [/^(has|have)\s+\w+/i, 'hiện tại hoàn thành (has/have + V3) — nối quá khứ với hiện tại'],
+  [/^had\s+\w+/i, 'quá khứ hoàn thành (had + V3) — xảy ra TRƯỚC một mốc quá khứ khác'],
+  [/^(is|are|am)\s+going\s+to/i, 'be going to + V — dự định có sẵn hoặc dự đoán CÓ dấu hiệu trước mắt'],
+  [/^(is|are|am)\s+\w+ing$/i, 'hiện tại tiếp diễn (is/are/am + V-ing) — đang xảy ra lúc nói'],
+  [/^(was|were)\s+\w+ing$/i, 'quá khứ tiếp diễn (was/were + V-ing) — đang xảy ra tại một mốc quá khứ'],
+  [/^(is|are|am)\s+\w+/i, 'bị động hiện tại đơn (is/are/am + V3)'],
+  [/^(was|were)\s+\w+/i, 'bị động quá khứ đơn (was/were + V3)'],
+  [/^will\s+\w+/i, 'tương lai đơn (will + V) — quyết định tức thì hoặc dự đoán không có căn cứ trước mắt'],
+  [/^would\s+\w+/i, 'dạng "would + V" — câu điều kiện loại 2 hoặc tương lai trong quá khứ'],
+  [/^(could|might|may|should|must|can)\s+have\s+\w+/i, 'động từ khuyết thiếu + have + V3 — suy đoán về QUÁ KHỨ'],
+  [/^(could|might|may|should|must|can|need|ought)\b/i, 'động từ khuyết thiếu + V nguyên thể — nói về hiện tại hoặc tương lai'],
+  [/^to\s+\w+/i, 'động từ nguyên thể có "to"'],
+  [/^being\s+\w+/i, 'dạng "being + V3" — phân từ bị động rút gọn'],
+  [/^having\s+\w+/i, 'dạng "having + V3" — phân từ hoàn thành, hành động xảy ra TRƯỚC vế chính'],
+  [/^(who|whom|whose|which|that|where|when|why)$/i, 'đại từ quan hệ — chọn sai thì mệnh đề không nối đúng vào danh từ đứng trước']
+];
+TD.nghiaTuAnh = function (x) {
+  const chu = String(x).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  for (const [re, mo] of DANG_NP)
+    if (re.test(chu)) return `"${chu}" là ${mo} — không hợp với dấu hiệu trong câu.`;
+  const t = (TD.KHO_TU || []).find(y => y.w.toLowerCase() === chu.toLowerCase());
+  if (t) return `<b>${t.w}</b> (${t.l}) = ${t.n} — không hợp nghĩa ở đây.`;
+  const HAU_TO = [
+    [/ly$/, 'trạng từ'],
+    [/(tion|sion|ment|ness|ity|ance|ence|ship|hood|ism|ist)$/, 'danh từ'],
+    [/(ive|ous|ful|less|able|ible|al|ic|ary|ant|ent)$/, 'tính từ'],
+    [/(ise|ize|ify|ate|en)$/, 'động từ'],
+    [/ing$/, 'dạng V-ing (phân từ hiện tại hoặc danh động từ)'],
+    [/ed$/, 'dạng V-ed (quá khứ đơn hoặc phân từ hai)'],
+    [/s$/, 'dạng số nhiều hoặc động từ chia ngôi thứ ba số ít']
+  ];
+  if (/^[a-zA-Z][a-zA-Z '-]*$/.test(chu))
+    for (const [re, loai] of HAU_TO)
+      if (re.test(chu.toLowerCase()))
+        return `"${chu}" là ${loai}, không đúng dạng mà chỗ trống cần.`;
+  return `"${chu}" không hợp với cấu trúc câu ở đây.`;
+};
+
 const MC = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
   const loai = opts.filter(x => x !== it.d)
-    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không thoả yêu cầu của đề.'}`)
+    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || TD.nghiaTuAnh(x)}`)
     .join('\n');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
@@ -11741,7 +11835,10 @@ const MC = (R, de, it, meo) => {
 const theoCD = {};
 (TD.KHO_TU || []).forEach(x => { (theoCD[x.cd] = theoCD[x.cd] || []).push(x); });
 
-const nhieuTu = (R, x, lay) => {
+/* Trả về ba đối tượng từ làm phương án nhiễu (không phải chuỗi), để mỗi
+   phương án bị loại còn giải nghĩa được — học sinh sai một câu thì học thêm
+   được ba từ, chứ đọc "không thoả yêu cầu của đề" thì chẳng học được gì. */
+const nhieuTuObj = (R, x, lay) => {
   /* phương án nhiễu: cùng chủ đề và cùng loại từ trước, thiếu thì mở rộng ra cả kho */
   let bo = (theoCD[x.cd] || []).filter(y => y.w !== x.w && y.l === x.l && y.n !== x.n);
   if (bo.length < 3) bo = (TD.KHO_TU || []).filter(y => y.w !== x.w && y.l === x.l && y.n !== x.n);
@@ -11753,11 +11850,50 @@ const nhieuTu = (R, x, lay) => {
   for (const y of TD.xaoR(R, bo)) {
     const v = lay(y);
     if (daCo[v]) continue;
-    daCo[v] = 1; ra.push(v);
+    daCo[v] = 1; ra.push(y);
     if (ra.length === 3) return ra;
   }
   return null;
 };
+const nhieuTu = (R, x, lay) => { const o = nhieuTuObj(R, x, lay); return o && o.map(lay); };
+
+/* ---------- Dựng câu hỏi cho MỘT mục cụ thể ----------
+   Mấy mẫu đề ở trên tự bốc từ ngẫu nhiên trong kho, nên không dùng được cho
+   chức năng "kiểm tra hết 2019 từ" — muốn phủ hết thì phải hỏi được ĐÚNG một
+   từ đã chỉ định. Ba hàm dưới đây làm việc đó, dùng lại đúng khuôn MC ở trên
+   nên lời giải và cách nêu lí do loại phương án vẫn y hệt. */
+TD.cauTuAnh = function (R, x) {                 /* Anh → Việt */
+  const o = nhieuTuObj(R, x, y => y.n);
+  if (!o) return null;
+  const sv = {};
+  o.forEach(y => { sv[y.n] = `đây là nghĩa của <b>${y.w}</b> (${y.l}) — học luôn từ này.`; });
+  return MC(R, `Từ "<b>${x.w}</b>" (${x.l}) có nghĩa là gì?`,
+    { d: x.n, s: o.map(y => y.n), sv: sv, v: `${x.w} (${x.l}) = ${x.n}. Thuộc chủ đề: ${x.cd}.` },
+    'Học từ theo CHỦ ĐỀ và theo CỤM, đừng học rời từng từ — đề đọc hiểu luôn xoay quanh một chủ đề nhất định.');
+};
+TD.cauTuViet = function (R, x) {                /* Việt → Anh */
+  const o = nhieuTuObj(R, x, y => y.w);
+  if (!o) return null;
+  const sv = {};
+  o.forEach(y => { sv[y.w] = `<b>${y.w}</b> (${y.l}) = ${y.n} — nghĩa khác hẳn.`; });
+  return MC(R, `Từ tiếng Anh nào mang nghĩa "<b>${x.n}</b>"? (${x.l})`,
+    { d: x.w, s: o.map(y => y.w), sv: sv, v: `${x.n} = ${x.w} (${x.l}). Thuộc chủ đề: ${x.cd}.` },
+    'Nhớ được nghĩa Việt → Anh mới viết được câu. Chỉ nhận ra mặt chữ thì chỉ đủ cho phần đọc hiểu.');
+};
+TD.cauCollocation = function (R, x) {
+  const kho = TD.KHO_COLLOC || [];
+  const khac = kho.filter(y => y.n !== x.n);
+  if (khac.length < 3) return null;
+  const o3 = R.chonNhieu(khac, 3);
+  const s = o3.map(y => y.n);
+  if (new Set(s.concat([x.n])).size !== 4) return null;
+  const sv = {};
+  o3.forEach(y => { sv[y.n] = `đây là nghĩa của cụm <b>${y.tu} ${y.cum}</b> — học luôn cụm này.`; });
+  return MC(R, `Cụm "<b>${x.tu} ${x.cum}</b>" có nghĩa là gì?`,
+    { d: x.n, s: s, sv: sv, v: `${x.tu} ${x.cum} = ${x.n}. Nhóm: ${x.nhom}.` },
+    'Biết nghĩa của cụm mới dùng đúng trong bài điền từ. Nhiều cụm nghĩa không suy ra được từ nghĩa các từ thành phần.');
+};
+
 
 TD.GEN.anh = (TD.GEN.anh || []).concat([
 
@@ -11766,10 +11902,12 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const kho = TD.KHO_TU || [];
     if (kho.length < 8) return null;
     const x = R.chon(kho);
-    const s = nhieuTu(R, x, y => y.n);
-    if (!s) return null;
+    const o = nhieuTuObj(R, x, y => y.n);
+    if (!o) return null;
+    const s = o.map(y => y.n), sv = {};
+    o.forEach(y => { sv[y.n] = `đây là nghĩa của <b>${y.w}</b> (${y.l}) — học luôn từ này.`; });
     return MC(R, `Từ "<b>${x.w}</b>" (${x.l}) có nghĩa là gì?`,
-      { d: x.n, s: s, v: `${x.w} (${x.l}) = ${x.n}. Thuộc chủ đề: ${x.cd}.` },
+      { d: x.n, s: s, sv: sv, v: `${x.w} (${x.l}) = ${x.n}. Thuộc chủ đề: ${x.cd}.` },
       'Học từ theo CHỦ ĐỀ và theo CỤM, đừng học rời từng từ — đề đọc hiểu luôn xoay quanh một chủ đề nhất định.');
   } },
 
@@ -11778,10 +11916,12 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const kho = TD.KHO_TU || [];
     if (kho.length < 8) return null;
     const x = R.chon(kho);
-    const s = nhieuTu(R, x, y => y.w);
-    if (!s) return null;
+    const o = nhieuTuObj(R, x, y => y.w);
+    if (!o) return null;
+    const s = o.map(y => y.w), sv = {};
+    o.forEach(y => { sv[y.w] = `<b>${y.w}</b> (${y.l}) = ${y.n} — nghĩa khác hẳn.`; });
     return MC(R, `Từ tiếng Anh nào mang nghĩa "<b>${x.n}</b>"? (${x.l})`,
-      { d: x.w, s: s, v: `${x.n} = ${x.w} (${x.l}). Thuộc chủ đề: ${x.cd}.` },
+      { d: x.w, s: s, sv: sv, v: `${x.n} = ${x.w} (${x.l}). Thuộc chủ đề: ${x.cd}.` },
       'Nhớ được nghĩa Việt → Anh mới viết được câu. Chỉ nhận ra mặt chữ thì chỉ đủ cho phần đọc hiểu.');
   } },
 
@@ -11791,8 +11931,13 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     if (kho.length < 8) return null;
     const x = R.chon(kho);
     const s = ['make', 'do', 'take', 'have'].filter(v => v !== x.tu);
+    const sv = {};
+    s.forEach(v => {
+      const vd = kho.filter(y => y.tu === v).slice(0, 2).map(y => `${v} ${y.cum}`).join(' · ');
+      sv[v] = `"${v} ${x.cum}" không phải cụm chuẩn.` + (vd ? ` "${v}" đi với: ${vd}.` : '');
+    });
     return MC(R, `Chọn động từ đúng: "____ ${x.cum}" (${x.n})`,
-      { d: x.tu, s: s, v: `Cụm chuẩn là "<b>${x.tu} ${x.cum}</b>" = ${x.n}.\n`
+      { d: x.tu, s: s, sv: sv, v: `Cụm chuẩn là "<b>${x.tu} ${x.cum}</b>" = ${x.n}.\n`
         + `make/do/take/have là bốn động từ đi kèm rất nhiều danh từ khác nhau, phải học thuộc theo cụm.` },
       'make thiên về TẠO RA cái mới (a decision, progress); do thiên về THỰC HIỆN công việc '
       + '(homework, research); take thiên về NHẬN/CHIẾM (part in, care of, place).');
@@ -11808,10 +11953,13 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const x = R.chon(kho);
     const cung = kho.filter(y => y.nhom === x.nhom && y.tu !== x.tu && y.cum !== x.cum);
     if (cung.length < 3) return null;
-    const s = R.chonNhieu(cung, 3).map(y => y.tu);
+    const o3 = R.chonNhieu(cung, 3);
+    const s = o3.map(y => y.tu);
     if (new Set(s.concat([x.tu])).size !== 4) return null;
+    const sv = {};
+    o3.forEach(y => { sv[y.tu] = `"${y.tu}" đi với cụm khác: <b>${y.tu} ${y.cum}</b> = ${y.n}.`; });
     return MC(R, `Chọn từ đúng để hoàn thành cụm: "____ ${x.cum}" (${x.n})`,
-      { d: x.tu, s: s, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.\nNhóm: ${x.nhom}.` },
+      { d: x.tu, s: s, sv: sv, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.\nNhóm: ${x.nhom}.` },
       'Collocation là chỗ người Việt hay dịch từng chữ rồi ghép sai. '
       + 'Học theo CỤM và theo NHÓM, đừng học từng từ rời.');
   } },
@@ -11823,10 +11971,13 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const x = R.chon(kho);
     const khac = kho.filter(y => y.n !== x.n);
     if (khac.length < 3) return null;
-    const s = R.chonNhieu(khac, 3).map(y => y.n);
+    const o3 = R.chonNhieu(khac, 3);
+    const s = o3.map(y => y.n);
     if (new Set(s.concat([x.n])).size !== 4) return null;
+    const sv = {};
+    o3.forEach(y => { sv[y.n] = `đây là nghĩa của cụm <b>${y.tu} ${y.cum}</b> — học luôn cụm này.`; });
     return MC(R, `Cụm "<b>${x.tu} ${x.cum}</b>" có nghĩa là gì?`,
-      { d: x.n, s: s, v: `${x.tu} ${x.cum} = ${x.n}. Nhóm: ${x.nhom}.` },
+      { d: x.n, s: s, sv: sv, v: `${x.tu} ${x.cum} = ${x.n}. Nhóm: ${x.nhom}.` },
       'Biết nghĩa của cụm mới dùng đúng trong bài điền từ. '
       + 'Nhiều cụm nghĩa không suy ra được từ nghĩa các từ thành phần.');
   } },
@@ -11838,8 +11989,13 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const x = R.chon(kho);
     const moi = ['at', 'in', 'on', 'of', 'for', 'to', 'with', 'from', 'about'];
     const s = R.chonNhieu(moi.filter(g => g !== x.cum), 3);
+    const sv = {};
+    s.forEach(g => {
+      const vd = kho.filter(y => y.cum === g && y.tu !== x.tu).slice(0, 2).map(y => `${y.tu} ${g}`).join(' · ');
+      sv[g] = `"${x.tu} ${g}" không phải cụm chuẩn.` + (vd ? ` "${g}" thường đi với: ${vd}.` : '');
+    });
     return MC(R, `Điền giới từ đúng: "${x.tu} ____" (${x.n})`,
-      { d: x.cum, s: s, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.` },
+      { d: x.cum, s: s, sv: sv, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.` },
       'Giới từ không suy luận được, phải học thuộc theo cụm. Nhóm hay ra thi nhất: '
       + 'good AT · interested IN · afraid OF · famous FOR · similar TO · satisfied WITH · different FROM.');
   } },
@@ -18565,7 +18721,7 @@ window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
 const MC = (R, de, it, meo, pt) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
   const loai = opts.filter(x => x !== it.d)
-    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không đúng ngữ pháp trong ngữ cảnh này.'}`).join('\n');
+    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || (TD.nghiaTuAnh ? TD.nghiaTuAnh(x) : 'không đúng ngữ pháp trong ngữ cảnh này.')}`).join('\n');
   const them = (it.pt || pt) ? `\n\nCách phân tích từng bước:\n${it.pt || pt}` : '';
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}${them}\n\nVì sao các phương án còn lại bị loại:\n${loai}`, meo: meo };
@@ -21340,6 +21496,90 @@ TD.man_luyencong = function (c) {
     luoi.appendChild(t);
   });
   c.appendChild(luoi);
+
+  const bYeu = el('button', 'nut kim', '🎯 Bảng yếu điểm — ôn nhanh đúng chỗ đang hổng');
+  bYeu.onclick = () => TD.manYeuDiem();
+  c.appendChild(el('div', 'the', '')).appendChild(bYeu);
+};
+
+/* ============================================================
+   BẢNG YẾU ĐIỂM + ÔN NHANH THEO CHUYÊN ĐỀ
+   Thống kê theo MỨC chỉ nói được "kém câu vận dụng", không nói được
+   kém ở Oxyz hay ở tích phân. Bảng này chấm điểm từng chuyên đề rồi
+   cho ôn thẳng chuyên đề yếu nhất bằng phiên 10 câu.
+   ============================================================ */
+TD.YD = { mon: null, dai: 10 };
+
+TD.manYeuDiem = function (mon) {
+  TD.YD.mon = mon || TD.YD.mon || (TD.S.to_hop && TD.S.to_hop[0]) || 'toan';
+  const c = $('#noidung'); c.innerHTML = '';
+  const m = TD.YD.mon;
+
+  const chonMon = TD.THU_TU_MON.map(x =>
+    `<button class="nut ${x === m ? 'kim' : 'phu'}" data-m="${x}"
+      style="padding:6px 11px;font-size:13px">${TD.MON[x].icon} ${TD.MON[x].ten}</button>`).join('');
+  const dau = el('div', 'the vien-kim', `<h3>🎯 Bảng yếu điểm</h3>
+    <p class="mo-nhat">Chuyên đề xếp từ YẾU nhất lên đầu. Bấm vào một chuyên đề để ôn nhanh
+    ${TD.YD.dai} câu đúng chuyên đề đó — sai chỗ nào vá chỗ đó, không học lan man.</p>
+    <div class="hang-nut" style="margin-top:9px">${chonMon}</div>
+    <div class="hang-nut" style="margin-top:4px">
+      ${[10, 20, 30].map(n2 => `<button class="nut ${TD.YD.dai === n2 ? 'kim' : 'phu'}" data-dai="${n2}"
+        style="padding:5px 12px;font-size:12.6px">phiên ${n2} câu</button>`).join('')}
+    </div>`);
+  c.appendChild(dau);
+  dau.querySelectorAll('[data-m]').forEach(b => b.onclick = () => TD.manYeuDiem(b.dataset.m));
+  dau.querySelectorAll('[data-dai]').forEach(b => b.onclick = () => { TD.YD.dai = +b.dataset.dai; TD.manYeuDiem(m); });
+
+  const bang = TD.bangChuyenDe(m);
+  if (!bang.length) {
+    c.appendChild(el('div', 'the', '<p>Môn này chưa chia chuyên đề.</p>'));
+  } else {
+    const daLam = bang.filter(x => x.duCan);
+    const chuaLam = bang.filter(x => !x.duCan);
+    const hop = el('div', 'the', '');
+    if (daLam.length) {
+      const yeu = daLam.filter(x => x.pt < 70);
+      hop.appendChild(el('div', '', `<div style="color:var(--kim);font-weight:700;font-size:13.5px;margin-bottom:8px">
+        Đã có căn cứ (${daLam.length} chuyên đề)${yeu.length ? ` · <span style="color:var(--lua)">${yeu.length} chuyên đề dưới 70%</span>` : ' · chưa chuyên đề nào dưới 70%'}</div>`));
+    } else {
+      hop.appendChild(el('div', 'mo-nhat', 'Chưa chuyên đề nào làm đủ 4 câu để có căn cứ. Cứ Luyện Công vài phiên rồi quay lại đây.'));
+    }
+    daLam.concat(chuaLam).forEach(x => {
+      const mau = x.pt === null ? 'var(--chu3)'
+        : x.pt < 50 ? 'var(--lua)' : x.pt < 70 ? 'var(--kim)' : x.pt < 85 ? 'var(--ngoc)' : 'var(--dung)';
+      const b = el('button', 'dapan', `
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%">
+          <span style="text-align:left">${x.cd}</span>
+          <span style="flex:0 0 auto;font-size:12.6px;color:${mau};font-weight:700">
+            ${x.pt === null ? (x.tong ? x.dung + '/' + x.tong + ' câu' : 'chưa làm') : x.pt + '% · ' + x.dung + '/' + x.tong}
+          </span>
+        </div>
+        <div class="thanh" style="margin-top:6px;height:5px"><i style="width:${x.pt === null ? 0 : x.pt}%;background:${mau}"></i></div>`);
+      b.onclick = () => TD.onNhanh(m, x.cd);
+      hop.appendChild(b);
+    });
+    c.appendChild(hop);
+  }
+  c.appendChild(el('div', 'the', '')).appendChild((() => {
+    const h = el('div', 'hang-nut', '');
+    const b1 = el('button', 'nut', '⚔️ Ôn nhanh chuyên đề yếu nhất');
+    b1.onclick = () => {
+      const yeu = TD.bangChuyenDe(m).filter(x => x.duCan)[0];
+      if (!yeu) { TD.bao('Chưa đủ dữ liệu — làm thêm vài phiên đã.', 'lua'); return; }
+      TD.onNhanh(m, yeu.cd);
+    };
+    const b2 = el('button', 'nut phu', '← Về Luyện Công');
+    b2.onclick = () => TD.di('luyencong');
+    h.appendChild(b1); h.appendChild(b2);
+    return h;
+  })());
+};
+
+/* Phiên ôn nhanh: ngắn, đúng một chuyên đề, không giới hạn giờ */
+TD.onNhanh = function (mon, cd) {
+  const ds = TD.deChuyenDe(mon, cd, TD.YD.dai || 10);
+  if (!ds.length) { TD.bao('Chuyên đề này chưa đủ câu hỏi.', 'lua'); return; }
+  TD.batDauPhien(mon, null, 'luyen', ds.slice(0, TD.YD.dai || 10));
 };
 
 TD.chonMuc = function (mon) {
@@ -21632,7 +21872,7 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
   const soi = !!q._soiGuong;
   document.querySelectorAll('.phap-bao').forEach(b => { b.disabled = true; });
 
-  TD.ghiNhan(mon, q.muc, dung, soi);
+  TD.ghiNhan(mon, q.muc, dung, soi, TD.chuDeCuaThe(mon, { nhom: q.chuong, cd: q.cd }) || q.chuong);
   TD.SRS.capNhat(TD.idThe(p.ds[p.vt]), soi ? false : dung);
 
   /* tiếng phản hồi: chuỗi càng dài chuông càng cao, mốc 5 câu thì reo hẳn một quãng */
@@ -21979,6 +22219,7 @@ TD.manTuVung = function (che) {
   /* ---- danh sách ---- */
   const ra = el('div', 'the', '');
   c.appendChild(ra);
+  let nutKT = null;
 
   const ve = () => {
     const q = TD.khongDau(TD.TV.tim.trim());
@@ -21991,6 +22232,8 @@ TD.manTuVung = function (che) {
       if (TD.TV.nhom) ds = ds.filter(x => x.nhom === TD.TV.nhom);
       if (q) ds = ds.filter(x => TD.khongDau(x.tu + ' ' + x.cum).indexOf(q) >= 0 || TD.khongDau(x.n).indexOf(q) >= 0);
     }
+    TD.TV.dangLoc = ds;                 /* nút Kiểm tra bám đúng phạm vi đang xem */
+    if (nutKT) nutKT.textContent = `📝 Kiểm tra ${ds.length} mục đang lọc`;
     ra.innerHTML = '';
     ra.appendChild(el('div', 'mo-nhat', `Tìm thấy <b style="color:var(--kim)">${ds.length}</b> mục`
       + (ds.length > TD.TV.hien ? ` · đang hiện ${TD.TV.hien}` : '')));
@@ -22022,9 +22265,10 @@ TD.manTuVung = function (che) {
   };
 
   const cuoi = el('div', 'hang-nut', '');
-  const bKT = el('button', 'nut kim', '📝 Kiểm tra 50 câu từ vựng & collocation');
-  bKT.onclick = () => TD.kiemTraTuVung();
+  const bKT = el('button', 'nut kim', '📝 Kiểm tra');
+  bKT.onclick = () => TD.hoiKiemTraTuVung();
   cuoi.appendChild(bKT);
+  nutKT = bKT; ve();          /* vẽ lại để nhãn nút mang đúng số mục đang lọc */
   const bVe = el('button', 'nut phu', '← Về Tàng Kinh Các');
   bVe.onclick = () => { TD.monTK = 'anh'; TD.di('tangkinh'); };
   cuoi.appendChild(bVe);
@@ -22032,18 +22276,88 @@ TD.manTuVung = function (che) {
   window.scrollTo(0, 0);
 };
 
-/* Kiểm tra nhanh riêng phần từ vựng — chỉ lấy các mẫu đề dùng kho từ */
-TD.kiemTraTuVung = function () {
-  const ma = ['anh-nghia', 'anh-tu', 'anh-wordform', 'anh-colloc', 'anh-colloc-cum', 'anh-colloc-nghia', 'anh-gioitu'];
-  const mau = (TD.GEN.anh || []).filter(t => ma.indexOf(t.ma) >= 0);
-  if (!mau.length) { TD.bao('Chưa có mẫu đề từ vựng.', 'lua'); return; }
-  const ds = [];
-  for (let k = 0; ds.length < 50 && k < 400; k++) {
-    const t = mau[k % mau.length];
-    const s = (Math.random() * 4294967295) >>> 0;
-    if (TD.sinhCau(t, s)) ds.push({ mon: 'anh', g: t.ma, s: s });
+/* ============================================================
+   KIỂM TRA TỪ VỰNG — QUÉT ĐÚNG PHẠM VI ĐANG LỌC
+   Bản cũ bốc ngẫu nhiên 50 câu từ toàn kho, nên lọc "Ẩm thực" 30 từ
+   vẫn ra 50 câu lẫn từ chủ đề khác, mà chọn cả 2019 từ cũng chỉ được
+   50 câu. Bản này hỏi TỪNG mục trong phạm vi đang lọc đúng một lần,
+   không thừa không thiếu, và cho chọn độ dài phiên.
+   ============================================================ */
+
+/* Sinh một câu hỏi cho ĐÚNG một mục đã chỉ định (không bốc ngẫu nhiên).
+   Phải tự gắn chương / mức / dạng vì mấy trường đó bình thường do MẪU ĐỀ cấp,
+   mà ở đây không đi qua mẫu đề nào cả. */
+TD.cauChoMuc = function (x, chieu) {
+  const R = TD.rng((Math.random() * 4294967295) >>> 0);
+  const laTu = x.w !== undefined;
+  const q = laTu
+    ? (chieu === 'va' ? TD.cauTuViet(R, x) : TD.cauTuAnh(R, x))
+    : TD.cauCollocation(R, x);
+  if (!q) return null;
+  ['q', 'giai', 'meo'].forEach(k => { if (q[k]) q[k] = TD.chuanDau(q[k]); });
+  if (q.opts) q.opts = q.opts.map(TD.chuanDau);
+  return Object.assign({
+    chuong: laTu ? 'Từ loại' : 'Ngữ pháp khác',
+    muc: laTu ? (chieu === 'va' ? 2 : 1) : 2,
+    dang: 'mc', _sinh: true
+  }, q);
+};
+
+TD.hoiKiemTraTuVung = function () {
+  const ds = (TD.TV.dangLoc || []).slice();
+  if (!ds.length) { TD.bao('Không có mục nào trong phạm vi đang lọc.', 'lua'); return; }
+  const laTu = ds[0].w !== undefined;
+  const c = $('#noidung');
+  const hop = el('div', 'the vien-kim', `<h3>📝 Kiểm tra ${laTu ? 'từ vựng' : 'collocation'}</h3>
+    <p style="color:var(--chu2);font-size:13.8px">Phạm vi đang lọc: <b style="color:var(--kim)">${ds.length}</b> mục
+    ${TD.TV.cd ? `· chủ đề <b>${TD.TV.cd}</b>` : TD.TV.nhom ? `· nhóm <b>${TD.TV.nhom}</b>` : '· toàn bộ kho'}.
+    Mỗi mục được hỏi đúng một lần, không lặp lại và không lẫn mục ngoài phạm vi.</p>
+    <div class="hang-nut" id="kt-nut"></div>
+    <p class="mo-nhat" style="margin-top:8px">Chọn ít hơn tổng số thì phần còn lại vẫn nằm trong kho —
+    lần kiểm tra sau sẽ hỏi tiếp những mục chưa gặp.</p>`);
+  c.insertBefore(hop, c.firstChild);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const mocs = [20, 50, 100, 200].filter(n => n < ds.length).concat([ds.length]);
+  const hangNut = hop.querySelector('#kt-nut');
+  mocs.forEach((n, i) => {
+    const b = el('button', 'nut ' + (i === mocs.length - 1 ? 'kim' : 'phu'),
+      n === ds.length ? `Toàn bộ ${n} mục` : `${n} câu`);
+    b.onclick = () => TD.kiemTraTuVung(n);
+    hangNut.appendChild(b);
+  });
+  const bHuy = el('button', 'nut phu', 'Huỷ');
+  bHuy.onclick = () => hop.remove();
+  hangNut.appendChild(bHuy);
+};
+
+TD.kiemTraTuVung = function (soCau) {
+  let bo = (TD.TV.dangLoc || []).slice();
+  if (!bo.length) bo = (TD.KHO_TU || []).slice();
+  if (!bo.length) { TD.bao('Kho từ vựng đang trống.', 'lua'); return; }
+
+  /* ưu tiên mục CHƯA từng được hỏi, hết mới quay lại mục đã gặp */
+  TD.S.tu_da_hoi = TD.S.tu_da_hoi || {};
+  const khoaMuc = x => x.w !== undefined ? 'w|' + x.w : 'c|' + x.tu + ' ' + x.cum;
+  const chua = bo.filter(x => !TD.S.tu_da_hoi[khoaMuc(x)]);
+  const nguon = TD.xao(chua.length ? chua : bo).concat(chua.length ? TD.xao(bo) : []);
+
+  const n = Math.min(soCau || bo.length, bo.length);
+  const ds = [], daLay = {};
+  for (const x of nguon) {
+    if (ds.length >= n) break;
+    const k = khoaMuc(x);
+    if (daLay[k]) continue;
+    /* từ hỏi hai chiều Anh→Việt và Việt→Anh, đổi chiều ngẫu nhiên cho đỡ học vẹt */
+    const q = TD.cauChoMuc(x, Math.random() < 0.5 ? 'av' : 'va');
+    if (!q) continue;
+    daLay[k] = 1;
+    TD.S.tu_da_hoi[k] = 1;
+    ds.push({ mon: 'anh', cau: q, khoaTu: k });
   }
-  TD.batDauPhien('anh', null, 'luyen', TD.xao(ds));
+  if (!ds.length) { TD.bao('Không dựng được câu hỏi cho phạm vi này.', 'lua'); return; }
+  TD.luu();
+  TD.batDauPhien('anh', null, 'luyen', ds);
 };
 
 TD.moThe = function (khoa, i) {

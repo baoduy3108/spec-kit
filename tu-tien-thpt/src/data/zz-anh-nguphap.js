@@ -16,7 +16,7 @@ window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
 const MC = (R, de, it, meo, pt) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
   const loai = opts.filter(x => x !== it.d)
-    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không đúng ngữ pháp trong ngữ cảnh này.'}`).join('\n');
+    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || (TD.nghiaTuAnh ? TD.nghiaTuAnh(x) : 'không đúng ngữ pháp trong ngữ cảnh này.')}`).join('\n');
   const them = (it.pt || pt) ? `\n\nCách phân tích từng bước:\n${it.pt || pt}` : '';
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}${them}\n\nVì sao các phương án còn lại bị loại:\n${loai}`, meo: meo };

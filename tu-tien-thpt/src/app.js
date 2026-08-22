@@ -205,6 +205,90 @@ TD.man_luyencong = function (c) {
     luoi.appendChild(t);
   });
   c.appendChild(luoi);
+
+  const bYeu = el('button', 'nut kim', '🎯 Bảng yếu điểm — ôn nhanh đúng chỗ đang hổng');
+  bYeu.onclick = () => TD.manYeuDiem();
+  c.appendChild(el('div', 'the', '')).appendChild(bYeu);
+};
+
+/* ============================================================
+   BẢNG YẾU ĐIỂM + ÔN NHANH THEO CHUYÊN ĐỀ
+   Thống kê theo MỨC chỉ nói được "kém câu vận dụng", không nói được
+   kém ở Oxyz hay ở tích phân. Bảng này chấm điểm từng chuyên đề rồi
+   cho ôn thẳng chuyên đề yếu nhất bằng phiên 10 câu.
+   ============================================================ */
+TD.YD = { mon: null, dai: 10 };
+
+TD.manYeuDiem = function (mon) {
+  TD.YD.mon = mon || TD.YD.mon || (TD.S.to_hop && TD.S.to_hop[0]) || 'toan';
+  const c = $('#noidung'); c.innerHTML = '';
+  const m = TD.YD.mon;
+
+  const chonMon = TD.THU_TU_MON.map(x =>
+    `<button class="nut ${x === m ? 'kim' : 'phu'}" data-m="${x}"
+      style="padding:6px 11px;font-size:13px">${TD.MON[x].icon} ${TD.MON[x].ten}</button>`).join('');
+  const dau = el('div', 'the vien-kim', `<h3>🎯 Bảng yếu điểm</h3>
+    <p class="mo-nhat">Chuyên đề xếp từ YẾU nhất lên đầu. Bấm vào một chuyên đề để ôn nhanh
+    ${TD.YD.dai} câu đúng chuyên đề đó — sai chỗ nào vá chỗ đó, không học lan man.</p>
+    <div class="hang-nut" style="margin-top:9px">${chonMon}</div>
+    <div class="hang-nut" style="margin-top:4px">
+      ${[10, 20, 30].map(n2 => `<button class="nut ${TD.YD.dai === n2 ? 'kim' : 'phu'}" data-dai="${n2}"
+        style="padding:5px 12px;font-size:12.6px">phiên ${n2} câu</button>`).join('')}
+    </div>`);
+  c.appendChild(dau);
+  dau.querySelectorAll('[data-m]').forEach(b => b.onclick = () => TD.manYeuDiem(b.dataset.m));
+  dau.querySelectorAll('[data-dai]').forEach(b => b.onclick = () => { TD.YD.dai = +b.dataset.dai; TD.manYeuDiem(m); });
+
+  const bang = TD.bangChuyenDe(m);
+  if (!bang.length) {
+    c.appendChild(el('div', 'the', '<p>Môn này chưa chia chuyên đề.</p>'));
+  } else {
+    const daLam = bang.filter(x => x.duCan);
+    const chuaLam = bang.filter(x => !x.duCan);
+    const hop = el('div', 'the', '');
+    if (daLam.length) {
+      const yeu = daLam.filter(x => x.pt < 70);
+      hop.appendChild(el('div', '', `<div style="color:var(--kim);font-weight:700;font-size:13.5px;margin-bottom:8px">
+        Đã có căn cứ (${daLam.length} chuyên đề)${yeu.length ? ` · <span style="color:var(--lua)">${yeu.length} chuyên đề dưới 70%</span>` : ' · chưa chuyên đề nào dưới 70%'}</div>`));
+    } else {
+      hop.appendChild(el('div', 'mo-nhat', 'Chưa chuyên đề nào làm đủ 4 câu để có căn cứ. Cứ Luyện Công vài phiên rồi quay lại đây.'));
+    }
+    daLam.concat(chuaLam).forEach(x => {
+      const mau = x.pt === null ? 'var(--chu3)'
+        : x.pt < 50 ? 'var(--lua)' : x.pt < 70 ? 'var(--kim)' : x.pt < 85 ? 'var(--ngoc)' : 'var(--dung)';
+      const b = el('button', 'dapan', `
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%">
+          <span style="text-align:left">${x.cd}</span>
+          <span style="flex:0 0 auto;font-size:12.6px;color:${mau};font-weight:700">
+            ${x.pt === null ? (x.tong ? x.dung + '/' + x.tong + ' câu' : 'chưa làm') : x.pt + '% · ' + x.dung + '/' + x.tong}
+          </span>
+        </div>
+        <div class="thanh" style="margin-top:6px;height:5px"><i style="width:${x.pt === null ? 0 : x.pt}%;background:${mau}"></i></div>`);
+      b.onclick = () => TD.onNhanh(m, x.cd);
+      hop.appendChild(b);
+    });
+    c.appendChild(hop);
+  }
+  c.appendChild(el('div', 'the', '')).appendChild((() => {
+    const h = el('div', 'hang-nut', '');
+    const b1 = el('button', 'nut', '⚔️ Ôn nhanh chuyên đề yếu nhất');
+    b1.onclick = () => {
+      const yeu = TD.bangChuyenDe(m).filter(x => x.duCan)[0];
+      if (!yeu) { TD.bao('Chưa đủ dữ liệu — làm thêm vài phiên đã.', 'lua'); return; }
+      TD.onNhanh(m, yeu.cd);
+    };
+    const b2 = el('button', 'nut phu', '← Về Luyện Công');
+    b2.onclick = () => TD.di('luyencong');
+    h.appendChild(b1); h.appendChild(b2);
+    return h;
+  })());
+};
+
+/* Phiên ôn nhanh: ngắn, đúng một chuyên đề, không giới hạn giờ */
+TD.onNhanh = function (mon, cd) {
+  const ds = TD.deChuyenDe(mon, cd, TD.YD.dai || 10);
+  if (!ds.length) { TD.bao('Chuyên đề này chưa đủ câu hỏi.', 'lua'); return; }
+  TD.batDauPhien(mon, null, 'luyen', ds.slice(0, TD.YD.dai || 10));
 };
 
 TD.chonMuc = function (mon) {
@@ -497,7 +581,7 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
   const soi = !!q._soiGuong;
   document.querySelectorAll('.phap-bao').forEach(b => { b.disabled = true; });
 
-  TD.ghiNhan(mon, q.muc, dung, soi);
+  TD.ghiNhan(mon, q.muc, dung, soi, TD.chuDeCuaThe(mon, { nhom: q.chuong, cd: q.cd }) || q.chuong);
   TD.SRS.capNhat(TD.idThe(p.ds[p.vt]), soi ? false : dung);
 
   /* tiếng phản hồi: chuỗi càng dài chuông càng cao, mốc 5 câu thì reo hẳn một quãng */
@@ -844,6 +928,7 @@ TD.manTuVung = function (che) {
   /* ---- danh sách ---- */
   const ra = el('div', 'the', '');
   c.appendChild(ra);
+  let nutKT = null;
 
   const ve = () => {
     const q = TD.khongDau(TD.TV.tim.trim());
@@ -856,6 +941,8 @@ TD.manTuVung = function (che) {
       if (TD.TV.nhom) ds = ds.filter(x => x.nhom === TD.TV.nhom);
       if (q) ds = ds.filter(x => TD.khongDau(x.tu + ' ' + x.cum).indexOf(q) >= 0 || TD.khongDau(x.n).indexOf(q) >= 0);
     }
+    TD.TV.dangLoc = ds;                 /* nút Kiểm tra bám đúng phạm vi đang xem */
+    if (nutKT) nutKT.textContent = `📝 Kiểm tra ${ds.length} mục đang lọc`;
     ra.innerHTML = '';
     ra.appendChild(el('div', 'mo-nhat', `Tìm thấy <b style="color:var(--kim)">${ds.length}</b> mục`
       + (ds.length > TD.TV.hien ? ` · đang hiện ${TD.TV.hien}` : '')));
@@ -887,9 +974,10 @@ TD.manTuVung = function (che) {
   };
 
   const cuoi = el('div', 'hang-nut', '');
-  const bKT = el('button', 'nut kim', '📝 Kiểm tra 50 câu từ vựng & collocation');
-  bKT.onclick = () => TD.kiemTraTuVung();
+  const bKT = el('button', 'nut kim', '📝 Kiểm tra');
+  bKT.onclick = () => TD.hoiKiemTraTuVung();
   cuoi.appendChild(bKT);
+  nutKT = bKT; ve();          /* vẽ lại để nhãn nút mang đúng số mục đang lọc */
   const bVe = el('button', 'nut phu', '← Về Tàng Kinh Các');
   bVe.onclick = () => { TD.monTK = 'anh'; TD.di('tangkinh'); };
   cuoi.appendChild(bVe);
@@ -897,18 +985,88 @@ TD.manTuVung = function (che) {
   window.scrollTo(0, 0);
 };
 
-/* Kiểm tra nhanh riêng phần từ vựng — chỉ lấy các mẫu đề dùng kho từ */
-TD.kiemTraTuVung = function () {
-  const ma = ['anh-nghia', 'anh-tu', 'anh-wordform', 'anh-colloc', 'anh-colloc-cum', 'anh-colloc-nghia', 'anh-gioitu'];
-  const mau = (TD.GEN.anh || []).filter(t => ma.indexOf(t.ma) >= 0);
-  if (!mau.length) { TD.bao('Chưa có mẫu đề từ vựng.', 'lua'); return; }
-  const ds = [];
-  for (let k = 0; ds.length < 50 && k < 400; k++) {
-    const t = mau[k % mau.length];
-    const s = (Math.random() * 4294967295) >>> 0;
-    if (TD.sinhCau(t, s)) ds.push({ mon: 'anh', g: t.ma, s: s });
+/* ============================================================
+   KIỂM TRA TỪ VỰNG — QUÉT ĐÚNG PHẠM VI ĐANG LỌC
+   Bản cũ bốc ngẫu nhiên 50 câu từ toàn kho, nên lọc "Ẩm thực" 30 từ
+   vẫn ra 50 câu lẫn từ chủ đề khác, mà chọn cả 2019 từ cũng chỉ được
+   50 câu. Bản này hỏi TỪNG mục trong phạm vi đang lọc đúng một lần,
+   không thừa không thiếu, và cho chọn độ dài phiên.
+   ============================================================ */
+
+/* Sinh một câu hỏi cho ĐÚNG một mục đã chỉ định (không bốc ngẫu nhiên).
+   Phải tự gắn chương / mức / dạng vì mấy trường đó bình thường do MẪU ĐỀ cấp,
+   mà ở đây không đi qua mẫu đề nào cả. */
+TD.cauChoMuc = function (x, chieu) {
+  const R = TD.rng((Math.random() * 4294967295) >>> 0);
+  const laTu = x.w !== undefined;
+  const q = laTu
+    ? (chieu === 'va' ? TD.cauTuViet(R, x) : TD.cauTuAnh(R, x))
+    : TD.cauCollocation(R, x);
+  if (!q) return null;
+  ['q', 'giai', 'meo'].forEach(k => { if (q[k]) q[k] = TD.chuanDau(q[k]); });
+  if (q.opts) q.opts = q.opts.map(TD.chuanDau);
+  return Object.assign({
+    chuong: laTu ? 'Từ loại' : 'Ngữ pháp khác',
+    muc: laTu ? (chieu === 'va' ? 2 : 1) : 2,
+    dang: 'mc', _sinh: true
+  }, q);
+};
+
+TD.hoiKiemTraTuVung = function () {
+  const ds = (TD.TV.dangLoc || []).slice();
+  if (!ds.length) { TD.bao('Không có mục nào trong phạm vi đang lọc.', 'lua'); return; }
+  const laTu = ds[0].w !== undefined;
+  const c = $('#noidung');
+  const hop = el('div', 'the vien-kim', `<h3>📝 Kiểm tra ${laTu ? 'từ vựng' : 'collocation'}</h3>
+    <p style="color:var(--chu2);font-size:13.8px">Phạm vi đang lọc: <b style="color:var(--kim)">${ds.length}</b> mục
+    ${TD.TV.cd ? `· chủ đề <b>${TD.TV.cd}</b>` : TD.TV.nhom ? `· nhóm <b>${TD.TV.nhom}</b>` : '· toàn bộ kho'}.
+    Mỗi mục được hỏi đúng một lần, không lặp lại và không lẫn mục ngoài phạm vi.</p>
+    <div class="hang-nut" id="kt-nut"></div>
+    <p class="mo-nhat" style="margin-top:8px">Chọn ít hơn tổng số thì phần còn lại vẫn nằm trong kho —
+    lần kiểm tra sau sẽ hỏi tiếp những mục chưa gặp.</p>`);
+  c.insertBefore(hop, c.firstChild);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const mocs = [20, 50, 100, 200].filter(n => n < ds.length).concat([ds.length]);
+  const hangNut = hop.querySelector('#kt-nut');
+  mocs.forEach((n, i) => {
+    const b = el('button', 'nut ' + (i === mocs.length - 1 ? 'kim' : 'phu'),
+      n === ds.length ? `Toàn bộ ${n} mục` : `${n} câu`);
+    b.onclick = () => TD.kiemTraTuVung(n);
+    hangNut.appendChild(b);
+  });
+  const bHuy = el('button', 'nut phu', 'Huỷ');
+  bHuy.onclick = () => hop.remove();
+  hangNut.appendChild(bHuy);
+};
+
+TD.kiemTraTuVung = function (soCau) {
+  let bo = (TD.TV.dangLoc || []).slice();
+  if (!bo.length) bo = (TD.KHO_TU || []).slice();
+  if (!bo.length) { TD.bao('Kho từ vựng đang trống.', 'lua'); return; }
+
+  /* ưu tiên mục CHƯA từng được hỏi, hết mới quay lại mục đã gặp */
+  TD.S.tu_da_hoi = TD.S.tu_da_hoi || {};
+  const khoaMuc = x => x.w !== undefined ? 'w|' + x.w : 'c|' + x.tu + ' ' + x.cum;
+  const chua = bo.filter(x => !TD.S.tu_da_hoi[khoaMuc(x)]);
+  const nguon = TD.xao(chua.length ? chua : bo).concat(chua.length ? TD.xao(bo) : []);
+
+  const n = Math.min(soCau || bo.length, bo.length);
+  const ds = [], daLay = {};
+  for (const x of nguon) {
+    if (ds.length >= n) break;
+    const k = khoaMuc(x);
+    if (daLay[k]) continue;
+    /* từ hỏi hai chiều Anh→Việt và Việt→Anh, đổi chiều ngẫu nhiên cho đỡ học vẹt */
+    const q = TD.cauChoMuc(x, Math.random() < 0.5 ? 'av' : 'va');
+    if (!q) continue;
+    daLay[k] = 1;
+    TD.S.tu_da_hoi[k] = 1;
+    ds.push({ mon: 'anh', cau: q, khoaTu: k });
   }
-  TD.batDauPhien('anh', null, 'luyen', TD.xao(ds));
+  if (!ds.length) { TD.bao('Không dựng được câu hỏi cho phạm vi này.', 'lua'); return; }
+  TD.luu();
+  TD.batDauPhien('anh', null, 'luyen', ds);
 };
 
 TD.moThe = function (khoa, i) {

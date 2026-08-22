@@ -19,6 +19,10 @@ TD.macDinhTrangThai = function () {
     bat_dau: TD.ngayBatDauGoiY(),
     /* thống kê: thong_ke[mon][muc] = {dung, tong} */
     thong_ke: {},
+    /* thống kê theo chuyên đề: thong_ke_cd[mon][chuyên đề] = {dung, tong} */
+    thong_ke_cd: {},
+    /* mục từ vựng đã được hỏi ít nhất một lần */
+    tu_da_hoi: {},
     /* nhật ký theo ngày: nhat_ky['2026-08-19'] = số câu đã làm */
     nhat_ky: {},
     /* thẻ ôn giãn cách: the[id] = {lan, khoang, de, han, sai} */
@@ -155,7 +159,7 @@ TD.SRS = {
 };
 
 /* ---------- THỐNG KÊ ---------- */
-TD.ghiNhan = function (mon, muc, dung, khongTinh) {
+TD.ghiNhan = function (mon, muc, dung, khongTinh, chuyenDe) {
   const h = TD.homNay();
   TD.S.nhat_ky[h] = (TD.S.nhat_ky[h] || 0) + 1;
   TD.diemDanh();
@@ -168,6 +172,16 @@ TD.ghiNhan = function (mon, muc, dung, khongTinh) {
   const o = TD.S.thong_ke[mon][muc] = TD.S.thong_ke[mon][muc] || { dung: 0, tong: 0 };
   o.tong++; if (dung) o.dung++;
 
+  /* Thống kê theo CHUYÊN ĐỀ: biết mình yếu chỗ nào mới ôn trúng chỗ đó.
+     Thống kê theo mức chỉ nói được "mình kém câu vận dụng", không nói được
+     "kém ở Oxyz hay ở tích phân". */
+  if (chuyenDe) {
+    TD.S.thong_ke_cd = TD.S.thong_ke_cd || {};
+    TD.S.thong_ke_cd[mon] = TD.S.thong_ke_cd[mon] || {};
+    const z = TD.S.thong_ke_cd[mon][chuyenDe] = TD.S.thong_ke_cd[mon][chuyenDe] || { dung: 0, tong: 0 };
+    z.tong++; if (dung) z.dung++;
+  }
+
   if (dung) {
     TD.S.chuoi++;
     if (TD.S.chuoi > TD.S.chuoi_max) TD.S.chuoi_max = TD.S.chuoi;
@@ -175,6 +189,32 @@ TD.ghiNhan = function (mon, muc, dung, khongTinh) {
     TD.S.tui.hoi_xuan--;                       /* Hồi Xuân Đan tự động giữ chuỗi */
     TD.bao('💊 Hồi Xuân Đan đã giữ lại chuỗi liên kích ' + TD.S.chuoi + '! (còn ' + TD.S.tui.hoi_xuan + ' viên)', 'kim');
   } else TD.S.chuoi = 0;
+};
+
+/* Bảng chuyên đề của một môn, xếp từ yếu tới mạnh.
+   Chuyên đề chưa làm đủ 4 câu thì chưa đủ căn cứ nên xếp riêng. */
+TD.bangChuyenDe = function (mon) {
+  const tk = (TD.S.thong_ke_cd || {})[mon] || {};
+  const cds = [...new Set((TD.KHO_LT[mon] || []).map(x => x.cd).filter(Boolean))];
+  (TD.GEN[mon] || []).forEach(t => {
+    const cd = TD.chuDeCuaThe(mon, { nhom: t.chuong });
+    if (cd && cds.indexOf(cd) < 0) cds.push(cd);
+  });
+  const ra = cds.map(cd => {
+    const o = tk[cd] || { dung: 0, tong: 0 };
+    return { cd: cd, dung: o.dung, tong: o.tong,
+      pt: o.tong ? Math.round((o.dung / o.tong) * 100) : null,
+      duCan: o.tong >= 4 };
+  });
+  /* yếu nhất lên đầu; chưa làm đủ căn cứ thì xuống cuối */
+  ra.sort((a, b) => {
+    if (a.duCan !== b.duCan) return a.duCan ? -1 : 1;
+    if (a.pt === null && b.pt === null) return b.tong - a.tong;
+    if (a.pt === null) return 1;
+    if (b.pt === null) return -1;
+    return a.pt - b.pt;
+  });
+  return ra;
 };
 
 /* Độ chính xác tổng của một môn (0–100) */
@@ -520,6 +560,7 @@ TD.sinhCau = function (mau, seed) {
    Mục tĩnh: {mon, i} · Mục sinh: {mon, g: mã mẫu, s: hạt giống} */
 TD.layCau = function (it) {
   if (!it) return null;
+  if (it.cau) return it.cau;          /* câu đã dựng sẵn (kiểm tra từ vựng theo phạm vi) */
   if (it.dsy) return TD.cauDsTuMenhDe(it.mon, it.dsy, it.cd, it.s);
   if (it.lt !== undefined) return TD.cauTuMenhDe(it.mon, it.lt, it.c, it.s);
   if (it.g) {
@@ -533,6 +574,9 @@ TD.layCau = function (it) {
    Với câu sinh tự động, thẻ gắn với MẪU ĐỀ chứ không phải số liệu cụ thể
    — nên khi tâm ma quay lại, bạn gặp một biến thể MỚI của cùng dạng bài. */
 TD.idThe = function (it) {
+  /* câu dựng sẵn cho một MỤC TỪ VỰNG cụ thể: thẻ ôn phải gắn với đúng từ đó,
+     không gắn với mẫu đề, để tâm ma trả lại đúng từ mình đã sai. */
+  if (it.cau) return it.mon + '~' + (it.khoaTu || String(it.cau.q).slice(0, 60));
   if (it.dsy) return it.mon + '\u00A7' + it.cd;
   if (it.lt !== undefined) return it.mon + '$' + it.lt;
   return it.g ? it.mon + '@' + it.g : it.mon + '#' + it.i;
