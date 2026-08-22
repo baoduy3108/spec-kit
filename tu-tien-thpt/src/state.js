@@ -138,7 +138,11 @@ TD.SRS = {
       t.de = Math.max(1.3, t.de - 0.22);
       t.sai = (t.sai || 0) + 1;
     }
-    t.han = Date.now() + (t.khoang > 0 ? t.khoang * 86400000 : 10 * 60000);
+    /* Trả lời sai thì thẻ đến hạn NGAY, không hoãn 10 phút. Màn Tâm Ma Kiếp tự
+       nói "trả lời sai thì nó quay lại ngay" và thông báo sau mỗi câu sai cũng
+       bảo vào đó trấn áp — mà hoãn 10 phút thì vào chỉ thấy "tâm cảnh thanh
+       tịnh", tức là ứng dụng nói dối người học. */
+    t.han = Date.now() + (t.khoang > 0 ? t.khoang * 86400000 : 0);
     TD.S.the[id] = t;
     return t;
   },
@@ -332,9 +336,18 @@ TD.lamTron = function (x, n) {
   const m = Math.pow(10, n === undefined ? 2 : n);
   return Math.round(x * m) / m;
 };
+/* Định dạng số kiểu Việt Nam (dấu phẩy thập phân).
+   KHÔNG được tự làm tròn về 2 chữ số khi gọi không kèm độ chính xác: khắp nơi
+   trong bộ sinh đề viết S(T(v, 4)) — đã cố ý làm tròn 4 chữ số rồi mới đưa vào
+   S. Nếu S lại cắt xuống 2 chữ số thì lời giải in ra một đằng, đáp án tính một
+   nẻo, học sinh bấm máy theo từng bước sẽ không ra kết quả. Nên khi không nói
+   rõ, chỉ dọn nhiễu dấu phẩy động (làm tròn 6 chữ số) và bỏ số 0 thừa. */
 TD.soVN = function (x, n) {
-  const v = TD.lamTron(x, n);
-  return String(v).replace('.', ',');
+  if (n === undefined) {
+    const v = TD.lamTron(x, 6);
+    return String(v).replace('.', ',');
+  }
+  return String(TD.lamTron(x, n)).replace('.', ',');
 };
 
 /* Đáp án số cho câu trả lời ngắn: làm tròn ĐÚNG số chữ số thập phân mà đề yêu cầu,

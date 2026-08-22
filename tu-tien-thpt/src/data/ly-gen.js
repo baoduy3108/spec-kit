@@ -4,7 +4,7 @@
 window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
 
 (function () {
-const S = TD.soVN, T = TD.lamTron;
+const S = TD.soVN, T = TD.lamTron, D = TD.dapSo;
 
 TD.GEN.ly = [
 { ma: 'ly-nhietluong', chuong: 'Vật lí nhiệt', muc: 2, dang: 'tln',
@@ -19,10 +19,10 @@ TD.GEN.ly = [
     return {
       q: `Tính nhiệt lượng cần cung cấp để làm ${S(m)} kg ${c.t} nóng lên từ ${t1} °C đến ${t2} °C. `
        + `Biết nhiệt dung riêng của ${c.t} là ${c.c} J/(kg·K). Đáp án tính bằng kJ (làm tròn đến hàng phần trăm).`,
-      ans: S(Q),
+      ans: D(Q, 2),
       giai: `Q = m·c·Δt\n`
           + `Δt = ${t2} − ${t1} = ${t2 - t1} °C (cũng chính là ${t2 - t1} K)\n`
-          + `Q = ${S(m)} · ${c.c} · ${t2 - t1} = ${S(T(m * c.c * (t2 - t1), 1))} J = ${S(Q)} kJ.`,
+          + `Q = ${S(m)} · ${c.c} · ${t2 - t1} = ${S(T(m * c.c * (t2 - t1), 1))} J = ${D(Q, 2)} kJ.`,
       meo: 'Độ chênh nhiệt độ trong thang °C và K là như nhau. Đọc kỹ đề hỏi J hay kJ.'
     };
   } },
@@ -38,9 +38,9 @@ TD.GEN.ly = [
     return {
       q: `Tính nhiệt lượng cần cung cấp để ${c.t} ${S(m)} kg ${c.mo}. `
        + `Biết ${c.ten} là ${c.k.toExponential(2).replace('e+', '·10^').replace('.', ',')} J/kg. Đáp án tính bằng kJ (làm tròn đến hàng phần trăm).`,
-      ans: S(Q),
+      ans: D(Q, 2),
       giai: `Trong quá trình chuyển thể, nhiệt độ KHÔNG đổi nên không dùng công thức mcΔt.\n`
-          + `Q = ${loai ? 'λ' : 'L'}·m = ${S(T(c.k, 0))} · ${S(m)} = ${S(T(m * c.k, 0))} J = ${S(Q)} kJ.`,
+          + `Q = ${loai ? 'λ' : 'L'}·m = ${S(T(c.k, 0))} · ${S(m)} = ${S(T(m * c.k, 0))} J = ${D(Q, 2)} kJ.`,
       meo: 'Nóng chảy dùng Q = λm, hoá hơi dùng Q = Lm. Trong lúc chuyển thể nhiệt độ đứng yên.'
     };
   } },
@@ -58,11 +58,11 @@ TD.GEN.ly = [
     return {
       q: `Thả ${S(m1)} kg ${kl.t} ở ${t1} °C vào ${S(m2)} kg nước ở ${t2} °C. Bỏ qua hao phí nhiệt. `
        + `Nhiệt độ khi cân bằng là bao nhiêu °C? (c<sub>${kl.t}</sub> = ${kl.c}, c<sub>nước</sub> = 4200 J/kg·K; làm tròn đến hàng phần trăm)`,
-      ans: S(kq),
+      ans: D(kq, 2),
       giai: `Phương trình cân bằng nhiệt: Q(toả) = Q(thu)\n`
           + `${S(m1)}·${kl.c}·(${t1} − t) = ${S(m2)}·4200·(t − ${t2})\n`
           + `${S(T(m1 * kl.c, 2))}·(${t1} − t) = ${S(T(m2 * 4200, 2))}·(t − ${t2})\n`
-          + `⇒ t = [${S(T(m1 * kl.c * t1, 1))} + ${S(T(m2 * 4200 * t2, 1))}] / [${S(T(m1 * kl.c, 2))} + ${S(T(m2 * 4200, 2))}] = ${S(kq)} °C.`,
+          + `⇒ t = [${S(T(m1 * kl.c * t1, 1))} + ${S(T(m2 * 4200 * t2, 1))}] / [${S(T(m1 * kl.c, 2))} + ${S(T(m2 * 4200, 2))}] = ${D(kq, 2)} °C.`,
       meo: 'Nhiệt độ cân bằng luôn nằm GIỮA hai nhiệt độ ban đầu — dùng để kiểm tra kết quả.'
     };
   } },
@@ -95,10 +95,10 @@ TD.GEN.ly = [
     return {
       q: `Nén đẳng nhiệt một lượng khí từ thể tích ${V1} lít xuống ${V2} lít. Áp suất ban đầu là ${p1} atm. `
        + `Áp suất sau khi nén là bao nhiêu atm? (làm tròn đến hàng phần trăm)`,
-      ans: S(p2),
+      ans: D(p2, 2),
       giai: `Quá trình đẳng nhiệt, áp dụng định luật Boyle: p₁V₁ = p₂V₂\n`
           + `${p1}·${V1} = p₂·${V2}\n`
-          + `p₂ = ${p1 * V1}/${V2} = ${S(p2)} atm.`,
+          + `p₂ = ${p1 * V1}/${V2} = ${D(p2, 2)} atm.`,
       meo: 'Đẳng nhiệt: p và V tỉ lệ NGHỊCH. Thể tích giảm bao nhiêu lần thì áp suất tăng bấy nhiêu lần.'
     };
   } },
@@ -112,10 +112,10 @@ TD.GEN.ly = [
     return {
       q: `Một lượng khí trong bình kín có áp suất ${p1} atm ở ${t1} °C. Nung nóng bình đến ${t2} °C. `
        + `Áp suất của khí lúc này là bao nhiêu atm? (làm tròn đến hàng phần trăm)`,
-      ans: S(p2),
+      ans: D(p2, 2),
       giai: `Thể tích không đổi ⇒ quá trình đẳng tích, áp dụng định luật Charles: p₁/T₁ = p₂/T₂\n`
           + `Đổi sang Kelvin: T₁ = ${t1} + 273 = ${T1} K ; T₂ = ${t2} + 273 = ${T2} K\n`
-          + `p₂ = p₁·T₂/T₁ = ${p1}·${T2}/${T1} = ${S(p2)} atm.`,
+          + `p₂ = p₁·T₂/T₁ = ${p1}·${T2}/${T1} = ${D(p2, 2)} atm.`,
       meo: 'BẮT BUỘC đổi sang Kelvin. Dùng thẳng độ C là sai hoàn toàn.'
     };
   } },
@@ -130,10 +130,10 @@ TD.GEN.ly = [
     return {
       q: `Một bình có thể tích ${S(T(V * 1000, 1))} lít chứa ${S(n)} mol khí lí tưởng ở nhiệt độ ${t} °C. `
        + `Tính áp suất của khí trong bình (đơn vị Pa, làm tròn đến hàng đơn vị). Cho R = 8,31 J/(mol·K).`,
-      ans: S(p),
+      ans: D(p, 0),
       giai: `Phương trình Clapeyron–Mendeleev: pV = nRT\n`
           + `Đổi đơn vị: V = ${S(T(V * 1000, 1))} lít = ${S(V)} m³ ; T = ${t} + 273 = ${Tk} K\n`
-          + `p = nRT/V = ${S(n)}·8,31·${Tk}/${S(V)} = ${S(p)} Pa.`,
+          + `p = nRT/V = ${S(n)}·8,31·${Tk}/${S(V)} = ${D(p, 0)} Pa.`,
       meo: 'Đơn vị chuẩn: p (Pa), V (m³), T (K). Sai đơn vị là sai cả bài.'
     };
   } },
@@ -148,10 +148,10 @@ TD.GEN.ly = [
     return {
       q: `Tính động năng trung bình của một phân tử khí lí tưởng ở nhiệt độ ${t} °C. `
        + `Cho k = 1,38·10⁻²³ J/K. Đáp án có dạng x·10⁻²¹ J, hãy tìm x (làm tròn đến hàng phần trăm).`,
-      ans: S(heSo),
+      ans: D(heSo, 2),
       giai: `Động năng trung bình: W̄đ = (3/2)·k·T\n`
           + `T = ${t} + 273 = ${Tk} K\n`
-          + `W̄đ = 1,5 · 1,38·10⁻²³ · ${Tk} = ${S(heSo)}·10⁻²¹ J.`,
+          + `W̄đ = 1,5 · 1,38·10⁻²³ · ${Tk} = ${D(heSo, 2)}·10⁻²¹ J.`,
       meo: 'Động năng trung bình phân tử CHỈ phụ thuộc nhiệt độ, không phụ thuộc loại khí.'
     };
   } },
@@ -167,10 +167,10 @@ TD.GEN.ly = [
     return {
       q: `Một đoạn dây dẫn dài ${S(L)} m mang dòng điện ${S(I)} A đặt trong từ trường đều có cảm ứng từ ${S(B)} T. `
        + `Dây hợp với đường sức từ góc ${goc}°. Tính lực từ tác dụng lên đoạn dây (đơn vị N, làm tròn đến hàng phần trăm).`,
-      ans: S(F),
+      ans: D(F, 2),
       giai: `F = B·I·L·sinα\n`
           + `sin${goc}° = ${S(T(sin, 4))}\n`
-          + `F = ${S(B)} · ${S(I)} · ${S(L)} · ${S(T(sin, 4))} = ${S(F)} N.`,
+          + `F = ${S(B)} · ${S(I)} · ${S(L)} · ${S(T(sin, 4))} = ${D(F, 2)} N.`,
       meo: 'Dây SONG SONG đường sức (α = 0) thì F = 0. Lực cực đại khi dây vuông góc.'
     };
   } },
@@ -206,9 +206,9 @@ TD.GEN.ly = [
     return {
       q: `Một khung dây gồm ${N} vòng. Từ thông qua mỗi vòng biến thiên một lượng ${S(dPhi)} Wb trong thời gian ${S(dt)} s. `
        + `Tính độ lớn suất điện động cảm ứng xuất hiện trong khung (đơn vị V, làm tròn đến hàng phần trăm).`,
-      ans: S(e),
+      ans: D(e, 2),
       giai: `Định luật Faraday: |e| = N·|ΔΦ|/Δt\n`
-          + `|e| = ${N} · ${S(dPhi)} / ${S(dt)} = ${S(e)} V.`,
+          + `|e| = ${N} · ${S(dPhi)} / ${S(dt)} = ${D(e, 2)} V.`,
       meo: 'Dấu trừ trong công thức Faraday chỉ thể hiện định luật Lenz (chiều). Hỏi ĐỘ LỚN thì bỏ dấu trừ.'
     };
   } },
@@ -229,12 +229,12 @@ TD.GEN.ly = [
        + (hoiU
           ? `Đặt vào hai đầu cuộn sơ cấp điện áp hiệu dụng ${U1} V. Điện áp hiệu dụng ở hai đầu cuộn thứ cấp là bao nhiêu V? (làm tròn đến hàng phần trăm)`
           : `Cường độ dòng điện hiệu dụng ở cuộn sơ cấp là ${S(I1)} A. Cường độ dòng điện ở cuộn thứ cấp là bao nhiêu A? (làm tròn đến hàng phần trăm)`),
-      ans: hoiU ? S(U2) : S(I2),
+      ans: hoiU ? D(U2, 2) : D(I2, 2),
       giai: hoiU
-        ? `U₂/U₁ = N₂/N₁\nU₂ = ${U1} · ${N2}/${N1} = ${S(U2)} V.\n`
+        ? `U₂/U₁ = N₂/N₁\nU₂ = ${U1} · ${N2}/${N1} = ${S(U2)} V ≈ ${D(U2, 2)} V.\n`
           + `(${N2 < N1 ? 'N₂ < N₁ nên đây là máy HẠ áp.' : 'N₂ > N₁ nên đây là máy TĂNG áp.'})`
         : `Với máy biến áp lí tưởng: U₁I₁ = U₂I₂ và U₂/U₁ = N₂/N₁\n`
-          + `⇒ I₂/I₁ = N₁/N₂\nI₂ = ${S(I1)} · ${N1}/${N2} = ${S(I2)} A.\n`
+          + `⇒ I₂/I₁ = N₁/N₂\nI₂ = ${S(I1)} · ${N1}/${N2} = ${S(I2)} A ≈ ${D(I2, 2)} A.\n`
           + `(${N2 < N1 ? 'Máy hạ áp: điện áp giảm nhưng dòng điện TĂNG.' : 'Máy tăng áp: điện áp tăng nhưng dòng điện GIẢM.'})`,
       meo: 'Điện áp và số vòng tỉ lệ THUẬN; cường độ dòng điện và số vòng tỉ lệ NGHỊCH.'
     };
@@ -364,11 +364,11 @@ TD.GEN.ly = [
     return {
       q: `Một nguồn điện có suất điện động ${xi} V và điện trở trong ${S(r)} Ω được nối với điện trở ngoài ${Rn} Ω. `
        + `Tính ${hoiI ? 'cường độ dòng điện trong mạch (A)' : 'hiệu điện thế giữa hai cực của nguồn (V)'}. (làm tròn đến hàng phần trăm)`,
-      ans: hoiI ? S(I) : S(U),
+      ans: hoiI ? D(I, 2) : D(U, 2),
       giai: `Định luật Ohm cho toàn mạch: I = ξ/(R + r)\n`
           + `I = ${xi}/(${Rn} + ${S(r)}) = ${xi}/${S(T(Rn + r, 2))} = ${S(I)} A\n`
-          + (hoiI ? `Vậy I = ${S(I)} A.`
-                  : `Hiệu điện thế hai cực: U = I·R = ${S(I)}·${Rn} = ${S(U)} V.\n(Cũng bằng U = ξ − I·r = ${xi} − ${S(I)}·${S(r)}.)`),
+          + (hoiI ? `Vậy I ≈ ${D(I, 2)} A.`
+                  : `Hiệu điện thế hai cực: U = I·R = ${S(I)}·${Rn} = ${S(U)} V ≈ ${D(U, 2)} V.\n(Cũng bằng U = ξ − I·r = ${xi} − ${S(I)}·${S(r)}.)`),
       meo: 'U hai cực nguồn chỉ bằng ξ khi mạch HỞ. Có dòng chạy thì U = ξ − I·r luôn nhỏ hơn ξ.'
     };
   } },
@@ -382,9 +382,9 @@ TD.GEN.ly = [
     return {
       q: `Cho dòng điện cường độ ${S(I)} A chạy qua điện trở ${Rn} Ω trong ${t} giây. `
        + `Tính nhiệt lượng toả ra trên điện trở (đơn vị kJ, làm tròn đến hàng phần trăm).`,
-      ans: S(Q),
+      ans: D(Q, 2),
       giai: `Định luật Joule–Lenz: Q = I²·R·t\n`
-          + `Q = ${S(I)}² · ${Rn} · ${t} = ${S(T(I * I, 3))} · ${Rn} · ${t} = ${S(T(I * I * Rn * t, 1))} J = ${S(Q)} kJ.`,
+          + `Q = ${S(I)}² · ${Rn} · ${t} = ${S(T(I * I, 3))} · ${Rn} · ${t} = ${S(T(I * I * Rn * t, 1))} J = ${D(Q, 2)} kJ.`,
       meo: 'Nhiệt lượng tỉ lệ với BÌNH PHƯƠNG cường độ dòng điện — tăng I gấp đôi thì nhiệt gấp bốn.'
     };
   } },

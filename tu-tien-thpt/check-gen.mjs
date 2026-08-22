@@ -30,7 +30,49 @@ const LUAT_TRINH_BAY = [
   [/=\s*=|\.\s*\./,                     'lặp dấu (== hoặc ..)']
 ];
 
-const LAN = 400;                       /* số biến thể thử mỗi mẫu */
+/* ============================================================
+   TỰ TÍNH LẠI MỌI PHÉP TÍNH TRONG LỜI GIẢI
+   Luật hình thức không bắt được kiểu lỗi nguy hiểm nhất: lời giải in
+   số ĐÃ LÀM TRÒN rồi lấy số đó tính tiếp, nên học sinh bấm máy theo
+   từng bước lại ra kết quả khác đáp án. Ở đây tách mọi biểu thức dạng
+   "<phép tính> = <số>" rồi tính lại bằng máy.
+   ============================================================ */
+const DON_VI = /\s*\(?(mol|gam|g|kg|lít|L|mL|ml|cm³|cm2|cm|m³|m2|m|kJ|J|kcal|K|°C|tạ\/ha|tấn|Wb|A|V|s|giây|phút|năm|người|câu|điểm|nuclêôtit|axit amin|loại|triệu đồng|tỉ USD|M|nghìn|đvC|Å|chu kì xoắn)\)?\s*\.?$/;
+const doiSoVN = t => t
+  .replace(/<sup>(\d+)<\/sup>/g, '**$1')
+  .replace(/<[^>]+>/g, '')
+  .replace(/×/g, '*').replace(/·/g, '*').replace(/÷/g, '/')
+  .replace(/[−–]/g, '-')
+  .replace(/(\d),(\d)/g, '$1.$2')
+  .replace(/(\d)\s+(\d)/g, '$1$2');
+const donViCua = e => { const m = e.trim().match(DON_VI); return m ? m[1] : ''; };
+const gotSo = e => e.replace(/^[\s≈~⇒⇔:]+/, '').replace(DON_VI, '').replace(/[.,;]$/, '').trim();
+const tinhLai = e0 => {
+  const e = gotSo(e0);
+  if (!/^[\d\s.+\-*/()]+$/.test(e) || !/\d/.test(e)) return null;
+  try { const v = Function('"use strict";return (' + e + ')')(); return Number.isFinite(v) ? v : null; }
+  catch (x) { return null; }
+};
+/* trả về mô tả phép tính lệch đầu tiên tìm được, hoặc null */
+const soiPhepTinh = giai => {
+  for (const dong of String(giai || '').split('\n')) {
+    const d = doiSoVN(dong);
+    if (/%/.test(d)) continue;                       /* 1 + 15% = 1,15 không phải phép cộng thuần */
+    const ve = d.split('=').map(x => x.trim()).filter(Boolean);
+    for (let i = 0; i + 1 < ve.length; i++) {
+      const dvA = donViCua(ve[i]), dvB = donViCua(ve[i + 1]);
+      if (dvA && dvB && dvA !== dvB) continue;        /* đây là phép ĐỔI ĐƠN VỊ */
+      const a = tinhLai(ve[i]), b = tinhLai(ve[i + 1]);
+      if (a === null || b === null) continue;
+      const nguong = Math.max(Math.abs(a), Math.abs(b)) * 0.012 + 0.011;
+      if (Math.abs(a - b) > nguong)
+        return `${dong.replace(/<[^>]+>/g, '').trim().slice(0, 100)} ⇒ tính lại được ${a}, lời giải ghi ${b}`;
+    }
+  }
+  return null;
+};
+
+const LAN = +(process.env.LAN || 400);                       /* số biến thể thử mỗi mẫu */
 let loi = 0, tongSinh = 0, tongBienThe = 0;
 
 const bao = (ma, msg, q) => {
@@ -62,6 +104,9 @@ for (const mon of Object.keys(TD.GEN)) {
       /* Vận dụng cao phải là bài nhiều bước, không phải thay số vào một công thức.
          Đo bằng độ dài và số dòng của lời giải — mẫu nào không đạt thì hoặc phải
          viết sâu thêm, hoặc phải hạ về mức 3 cho đúng bản chất. */
+      const lechTinh = soiPhepTinh(q.giai);
+      if (lechTinh) { bao(mau.ma, 'phép tính trong lời giải không khớp — ' + lechTinh, q); break; }
+
       if (mau.muc === 4) {
         const gi = String(q.giai || '');
         const dong = gi.split('\n').filter(x => x.trim()).length;
