@@ -398,6 +398,20 @@ TD.VAT_PHAM = {
 /* Bộ GD&ĐT công bố tỉ lệ cấp độ tư duy của đề thi từ 2025 là BIẾT : HIỂU : VẬN DỤNG = 4 : 3 : 3.
    Khung chính thức chỉ có BA cấp; game vẫn tách mức 3 và mức 4 để luyện riêng phần khó,
    nhưng cộng lại phải đúng 30% thì ước lượng điểm mới sát thực tế. */
+/* ============================================================
+   HẠN NGẠCH CÂU CÓ HÌNH
+   Đề thi thật câu nào cũng có hình: Toán vài câu đồ thị và bảng biến
+   thiên, Sinh gần như luôn có một câu phả hệ, Lý có mạch điện và đồ
+   thị p–V, Hoá có đồ thị kết tủa, Địa có biểu đồ.
+   Nếu chỉ thả mẫu có hình vào chung một rổ với hơn tám trăm mẫu khác
+   thì xác suất gặp gần bằng không — đo thực tế trước khi đặt hạn
+   ngạch: đề Toán trung bình 0,01 câu có hình mỗi đề. Nên phải cấp
+   phát chỗ riêng, đúng như cách Bộ ra đề.
+   ============================================================ */
+TD.SO_CAU_HINH = { toan: 3, ly: 2, hoa: 1, sinh: 1, dia: 2 };
+/* tỉ lệ câu có hình trong một phiên Luyện Công của môn có hình */
+TD.TY_LE_HINH = 0.18;
+
 TD.TRONG_SO_MUC = { 1: 0.40, 2: 0.30, 3: 0.21, 4: 0.09 };
 
 TD.hamMucTieu = function (diem) {
@@ -1068,21 +1082,28 @@ TD.sinhNhieu = function (mon, muc, n) {
     return ra;
   };
 
+  /* Giữ sẵn một phần chỗ cho câu CÓ HÌNH, vì mẫu có hình rất ít so với
+     tổng số mẫu nên bốc ngẫu nhiên thì gần như không bao giờ ra. */
+  const mauHinh = mau.filter(t => t._hinh);
+  const canHinh = mauHinh.length ? Math.min(Math.round(n * (TD.TY_LE_HINH || 0.18)), mauHinh.length * 3) : 0;
+  const phanHinh = canHinh ? rutTu(mauHinh, canHinh) : [];
+  const conLai = Math.max(0, n - phanHinh.length);
+
   const tyLe = TD.TY_LE_BAI_TAP[mon];
   if (tyLe) {
-    const baiTap = mau.filter(t => !t._tuLT);
+    const baiTap = mau.filter(t => !t._tuLT && !t._hinh);
     const lyThuyet = mau.filter(t => t._tuLT);
     if (baiTap.length) {
-      const canBT = Math.round(n * tyLe);
+      const canBT = Math.round(conLai * tyLe);
       const bt = rutTu(baiTap, canBT);
-      const lt = rutTu(lyThuyet, n - bt.length);
-      const ra = bt.concat(lt);
+      const lt = rutTu(lyThuyet, conLai - bt.length);
+      const ra = phanHinh.concat(bt, lt);
       /* thiếu thì bù nốt bằng bài tập, không bù bằng câu lý thuyết */
       if (ra.length < n) ra.push.apply(ra, rutTu(baiTap, n - ra.length));
       return TD.xao(ra);
     }
   }
-  return TD.xao(rutTu(mau, n));
+  return TD.xao(phanHinh.concat(rutTu(mau.filter(t => !t._hinh), conLai)));
 };
 
 /* Đếm số mẫu đề của một môn */
@@ -1591,10 +1612,42 @@ TD.deThiThat = function (mon, seed, cap) {
     return ra;
   };
 
+  /* ---- CẤP CHỖ RIÊNG CHO CÂU CÓ HÌNH ----
+     Đề thật luôn có mấy câu đồ thị, bảng biến thiên, phả hệ, mạch điện.
+     Thả mẫu có hình chung rổ với hơn tám trăm mẫu khác thì xác suất bốc
+     trúng gần bằng không (đo được 0,01 câu mỗi đề môn Toán), nên phải giữ
+     sẵn chỗ cho chúng trước khi rút phần còn lại. */
+  const canHinh = (TD.SO_CAU_HINH || {})[mon] || 0;
+  const maHinh = {};
+  gen.forEach(t => { if (t._hinh) maHinh[mon + '@' + t.ma] = t.dang; });
+  const rutHinh = (bo, n, mucToiThieu) => {
+    const ra = [];
+    if (!n) return ra;
+    for (const x of TD.xaoR(R, bo.filter(y => maHinh[y.khoa] && (!mucToiThieu || y.muc >= mucToiThieu)))) {
+      if (ra.length >= n) break;
+      if ((daDung[x.khoa] || 0) >= 1) continue;
+      daDung[x.khoa] = 1;
+      quota[x.muc] = Math.max(0, (quota[x.muc] || 0) - 1);
+      ra.push(x.it);
+    }
+    return ra;
+  };
+  /* Chia hạn ngạch hình theo số mẫu THỰC CÓ của từng dạng, không chia cứng
+     theo tỉ lệ: môn Lý chỉ có một mẫu hình dạng trắc nghiệm nên chia cứng
+     70% cho Phần I là hụt mất một câu. */
+  const coMc = Object.values(maHinh).filter(d => d === 'mc').length;
+  const coTln = Object.values(maHinh).filter(d => d === 'tln').length;
+  const soHinhMc = Math.min(canHinh, coMc, M.p1);
+  const hinhMc = chot(rutHinh(be.mc, soHinhMc));
+  /* Phần III của đề thật chỉ có câu vận dụng trở lên, nên câu hình đưa vào
+     đây cũng phải từ mức 3 — không được vì muốn đủ hạn ngạch mà nhét câu dễ. */
+  const soHinhTln = Math.min(canHinh - hinhMc.length, coTln, M.p3);
+  const hinhTln = chot(rutHinh(be.tln, soHinhTln, 3));
+
   /* Rút theo đúng thứ tự: Phần III (khó nhất) → Phần II → Phần I nhận phần còn lại */
-  const p3 = chot(rut(be.tln, M.p3, [4, 3, 2, 1]));
+  const p3 = hinhTln.concat(chot(rut(be.tln, M.p3 - hinhTln.length, [4, 3, 2, 1])));
   const p2 = chot(rut(be.ds, M.p2, [2, 3, 4, 1]));
-  const p1 = chot(rut(be.mc, M.p1, [1, 2, 3, 4]));
+  const p1 = hinhMc.concat(chot(rut(be.mc, M.p1 - hinhMc.length, [1, 2, 3, 4])));
   /* thứ tự làm bài khuyến nghị: Phần I → Phần III → Phần II */
   return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2), kiep: K };
 };
@@ -7095,6 +7148,30 @@ TD.hinhKetTua = function (aMol, dinh, tenX, tenY) {
      + `<text x="${so(X(aMol * 3))}" y="${H - le + 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">3a</text>`
      + `<text x="${so(X(aMol * 4))}" y="${H - le + 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">4a</text>`
      + `<text x="${le - 5}" y="${so(Y(aMol) + 4)}" fill="${M.nhan}" font-size="10.5" text-anchor="end">a</text>`;
+  (dinh || []).forEach(d => {
+    ra += `<circle cx="${so(X(d.x))}" cy="${so(Y(d.y))}" r="3.6" fill="${M.do}"/>`
+       + `<line x1="${so(X(d.x))}" y1="${so(Y(d.y))}" x2="${so(X(d.x))}" y2="${so(Y(0))}" stroke="${M.do}" stroke-width="1" stroke-dasharray="3 3"/>`
+       + (d.ten ? `<text x="${so(X(d.x))}" y="${so(Y(d.y) - 8)}" fill="${M.do}" font-size="10.5" text-anchor="middle">${d.ten}</text>` : '');
+  });
+  return boc(W, H, ra);
+};
+
+/* Đồ thị tam giác lệch tổng quát: lên tới đỉnh rồi xuống về 0.
+   Dùng chung cho kết tủa nhôm (3a, 4a) lẫn sục CO₂ vào Ca(OH)₂ (a, 2a). */
+TD.hinhTamGiac = function (xDinh, xHet, yDinh, ten, dinh) {
+  const W = 320, H = 230, le = 44;
+  const xMax = xHet * 1.14, yMax = yDinh * 1.3;
+  const X = x => le + x / xMax * (W - le - 22);
+  const Y = y => H - le - y / yMax * (H - le - 24);
+  let ra = `<line x1="${le}" y1="${H - le}" x2="${W - 12}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<line x1="${le}" y1="16" x2="${le}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<text x="${W - 10}" y="${H - le + 15}" fill="${M.chu}" font-size="10.5" text-anchor="end">${(ten && ten.x) || 'n'}</text>`
+    + `<text x="${le - 4}" y="12" fill="${M.chu}" font-size="10.5" text-anchor="end">${(ten && ten.y) || 'n↓'}</text>`
+    + `<polyline points="${so(X(0))},${so(Y(0))} ${so(X(xDinh))},${so(Y(yDinh))} ${so(X(xHet))},${so(Y(0))}" fill="none" stroke="${M.net}" stroke-width="2.4"/>`
+    + `<line x1="${so(X(xDinh))}" y1="${so(Y(yDinh))}" x2="${so(X(xDinh))}" y2="${so(Y(0))}" stroke="${M.phu}" stroke-dasharray="4 3"/>`
+    + `<line x1="${le}" y1="${so(Y(yDinh))}" x2="${so(X(xDinh))}" y2="${so(Y(yDinh))}" stroke="${M.phu}" stroke-dasharray="4 3"/>`
+    + `<text x="${so(X(xDinh))}" y="${H - le + 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${(ten && ten.dinh) || ''}</text>`
+    + `<text x="${so(X(xHet))}" y="${H - le + 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${(ten && ten.het) || ''}</text>`;
   (dinh || []).forEach(d => {
     ra += `<circle cx="${so(X(d.x))}" cy="${so(Y(d.y))}" r="3.6" fill="${M.do}"/>`
        + `<line x1="${so(X(d.x))}" y1="${so(Y(d.y))}" x2="${so(X(d.x))}" y2="${so(Y(0))}" stroke="${M.do}" stroke-width="1" stroke-dasharray="3 3"/>`
@@ -21325,7 +21402,7 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
    ============================================================ */
 TD.GEN.ly = (TD.GEN.ly || []).concat([
 
-{ ma: 'ly-hinh-mach', chuong: 'Lớp 10 – 11', muc: 2, dang: 'tln', duong: true,
+{ ma: 'ly-hinh-mach', chuong: 'Lớp 10 – 11', muc: 3, dang: 'tln', duong: true,
   tao(R) {
     const noiTiep = R() < 0.5;
     const r1 = R.nguyen(2, 12), r2 = R.nguyen(2, 12), r3 = R.nguyen(2, 12);
@@ -21350,6 +21427,275 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
   } }
 
 ]);
+})();
+
+/* ============================================================
+   BỔ SUNG — SÁU MẪU CÓ HÌNH NỮA
+   Sáu mẫu đầu là quá ít so với 877 mẫu của cả app: đo ra trung bình
+   một phiên Luyện Công 30 câu chỉ gặp 0,3–0,55 câu có hình, còn đề
+   Độ Kiếp thì gần như không bao giờ. Thêm mẫu để hình thành chuyện
+   bình thường chứ không phải của hiếm.
+   ============================================================ */
+(function () {
+const S = TD.soVN, T = TD.lamTron, D = TD.dapSo;
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n`
+      + TD.khoiLoai(opts, it.d, it.sv, 'không đọc đúng thông tin trên hình.'),
+    meo: meo };
+};
+/* Lọc lấy đúng ba nhiễu khác đáp án và khác nhau; không đủ thì trả null để
+   đổi hạt giống, chứ không để câu hỏi có hai phương án y hệt. */
+const baNhieu = (dung, ung) => {
+  const ra = [];
+  for (const x of ung) if (x !== dung && ra.indexOf(x) < 0) ra.push(x);
+  return ra.length >= 3 ? ra.slice(0, 3) : null;
+};
+
+TD.GEN.toan = (TD.GEN.toan || []).concat([
+
+/* --- Đồ thị hàm trùng phương --- */
+{ ma: 'toan-hinh-dothi4', chuong: 'Đạo hàm – Khảo sát', muc: 2, dang: 'mc',
+  tao(R) {
+    const a = R.chon([1, -1]);
+    const b = R.nguyen(1, 3);                    /* y = a(x⁴ − 2b·x²) + c, cực trị tại 0 và ±√b */
+    const c = R.nguyen(-2, 2);
+    const f = x => a * (x * x * x * x - 2 * b * x * x) + c;
+    const r = Math.sqrt(b);
+    const yBien = T(f(r), 2), yGiua = c;
+    const hinh = TD.hinhDoThi(f, {
+      xMin: -r - 1.3, xMax: r + 1.3,
+      yMin: Math.min(yBien, yGiua) - 2, yMax: Math.max(yBien, yGiua) + 2.5
+    });
+    const hoi = R.chon(['cuctri', 'hesoa']);
+    if (hoi === 'cuctri')
+      return MC(R, `Cho hàm số y = ax⁴ + bx² + c có đồ thị như hình vẽ.${hinh}Hàm số đã cho có bao nhiêu điểm cực trị?`,
+        { d: '3', s: ['1', '2', '0'],
+          sv: { '1': 'chỉ đúng khi đồ thị có đúng một "đáy" hoặc một "đỉnh"; hình này có ba chỗ đổi chiều',
+                '2': 'hàm trùng phương chỉ có 1 hoặc 3 cực trị, không bao giờ có 2',
+                '0': 'đồ thị rõ ràng có chỗ đổi chiều' },
+          v: `Đếm số lần đồ thị ĐỔI CHIỀU trên hình: có ba chỗ (hai bên và một ở giữa) ⇒ 3 điểm cực trị.\n`
+            + `Với hàm trùng phương, ba cực trị xảy ra khi a·b < 0; hình dạng "chữ W" (hoặc "chữ M" lộn ngược) là dấu hiệu nhận biết.` },
+        'Hàm trùng phương chỉ có thể có 1 hoặc 3 điểm cực trị — không bao giờ 2. Thấy phương án "2 điểm" là loại được ngay.');
+    return MC(R, `Cho hàm số y = ax⁴ + bx² + c có đồ thị như hình vẽ.${hinh}Khẳng định nào sau đây đúng?`,
+      { d: a > 0 ? 'a > 0 và b < 0' : 'a < 0 và b > 0',
+        s: a > 0 ? ['a > 0 và b > 0', 'a < 0 và b < 0', 'a < 0 và b > 0'] : ['a < 0 và b < 0', 'a > 0 và b > 0', 'a > 0 và b < 0'],
+        v: `Hai bước đọc hình:\n`
+          + `① Nhánh ngoài cùng bên phải đi ${a > 0 ? 'LÊN ⇒ a > 0' : 'XUỐNG ⇒ a < 0'}.\n`
+          + `② Đồ thị có BA cực trị ⇒ a·b < 0 ⇒ b ${a > 0 ? '< 0' : '> 0'}.` },
+      'Với hàm trùng phương: nhánh phải quyết định dấu a · số cực trị quyết định dấu tích a·b (ba cực trị ⇔ a·b < 0).');
+  } },
+
+/* --- Đồ thị hàm phân thức: đọc tiệm cận --- */
+{ ma: 'toan-hinh-tiemcan', chuong: 'Đạo hàm – Khảo sát', muc: 2, dang: 'mc',
+  tao(R) {
+    const doc = R.chon([-2, -1, 1, 2]), ngang = R.chon([-2, -1, 1, 2]);
+    const k = R.chon([1, 2, -1, -2]);
+    const f = x => ngang + k / (x - doc);
+    const hinh = TD.hinhDoThi(f, {
+      xMin: doc - 3.5, xMax: doc + 3.5, yMin: ngang - 4, yMax: ngang + 4,
+      tiemCan: [{ doc: doc }, { ngang: ngang }]
+    });
+    const dungPA = `x = ${TD.so(doc)} và y = ${TD.so(ngang)}`;
+    const nhieu = baNhieu(dungPA, [
+      `x = ${TD.so(ngang)} và y = ${TD.so(doc)}`,
+      `x = ${TD.so(-doc)} và y = ${TD.so(ngang)}`,
+      `x = ${TD.so(doc)} và y = ${TD.so(-ngang)}`,
+      `x = ${TD.so(-ngang)} và y = ${TD.so(-doc)}`,
+      `x = ${TD.so(doc + 1)} và y = ${TD.so(ngang)}`
+    ]);
+    if (!nhieu) return null;
+    return MC(R, `Cho hàm số y = f(x) có đồ thị như hình vẽ (hai đường nét đứt là tiệm cận).${hinh}Đồ thị hàm số có tiệm cận đứng và tiệm cận ngang lần lượt là gì?`,
+      { d: dungPA, s: nhieu,
+        sv: { [`x = ${TD.so(ngang)} và y = ${TD.so(doc)}`]: 'đảo vai trò hai đường: tiệm cận ĐỨNG là đường thẳng song song trục Oy, phải có dạng x = …',
+              [`x = ${TD.so(-doc)} và y = ${TD.so(ngang)}`]: 'đọc sai dấu của giao điểm đường đứng với trục hoành',
+              [`x = ${TD.so(doc)} và y = ${TD.so(-ngang)}`]: 'đọc sai dấu của giao điểm đường ngang với trục tung' },
+        v: `Tiệm cận ĐỨNG là đường nét đứt THẲNG ĐỨNG — nó cắt trục hoành tại ${TD.so(doc)} nên phương trình là x = ${TD.so(doc)}.\n`
+          + `Tiệm cận NGANG là đường nét đứt NẰM NGANG — nó cắt trục tung tại ${TD.so(ngang)} nên phương trình là y = ${TD.so(ngang)}.` },
+      'Đường thẳng đứng luôn viết x = số · đường nằm ngang luôn viết y = số. Nhớ được điều này thì loại ngay hai phương án đảo vai trò.');
+  } }
+
+]);
+
+TD.GEN.ly = (TD.GEN.ly || []).concat([
+
+/* --- Đồ thị p–V: nhận dạng đẳng quá trình --- */
+{ ma: 'ly-hinh-pv', chuong: 'Khí lí tưởng', muc: 3, dang: 'mc',
+  tao(R) {
+    const loai = R.chon(['nhiet', 'tich', 'ap']);
+    const p1 = R.nguyen(2, 4), V1 = R.nguyen(1, 2), he = p1 * V1;
+    const f = loai === 'nhiet' ? (v => he / v)
+            : loai === 'tich' ? (v => (Math.abs(v - V1) < 0.06 ? p1 : NaN))
+            : (v => p1);
+    const hinh = TD.hinhDoThi(f, { xMin: 0.2, xMax: 5, yMin: 0, yMax: 6 });
+    const ten = { nhiet: 'đẳng nhiệt', tich: 'đẳng tích', ap: 'đẳng áp' };
+    const dung = { nhiet: 'Quá trình đẳng nhiệt (T không đổi)', tich: 'Quá trình đẳng tích (V không đổi)', ap: 'Quá trình đẳng áp (p không đổi)' };
+    const moTa = { nhiet: 'đường cong hypebol, p giảm khi V tăng sao cho tích p·V không đổi',
+                   tich: 'đường thẳng ĐỨNG, V giữ nguyên khi p thay đổi',
+                   ap: 'đường thẳng NẰM NGANG, p giữ nguyên khi V thay đổi' };
+    const khac = Object.keys(dung).filter(x => x !== loai);
+    return MC(R, `Trong hệ toạ độ (V; p), một lượng khí lí tưởng biến đổi theo đồ thị sau (trục hoành là V, trục tung là p).${hinh}Đồ thị trên mô tả quá trình nào?`,
+      { d: dung[loai], s: khac.map(x => dung[x]).concat(['Quá trình đoạn nhiệt (không trao đổi nhiệt)']),
+        sv: Object.fromEntries(khac.map(x => [dung[x], `quá trình đó cho ${moTa[x]}, không khớp với hình`])
+          .concat([['Quá trình đoạn nhiệt (không trao đổi nhiệt)', 'không nằm trong ba đẳng quá trình của chương trình phổ thông']])),
+        v: `Trong hệ (V; p), mỗi đẳng quá trình có một dáng riêng:\n`
+          + `· đẳng nhiệt — đường cong hypebol (p·V = hằng số)\n`
+          + `· đẳng tích — đường thẳng ĐỨNG\n`
+          + `· đẳng áp — đường thẳng NẰM NGANG\n`
+          + `Hình đã cho là ${moTa[loai]} ⇒ ${ten[loai]}.` },
+      'Nhìn DÁNG đường là ra ngay, không cần tính: cong hypebol ⇒ đẳng nhiệt · thẳng đứng ⇒ đẳng tích · thẳng ngang ⇒ đẳng áp. '
+      + 'Nhớ kiểm trục nào là p, trục nào là V trước — đổi trục thì dáng cũng đổi.');
+  } }
+
+]);
+
+TD.GEN.hoa = (TD.GEN.hoa || []).concat([
+
+/* --- Đồ thị sục CO₂ vào dung dịch Ca(OH)₂ --- */
+{ ma: 'hoa-hinh-co2', chuong: 'IA – IIA – Nhôm', muc: 4, dang: 'tln',
+  tao(R) {
+    const a = R.nguyen(2, 20) * 0.05;                  /* mol Ca(OH)₂ */
+    const ty = R.chon([0.3, 0.4, 0.5, 0.6, 0.7, 0.8]);
+    const x = T(a * ty, 4);                            /* mol kết tủa ở nhánh xuống */
+    const b = T(2 * a - x, 4);
+    const hinh = TD.hinhTamGiac(a, 2 * a, a,
+      { x: 'n(CO₂)', y: 'n(CaCO₃)', dinh: 'a', het: '2a' }, [{ x: b, y: x, ten: 'b' }]);
+    return {
+      q: `Sục từ từ khí CO₂ vào dung dịch chứa ${S(a, 2)} mol Ca(OH)₂. Số mol kết tủa CaCO₃ biến thiên theo `
+        + `số mol CO₂ như đồ thị sau (a = ${S(a, 2)} mol):${hinh}`
+        + `Tại thời điểm số mol CO₂ bằng b, lượng kết tủa còn lại là ${S(x, 4)} mol. Giá trị của b là bao nhiêu? `
+        + `(làm tròn đến hàng phần trăm)`,
+      ans: D(b, 2),
+      giai: `Bước 1 — đọc hình: điểm b nằm ở NHÁNH ĐI XUỐNG, tức CO₂ đã dư và đang hoà tan bớt kết tủa.\n`
+        + `Bước 2 — hai giai đoạn của phản ứng:\n`
+        + `  · Giai đoạn 1 — CO₂ + Ca(OH)₂ → CaCO₃↓ + H₂O. Kết tủa cực đại bằng a = ${S(a, 2)} mol khi n(CO₂) = a.\n`
+        + `  · Giai đoạn 2 — CO₂ + CaCO₃ + H₂O → Ca(HCO₃)₂. Kết tủa tan dần, hết sạch khi n(CO₂) = 2a = ${S(2 * a, 3)} mol.\n`
+        + `Bước 3 — công thức cho nhánh xuống: n(kết tủa) = 2a − n(CO₂)\n`
+        + `  ⇒ b = 2a − n(kết tủa) = 2×${S(a, 2)} − ${S(x, 4)} = ${D(b, 2)} mol.`,
+      meo: 'Phân biệt hai đồ thị hình tam giác hay bị lẫn: sục CO₂ vào Ca(OH)₂ thì đỉnh ở a và về 0 tại 2a; '
+        + 'còn nhỏ NaOH vào AlCl₃ thì đỉnh ở 3a và về 0 tại 4a. Nhìn nhãn trên trục hoành để biết mình đang ở bài nào.'
+    };
+  } }
+
+]);
+
+TD.GEN.sinh = (TD.GEN.sinh || []).concat([
+
+/* --- Phả hệ gen lặn trên X: dạng hay ra nhất --- */
+{ ma: 'sinh-hinh-phahe-x', chuong: 'Di truyền người', muc: 4, dang: 'mc',
+  tao(R) {
+    /* Bố (1) bình thường × mẹ (2) bình thường sinh con TRAI (5) bị bệnh;
+       con gái (6) bình thường lấy (7) bình thường sinh con trai (9) bị bệnh.
+       Không có nữ nào bị bệnh ⇒ dấu hiệu điển hình của gen lặn trên X. */
+    const nguoi = [
+      { id: '1', doi: 1, x: 1, nam: true, benh: false },
+      { id: '2', doi: 1, x: 2, nam: false, benh: false },
+      { id: '3', doi: 1, x: 4.2, nam: true, benh: false },
+      { id: '4', doi: 1, x: 5.2, nam: false, benh: false },
+      { id: '5', doi: 2, x: 0.8, nam: true, benh: true },
+      { id: '6', doi: 2, x: 2.2, nam: false, benh: false },
+      { id: '7', doi: 2, x: 3.6, nam: true, benh: false },
+      { id: '8', doi: 2, x: 5.4, nam: false, benh: false },
+      { id: '9', doi: 3, x: 2.4, nam: true, benh: true },
+      { id: '10', doi: 3, x: 3.6, nam: false, benh: false }
+    ];
+    const hinh = TD.hinhPhaHe(nguoi, [['1', '2'], ['3', '4'], ['6', '7']],
+      [{ cha: '1', me: '2', ds: ['5', '6'] }, { cha: '3', me: '4', ds: ['7', '8'] }, { cha: '6', me: '7', ds: ['9', '10'] }]);
+    const hoi = R.chon(['viTri', 'xacSuat', 'conTrai', 'mangGen']);
+    if (hoi === 'viTri')
+      return MC(R, `Cho sơ đồ phả hệ về một bệnh ở người:${hinh}Bệnh trên nhiều khả năng do loại gen nào quy định?`,
+        { d: 'Gen lặn nằm trên vùng không tương đồng của nhiễm sắc thể X',
+          s: ['Gen lặn nằm trên nhiễm sắc thể thường', 'Gen trội nằm trên nhiễm sắc thể thường', 'Gen trội nằm trên vùng không tương đồng của nhiễm sắc thể X'],
+          sv: { 'Gen lặn nằm trên nhiễm sắc thể thường': 'nếu nằm trên NST thường thì bệnh xuất hiện đều ở hai giới; ở đây CẢ HAI người bệnh đều là nam, và cả phả hệ không có nữ nào bị bệnh',
+                'Gen trội nằm trên nhiễm sắc thể thường': 'gen trội thì người bệnh phải có bố hoặc mẹ bị bệnh — cặp (1)×(2) đều bình thường mà sinh con (5) bị bệnh',
+                'Gen trội nằm trên vùng không tương đồng của nhiễm sắc thể X': 'nếu trội trên X thì bố bị bệnh sẽ truyền cho TẤT CẢ con gái; hơn nữa bố mẹ bình thường không thể sinh con bệnh' },
+          v: `Suy luận hai bước:\n`
+            + `① Cặp (1) × (2) đều bình thường mà sinh con (5) bị bệnh ⇒ bệnh do gen LẶN.\n`
+            + `② Cả hai người bệnh (5) và (9) đều là NAM, không có nữ nào bị bệnh ⇒ dấu hiệu của gen lặn nằm trên NST giới tính X. `
+            + `Nam chỉ có một X nên chỉ cần một allele lặn là biểu hiện bệnh; nữ phải có cả hai X đều lặn nên hiếm hơn nhiều.\n`
+            + `Vậy bệnh do gen lặn trên vùng không tương đồng của X.` },
+        'Hai phả hệ trông giống nhau nhưng khác một chi tiết sống còn: có nữ bị bệnh mà bố bình thường ⇒ gen trên NST THƯỜNG; '
+        + 'chỉ toàn nam bị bệnh ⇒ nghĩ ngay tới gen lặn trên X.');
+    if (hoi === 'conTrai')
+      return MC(R, `Cho sơ đồ phả hệ về một bệnh do gen lặn nằm trên vùng không tương đồng của nhiễm sắc thể X quy định:${hinh}Cặp vợ chồng (6) × (7) sinh thêm một người con TRAI. Xác suất người con trai đó bị bệnh là bao nhiêu?`,
+        { d: '50%', s: ['25%', '75%', '100%'],
+          sv: { '25%': 'đây là xác suất sinh con trai bị bệnh khi tính trên TỔNG số con; đề đã cho biết là con trai nên không nhân thêm 1/2 nữa',
+                '75%': 'đây là xác suất con KHÔNG bị bệnh của phép lai trên NST thường, không áp dụng ở đây',
+                '100%': 'mẹ chỉ dị hợp XᴬXᵃ nên một nửa số con trai vẫn nhận được Xᴬ và bình thường' },
+          v: `Bước 1 — con trai (9) bị bệnh nên mẹ (6) chắc chắn là XᴬXᵃ; bố (7) bình thường nên là XᴬY.\n`
+            + `Bước 2 — phép lai XᴬXᵃ × XᴬY cho đời con: XᴬXᴬ, XᴬXᵃ, XᴬY, XᵃY.\n`
+            + `Bước 3 — đề đã CHO BIẾT đứa con là con trai, nên chỉ xét hai kiểu gen con trai XᴬY và XᵃY ⇒ xác suất bị bệnh là 1/2 = 50%.` },
+        'Đọc kĩ đề hỏi "sinh một người con" hay "sinh một người con TRAI". Nếu đã biết là con trai thì không nhân thêm 1/2 giới tính nữa — '
+        + 'đây là chỗ hai đáp án 25% và 50% được đặt cạnh nhau để bẫy.');
+    if (hoi === 'mangGen')
+      return MC(R, `Cho sơ đồ phả hệ về một bệnh do gen lặn nằm trên vùng không tương đồng của nhiễm sắc thể X quy định:${hinh}Người phụ nữ (2) có kiểu gen như thế nào?`,
+        { d: 'Chắc chắn là XᴬXᵃ', s: ['Chắc chắn là XᴬXᴬ', 'Có thể là XᴬXᴬ hoặc XᴬXᵃ', 'Chắc chắn là XᵃXᵃ'],
+          sv: { 'Chắc chắn là XᴬXᴬ': 'nếu vậy con trai (5) chỉ nhận Xᴬ từ mẹ và không thể bị bệnh',
+                'Có thể là XᴬXᴬ hoặc XᴬXᵃ': 'con trai (5) bị bệnh đã loại hẳn khả năng XᴬXᴬ',
+                'Chắc chắn là XᵃXᵃ': 'nếu vậy chính (2) đã bị bệnh, nhưng trên hình (2) bình thường' },
+          v: `Con trai (5) bị bệnh nên mang XᵃY. Allele Xᵃ chỉ có thể đến từ MẸ vì bố truyền Y cho con trai.\n`
+            + `Mẹ (2) bình thường nên không thể là XᵃXᵃ ⇒ kiểu gen của (2) là XᴬXᵃ.` },
+        'Con trai nhận X từ mẹ, Y từ bố. Nên gặp con trai bị bệnh do gen trên X là truy ngược lên MẸ, bố hoàn toàn vô can.');
+    return MC(R, `Cho sơ đồ phả hệ về một bệnh do gen lặn nằm trên vùng không tương đồng của nhiễm sắc thể X quy định:${hinh}Người phụ nữ (6) có kiểu gen như thế nào?`,
+      { d: 'Chắc chắn là XᴬXᵃ', s: ['Chắc chắn là XᴬXᴬ', 'Có thể là XᴬXᴬ hoặc XᴬXᵃ', 'Chắc chắn là XᵃXᵃ'],
+        sv: { 'Chắc chắn là XᴬXᴬ': 'nếu vậy thì con trai (9) chỉ nhận được Xᴬ từ mẹ và không thể bị bệnh',
+              'Có thể là XᴬXᴬ hoặc XᴬXᴬ hoặc XᴬXᵃ': 'không còn nghi ngờ nữa vì con trai bị bệnh đã chốt kiểu gen của mẹ',
+              'Có thể là XᴬXᴬ hoặc XᴬXᵃ': 'con trai (9) bị bệnh đã loại hẳn khả năng XᴬXᴬ',
+              'Chắc chắn là XᵃXᵃ': 'nếu vậy thì chính (6) đã bị bệnh, nhưng trên hình (6) bình thường' },
+        v: `Con trai (9) bị bệnh nên có kiểu gen XᵃY. Con trai chỉ nhận Y từ bố và nhận X từ MẸ ⇒ Xᵃ chắc chắn đến từ mẹ (6).\n`
+          + `Mà (6) không bị bệnh nên không thể là XᵃXᵃ ⇒ kiểu gen của (6) là XᴬXᵃ, tức người mang gen bệnh.` },
+      'Nguyên tắc vàng của gen trên X: con trai nhận X từ MẸ và Y từ BỐ. Nên con trai bệnh thì truy ngược lên mẹ, không truy bố.');
+  } }
+
+]);
+
+TD.GEN.dia = (TD.GEN.dia || []).concat([
+
+/* --- Biểu đồ tròn: đọc cơ cấu --- */
+{ ma: 'dia-hinh-tron', chuong: 'Kỹ năng', muc: 2, dang: 'mc',
+  tao(R) {
+    const nn = R.nguyen(8, 18), cn = R.nguyen(33, 42), dv = 100 - nn - cn;
+    if (dv < 40 || dv > 58) return null;
+    const hinh = TD.hinhTron([
+      { ten: 'Nông – lâm – thuỷ sản', v: nn },
+      { ten: 'Công nghiệp – xây dựng', v: cn },
+      { ten: 'Dịch vụ', v: dv }
+    ]);
+    const hoi = R.chon(['lonNhat', 'chenh']);
+    if (hoi === 'lonNhat') {
+      const ds = [['Nông – lâm – thuỷ sản', nn], ['Công nghiệp – xây dựng', cn], ['Dịch vụ', dv]];
+      const max = ds.slice().sort((a, b) => b[1] - a[1])[0][0];
+      return MC(R, `Cho biểu đồ cơ cấu GDP phân theo khu vực kinh tế của nước ta:${hinh}Khu vực nào chiếm tỉ trọng lớn nhất?`,
+        { d: max, s: ds.map(x => x[0]).filter(x => x !== max).concat(['Ba khu vực chiếm tỉ trọng ngang nhau']),
+          v: `Đọc số phần trăm ghi trong chú giải: nông – lâm – thuỷ sản ${nn}%, công nghiệp – xây dựng ${cn}%, dịch vụ ${dv}%.\n`
+            + `Lớn nhất là ${max}.` },
+        'Đọc số trong chú giải chứ đừng ước lượng độ rộng hình quạt bằng mắt — hai phần chênh nhau vài phần trăm nhìn gần như nhau.');
+    }
+    const dungPA2 = S(dv - nn) + '%';
+    const nhieu2 = baNhieu(dungPA2, [S(dv + nn) + '%', S(T(dv / nn, 1), 1) + '%', S(100 - dv) + '%', S(cn - nn) + '%', S(dv - cn) + '%']);
+    if (!nhieu2) return null;
+    return MC(R, `Cho biểu đồ cơ cấu GDP phân theo khu vực kinh tế của nước ta:${hinh}Tỉ trọng khu vực dịch vụ lớn hơn khu vực nông – lâm – thuỷ sản bao nhiêu phần trăm?`,
+      { d: dungPA2, s: nhieu2,
+        sv: { [S(dv + nn) + '%']: 'đây là tổng hai khu vực, không phải chênh lệch',
+              [S(T(dv / nn, 1), 1) + '%']: 'đây là số LẦN, câu hỏi hỏi chênh bao nhiêu phần trăm',
+              [S(100 - dv) + '%']: 'đây là tỉ trọng của hai khu vực còn lại cộng lại' },
+        v: `Chênh lệch = ${dv}% − ${nn}% = ${S(dv - nn)}%.\n`
+          + `Lưu ý: với biểu đồ cơ cấu, "lớn hơn bao nhiêu phần trăm" là lấy HIỆU hai tỉ trọng, còn "gấp bao nhiêu lần" mới lấy thương.` },
+      'Ba cách hỏi hay bị lẫn: "lớn hơn bao nhiêu %" lấy hiệu · "gấp mấy lần" lấy thương · "tăng bao nhiêu %" lấy thương rồi trừ 100.');
+  } }
+
+]);
+})();
+
+/* Đánh dấu mọi mẫu trong file này là mẫu CÓ HÌNH, để bộ dựng đề cấp phát
+   chỗ riêng cho chúng thay vì thả chung rổ rồi hi vọng bốc trúng. */
+(function () {
+  const MA_HINH = ['toan-hinh-dothi3', 'toan-hinh-bbt', 'toan-hinh-dothi4', 'toan-hinh-tiemcan',
+                   'sinh-hinh-phahe', 'sinh-hinh-phahe-x', 'hoa-hinh-kettua', 'hoa-hinh-co2',
+                   'dia-hinh-cot', 'dia-hinh-tron', 'ly-hinh-mach', 'ly-hinh-pv'];
+  for (const mon of Object.keys(TD.GEN))
+    for (const t of TD.GEN[mon]) if (MA_HINH.indexOf(t.ma) >= 0) t._hinh = true;
 })();
 
 </script>

@@ -116,6 +116,20 @@ TD.VAT_PHAM = {
 /* Bộ GD&ĐT công bố tỉ lệ cấp độ tư duy của đề thi từ 2025 là BIẾT : HIỂU : VẬN DỤNG = 4 : 3 : 3.
    Khung chính thức chỉ có BA cấp; game vẫn tách mức 3 và mức 4 để luyện riêng phần khó,
    nhưng cộng lại phải đúng 30% thì ước lượng điểm mới sát thực tế. */
+/* ============================================================
+   HẠN NGẠCH CÂU CÓ HÌNH
+   Đề thi thật câu nào cũng có hình: Toán vài câu đồ thị và bảng biến
+   thiên, Sinh gần như luôn có một câu phả hệ, Lý có mạch điện và đồ
+   thị p–V, Hoá có đồ thị kết tủa, Địa có biểu đồ.
+   Nếu chỉ thả mẫu có hình vào chung một rổ với hơn tám trăm mẫu khác
+   thì xác suất gặp gần bằng không — đo thực tế trước khi đặt hạn
+   ngạch: đề Toán trung bình 0,01 câu có hình mỗi đề. Nên phải cấp
+   phát chỗ riêng, đúng như cách Bộ ra đề.
+   ============================================================ */
+TD.SO_CAU_HINH = { toan: 3, ly: 2, hoa: 1, sinh: 1, dia: 2 };
+/* tỉ lệ câu có hình trong một phiên Luyện Công của môn có hình */
+TD.TY_LE_HINH = 0.18;
+
 TD.TRONG_SO_MUC = { 1: 0.40, 2: 0.30, 3: 0.21, 4: 0.09 };
 
 TD.hamMucTieu = function (diem) {

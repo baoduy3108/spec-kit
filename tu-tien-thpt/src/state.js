@@ -655,21 +655,28 @@ TD.sinhNhieu = function (mon, muc, n) {
     return ra;
   };
 
+  /* Giữ sẵn một phần chỗ cho câu CÓ HÌNH, vì mẫu có hình rất ít so với
+     tổng số mẫu nên bốc ngẫu nhiên thì gần như không bao giờ ra. */
+  const mauHinh = mau.filter(t => t._hinh);
+  const canHinh = mauHinh.length ? Math.min(Math.round(n * (TD.TY_LE_HINH || 0.18)), mauHinh.length * 3) : 0;
+  const phanHinh = canHinh ? rutTu(mauHinh, canHinh) : [];
+  const conLai = Math.max(0, n - phanHinh.length);
+
   const tyLe = TD.TY_LE_BAI_TAP[mon];
   if (tyLe) {
-    const baiTap = mau.filter(t => !t._tuLT);
+    const baiTap = mau.filter(t => !t._tuLT && !t._hinh);
     const lyThuyet = mau.filter(t => t._tuLT);
     if (baiTap.length) {
-      const canBT = Math.round(n * tyLe);
+      const canBT = Math.round(conLai * tyLe);
       const bt = rutTu(baiTap, canBT);
-      const lt = rutTu(lyThuyet, n - bt.length);
-      const ra = bt.concat(lt);
+      const lt = rutTu(lyThuyet, conLai - bt.length);
+      const ra = phanHinh.concat(bt, lt);
       /* thiếu thì bù nốt bằng bài tập, không bù bằng câu lý thuyết */
       if (ra.length < n) ra.push.apply(ra, rutTu(baiTap, n - ra.length));
       return TD.xao(ra);
     }
   }
-  return TD.xao(rutTu(mau, n));
+  return TD.xao(phanHinh.concat(rutTu(mau.filter(t => !t._hinh), conLai)));
 };
 
 /* Đếm số mẫu đề của một môn */
@@ -1178,10 +1185,42 @@ TD.deThiThat = function (mon, seed, cap) {
     return ra;
   };
 
+  /* ---- CẤP CHỖ RIÊNG CHO CÂU CÓ HÌNH ----
+     Đề thật luôn có mấy câu đồ thị, bảng biến thiên, phả hệ, mạch điện.
+     Thả mẫu có hình chung rổ với hơn tám trăm mẫu khác thì xác suất bốc
+     trúng gần bằng không (đo được 0,01 câu mỗi đề môn Toán), nên phải giữ
+     sẵn chỗ cho chúng trước khi rút phần còn lại. */
+  const canHinh = (TD.SO_CAU_HINH || {})[mon] || 0;
+  const maHinh = {};
+  gen.forEach(t => { if (t._hinh) maHinh[mon + '@' + t.ma] = t.dang; });
+  const rutHinh = (bo, n, mucToiThieu) => {
+    const ra = [];
+    if (!n) return ra;
+    for (const x of TD.xaoR(R, bo.filter(y => maHinh[y.khoa] && (!mucToiThieu || y.muc >= mucToiThieu)))) {
+      if (ra.length >= n) break;
+      if ((daDung[x.khoa] || 0) >= 1) continue;
+      daDung[x.khoa] = 1;
+      quota[x.muc] = Math.max(0, (quota[x.muc] || 0) - 1);
+      ra.push(x.it);
+    }
+    return ra;
+  };
+  /* Chia hạn ngạch hình theo số mẫu THỰC CÓ của từng dạng, không chia cứng
+     theo tỉ lệ: môn Lý chỉ có một mẫu hình dạng trắc nghiệm nên chia cứng
+     70% cho Phần I là hụt mất một câu. */
+  const coMc = Object.values(maHinh).filter(d => d === 'mc').length;
+  const coTln = Object.values(maHinh).filter(d => d === 'tln').length;
+  const soHinhMc = Math.min(canHinh, coMc, M.p1);
+  const hinhMc = chot(rutHinh(be.mc, soHinhMc));
+  /* Phần III của đề thật chỉ có câu vận dụng trở lên, nên câu hình đưa vào
+     đây cũng phải từ mức 3 — không được vì muốn đủ hạn ngạch mà nhét câu dễ. */
+  const soHinhTln = Math.min(canHinh - hinhMc.length, coTln, M.p3);
+  const hinhTln = chot(rutHinh(be.tln, soHinhTln, 3));
+
   /* Rút theo đúng thứ tự: Phần III (khó nhất) → Phần II → Phần I nhận phần còn lại */
-  const p3 = chot(rut(be.tln, M.p3, [4, 3, 2, 1]));
+  const p3 = hinhTln.concat(chot(rut(be.tln, M.p3 - hinhTln.length, [4, 3, 2, 1])));
   const p2 = chot(rut(be.ds, M.p2, [2, 3, 4, 1]));
-  const p1 = chot(rut(be.mc, M.p1, [1, 2, 3, 4]));
+  const p1 = hinhMc.concat(chot(rut(be.mc, M.p1 - hinhMc.length, [1, 2, 3, 4])));
   /* thứ tự làm bài khuyến nghị: Phần I → Phần III → Phần II */
   return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2), kiep: K };
 };

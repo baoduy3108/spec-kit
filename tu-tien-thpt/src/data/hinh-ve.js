@@ -187,6 +187,30 @@ TD.hinhKetTua = function (aMol, dinh, tenX, tenY) {
   return boc(W, H, ra);
 };
 
+/* Đồ thị tam giác lệch tổng quát: lên tới đỉnh rồi xuống về 0.
+   Dùng chung cho kết tủa nhôm (3a, 4a) lẫn sục CO₂ vào Ca(OH)₂ (a, 2a). */
+TD.hinhTamGiac = function (xDinh, xHet, yDinh, ten, dinh) {
+  const W = 320, H = 230, le = 44;
+  const xMax = xHet * 1.14, yMax = yDinh * 1.3;
+  const X = x => le + x / xMax * (W - le - 22);
+  const Y = y => H - le - y / yMax * (H - le - 24);
+  let ra = `<line x1="${le}" y1="${H - le}" x2="${W - 12}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<line x1="${le}" y1="16" x2="${le}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<text x="${W - 10}" y="${H - le + 15}" fill="${M.chu}" font-size="10.5" text-anchor="end">${(ten && ten.x) || 'n'}</text>`
+    + `<text x="${le - 4}" y="12" fill="${M.chu}" font-size="10.5" text-anchor="end">${(ten && ten.y) || 'n↓'}</text>`
+    + `<polyline points="${so(X(0))},${so(Y(0))} ${so(X(xDinh))},${so(Y(yDinh))} ${so(X(xHet))},${so(Y(0))}" fill="none" stroke="${M.net}" stroke-width="2.4"/>`
+    + `<line x1="${so(X(xDinh))}" y1="${so(Y(yDinh))}" x2="${so(X(xDinh))}" y2="${so(Y(0))}" stroke="${M.phu}" stroke-dasharray="4 3"/>`
+    + `<line x1="${le}" y1="${so(Y(yDinh))}" x2="${so(X(xDinh))}" y2="${so(Y(yDinh))}" stroke="${M.phu}" stroke-dasharray="4 3"/>`
+    + `<text x="${so(X(xDinh))}" y="${H - le + 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${(ten && ten.dinh) || ''}</text>`
+    + `<text x="${so(X(xHet))}" y="${H - le + 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${(ten && ten.het) || ''}</text>`;
+  (dinh || []).forEach(d => {
+    ra += `<circle cx="${so(X(d.x))}" cy="${so(Y(d.y))}" r="3.6" fill="${M.do}"/>`
+       + `<line x1="${so(X(d.x))}" y1="${so(Y(d.y))}" x2="${so(X(d.x))}" y2="${so(Y(0))}" stroke="${M.do}" stroke-width="1" stroke-dasharray="3 3"/>`
+       + (d.ten ? `<text x="${so(X(d.x))}" y="${so(Y(d.y) - 8)}" fill="${M.do}" font-size="10.5" text-anchor="middle">${d.ten}</text>` : '');
+  });
+  return boc(W, H, ra);
+};
+
 /* ============================================================
    ⑤ BIỂU ĐỒ CỘT / TRÒN — cho Địa lí và GDKT
    ============================================================ */
