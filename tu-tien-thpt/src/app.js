@@ -256,10 +256,15 @@ TD.manYeuDiem = function (mon) {
     daLam.concat(chuaLam).forEach(x => {
       const mau = x.pt === null ? 'var(--chu3)'
         : x.pt < 50 ? 'var(--lua)' : x.pt < 70 ? 'var(--kim)' : x.pt < 85 ? 'var(--ngoc)' : 'var(--dung)';
+      const g = ((TD.S.gio_cd || {})[m] || {})[x.cd];
+      const tbGiay = g && g.cau ? Math.round(g.giay / g.cau) : null;
+      const M2 = TD.MON[m];
+      const nguong = M2 && !M2.tuluan ? Math.round(M2.phut * 60 / Math.max(1, M2.p1 + M2.p2 + M2.p3)) : 105;
       const b = el('button', 'dapan', `
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%">
           <span style="text-align:left">${x.cd}</span>
           <span style="flex:0 0 auto;font-size:12.6px;color:${mau};font-weight:700">
+            ${tbGiay !== null ? `<span style="color:${tbGiay > nguong ? 'var(--lua)' : 'var(--chu3)'};font-weight:400">⏱ ${tbGiay}s</span> · ` : ''}
             ${x.pt === null ? (x.tong ? x.dung + '/' + x.tong + ' câu' : 'chưa làm') : x.pt + '% · ' + x.dung + '/' + x.tong}
           </span>
         </div>
@@ -282,6 +287,74 @@ TD.manYeuDiem = function (mon) {
     h.appendChild(b1); h.appendChild(b2);
     return h;
   })());
+};
+
+/* ============================================================
+   IN ĐỀ RA GIẤY
+   Nhiều bạn cần luyện viết tay và tô đáp án đúng như phòng thi, mà
+   làm trên điện thoại thì không rèn được cái đó. Ở đây dựng một
+   trang riêng chứa TRỌN đề — đủ ba phần, đánh số như đề thật — kèm
+   đáp án tách xuống cuối để làm xong mới soi.
+   ============================================================ */
+TD.inDe = function (mon, cap) {
+  const M = TD.MON[mon];
+  const de = TD.deThiThat(mon, undefined, cap || TD.S.kiep_chon);
+  if (!de.ds.length) { TD.bao('Chưa đủ câu hỏi để dựng đề môn này.', 'lua'); return; }
+  const KY = ['A', 'B', 'C', 'D'];
+  const chu = t => String(t == null ? '' : t);
+
+  let so = 0;
+  const phan = (ten, ds, kieu) => {
+    if (!ds.length) return '';
+    let ra = `<h2 class="in-phan">${ten}</h2>`;
+    ds.forEach(it => {
+      const q = TD.layCau(it); if (!q) return;
+      so++;
+      ra += `<div class="in-cau"><b>Câu ${so}.</b> ${chu(q.q)}`;
+      if (kieu === 'mc')
+        ra += `<div class="in-pa">${(q.opts || []).map((o, i) => `<span><b>${KY[i]}.</b> ${chu(o)}</span>`).join('')}</div>`;
+      else if (kieu === 'ds')
+        ra += `<div class="in-y">${(q.items || []).map((y, i) =>
+          `<div><b>${'abcd'[i]})</b> ${chu(y.t)} <span class="in-o">☐ Đúng &nbsp; ☐ Sai</span></div>`).join('')}</div>`;
+      else
+        ra += `<div class="in-tra">Trả lời: <span class="in-ke"></span></div>`;
+      ra += `</div>`;
+    });
+    return ra;
+  };
+
+  const p1 = phan(`PHẦN I. Trắc nghiệm nhiều phương án lựa chọn (${de.p1.length} câu)`, de.p1, 'mc');
+  const p2 = phan(`PHẦN II. Trắc nghiệm đúng/sai (${de.p2.length} câu)`, de.p2, 'ds');
+  const p3 = phan(`PHẦN III. Trắc nghiệm trả lời ngắn (${de.p3.length} câu)`, de.p3, 'tln');
+
+  /* Đáp án gom riêng, sang trang mới — làm xong mới lật xem */
+  let k = 0; const dapAn = [];
+  de.p1.forEach(it => { const q = TD.layCau(it); if (q) dapAn.push(`${++k}. ${KY[q.ans]}`); });
+  de.p2.forEach(it => { const q = TD.layCau(it); if (q) dapAn.push(`${++k}. ${(q.items || []).map((y, i) => `${'abcd'[i]}${y.a ? 'Đ' : 'S'}`).join(' ')}`); });
+  de.p3.forEach(it => { const q = TD.layCau(it); if (q) dapAn.push(`${++k}. ${chu(q.ans)}`); });
+
+  /* Dựng ngay TRONG trang rồi để CSS @media print lo phần còn lại.
+     Không mở cửa sổ mới: bản chạy trong khung nhúng chặn cửa sổ bật lên,
+     mà trên điện thoại thì cửa sổ mới cũng rất phiền. */
+  let hop = document.getElementById('trang-in');
+  if (!hop) { hop = el('div', '', ''); hop.id = 'trang-in'; document.body.appendChild(hop); }
+  hop.innerHTML = `
+    <div class="in-thanh">
+      <button class="nut" id="in-chay">🖨 In / Lưu PDF</button>
+      <button class="nut phu" id="in-dong">Đóng bản in</button>
+      <span class="mo-nhat">Đề đã sẵn sàng — đáp án nằm ở trang cuối.</span>
+    </div>
+    <h1 class="in-tieu">ĐỀ ÔN LUYỆN MÔN ${M.ten.toUpperCase()}</h1>
+    <div class="in-dau">${de.kiep.ten} · Thời gian làm bài: ${Math.round(M.phut * de.kiep.gio)} phút<br>
+      Họ và tên: ....................................................... Lớp: ................ Ngày: ................</div>
+    ${p1}${p2}${p3}
+    <div class="in-dapan"><h2 class="in-phan">Đáp án</h2>${dapAn.map(x => `<div>${x}</div>`).join('')}</div>`;
+  document.body.classList.add('che-in');
+  window.scrollTo(0, 0);
+  const dong = () => { document.body.classList.remove('che-in'); hop.innerHTML = ''; };
+  $('#in-dong').onclick = dong;
+  $('#in-chay').onclick = () => { try { window.print(); } catch (e) { TD.bao('Trình duyệt không cho in ở đây — hãy chụp màn hình hoặc mở bản tải về.', 'lua'); } };
+  TD.bao('🖨 Đã dựng bản in. Bấm "In / Lưu PDF" hoặc dùng chức năng in của trình duyệt.', 'kim');
 };
 
 /* Phiên ôn nhanh: ngắn, đúng một chuyên đề, không giới hạn giờ */
@@ -372,6 +445,7 @@ TD.veCau = function () {
   const q = TD.layCau(p.ds[p.vt]);
   if (!q) { p.vt++; TD.veCau(); return; }
   p.cauHienTai = q;
+  p.batDauCau = Date.now();          /* để đo thời gian làm riêng câu này */
   const M = TD.MON[m], MU = TD.MUC[q.muc];
   c.innerHTML = '';
 
@@ -575,7 +649,17 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
   const p = TD.phien;
   p.diem += diem; p.diemToiDa += diemToiDa;
   if (dung) p.dung++;
-  p.ketQua.push({ mon: mon, muc: q.muc, chuong: q.chuong, de: q.q, dung: dung, diem: diem });
+  /* Thời gian làm từng câu: đề 28 câu trong 50 phút là 1,8 phút một câu.
+     Biết mình ngốn 4 phút ở dạng nào mới biết câu nào nên bỏ qua trong phòng thi. */
+  const giay = p.batDauCau ? Math.round((Date.now() - p.batDauCau) / 1000) : null;
+  p.ketQua.push({ mon: mon, muc: q.muc, chuong: q.chuong, de: q.q, dung: dung, diem: diem, giay: giay });
+  if (giay !== null && giay < 3600) {
+    const cd = TD.chuDeCuaThe(mon, { nhom: q.chuong, cd: q.cd }) || q.chuong;
+    TD.S.gio_cd = TD.S.gio_cd || {};
+    TD.S.gio_cd[mon] = TD.S.gio_cd[mon] || {};
+    const g = TD.S.gio_cd[mon][cd] = TD.S.gio_cd[mon][cd] || { giay: 0, cau: 0 };
+    g.giay += giay; g.cau++;
+  }
 
   /* đã soi Truy Hồn Kính thì không tính là tự làm được */
   const soi = !!q._soiGuong;
@@ -710,6 +794,37 @@ TD.ketThucPhien = function () {
       <button class="nut phu" onclick="TD.di('luyencong')">Luyện tiếp</button>
       ${TD.SRS.denHan().length ? `<button class="nut lua" onclick="TD.di('tamma')">Trấn áp tâm ma (${TD.SRS.denHan().length})</button>` : ''}
     </div>`));
+
+  /* ---- nhịp độ làm bài: câu nào ngốn thời gian ---- */
+  const coGio = p.ketQua.filter(k => typeof k.giay === 'number');
+  if (coGio.length >= 3) {
+    const M2 = TD.MON[p.mon] || null;
+    /* ngưỡng lấy từ chính đề thật của môn đó: tổng phút chia tổng số câu */
+    const nguong = M2 && !M2.tuluan
+      ? Math.round(M2.phut * 60 / Math.max(1, M2.p1 + M2.p2 + M2.p3)) : 105;
+    const tong = coGio.reduce((a, k) => a + k.giay, 0);
+    const tb = Math.round(tong / coGio.length);
+    const cham = coGio.slice().sort((a, b) => b.giay - a.giay).slice(0, 3);
+    const quaCham = coGio.filter(k => k.giay > nguong * 1.6).length;
+    const ph = g => g >= 60 ? Math.floor(g / 60) + 'ph' + (g % 60 ? String(g % 60).padStart(2, '0') + 's' : '') : g + 's';
+    c.appendChild(el('div', 'the', `<h3>⏱ Nhịp độ làm bài</h3>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;margin:10px 0">
+        <div><div class="so-to" style="color:${tb > nguong ? 'var(--lua)' : 'var(--dung)'}">${ph(tb)}</div><div class="so-nhan">trung bình mỗi câu</div></div>
+        <div><div class="so-to">${ph(nguong)}</div><div class="so-nhan">nhịp đề thật</div></div>
+        <div><div class="so-to" style="color:${quaCham ? 'var(--kim)' : 'var(--dung)'}">${quaCham}</div><div class="so-nhan">câu quá chậm</div></div>
+      </div>
+      <p class="mo-nhat">Đề thật môn này cho <b>${M2 && !M2.tuluan ? M2.phut + ' phút cho ' + (M2.p1 + M2.p2 + M2.p3) + ' câu' : 'khoảng 105 giây mỗi câu'}</b>.
+      ${tb > nguong
+        ? 'Bạn đang chậm hơn nhịp đề — trong phòng thi sẽ không kịp làm hết.'
+        : 'Bạn đang bám đúng nhịp. Giữ như vậy, phần dư dành để soát lại.'}</p>
+      <div style="margin-top:10px;font-size:13.4px">
+        <b style="color:var(--kim)">Ba câu ngốn thời gian nhất</b>
+        <ol style="padding-left:20px;margin:7px 0">${cham.map(k =>
+          `<li style="margin-bottom:5px"><b style="color:${k.giay > nguong * 1.6 ? 'var(--lua)' : 'var(--chu2)'}">${ph(k.giay)}</b>
+            · ${k.chuong} · ${TD.MUC[k.muc].ten}${k.dung ? '' : ' <span style="color:var(--lua)">(vẫn sai)</span>'}</li>`).join('')}</ol>
+        <p class="mo-nhat">Câu vừa chậm vừa sai là câu nên <b>bỏ qua</b> trong phòng thi để dồn giờ cho câu chắc ăn.</p>
+      </div>`));
+  }
 
   /* danh sách câu sai để xem lại */
   const sai = p.ketQua.filter(k => !k.dung);
@@ -1462,8 +1577,12 @@ TD.dungDe = function (mon, cap) {
     </div>
     <div class="hang-nut">
       <button class="nut lua" id="dk-batdau">Bắt đầu độ kiếp</button>
+      <button class="nut phu" id="dk-in">🖨 In đề ra giấy</button>
       <button class="nut phu" onclick="TD.di('dokiep')">← Quay lại</button>
-    </div>`));
+    </div>
+    <p class="mo-nhat">In ra giấy để luyện viết tay và tô đáp án đúng như phòng thi — đáp án nằm ở trang cuối, làm xong mới lật.</p>`));
+
+  $('#dk-in').onclick = () => TD.inDe(mon, cap || TD.S.kiep_chon);
 
   $('#dk-batdau').onclick = () => {
     TD.keu('sam');

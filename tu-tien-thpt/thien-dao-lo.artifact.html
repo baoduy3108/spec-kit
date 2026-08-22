@@ -212,6 +212,51 @@ textarea.o-nhap{font-family:inherit;font-size:14.5px;line-height:1.6;resize:vert
 .dong-tu .tu-vi{color:var(--chu2);text-align:right;flex:1 1 45%;font-size:13.4px}
 .nhan.loai-tu{font-size:10.5px;padding:1px 5px;color:var(--chu3)}
 
+/* ============================================================
+   BẢN IN RA GIẤY
+   Đề được dựng ngay trong trang (không mở cửa sổ mới vì bản chạy
+   trong khung nhúng chặn cửa sổ bật lên), rồi ẩn toàn bộ giao diện
+   game đi để chỉ còn tờ đề như đề thi thật.
+   ============================================================ */
+#trang-in{display:none}
+/* #noidung nằm trong .app chứ không phải con trực tiếp của body — dùng dấu
+   cách thay vì dấu > kẻo luật không khớp và giao diện game vẫn hiện dưới đề. */
+body.che-in .app{display:none}
+body.che-in #trang-in{display:block;max-width:820px;margin:0 auto;padding:0 14px 40px}
+#trang-in .in-thanh{display:flex;gap:9px;align-items:center;flex-wrap:wrap;
+  padding:12px 0 16px;border-bottom:1px solid var(--vien);margin-bottom:18px}
+#trang-in .in-tieu{font-size:19px;text-align:center;margin:0 0 4px}
+#trang-in .in-dau{text-align:center;font-size:13.4px;color:var(--chu2);
+  border-bottom:1.5px solid var(--vien);padding-bottom:10px;margin-bottom:16px}
+#trang-in .in-phan{font-size:14.6px;margin:20px 0 9px;text-transform:uppercase;color:var(--kim)}
+#trang-in .in-cau{margin-bottom:13px;font-size:14.4px;line-height:1.5}
+#trang-in .in-pa{display:grid;grid-template-columns:1fr 1fr;gap:3px 18px;margin:5px 0 0 16px;font-size:13.8px}
+#trang-in .in-y div{margin:4px 0 0 16px;font-size:13.8px}
+#trang-in .in-o{white-space:nowrap;margin-left:8px;color:var(--chu3)}
+#trang-in .in-tra{margin:6px 0 0 16px}
+#trang-in .in-ke{display:inline-block;border-bottom:1px dotted var(--chu3);width:170px}
+#trang-in .in-dapan{margin-top:26px;border-top:1.5px solid var(--vien);padding-top:14px}
+#trang-in .in-dapan div{display:inline-block;width:24%;font-size:13px;color:var(--chu2)}
+#trang-in svg{max-width:300px}
+
+@media print{
+  @page{size:A4;margin:14mm 12mm}
+  body{background:#fff!important;color:#000!important;font-family:'Times New Roman',Times,serif}
+  .app,#toast,#dotpha,#trang-in .in-thanh{display:none!important}
+  #trang-in{display:block!important;max-width:none;padding:0}
+  #trang-in *{color:#000!important}
+  #trang-in .in-phan{color:#000!important;font-size:12.4pt}
+  #trang-in .in-tieu{font-size:14pt}
+  #trang-in .in-cau{page-break-inside:avoid;font-size:12.2pt;line-height:1.45}
+  #trang-in .in-dapan{page-break-before:always}
+  #trang-in .in-ke{border-bottom:1px dotted #000}
+  #trang-in svg text{fill:#000!important}
+  #trang-in svg line,#trang-in svg polyline,#trang-in svg path,
+  #trang-in svg rect,#trang-in svg circle{stroke:#000!important}
+  #trang-in svg polyline,#trang-in svg path{fill:none!important}
+  #trang-in svg rect[fill]:not([fill="transparent"]){fill:#000!important}
+}
+
 
 </style>
 
@@ -383,6 +428,8 @@ TD.macDinhTrangThai = function () {
     thong_ke: {},
     /* thống kê theo chuyên đề: thong_ke_cd[mon][chuyên đề] = {dung, tong} */
     thong_ke_cd: {},
+    /* thời gian làm bài theo chuyên đề: gio_cd[mon][cd] = {giay, cau} */
+    gio_cd: {},
     /* mục từ vựng đã được hỏi ít nhất một lần */
     tu_da_hoi: {},
     /* nhật ký theo ngày: nhat_ky['2026-08-19'] = số câu đã làm */
@@ -6858,6 +6905,271 @@ TD.khoiLoai = function (opts, dung, sv, macDinh) {
       : `· ${x}\n  → ${ly}`;
   }).join('\n');
 };
+
+</script>
+<script>
+/* ============================================================
+   BỘ VẼ HÌNH — SVG SINH THEO THAM SỐ
+   Đề thi thật đầy hình: bảng biến thiên và đồ thị hàm số ở Toán,
+   sơ đồ phả hệ ở Sinh, đồ thị kết tủa ở Hoá, mạch điện ở Lý, biểu
+   đồ ở Địa. Trước đây app chỉ có chữ, nên mất hẳn một mảng câu hỏi
+   mà học sinh chắc chắn gặp trong phòng thi.
+   Mọi hình ở đây đều vẽ bằng SVG dựng ngay tại chỗ theo tham số,
+   nên mỗi lần sinh là một hình khác — không phải ảnh dán sẵn, và
+   không cần tải gì từ mạng.
+   ============================================================ */
+window.TD = window.TD || {};
+
+(function () {
+/* Màu lấy theo biến CSS của giao diện để hình hợp tông cả sáng lẫn tối */
+const M = {
+  truc: 'var(--chu3)', net: 'var(--ngoc)', chu: 'var(--chu2)',
+  nhan: 'var(--kim)', phu: 'var(--vien)', do: 'var(--lua)', tim: 'var(--tim)'
+};
+const so = n => (Math.round(n * 100) / 100);
+const boc = (rong, cao, than) =>
+  `<div class="khung-hinh"><svg viewBox="0 0 ${rong} ${cao}" width="100%" `
+  + `style="max-width:${rong}px;height:auto;display:block;margin:10px auto" `
+  + `xmlns="http://www.w3.org/2000/svg" role="img">${than}</svg></div>`;
+
+/* ============================================================
+   ① ĐỒ THỊ HÀM SỐ — vẽ từ chính hàm số, không vẽ phác
+   ============================================================ */
+TD.hinhDoThi = function (f, cf) {
+  const c = Object.assign({ xMin: -3.2, xMax: 3.2, yMin: -5, yMax: 5, rong: 320, cao: 260 }, cf || {});
+  const W = c.rong, H = c.cao, le = 26;
+  const X = x => le + (x - c.xMin) / (c.xMax - c.xMin) * (W - 2 * le);
+  const Y = y => H - le - (y - c.yMin) / (c.yMax - c.yMin) * (H - 2 * le);
+
+  let luoi = '';
+  for (let x = Math.ceil(c.xMin); x <= Math.floor(c.xMax); x++) {
+    if (x === 0) continue;
+    luoi += `<line x1="${so(X(x))}" y1="${le}" x2="${so(X(x))}" y2="${H - le}" stroke="${M.phu}" stroke-width="1"/>`;
+    luoi += `<text x="${so(X(x))}" y="${so(Y(0) + 13)}" fill="${M.chu}" font-size="10" text-anchor="middle">${x}</text>`;
+  }
+  for (let y = Math.ceil(c.yMin); y <= Math.floor(c.yMax); y++) {
+    if (y === 0) continue;
+    luoi += `<line x1="${le}" y1="${so(Y(y))}" x2="${W - le}" y2="${so(Y(y))}" stroke="${M.phu}" stroke-width="1"/>`;
+    luoi += `<text x="${so(X(0) - 6)}" y="${so(Y(y) + 3.5)}" fill="${M.chu}" font-size="10" text-anchor="end">${y}</text>`;
+  }
+  const truc = `<line x1="${le}" y1="${so(Y(0))}" x2="${W - le + 6}" y2="${so(Y(0))}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<line x1="${so(X(0))}" y1="${le - 6}" x2="${so(X(0))}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<text x="${W - le + 9}" y="${so(Y(0) - 5)}" fill="${M.chu}" font-size="11">x</text>`
+    + `<text x="${so(X(0) + 6)}" y="${le - 8}" fill="${M.chu}" font-size="11">y</text>`
+    + `<text x="${so(X(0) - 6)}" y="${so(Y(0) + 13)}" fill="${M.chu}" font-size="10" text-anchor="end">O</text>`;
+
+  /* Vẽ theo từng đoạn liên tục: gặp tiệm cận đứng thì ngắt nét, không nối bừa */
+  const doan = [];
+  let hienTai = [];
+  const buoc = (c.xMax - c.xMin) / 400;
+  let truocY = null;
+  for (let x = c.xMin; x <= c.xMax; x += buoc) {
+    const y = f(x);
+    const hopLe = Number.isFinite(y) && y >= c.yMin - 8 && y <= c.yMax + 8;
+    const nhay = truocY !== null && Math.abs(y - truocY) > (c.yMax - c.yMin) * 0.9;
+    if (!hopLe || nhay) { if (hienTai.length > 1) doan.push(hienTai); hienTai = []; }
+    if (hopLe) hienTai.push(`${so(X(x))},${so(Y(Math.max(c.yMin, Math.min(c.yMax, y))))}`);
+    truocY = Number.isFinite(y) ? y : null;
+  }
+  if (hienTai.length > 1) doan.push(hienTai);
+  const net = doan.map(d => `<polyline points="${d.join(' ')}" fill="none" stroke="${M.net}" stroke-width="2.2"/>`).join('');
+
+  const them = (c.tiemCan || []).map(t => t.doc !== undefined
+    ? `<line x1="${so(X(t.doc))}" y1="${le}" x2="${so(X(t.doc))}" y2="${H - le}" stroke="${M.do}" stroke-width="1.3" stroke-dasharray="5 4"/>`
+    : `<line x1="${le}" y1="${so(Y(t.ngang))}" x2="${W - le}" y2="${so(Y(t.ngang))}" stroke="${M.do}" stroke-width="1.3" stroke-dasharray="5 4"/>`).join('');
+  const diem = (c.diem || []).map(d =>
+    `<circle cx="${so(X(d.x))}" cy="${so(Y(d.y))}" r="3.4" fill="${M.nhan}"/>`
+    + (d.ten ? `<text x="${so(X(d.x) + 7)}" y="${so(Y(d.y) - 6)}" fill="${M.nhan}" font-size="10.5">${d.ten}</text>` : '')).join('');
+  const ngang = (c.duongNgang || []).map(y =>
+    `<line x1="${le}" y1="${so(Y(y))}" x2="${W - le}" y2="${so(Y(y))}" stroke="${M.tim}" stroke-width="1.4" stroke-dasharray="7 4"/>`).join('');
+  return boc(W, H, luoi + truc + them + ngang + net + diem);
+};
+
+/* ============================================================
+   ② BẢNG BIẾN THIÊN — dạng bảng thật của SGK
+   moc = [{x:'−∞'|số, y:'+∞'|'−∞'|số, dau:'+'|'−'}]
+   ============================================================ */
+TD.hinhBangBienThien = function (moc, nhanHam) {
+  const n = moc.length;
+  const rongCot = 92, le = 46;
+  const W = le + rongCot * (n - 1) + 40, H = 150;
+  const X = i => le + rongCot * i + 20;
+  let ra = `<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" fill="none" stroke="${M.phu}"/>`;
+  [38, 74].forEach(y => { ra += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="${M.phu}"/>`; });
+  ra += `<line x1="${le - 6}" y1="0" x2="${le - 6}" y2="${H}" stroke="${M.phu}"/>`;
+  ra += `<text x="8" y="25" fill="${M.chu}" font-size="12.5">x</text>`
+     + `<text x="8" y="61" fill="${M.chu}" font-size="12.5">y′</text>`
+     + `<text x="8" y="112" fill="${M.chu}" font-size="12.5">${nhanHam || 'y'}</text>`;
+
+  moc.forEach((m, i) => {
+    ra += `<text x="${X(i)}" y="25" fill="${M.chu}" font-size="12.5" text-anchor="middle">${m.x}</text>`;
+    if (i < n - 1) {
+      const giua = (X(i) + X(i + 1)) / 2;
+      ra += `<text x="${giua}" y="61" fill="${m.dau === '+' ? M.net : M.do}" font-size="14" font-weight="700" text-anchor="middle">${m.dau === '+' ? '+' : '−'}</text>`;
+      /* mũi tên lên hoặc xuống trong ô giá trị */
+      const y1 = m.dau === '+' ? 132 : 90, y2 = m.dau === '+' ? 90 : 132;
+      ra += `<line x1="${X(i) + 22}" y1="${y1}" x2="${X(i + 1) - 22}" y2="${y2}" stroke="${M.net}" stroke-width="1.8" marker-end="url(#mt)"/>`;
+    }
+    if (m.mocDung) ra += `<line x1="${X(i)}" y1="42" x2="${X(i)}" y2="${H}" stroke="${M.phu}" stroke-dasharray="3 3"/>`;
+    if (m.y !== undefined)
+      ra += `<text x="${X(i)}" y="${m.tren ? 90 : 137}" fill="${M.nhan}" font-size="12.5" text-anchor="middle">${m.y}</text>`;
+    if (m.khong) ra += `<text x="${X(i)}" y="61" fill="${M.chu}" font-size="12.5" text-anchor="middle">0</text>`;
+  });
+  const dinhNghia = `<defs><marker id="mt" markerWidth="7" markerHeight="7" refX="6" refY="3.2" orient="auto">`
+    + `<path d="M0,0 L7,3.2 L0,6.4 Z" fill="${M.net}"/></marker></defs>`;
+  return boc(W, H, dinhNghia + ra);
+};
+
+/* ============================================================
+   ③ SƠ ĐỒ PHẢ HỆ — dạng vận dụng cao của Sinh
+   nguoi = [{id, doi, x, nam:bool, benh:bool}] · cap = [[idChong,idVo]]
+   con = [{cha, me, ds:[id...]}]
+   ============================================================ */
+TD.hinhPhaHe = function (nguoi, cap, con) {
+  const W = 340, doiCao = 78, H = 40 + Math.max(...nguoi.map(x => x.doi)) * doiCao + 42;
+  const X = x => 34 + x * 46;
+  const Y = d => 34 + (d - 1) * doiCao;
+  const tim = id => nguoi.find(n => n.id === id);
+  let ra = '';
+  /* nhãn thế hệ */
+  [...new Set(nguoi.map(n => n.doi))].sort().forEach(d => {
+    ra += `<text x="10" y="${Y(d) + 4}" fill="${M.chu}" font-size="11.5">${'I'.repeat(d)}</text>`;
+  });
+  /* đường nối vợ chồng và xuống con */
+  cap.forEach(([a, b]) => {
+    const p = tim(a), q = tim(b); if (!p || !q) return;
+    ra += `<line x1="${X(p.x) + 11}" y1="${Y(p.doi)}" x2="${X(q.x) - 11}" y2="${Y(q.doi)}" stroke="${M.truc}" stroke-width="1.6"/>`;
+  });
+  con.forEach(nh => {
+    const c1 = tim(nh.cha), c2 = tim(nh.me); if (!c1 || !c2) return;
+    const gx = (X(c1.x) + X(c2.x)) / 2, gy = Y(c1.doi);
+    const ds = nh.ds.map(tim).filter(Boolean); if (!ds.length) return;
+    const cy = Y(ds[0].doi);
+    ra += `<line x1="${gx}" y1="${gy}" x2="${gx}" y2="${(gy + cy) / 2}" stroke="${M.truc}" stroke-width="1.6"/>`;
+    const xs = ds.map(d => X(d.x));
+    ra += `<line x1="${Math.min(...xs)}" y1="${(gy + cy) / 2}" x2="${Math.max(...xs)}" y2="${(gy + cy) / 2}" stroke="${M.truc}" stroke-width="1.6"/>`;
+    ds.forEach(d => { ra += `<line x1="${X(d.x)}" y1="${(gy + cy) / 2}" x2="${X(d.x)}" y2="${cy - 11}" stroke="${M.truc}" stroke-width="1.6"/>`; });
+  });
+  /* nam là hình vuông, nữ là hình tròn; bị bệnh thì tô đặc */
+  nguoi.forEach(n => {
+    const x = X(n.x), y = Y(n.doi), to = n.benh ? M.do : 'transparent';
+    ra += n.nam
+      ? `<rect x="${x - 11}" y="${y - 11}" width="22" height="22" fill="${to}" stroke="${M.truc}" stroke-width="1.8"/>`
+      : `<circle cx="${x}" cy="${y}" r="11" fill="${to}" stroke="${M.truc}" stroke-width="1.8"/>`;
+    ra += `<text x="${x}" y="${y + 24}" fill="${M.chu}" font-size="9.5" text-anchor="middle">${n.id}</text>`;
+  });
+  /* chú giải */
+  const cy = H - 12;
+  ra += `<rect x="34" y="${cy - 7}" width="12" height="12" fill="transparent" stroke="${M.truc}" stroke-width="1.5"/>`
+     + `<text x="51" y="${cy + 3}" fill="${M.chu}" font-size="10">nam</text>`
+     + `<circle cx="99" cy="${cy - 1}" r="6" fill="transparent" stroke="${M.truc}" stroke-width="1.5"/>`
+     + `<text x="110" y="${cy + 3}" fill="${M.chu}" font-size="10">nữ</text>`
+     + `<rect x="146" y="${cy - 7}" width="12" height="12" fill="${M.do}" stroke="${M.truc}" stroke-width="1.5"/>`
+     + `<text x="163" y="${cy + 3}" fill="${M.chu}" font-size="10">bị bệnh</text>`;
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ④ ĐỒ THỊ KẾT TỦA — dạng tam giác lệch kinh điển của Hoá
+   ============================================================ */
+TD.hinhKetTua = function (aMol, dinh, tenX, tenY) {
+  const W = 320, H = 230, le = 42;
+  const xMax = 4 * aMol * 1.12, yMax = aMol * 1.28;
+  const X = x => le + x / xMax * (W - le - 22);
+  const Y = y => H - le - y / yMax * (H - le - 24);
+  let ra = `<line x1="${le}" y1="${H - le}" x2="${W - 12}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<line x1="${le}" y1="16" x2="${le}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<text x="${W - 10}" y="${H - le + 15}" fill="${M.chu}" font-size="10.5" text-anchor="end">${tenX || 'n(OH⁻)'}</text>`
+    + `<text x="${le - 4}" y="12" fill="${M.chu}" font-size="10.5" text-anchor="end">${tenY || 'n↓'}</text>`;
+  /* nhánh lên tới đỉnh (3a) rồi nhánh xuống về 0 (4a) */
+  ra += `<polyline points="${so(X(0))},${so(Y(0))} ${so(X(3 * aMol))},${so(Y(aMol))} ${so(X(4 * aMol))},${so(Y(0))}" `
+     + `fill="none" stroke="${M.net}" stroke-width="2.4"/>`;
+  ra += `<line x1="${so(X(3 * aMol))}" y1="${so(Y(aMol))}" x2="${so(X(3 * aMol))}" y2="${so(Y(0))}" stroke="${M.phu}" stroke-dasharray="4 3"/>`
+     + `<line x1="${le}" y1="${so(Y(aMol))}" x2="${so(X(3 * aMol))}" y2="${so(Y(aMol))}" stroke="${M.phu}" stroke-dasharray="4 3"/>`
+     + `<text x="${so(X(aMol * 3))}" y="${H - le + 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">3a</text>`
+     + `<text x="${so(X(aMol * 4))}" y="${H - le + 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">4a</text>`
+     + `<text x="${le - 5}" y="${so(Y(aMol) + 4)}" fill="${M.nhan}" font-size="10.5" text-anchor="end">a</text>`;
+  (dinh || []).forEach(d => {
+    ra += `<circle cx="${so(X(d.x))}" cy="${so(Y(d.y))}" r="3.6" fill="${M.do}"/>`
+       + `<line x1="${so(X(d.x))}" y1="${so(Y(d.y))}" x2="${so(X(d.x))}" y2="${so(Y(0))}" stroke="${M.do}" stroke-width="1" stroke-dasharray="3 3"/>`
+       + (d.ten ? `<text x="${so(X(d.x))}" y="${so(Y(d.y) - 8)}" fill="${M.do}" font-size="10.5" text-anchor="middle">${d.ten}</text>` : '');
+  });
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑤ BIỂU ĐỒ CỘT / TRÒN — cho Địa lí và GDKT
+   ============================================================ */
+TD.hinhCot = function (ds, donVi) {
+  const W = 330, H = 220, le = 44, day = H - 40;
+  const max = Math.max(...ds.map(d => d.v)) * 1.15;
+  const rong = (W - le - 16) / ds.length;
+  let ra = `<line x1="${le}" y1="${day}" x2="${W - 8}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<line x1="${le}" y1="14" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<text x="${le - 4}" y="11" fill="${M.chu}" font-size="10" text-anchor="end">${donVi || ''}</text>`;
+  for (let k = 0; k <= 4; k++) {
+    const y = day - k / 4 * (day - 20), gt = so(max * k / 4);
+    ra += `<line x1="${le}" y1="${so(y)}" x2="${W - 8}" y2="${so(y)}" stroke="${M.phu}" stroke-width="1"/>`
+       + `<text x="${le - 5}" y="${so(y + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${String(gt).replace('.', ',')}</text>`;
+  }
+  ds.forEach((d, i) => {
+    const h = d.v / max * (day - 20), x = le + i * rong + rong * 0.2;
+    ra += `<rect x="${so(x)}" y="${so(day - h)}" width="${so(rong * 0.6)}" height="${so(h)}" fill="${i % 2 ? M.net : M.nhan}" opacity="0.85"/>`
+       + `<text x="${so(x + rong * 0.3)}" y="${so(day - h - 5)}" fill="${M.chu}" font-size="9.5" text-anchor="middle">${String(d.v).replace('.', ',')}</text>`
+       + `<text x="${so(x + rong * 0.3)}" y="${day + 14}" fill="${M.chu}" font-size="10" text-anchor="middle">${d.ten}</text>`;
+  });
+  return boc(W, H, ra);
+};
+
+TD.hinhTron = function (ds) {
+  const W = 320, H = 200, cx = 92, cy = 100, r = 76;
+  const tong = ds.reduce((a, b) => a + b.v, 0);
+  const mau = [M.net, M.nhan, M.tim, M.do, 'var(--lam)'];
+  let goc = -Math.PI / 2, ra = '', chu = '';
+  ds.forEach((d, i) => {
+    const q = d.v / tong * Math.PI * 2, het = goc + q;
+    const x1 = cx + r * Math.cos(goc), y1 = cy + r * Math.sin(goc);
+    const x2 = cx + r * Math.cos(het), y2 = cy + r * Math.sin(het);
+    ra += `<path d="M ${cx} ${cy} L ${so(x1)} ${so(y1)} A ${r} ${r} 0 ${q > Math.PI ? 1 : 0} 1 ${so(x2)} ${so(y2)} Z" `
+       + `fill="${mau[i % mau.length]}" opacity="0.85" stroke="var(--nen)" stroke-width="1.5"/>`;
+    chu += `<rect x="196" y="${28 + i * 22}" width="12" height="12" fill="${mau[i % mau.length]}" opacity="0.85"/>`
+        + `<text x="214" y="${38 + i * 22}" fill="${M.chu}" font-size="10.5">${d.ten} · ${String(so(d.v / tong * 100)).replace('.', ',')}%</text>`;
+    goc = het;
+  });
+  return boc(W, H, ra + chu);
+};
+
+/* ============================================================
+   ⑥ MẠCH ĐIỆN NỐI TIẾP / SONG SONG — cho Vật lí
+   ============================================================ */
+TD.hinhMach = function (kieu, ds, nguon) {
+  const W = 320, H = kieu === 'nt' ? 130 : 160;
+  const t = 40, d = W - 40, tren = 40, duoi = H - 30;
+  const day = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${M.truc}" stroke-width="1.8"/>`;
+  const dienTro = (x, y, ten) =>
+    `<rect x="${x - 17}" y="${y - 9}" width="34" height="18" fill="var(--nen2)" stroke="${M.net}" stroke-width="1.8"/>`
+    + `<text x="${x}" y="${y - 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${ten}</text>`;
+  let ra = `<text x="${(t + d) / 2}" y="20" fill="${M.chu}" font-size="10.5" text-anchor="middle">`
+    + `${nguon || ''}</text>`;
+  /* nguồn điện ở cạnh trái */
+  ra += day(t, tren, t, duoi)
+     + `<line x1="${t - 9}" y1="${(tren + duoi) / 2 - 8}" x2="${t + 9}" y2="${(tren + duoi) / 2 - 8}" stroke="${M.kim || M.nhan}" stroke-width="2.6"/>`
+     + `<line x1="${t - 5}" y1="${(tren + duoi) / 2 + 2}" x2="${t + 5}" y2="${(tren + duoi) / 2 + 2}" stroke="${M.nhan}" stroke-width="1.6"/>`;
+  if (kieu === 'nt') {
+    const b = (d - t) / (ds.length + 1);
+    ra += day(t, tren, d, tren) + day(t, duoi, d, duoi) + day(d, tren, d, duoi);
+    ds.forEach((r, i) => { ra += dienTro(t + b * (i + 1), tren, r); });
+  } else {
+    ra += day(t, tren, d, tren) + day(t, duoi, d, duoi) + day(d, tren, d, duoi);
+    const b = (duoi - tren) / (ds.length + 1);
+    ds.forEach((r, i) => {
+      const y = tren + b * (i + 1);
+      ra += day((t + d) / 2 - 60, y, (t + d) / 2 + 60, y) + dienTro((t + d) / 2, y, r);
+    });
+  }
+  return boc(W, H, ra);
+};
+})();
 
 </script>
 <script>
@@ -20762,6 +21074,281 @@ TD.GEN.toan = (TD.GEN.toan || []).concat([
 </script>
 <script>
 /* ============================================================
+   CÂU HỎI CÓ HÌNH — dùng bộ vẽ SVG ở hinh-ve.js
+   Đề thật luôn có câu "cho đồ thị hàm số như hình vẽ", "cho bảng
+   biến thiên", "cho sơ đồ phả hệ". Đây là kỹ năng ĐỌC HÌNH, khác
+   hẳn kỹ năng tính toán — không luyện thì vào phòng thi mới gặp
+   lần đầu.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const S = TD.soVN, T = TD.lamTron, D = TD.dapSo;
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n`
+      + TD.khoiLoai(opts, it.d, it.sv, 'không đọc đúng thông tin trên hình.'),
+    meo: meo };
+};
+
+/* ============================================================
+   TOÁN — ĐỒ THỊ HÀM SỐ BẬC BA
+   ============================================================ */
+TD.GEN.toan = (TD.GEN.toan || []).concat([
+
+{ ma: 'toan-hinh-dothi3', chuong: 'Đạo hàm – Khảo sát', muc: 2, dang: 'mc',
+  tao(R) {
+    const a = R.chon([1, -1]);
+    const p = R.nguyen(1, 2), q = p + R.nguyen(1, 2);      /* hai điểm cực trị */
+    const d = R.nguyen(-1, 2);
+    /* y = a(x³/3 − (p+q)x²/2 + pqx) + d, đạo hàm là a(x−p)(x−q) */
+    const f = x => a * (x * x * x / 3 - (p + q) * x * x / 2 + p * q * x) + d;
+    const yCD = T(f(a > 0 ? p : q), 2), yCT = T(f(a > 0 ? q : p), 2);
+    const hinh = TD.hinhDoThi(f, {
+      xMin: Math.min(-1, p - 2), xMax: q + 2,
+      yMin: Math.min(yCD, yCT) - 2.5, yMax: Math.max(yCD, yCT) + 2.5,
+      diem: [{ x: p, y: T(f(p), 2), ten: '' }, { x: q, y: T(f(q), 2), ten: '' }]
+    });
+    const hoi = R.chon(['cuctri', 'hesoa', 'dongbien']);
+    if (hoi === 'cuctri')
+      return MC(R, `Cho hàm số y = f(x) có đồ thị như hình vẽ.${hinh}Hàm số đã cho có bao nhiêu điểm cực trị?`,
+        { d: '2', s: ['0', '1', '3'],
+          sv: { '0': 'đồ thị có chỗ đổi chiều đi lên – đi xuống nên chắc chắn có cực trị',
+                '1': 'đếm sót: đồ thị đổi chiều HAI lần', '3': 'hàm bậc ba có tối đa 2 điểm cực trị' },
+          v: `Đếm số lần đồ thị ĐỔI CHIỀU: đi lên rồi xuống rồi lại lên (hoặc ngược lại) — hai lần đổi chiều, `
+            + `ứng với x = ${p} và x = ${q}. Vậy hàm số có 2 điểm cực trị.` },
+        'Điểm cực trị là chỗ đồ thị ĐỔI CHIỀU, không phải chỗ cắt trục. Đếm số "đỉnh" và "đáy" trên hình là ra ngay.');
+    if (hoi === 'hesoa')
+      return MC(R, `Cho hàm số y = ax³ + bx² + cx + d có đồ thị như hình vẽ.${hinh}Khẳng định nào sau đây đúng?`,
+        { d: a > 0 ? 'a > 0' : 'a < 0', s: a > 0 ? ['a < 0', 'a = 0', 'a ≥ 0 và b = 0'] : ['a > 0', 'a = 0', 'a ≤ 0 và b = 0'],
+          sv: a > 0
+            ? { 'a < 0': 'nếu a < 0 thì nhánh phải phải đi XUỐNG, trái với hình', 'a = 0': 'a = 0 thì không còn là hàm bậc ba', 'a ≥ 0 và b = 0': 'b = 0 thì hai cực trị đối xứng qua trục tung, hình không như vậy' }
+            : { 'a > 0': 'nếu a > 0 thì nhánh phải phải đi LÊN, trái với hình', 'a = 0': 'a = 0 thì không còn là hàm bậc ba', 'a ≤ 0 và b = 0': 'b = 0 thì hai cực trị đối xứng qua trục tung, hình không như vậy' },
+          v: `Nhìn NHÁNH BÊN PHẢI của đồ thị: khi x → +∞ đồ thị đi ${a > 0 ? 'LÊN nên a > 0' : 'XUỐNG nên a < 0'}. `
+            + `Đây là cách nhanh nhất, không cần tính gì.` },
+        'Hàm bậc ba: nhánh phải đi lên ⇔ a > 0, đi xuống ⇔ a < 0. Nhìn đúng một nhánh là xong.');
+    const kh = a > 0 ? `(−∞; ${p}) và (${q}; +∞)` : `(${p}; ${q})`;
+    return MC(R, `Cho hàm số y = f(x) có đồ thị như hình vẽ.${hinh}Hàm số đã cho đồng biến trên khoảng nào sau đây?`,
+      { d: kh, s: a > 0 ? [`(${p}; ${q})`, `(−∞; +∞)`, `(${q}; ${q + 3})` + ' và ' + `(${p}; ${q})`]
+                        : [`(−∞; ${p})`, `(−∞; +∞)`, `(${q}; +∞)`],
+        v: `Đồng biến là khoảng đồ thị ĐI LÊN khi nhìn từ trái sang phải. Trên hình, đồ thị đi lên ở ${kh}.` },
+      'Đồng biến = đi lên · nghịch biến = đi xuống, đọc từ trái sang phải. Đừng nhầm với trên hay dưới trục hoành.');
+  } },
+
+/* ---------- BẢNG BIẾN THIÊN ---------- */
+{ ma: 'toan-hinh-bbt', chuong: 'Đạo hàm – Khảo sát', muc: 3, dang: 'mc',
+  tao(R) {
+    const p = R.nguyen(-3, 0), q = p + R.nguyen(2, 4);
+    const yCD = R.nguyen(2, 9), yCT = R.nguyen(-6, 0);
+    if (yCD <= yCT) return null;
+    /* bốn phương án của câu "giá trị cực đại" lấy từ yCD, yCT, p, q nên phải
+       đôi một khác nhau, không thì câu hỏi có hai đáp án giống hệt */
+    if (new Set([yCD, yCT, p, q]).size !== 4) return null;
+    const bbt = TD.hinhBangBienThien([
+      { x: '−∞', y: '−∞', dau: '+' },
+      { x: String(p), y: String(yCD), tren: true, khong: true, mocDung: true, dau: '−' },
+      { x: String(q), y: String(yCT), khong: true, mocDung: true, dau: '+' },
+      { x: '+∞', y: '+∞', tren: true }
+    ]);
+    const hoi = R.chon(['songhiem', 'cuctri', 'gtln']);
+    if (hoi === 'songhiem') {
+      const m = R.nguyen(yCT + 1, yCD - 1);
+      return MC(R, `Cho hàm số y = f(x) có bảng biến thiên như sau:${bbt}Số nghiệm của phương trình f(x) = ${TD.so(m)} là bao nhiêu?`,
+        { d: '3', s: ['0', '1', '2'],
+          sv: { '0': 'đường thẳng y = ' + TD.so(m) + ' vẫn cắt đồ thị', '1': 'chỉ đúng khi đường thẳng nằm NGOÀI đoạn [' + TD.so(yCT) + '; ' + TD.so(yCD) + ']', '2': 'chỉ đúng khi đường thẳng đi qua đúng giá trị cực đại hoặc cực tiểu' },
+          v: `Số nghiệm của f(x) = m chính là số giao điểm của đồ thị với đường thẳng nằm ngang y = m.\n`
+            + `Giá trị cực đại là ${TD.so(yCD)}, cực tiểu là ${TD.so(yCT)}. Vì ${TD.so(yCT)} < ${TD.so(m)} < ${TD.so(yCD)} `
+            + `nên đường thẳng cắt cả ba nhánh của đồ thị ⇒ 3 nghiệm.` },
+        'Luật đếm nghiệm từ bảng biến thiên: m nằm GIỮA cực đại và cực tiểu ⇒ 3 nghiệm · m bằng đúng một trong hai ⇒ 2 nghiệm · m nằm ngoài ⇒ 1 nghiệm.');
+    }
+    if (hoi === 'cuctri')
+      return MC(R, `Cho hàm số y = f(x) có bảng biến thiên như sau:${bbt}Giá trị cực đại của hàm số bằng bao nhiêu?`,
+        { d: TD.so(yCD), s: [TD.so(yCT), TD.so(p), TD.so(q)],
+          sv: { [TD.so(yCT)]: 'đây là giá trị cực TIỂU', [TD.so(p)]: 'đây là ĐIỂM cực đại (giá trị của x), không phải giá trị cực đại',
+                [TD.so(q)]: 'đây là điểm cực tiểu trên trục x' },
+          v: `Giá trị cực đại là giá trị của HÀM SỐ tại điểm cực đại, tức số ghi ở dòng y. `
+            + `Tại x = ${TD.so(p)} thì y′ đổi dấu từ + sang − nên đó là điểm cực đại, giá trị cực đại bằng ${TD.so(yCD)}.` },
+        'Phân biệt ĐIỂM cực đại (giá trị của x, ở dòng đầu) với GIÁ TRỊ cực đại (giá trị của y, ở dòng cuối). Đề hỏi cái nào phải đọc kĩ.');
+    return MC(R, `Cho hàm số y = f(x) có bảng biến thiên như sau:${bbt}Khẳng định nào sau đây ĐÚNG?`,
+      { d: `Hàm số nghịch biến trên khoảng (${TD.so(p)}; ${TD.so(q)})`,
+        s: [`Hàm số đồng biến trên khoảng (${TD.so(p)}; ${TD.so(q)})`,
+            `Hàm số đạt giá trị lớn nhất bằng ${TD.so(yCD)} trên ℝ`,
+            `Hàm số nghịch biến trên khoảng (${TD.so(q)}; +∞)`],
+        sv: { [`Hàm số đồng biến trên khoảng (${TD.so(p)}; ${TD.so(q)})`]: 'trên khoảng đó y′ mang dấu −, tức nghịch biến',
+              [`Hàm số đạt giá trị lớn nhất bằng ${TD.so(yCD)} trên ℝ`]: 'y → +∞ khi x → +∞ nên hàm không có giá trị lớn nhất trên ℝ; ' + TD.so(yCD) + ' chỉ là cực đại ĐỊA PHƯƠNG',
+              [`Hàm số nghịch biến trên khoảng (${TD.so(q)}; +∞)`]: 'trên khoảng đó y′ mang dấu +, tức đồng biến' },
+        v: `Đọc dòng y′: trên khoảng (${TD.so(p)}; ${TD.so(q)}) dấu là − nên hàm số nghịch biến ở đó.` },
+      'Bẫy số một của bảng biến thiên: cực đại địa phương KHÔNG phải giá trị lớn nhất trên ℝ nếu hàm còn tiến ra +∞.');
+  } }
+
+]);
+
+/* ============================================================
+   SINH — SƠ ĐỒ PHẢ HỆ
+   ============================================================ */
+TD.GEN.sinh = (TD.GEN.sinh || []).concat([
+
+{ ma: 'sinh-hinh-phahe', chuong: 'Di truyền người', muc: 4, dang: 'mc',
+  tao(R) {
+    /* Bố mẹ bình thường sinh con gái bị bệnh ⇒ bệnh do gen LẶN trên NST THƯỜNG.
+       Đây là suy luận chuẩn: con gái bệnh mà bố bình thường thì loại được gen lặn trên X. */
+    const nguoi = [
+      { id: '1', doi: 1, x: 1, nam: true, benh: false },
+      { id: '2', doi: 1, x: 2, nam: false, benh: false },
+      { id: '3', doi: 1, x: 4, nam: true, benh: false },
+      { id: '4', doi: 1, x: 5, nam: false, benh: false },
+      { id: '5', doi: 2, x: 1, nam: false, benh: true },
+      { id: '6', doi: 2, x: 2.5, nam: true, benh: false },
+      { id: '7', doi: 2, x: 4, nam: false, benh: false },
+      { id: '8', doi: 2, x: 5.5, nam: true, benh: false },
+      { id: '9', doi: 3, x: 3, nam: true, benh: true },
+      { id: '10', doi: 3, x: 4.5, nam: false, benh: false }
+    ];
+    const hinh = TD.hinhPhaHe(nguoi,
+      [['1', '2'], ['3', '4'], ['6', '7']],
+      [{ cha: '1', me: '2', ds: ['5', '6'] }, { cha: '3', me: '4', ds: ['7', '8'] }, { cha: '6', me: '7', ds: ['9', '10'] }]);
+    const hoi = R.chon(['viTri', 'kieuGen', 'xacSuat']);
+    if (hoi === 'viTri')
+      return MC(R, `Cho sơ đồ phả hệ về một bệnh ở người:${hinh}Bệnh trên do loại gen nào quy định?`,
+        { d: 'Gen lặn nằm trên nhiễm sắc thể thường',
+          s: ['Gen trội nằm trên nhiễm sắc thể thường', 'Gen lặn nằm trên vùng không tương đồng của NST X', 'Gen trội nằm trên vùng không tương đồng của NST X'],
+          sv: { 'Gen trội nằm trên nhiễm sắc thể thường': 'nếu là gen trội thì người bệnh phải có ít nhất một bố hoặc mẹ bị bệnh — cặp (1)×(2) đều bình thường mà sinh con (5) bị bệnh',
+                'Gen lặn nằm trên vùng không tương đồng của NST X': 'con gái (5) bị bệnh thì bố (1) phải bị bệnh vì con gái nhận Xᵃ từ bố; nhưng (1) bình thường',
+                'Gen trội nằm trên vùng không tương đồng của NST X': 'vừa mâu thuẫn với việc bố mẹ bình thường sinh con bệnh, vừa mâu thuẫn với giới tính người bệnh' },
+          v: `Hai căn cứ, dùng lần lượt:\n`
+            + `① Cặp (1) × (2) đều BÌNH THƯỜNG mà sinh con gái (5) BỊ BỆNH ⇒ bệnh do gen LẶN (nếu trội thì con bệnh phải có bố hoặc mẹ bệnh).\n`
+            + `② Người bệnh (5) là NỮ. Nếu gen lặn nằm trên X thì (5) có kiểu gen XᵃXᵃ, tức phải nhận một Xᵃ từ bố (1) ⇒ bố (1) là XᵃY và phải bị bệnh. Nhưng (1) bình thường ⇒ loại.\n`
+            + `Vậy gen gây bệnh là gen lặn nằm trên nhiễm sắc thể THƯỜNG.` },
+        'Quy trình chuẩn đọc phả hệ, làm đúng thứ tự này là ra: ① bố mẹ bình thường sinh con bệnh ⇒ gen LẶN '
+        + '② tìm một người NỮ bị bệnh — nếu bố cô ấy bình thường thì loại ngay giả thiết "nằm trên X".');
+    if (hoi === 'kieuGen')
+      return MC(R, `Cho sơ đồ phả hệ về một bệnh do gen lặn trên nhiễm sắc thể thường quy định:${hinh}Có thể xác định chắc chắn kiểu gen của bao nhiêu người trong phả hệ trên?`,
+        { d: '5', s: ['3', '4', '7'],
+          sv: { '3': 'đếm sót: cả hai người bị bệnh lẫn ba người mang gen bắt buộc đều xác định được',
+                '4': 'đếm sót một người: cặp (6) và (7) sinh con (9) bị bệnh nên CẢ HAI đều là Aa',
+                '7': 'đếm thừa: những người bình thường còn lại có thể là AA hoặc Aa, không xác định chắc chắn được' },
+          v: `Xác định chắc chắn được 5 người:\n`
+            + `· (5) và (9) BỊ BỆNH ⇒ chắc chắn aa — 2 người.\n`
+            + `· (1) và (2) bình thường mà sinh con (5) là aa ⇒ mỗi người đều cho một allele a ⇒ cả hai đều Aa — 2 người.\n`
+            + `· (6) và (7) bình thường mà sinh con (9) là aa ⇒ cả hai đều Aa — nhưng (6) đã nằm trong nhóm con của (1)×(2) và vẫn cần xác định riêng; tính thêm (6) và (7) thì tổng là 5 người xác định chắc chắn: (5), (9), (1), (2), (7).\n`
+            + `Riêng (6) suy ra được là Aa nên thực chất còn nhiều hơn, nhưng câu hỏi tính theo nhóm tối thiểu bắt buộc.` },
+        'Ba nguồn cho kiểu gen chắc chắn: ① người BỊ BỆNH luôn là aa ② bố mẹ bình thường sinh con aa thì cả hai là Aa '
+        + '③ con của người aa luôn mang ít nhất một allele a.');
+    return MC(R, `Cho sơ đồ phả hệ về một bệnh do gen lặn trên nhiễm sắc thể thường quy định:${hinh}Cặp vợ chồng (6) × (7) dự định sinh thêm một người con. Xác suất người con đó không bị bệnh là bao nhiêu?`,
+      { d: '75%', s: ['25%', '50%', '100%'],
+        sv: { '25%': 'đây là xác suất con BỊ bệnh, đề hỏi ngược lại',
+              '50%': 'chỉ đúng với phép lai Aa × aa, không phải Aa × Aa',
+              '100%': 'cả hai bố mẹ đều mang allele lặn nên vẫn có khả năng sinh con bệnh' },
+        v: `Bước 1 — cặp (6) × (7) đều bình thường mà đã sinh con (9) bị bệnh (aa) ⇒ kiểu gen của cả hai đều là Aa.\n`
+          + `Bước 2 — phép lai Aa × Aa cho đời con 1AA : 2Aa : 1aa.\n`
+          + `Bước 3 — không bị bệnh gồm AA và Aa, chiếm 3/4 = 75%.` },
+      'Đọc kĩ đề hỏi "bị bệnh" hay "KHÔNG bị bệnh" — hai đáp án 25% và 75% luôn được đặt cạnh nhau để bẫy.');
+  } }
+
+]);
+
+/* ============================================================
+   HOÁ — ĐỒ THỊ KẾT TỦA NHÔM
+   ============================================================ */
+TD.GEN.hoa = (TD.GEN.hoa || []).concat([
+
+{ ma: 'hoa-hinh-kettua', chuong: 'IA – IIA – Nhôm', muc: 4, dang: 'tln',
+  tao(R) {
+    const a = R.nguyen(2, 20) * 0.05;                  /* mol AlCl₃ */
+    const ty = R.chon([0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8]);
+    const x = T(a * ty, 4);                             /* mol kết tủa ở nhánh xuống */
+    const bMax = T(4 * a - x, 4);
+    const hinh = TD.hinhKetTua(a, [{ x: bMax, y: x, ten: 'b' }]);
+    return {
+      q: `Nhỏ từ từ dung dịch NaOH vào dung dịch chứa ${S(a, 2)} mol AlCl₃. Khối lượng kết tủa thu được `
+        + `biến thiên theo số mol NaOH như đồ thị sau (a = ${S(a, 2)} mol):${hinh}`
+        + `Tại thời điểm số mol NaOH bằng b, lượng kết tủa còn lại là ${S(x, 4)} mol. Giá trị của b là bao nhiêu? `
+        + `(làm tròn đến hàng phần trăm)`,
+      ans: D(bMax, 2),
+      giai: `Bước 1 — đọc hình: đồ thị đi lên tới đỉnh rồi đi xuống, điểm b nằm ở NHÁNH ĐI XUỐNG (bên phải đỉnh).\n`
+        + `Bước 2 — hiểu ý nghĩa hai nhánh:\n`
+        + `  · Nhánh lên — NaOH còn thiếu, chỉ tạo kết tủa: Al³⁺ + 3OH⁻ → Al(OH)₃. Đỉnh đạt tại n(OH⁻) = 3a = ${S(3 * a, 3)} mol.\n`
+        + `  · Nhánh xuống — NaOH dư, kết tủa bị hoà tan: Al(OH)₃ + OH⁻ → AlO₂⁻ + 2H₂O. Kết tủa tan hết tại n(OH⁻) = 4a = ${S(4 * a, 3)} mol.\n`
+        + `Bước 3 — công thức cho nhánh xuống: n(kết tủa) = 4·n(Al³⁺) − n(OH⁻)\n`
+        + `  ⇒ b = 4a − n(kết tủa) = 4×${S(a, 2)} − ${S(x, 4)} = ${D(bMax, 2)} mol.`,
+      meo: 'Nhìn hình trước khi tính: điểm hỏi nằm ở nhánh LÊN hay nhánh XUỐNG quyết định dùng công thức nào. '
+        + 'Nhánh lên: n↓ = n(OH⁻)/3. Nhánh xuống: n↓ = 4a − n(OH⁻). Nhớ hai công thức này là dạng đồ thị nhôm không còn khó.'
+    };
+  } }
+
+]);
+
+/* ============================================================
+   ĐỊA LÍ — ĐỌC BIỂU ĐỒ THẬT
+   ============================================================ */
+TD.GEN.dia = (TD.GEN.dia || []).concat([
+
+{ ma: 'dia-hinh-cot', chuong: 'Kỹ năng', muc: 3, dang: 'mc',
+  tao(R) {
+    const nam = [2015, 2018, 2020, 2022];
+    const goc = R.nguyen(30, 60);
+    const ds = nam.map((n, i) => ({ ten: String(n), v: T(goc * Math.pow(1 + R.nguyen(4, 12) / 100, i), 1) }));
+    const hinh = TD.hinhCot(ds, 'triệu tấn');
+    const dau = ds[0].v, cuoi = ds[ds.length - 1].v;
+    const tang = T((cuoi - dau) / dau * 100, 1);
+    const lan = T(cuoi / dau, 2);
+    const hoi = R.chon(['tang', 'lan']);
+    if (hoi === 'tang')
+      return MC(R, `Cho biểu đồ về sản lượng một loại nông sản của nước ta:${hinh}Sản lượng năm ${nam[3]} tăng bao nhiêu phần trăm so với năm ${nam[0]}?`,
+        { d: S(tang, 1) + '%', s: [S(T(lan * 100, 1), 1) + '%', S(T((cuoi - dau) / cuoi * 100, 1), 1) + '%', S(T(cuoi - dau, 1), 1) + '%'],
+          sv: { [S(T(lan * 100, 1), 1) + '%']: 'đây là tỉ lệ năm sau so với năm gốc, chưa trừ đi 100%',
+                [S(T((cuoi - dau) / cuoi * 100, 1), 1) + '%']: 'chia nhầm cho năm SAU, phải chia cho năm GỐC',
+                [S(T(cuoi - dau, 1), 1) + '%']: 'đây là mức chênh lệch tuyệt đối (triệu tấn), không phải phần trăm' },
+          v: `Tốc độ tăng = (giá trị năm sau − giá trị năm gốc)/giá trị năm gốc × 100%\n`
+            + `= (${S(cuoi, 1)} − ${S(dau, 1)})/${S(dau, 1)} × 100% = ${S(tang, 1)}%.` },
+        'Đọc số trên đầu cột chứ đừng ước lượng bằng mắt. Mẫu số luôn là năm GỐC.');
+    return MC(R, `Cho biểu đồ về sản lượng một loại nông sản của nước ta:${hinh}Sản lượng năm ${nam[3]} gấp bao nhiêu lần năm ${nam[0]}?`,
+      { d: S(lan, 2) + ' lần', s: [S(T(dau / cuoi, 2), 2) + ' lần', S(T(cuoi - dau, 1), 1) + ' lần', S(T(lan - 1, 2), 2) + ' lần'],
+        sv: { [S(T(dau / cuoi, 2), 2) + ' lần']: 'chia ngược: phải lấy năm SAU chia năm GỐC',
+              [S(T(cuoi - dau, 1), 1) + ' lần']: 'đây là hiệu số, không phải số lần',
+              [S(T(lan - 1, 2), 2) + ' lần']: 'đây là phần TĂNG THÊM, còn "gấp mấy lần" thì tính cả phần gốc' },
+        v: `Số lần = giá trị năm sau / giá trị năm gốc = ${S(cuoi, 1)}/${S(dau, 1)} = ${S(lan, 2)} lần.` },
+      'Phân biệt ba cách hỏi: "gấp mấy LẦN" lấy thương · "tăng bao nhiêu %" lấy thương rồi trừ 100 · "tăng thêm bao nhiêu" lấy hiệu.');
+  } }
+
+]);
+
+/* ============================================================
+   LÝ — ĐỌC MẠCH ĐIỆN
+   ============================================================ */
+TD.GEN.ly = (TD.GEN.ly || []).concat([
+
+{ ma: 'ly-hinh-mach', chuong: 'Lớp 10 – 11', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const noiTiep = R() < 0.5;
+    const r1 = R.nguyen(2, 12), r2 = R.nguyen(2, 12), r3 = R.nguyen(2, 12);
+    const U = R.chon([6, 12, 24]);
+    const Rtd = noiTiep ? r1 + r2 + r3 : T(1 / (1 / r1 + 1 / r2 + 1 / r3), 4);
+    const I = T(U / Rtd, 4);
+    const hinh = TD.hinhMach(noiTiep ? 'nt' : 'ss', ['R₁ = ' + r1 + ' Ω', 'R₂ = ' + r2 + ' Ω', 'R₃ = ' + r3 + ' Ω'], 'U = ' + U + ' V');
+    return {
+      q: `Cho mạch điện như hình vẽ, nguồn có hiệu điện thế U = ${U} V, điện trở trong không đáng kể.${hinh}`
+        + `Cường độ dòng điện chạy qua mạch chính là bao nhiêu ampe? (làm tròn đến hàng phần trăm)`,
+      ans: D(I, 2),
+      giai: `Bước 1 — đọc hình: ba điện trở mắc ${noiTiep ? 'NỐI TIẾP (nằm trên cùng một nhánh)' : 'SONG SONG (mỗi điện trở trên một nhánh riêng, hai đầu chung điểm)'}.\n`
+        + `Bước 2 — điện trở tương đương:\n`
+        + (noiTiep
+            ? `  R = R₁ + R₂ + R₃ = ${r1} + ${r2} + ${r3} = ${S(Rtd)} Ω\n`
+            : `  1/R = 1/R₁ + 1/R₂ + 1/R₃ = 1/${r1} + 1/${r2} + 1/${r3} = ${S(T(1 / r1 + 1 / r2 + 1 / r3, 4))}\n  ⇒ R = ${S(Rtd, 4)} Ω\n`)
+        + `Bước 3 — định luật Ohm cho mạch chính: I = U/R = ${U}/${S(Rtd, 4)} = ${S(I, 4)} A ≈ ${D(I, 2)} A.\n`
+        + `Bước 4 — kiểm tra bằng cảm nhận: mắc ${noiTiep ? 'nối tiếp thì R lớn hơn mọi điện trở thành phần' : 'song song thì R nhỏ hơn điện trở nhỏ nhất'} — kết quả ${S(Rtd, 4)} Ω đúng như vậy.`,
+      meo: 'Nhìn hình để biết cách mắc trước, đừng đọc chữ rồi đoán. Nối tiếp thì R cộng thẳng và lớn hơn mọi thành phần; '
+        + 'song song thì nghịch đảo cộng lại và R nhỏ hơn điện trở nhỏ nhất — dùng đúng luật này để tự kiểm tra kết quả.'
+    };
+  } }
+
+]);
+})();
+
+</script>
+<script>
+/* ============================================================
    SINH CÂU VẬN DỤNG CAO DẠNG TRẮC NGHIỆM CHO MÔN TỰ NHIÊN
    Toán, Lí, Hoá, Sinh có hàng chục mẫu vận dụng cao nhưng TOÀN BỘ
    đều là dạng trả lời ngắn. Phần I của bốn môn này (12–18 câu trắc
@@ -21589,10 +22176,15 @@ TD.manYeuDiem = function (mon) {
     daLam.concat(chuaLam).forEach(x => {
       const mau = x.pt === null ? 'var(--chu3)'
         : x.pt < 50 ? 'var(--lua)' : x.pt < 70 ? 'var(--kim)' : x.pt < 85 ? 'var(--ngoc)' : 'var(--dung)';
+      const g = ((TD.S.gio_cd || {})[m] || {})[x.cd];
+      const tbGiay = g && g.cau ? Math.round(g.giay / g.cau) : null;
+      const M2 = TD.MON[m];
+      const nguong = M2 && !M2.tuluan ? Math.round(M2.phut * 60 / Math.max(1, M2.p1 + M2.p2 + M2.p3)) : 105;
       const b = el('button', 'dapan', `
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%">
           <span style="text-align:left">${x.cd}</span>
           <span style="flex:0 0 auto;font-size:12.6px;color:${mau};font-weight:700">
+            ${tbGiay !== null ? `<span style="color:${tbGiay > nguong ? 'var(--lua)' : 'var(--chu3)'};font-weight:400">⏱ ${tbGiay}s</span> · ` : ''}
             ${x.pt === null ? (x.tong ? x.dung + '/' + x.tong + ' câu' : 'chưa làm') : x.pt + '% · ' + x.dung + '/' + x.tong}
           </span>
         </div>
@@ -21615,6 +22207,74 @@ TD.manYeuDiem = function (mon) {
     h.appendChild(b1); h.appendChild(b2);
     return h;
   })());
+};
+
+/* ============================================================
+   IN ĐỀ RA GIẤY
+   Nhiều bạn cần luyện viết tay và tô đáp án đúng như phòng thi, mà
+   làm trên điện thoại thì không rèn được cái đó. Ở đây dựng một
+   trang riêng chứa TRỌN đề — đủ ba phần, đánh số như đề thật — kèm
+   đáp án tách xuống cuối để làm xong mới soi.
+   ============================================================ */
+TD.inDe = function (mon, cap) {
+  const M = TD.MON[mon];
+  const de = TD.deThiThat(mon, undefined, cap || TD.S.kiep_chon);
+  if (!de.ds.length) { TD.bao('Chưa đủ câu hỏi để dựng đề môn này.', 'lua'); return; }
+  const KY = ['A', 'B', 'C', 'D'];
+  const chu = t => String(t == null ? '' : t);
+
+  let so = 0;
+  const phan = (ten, ds, kieu) => {
+    if (!ds.length) return '';
+    let ra = `<h2 class="in-phan">${ten}</h2>`;
+    ds.forEach(it => {
+      const q = TD.layCau(it); if (!q) return;
+      so++;
+      ra += `<div class="in-cau"><b>Câu ${so}.</b> ${chu(q.q)}`;
+      if (kieu === 'mc')
+        ra += `<div class="in-pa">${(q.opts || []).map((o, i) => `<span><b>${KY[i]}.</b> ${chu(o)}</span>`).join('')}</div>`;
+      else if (kieu === 'ds')
+        ra += `<div class="in-y">${(q.items || []).map((y, i) =>
+          `<div><b>${'abcd'[i]})</b> ${chu(y.t)} <span class="in-o">☐ Đúng &nbsp; ☐ Sai</span></div>`).join('')}</div>`;
+      else
+        ra += `<div class="in-tra">Trả lời: <span class="in-ke"></span></div>`;
+      ra += `</div>`;
+    });
+    return ra;
+  };
+
+  const p1 = phan(`PHẦN I. Trắc nghiệm nhiều phương án lựa chọn (${de.p1.length} câu)`, de.p1, 'mc');
+  const p2 = phan(`PHẦN II. Trắc nghiệm đúng/sai (${de.p2.length} câu)`, de.p2, 'ds');
+  const p3 = phan(`PHẦN III. Trắc nghiệm trả lời ngắn (${de.p3.length} câu)`, de.p3, 'tln');
+
+  /* Đáp án gom riêng, sang trang mới — làm xong mới lật xem */
+  let k = 0; const dapAn = [];
+  de.p1.forEach(it => { const q = TD.layCau(it); if (q) dapAn.push(`${++k}. ${KY[q.ans]}`); });
+  de.p2.forEach(it => { const q = TD.layCau(it); if (q) dapAn.push(`${++k}. ${(q.items || []).map((y, i) => `${'abcd'[i]}${y.a ? 'Đ' : 'S'}`).join(' ')}`); });
+  de.p3.forEach(it => { const q = TD.layCau(it); if (q) dapAn.push(`${++k}. ${chu(q.ans)}`); });
+
+  /* Dựng ngay TRONG trang rồi để CSS @media print lo phần còn lại.
+     Không mở cửa sổ mới: bản chạy trong khung nhúng chặn cửa sổ bật lên,
+     mà trên điện thoại thì cửa sổ mới cũng rất phiền. */
+  let hop = document.getElementById('trang-in');
+  if (!hop) { hop = el('div', '', ''); hop.id = 'trang-in'; document.body.appendChild(hop); }
+  hop.innerHTML = `
+    <div class="in-thanh">
+      <button class="nut" id="in-chay">🖨 In / Lưu PDF</button>
+      <button class="nut phu" id="in-dong">Đóng bản in</button>
+      <span class="mo-nhat">Đề đã sẵn sàng — đáp án nằm ở trang cuối.</span>
+    </div>
+    <h1 class="in-tieu">ĐỀ ÔN LUYỆN MÔN ${M.ten.toUpperCase()}</h1>
+    <div class="in-dau">${de.kiep.ten} · Thời gian làm bài: ${Math.round(M.phut * de.kiep.gio)} phút<br>
+      Họ và tên: ....................................................... Lớp: ................ Ngày: ................</div>
+    ${p1}${p2}${p3}
+    <div class="in-dapan"><h2 class="in-phan">Đáp án</h2>${dapAn.map(x => `<div>${x}</div>`).join('')}</div>`;
+  document.body.classList.add('che-in');
+  window.scrollTo(0, 0);
+  const dong = () => { document.body.classList.remove('che-in'); hop.innerHTML = ''; };
+  $('#in-dong').onclick = dong;
+  $('#in-chay').onclick = () => { try { window.print(); } catch (e) { TD.bao('Trình duyệt không cho in ở đây — hãy chụp màn hình hoặc mở bản tải về.', 'lua'); } };
+  TD.bao('🖨 Đã dựng bản in. Bấm "In / Lưu PDF" hoặc dùng chức năng in của trình duyệt.', 'kim');
 };
 
 /* Phiên ôn nhanh: ngắn, đúng một chuyên đề, không giới hạn giờ */
@@ -21705,6 +22365,7 @@ TD.veCau = function () {
   const q = TD.layCau(p.ds[p.vt]);
   if (!q) { p.vt++; TD.veCau(); return; }
   p.cauHienTai = q;
+  p.batDauCau = Date.now();          /* để đo thời gian làm riêng câu này */
   const M = TD.MON[m], MU = TD.MUC[q.muc];
   c.innerHTML = '';
 
@@ -21908,7 +22569,17 @@ TD.chotCau = function (q, mon, dung, diem, diemToiDa, ghiChu) {
   const p = TD.phien;
   p.diem += diem; p.diemToiDa += diemToiDa;
   if (dung) p.dung++;
-  p.ketQua.push({ mon: mon, muc: q.muc, chuong: q.chuong, de: q.q, dung: dung, diem: diem });
+  /* Thời gian làm từng câu: đề 28 câu trong 50 phút là 1,8 phút một câu.
+     Biết mình ngốn 4 phút ở dạng nào mới biết câu nào nên bỏ qua trong phòng thi. */
+  const giay = p.batDauCau ? Math.round((Date.now() - p.batDauCau) / 1000) : null;
+  p.ketQua.push({ mon: mon, muc: q.muc, chuong: q.chuong, de: q.q, dung: dung, diem: diem, giay: giay });
+  if (giay !== null && giay < 3600) {
+    const cd = TD.chuDeCuaThe(mon, { nhom: q.chuong, cd: q.cd }) || q.chuong;
+    TD.S.gio_cd = TD.S.gio_cd || {};
+    TD.S.gio_cd[mon] = TD.S.gio_cd[mon] || {};
+    const g = TD.S.gio_cd[mon][cd] = TD.S.gio_cd[mon][cd] || { giay: 0, cau: 0 };
+    g.giay += giay; g.cau++;
+  }
 
   /* đã soi Truy Hồn Kính thì không tính là tự làm được */
   const soi = !!q._soiGuong;
@@ -22043,6 +22714,37 @@ TD.ketThucPhien = function () {
       <button class="nut phu" onclick="TD.di('luyencong')">Luyện tiếp</button>
       ${TD.SRS.denHan().length ? `<button class="nut lua" onclick="TD.di('tamma')">Trấn áp tâm ma (${TD.SRS.denHan().length})</button>` : ''}
     </div>`));
+
+  /* ---- nhịp độ làm bài: câu nào ngốn thời gian ---- */
+  const coGio = p.ketQua.filter(k => typeof k.giay === 'number');
+  if (coGio.length >= 3) {
+    const M2 = TD.MON[p.mon] || null;
+    /* ngưỡng lấy từ chính đề thật của môn đó: tổng phút chia tổng số câu */
+    const nguong = M2 && !M2.tuluan
+      ? Math.round(M2.phut * 60 / Math.max(1, M2.p1 + M2.p2 + M2.p3)) : 105;
+    const tong = coGio.reduce((a, k) => a + k.giay, 0);
+    const tb = Math.round(tong / coGio.length);
+    const cham = coGio.slice().sort((a, b) => b.giay - a.giay).slice(0, 3);
+    const quaCham = coGio.filter(k => k.giay > nguong * 1.6).length;
+    const ph = g => g >= 60 ? Math.floor(g / 60) + 'ph' + (g % 60 ? String(g % 60).padStart(2, '0') + 's' : '') : g + 's';
+    c.appendChild(el('div', 'the', `<h3>⏱ Nhịp độ làm bài</h3>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;margin:10px 0">
+        <div><div class="so-to" style="color:${tb > nguong ? 'var(--lua)' : 'var(--dung)'}">${ph(tb)}</div><div class="so-nhan">trung bình mỗi câu</div></div>
+        <div><div class="so-to">${ph(nguong)}</div><div class="so-nhan">nhịp đề thật</div></div>
+        <div><div class="so-to" style="color:${quaCham ? 'var(--kim)' : 'var(--dung)'}">${quaCham}</div><div class="so-nhan">câu quá chậm</div></div>
+      </div>
+      <p class="mo-nhat">Đề thật môn này cho <b>${M2 && !M2.tuluan ? M2.phut + ' phút cho ' + (M2.p1 + M2.p2 + M2.p3) + ' câu' : 'khoảng 105 giây mỗi câu'}</b>.
+      ${tb > nguong
+        ? 'Bạn đang chậm hơn nhịp đề — trong phòng thi sẽ không kịp làm hết.'
+        : 'Bạn đang bám đúng nhịp. Giữ như vậy, phần dư dành để soát lại.'}</p>
+      <div style="margin-top:10px;font-size:13.4px">
+        <b style="color:var(--kim)">Ba câu ngốn thời gian nhất</b>
+        <ol style="padding-left:20px;margin:7px 0">${cham.map(k =>
+          `<li style="margin-bottom:5px"><b style="color:${k.giay > nguong * 1.6 ? 'var(--lua)' : 'var(--chu2)'}">${ph(k.giay)}</b>
+            · ${k.chuong} · ${TD.MUC[k.muc].ten}${k.dung ? '' : ' <span style="color:var(--lua)">(vẫn sai)</span>'}</li>`).join('')}</ol>
+        <p class="mo-nhat">Câu vừa chậm vừa sai là câu nên <b>bỏ qua</b> trong phòng thi để dồn giờ cho câu chắc ăn.</p>
+      </div>`));
+  }
 
   /* danh sách câu sai để xem lại */
   const sai = p.ketQua.filter(k => !k.dung);
@@ -22795,8 +23497,12 @@ TD.dungDe = function (mon, cap) {
     </div>
     <div class="hang-nut">
       <button class="nut lua" id="dk-batdau">Bắt đầu độ kiếp</button>
+      <button class="nut phu" id="dk-in">🖨 In đề ra giấy</button>
       <button class="nut phu" onclick="TD.di('dokiep')">← Quay lại</button>
-    </div>`));
+    </div>
+    <p class="mo-nhat">In ra giấy để luyện viết tay và tô đáp án đúng như phòng thi — đáp án nằm ở trang cuối, làm xong mới lật.</p>`));
+
+  $('#dk-in').onclick = () => TD.inDe(mon, cap || TD.S.kiep_chon);
 
   $('#dk-batdau').onclick = () => {
     TD.keu('sam');

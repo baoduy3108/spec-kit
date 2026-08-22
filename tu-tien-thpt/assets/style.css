@@ -208,3 +208,48 @@ textarea.o-nhap{font-family:inherit;font-size:14.5px;line-height:1.6;resize:vert
 .dong-tu .tu-en{color:var(--ngoc);font-weight:700}
 .dong-tu .tu-vi{color:var(--chu2);text-align:right;flex:1 1 45%;font-size:13.4px}
 .nhan.loai-tu{font-size:10.5px;padding:1px 5px;color:var(--chu3)}
+
+/* ============================================================
+   BẢN IN RA GIẤY
+   Đề được dựng ngay trong trang (không mở cửa sổ mới vì bản chạy
+   trong khung nhúng chặn cửa sổ bật lên), rồi ẩn toàn bộ giao diện
+   game đi để chỉ còn tờ đề như đề thi thật.
+   ============================================================ */
+#trang-in{display:none}
+/* #noidung nằm trong .app chứ không phải con trực tiếp của body — dùng dấu
+   cách thay vì dấu > kẻo luật không khớp và giao diện game vẫn hiện dưới đề. */
+body.che-in .app{display:none}
+body.che-in #trang-in{display:block;max-width:820px;margin:0 auto;padding:0 14px 40px}
+#trang-in .in-thanh{display:flex;gap:9px;align-items:center;flex-wrap:wrap;
+  padding:12px 0 16px;border-bottom:1px solid var(--vien);margin-bottom:18px}
+#trang-in .in-tieu{font-size:19px;text-align:center;margin:0 0 4px}
+#trang-in .in-dau{text-align:center;font-size:13.4px;color:var(--chu2);
+  border-bottom:1.5px solid var(--vien);padding-bottom:10px;margin-bottom:16px}
+#trang-in .in-phan{font-size:14.6px;margin:20px 0 9px;text-transform:uppercase;color:var(--kim)}
+#trang-in .in-cau{margin-bottom:13px;font-size:14.4px;line-height:1.5}
+#trang-in .in-pa{display:grid;grid-template-columns:1fr 1fr;gap:3px 18px;margin:5px 0 0 16px;font-size:13.8px}
+#trang-in .in-y div{margin:4px 0 0 16px;font-size:13.8px}
+#trang-in .in-o{white-space:nowrap;margin-left:8px;color:var(--chu3)}
+#trang-in .in-tra{margin:6px 0 0 16px}
+#trang-in .in-ke{display:inline-block;border-bottom:1px dotted var(--chu3);width:170px}
+#trang-in .in-dapan{margin-top:26px;border-top:1.5px solid var(--vien);padding-top:14px}
+#trang-in .in-dapan div{display:inline-block;width:24%;font-size:13px;color:var(--chu2)}
+#trang-in svg{max-width:300px}
+
+@media print{
+  @page{size:A4;margin:14mm 12mm}
+  body{background:#fff!important;color:#000!important;font-family:'Times New Roman',Times,serif}
+  .app,#toast,#dotpha,#trang-in .in-thanh{display:none!important}
+  #trang-in{display:block!important;max-width:none;padding:0}
+  #trang-in *{color:#000!important}
+  #trang-in .in-phan{color:#000!important;font-size:12.4pt}
+  #trang-in .in-tieu{font-size:14pt}
+  #trang-in .in-cau{page-break-inside:avoid;font-size:12.2pt;line-height:1.45}
+  #trang-in .in-dapan{page-break-before:always}
+  #trang-in .in-ke{border-bottom:1px dotted #000}
+  #trang-in svg text{fill:#000!important}
+  #trang-in svg line,#trang-in svg polyline,#trang-in svg path,
+  #trang-in svg rect,#trang-in svg circle{stroke:#000!important}
+  #trang-in svg polyline,#trang-in svg path{fill:none!important}
+  #trang-in svg rect[fill]:not([fill="transparent"]){fill:#000!important}
+}

@@ -21,6 +21,8 @@ TD.macDinhTrangThai = function () {
     thong_ke: {},
     /* thống kê theo chuyên đề: thong_ke_cd[mon][chuyên đề] = {dung, tong} */
     thong_ke_cd: {},
+    /* thời gian làm bài theo chuyên đề: gio_cd[mon][cd] = {giay, cau} */
+    gio_cd: {},
     /* mục từ vựng đã được hỏi ít nhất một lần */
     tu_da_hoi: {},
     /* nhật ký theo ngày: nhat_ky['2026-08-19'] = số câu đã làm */

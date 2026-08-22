@@ -54,8 +54,12 @@ const tinhLai = e0 => {
   catch (x) { return null; }
 };
 /* trả về mô tả phép tính lệch đầu tiên tìm được, hoặc null */
+/* Hình vẽ SVG chứa hàng trăm toạ độ, không phải câu chữ cho học sinh đọc —
+   phải gỡ ra trước khi soi luật trình bày lẫn soi phép tính. */
+const boHinh = t => String(t == null ? '' : t).replace(/<svg[\s\S]*?<\/svg>/gi, ' [hình vẽ] ');
+
 const soiPhepTinh = giai => {
-  for (const dong of String(giai || '').split('\n')) {
+  for (const dong of boHinh(giai).split('\n')) {
     const d = doiSoVN(dong);
     if (/%/.test(d)) continue;                       /* 1 + 15% = 1,15 không phải phép cộng thuần */
     const ve = d.split('=').map(x => x.trim()).filter(Boolean);
@@ -120,8 +124,8 @@ for (const mon of Object.keys(TD.GEN)) {
 
       /* Trình bày phải giống đề thật: không có 0x, 1x, "+ -3", gạch nối ASCII làm dấu trừ… */
       {
-        const vb = [q.q, (q.opts || []).join(' § '), (q.items || []).map(y => y.t).join(' § '),
-                    q.giai || '', q.meo || ''].join('\n');
+        const vb = boHinh([q.q, (q.opts || []).join(' § '), (q.items || []).map(y => y.t).join(' § '),
+                    q.giai || '', q.meo || ''].join('\n'));
         let dinh = null;
         for (const [re, ten] of LUAT_TRINH_BAY) if (re.test(vb)) { dinh = ten; break; }
         if (dinh) { bao(mau.ma, dinh, q); break; }
