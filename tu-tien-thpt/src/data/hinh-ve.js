@@ -46,16 +46,25 @@ TD.hinhDoThi = function (f, cf) {
   const kep = (v, min, max) => Math.min(Math.max(v, min), max);
   const yNhan = kep(Y(0) + 13, le + 11, H - 5);
   const xNhan = kep(X(0) - 6, 15, W - 5);
+  /* Không ghi mọi số nguyên: đồ thị có biên độ lớn (nhiệt độ từ −30 đến 30
+     chẳng hạn) sẽ xếp sáu chục nhãn chồng lên nhau thành một vệt đen. Chọn
+     bước chia sao cho mỗi trục nhiều nhất mười vạch. */
+  const buocChia = (min, max) => {
+    const n = Math.floor(max) - Math.ceil(min);
+    for (const b of [1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000, 2000, 5000]) if (n / b <= 10) return b;
+    return Math.ceil(n / 10);
+  };
+  const bx = buocChia(c.xMin, c.xMax), by = buocChia(c.yMin, c.yMax);
   let luoi = '';
-  for (let x = Math.ceil(c.xMin); x <= Math.floor(c.xMax); x++) {
+  for (let x = Math.ceil(c.xMin / bx) * bx; x <= c.xMax; x += bx) {
     if (x === 0) continue;
     luoi += `<line x1="${so(X(x))}" y1="${le}" x2="${so(X(x))}" y2="${H - le}" stroke="${M.phu}" stroke-width="1"/>`;
-    luoi += `<text x="${so(X(x))}" y="${so(yNhan)}" fill="${M.chu}" font-size="10" text-anchor="middle">${x}</text>`;
+    luoi += `<text x="${so(X(x))}" y="${so(yNhan)}" fill="${M.chu}" font-size="10" text-anchor="middle">${so(x)}</text>`;
   }
-  for (let y = Math.ceil(c.yMin); y <= Math.floor(c.yMax); y++) {
+  for (let y = Math.ceil(c.yMin / by) * by; y <= c.yMax; y += by) {
     if (y === 0) continue;
     luoi += `<line x1="${le}" y1="${so(Y(y))}" x2="${W - le}" y2="${so(Y(y))}" stroke="${M.phu}" stroke-width="1"/>`;
-    luoi += `<text x="${so(xNhan)}" y="${so(Y(y) + 3.5)}" fill="${M.chu}" font-size="10" text-anchor="end">${y}</text>`;
+    luoi += `<text x="${so(xNhan)}" y="${so(Y(y) + 3.5)}" fill="${M.chu}" font-size="10" text-anchor="end">${so(y)}</text>`;
   }
   /* Trục chỉ vẽ khi nó thật sự nằm trong vùng hiển thị; nếu không thì thay
      bằng khung viền, và không ghi chữ O ở nơi không có gốc toạ độ. */
@@ -457,15 +466,21 @@ TD.hinhGianDo = function (hDau, hCuoi, tenDau, tenCuoi) {
     + `<line x1="${le}" y1="${day}" x2="${W - 10}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
     + `<text x="${le - 6}" y="16" fill="${M.chu}" font-size="10.5" text-anchor="end">H</text>`
     + `<text x="${W - 8}" y="${day + 14}" fill="${M.chu}" font-size="10.5" text-anchor="end">tiến trình phản ứng</text>`;
+  /* Nhãn phải nằm PHÍA ĐỐI DIỆN với đường nối hai mức, nếu không thì nét đứt
+     chạy xuyên qua chữ. Phản ứng toả nhiệt: đường nối đi xuống nên nhãn chất
+     đầu ở trên, nhãn sản phẩm ở dưới; thu nhiệt thì ngược lại. */
+  const thuNhiet = hCuoi > hDau;
+  const yDau = thuNhiet ? Y(hDau) + 16 : Y(hDau) - 9;
+  const yCuoi = thuNhiet ? Y(hCuoi) - 9 : Y(hCuoi) + 16;
   ra += `<line x1="${le + 20}" y1="${so(Y(hDau))}" x2="${le + 92}" y2="${so(Y(hDau))}" stroke="${M.nhan}" stroke-width="2.6"/>`
-     + `<text x="${le + 56}" y="${so(Y(hDau) - 8)}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${tenDau || 'chất đầu'}</text>`
+     + `<text x="${le + 56}" y="${so(yDau)}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${tenDau || 'chất đầu'}</text>`
      + `<line x1="${W - 106}" y1="${so(Y(hCuoi))}" x2="${W - 34}" y2="${so(Y(hCuoi))}" stroke="${M.net}" stroke-width="2.6"/>`
-     + `<text x="${W - 70}" y="${so(Y(hCuoi) - 8)}" fill="${M.net}" font-size="10.5" text-anchor="middle">${tenCuoi || 'sản phẩm'}</text>`;
+     + `<text x="${W - 70}" y="${so(yCuoi)}" fill="${M.net}" font-size="10.5" text-anchor="middle">${tenCuoi || 'sản phẩm'}</text>`;
   ra += `<line x1="${le + 92}" y1="${so(Y(hDau))}" x2="${W - 106}" y2="${so(Y(hCuoi))}" stroke="${M.chu}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
   const giua = (le + 92 + W - 106) / 2;
   ra += `<line x1="${giua}" y1="${so(Y(hDau))}" x2="${giua}" y2="${so(Y(hCuoi))}" stroke="${M.do}" stroke-width="1.8" marker-end="url(#mtgd)"/>`
      + `<defs><marker id="mtgd" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 Z" fill="${M.do}"/></marker></defs>`
-     + `<text x="${giua + 8}" y="${so((Y(hDau) + Y(hCuoi)) / 2)}" fill="${M.do}" font-size="11">ΔrH</text>`;
+     + `<text x="${giua + 13}" y="${so((Y(hDau) + Y(hCuoi)) / 2)}" fill="${M.do}" font-size="11">ΔrH</text>`;
   return boc(W, H, ra);
 };
 

@@ -236,6 +236,12 @@ body.che-in #trang-in{display:block;max-width:820px;margin:0 auto;padding:0 14px
 #trang-in .in-dapan div{display:inline-block;width:24%;font-size:13px;color:var(--chu2)}
 #trang-in svg{max-width:300px}
 
+/* Chữ trong hình vẽ có viền nền mảnh: nét đồ thị, trục hay mạch DNA chạy
+   ngang qua nhãn thì chữ vẫn tách khỏi nền chứ không bị nuốt mất. Chữ nào
+   vốn tô bằng màu nền (số nằm TRONG cột màu) thì không cần viền. */
+.khung-hinh svg text:not([fill="var(--nen)"]){
+  paint-order:stroke;stroke:var(--nen);stroke-width:2.6px;stroke-linejoin:round}
+
 @media print{
   @page{size:A4;margin:14mm 12mm}
   body{background:#fff!important;color:#000!important;font-family:'Times New Roman',Times,serif}
@@ -247,9 +253,20 @@ body.che-in #trang-in{display:block;max-width:820px;margin:0 auto;padding:0 14px
   #trang-in .in-cau{page-break-inside:avoid;font-size:12.2pt;line-height:1.45}
   #trang-in .in-dapan{page-break-before:always}
   #trang-in .in-ke{border-bottom:1px dotted #000}
-  #trang-in svg text{fill:#000!important}
+  /* Bản in là nét đen trên giấy trắng: mảng màu chuyển thành viền đen ruột
+     trắng, nếu tô đặc thì số ghi bên trong cột biến mất hẳn. */
+  #trang-in svg text{fill:#000!important;stroke:#fff!important;stroke-width:2.4px;paint-order:stroke}
   #trang-in svg line,#trang-in svg polyline,#trang-in svg path,
-  #trang-in svg rect,#trang-in svg circle{stroke:#000!important}
+  #trang-in svg rect,#trang-in svg circle,#trang-in svg ellipse,
+  #trang-in svg polygon{stroke:#000!important}
   #trang-in svg polyline,#trang-in svg path{fill:none!important}
-  #trang-in svg rect[fill]:not([fill="transparent"]){fill:#000!important}
+  /* Chỉ tô trắng những mảng vốn CÓ màu. Khung viền của đồ thị vẽ bằng rect
+     fill="none" — tô trắng nó thì cả lưới ô kẻ nằm dưới bị phủ mất sạch. */
+  #trang-in svg rect:not([fill="none"]),#trang-in svg circle:not([fill="none"]),
+  #trang-in svg ellipse:not([fill="none"]),#trang-in svg polygon:not([fill="none"])
+    {fill:#fff!important;fill-opacity:1!important}
+  #trang-in svg marker path,#trang-in svg marker polygon{fill:#000!important}
+  /* lưới ô kẻ và khung viền in nhạt hơn nét đồ thị, đúng kiểu giấy kẻ ô */
+  #trang-in svg line[stroke="var(--vien)"],#trang-in svg rect[stroke="var(--vien)"]
+    {stroke:#aaa!important}
 }

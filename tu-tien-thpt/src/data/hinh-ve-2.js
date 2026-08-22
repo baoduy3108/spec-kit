@@ -29,14 +29,16 @@ TD.hinhOxyz = function (diem, hop) {
   const W = 320, H = 250;
   const O = [110, 175];
   /* Oz thẳng đứng, Oy sang phải, Ox chiếu xiên xuống trái */
-  const dv = 26;
+  const dv = 28;
   const P = (x, y, z) => [O[0] + y * dv - x * dv * 0.55, O[1] - z * dv + x * dv * 0.42];
   const net = (a, b, mau, dut, to) =>
     `<line x1="${so(a[0])}" y1="${so(a[1])}" x2="${so(b[0])}" y2="${so(b[1])}" stroke="${mau || M.truc}" `
     + `stroke-width="${to || 1.6}"${dut ? ' stroke-dasharray="5 4"' : ''}/>`;
   let ra = `<defs>${mui('mtoxyz', M.truc)}</defs>`;
   /* ba trục */
-  const gx = P(3.3, 0, 0), gy = P(0, 4.6, 0), gz = P(0, 0, 3.4);
+  /* Trục kéo dài hơn kích thước hộp một quãng để tên trục không dính vào
+     tên đỉnh nằm ngay trên trục đó (C trên Oy, O′ trên Oz, A trên Ox). */
+  const gx = P(3.9, 0, 0), gy = P(0, 5.3, 0), gz = P(0, 0, 4);
   ra += `<line x1="${O[0]}" y1="${O[1]}" x2="${so(gx[0])}" y2="${so(gx[1])}" stroke="${M.truc}" stroke-width="1.7" marker-end="url(#mtoxyz)"/>`
      + `<line x1="${O[0]}" y1="${O[1]}" x2="${so(gy[0])}" y2="${so(gy[1])}" stroke="${M.truc}" stroke-width="1.7" marker-end="url(#mtoxyz)"/>`
      + `<line x1="${O[0]}" y1="${O[1]}" x2="${so(gz[0])}" y2="${so(gz[1])}" stroke="${M.truc}" stroke-width="1.7" marker-end="url(#mtoxyz)"/>`
@@ -55,9 +57,18 @@ TD.hinhOxyz = function (diem, hop) {
        + net(d.O2, d.A2, M.net) + net(d.A2, d.B2, M.net) + net(d.B2, d.C2, M.net) + net(d.C2, d.O2, M.net)
        + net(d.O, d.O2, M.net, true) + net(d.A, d.A2, M.net) + net(d.B, d.B2, M.net) + net(d.C, d.C2, M.net);
     const ten = { A: 'A', B: 'B', C: 'C', A2: "A′", B2: "B′", C2: "C′", O2: "O′" };
+    /* Tên đỉnh đẩy ra NGOÀI khối theo hướng từ tâm ra, đúng lối vẽ của sách.
+       Đặt cứng ở góc trên bên phải mỗi đỉnh thì chữ nằm ngay trên cạnh hộp
+       và hai đỉnh gần nhau ăn vào chữ của nhau. */
+    const dinh = Object.keys(d).map(k => d[k]);
+    const tam = [dinh.reduce((t, q) => t + q[0], 0) / dinh.length,
+                 dinh.reduce((t, q) => t + q[1], 0) / dinh.length];
     Object.keys(ten).forEach(k => {
+      const ex = d[k][0] - tam[0], ey = d[k][1] - tam[1];
+      const L = Math.hypot(ex, ey) || 1;
       ra += `<circle cx="${so(d[k][0])}" cy="${so(d[k][1])}" r="2.6" fill="${M.nhan}"/>`
-         + `<text x="${so(d[k][0] + 7)}" y="${so(d[k][1] - 5)}" fill="${M.nhan}" font-size="11">${ten[k]}</text>`;
+         + `<text x="${so(d[k][0] + ex / L * 14)}" y="${so(d[k][1] + ey / L * 14 + 4)}" fill="${M.nhan}" `
+         + `font-size="11.5" text-anchor="middle">${ten[k]}</text>`;
     });
   }
   (diem || []).forEach(p => {
@@ -247,7 +258,10 @@ TD.hinhDNA = function (kieu) {
       ra += `<line x1="${x2}" y1="${y2}" x2="${x1}" y2="${y1}" stroke="${M.nhan}" stroke-width="2.6" marker-end="url(#mtadn2)"/>`;
     });
     ra += `<text x="236" y="164" fill="${M.nhan}" font-size="10" text-anchor="middle">các đoạn Okazaki (mạch gián đoạn)</text>`
-       + `<text x="150" y="82" fill="${M.do}" font-size="10.5" text-anchor="middle">chạc tái bản</text>`;
+       /* nhãn nằm bên TRÁI điểm chạc, trên phần mạch kép — đặt giữa như cũ thì
+          chữ vắt ngang đúng chỗ mạch khuôn trên vừa tách ra */
+       + `<line x1="148" y1="83" x2="152" y2="88" stroke="${M.do}" stroke-width="1.1"/>`
+       + `<text x="145" y="80" fill="${M.do}" font-size="10.5" text-anchor="end">chạc tái bản</text>`;
   } else if (kieu === 'phienma') {
     ra += `<text x="14" y="20" fill="${M.chu}" font-size="10.5">Phiên mã: RNA được tổng hợp từ mạch mã gốc</text>`;
     ra += `<line x1="24" y1="70" x2="300" y2="70" stroke="${M.truc}" stroke-width="2.4"/>`
@@ -255,7 +269,7 @@ TD.hinhDNA = function (kieu) {
        + `<text x="24" y="60" fill="${M.chu}" font-size="9.5">3′</text><text x="296" y="60" fill="${M.chu}" font-size="9.5">5′</text>`
        + `<line x1="24" y1="102" x2="300" y2="102" stroke="${M.truc}" stroke-width="2.4"/>`
        + `<text x="24" y="118" fill="${M.chu}" font-size="9.5">5′</text><text x="296" y="118" fill="${M.chu}" font-size="9.5">3′</text>`
-       + `<text x="160" y="62" fill="${M.do}" font-size="10" text-anchor="middle">mạch mã gốc (3′ → 5′)</text>`
+       + `<text x="160" y="54" fill="${M.do}" font-size="10" text-anchor="middle">mạch mã gốc (3′ → 5′)</text>`
        + `<text x="160" y="118" fill="${M.chu}" font-size="10" text-anchor="middle">mạch bổ sung</text>`;
     ra += `<ellipse cx="150" cy="86" rx="42" ry="24" fill="${M.tim}" opacity="0.35" stroke="${M.tim}" stroke-width="1.6"/>`
        + `<text x="150" y="90" fill="${M.chu}" font-size="9.5" text-anchor="middle">RNA polymerase</text>`;
