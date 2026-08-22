@@ -119,8 +119,16 @@ TD.khoiLoai = function (opts, dung, sv, macDinh) {
   return opts.filter(x => x !== dung).map(x => {
     const ly = (sv && sv[x]) || (typeof macDinh === 'function' ? macDinh(x) : macDinh)
       || 'không thoả yêu cầu của đề.';
-    /* đo độ dài phần chữ thật, bỏ thẻ HTML ra khỏi phép đếm */
+    /* đo và so trên phần chữ thật, bỏ thẻ HTML ra ngoài */
     const tho = String(ly).replace(/<[^>]+>/g, '');
+    /* Lời giải MỞ ĐẦU bằng thẻ in đậm là loại tự mang nhãn — nó đã nêu mặt
+       tiếng Anh ngay đầu dòng rồi, in thêm phương án nữa là lặp. Nhờ vậy câu
+       từ vựng ra đúng kiểu tra từ điển:
+         · lifelong learning (n): học tập suốt đời
+       Chỉ nhận dấu hiệu <b> ở đầu chứ không so chuỗi con, vì lí do viết tay
+       hay nhắc lại phương án giữa câu (ví dụ 'It was … that …' có chữ "that")
+       và khớp chuỗi con sẽ nuốt mất nhãn của dòng đó. */
+    if (/^\s*<b>/.test(String(ly))) return `· ${ly}`;
     return (tho.length <= 58 && tho.indexOf('\n') < 0)
       ? `· ${x} — ${ly}`
       : `· ${x}\n  → ${ly}`;

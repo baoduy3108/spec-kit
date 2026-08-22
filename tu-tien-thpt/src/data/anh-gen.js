@@ -50,9 +50,9 @@ const DANG_NP = [
 TD.nghiaTuAnh = function (x) {
   const chu = String(x).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
   for (const [re, mo] of DANG_NP)
-    if (re.test(chu)) return mo;
+    if (re.test(chu)) return `<b>${chu}</b>: ${mo}`;
   const t = (TD.KHO_TU || []).find(y => y.w.toLowerCase() === chu.toLowerCase());
-  if (t) return `(${t.l}) = ${t.n}`;
+  if (t) return `<b>${t.w}</b> (${t.l}): ${t.n}`;
   const HAU_TO = [
     [/ly$/, 'trạng từ'],
     [/(tion|sion|ment|ness|ity|ance|ence|ship|hood|ism|ist)$/, 'danh từ'],
@@ -65,8 +65,8 @@ TD.nghiaTuAnh = function (x) {
   if (/^[a-zA-Z][a-zA-Z '-]*$/.test(chu))
     for (const [re, loai] of HAU_TO)
       if (re.test(chu.toLowerCase()))
-        return loai + ', sai dạng';
-  return 'không hợp với cấu trúc câu ở đây';
+        return `<b>${chu}</b>: ${loai}, sai dạng`;
+  return `<b>${chu}</b>: không hợp với cấu trúc câu ở đây`;
 };
 
 const MC = (R, de, it, meo) => {
@@ -112,7 +112,7 @@ TD.cauTuAnh = function (R, x) {                 /* Anh → Việt */
   const o = nhieuTuObj(R, x, y => y.n);
   if (!o) return null;
   const sv = {};
-  o.forEach(y => { sv[y.n] = `nghĩa của <b>${y.w}</b> (${y.l})`; });
+  o.forEach(y => { sv[y.n] = `<b>${y.w}</b> (${y.l}): ${y.n}`; });
   return MC(R, `Từ "<b>${x.w}</b>" (${x.l}) có nghĩa là gì?`,
     { d: x.n, s: o.map(y => y.n), sv: sv, v: `${x.w} (${x.l}) = ${x.n}. Thuộc chủ đề: ${x.cd}.` },
     'Học từ theo CHỦ ĐỀ và theo CỤM, đừng học rời từng từ — đề đọc hiểu luôn xoay quanh một chủ đề nhất định.');
@@ -121,7 +121,7 @@ TD.cauTuViet = function (R, x) {                /* Việt → Anh */
   const o = nhieuTuObj(R, x, y => y.w);
   if (!o) return null;
   const sv = {};
-  o.forEach(y => { sv[y.w] = `(${y.l}) = ${y.n}`; });
+  o.forEach(y => { sv[y.w] = `<b>${y.w}</b> (${y.l}): ${y.n}`; });
   return MC(R, `Từ tiếng Anh nào mang nghĩa "<b>${x.n}</b>"? (${x.l})`,
     { d: x.w, s: o.map(y => y.w), sv: sv, v: `${x.n} = ${x.w} (${x.l}). Thuộc chủ đề: ${x.cd}.` },
     'Nhớ được nghĩa Việt → Anh mới viết được câu. Chỉ nhận ra mặt chữ thì chỉ đủ cho phần đọc hiểu.');
@@ -134,7 +134,7 @@ TD.cauCollocation = function (R, x) {
   const s = o3.map(y => y.n);
   if (new Set(s.concat([x.n])).size !== 4) return null;
   const sv = {};
-  o3.forEach(y => { sv[y.n] = `nghĩa của cụm <b>${y.tu} ${y.cum}</b>`; });
+  o3.forEach(y => { sv[y.n] = `<b>${y.tu} ${y.cum}</b>: ${y.n}`; });
   return MC(R, `Cụm "<b>${x.tu} ${x.cum}</b>" có nghĩa là gì?`,
     { d: x.n, s: s, sv: sv, v: `${x.tu} ${x.cum} = ${x.n}. Nhóm: ${x.nhom}.` },
     'Biết nghĩa của cụm mới dùng đúng trong bài điền từ. Nhiều cụm nghĩa không suy ra được từ nghĩa các từ thành phần.');
@@ -151,7 +151,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const o = nhieuTuObj(R, x, y => y.n);
     if (!o) return null;
     const s = o.map(y => y.n), sv = {};
-    o.forEach(y => { sv[y.n] = `nghĩa của <b>${y.w}</b> (${y.l})`; });
+    o.forEach(y => { sv[y.n] = `<b>${y.w}</b> (${y.l}): ${y.n}`; });
     return MC(R, `Từ "<b>${x.w}</b>" (${x.l}) có nghĩa là gì?`,
       { d: x.n, s: s, sv: sv, v: `${x.w} (${x.l}) = ${x.n}. Thuộc chủ đề: ${x.cd}.` },
       'Học từ theo CHỦ ĐỀ và theo CỤM, đừng học rời từng từ — đề đọc hiểu luôn xoay quanh một chủ đề nhất định.');
@@ -165,7 +165,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const o = nhieuTuObj(R, x, y => y.w);
     if (!o) return null;
     const s = o.map(y => y.w), sv = {};
-    o.forEach(y => { sv[y.w] = `(${y.l}) = ${y.n}`; });
+    o.forEach(y => { sv[y.w] = `<b>${y.w}</b> (${y.l}): ${y.n}`; });
     return MC(R, `Từ tiếng Anh nào mang nghĩa "<b>${x.n}</b>"? (${x.l})`,
       { d: x.w, s: s, sv: sv, v: `${x.n} = ${x.w} (${x.l}). Thuộc chủ đề: ${x.cd}.` },
       'Nhớ được nghĩa Việt → Anh mới viết được câu. Chỉ nhận ra mặt chữ thì chỉ đủ cho phần đọc hiểu.');
@@ -180,7 +180,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const sv = {};
     s.forEach(v => {
       const vd = kho.filter(y => y.tu === v).slice(0, 2).map(y => `${v} ${y.cum}`).join(' · ');
-      sv[v] = vd ? `"${v}" đi với: ${vd}` : 'không phải cụm chuẩn';
+      sv[v] = vd ? `<b>${v}</b>: đi với ${vd}` : `<b>${v}</b>: không phải cụm chuẩn`;
     });
     return MC(R, `Chọn động từ đúng: "____ ${x.cum}" (${x.n})`,
       { d: x.tu, s: s, sv: sv, v: `Cụm chuẩn là "<b>${x.tu} ${x.cum}</b>" = ${x.n}.\n`
@@ -203,7 +203,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const s = o3.map(y => y.tu);
     if (new Set(s.concat([x.tu])).size !== 4) return null;
     const sv = {};
-    o3.forEach(y => { sv[y.tu] = `đi với cụm khác: <b>${y.tu} ${y.cum}</b> = ${y.n}`; });
+    o3.forEach(y => { sv[y.tu] = `<b>${y.tu} ${y.cum}</b>: ${y.n}`; });
     return MC(R, `Chọn từ đúng để hoàn thành cụm: "____ ${x.cum}" (${x.n})`,
       { d: x.tu, s: s, sv: sv, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.\nNhóm: ${x.nhom}.` },
       'Collocation là chỗ người Việt hay dịch từng chữ rồi ghép sai. '
@@ -221,7 +221,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const s = o3.map(y => y.n);
     if (new Set(s.concat([x.n])).size !== 4) return null;
     const sv = {};
-    o3.forEach(y => { sv[y.n] = `nghĩa của cụm <b>${y.tu} ${y.cum}</b>`; });
+    o3.forEach(y => { sv[y.n] = `<b>${y.tu} ${y.cum}</b>: ${y.n}`; });
     return MC(R, `Cụm "<b>${x.tu} ${x.cum}</b>" có nghĩa là gì?`,
       { d: x.n, s: s, sv: sv, v: `${x.tu} ${x.cum} = ${x.n}. Nhóm: ${x.nhom}.` },
       'Biết nghĩa của cụm mới dùng đúng trong bài điền từ. '
@@ -238,7 +238,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const sv = {};
     s.forEach(g => {
       const vd = kho.filter(y => y.cum === g && y.tu !== x.tu).slice(0, 2).map(y => `${y.tu} ${g}`).join(' · ');
-      sv[g] = vd ? `"${g}" đi với: ${vd}` : 'không phải cụm chuẩn';
+      sv[g] = vd ? `<b>${g}</b>: đi với ${vd}` : `<b>${g}</b>: không phải cụm chuẩn`;
     });
     return MC(R, `Điền giới từ đúng: "${x.tu} ____" (${x.n})`,
       { d: x.cum, s: s, sv: sv, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.` },
