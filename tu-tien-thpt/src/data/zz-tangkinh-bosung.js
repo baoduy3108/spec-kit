@@ -780,7 +780,7 @@ them('sinh_ct', [
   ct: '<b>Ứng dụng trong y học:</b> sản xuất insulin, hormone sinh trưởng, vaccine tái tổ hợp; '
     + 'xét nghiệm gene và liệu pháp gene.<br>'
     + '<b>Trong nông nghiệp:</b> giống kháng sâu bệnh, chịu hạn, chịu mặn, tăng hàm lượng dinh dưỡng.<br>'
-    + '<b>Trong pháp y:</b> giám định ADN xác định huyết thống và truy tìm thủ phạm.<br>'
+    + '<b>Trong pháp y:</b> giám định DNA xác định huyết thống và truy tìm thủ phạm.<br>'
     + '<b>Ưu điểm so với chọn giống truyền thống:</b> nhanh hơn nhiều, chuyển được gene giữa các loài xa nhau, '
     + 'kiểm soát được đặc tính muốn có.<br>'
     + '<b>Vấn đề đặt ra:</b> an toàn sinh học (phát tán gene ra tự nhiên) · đa dạng sinh học · '

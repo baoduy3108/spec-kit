@@ -296,11 +296,11 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
   tao(R) {
     const N = R.nguyen(30, 300) * 10;
     const L = N / 2 * 3.4;
-    return MC(R, `Một đoạn phân tử ADN có chiều dài ${S(L, 1)} Å. Tổng số nuclêôtit của đoạn ADN đó bằng bao nhiêu?`,
+    return MC(R, `Một đoạn phân tử DNA có chiều dài ${S(L, 1)} Å. Tổng số nuclêôtit của đoạn DNA đó bằng bao nhiêu?`,
       N, [N / 2, N * 2, Math.round(L / 3.4 * 2 / 3), N / 4],
       `L = (N/2)·3,4 Å ⇒ N = 2L/3,4\n`
       + `N = 2·${S(L, 1)}/3,4 = ${N} nuclêôtit.`,
-      'ADN có HAI mạch nên chiều dài tính theo N/2 nuclêôtit của một mạch, mỗi nuclêôtit dài 3,4 Å. Quên nhân 2 là ra đúng một nửa.',
+      'DNA có HAI mạch nên chiều dài tính theo N/2 nuclêôtit của một mạch, mỗi nuclêôtit dài 3,4 Å. Quên nhân 2 là ra đúng một nửa.',
       x => S(x) + ' nuclêôtit');
   } },
 
@@ -311,7 +311,7 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
     const A = Math.round(N * pA / 100);
     const G = N / 2 - A;
     if (G <= 0) return null;
-    return MC(R, `Một phân tử ADN có tổng số ${N} nuclêôtit, trong đó ađênin chiếm ${pA}% tổng số nuclêôtit. Số nuclêôtit loại guanin của phân tử này bằng bao nhiêu?`,
+    return MC(R, `Một phân tử DNA có tổng số ${N} nuclêôtit, trong đó ađênin chiếm ${pA}% tổng số nuclêôtit. Số nuclêôtit loại guanin của phân tử này bằng bao nhiêu?`,
       G, [N / 2 + A, A, N - A, Math.round(N * (100 - pA) / 100)],
       `Theo nguyên tắc bổ sung: A = T, G = X và A + G = N/2.\n`
       + `A = ${pA}%·${N} = ${A}\n`
@@ -324,7 +324,7 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
   tao(R) {
     const A = R.nguyen(20, 150) * 10, G = R.nguyen(20, 150) * 10;
     const H = 2 * A + 3 * G;
-    return MC(R, `Một phân tử ADN có ${A} nuclêôtit loại A và ${G} nuclêôtit loại G. Số liên kết hiđrô của phân tử ADN này bằng bao nhiêu?`,
+    return MC(R, `Một phân tử DNA có ${A} nuclêôtit loại A và ${G} nuclêôtit loại G. Số liên kết hiđrô của phân tử DNA này bằng bao nhiêu?`,
       H, [3 * A + 2 * G, A + G, 2 * (A + G), 3 * (A + G)],
       `Cặp A – T có 2 liên kết hiđrô, cặp G – X có 3 liên kết hiđrô.\n`
       + `H = 2A + 3G = 2·${A} + 3·${G} = ${2 * A} + ${3 * G} = ${H}.`,

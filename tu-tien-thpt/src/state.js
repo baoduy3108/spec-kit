@@ -555,6 +555,12 @@ TD.timMau = function (mon, ma) {
    với những gì học sinh gõ vào. */
 TD.chuanDau = function (t) {
   if (typeof t !== 'string') return t;
+  /* Trong hình vẽ SVG, dấu trừ ASCII là CÚ PHÁP toạ độ (d="M 52 176 q 10 -16 20 0").
+     Đổi nó sang dấu trừ kiểu chữ in thì trình duyệt không đọc được đường path nữa
+     và hình mất hẳn — nên phải chừa nguyên mọi đoạn <svg>…</svg> ra. */
+  if (t.indexOf('<svg') >= 0)
+    return t.split(/(<svg[\s\S]*?<\/svg>)/i)
+      .map(x => (/^<svg/i.test(x) ? x : TD.chuanDau(x))).join('');
   return t
     .replace(/([+−])\s*-(\d)/g, (m, d, n) => (d === '+' ? '− ' : '+ ') + n)   /* + -3 → − 3 */
     .replace(/(^|[=(:;,[\s])-(\d)/g, '$1−$2');                                /* = -3 → = −3 */
@@ -1210,16 +1216,21 @@ TD.deThiThat = function (mon, seed, cap) {
      70% cho Phần I là hụt mất một câu. */
   const coMc = Object.values(maHinh).filter(d => d === 'mc').length;
   const coTln = Object.values(maHinh).filter(d => d === 'tln').length;
-  const soHinhMc = Math.min(canHinh, coMc, M.p1);
+  const coDs = Object.values(maHinh).filter(d => d === 'ds').length;
+  /* Phần II đáng giá tới 1,0đ một câu và đề thật rất hay đặt hình ở đây,
+     nên giữ trước đúng một chỗ cho câu đúng/sai có hình nếu môn đó có mẫu. */
+  const soHinhDs = Math.min(coDs ? 1 : 0, canHinh, M.p2);
+  const hinhDs = chot(rutHinh(be.ds, soHinhDs));
+  const soHinhMc = Math.min(canHinh - hinhDs.length, coMc, M.p1);
   const hinhMc = chot(rutHinh(be.mc, soHinhMc));
   /* Phần III của đề thật chỉ có câu vận dụng trở lên, nên câu hình đưa vào
      đây cũng phải từ mức 3 — không được vì muốn đủ hạn ngạch mà nhét câu dễ. */
-  const soHinhTln = Math.min(canHinh - hinhMc.length, coTln, M.p3);
+  const soHinhTln = Math.min(canHinh - hinhDs.length - hinhMc.length, coTln, M.p3);
   const hinhTln = chot(rutHinh(be.tln, soHinhTln, 3));
 
   /* Rút theo đúng thứ tự: Phần III (khó nhất) → Phần II → Phần I nhận phần còn lại */
   const p3 = hinhTln.concat(chot(rut(be.tln, M.p3 - hinhTln.length, [4, 3, 2, 1])));
-  const p2 = chot(rut(be.ds, M.p2, [2, 3, 4, 1]));
+  const p2 = hinhDs.concat(chot(rut(be.ds, M.p2 - hinhDs.length, [2, 3, 4, 1])));
   const p1 = hinhMc.concat(chot(rut(be.mc, M.p1 - hinhMc.length, [1, 2, 3, 4])));
   /* thứ tự làm bài khuyến nghị: Phần I → Phần III → Phần II */
   return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2), kiep: K };

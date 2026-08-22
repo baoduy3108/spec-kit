@@ -402,7 +402,7 @@ TD.VAT_PHAM = {
    ngạch: đề Toán trung bình 0,01 câu có hình mỗi đề. Nên phải cấp
    phát chỗ riêng, đúng như cách Bộ ra đề.
    ============================================================ */
-TD.SO_CAU_HINH = { toan: 3, ly: 2, hoa: 2, sinh: 2, dia: 2, gdkt: 1 };
+TD.SO_CAU_HINH = { toan: 4, ly: 4, hoa: 3, sinh: 3, dia: 3, gdkt: 2, su: 2 };
 /* tỉ lệ câu có hình trong một phiên Luyện Công của môn có hình */
 TD.TY_LE_HINH = 0.18;
 
@@ -976,6 +976,12 @@ TD.timMau = function (mon, ma) {
    với những gì học sinh gõ vào. */
 TD.chuanDau = function (t) {
   if (typeof t !== 'string') return t;
+  /* Trong hình vẽ SVG, dấu trừ ASCII là CÚ PHÁP toạ độ (d="M 52 176 q 10 -16 20 0").
+     Đổi nó sang dấu trừ kiểu chữ in thì trình duyệt không đọc được đường path nữa
+     và hình mất hẳn — nên phải chừa nguyên mọi đoạn <svg>…</svg> ra. */
+  if (t.indexOf('<svg') >= 0)
+    return t.split(/(<svg[\s\S]*?<\/svg>)/i)
+      .map(x => (/^<svg/i.test(x) ? x : TD.chuanDau(x))).join('');
   return t
     .replace(/([+−])\s*-(\d)/g, (m, d, n) => (d === '+' ? '− ' : '+ ') + n)   /* + -3 → − 3 */
     .replace(/(^|[=(:;,[\s])-(\d)/g, '$1−$2');                                /* = -3 → = −3 */
@@ -1631,16 +1637,21 @@ TD.deThiThat = function (mon, seed, cap) {
      70% cho Phần I là hụt mất một câu. */
   const coMc = Object.values(maHinh).filter(d => d === 'mc').length;
   const coTln = Object.values(maHinh).filter(d => d === 'tln').length;
-  const soHinhMc = Math.min(canHinh, coMc, M.p1);
+  const coDs = Object.values(maHinh).filter(d => d === 'ds').length;
+  /* Phần II đáng giá tới 1,0đ một câu và đề thật rất hay đặt hình ở đây,
+     nên giữ trước đúng một chỗ cho câu đúng/sai có hình nếu môn đó có mẫu. */
+  const soHinhDs = Math.min(coDs ? 1 : 0, canHinh, M.p2);
+  const hinhDs = chot(rutHinh(be.ds, soHinhDs));
+  const soHinhMc = Math.min(canHinh - hinhDs.length, coMc, M.p1);
   const hinhMc = chot(rutHinh(be.mc, soHinhMc));
   /* Phần III của đề thật chỉ có câu vận dụng trở lên, nên câu hình đưa vào
      đây cũng phải từ mức 3 — không được vì muốn đủ hạn ngạch mà nhét câu dễ. */
-  const soHinhTln = Math.min(canHinh - hinhMc.length, coTln, M.p3);
+  const soHinhTln = Math.min(canHinh - hinhDs.length - hinhMc.length, coTln, M.p3);
   const hinhTln = chot(rutHinh(be.tln, soHinhTln, 3));
 
   /* Rút theo đúng thứ tự: Phần III (khó nhất) → Phần II → Phần I nhận phần còn lại */
   const p3 = hinhTln.concat(chot(rut(be.tln, M.p3 - hinhTln.length, [4, 3, 2, 1])));
-  const p2 = chot(rut(be.ds, M.p2, [2, 3, 4, 1]));
+  const p2 = hinhDs.concat(chot(rut(be.ds, M.p2 - hinhDs.length, [2, 3, 4, 1])));
   const p1 = hinhMc.concat(chot(rut(be.mc, M.p1 - hinhMc.length, [1, 2, 3, 4])));
   /* thứ tự làm bài khuyến nghị: Phần I → Phần III → Phần II */
   return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2), kiep: K };
@@ -7426,6 +7437,345 @@ TD.hinhMach = function (kieu, ds, nguon) {
       ra += day((t + d) / 2 - 60, y, (t + d) / 2 + 60, y) + dienTro((t + d) / 2, y, r);
     });
   }
+  return boc(W, H, ra);
+};
+})();
+
+</script>
+<script>
+/* ============================================================
+   BỘ VẼ HÌNH — ĐỢT 2
+   Tám kiểu hình còn lại mà đề thật hay ra: hệ trục Oxyz, miền phẳng
+   giới hạn bởi đồ thị, đường sức từ, khung dây trong từ trường, bộ
+   dụng cụ thí nghiệm, đường chuẩn độ pH, sơ đồ nhân đôi – phiên mã
+   – dịch mã, và sơ đồ đột biến nhiễm sắc thể.
+   Mấy kiểu này vẽ khó hơn đồ thị nên tách riêng một file cho dễ soi.
+   ============================================================ */
+window.TD = window.TD || {};
+
+(function () {
+const M = {
+  truc: 'var(--chu3)', net: 'var(--ngoc)', chu: 'var(--chu2)',
+  nhan: 'var(--kim)', phu: 'var(--vien)', do: 'var(--lua)', tim: 'var(--tim)', lam: 'var(--lam)'
+};
+const so = n => Math.round(n * 100) / 100;
+const boc = (rong, cao, than) =>
+  `<div class="khung-hinh"><svg viewBox="0 0 ${rong} ${cao}" width="100%" `
+  + `style="max-width:${rong}px;height:auto;display:block;margin:10px auto" `
+  + `xmlns="http://www.w3.org/2000/svg" role="img">${than}</svg></div>`;
+const mui = (id, mau) => `<marker id="${id}" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto">`
+  + `<path d="M0,0 L8,3.5 L0,7 Z" fill="${mau}"/></marker>`;
+
+/* ============================================================
+   ⑪ HỆ TRỤC Oxyz — chiếu xiên như SGK
+   diem = [{x,y,z,ten}] · hop = {a,b,c} vẽ hình hộp chữ nhật từ gốc
+   ============================================================ */
+TD.hinhOxyz = function (diem, hop) {
+  const W = 320, H = 250;
+  const O = [110, 175];
+  /* Oz thẳng đứng, Oy sang phải, Ox chiếu xiên xuống trái */
+  const dv = 26;
+  const P = (x, y, z) => [O[0] + y * dv - x * dv * 0.55, O[1] - z * dv + x * dv * 0.42];
+  const net = (a, b, mau, dut, to) =>
+    `<line x1="${so(a[0])}" y1="${so(a[1])}" x2="${so(b[0])}" y2="${so(b[1])}" stroke="${mau || M.truc}" `
+    + `stroke-width="${to || 1.6}"${dut ? ' stroke-dasharray="5 4"' : ''}/>`;
+  let ra = `<defs>${mui('mtoxyz', M.truc)}</defs>`;
+  /* ba trục */
+  const gx = P(3.3, 0, 0), gy = P(0, 4.6, 0), gz = P(0, 0, 3.4);
+  ra += `<line x1="${O[0]}" y1="${O[1]}" x2="${so(gx[0])}" y2="${so(gx[1])}" stroke="${M.truc}" stroke-width="1.7" marker-end="url(#mtoxyz)"/>`
+     + `<line x1="${O[0]}" y1="${O[1]}" x2="${so(gy[0])}" y2="${so(gy[1])}" stroke="${M.truc}" stroke-width="1.7" marker-end="url(#mtoxyz)"/>`
+     + `<line x1="${O[0]}" y1="${O[1]}" x2="${so(gz[0])}" y2="${so(gz[1])}" stroke="${M.truc}" stroke-width="1.7" marker-end="url(#mtoxyz)"/>`
+     + `<text x="${so(gx[0] - 12)}" y="${so(gx[1] + 10)}" fill="${M.chu}" font-size="11.5">x</text>`
+     + `<text x="${so(gy[0] + 6)}" y="${so(gy[1] + 4)}" fill="${M.chu}" font-size="11.5">y</text>`
+     + `<text x="${so(gz[0] - 2)}" y="${so(gz[1] - 6)}" fill="${M.chu}" font-size="11.5">z</text>`
+     + `<text x="${O[0] - 12}" y="${O[1] + 13}" fill="${M.chu}" font-size="11">O</text>`;
+  /* hình hộp chữ nhật OABC.O′A′B′C′ */
+  if (hop) {
+    const a = hop.a, b = hop.b, c = hop.c;
+    const d = {
+      O: P(0, 0, 0), A: P(a, 0, 0), B: P(a, b, 0), C: P(0, b, 0),
+      O2: P(0, 0, c), A2: P(a, 0, c), B2: P(a, b, c), C2: P(0, b, c)
+    };
+    ra += net(d.O, d.A, M.net) + net(d.A, d.B, M.net) + net(d.B, d.C, M.net, true) + net(d.C, d.O, M.net, true)
+       + net(d.O2, d.A2, M.net) + net(d.A2, d.B2, M.net) + net(d.B2, d.C2, M.net) + net(d.C2, d.O2, M.net)
+       + net(d.O, d.O2, M.net, true) + net(d.A, d.A2, M.net) + net(d.B, d.B2, M.net) + net(d.C, d.C2, M.net);
+    const ten = { A: 'A', B: 'B', C: 'C', A2: "A′", B2: "B′", C2: "C′", O2: "O′" };
+    Object.keys(ten).forEach(k => {
+      ra += `<circle cx="${so(d[k][0])}" cy="${so(d[k][1])}" r="2.6" fill="${M.nhan}"/>`
+         + `<text x="${so(d[k][0] + 7)}" y="${so(d[k][1] - 5)}" fill="${M.nhan}" font-size="11">${ten[k]}</text>`;
+    });
+  }
+  (diem || []).forEach(p => {
+    const q = P(p.x, p.y, p.z);
+    ra += net(P(0, 0, 0), q, M.tim, true, 1.3)
+       + `<circle cx="${so(q[0])}" cy="${so(q[1])}" r="3.4" fill="${M.do}"/>`
+       + `<text x="${so(q[0] + 7)}" y="${so(q[1] - 6)}" fill="${M.do}" font-size="11">${p.ten || ''}</text>`;
+  });
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑫ MIỀN PHẲNG GIỚI HẠN BỞI ĐỒ THỊ — cho bài diện tích
+   ============================================================ */
+TD.hinhMienPhang = function (f, g, tu, den, cf) {
+  const c = Object.assign({ xMin: tu - 1.4, xMax: den + 1.4, yMin: -1, yMax: 6, rong: 320, cao: 245 }, cf || {});
+  const W = c.rong, H = c.cao, le = 28;
+  const X = x => le + (x - c.xMin) / (c.xMax - c.xMin) * (W - 2 * le);
+  const Y = y => H - le - (y - c.yMin) / (c.yMax - c.yMin) * (H - 2 * le);
+  const ket = (h, tuX, denX) => {
+    const d = [];
+    for (let x = tuX; x <= denX + 1e-9; x += (denX - tuX) / 120) {
+      const y = h(x);
+      if (Number.isFinite(y)) d.push(so(X(x)) + ',' + so(Y(Math.max(c.yMin, Math.min(c.yMax, y)))));
+    }
+    return d;
+  };
+  let ra = '';
+  for (let x = Math.ceil(c.xMin); x <= Math.floor(c.xMax); x++)
+    ra += `<line x1="${so(X(x))}" y1="${le}" x2="${so(X(x))}" y2="${H - le}" stroke="${M.phu}" stroke-width="1"/>`
+       + (x !== 0 ? `<text x="${so(X(x))}" y="${so(Y(0) + 13)}" fill="${M.chu}" font-size="10" text-anchor="middle">${x}</text>` : '');
+  for (let y = Math.ceil(c.yMin); y <= Math.floor(c.yMax); y++)
+    ra += `<line x1="${le}" y1="${so(Y(y))}" x2="${W - le}" y2="${so(Y(y))}" stroke="${M.phu}" stroke-width="1"/>`;
+  /* miền tô: đi theo f rồi quay về theo g */
+  const mien = ket(f, tu, den).concat(ket(g, den, tu));
+  ra += `<polygon points="${mien.join(' ')}" fill="${M.net}" opacity="0.24" stroke="none"/>`;
+  ra += `<line x1="${le}" y1="${so(Y(0))}" x2="${W - le + 6}" y2="${so(Y(0))}" stroke="${M.truc}" stroke-width="1.6"/>`
+     + `<line x1="${so(X(0))}" y1="${le - 6}" x2="${so(X(0))}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
+     + `<text x="${W - le + 9}" y="${so(Y(0) - 5)}" fill="${M.chu}" font-size="11">x</text>`
+     + `<text x="${so(X(0) + 6)}" y="${le - 8}" fill="${M.chu}" font-size="11">y</text>`;
+  ra += `<polyline points="${ket(f, c.xMin, c.xMax).join(' ')}" fill="none" stroke="${M.net}" stroke-width="2.2"/>`;
+  ra += `<polyline points="${ket(g, c.xMin, c.xMax).join(' ')}" fill="none" stroke="${M.nhan}" stroke-width="2"/>`;
+  [tu, den].forEach(x => {
+    ra += `<line x1="${so(X(x))}" y1="${so(Y(f(x)))}" x2="${so(X(x))}" y2="${so(Y(g(x)))}" stroke="${M.do}" stroke-width="1.4" stroke-dasharray="4 3"/>`
+       + `<text x="${so(X(x))}" y="${H - 6}" fill="${M.do}" font-size="10.5" text-anchor="middle">${so(x)}</text>`;
+  });
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑬ ĐƯỜNG SỨC TỪ — nam châm thẳng, dây dẫn thẳng, ống dây
+   ============================================================ */
+TD.hinhTuTruong = function (kieu) {
+  const W = 320, H = 210;
+  let ra = `<defs>${mui('mttt', M.net)}</defs>`;
+  if (kieu === 'namcham') {
+    const x = 110, y = 92, r = 100, c = 26;
+    ra += `<rect x="${x}" y="${y}" width="${r / 2}" height="${c}" fill="${M.do}" opacity="0.85"/>`
+       + `<rect x="${x + r / 2}" y="${y}" width="${r / 2}" height="${c}" fill="${M.lam}" opacity="0.85"/>`
+       + `<text x="${x + r / 4}" y="${y + 18}" fill="var(--nen)" font-size="13" font-weight="700" text-anchor="middle">N</text>`
+       + `<text x="${x + r * 0.75}" y="${y + 18}" fill="var(--nen)" font-size="13" font-weight="700" text-anchor="middle">S</text>`;
+    /* đường sức đi ra từ cực N, vòng về cực S */
+    [26, 50, 74].forEach((h, i) => {
+      const t = x + r + 6, d = x - 6, gy = y + c / 2;
+      ra += `<path d="M ${t} ${gy} C ${t + 46} ${gy - h} ${d - 46} ${gy - h} ${d} ${gy}" fill="none" stroke="${M.net}" stroke-width="1.7" marker-end="url(#mttt)"/>`
+         + `<path d="M ${t} ${gy} C ${t + 46} ${gy + h} ${d - 46} ${gy + h} ${d} ${gy}" fill="none" stroke="${M.net}" stroke-width="1.7" marker-end="url(#mttt)"/>`;
+    });
+    ra += `<text x="${W / 2}" y="${H - 6}" fill="${M.chu}" font-size="10.5" text-anchor="middle">Đường sức từ của nam châm thẳng</text>`;
+  } else if (kieu === 'daythang') {
+    const cx = 160, cy = 96;
+    ra += `<line x1="${cx}" y1="14" x2="${cx}" y2="${H - 30}" stroke="${M.do}" stroke-width="3"/>`
+       + `<polygon points="${cx - 5},34 ${cx + 5},34 ${cx},22" fill="${M.do}"/>`
+       + `<text x="${cx + 9}" y="26" fill="${M.do}" font-size="11">I</text>`;
+    [34, 56, 78].forEach(r => {
+      ra += `<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${so(r * 0.34)}" fill="none" stroke="${M.net}" stroke-width="1.6"/>`
+         + `<polygon points="${cx + r},${cy} ${cx + r - 7},${cy - 5} ${cx + r - 7},${cy + 5}" fill="${M.net}"/>`;
+    });
+    ra += `<text x="${W / 2}" y="${H - 6}" fill="${M.chu}" font-size="10.5" text-anchor="middle">Đường sức từ của dòng điện thẳng dài</text>`;
+  } else {
+    const x = 70, y = 66, w = 180, h = 56;
+    for (let i = 0; i < 7; i++) {
+      const cx = x + 14 + i * 25;
+      ra += `<ellipse cx="${cx}" cy="${y + h / 2}" rx="9" ry="${h / 2}" fill="none" stroke="${M.do}" stroke-width="2.2"/>`;
+    }
+    ra += `<line x1="${x - 22}" y1="${y + h / 2}" x2="${x + 14}" y2="${y + h / 2}" stroke="${M.do}" stroke-width="2.2"/>`
+       + `<line x1="${x + w - 12}" y1="${y + h / 2}" x2="${x + w + 20}" y2="${y + h / 2}" stroke="${M.do}" stroke-width="2.2"/>`
+       + `<text x="${x - 26}" y="${y + h / 2 - 8}" fill="${M.do}" font-size="11">I</text>`;
+    ra += `<line x1="${x - 6}" y1="${y + h / 2}" x2="${x + w + 6}" y2="${y + h / 2}" stroke="${M.net}" stroke-width="1.8" marker-end="url(#mttt)"/>`
+       + `<text x="${x + w / 2}" y="${y + h / 2 - 10}" fill="${M.net}" font-size="11" text-anchor="middle">B</text>`
+       + `<text x="${W / 2}" y="${H - 6}" fill="${M.chu}" font-size="10.5" text-anchor="middle">Từ trường trong lòng ống dây</text>`;
+  }
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑭ BỘ DỤNG CỤ THÍ NGHIỆM — điều chế và thu khí
+   ============================================================ */
+TD.hinhThiNghiem = function (cach, tenKhi) {
+  const W = 330, H = 220;
+  let ra = `<defs>${mui('mttn', M.net)}</defs>`;
+  /* bình cầu có nhánh + đèn cồn */
+  ra += `<path d="M 46 96 L 46 62 L 78 62 L 78 96 A 30 30 0 1 1 46 96 Z" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+     + `<path d="M 34 116 A 28 28 0 0 0 90 116 L 90 112 L 34 112 Z" fill="${M.lam}" opacity="0.5"/>`
+     + `<text x="62" y="150" fill="${M.chu}" font-size="10" text-anchor="middle">hỗn hợp phản ứng</text>`
+     + `<path d="M 52 176 q 10 -16 20 0 z" fill="${M.nhan}" opacity="0.9"/>`
+     + `<rect x="50" y="176" width="24" height="14" fill="none" stroke="${M.truc}" stroke-width="1.5"/>`;
+  /* ống dẫn khí */
+  ra += `<path d="M 78 72 L 150 72" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`;
+  if (cach === 'daynuoc') {
+    ra += `<rect x="160" y="96" width="130" height="76" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+       + `<rect x="161" y="106" width="128" height="65" fill="${M.lam}" opacity="0.45"/>`
+       + `<path d="M 150 72 L 150 150 L 196 150" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+       + `<path d="M 196 150 L 196 108" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+       + `<rect x="184" y="60" width="34" height="60" rx="4" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+       + `<rect x="185" y="61" width="32" height="28" fill="${M.net}" opacity="0.35"/>`
+       + `<text x="201" y="52" fill="${M.net}" font-size="10.5" text-anchor="middle">${tenKhi || 'khí'}</text>`
+       + `<text x="225" y="190" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy nước</text>`;
+  } else {
+    const nguoc = cach === 'nguoc';
+    ra += `<path d="M 150 72 L 218 72 L 218 ${nguoc ? 96 : 130}" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`;
+    if (nguoc)
+      ra += `<path d="M 194 84 L 194 148 A 24 24 0 0 0 242 148 L 242 84 Z" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+         + `<path d="M 195 100 L 195 148 A 23 23 0 0 0 241 148 L 241 100 Z" fill="${M.net}" opacity="0.3"/>`
+         + `<text x="218" y="176" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy không khí</text>`
+         + `<text x="278" y="120" fill="${M.chu}" font-size="10" text-anchor="middle">(úp ngược bình)</text>`;
+    else
+      ra += `<path d="M 194 96 L 194 160 A 24 24 0 0 0 242 160 L 242 96 Z" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+         + `<path d="M 195 128 L 195 160 A 23 23 0 0 0 241 160 L 241 128 Z" fill="${M.net}" opacity="0.3"/>`
+         + `<text x="218" y="186" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy không khí</text>`
+         + `<text x="278" y="120" fill="${M.chu}" font-size="10" text-anchor="middle">(đặt đứng bình)</text>`;
+  }
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑮ ĐƯỜNG CHUẨN ĐỘ pH
+   ============================================================ */
+TD.hinhChuanDo = function (pHDau, pHTuongDuong, vTuongDuong) {
+  const W = 320, H = 235, le = 42, day = H - 42;
+  const vMax = vTuongDuong * 2;
+  const X = v => le + v / vMax * (W - le - 18);
+  const Y = p => day - p / 14 * (day - 22);
+  const f = v => {
+    const t = (v - vTuongDuong) / (vTuongDuong * 0.14);
+    return pHDau + (14 - pHDau - 1.2) / (1 + Math.exp(-t)) * (pHTuongDuong > 7 ? 1 : 0.86);
+  };
+  let ra = '';
+  [0, 2, 4, 6, 8, 10, 12, 14].forEach(p => {
+    ra += `<line x1="${le}" y1="${so(Y(p))}" x2="${W - 10}" y2="${so(Y(p))}" stroke="${M.phu}" stroke-width="1"/>`
+       + `<text x="${le - 5}" y="${so(Y(p) + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${p}</text>`;
+  });
+  ra += `<line x1="${le}" y1="16" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
+     + `<line x1="${le}" y1="${day}" x2="${W - 10}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
+     + `<text x="${le - 4}" y="13" fill="${M.chu}" font-size="10.5" text-anchor="end">pH</text>`
+     + `<text x="${W - 8}" y="${day + 15}" fill="${M.chu}" font-size="10.5" text-anchor="end">V dung dịch chuẩn (mL)</text>`;
+  const d = [];
+  for (let v = 0; v <= vMax; v += vMax / 200) d.push(so(X(v)) + ',' + so(Y(Math.max(0, Math.min(14, f(v))))));
+  ra += `<polyline points="${d.join(' ')}" fill="none" stroke="${M.net}" stroke-width="2.3"/>`;
+  ra += `<line x1="${so(X(vTuongDuong))}" y1="${so(Y(0))}" x2="${so(X(vTuongDuong))}" y2="${so(Y(14))}" stroke="${M.do}" stroke-width="1.3" stroke-dasharray="5 4"/>`
+     + `<circle cx="${so(X(vTuongDuong))}" cy="${so(Y(pHTuongDuong))}" r="4" fill="${M.do}"/>`
+     + `<text x="${so(X(vTuongDuong) + 8)}" y="${so(Y(pHTuongDuong) + 4)}" fill="${M.do}" font-size="10.5">điểm tương đương</text>`
+     + `<text x="${so(X(vTuongDuong))}" y="${day + 15}" fill="${M.do}" font-size="10.5" text-anchor="middle">${so(vTuongDuong)}</text>`;
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑯ SƠ ĐỒ NHÂN ĐÔI – PHIÊN MÃ – DỊCH MÃ
+   ============================================================ */
+TD.hinhDNA = function (kieu) {
+  const W = 330, H = kieu === 'dichma' ? 190 : 175;
+  const bz = (x, y, w, mau, chu) =>
+    `<rect x="${x}" y="${y}" width="${w}" height="17" rx="3" fill="${mau}" opacity="0.85"/>`
+    + `<text x="${so(x + w / 2)}" y="${y + 12.5}" fill="var(--nen)" font-size="9.5" font-weight="700" text-anchor="middle">${chu}</text>`;
+  let ra = `<defs>${mui('mtadn', M.net)}${mui('mtadn2', M.nhan)}</defs>`;
+  if (kieu === 'nhandoi') {
+    ra += `<text x="14" y="20" fill="${M.chu}" font-size="10.5">Chạc chữ Y khi DNA nhân đôi</text>`;
+    ra += `<line x1="20" y1="88" x2="150" y2="88" stroke="${M.truc}" stroke-width="2.4"/>`
+       + `<line x1="20" y1="104" x2="150" y2="104" stroke="${M.truc}" stroke-width="2.4"/>`;
+    for (let x = 26; x < 148; x += 12) ra += `<line x1="${x}" y1="88" x2="${x}" y2="104" stroke="${M.phu}" stroke-width="1.3"/>`;
+    ra += `<line x1="150" y1="88" x2="290" y2="52" stroke="${M.truc}" stroke-width="2.4"/>`
+       + `<line x1="150" y1="104" x2="290" y2="140" stroke="${M.truc}" stroke-width="2.4"/>`;
+    /* mạch mới: liên tục ở trên, từng đoạn Okazaki ở dưới */
+    ra += `<line x1="164" y1="62" x2="286" y2="32" stroke="${M.net}" stroke-width="2.6" marker-end="url(#mtadn)"/>`
+       + `<text x="228" y="28" fill="${M.net}" font-size="10" text-anchor="middle">mạch liên tục</text>`;
+    [0, 1, 2].forEach(i => {
+      const x1 = 176 + i * 40, x2 = x1 + 30, y1 = 116 + i * 9.6, y2 = y1 + 7.6;
+      ra += `<line x1="${x2}" y1="${y2}" x2="${x1}" y2="${y1}" stroke="${M.nhan}" stroke-width="2.6" marker-end="url(#mtadn2)"/>`;
+    });
+    ra += `<text x="236" y="164" fill="${M.nhan}" font-size="10" text-anchor="middle">các đoạn Okazaki (mạch gián đoạn)</text>`
+       + `<text x="150" y="82" fill="${M.do}" font-size="10.5" text-anchor="middle">chạc</text>`;
+  } else if (kieu === 'phienma') {
+    ra += `<text x="14" y="20" fill="${M.chu}" font-size="10.5">Phiên mã: RNA được tổng hợp từ mạch mã gốc</text>`;
+    ra += `<line x1="24" y1="70" x2="300" y2="70" stroke="${M.truc}" stroke-width="2.4"/>`
+       + `<text x="14" y="66" fill="${M.chu}" font-size="9.5" text-anchor="end"></text>`
+       + `<text x="24" y="60" fill="${M.chu}" font-size="9.5">3′</text><text x="296" y="60" fill="${M.chu}" font-size="9.5">5′</text>`
+       + `<line x1="24" y1="102" x2="300" y2="102" stroke="${M.truc}" stroke-width="2.4"/>`
+       + `<text x="24" y="118" fill="${M.chu}" font-size="9.5">5′</text><text x="296" y="118" fill="${M.chu}" font-size="9.5">3′</text>`
+       + `<text x="160" y="62" fill="${M.do}" font-size="10" text-anchor="middle">mạch mã gốc (3′ → 5′)</text>`
+       + `<text x="160" y="118" fill="${M.chu}" font-size="10" text-anchor="middle">mạch bổ sung</text>`;
+    ra += `<ellipse cx="150" cy="86" rx="42" ry="24" fill="${M.tim}" opacity="0.35" stroke="${M.tim}" stroke-width="1.6"/>`
+       + `<text x="150" y="90" fill="${M.chu}" font-size="9.5" text-anchor="middle">RNA polymerase</text>`;
+    ra += `<line x1="112" y1="140" x2="240" y2="140" stroke="${M.net}" stroke-width="2.8" marker-end="url(#mtadn)"/>`
+       + `<text x="176" y="158" fill="${M.net}" font-size="10" text-anchor="middle">mRNA mới (5′ → 3′)</text>`;
+  } else {
+    ra += `<text x="14" y="20" fill="${M.chu}" font-size="10.5">Dịch mã: ribôxôm trượt trên mRNA theo chiều 5′ → 3′</text>`;
+    ra += `<line x1="20" y1="104" x2="310" y2="104" stroke="${M.truc}" stroke-width="2.6"/>`
+       + `<text x="22" y="122" fill="${M.chu}" font-size="9.5">5′</text><text x="302" y="122" fill="${M.chu}" font-size="9.5">3′</text>`;
+    const bo = ['AUG', 'GXU', 'AAA', 'XGU', 'UAA'];
+    bo.forEach((b, i) => {
+      const x = 34 + i * 54;
+      ra += bz(x, 88, 46, i === 0 ? M.nhan : i === bo.length - 1 ? M.do : M.lam, b);
+    });
+    ra += `<text x="57" y="80" fill="${M.nhan}" font-size="9.5" text-anchor="middle">mở đầu</text>`
+       + `<text x="273" y="80" fill="${M.do}" font-size="9.5" text-anchor="middle">kết thúc</text>`;
+    ra += `<ellipse cx="150" cy="132" rx="46" ry="20" fill="${M.tim}" opacity="0.35" stroke="${M.tim}" stroke-width="1.6"/>`
+       + `<text x="150" y="136" fill="${M.chu}" font-size="9.5" text-anchor="middle">ribôxôm</text>`
+       + `<line x1="200" y1="160" x2="262" y2="160" stroke="${M.net}" stroke-width="2.2" marker-end="url(#mtadn)"/>`
+       + `<text x="180" y="176" fill="${M.net}" font-size="10" text-anchor="end">chiều trượt</text>`;
+  }
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑰ ĐỘT BIẾN CẤU TRÚC NHIỄM SẮC THỂ
+   ============================================================ */
+TD.hinhNST = function (goc, sau, ten) {
+  const W = 330, H = 150;
+  const ve = (ds, y, nhan, mau) => {
+    let r = `<text x="14" y="${y + 14}" fill="${M.chu}" font-size="10.5">${nhan}</text>`;
+    ds.forEach((c, i) => {
+      const x = 108 + i * 30;
+      r += `<rect x="${x}" y="${y}" width="27" height="22" rx="3" fill="${mau}" opacity="${c === '·' ? 0.15 : 0.85}" stroke="${M.truc}" stroke-width="1.2"/>`
+        + (c === '·' ? '' : `<text x="${x + 13.5}" y="${y + 16}" fill="var(--nen)" font-size="11" font-weight="700" text-anchor="middle">${c}</text>`);
+    });
+    return r;
+  };
+  let ra = ve(goc, 30, 'Trước:', M.net) + ve(sau, 86, 'Sau:', M.nhan);
+  ra += `<text x="${W / 2}" y="${H - 6}" fill="${M.chu}" font-size="10.5" text-anchor="middle">${ten || ''}</text>`;
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑱ TRỤC THỜI GIAN — cho Lịch sử
+   moc = [{nam, ten}] · các mốc chia đều cho dễ đọc, nhãn so le
+   ============================================================ */
+TD.hinhTrucThoiGian = function (moc, tieuDe) {
+  const n = moc.length;
+  const W = Math.max(340, 72 * n + 76), H = 176;
+  const y = 104, le = 50;
+  const X = i => le + (n === 1 ? (W - 2 * le) / 2 : i * (W - 2 * le) / (n - 1));
+  let ra = `<defs>${mui('mttg', M.truc)}</defs>`
+    + `<line x1="14" y1="${y}" x2="${W - 12}" y2="${y}" stroke="${M.truc}" stroke-width="2" marker-end="url(#mttg)"/>`;
+  if (tieuDe) ra += `<text x="${W / 2}" y="18" fill="${M.chu}" font-size="11.5" text-anchor="middle">${tieuDe}</text>`;
+  moc.forEach((m, i) => {
+    const x = so(X(i));
+    /* nhãn so le trên – dưới để chữ dài không đè nhau */
+    const tren = i % 2 === 0;
+    const yNhan = tren ? y - 30 : y + 44;
+    const yChan = tren ? y - 12 : y + 12;
+    ra += `<line x1="${x}" y1="${y - 7}" x2="${x}" y2="${y + 7}" stroke="${M.nhan}" stroke-width="2.2"/>`
+       + `<circle cx="${x}" cy="${y}" r="4" fill="${M.nhan}"/>`
+       + `<line x1="${x}" y1="${yChan}" x2="${x}" y2="${so(yNhan + (tren ? 6 : -12))}" stroke="${M.phu}" stroke-width="1.1" stroke-dasharray="3 3"/>`
+       + `<text x="${x}" y="${so(tren ? y + 22 : y - 16)}" fill="${M.nhan}" font-size="12" font-weight="700" text-anchor="middle">${m.nam}</text>`;
+    /* tên sự kiện cắt thành tối đa hai dòng */
+    const chu = String(m.ten || '').split(' ');
+    const d1 = [], d2 = [];
+    chu.forEach(t => { (d1.join(' ').length + t.length <= 15 && !d2.length ? d1 : d2).push(t); });
+    /* nhãn ở hai mốc ngoài cùng dễ lòi ra khỏi khung — kéo vào cho vừa */
+    const dai = Math.max(d1.join(' ').length, d2.join(' ').length) * 2.75;
+    const xN = so(Math.min(Math.max(x, 3 + dai), W - 3 - dai));
+    ra += `<text x="${xN}" y="${so(yNhan)}" fill="${M.chu}" font-size="10.5" text-anchor="middle">${d1.join(' ')}</text>`;
+    if (d2.length) ra += `<text x="${xN}" y="${so(yNhan + 13)}" fill="${M.chu}" font-size="10.5" text-anchor="middle">${d2.join(' ')}</text>`;
+  });
   return boc(W, H, ra);
 };
 })();
@@ -18499,7 +18849,7 @@ them('sinh_ct', [
   ct: '<b>Ứng dụng trong y học:</b> sản xuất insulin, hormone sinh trưởng, vaccine tái tổ hợp; '
     + 'xét nghiệm gene và liệu pháp gene.<br>'
     + '<b>Trong nông nghiệp:</b> giống kháng sâu bệnh, chịu hạn, chịu mặn, tăng hàm lượng dinh dưỡng.<br>'
-    + '<b>Trong pháp y:</b> giám định ADN xác định huyết thống và truy tìm thủ phạm.<br>'
+    + '<b>Trong pháp y:</b> giám định DNA xác định huyết thống và truy tìm thủ phạm.<br>'
     + '<b>Ưu điểm so với chọn giống truyền thống:</b> nhanh hơn nhiều, chuyển được gene giữa các loài xa nhau, '
     + 'kiểm soát được đặc tính muốn có.<br>'
     + '<b>Vấn đề đặt ra:</b> an toàn sinh học (phát tán gene ra tự nhiên) · đa dạng sinh học · '
@@ -20077,11 +20427,11 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
   tao(R) {
     const N = R.nguyen(30, 300) * 10;
     const L = N / 2 * 3.4;
-    return MC(R, `Một đoạn phân tử ADN có chiều dài ${S(L, 1)} Å. Tổng số nuclêôtit của đoạn ADN đó bằng bao nhiêu?`,
+    return MC(R, `Một đoạn phân tử DNA có chiều dài ${S(L, 1)} Å. Tổng số nuclêôtit của đoạn DNA đó bằng bao nhiêu?`,
       N, [N / 2, N * 2, Math.round(L / 3.4 * 2 / 3), N / 4],
       `L = (N/2)·3,4 Å ⇒ N = 2L/3,4\n`
       + `N = 2·${S(L, 1)}/3,4 = ${N} nuclêôtit.`,
-      'ADN có HAI mạch nên chiều dài tính theo N/2 nuclêôtit của một mạch, mỗi nuclêôtit dài 3,4 Å. Quên nhân 2 là ra đúng một nửa.',
+      'DNA có HAI mạch nên chiều dài tính theo N/2 nuclêôtit của một mạch, mỗi nuclêôtit dài 3,4 Å. Quên nhân 2 là ra đúng một nửa.',
       x => S(x) + ' nuclêôtit');
   } },
 
@@ -20092,7 +20442,7 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
     const A = Math.round(N * pA / 100);
     const G = N / 2 - A;
     if (G <= 0) return null;
-    return MC(R, `Một phân tử ADN có tổng số ${N} nuclêôtit, trong đó ađênin chiếm ${pA}% tổng số nuclêôtit. Số nuclêôtit loại guanin của phân tử này bằng bao nhiêu?`,
+    return MC(R, `Một phân tử DNA có tổng số ${N} nuclêôtit, trong đó ađênin chiếm ${pA}% tổng số nuclêôtit. Số nuclêôtit loại guanin của phân tử này bằng bao nhiêu?`,
       G, [N / 2 + A, A, N - A, Math.round(N * (100 - pA) / 100)],
       `Theo nguyên tắc bổ sung: A = T, G = X và A + G = N/2.\n`
       + `A = ${pA}%·${N} = ${A}\n`
@@ -20105,7 +20455,7 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
   tao(R) {
     const A = R.nguyen(20, 150) * 10, G = R.nguyen(20, 150) * 10;
     const H = 2 * A + 3 * G;
-    return MC(R, `Một phân tử ADN có ${A} nuclêôtit loại A và ${G} nuclêôtit loại G. Số liên kết hiđrô của phân tử ADN này bằng bao nhiêu?`,
+    return MC(R, `Một phân tử DNA có ${A} nuclêôtit loại A và ${G} nuclêôtit loại G. Số liên kết hiđrô của phân tử DNA này bằng bao nhiêu?`,
       H, [3 * A + 2 * G, A + G, 2 * (A + G), 3 * (A + G)],
       `Cặp A – T có 2 liên kết hiđrô, cặp G – X có 3 liên kết hiđrô.\n`
       + `H = 2A + 3G = 2·${A} + 3·${G} = ${2 * A} + ${3 * G} = ${H}.`,
@@ -20913,7 +21263,7 @@ themCam('gdkt', [
 
 /* ---------------- SINH HỌC ---------------- */
 themCam('sinh', [
-{ nhom: '👁 Nhìn là biết', ten: 'Sáu công thức ADN – gen ra đáp án trong một dòng', cap: 1,
+{ nhom: '👁 Nhìn là biết', ten: 'Sáu công thức DNA – gen ra đáp án trong một dòng', cap: 1,
   ct: '<b>N = 2A + 2G</b> · <b>A = T</b>, <b>G = X</b> · <b>%A + %G = 50%</b><br>'
     + '<b>Chiều dài</b> L = (N/2) × 3,4 Å ⇒ N = 2L/3,4<br>'
     + '<b>Số liên kết hiđrô</b> H = 2A + 3G<br>'
@@ -22451,6 +22801,1050 @@ TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
               'sinh-hinh-tangtruong', 'sinh-hinh-thap', 'sinh-hinh-luoi',
               'dia-hinh-duong', 'dia-hinh-mien', 'dia-hinh-kethop',
               'gdkt-hinh-tangtruong', 'gdkt-hinh-lamphat', 'gdkt-hinh-cocau', 'gdkt-hinh-tietkiem'];
+  for (const mon of Object.keys(TD.GEN))
+    for (const t of TD.GEN[mon]) if (MA.indexOf(t.ma) >= 0) t._hinh = true;
+})();
+})();
+
+</script>
+<script>
+/* ============================================================
+   CÂU HỎI CÓ HÌNH — ĐỢT 3: NỐT NHỮNG DẠNG CÒN THIẾU
+   Tám dạng hình mà đề thật có nhưng app còn trống hẳn: hệ trục
+   Oxyz, miền phẳng giới hạn bởi đồ thị, đường sức từ, bộ dụng cụ
+   thí nghiệm, đường chuẩn độ pH, nhân đôi – phiên mã – dịch mã, và
+   đột biến cấu trúc nhiễm sắc thể.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const S = TD.soVN, T = TD.lamTron, D = TD.dapSo;
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n`
+      + TD.khoiLoai(opts, it.d, it.sv, 'không đọc đúng thông tin trên hình.'),
+    meo: meo };
+};
+const baNhieu = (dung, ung) => {
+  const ra = [];
+  for (const x of ung) if (x !== dung && ra.indexOf(x) < 0) ra.push(x);
+  return ra.length >= 3 ? ra.slice(0, 3) : null;
+};
+
+/* ============================================================
+   TOÁN — HỆ TRỤC Oxyz VÀ MIỀN PHẲNG
+   ============================================================ */
+TD.GEN.toan = (TD.GEN.toan || []).concat([
+
+{ ma: 'toan-hinh-oxyz', chuong: 'Oxyz', muc: 2, dang: 'mc',
+  tao(R) {
+    const a = R.nguyen(1, 3), b = R.nguyen(2, 4), c = R.nguyen(1, 3);
+    const hinh = TD.hinhOxyz(null, { a: a, b: b, c: c });
+    const hoi = R.chon(['toaDo', 'vecto']);
+    if (hoi === 'toaDo') {
+      const bo = t => `(${t.join('; ')})`;
+      const dung = bo([a, b, c]);
+      const nhieu = baNhieu(dung, [bo([b, a, c]), bo([a, c, b]), bo([c, b, a]), bo([a, b, 0]), bo([0, b, c])]);
+      if (!nhieu) return null;
+      return MC(R, `Trong không gian Oxyz cho hình hộp chữ nhật OABC.O′A′B′C′ có OA = ${a} nằm trên tia Ox, `
+        + `OC = ${b} nằm trên tia Oy và OO′ = ${c} nằm trên tia Oz (như hình vẽ).${hinh}Toạ độ của điểm B′ là gì?`,
+        { d: dung, s: nhieu,
+          sv: { [bo([b, a, c])]: 'đảo hoành độ với tung độ — OA nằm trên Ox nên hoành độ phải là ' + a,
+                [bo([a, b, 0])]: 'đây là toạ độ điểm B nằm trên mặt đáy, chưa nâng lên độ cao ' + c,
+                [bo([0, b, c])]: 'đây là toạ độ điểm C′, thiếu phần trên trục Ox' },
+          v: `B′ là đỉnh đối diện với O qua tâm hình hộp, nên cả ba toạ độ đều khác 0.\n`
+            + `· Hình chiếu trên Ox bằng OA = ${a}\n· Hình chiếu trên Oy bằng OC = ${b}\n· Hình chiếu trên Oz bằng OO′ = ${c}\n`
+            + `Vậy B′${dung}.` },
+        'Toạ độ một đỉnh của hình hộp đặt tại gốc O chính là ba kích thước theo đúng thứ tự Ox, Oy, Oz. '
+        + 'Đỉnh nào nằm trên mặt đáy thì cao độ z bằng 0, đỉnh nào nằm trên mặt bên chứa O thì có một toạ độ bằng 0.');
+    }
+    const bo = t => `(${t.join('; ')})`;
+    const dung = bo([-a, b, c]);
+    const nhieu = baNhieu(dung, [bo([a, b, c]), bo([a, -b, c]), bo([-a, -b, -c]), bo([b, -a, c])]);
+    if (!nhieu) return null;
+    return MC(R, `Trong không gian Oxyz cho hình hộp chữ nhật OABC.O′A′B′C′ như hình vẽ, với OA = ${a} trên tia Ox, `
+      + `OC = ${b} trên tia Oy, OO′ = ${c} trên tia Oz.${hinh}Toạ độ của vectơ AC′ là gì?`,
+      { d: dung, s: nhieu,
+        sv: { [bo([a, b, c])]: 'đây là vectơ OB′, không phải AC′',
+              [bo([-a, -b, -c])]: 'sai dấu hai toạ độ sau: C′ có tung độ và cao độ DƯƠNG' },
+        v: `Xác định toạ độ hai đầu mút trước:\n· A(${a}; 0; 0) vì A nằm trên tia Ox\n· C′(0; ${b}; ${c}) vì C′ nằm trên mặt phẳng Oyz\n`
+          + `AC′ = (x_C′ − x_A; y_C′ − y_A; z_C′ − z_A) = (0 − ${a}; ${b} − 0; ${c} − 0) = ${dung}.` },
+      'Vectơ luôn là ĐIỂM NGỌN trừ ĐIỂM GỐC. Với hình hộp đặt ở gốc toạ độ, cứ đọc từng đỉnh ra toạ độ trước rồi mới trừ, đừng nhẩm tắt.');
+  } },
+
+{ ma: 'toan-hinh-dientich', chuong: 'Ứng dụng tích phân', muc: 4, dang: 'tln',
+  tao(R) {
+    /* miền giữa parabol y = k − a(x − m)² và đường thẳng y = n */
+    const a = R.chon([1, 2]), m = R.nguyen(0, 2), r = R.nguyen(1, 3);
+    const n = R.nguyen(0, 3);
+    const k = n + a * r * r;                        /* hai giao điểm tại m ± r */
+    const f = x => k - a * (x - m) * (x - m);
+    const g = () => n;
+    const tu = m - r, den = m + r;
+    const dt = T(4 * a * r * r * r / 3, 4);         /* ∫(f − g) = 4ar³/3 */
+    const hinh = TD.hinhMienPhang(f, g, tu, den,
+      { xMin: tu - 1.6, xMax: den + 1.6, yMin: Math.min(0, n) - 1, yMax: k + 1.6 });
+    return {
+      q: `Tính diện tích hình phẳng được tô đậm trong hình vẽ, giới hạn bởi parabol `
+        + `y = ${TD.daThuc([[-a, '(x − ' + TD.so(m) + ')²']])} + ${TD.so(k)} và đường thẳng y = ${TD.so(n)}.${hinh}`
+        + `(làm tròn đến hàng phần trăm)`,
+      ans: D(dt, 2),
+      giai: `Bước 1 — đọc hình: miền tô nằm giữa parabol (đường cong) ở TRÊN và đường thẳng ở DƯỚI, `
+        + `hai cận là hoành độ hai giao điểm, trên hình là x = ${TD.so(tu)} và x = ${TD.so(den)}.\n`
+        + `Bước 2 — tìm cận bằng cách giải phương trình hoành độ giao điểm:\n`
+        + `  ${TD.so(k)} − ${TD.so(a)}(x − ${TD.so(m)})² = ${TD.so(n)} ⇔ (x − ${TD.so(m)})² = ${TD.so(r * r)} ⇔ x = ${TD.so(tu)} hoặc x = ${TD.so(den)}.\n`
+        + `Bước 3 — công thức diện tích: S = ∫ từ ${TD.so(tu)} đến ${TD.so(den)} của |f(x) − g(x)| dx.\n`
+        + `  Vì trên đoạn này parabol nằm TRÊN đường thẳng nên bỏ được dấu giá trị tuyệt đối:\n`
+        + `  f(x) − g(x) = ${TD.so(a * r * r)} − ${TD.so(a)}(x − ${TD.so(m)})²\n`
+        + `Bước 4 — tính tích phân:\n`
+        + `  S = 4·${TD.so(a)}·${TD.so(r)}³/3 = ${D(dt, 2)}.`,
+      meo: 'Nhìn hình để biết đường nào nằm TRÊN rồi lấy trên trừ dưới — làm vậy thì bỏ được dấu giá trị tuyệt đối. '
+        + 'Nếu hai đồ thị cắt nhau nhiều lần thì phải chia đoạn, mỗi đoạn xét lại xem đường nào ở trên.'
+    };
+  } }
+
+]);
+
+/* ============================================================
+   LÝ — ĐƯỜNG SỨC TỪ
+   ============================================================ */
+TD.GEN.ly = (TD.GEN.ly || []).concat([
+
+{ ma: 'ly-hinh-tutruong', chuong: 'Từ trường', muc: 2, dang: 'mc',
+  tao(R) {
+    const kieu = R.chon(['namcham', 'daythang', 'ongday']);
+    const hinh = TD.hinhTuTruong(kieu);
+    if (kieu === 'namcham')
+      return MC(R, `Hình vẽ mô tả đường sức từ của một nam châm thẳng.${hinh}Phát biểu nào sau đây đúng?`,
+        { d: 'Bên ngoài nam châm, đường sức từ đi ra từ cực Bắc và đi vào cực Nam',
+          s: ['Bên ngoài nam châm, đường sức từ đi ra từ cực Nam và đi vào cực Bắc',
+              'Đường sức từ xuất phát từ cực Bắc rồi kết thúc lơ lửng trong không gian',
+              'Hai đường sức từ có thể cắt nhau tại điểm nằm giữa hai cực'],
+          sv: { 'Bên ngoài nam châm, đường sức từ đi ra từ cực Nam và đi vào cực Bắc': 'ngược chiều mũi tên trên hình',
+                'Đường sức từ xuất phát từ cực Bắc rồi kết thúc lơ lửng trong không gian': 'đường sức từ luôn KHÉP KÍN, đi vào cực Nam rồi xuyên qua lòng nam châm về cực Bắc',
+                'Hai đường sức từ có thể cắt nhau tại điểm nằm giữa hai cực': 'nếu cắt nhau thì tại giao điểm có hai hướng của B, vô lí — đường sức từ không bao giờ cắt nhau' },
+          v: `Nhìn chiều mũi tên trên hình: các đường sức đi RA từ đầu N (cực Bắc), vòng ra ngoài rồi đi VÀO đầu S (cực Nam).\n`
+            + `Trong lòng nam châm, chúng tiếp tục đi từ S sang N để khép kín — đó là lí do đường sức từ luôn là đường cong khép kín, khác hẳn đường sức điện.` },
+        'Ba tính chất phải nhớ: ① đường sức từ luôn KHÉP KÍN ② bên ngoài nam châm đi từ N sang S, bên trong thì ngược lại '
+        + '③ không bao giờ cắt nhau, và chỗ nào dày hơn thì từ trường mạnh hơn.');
+    if (kieu === 'daythang')
+      return MC(R, `Hình vẽ mô tả đường sức từ của dòng điện chạy trong dây dẫn thẳng dài (mũi tên trên dây là chiều dòng điện).${hinh}Đường sức từ trong trường hợp này có dạng gì?`,
+        { d: 'Những đường tròn đồng tâm nằm trong mặt phẳng vuông góc với dây, tâm nằm trên dây',
+          s: ['Những đường thẳng song song với dây dẫn',
+              'Những đường tròn có tâm nằm ngoài dây dẫn',
+              'Những đường thẳng hướng thẳng ra xa dây theo mọi phía'],
+          sv: { 'Những đường thẳng song song với dây dẫn': 'đó là dạng đường sức trong lòng ống dây, không phải quanh dây thẳng',
+                'Những đường tròn có tâm nằm ngoài dây dẫn': 'tâm của các đường tròn luôn nằm ĐÚNG trên dây dẫn',
+                'Những đường thẳng hướng thẳng ra xa dây theo mọi phía': 'đó là dạng đường sức ĐIỆN của điện tích điểm, không phải từ trường' },
+          v: `Trên hình, các đường sức là những đường tròn bao quanh dây, tâm nằm trên dây và mặt phẳng chứa chúng vuông góc với dây.\n`
+            + `Chiều xác định bằng quy tắc nắm tay phải: ngón cái chỉ chiều dòng điện, bốn ngón còn lại khum theo chiều đường sức.\n`
+            + `Độ lớn cảm ứng từ: B = 2·10⁻⁷·I/r — càng xa dây thì càng yếu, nên trên hình các vòng ngoài thưa hơn.` },
+        'Quy tắc nắm tay phải cho dây thẳng: ngón CÁI theo chiều dòng điện, bốn ngón khum lại chỉ chiều đường sức. '
+        + 'Với ống dây thì ngược lại — bốn ngón theo chiều dòng điện, ngón cái chỉ chiều B trong lòng ống.');
+    return MC(R, `Hình vẽ mô tả từ trường bên trong một ống dây có dòng điện chạy qua.${hinh}Từ trường trong lòng ống dây có đặc điểm gì?`,
+      { d: 'Là từ trường đều, các đường sức song song và cách đều nhau',
+        s: ['Từ trường mạnh nhất ở sát thành ống và yếu dần vào giữa',
+            'Các đường sức là những đường tròn đồng tâm quanh trục ống',
+            'Từ trường bên trong bằng không, chỉ tồn tại bên ngoài ống'],
+        sv: { 'Từ trường mạnh nhất ở sát thành ống và yếu dần vào giữa': 'trong lòng ống dây dài, cảm ứng từ gần như như nhau ở mọi điểm',
+              'Các đường sức là những đường tròn đồng tâm quanh trục ống': 'đó là dạng đường sức của DÂY THẲNG, không phải trong lòng ống dây',
+              'Từ trường bên trong bằng không, chỉ tồn tại bên ngoài ống': 'ngược lại — trong lòng ống dây từ trường mạnh và đều, bên ngoài mới yếu' },
+        v: `Trên hình, các đường sức trong lòng ống là những đường thẳng song song và cách đều — đó chính là dấu hiệu của TỪ TRƯỜNG ĐỀU.\n`
+          + `Cảm ứng từ trong lòng ống dây: B = 4π·10⁻⁷·n·I với n là số vòng dây trên một mét chiều dài.` },
+      'Từ trường ĐỀU là từ trường có đường sức song song, cùng chiều và cách đều nhau. '
+      + 'Hai nơi tạo được từ trường đều trong chương trình: lòng ống dây dài có dòng điện và khoảng giữa hai cực của nam châm chữ U.');
+  } }
+
+]);
+
+/* ============================================================
+   HOÁ — DỤNG CỤ THÍ NGHIỆM VÀ CHUẨN ĐỘ
+   ============================================================ */
+TD.GEN.hoa = (TD.GEN.hoa || []).concat([
+
+{ ma: 'hoa-hinh-thunghiem', chuong: 'Phi kim – Vô cơ', muc: 3, dang: 'mc',
+  tao(R) {
+    const ds = [
+      { khi: 'O₂', M: 32, tan: false, cach: 'daynuoc',
+        v: 'O₂ tan rất ít trong nước nên thu được bằng cách đẩy nước; cách này còn cho khí sạch hơn vì hơi nước cuốn theo tạp chất tan.' },
+      { khi: 'H₂', M: 2, tan: false, cach: 'daynuoc',
+        v: 'H₂ hầu như không tan trong nước nên thu bằng cách đẩy nước. Nếu thu bằng đẩy không khí thì phải ÚP NGƯỢC bình vì H₂ nhẹ hơn không khí rất nhiều.' },
+      { khi: 'CO₂', M: 44, tan: true, cach: 'xuoi',
+        v: 'CO₂ tan được trong nước nên không thu bằng đẩy nước. M = 44 > 29 nên nặng hơn không khí, phải đặt ĐỨNG bình để khí chìm xuống đáy.' },
+      { khi: 'NH₃', M: 17, tan: true, cach: 'nguoc',
+        v: 'NH₃ tan rất nhiều trong nước (1 lít nước hoà tan tới hàng trăm lít khí) nên tuyệt đối không thu bằng đẩy nước. M = 17 < 29 nên nhẹ hơn không khí, phải ÚP NGƯỢC bình.' },
+      { khi: 'HCl', M: 36.5, tan: true, cach: 'xuoi',
+        v: 'HCl tan rất mạnh trong nước nên không thu bằng đẩy nước. M = 36,5 > 29 nên nặng hơn không khí, đặt đứng bình.' },
+      { khi: 'Cl₂', M: 71, tan: true, cach: 'xuoi',
+        v: 'Cl₂ tan được trong nước và còn phản ứng với nước. M = 71 > 29 nên nặng hơn không khí, thu bằng cách đẩy không khí với bình đặt đứng.' }
+    ];
+    const it = R.chon(ds);
+    const hinh = TD.hinhThiNghiem(it.cach, it.khi);
+    const dung = it.cach === 'daynuoc' ? 'Đẩy nước'
+      : it.cach === 'nguoc' ? 'Đẩy không khí, úp ngược bình' : 'Đẩy không khí, đặt đứng bình';
+    return MC(R, `Hình vẽ mô tả bộ dụng cụ điều chế và thu khí <b>${it.khi}</b> trong phòng thí nghiệm.${hinh}`
+      + `Vì sao khí ${it.khi} được thu theo cách như hình vẽ?`,
+      { d: dung === 'Đẩy nước'
+            ? `Vì ${it.khi} tan rất ít trong nước`
+            : (it.M > 29 ? `Vì ${it.khi} nặng hơn không khí và tan được trong nước` : `Vì ${it.khi} nhẹ hơn không khí và tan nhiều trong nước`),
+        s: baNhieu(dung === 'Đẩy nước'
+            ? `Vì ${it.khi} tan rất ít trong nước`
+            : (it.M > 29 ? `Vì ${it.khi} nặng hơn không khí và tan được trong nước` : `Vì ${it.khi} nhẹ hơn không khí và tan nhiều trong nước`),
+          [`Vì ${it.khi} tan rất ít trong nước`,
+           `Vì ${it.khi} nặng hơn không khí và tan được trong nước`,
+           `Vì ${it.khi} nhẹ hơn không khí và tan nhiều trong nước`,
+           `Vì ${it.khi} phản ứng mạnh với thuỷ tinh nên phải dùng bình kín`,
+           `Vì ${it.khi} chỉ tồn tại ở nhiệt độ rất thấp`]) || [],
+        v: `${it.v}\n\nHai câu hỏi quyết định cách thu khí:\n`
+          + `① Khí có tan trong nước không? Không tan ⇒ thu bằng ĐẨY NƯỚC (sạch nhất).\n`
+          + `② Nếu tan thì so phân tử khối với 29 (khối lượng mol trung bình của không khí): nặng hơn ⇒ đặt ĐỨNG bình, nhẹ hơn ⇒ ÚP NGƯỢC bình.\n`
+          + `Ở đây M(${it.khi}) = ${S(it.M)} ${it.M > 29 ? '> 29 nên nặng hơn không khí' : '< 29 nên nhẹ hơn không khí'}.` },
+      'Con số 29 là mốc phải thuộc — đó là khối lượng mol trung bình của không khí. '
+      + 'Nhóm khí nhẹ hơn 29 hay hỏi: H₂ (2), He (4), CH₄ (16), NH₃ (17), N₂ (28) — mấy khí này thu bằng cách úp ngược bình.');
+  } },
+
+{ ma: 'hoa-hinh-chuando', chuong: 'Phi kim – Vô cơ', muc: 4, dang: 'tln',
+  tao(R) {
+    const Cb = R.chon([0.05, 0.1, 0.2]);            /* nồng độ NaOH chuẩn */
+    const Va = R.chon([10, 20, 25]);                /* thể tích acid lấy để chuẩn độ */
+    const Vb = R.nguyen(8, 30);                     /* thể tích tại điểm tương đương */
+    const Ca = T(Cb * Vb / Va, 4);
+    if (Ca < 0.01 || Ca > 0.6) return null;
+    const hinh = TD.hinhChuanDo(1.5, 7, Vb);
+    return {
+      q: `Chuẩn độ ${Va} mL dung dịch HCl chưa biết nồng độ bằng dung dịch NaOH ${S(Cb, 2)} M. `
+        + `Đường chuẩn độ thu được như hình vẽ.${hinh}`
+        + `Dựa vào đồ thị, xác định nồng độ mol của dung dịch HCl. (làm tròn đến hàng phần nghìn)`,
+      ans: D(Ca, 3),
+      giai: `Bước 1 — đọc hình: pH tăng vọt tại thời điểm thêm ${S(Vb)} mL NaOH, đó là ĐIỂM TƯƠNG ĐƯƠNG. `
+        + `Với phản ứng acid mạnh và base mạnh, điểm tương đương có pH = 7.\n`
+        + `Bước 2 — tại điểm tương đương, số mol acid và base phản ứng vừa hết nhau theo tỉ lệ 1 : 1:\n`
+        + `  HCl + NaOH → NaCl + H₂O\n  n(HCl) = n(NaOH)\n`
+        + `Bước 3 — tính số mol NaOH đã dùng:\n`
+        + `  n(NaOH) = ${S(Cb, 2)} × ${S(Vb / 1000, 4)} = ${S(T(Cb * Vb / 1000, 5), 5)} mol\n`
+        + `Bước 4 — suy ra nồng độ acid:\n`
+        + `  C(HCl) = n/V = ${S(T(Cb * Vb / 1000, 5), 5)}/${S(Va / 1000, 4)} = ${D(Ca, 3)} M.\n`
+        + `Bước 5 — có thể dùng thẳng công thức rút gọn cho tỉ lệ 1 : 1: C_a·V_a = C_b·V_b.`,
+      meo: 'Điểm tương đương là chỗ đồ thị DỰNG ĐỨNG, đọc hoành độ tại đó chứ đừng đọc chỗ pH = 7 nếu acid hoặc base yếu. '
+        + 'Acid mạnh + base mạnh thì điểm tương đương ở pH = 7; acid yếu + base mạnh thì pH > 7; acid mạnh + base yếu thì pH < 7.'
+    };
+  } }
+
+]);
+
+/* ============================================================
+   SINH — CƠ CHẾ PHÂN TỬ VÀ ĐỘT BIẾN NST
+   ============================================================ */
+TD.GEN.sinh = (TD.GEN.sinh || []).concat([
+
+{ ma: 'sinh-hinh-cochephantu', chuong: 'Di truyền phân tử', muc: 3, dang: 'mc',
+  tao(R) {
+    const kieu = R.chon(['nhandoi', 'phienma', 'dichma']);
+    const hinh = TD.hinhDNA(kieu);
+    if (kieu === 'nhandoi')
+      return MC(R, `Hình vẽ mô tả một chạc chữ Y trong quá trình nhân đôi DNA.${hinh}Vì sao một mạch mới được tổng hợp liên tục còn mạch kia lại tổng hợp thành từng đoạn ngắn?`,
+        { d: 'Vì enzyme DNA polymerase chỉ tổng hợp mạch mới theo chiều 5′ → 3′, mà hai mạch khuôn ngược chiều nhau',
+          s: ['Vì hai mạch khuôn có số lượng nuclêôtit khác nhau',
+              'Vì chỉ một mạch khuôn mang thông tin di truyền, mạch kia thì không',
+              'Vì enzyme DNA polymerase hoạt động lúc nhanh lúc chậm một cách ngẫu nhiên'],
+          sv: { 'Vì hai mạch khuôn có số lượng nuclêôtit khác nhau': 'hai mạch của DNA luôn dài bằng nhau vì liên kết bổ sung từng cặp',
+                'Vì chỉ một mạch khuôn mang thông tin di truyền, mạch kia thì không': 'trong nhân đôi, CẢ HAI mạch đều làm khuôn; chuyện chỉ một mạch làm khuôn là ở PHIÊN MÃ',
+                'Vì enzyme DNA polymerase hoạt động lúc nhanh lúc chậm một cách ngẫu nhiên': 'đây không phải hiện tượng ngẫu nhiên mà là hệ quả tất yếu của chiều tổng hợp' },
+          v: `Hai mạch của DNA ngược chiều nhau (một mạch 3′ → 5′, mạch kia 5′ → 3′), trong khi DNA polymerase CHỈ có thể kéo dài mạch mới theo chiều 5′ → 3′.\n`
+            + `· Trên mạch khuôn 3′ → 5′: chiều tổng hợp trùng với chiều chạc mở ra ⇒ mạch mới được kéo dài LIÊN TỤC.\n`
+            + `· Trên mạch khuôn còn lại: chiều tổng hợp ngược với chiều chạc mở ⇒ phải tổng hợp thành từng đoạn ngắn (đoạn Okazaki), sau đó enzyme ligase nối lại.` },
+        'Mọi thắc mắc về mạch liên tục và mạch gián đoạn đều quy về một câu: DNA polymerase chỉ chạy được theo chiều 5′ → 3′. '
+        + 'Nhớ thêm hai enzyme: ligase nối các đoạn Okazaki, còn helicase mới là enzyme tháo xoắn.');
+    if (kieu === 'phienma')
+      return MC(R, `Hình vẽ mô tả quá trình phiên mã ở sinh vật nhân sơ.${hinh}Phát biểu nào sau đây đúng về quá trình này?`,
+        { d: 'Chỉ mạch có chiều 3′ → 5′ được dùng làm mạch mã gốc, phân tử RNA được tổng hợp theo chiều 5′ → 3′',
+          s: ['Cả hai mạch của gen đều được dùng làm khuôn để tổng hợp RNA',
+              'Phân tử RNA được tổng hợp theo chiều 3′ → 5′',
+              'Enzyme DNA polymerase là enzyme trực tiếp tổng hợp phân tử RNA'],
+          sv: { 'Cả hai mạch của gen đều được dùng làm khuôn để tổng hợp RNA': 'chuyện cả hai mạch làm khuôn là ở NHÂN ĐÔI; phiên mã chỉ dùng một mạch mã gốc',
+                'Phân tử RNA được tổng hợp theo chiều 3′ → 5′': 'ngược chiều — mọi mạch axit nuclêic mới đều được kéo dài theo chiều 5′ → 3′',
+                'Enzyme DNA polymerase là enzyme trực tiếp tổng hợp phân tử RNA': 'enzyme của phiên mã là RNA polymerase, nó vừa tháo xoắn vừa tổng hợp' },
+          v: `Trên hình, RNA polymerase trượt dọc mạch mã gốc có chiều 3′ → 5′ và tổng hợp phân tử mRNA theo chiều 5′ → 3′.\n`
+            + `Mạch còn lại gọi là mạch bổ sung, có trình tự giống hệt mRNA (chỉ khác T thay bằng U) nên KHÔNG dùng làm khuôn.` },
+        'Nhớ cặp đối lập: nhân đôi dùng CẢ HAI mạch làm khuôn, phiên mã chỉ dùng MỘT. '
+        + 'Trình tự mRNA giống mạch BỔ SUNG (chỉ đổi T thành U) chứ không giống mạch mã gốc — đây là chỗ hay nhầm khi đề cho một mạch rồi bắt viết mRNA.');
+    return MC(R, `Hình vẽ mô tả quá trình dịch mã trên phân tử mRNA.${hinh}Chuỗi pôlipeptit hoàn chỉnh do phân tử mRNA này tổng hợp có bao nhiêu axit amin?`,
+      { d: '3', s: ['2', '4', '5'],
+        sv: { '2': 'trừ nhầm hai lần: bộ ba kết thúc vốn đã không mã hoá axit amin nào, chỉ trừ thêm axit amin mở đầu',
+              '4': 'chưa cắt bỏ axit amin mở đầu — đó mới là chuỗi SƠ KHAI',
+              '5': 'đây là tổng số bộ ba trên mRNA, kể cả bộ ba kết thúc' },
+        v: `Đếm trên hình: mRNA có 5 bộ ba là AUG · GXU · AAA · XGU · UAA.\n`
+          + `· Bộ ba UAA ở cuối là bộ ba KẾT THÚC, không mã hoá axit amin nào ⇒ còn 4 bộ ba mã hoá.\n`
+          + `· Chuỗi pôlipeptit SƠ KHAI có 4 axit amin.\n`
+          + `· Chuỗi HOÀN CHỈNH bị cắt bỏ axit amin mở đầu (do AUG mã hoá) ⇒ còn 3 axit amin.` },
+      'Ba con số phải phân biệt: số bộ ba trên mRNA · số axit amin của chuỗi SƠ KHAI (trừ 1 bộ ba kết thúc) · '
+      + 'số axit amin của chuỗi HOÀN CHỈNH (trừ tiếp axit amin mở đầu). Đề hỏi cái nào phải đọc kĩ.');
+  } },
+
+{ ma: 'sinh-hinh-dotbien-nst', chuong: 'Di truyền NST', muc: 3, dang: 'mc',
+  tao(R) {
+    const ds = [
+      { goc: ['A', 'B', 'C', 'D', 'E'], sau: ['A', 'B', 'D', 'E', '·'], ten: 'Mất đoạn C',
+        d: 'Mất đoạn', v: 'Đoạn C biến mất khỏi nhiễm sắc thể, chiều dài nhiễm sắc thể ngắn lại.',
+        hq: 'Mất đoạn thường gây hậu quả nặng nhất vì làm giảm số lượng gen, ở người gây hội chứng tiếng mèo kêu (mất đoạn NST số 5).' },
+      { goc: ['A', 'B', 'C', 'D', 'E'], sau: ['A', 'B', 'C', 'C', 'D'], ten: 'Lặp đoạn C',
+        d: 'Lặp đoạn', v: 'Đoạn C xuất hiện hai lần liên tiếp, nhiễm sắc thể dài thêm ra.',
+        hq: 'Lặp đoạn làm tăng số bản sao của gen, thường ít gây hại hơn mất đoạn và là nguyên liệu quan trọng cho tiến hoá vì tạo ra gen mới.' },
+      { goc: ['A', 'B', 'C', 'D', 'E'], sau: ['A', 'D', 'C', 'B', 'E'], ten: 'Đảo đoạn BCD',
+        d: 'Đảo đoạn', v: 'Đoạn BCD bị đứt ra, quay ngược 180° rồi nối lại nên thứ tự thành DCB.',
+        hq: 'Đảo đoạn không làm thay đổi số lượng gen mà chỉ đổi VỊ TRÍ, nên thường ít ảnh hưởng tới sức sống; nó góp phần cách li sinh sản và hình thành loài mới.' },
+      { goc: ['A', 'B', 'C', 'D', 'E'], sau: ['A', 'B', 'M', 'N', 'E'], ten: 'Chuyển đoạn',
+        d: 'Chuyển đoạn', v: 'Đoạn CD được thay bằng đoạn MN vốn thuộc một nhiễm sắc thể khác.',
+        hq: 'Chuyển đoạn làm thay đổi nhóm gen liên kết, thường làm giảm khả năng sinh sản; ở người chuyển đoạn giữa NST 22 và 9 gây bệnh ung thư máu ác tính.' }
+    ];
+    const it = R.chon(ds);
+    const hinh = TD.hinhNST(it.goc, it.sau, '');
+    return MC(R, `Hình vẽ mô tả một nhiễm sắc thể trước và sau khi xảy ra đột biến (mỗi ô là một đoạn mang gen).${hinh}Đây là dạng đột biến cấu trúc nhiễm sắc thể nào?`,
+      { d: it.d, s: baNhieu(it.d, ds.map(x => x.d).concat(['Đột biến lệch bội', 'Đột biến đa bội'])) || [],
+        sv: Object.fromEntries(ds.filter(x => x.d !== it.d).map(x => [x.d, `dạng đó phải cho kết quả kiểu ${x.sau.filter(c => c !== '·').join('')}, không khớp với hình`])
+          .concat([['Đột biến lệch bội', 'lệch bội là thay đổi SỐ LƯỢNG nhiễm sắc thể, không phải cấu trúc bên trong một nhiễm sắc thể'],
+                   ['Đột biến đa bội', 'đa bội là tăng nguyên lần bộ nhiễm sắc thể, cũng thuộc nhóm số lượng chứ không phải cấu trúc']])),
+        v: `So hai hàng trên hình: ${it.goc.join('')} → ${it.sau.filter(c => c !== '·').join('')}.\n`
+          + `${it.v}\n\n${it.hq}` },
+      'Bốn dạng đột biến cấu trúc nhận ra bằng cách so trình tự trước và sau: '
+      + 'thiếu hẳn một đoạn ⇒ MẤT · một đoạn xuất hiện hai lần ⇒ LẶP · một đoạn quay ngược thứ tự ⇒ ĐẢO · xuất hiện đoạn lạ từ NST khác ⇒ CHUYỂN.');
+  } }
+
+]);
+
+/* Đánh dấu mẫu có hình */
+(function () {
+  const MA = ['toan-hinh-oxyz', 'toan-hinh-dientich', 'ly-hinh-tutruong',
+              'hoa-hinh-thunghiem', 'hoa-hinh-chuando',
+              'sinh-hinh-cochephantu', 'sinh-hinh-dotbien-nst'];
+  for (const mon of Object.keys(TD.GEN))
+    for (const t of TD.GEN[mon]) if (MA.indexOf(t.ma) >= 0) t._hinh = true;
+})();
+})();
+
+</script>
+<script>
+/* ============================================================
+   CÂU HỎI CÓ HÌNH — ĐỢT 4: TRỤC THỜI GIAN CHO LỊCH SỬ
+   Sử là môn duy nhất còn trống hẳn phần hình. Đề thật không có đồ
+   thị hay sơ đồ thí nghiệm, nhưng RẤT hay cho một trục thời gian
+   (hoặc bảng niên biểu) rồi bắt đọc – so sánh – nhận định. Ở đây
+   dựng tám trục theo tám chủ đề lớn, mỗi trục ra được cả bốn mức.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n`
+      + TD.khoiLoai(opts, it.d, it.sv, 'không khớp với các mốc trên trục thời gian.'),
+    meo: meo };
+};
+const baNhieu = (dung, ung) => {
+  const ra = [];
+  for (const x of ung) if (x !== dung && ra.indexOf(x) < 0) ra.push(x);
+  return ra.length >= 3 ? ra.slice(0, 3) : null;
+};
+
+/* ------------------------------------------------------------
+   TÁM TRỤC THỜI GIAN
+   moc : các mốc vẽ lên hình (đã kiểm theo sách giáo khoa)
+   nx  : nhận định mức 3 — d là đúng, s là ba nhận định sai
+   yn  : nhận định mức 4 — nhìn cả trục để rút ra quy luật
+   ------------------------------------------------------------ */
+const TRUC = [
+
+{ cd: 'Kháng chiến chống Pháp', ten: 'Việt Nam 1945 – 1954',
+  moc: [
+    { nam: 1945, ten: 'Cách mạng tháng Tám thành công' },
+    { nam: 1946, ten: 'Toàn quốc kháng chiến' },
+    { nam: 1947, ten: 'Chiến dịch Việt Bắc' },
+    { nam: 1950, ten: 'Chiến dịch Biên giới' },
+    { nam: 1954, ten: 'Chiến thắng Điện Biên Phủ' }],
+  nx: {
+    d: 'Ta giành được thế chủ động trên chiến trường chính Bắc Bộ kể từ chiến dịch Biên giới năm 1950.',
+    s: ['Ta giành được thế chủ động ngay từ ngày Toàn quốc kháng chiến năm 1946.',
+        'Chiến dịch Việt Bắc năm 1947 là chiến dịch tiến công lớn đầu tiên do ta chủ động mở.',
+        'Chiến thắng Điện Biên Phủ năm 1954 mở đầu cuộc kháng chiến toàn quốc chống Pháp.'],
+    sv: {
+      'Ta giành được thế chủ động ngay từ ngày Toàn quốc kháng chiến năm 1946.':
+        'cuối năm 1946 ta còn yếu hơn hẳn về trang bị, chủ trương lúc đó là giam chân địch trong các đô thị để hậu phương kịp di chuyển, tức là thế phòng ngự',
+      'Chiến dịch Việt Bắc năm 1947 là chiến dịch tiến công lớn đầu tiên do ta chủ động mở.':
+        'Việt Bắc 1947 là chiến dịch PHẢN CÔNG — Pháp mở cuộc tiến công lên căn cứ địa trước, ta đánh trả; Biên giới 1950 mới là chiến dịch đầu tiên ta chủ động chọn hướng và mở màn',
+      'Chiến thắng Điện Biên Phủ năm 1954 mở đầu cuộc kháng chiến toàn quốc chống Pháp.':
+        'Điện Biên Phủ nằm ở cuối trục, là trận quyết chiến chiến lược KẾT THÚC cuộc kháng chiến, không phải mở đầu' },
+    v: 'Đọc trục theo thế trận: 1946 – 1947 ta ở thế phòng ngự và phản công, 1950 ta lần đầu chủ động chọn hướng mở chiến dịch, '
+      + 'từ đó thế chủ động chiến lược trên chiến trường chính thuộc về ta cho đến 1954.' },
+  yn: {
+    d: 'Chín năm kháng chiến đi theo trình tự phòng ngự – cầm cự – phản công, và thắng lợi quân sự ở Điện Biên Phủ mới tạo ra cơ sở quyết định cho thắng lợi ngoại giao ở Hội nghị Genève.',
+    s: ['Thắng lợi tại Hội nghị Genève là nguyên nhân dẫn tới chiến thắng Điện Biên Phủ.',
+        'Cuộc kháng chiến kết thúc bằng một cuộc tổng khởi nghĩa giành chính quyền trong cả nước.',
+        'Trong suốt chín năm, ta luôn ở thế tiến công chiến lược nên không cần giai đoạn cầm cự.'],
+    sv: {
+      'Thắng lợi tại Hội nghị Genève là nguyên nhân dẫn tới chiến thắng Điện Biên Phủ.':
+        'đảo ngược quan hệ nhân quả và cả thứ tự thời gian: Điện Biên Phủ kết thúc ngày 7/5/1954, Hội nghị Genève bàn về Đông Dương khai mạc ngày 8/5/1954, tức là một ngày sau đó',
+      'Cuộc kháng chiến kết thúc bằng một cuộc tổng khởi nghĩa giành chính quyền trong cả nước.':
+        'lẫn với Cách mạng tháng Tám 1945 ở đầu trục; kháng chiến chống Pháp kết thúc bằng trận quyết chiến chiến lược và một hiệp định quốc tế, không phải bằng khởi nghĩa',
+      'Trong suốt chín năm, ta luôn ở thế tiến công chiến lược nên không cần giai đoạn cầm cự.':
+        'trái với chính các mốc trên trục — 1946 rút khỏi đô thị, 1947 phản công ở Việt Bắc đều là những bước lùi có tính toán của giai đoạn phòng ngự và cầm cự' },
+    v: 'Nhìn cả trục sẽ thấy hai tuyến đi song song. Tuyến quân sự: giữ chính quyền non trẻ (1945) → rút lui để bảo toàn lực lượng (1946) → '
+      + 'phản công đánh bại cuộc tiến công của Pháp (1947) → chủ động mở chiến dịch, khai thông biên giới (1950) → quyết chiến chiến lược (1954). '
+      + 'Tuyến ngoại giao đi sau và ăn theo tuyến quân sự: chỉ khi tập đoàn cứ điểm mạnh nhất Đông Dương bị tiêu diệt thì Pháp mới chấp nhận '
+      + 'ký kết công nhận độc lập, chủ quyền, thống nhất và toàn vẹn lãnh thổ của ba nước Đông Dương. Đây chính là bài học "thực lực là cái chiêng, '
+      + 'ngoại giao là cái tiếng" — trên bàn đàm phán chỉ nhận được cái mà chiến trường đã giành được.' } },
+
+{ cd: 'Kháng chiến chống Mỹ', ten: 'Việt Nam 1954 – 1975',
+  moc: [
+    { nam: 1954, ten: 'Hiệp định Genève' },
+    { nam: 1959, ten: 'Mở đường Trường Sơn' },
+    { nam: 1968, ten: 'Tổng tiến công Mậu Thân' },
+    { nam: 1972, ten: 'Điện Biên Phủ trên không' },
+    { nam: 1973, ten: 'Hiệp định Paris' },
+    { nam: 1975, ten: 'Chiến dịch Hồ Chí Minh' }],
+  nx: {
+    d: 'Hai đòn quân sự năm 1968 và năm 1972 là nguyên nhân trực tiếp buộc Mỹ phải ngồi vào bàn đàm phán rồi ký Hiệp định Paris.',
+    s: ['Hiệp định Paris năm 1973 lập tức chấm dứt chiến tranh, miền Nam được giải phóng ngay trong năm đó.',
+        'Đường Trường Sơn được mở sau khi Hiệp định Paris được ký kết.',
+        'Mỹ rút hết quân viễn chinh khỏi miền Nam ngay sau Tết Mậu Thân năm 1968.'],
+    sv: {
+      'Hiệp định Paris năm 1973 lập tức chấm dứt chiến tranh, miền Nam được giải phóng ngay trong năm đó.':
+        'trục còn một mốc nữa ở phía sau — Hiệp định Paris chỉ buộc Mỹ rút quân, phải đến Chiến dịch Hồ Chí Minh năm 1975 miền Nam mới được giải phóng',
+      'Đường Trường Sơn được mở sau khi Hiệp định Paris được ký kết.':
+        'ngược thứ tự trên trục: mốc 1959 đứng trước mốc 1973 tới mười bốn năm',
+      'Mỹ rút hết quân viễn chinh khỏi miền Nam ngay sau Tết Mậu Thân năm 1968.':
+        'sau Mậu Thân Mỹ mới chỉ chấp nhận đàm phán và chuyển sang "Việt Nam hoá chiến tranh"; việc rút hết quân là điều khoản của Hiệp định Paris 1973' },
+    v: 'Ghép mốc quân sự với mốc ngoại giao sẽ thấy rất rõ: đánh Mậu Thân 1968 ⇒ Mỹ chịu ngồi vào bàn Paris; '
+      + 'đập tan cuộc tập kích chiến lược bằng B-52 cuối 1972 ⇒ Mỹ chịu ký Hiệp định Paris đầu 1973.' },
+  yn: {
+    d: 'Trục thời gian cho thấy mỗi bước tiến trên bàn đàm phán đều đi ngay sau một thắng lợi quân sự, theo đúng phương châm đánh cho Mỹ cút rồi mới đánh cho nguỵ nhào.',
+    s: ['Thắng lợi năm 1975 là kết quả trực tiếp của Hiệp định Genève năm 1954 chứ không liên quan tới Hiệp định Paris.',
+        'Ta giành thắng lợi hoàn toàn bằng con đường đàm phán, không cần đến các đòn tiến công quân sự.',
+        'Việc Mỹ rút quân năm 1973 và việc chính quyền Sài Gòn sụp đổ năm 1975 là một sự kiện duy nhất.'],
+    sv: {
+      'Thắng lợi năm 1975 là kết quả trực tiếp của Hiệp định Genève năm 1954 chứ không liên quan tới Hiệp định Paris.':
+        'bỏ qua toàn bộ phần giữa của trục; Genève 1954 chỉ tạm chia hai miền ở vĩ tuyến 17, còn điều kiện trực tiếp cho năm 1975 là việc quân Mỹ đã rút theo Hiệp định Paris 1973',
+      'Ta giành thắng lợi hoàn toàn bằng con đường đàm phán, không cần đến các đòn tiến công quân sự.':
+        'trái với chính các mốc trên trục — 1968, 1972 và 1975 đều là mốc quân sự, và đàm phán chỉ tiến triển ngay sau các mốc đó',
+      'Việc Mỹ rút quân năm 1973 và việc chính quyền Sài Gòn sụp đổ năm 1975 là một sự kiện duy nhất.':
+        'trên trục là hai mốc cách nhau hai năm, ứng với hai nhiệm vụ khác nhau: đánh cho Mỹ cút rồi mới đánh cho nguỵ nhào' },
+    v: 'Đặt các mốc cạnh nhau sẽ thấy một quy luật lặp lại: 1968 tổng tiến công ⇒ Mỹ chịu đàm phán; cuối 1972 đập tan cuộc tập kích bằng B-52 ⇒ '
+      + 'đầu 1973 Mỹ chịu ký; Mỹ rút quân xong thì so sánh lực lượng ở miền Nam thay đổi hẳn ⇒ 1975 ta mở cuộc Tổng tiến công và nổi dậy. '
+      + 'Trục cũng cho thấy vì sao phải mở đường Trường Sơn từ 1959: không có tuyến vận chuyển chiến lược suốt mười sáu năm đó thì không thể '
+      + 'dồn lực lượng cho những đòn quyết định về sau. Toàn bộ hai mươi mốt năm vì thế là một quá trình vừa đánh vừa đàm, trong đó chiến trường '
+      + 'luôn quyết định bàn đàm phán chứ không phải ngược lại.' } },
+
+{ cd: 'Chiến tranh lạnh', ten: 'Chiến tranh lạnh 1947 – 1991',
+  moc: [
+    { nam: 1947, ten: 'Học thuyết Truman' },
+    { nam: 1949, ten: 'NATO thành lập' },
+    { nam: 1955, ten: 'Tổ chức Hiệp ước Vacsava' },
+    { nam: 1989, ten: 'Tuyên bố chấm dứt Chiến tranh lạnh' },
+    { nam: 1991, ten: 'Liên Xô tan rã' }],
+  nx: {
+    d: 'Chiến tranh lạnh được tuyên bố chấm dứt năm 1989, trước khi Liên Xô tan rã năm 1991 — đó là hai sự kiện khác nhau.',
+    s: ['Chiến tranh lạnh chấm dứt đúng vào lúc Liên Xô tan rã năm 1991.',
+        'Tổ chức Hiệp ước Vacsava ra đời trước khi NATO được thành lập.',
+        'Học thuyết Truman là văn kiện tuyên bố chấm dứt Chiến tranh lạnh.'],
+    sv: {
+      'Chiến tranh lạnh chấm dứt đúng vào lúc Liên Xô tan rã năm 1991.':
+        'trên trục là hai mốc riêng biệt, cách nhau hai năm',
+      'Tổ chức Hiệp ước Vacsava ra đời trước khi NATO được thành lập.':
+        'ngược thứ tự: NATO năm 1949, Vacsava năm 1955 — Vacsava ra đời để đối trọng với NATO chứ không phải ngược lại',
+      'Học thuyết Truman là văn kiện tuyên bố chấm dứt Chiến tranh lạnh.':
+        'Học thuyết Truman đứng ở đầu trục, là mốc KHỞI ĐẦU của Chiến tranh lạnh' },
+    v: 'Cuộc gặp cấp cao Xô – Mỹ tại đảo Malta cuối năm 1989 tuyên bố chấm dứt Chiến tranh lạnh; '
+      + 'Liên Xô chỉ tan rã cuối năm 1991, do khủng hoảng kéo dài trong nội bộ và công cuộc cải tổ thất bại.' },
+  yn: {
+    d: 'Trục cho thấy Chiến tranh lạnh mở đầu bằng đối đầu ý thức hệ, được thể chế hoá bằng hai khối quân sự đối lập rồi kết thúc bằng một thoả thuận chính trị; sự tan rã của Liên Xô là hệ quả về sau chứ không phải điều kiện để chấm dứt Chiến tranh lạnh.',
+    s: ['Chiến tranh lạnh chỉ là cuộc chạy đua vũ trang thuần tuý, không có nội dung đối đầu về ý thức hệ.',
+        'Hai khối quân sự NATO và Vacsava ra đời cùng một năm và cùng giải thể một lúc.',
+        'Chiến tranh lạnh kết thúc bằng một cuộc chiến tranh nóng trực tiếp giữa Liên Xô và Mỹ.'],
+    sv: {
+      'Chiến tranh lạnh chỉ là cuộc chạy đua vũ trang thuần tuý, không có nội dung đối đầu về ý thức hệ.':
+        'ngay mốc mở đầu đã là một học thuyết chính trị công khai nêu mục tiêu ngăn chặn chủ nghĩa cộng sản, tức là đối đầu ý thức hệ có trước và chi phối chạy đua vũ trang',
+      'Hai khối quân sự NATO và Vacsava ra đời cùng một năm và cùng giải thể một lúc.':
+        'trục ghi rõ 1949 và 1955, cách nhau sáu năm; hơn nữa Vacsava giải thể năm 1991 còn NATO vẫn tồn tại đến nay',
+      'Chiến tranh lạnh kết thúc bằng một cuộc chiến tranh nóng trực tiếp giữa Liên Xô và Mỹ.':
+        'đúng đặc trưng của Chiến tranh lạnh là hai siêu cường không bao giờ đụng độ quân sự trực tiếp; mốc cuối trục là một cuộc gặp cấp cao, tức là kết thúc bằng thoả thuận' },
+    v: 'Đọc trục theo ba tầng sẽ thấy toàn bộ logic của thời kỳ này. Tầng ý thức hệ: một bên nêu mục tiêu ngăn chặn chủ nghĩa cộng sản, '
+      + 'bên kia tập hợp các nước xã hội chủ nghĩa. Tầng tổ chức: mỗi bên dựng một khối quân sự, khối sau ra đời để đối trọng với khối trước, '
+      + 'khiến thế giới bị chia đôi trong hơn ba mươi năm. Tầng kết thúc: cuộc đối đầu không tan bằng chiến tranh mà tan bằng đàm phán, '
+      + 'khi cả hai bên đều kiệt sức vì chạy đua vũ trang và Liên Xô lâm vào khủng hoảng. Vì vậy phải tách bạch hai mốc cuối: 1989 là mốc của '
+      + 'quan hệ quốc tế, còn 1991 là mốc của lịch sử nội bộ Liên Xô.' } },
+
+{ cd: 'ASEAN', ten: 'ASEAN 1967 – 2015',
+  moc: [
+    { nam: 1967, ten: 'ASEAN thành lập tại Bangkok' },
+    { nam: 1976, ten: 'Hiệp ước Bali' },
+    { nam: 1995, ten: 'Việt Nam gia nhập ASEAN' },
+    { nam: 1999, ten: 'ASEAN đủ mười thành viên' },
+    { nam: 2015, ten: 'Cộng đồng ASEAN thành lập' }],
+  nx: {
+    d: 'Việt Nam gia nhập ASEAN năm 1995, tức là hai mươi tám năm sau khi tổ chức này ra đời.',
+    s: ['Việt Nam là một trong năm nước sáng lập ASEAN năm 1967.',
+        'Cộng đồng ASEAN được thành lập cùng năm với tổ chức ASEAN.',
+        'ASEAN đã có đủ mười thành viên ngay từ khi ký Hiệp ước Bali năm 1976.'],
+    sv: {
+      'Việt Nam là một trong năm nước sáng lập ASEAN năm 1967.':
+        'năm nước sáng lập là Indonesia, Malaysia, Philippines, Singapore và Thái Lan; Việt Nam đứng ở mốc 1995 trên trục',
+      'Cộng đồng ASEAN được thành lập cùng năm với tổ chức ASEAN.':
+        'trục ghi rõ hai mốc cách nhau bốn mươi tám năm — tổ chức ra đời trước, Cộng đồng là nấc phát triển cao hơn về sau',
+      'ASEAN đã có đủ mười thành viên ngay từ khi ký Hiệp ước Bali năm 1976.':
+        'mốc đủ mười thành viên nằm ở năm 1999, sau Hiệp ước Bali tới hai mươi ba năm' },
+    v: 'Lấy 1995 trừ 1967 được 28. Trục cũng cho thấy Việt Nam gia nhập ở giai đoạn ASEAN mở rộng, '
+      + 'sau khi Chiến tranh lạnh đã kết thúc và quan hệ trong khu vực chuyển từ đối đầu sang đối thoại.' },
+  yn: {
+    d: 'Trục phản ánh ba bước trưởng thành của ASEAN: ra đời trong bối cảnh Chiến tranh lạnh, xác lập nguyên tắc ứng xử chung bằng Hiệp ước Bali, rồi mở rộng đủ mười nước và nâng cấp thành Cộng đồng.',
+    s: ['ASEAN ngay từ khi thành lập đã là một liên minh quân sự nhằm chống lại một nước lớn trong khu vực.',
+        'Việc kết nạp đủ mười thành viên diễn ra trước khi ASEAN có văn kiện quy định nguyên tắc ứng xử chung.',
+        'Cộng đồng ASEAN là một nhà nước liên bang có chung chính phủ, quân đội và đồng tiền.'],
+    sv: {
+      'ASEAN ngay từ khi thành lập đã là một liên minh quân sự nhằm chống lại một nước lớn trong khu vực.':
+        'ASEAN được lập ra với mục tiêu hợp tác kinh tế – văn hoá – xã hội và giữ ổn định khu vực, chưa bao giờ là liên minh quân sự',
+      'Việc kết nạp đủ mười thành viên diễn ra trước khi ASEAN có văn kiện quy định nguyên tắc ứng xử chung.':
+        'ngược thứ tự trên trục: Hiệp ước Bali năm 1976 đứng trước mốc đủ mười thành viên năm 1999',
+      'Cộng đồng ASEAN là một nhà nước liên bang có chung chính phủ, quân đội và đồng tiền.':
+        'Cộng đồng ASEAN là liên kết khu vực dựa trên ba trụ cột chính trị – an ninh, kinh tế và văn hoá – xã hội, các nước thành viên vẫn giữ nguyên chủ quyền' },
+    v: 'Đọc dọc trục sẽ thấy ASEAN lớn lên theo ba nấc rõ rệt. Nấc thứ nhất là ra đời: năm nước lập tổ chức giữa lúc khu vực bị chia rẽ vì '
+      + 'Chiến tranh lạnh, mục tiêu ban đầu chỉ là hợp tác và giữ hoà bình. Nấc thứ hai là định luật chơi: Hiệp ước Bali đưa ra các nguyên tắc '
+      + 'tôn trọng chủ quyền, không can thiệp vào công việc nội bộ của nhau và giải quyết tranh chấp bằng biện pháp hoà bình, nhờ đó những nước '
+      + 'từng ở hai chiến tuyến mới có thể ngồi chung một bàn. Nấc thứ ba là mở rộng và nâng cấp: có luật chơi chung rồi thì kết nạp thêm thành viên '
+      + 'mới thuận lợi, đủ mười nước rồi mới đủ tầm để lập Cộng đồng với ba trụ cột. Trình tự lập luật trước, mở rộng sau chính là kinh nghiệm '
+      + 'đáng chú ý nhất của tổ chức này.' } },
+
+{ cd: 'Liên hợp quốc', ten: 'Việt Nam với Liên hợp quốc',
+  moc: [
+    { nam: 1945, ten: 'Liên hợp quốc thành lập' },
+    { nam: 1977, ten: 'Việt Nam gia nhập Liên hợp quốc' },
+    { nam: 2008, ten: 'Lần đầu là Uỷ viên không thường trực Hội đồng Bảo an' },
+    { nam: 2020, ten: 'Lần thứ hai là Uỷ viên không thường trực' }],
+  nx: {
+    d: 'Việt Nam gia nhập Liên hợp quốc năm 1977, sau khi đất nước đã hoàn thành thống nhất về mặt nhà nước.',
+    s: ['Việt Nam gia nhập Liên hợp quốc ngay khi tổ chức này ra đời năm 1945.',
+        'Việt Nam là Uỷ viên thường trực Hội đồng Bảo an từ năm 2008.',
+        'Việt Nam mới chỉ một lần được bầu vào Hội đồng Bảo an Liên hợp quốc.'],
+    sv: {
+      'Việt Nam gia nhập Liên hợp quốc ngay khi tổ chức này ra đời năm 1945.':
+        'năm 1945 nước Việt Nam Dân chủ Cộng hoà vừa mới ra đời và chưa được các nước công nhận; trục ghi mốc gia nhập là năm 1977',
+      'Việt Nam là Uỷ viên thường trực Hội đồng Bảo an từ năm 2008.':
+        'Hội đồng Bảo an chỉ có năm uỷ viên thường trực cố định; Việt Nam được bầu làm uỷ viên KHÔNG thường trực theo nhiệm kỳ hai năm',
+      'Việt Nam mới chỉ một lần được bầu vào Hội đồng Bảo an Liên hợp quốc.':
+        'trên trục có hai mốc — nhiệm kỳ 2008 – 2009 và nhiệm kỳ 2020 – 2021' },
+    v: 'Đất nước thống nhất về mặt nhà nước năm 1976, sang năm 1977 Việt Nam trở thành thành viên thứ 149 của Liên hợp quốc. '
+      + 'Đây là bước mở đầu cho quá trình hội nhập quốc tế.' },
+  yn: {
+    d: 'Trục cho thấy vị thế Việt Nam đi lên theo ba nấc: từ chỗ chưa phải thành viên, trở thành thành viên, rồi được các nước tín nhiệm bầu vào cơ quan giữ trọng trách hàng đầu về hoà bình và an ninh quốc tế tới hai nhiệm kỳ.',
+    s: ['Việc được bầu vào Hội đồng Bảo an chỉ là thủ tục luân phiên, không phản ánh uy tín quốc tế của một nước.',
+        'Việt Nam gia nhập Liên hợp quốc trước khi đất nước được thống nhất.',
+        'Là uỷ viên không thường trực, Việt Nam có quyền phủ quyết đối với các nghị quyết của Hội đồng Bảo an.'],
+    sv: {
+      'Việc được bầu vào Hội đồng Bảo an chỉ là thủ tục luân phiên, không phản ánh uy tín quốc tế của một nước.':
+        'ghế uỷ viên không thường trực do Đại hội đồng bỏ phiếu bầu và phải đạt đa số hai phần ba, tức là kết quả của sự tín nhiệm chứ không phải luân phiên tự động',
+      'Việt Nam gia nhập Liên hợp quốc trước khi đất nước được thống nhất.':
+        'ngược thứ tự: thống nhất về mặt nhà nước năm 1976, gia nhập Liên hợp quốc năm 1977',
+      'Là uỷ viên không thường trực, Việt Nam có quyền phủ quyết đối với các nghị quyết của Hội đồng Bảo an.':
+        'quyền phủ quyết chỉ thuộc về năm uỷ viên thường trực' },
+    v: 'Khoảng cách giữa các mốc nói lên rất nhiều điều. Từ 1945 đến 1977 là ba mươi hai năm chiến tranh và bị bao vây, Việt Nam đứng ngoài '
+      + 'tổ chức lớn nhất hành tinh. Năm 1977, ngay sau khi đất nước thống nhất, Việt Nam trở thành thành viên — hội nhập quốc tế bắt đầu từ '
+      + 'chỗ có hoà bình và có một nhà nước thống nhất. Ba mươi mốt năm tiếp theo là quá trình đổi mới và mở cửa, đến năm 2008 Việt Nam lần đầu '
+      + 'được bầu vào Hội đồng Bảo an với số phiếu rất cao, rồi lặp lại điều đó năm 2020. Như vậy trục không chỉ ghi các mốc rời rạc mà cho thấy '
+      + 'một đường đi lên: hoà bình và thống nhất là điều kiện của hội nhập, còn hội nhập sâu và có trách nhiệm mới đem lại vị thế.' } },
+
+{ cd: 'Hồ Chí Minh', ten: 'Hành trình Hồ Chí Minh 1911 – 1945',
+  moc: [
+    { nam: 1911, ten: 'Ra đi tìm đường cứu nước' },
+    { nam: 1920, ten: 'Đọc Luận cương của Lênin' },
+    { nam: 1930, ten: 'Sáng lập Đảng Cộng sản Việt Nam' },
+    { nam: 1941, ten: 'Về nước trực tiếp lãnh đạo cách mạng' },
+    { nam: 1945, ten: 'Đọc Tuyên ngôn Độc lập' }],
+  nx: {
+    d: 'Từ khi ra đi tìm đường cứu nước đến khi tìm thấy con đường cứu nước, Nguyễn Ái Quốc đã trải qua chín năm.',
+    s: ['Nguyễn Ái Quốc tìm thấy ngay con đường cứu nước vào năm rời bến cảng Nhà Rồng.',
+        'Người sáng lập Đảng Cộng sản Việt Nam trước khi đọc Luận cương của Lênin.',
+        'Người trở về nước trực tiếp lãnh đạo cách mạng ngay từ năm thành lập Đảng.'],
+    sv: {
+      'Nguyễn Ái Quốc tìm thấy ngay con đường cứu nước vào năm rời bến cảng Nhà Rồng.':
+        'trục có hai mốc riêng: ra đi năm 1911, còn bước ngoặt tư tưởng là năm 1920',
+      'Người sáng lập Đảng Cộng sản Việt Nam trước khi đọc Luận cương của Lênin.':
+        'ngược thứ tự: 1920 đứng trước 1930; phải có lý luận dẫn đường thì mới có cơ sở lập chính đảng',
+      'Người trở về nước trực tiếp lãnh đạo cách mạng ngay từ năm thành lập Đảng.':
+        'Hội nghị thành lập Đảng năm 1930 họp ở nước ngoài; mốc về nước trên trục là năm 1941' },
+    v: 'Lấy 1920 trừ 1911 được 9. Chín năm ấy Người đi qua nhiều châu lục để khảo sát các cuộc cách mạng, '
+      + 'đến khi đọc Luận cương của Lênin mới khẳng định con đường cách mạng vô sản.' },
+  yn: {
+    d: 'Trục thể hiện một logic chặt chẽ: khảo sát thực tiễn thế giới, tìm ra con đường cách mạng vô sản, chuẩn bị rồi lập ra chính đảng, xây dựng lực lượng trong nước và cuối cùng mới giành chính quyền, khai sinh nhà nước.',
+    s: ['Thắng lợi năm 1945 là kết quả của thời cơ bên ngoài, không cần đến quá trình chuẩn bị lâu dài trước đó.',
+        'Người lập ra chính đảng ngay trong năm ra đi tìm đường cứu nước.',
+        'Việc về nước năm 1941 chỉ là một chuyến đi bình thường, không gắn với việc chuẩn bị lực lượng cho khởi nghĩa.'],
+    sv: {
+      'Thắng lợi năm 1945 là kết quả của thời cơ bên ngoài, không cần đến quá trình chuẩn bị lâu dài trước đó.':
+        'thời cơ chỉ biến thành thắng lợi khi đã có sẵn đường lối, chính đảng và lực lượng — đó chính là bốn mốc đứng trước năm 1945 trên trục',
+      'Người lập ra chính đảng ngay trong năm ra đi tìm đường cứu nước.':
+        'trục ghi rõ hai mốc cách nhau mười chín năm',
+      'Việc về nước năm 1941 chỉ là một chuyến đi bình thường, không gắn với việc chuẩn bị lực lượng cho khởi nghĩa.':
+        'ngay sau khi về nước, Người chủ trì hội nghị đặt nhiệm vụ giải phóng dân tộc lên hàng đầu, lập mặt trận và xây dựng căn cứ địa — tức là bước chuẩn bị trực tiếp cho khởi nghĩa' },
+    v: 'Bốn khoảng cách trên trục ứng với bốn nhiệm vụ khác nhau. Chín năm đầu là đi và nhìn: khảo sát các nước tư bản để hiểu vì sao ở đâu '
+      + 'người lao động cũng khổ. Mười năm tiếp theo là chuẩn bị về tư tưởng và tổ chức: truyền bá lý luận, đào tạo cán bộ, lập các tổ chức tiền '
+      + 'thân, để năm 1930 hợp nhất được ba tổ chức cộng sản thành một chính đảng duy nhất. Mười một năm sau đó là chuẩn bị lực lượng ngay trong '
+      + 'nước: mặt trận, căn cứ địa và lực lượng vũ trang. Đến năm 1945, khi thời cơ xuất hiện thì mọi điều kiện bên trong đã sẵn sàng, nên chỉ '
+      + 'trong hơn hai tuần cả nước giành được chính quyền. Trục vì thế bác bỏ cách nghĩ cho rằng thắng lợi năm 1945 là chuyện may mắn.' } },
+
+{ cd: 'Chủ nghĩa xã hội từ 1917', ten: 'Chủ nghĩa xã hội 1917 – 1991',
+  moc: [
+    { nam: 1917, ten: 'Cách mạng tháng Mười Nga' },
+    { nam: 1922, ten: 'Liên Xô được thành lập' },
+    { nam: 1949, ten: 'Nước Cộng hoà Nhân dân Trung Hoa ra đời' },
+    { nam: 1959, ten: 'Cách mạng Cuba thắng lợi' },
+    { nam: 1991, ten: 'Liên Xô tan rã' }],
+  nx: {
+    d: 'Nước Nga Xô viết ra đời năm 1917, còn Liên Xô — nhà nước liên bang gồm nhiều nước cộng hoà — mãi năm 1922 mới được thành lập.',
+    s: ['Liên Xô được thành lập ngay trong năm nổ ra Cách mạng tháng Mười.',
+        'Cách mạng Cuba thắng lợi trước khi nước Cộng hoà Nhân dân Trung Hoa ra đời.',
+        'Chủ nghĩa xã hội chấm dứt hoàn toàn trên thế giới vào năm 1991.'],
+    sv: {
+      'Liên Xô được thành lập ngay trong năm nổ ra Cách mạng tháng Mười.':
+        'trục ghi hai mốc cách nhau năm năm — giữa hai mốc đó là nội chiến và can thiệp của nước ngoài',
+      'Cách mạng Cuba thắng lợi trước khi nước Cộng hoà Nhân dân Trung Hoa ra đời.':
+        'ngược thứ tự: 1949 đứng trước 1959',
+      'Chủ nghĩa xã hội chấm dứt hoàn toàn trên thế giới vào năm 1991.':
+        'chỉ mô hình ở Liên Xô và Đông Âu sụp đổ; Trung Quốc, Việt Nam, Cuba và Lào vẫn tiếp tục con đường xã hội chủ nghĩa với những cải cách riêng' },
+    v: 'Cách mạng tháng Mười lập ra chính quyền Xô viết ở nước Nga; sau khi nội chiến kết thúc, '
+      + 'các nước cộng hoà Xô viết mới hợp lại thành Liên bang Cộng hoà xã hội chủ nghĩa Xô viết vào cuối năm 1922.' },
+  yn: {
+    d: 'Trục cho thấy chủ nghĩa xã hội đi từ thắng lợi ở một nước, mở rộng thành hệ thống thế giới, rồi khủng hoảng và sụp đổ ở nơi khởi đầu, trong khi một số nước khác vẫn tiếp tục con đường ấy bằng cách cải cách, đổi mới.',
+    s: ['Sự sụp đổ năm 1991 chứng tỏ mọi nước xã hội chủ nghĩa đều đã từ bỏ con đường của mình.',
+        'Chủ nghĩa xã hội chỉ tồn tại trong phạm vi châu Âu, không lan sang châu Á và châu Mỹ.',
+        'Liên Xô tan rã do bị một nước ngoài tiến công quân sự trực tiếp.'],
+    sv: {
+      'Sự sụp đổ năm 1991 chứng tỏ mọi nước xã hội chủ nghĩa đều đã từ bỏ con đường của mình.':
+        'cái sụp đổ là một mô hình cụ thể ở Liên Xô và Đông Âu, không phải toàn bộ con đường; nhiều nước vẫn kiên trì và điều chỉnh bằng cải cách, đổi mới',
+      'Chủ nghĩa xã hội chỉ tồn tại trong phạm vi châu Âu, không lan sang châu Á và châu Mỹ.':
+        'trái với chính các mốc trên trục — năm 1949 ở châu Á và năm 1959 ở khu vực Mỹ Latinh',
+      'Liên Xô tan rã do bị một nước ngoài tiến công quân sự trực tiếp.':
+        'nguyên nhân là khủng hoảng kinh tế – xã hội kéo dài, mô hình quản lý quan liêu bao cấp trì trệ và công cuộc cải tổ mắc sai lầm, không có cuộc tiến công quân sự nào từ bên ngoài' },
+    v: 'Đọc trục theo hình vòng cung sẽ thấy ba đoạn. Đoạn đi lên: từ một nước duy nhất năm 1917, chủ nghĩa xã hội trở thành nhà nước liên bang '
+      + 'rộng lớn năm 1922 rồi lan sang châu Á và khu vực Mỹ Latinh trong các mốc 1949 và 1959, trở thành một hệ thống thế giới. Đoạn chững lại: '
+      + 'mô hình quản lý tập trung quan liêu bao cấp phát huy tác dụng trong chiến tranh và công nghiệp hoá ban đầu nhưng ngày càng trì trệ khi '
+      + 'kinh tế đòi hỏi năng suất và đổi mới công nghệ. Đoạn sụp đổ: cải tổ mắc sai lầm khiến Liên Xô tan rã năm 1991. Bài học rút ra không phải '
+      + 'là con đường sai, mà là mô hình cụ thể phải được đổi mới kịp thời — điều mà những nước còn lại đã làm.' } },
+
+{ cd: 'Công cuộc Đổi mới', ten: 'Đổi mới và hội nhập 1986 – 2007',
+  moc: [
+    { nam: 1986, ten: 'Đại hội VI khởi xướng Đổi mới' },
+    { nam: 1991, ten: 'Cương lĩnh xây dựng đất nước' },
+    { nam: 1995, ten: 'Gia nhập ASEAN, bình thường hoá quan hệ với Mỹ' },
+    { nam: 2007, ten: 'Gia nhập Tổ chức Thương mại Thế giới' }],
+  nx: {
+    d: 'Đổi mới bắt đầu từ bên trong đất nước, sau đó mới dẫn tới hội nhập khu vực rồi hội nhập toàn cầu.',
+    s: ['Việt Nam gia nhập Tổ chức Thương mại Thế giới trước khi gia nhập ASEAN.',
+        'Đường lối Đổi mới được đề ra tại Đại hội VII năm 1991.',
+        'Đổi mới chỉ là đổi mới về chính trị, không đụng chạm tới cơ chế kinh tế.'],
+    sv: {
+      'Việt Nam gia nhập Tổ chức Thương mại Thế giới trước khi gia nhập ASEAN.':
+        'ngược thứ tự trên trục: 1995 đứng trước 2007',
+      'Đường lối Đổi mới được đề ra tại Đại hội VII năm 1991.':
+        'mốc mở đầu trên trục là Đại hội VI cuối năm 1986; Đại hội VII năm 1991 thông qua Cương lĩnh, tức là bước tiếp theo chứ không phải bước khởi xướng',
+      'Đổi mới chỉ là đổi mới về chính trị, không đụng chạm tới cơ chế kinh tế.':
+        'nội dung trung tâm của Đổi mới chính là chuyển từ cơ chế tập trung quan liêu bao cấp sang kinh tế hàng hoá nhiều thành phần vận hành theo cơ chế thị trường' },
+    v: 'Ba mốc sau đều là hệ quả của mốc đầu: có đổi mới cơ chế kinh tế trong nước thì mới có cơ sở để mở cửa, '
+      + 'gia nhập tổ chức khu vực rồi tổ chức thương mại toàn cầu.' },
+  yn: {
+    d: 'Trục cho thấy một trình tự có tính quy luật: đổi mới tư duy kinh tế trong nước tạo ra nội lực, nội lực đủ mạnh mới mở cửa hội nhập khu vực, và hội nhập khu vực là bước tập dượt cho hội nhập toàn cầu.',
+    s: ['Việt Nam hội nhập toàn cầu trước, nhờ đó mới có động lực đổi mới ở trong nước.',
+        'Đổi mới là công việc làm một lần vào năm 1986 rồi kết thúc, các mốc sau không liên quan.',
+        'Việc gia nhập các tổ chức quốc tế đòi hỏi Việt Nam phải từ bỏ độc lập, tự chủ trong đường lối.'],
+    sv: {
+      'Việt Nam hội nhập toàn cầu trước, nhờ đó mới có động lực đổi mới ở trong nước.':
+        'đảo ngược trục: mốc toàn cầu nằm ở cuối, cách mốc khởi xướng Đổi mới hai mươi mốt năm',
+      'Đổi mới là công việc làm một lần vào năm 1986 rồi kết thúc, các mốc sau không liên quan.':
+        'chính các mốc 1991, 1995 và 2007 cho thấy Đổi mới là quá trình liên tục, mỗi mốc bổ sung một nội dung mới',
+      'Việc gia nhập các tổ chức quốc tế đòi hỏi Việt Nam phải từ bỏ độc lập, tự chủ trong đường lối.':
+        'phương châm nhất quán là chủ động hội nhập trên cơ sở giữ vững độc lập, tự chủ; hội nhập là mở rộng quan hệ chứ không phải lệ thuộc' },
+    v: 'Khoảng cách giữa các mốc chính là thời gian tích luỹ điều kiện. Từ 1986 đến 1991 là năm năm để cơ chế mới chứng minh hiệu quả: '
+      + 'từ chỗ thiếu lương thực, đất nước đã tự cân đối được và bắt đầu xuất khẩu gạo, đủ cơ sở thực tiễn để đại hội tiếp theo khái quát thành '
+      + 'cương lĩnh. Từ 1991 đến 1995 là bốn năm phá thế bao vây cấm vận, kết quả là cùng một năm vừa gia nhập tổ chức khu vực vừa bình thường '
+      + 'hoá quan hệ với đối thủ cũ. Từ 1995 đến 2007 là mười hai năm sửa luật, cải cách thủ tục và làm quen với luật chơi quốc tế trước khi bước '
+      + 'vào sân chơi thương mại toàn cầu. Trục vì thế cho thấy hội nhập không phải là mở cửa ào ạt mà là quá trình chuẩn bị nội lực từng bước.' } }
+
+];
+
+/* Ba mốc trở lên mới đủ chỗ ra bốn phương án đọc mốc */
+const veTruc = t => TD.hinhTrucThoiGian(t.moc, t.ten);
+
+TD.GEN.su = (TD.GEN.su || []).concat([
+
+/* ---------- MỨC 1: đọc thẳng một mốc trên trục ---------- */
+{ ma: 'su-hinh-docmoc', chuong: 'Tư liệu lịch sử', muc: 1, dang: 'mc',
+  tao(R) {
+    const t = R.chon(TRUC);
+    const i = R.nguyen(0, t.moc.length - 1);
+    const dung = t.moc[i].ten;
+    const nhieu = baNhieu(dung, TD.xaoR(R, t.moc.map(m => m.ten)));
+    if (!nhieu) return null;
+    const sv = {};
+    t.moc.forEach(m => { if (m.ten !== dung) sv[m.ten] = `sự kiện này nằm ở mốc năm ${m.nam} trên trục, không phải năm ${t.moc[i].nam}`; });
+    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện nào diễn ra vào năm ${t.moc[i].nam}?`,
+      { d: dung, s: nhieu, sv: sv,
+        v: `Dò theo trục tới vạch ghi năm ${t.moc[i].nam}, nhãn tương ứng là "${dung}".` },
+      'Câu đọc mốc chỉ cần dóng đúng vạch năm với nhãn sự kiện — đừng vội nhớ theo trí nhớ mà bỏ qua hình.');
+  } },
+
+/* ---------- MỨC 2: khoảng cách năm và thứ tự trước sau ---------- */
+{ ma: 'su-hinh-khoangcach', chuong: 'Tư liệu lịch sử', muc: 2, dang: 'mc',
+  tao(R) {
+    const t = R.chon(TRUC);
+    const kieu = R.chon(['cach', 'sau']);
+    if (kieu === 'cach') {
+      let i = R.nguyen(0, t.moc.length - 2);
+      let j = R.nguyen(i + 1, t.moc.length - 1);
+      const dung = String(t.moc[j].nam - t.moc[i].nam) + ' năm';
+      /* nhiễu lấy từ chính các khoảng cách khác trên trục cho hợp lý */
+      const ung = [];
+      for (let a = 0; a < t.moc.length; a++)
+        for (let b = a + 1; b < t.moc.length; b++) ung.push(String(t.moc[b].nam - t.moc[a].nam) + ' năm');
+      const nhieu = baNhieu(dung, TD.xaoR(R, ung));
+      if (!nhieu) return null;
+      return MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện "${t.moc[i].ten}" và sự kiện "${t.moc[j].ten}" cách nhau bao nhiêu năm?`,
+        { d: dung, s: nhieu,
+          sv: (() => { const s = {}; nhieu.forEach(x => { s[x] = 'đây là khoảng cách của một cặp mốc khác trên trục, không phải cặp mà đề hỏi'; }); return s; })(),
+          v: `Lấy năm của mốc sau trừ năm của mốc trước: ${t.moc[j].nam} − ${t.moc[i].nam} = ${t.moc[j].nam - t.moc[i].nam}.` },
+        'Khoảng cách hai mốc luôn là phép trừ hai con số ghi ngay dưới vạch — đừng nhẩm theo cảm giác "lâu" hay "gần".');
+    }
+    const i = R.nguyen(0, t.moc.length - 2);
+    const dung = t.moc[i + 1].ten;
+    const nhieu = baNhieu(dung, TD.xaoR(R, t.moc.map(m => m.ten)));
+    if (!nhieu) return null;
+    const sv = {};
+    t.moc.forEach((m, k) => {
+      if (m.ten === dung) return;
+      sv[m.ten] = k <= i ? `mốc năm ${m.nam} nằm TRƯỚC mốc mà đề hỏi` : `mốc năm ${m.nam} có đứng sau, nhưng còn một mốc khác xen vào giữa nên không phải sự kiện kế tiếp`;
+    });
+    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện nào diễn ra ngay sau sự kiện "${t.moc[i].ten}"?`,
+      { d: dung, s: nhieu, sv: sv,
+        v: `Trên trục, mốc đứng liền sau năm ${t.moc[i].nam} là năm ${t.moc[i + 1].nam} — ứng với "${dung}".` },
+      'Hỏi "ngay sau" là hỏi mốc LIỀN KỀ, không phải mốc cuối cùng của trục.');
+  } },
+
+/* ---------- MỨC 3: nhận định về mối liên hệ giữa các mốc ---------- */
+{ ma: 'su-hinh-nhandinh', chuong: 'Tư liệu lịch sử', muc: 3, dang: 'mc',
+  tao(R) {
+    const t = R.chon(TRUC);
+    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Nhận định nào sau đây đúng khi khai thác trục thời gian trên?`,
+      { d: t.nx.d, s: t.nx.s, sv: t.nx.sv, v: t.nx.v },
+      'Câu nhận định luôn giấu bẫy ở THỨ TỰ và ở việc gộp hai sự kiện khác nhau làm một — cứ dóng lại từng mốc trên hình là loại được.');
+  } },
+
+/* ---------- MỨC 4: rút ra quy luật của cả giai đoạn ---------- */
+{ ma: 'su-hinh-quyluat', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'mc',
+  tao(R) {
+    const t = R.chon(TRUC);
+    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Từ toàn bộ các mốc trên trục thời gian, có thể rút ra nhận xét khái quát nào sau đây?`,
+      { d: t.yn.d, s: t.yn.s, sv: t.yn.sv, v: t.yn.v },
+      'Câu khái quát không hỏi từng mốc mà hỏi SỢI DÂY nối các mốc: điều kiện nào dẫn tới điều kiện nào. '
+      + 'Phương án nào chỉ đúng với một mốc lẻ, hoặc đảo ngược quan hệ nhân quả, thì loại.');
+  } },
+
+/* ---------- MỨC 3: đúng/sai bốn ý trên cùng một trục ---------- */
+{ ma: 'su-hinh-dungsai', chuong: 'Tư liệu lịch sử', muc: 3, dang: 'ds',
+  tao(R) {
+    const t = R.chon(TRUC);
+    const sai = TD.xaoR(R, t.nx.s.concat(t.yn.s)).slice(0, 2);
+    const y = TD.xaoR(R, [
+      { t: t.nx.d, a: true }, { t: t.yn.d, a: true },
+      { t: sai[0], a: false }, { t: sai[1], a: false }]);
+    const nhan = ['a', 'b', 'c', 'd'];
+    const giai = y.map((x, k) => `Ý ${nhan[k]} ${x.a ? 'ĐÚNG' : 'SAI'}: `
+      + (x.a ? (x.t === t.nx.d ? t.nx.v : t.yn.v)
+             : ((t.nx.sv && t.nx.sv[x.t]) || (t.yn.sv && t.yn.sv[x.t]) || 'không khớp với các mốc trên trục.'))).join('\n');
+    return { q: `Cho trục thời gian sau:${veTruc(t)}Xét các phát biểu sau:`,
+      items: y, giai: giai,
+      meo: 'Dạng đúng/sai bốn ý thường có hai ý đọc mốc và hai ý khái quát. '
+        + 'Làm chắc hai ý đọc mốc trước để ăn điểm, rồi mới cân nhắc hai ý còn lại.' };
+  } }
+
+]);
+
+/* Đánh dấu mẫu có hình */
+(function () {
+  const MA = ['su-hinh-docmoc', 'su-hinh-khoangcach', 'su-hinh-nhandinh',
+              'su-hinh-quyluat', 'su-hinh-dungsai'];
+  for (const mon of Object.keys(TD.GEN))
+    for (const t of TD.GEN[mon]) if (MA.indexOf(t.ma) >= 0) t._hinh = true;
+})();
+})();
+
+</script>
+<script>
+/* ============================================================
+   CÂU HỎI CÓ HÌNH — ĐỢT 5: DẠNG ĐÚNG / SAI (PHẦN II)
+   Phần II của đề thật rất hay đặt một hình rồi bắt soi bốn ý cùng
+   lúc — đây mới là chỗ ăn điểm nặng (tối đa 1,0đ một câu). Trước
+   đợt này toàn bộ mẫu có hình đều là trắc nghiệm hoặc trả lời
+   ngắn, nên Phần II không bao giờ gặp hình.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const S = TD.soVN;
+/* dấu trừ phải là U+2212 cho giống đề in, không dùng gạch nối ASCII */
+const sn = v => String(v).replace('-', '−').replace('.', ',');
+
+/* Chọn 4 ý từ kho, bắt buộc có cả ý đúng lẫn ý sai — đề thật không
+   bao giờ cho cả bốn ý cùng đúng hoặc cùng sai. */
+const chon4 = (R, kho) => {
+  for (let lan = 0; lan < 30; lan++) {
+    const y = TD.xaoR(R, kho).slice(0, 4);
+    const d = y.filter(x => x.a).length;
+    if (d >= 1 && d <= 3) return y;
+  }
+  return null;
+};
+const nhan = ['a', 'b', 'c', 'd'];
+const ghepGiai = y => y.map((x, k) => `Ý ${nhan[k]} ${x.a ? 'ĐÚNG' : 'SAI'}: ${x.v}`).join('\n');
+
+/* ============================================================
+   TOÁN — ĐỒ THỊ HÀM BẬC BA, SOI BỐN Ý
+   ============================================================ */
+TD.GEN.toan = (TD.GEN.toan || []).concat([
+
+{ ma: 'toan-hinh-dothi-ds', chuong: 'Đạo hàm – Khảo sát', muc: 3, dang: 'ds',
+  tao(R) {
+    const a = R.chon([1, -1]);
+    const d = R.nguyen(-2, 2);
+    /* y = a(x³ − 3x) + d ⇒ y′ = 3a(x² − 1), cực trị tại x = ±1, các giá trị đều nguyên */
+    const f = x => a * (x * x * x - 3 * x) + d;
+    const xCD = a > 0 ? -1 : 1, xCT = a > 0 ? 1 : -1;
+    const yCD = f(xCD), yCT = f(xCT);
+    const hinh = TD.hinhDoThi(f, {
+      xMin: -2.6, xMax: 2.6, yMin: yCT - 2.5, yMax: yCD + 2.5,
+      diem: [{ x: xCD, y: yCD, ten: '' }, { x: xCT, y: yCT, ten: '' }]
+    });
+    const kTung = R.chon([d, d + 1, d - 1]);
+    const zCD = R.chon([-1, 1]);
+    const vCD = R.chon([yCD, yCT]);
+    const y = chon4(R, [
+      { t: `Đồ thị hàm số cắt trục tung tại điểm có tung độ bằng ${sn(kTung)}.`, a: kTung === d,
+        v: `thay x = 0 vào hàm số thì hai hạng tử chứa x đều triệt tiêu, còn lại đúng hệ số tự do, `
+          + `nên đồ thị cắt trục tung tại tung độ ${sn(d)}${kTung === d ? '' : ' chứ không phải ' + sn(kTung)}.` },
+      { t: `Hàm số đạt cực đại tại điểm x = ${sn(zCD)}.`, a: zCD === xCD,
+        v: `nhìn hình, đỉnh "nhô lên" (cực đại) nằm ở x = ${sn(xCD)} còn đáy "trũng xuống" (cực tiểu) nằm ở x = ${sn(xCT)}`
+          + `${zCD === xCD ? '' : ', nên ý này chỉ đúng nhãn mà sai vị trí'}.` },
+      { t: `Hàm số nghịch biến trên khoảng (−1; 1).`, a: a > 0,
+        v: a > 0
+          ? `trong khoảng giữa hai điểm cực trị, đồ thị đi XUỐNG khi nhìn từ trái sang phải ⇒ hàm nghịch biến.`
+          : `trong khoảng giữa hai điểm cực trị, đồ thị đi LÊN khi nhìn từ trái sang phải ⇒ hàm ĐỒNG biến chứ không nghịch biến.` },
+      { t: `Giá trị cực đại của hàm số bằng ${sn(vCD)}.`, a: vCD === yCD,
+        v: `giá trị cực đại là tung độ của đỉnh nhô lên, đọc trên hình được ${sn(yCD)}`
+          + `${vCD === yCD ? '' : `; con số ${sn(vCD)} là giá trị cực TIỂU`}.` },
+      { t: `Đồ thị hàm số có ${a > 0 ? 'nhánh bên phải đi lên' : 'nhánh bên phải đi xuống'} nên hệ số của x³ ${a > 0 ? 'dương' : 'âm'}.`, a: true,
+        v: `với hàm bậc ba, dáng của nhánh ngoài cùng bên phải quyết định dấu hệ số bậc ba — đi lên thì dương, đi xuống thì âm.` },
+      { t: `Hàm số đã cho có ba điểm cực trị.`, a: false,
+        v: `đồ thị chỉ đổi chiều hai lần, và hàm bậc ba nhiều nhất cũng chỉ có hai điểm cực trị.` }
+    ]);
+    if (!y) return null;
+    return { q: `Cho hàm số y = f(x) có đồ thị như hình vẽ.${hinh}Xét các phát biểu sau:`,
+      items: y, giai: ghepGiai(y),
+      meo: 'Câu đúng/sai về đồ thị luôn có ít nhất một ý chỉ cần NHÌN (cắt trục tung, nhánh phải lên hay xuống) '
+        + 'và một ý phải phân biệt cực đại với cực tiểu. Làm hai ý nhìn được trước để chắc 0,25đ rồi mới cân nhắc phần còn lại.' };
+  } }
+
+]);
+
+/* ============================================================
+   VẬT LÍ — ĐỒ THỊ (V; p) CỦA ĐẲNG QUÁ TRÌNH
+   ============================================================ */
+TD.GEN.ly = (TD.GEN.ly || []).concat([
+
+{ ma: 'ly-hinh-pv-ds', chuong: 'Khí lí tưởng', muc: 3, dang: 'ds',
+  tao(R) {
+    const loai = R.chon(['nhiet', 'tich', 'ap']);
+    const p1 = R.nguyen(2, 4), V1 = R.nguyen(1, 2), he = p1 * V1;
+    const f = loai === 'nhiet' ? (v => he / v)
+            : loai === 'tich' ? (v => (Math.abs(v - V1) < 0.06 ? p1 : NaN))
+            : (v => p1);
+    const hinh = TD.hinhDoThi(f, { xMin: 0.2, xMax: 5, yMin: 0, yMax: 6 });
+    const ten = { nhiet: 'đẳng nhiệt', tich: 'đẳng tích', ap: 'đẳng áp' };
+    const dangHoi = R.chon(['nhiet', 'tich', 'ap']);
+    const y = chon4(R, [
+      { t: `Đồ thị mô tả quá trình ${ten[dangHoi]}.`, a: dangHoi === loai,
+        v: `trong hệ (V; p): đẳng nhiệt là đường cong hypebol, đẳng tích là đường thẳng ĐỨNG, đẳng áp là đường thẳng NẰM NGANG. `
+          + `Hình đã cho ứng với quá trình ${ten[loai]}.` },
+      { t: 'Trong quá trình này, tích của áp suất và thể tích giữ nguyên giá trị.', a: loai === 'nhiet',
+        v: loai === 'nhiet'
+          ? `đúng nội dung định luật Boyle cho quá trình đẳng nhiệt.`
+          : `tích áp suất với thể tích chỉ không đổi ở quá trình đẳng nhiệt, còn hình này là quá trình ${ten[loai]}.` },
+      { t: 'Trong quá trình này, nhiệt độ tuyệt đối của khối khí giữ nguyên.', a: loai === 'nhiet',
+        v: loai === 'nhiet' ? `đẳng nhiệt nghĩa là nhiệt độ không đổi.`
+          : `quá trình ${ten[loai]} giữ ${loai === 'tich' ? 'thể tích' : 'áp suất'} không đổi, còn nhiệt độ thì thay đổi.` },
+      { t: 'Trong quá trình này, thể tích của khối khí giữ nguyên.', a: loai === 'tich',
+        v: loai === 'tich' ? `đường thẳng đứng nghĩa là hoành độ (thể tích) không đổi.`
+          : `thể tích chỉ giữ nguyên khi đường biểu diễn là đường thẳng đứng; hình này không phải như vậy.` },
+      { t: 'Trong quá trình này, áp suất của khối khí giữ nguyên.', a: loai === 'ap',
+        v: loai === 'ap' ? `đường thẳng nằm ngang nghĩa là tung độ (áp suất) không đổi.`
+          : `áp suất chỉ giữ nguyên khi đường biểu diễn nằm ngang; hình này không phải như vậy.` },
+      { t: 'Với một lượng khí lí tưởng xác định, thương của tích áp suất với thể tích chia cho nhiệt độ tuyệt đối luôn là hằng số.', a: true,
+        v: `đây là phương trình trạng thái của khí lí tưởng, đúng cho mọi quá trình chứ không riêng ba đẳng quá trình.` },
+      { t: 'Đường biểu diễn quá trình đẳng tích trong hệ toạ độ (T; p) là một đường thẳng đi qua gốc toạ độ.', a: true,
+        v: `khi thể tích không đổi thì áp suất tỉ lệ thuận với nhiệt độ tuyệt đối, nên đồ thị là nửa đường thẳng xuất phát từ gốc.` }
+    ]);
+    if (!y) return null;
+    return { q: `Một lượng khí lí tưởng biến đổi trạng thái theo đồ thị trong hệ toạ độ (V; p) sau, `
+        + `trục hoành là thể tích V, trục tung là áp suất p.${hinh}Xét các phát biểu sau:`,
+      items: y, giai: ghepGiai(y),
+      meo: 'Bước một: đọc DÁNG đường để gọi tên quá trình. Bước hai: mỗi đẳng quá trình giữ nguyên đúng MỘT đại lượng — '
+        + 'gạch tên đại lượng đó ra lề rồi soi từng ý sẽ không bị rối.' };
+  } }
+
+]);
+
+/* ============================================================
+   HOÁ — ĐỒ THỊ NHỎ NaOH VÀO DUNG DỊCH AlCl₃
+   ============================================================ */
+TD.GEN.hoa = (TD.GEN.hoa || []).concat([
+
+{ ma: 'hoa-hinh-kettua-ds', chuong: 'IA – IIA – Nhôm', muc: 3, dang: 'ds',
+  tao(R) {
+    const a = R.nguyen(2, 20) * 0.05;                    /* mol AlCl₃ */
+    const ba = TD.lamTron(3 * a, 4), bon = TD.lamTron(4 * a, 4);
+    const hinh = TD.hinhKetTua(a, []);
+    const vDinh = R.chon([ba, bon]);
+    const vTan = R.chon([bon, ba]);
+    const vMax = R.chon([a, TD.lamTron(2 * a, 4)]);
+    const y = chon4(R, [
+      { t: `Kết tủa đạt giá trị lớn nhất khi số mol NaOH đã dùng bằng ${S(vDinh, 2)} mol.`, a: vDinh === ba,
+        v: `tới đỉnh đồ thị, toàn bộ Al³⁺ vừa chuyển hết thành Al(OH)₃ theo tỉ lệ mỗi ion nhôm cần ba ion hydroxide, `
+          + `nên số mol NaOH ở đỉnh là ${S(ba, 2)} mol${vDinh === ba ? '' : ' chứ không phải ' + S(vDinh, 2) + ' mol'}.` },
+      { t: `Kết tủa tan hết khi số mol NaOH đã dùng bằng ${S(vTan, 2)} mol.`, a: vTan === bon,
+        v: `sau đỉnh, mỗi mol Al(OH)₃ cần thêm đúng một mol hydroxide nữa để tan thành aluminate, `
+          + `nên tổng cộng hết ${S(bon, 2)} mol thì đồ thị chạm trục hoành${vTan === bon ? '' : `; con số ${S(vTan, 2)} mol mới chỉ là lúc kết tủa cực đại`}.` },
+      { t: `Lượng kết tủa lớn nhất thu được là ${S(vMax, 2)} mol.`, a: vMax === TD.lamTron(a, 4),
+        v: `mỗi ion nhôm cho đúng một phân tử hydroxide, nên kết tủa cực đại bằng đúng số mol muối ban đầu là ${S(a, 2)} mol`
+          + `${vMax === TD.lamTron(a, 4) ? '' : ', không thể gấp đôi lượng nhôm có trong dung dịch'}.` },
+      { t: 'Ở nhánh đi xuống của đồ thị, kết tủa bị hoà tan do phản ứng giữa aluminium hydroxide với dung dịch kiềm dư.', a: true,
+        v: `Al(OH)₃ là hydroxide lưỡng tính nên tan được trong kiềm dư, tạo thành muối aluminate tan.` },
+      { t: 'Ở nhánh đi lên của đồ thị, cứ một mol ion nhôm cần bốn mol ion hydroxide để tạo kết tủa cực đại.', a: false,
+        v: `nhánh đi lên chỉ có phản ứng tạo kết tủa, tỉ lệ là một ion nhôm với ba ion hydroxide; con số bốn là tổng lượng cần dùng để vừa tạo rồi vừa hoà tan hết kết tủa.` },
+      { t: 'Nếu thay dung dịch NaOH bằng dung dịch NH₃ dư thì đồ thị sẽ không có nhánh đi xuống.', a: true,
+        v: `NH₃ là base yếu, không hoà tan được Al(OH)₃, nên kết tủa đạt cực đại rồi giữ nguyên chứ không tan trở lại.` }
+    ]);
+    if (!y) return null;
+    return { q: `Nhỏ từ từ dung dịch NaOH vào dung dịch chứa ${S(a, 2)} mol AlCl₃. Số mol kết tủa thu được biến thiên `
+        + `theo số mol NaOH như đồ thị sau (a = ${S(a, 2)} mol).${hinh}Xét các phát biểu sau:`,
+      items: y, giai: ghepGiai(y),
+      meo: 'Ba mốc phải thuộc lòng của đồ thị nhôm: đỉnh ở 3a · chạm trục hoành ở 4a · kết tủa cực đại đúng bằng a. '
+        + 'Nhớ ba mốc này thì mọi ý đúng/sai chỉ còn là so số.' };
+  } }
+
+]);
+
+/* ============================================================
+   SINH — SƠ ĐỒ PHẢ HỆ, SOI BỐN Ý
+   ============================================================ */
+TD.GEN.sinh = (TD.GEN.sinh || []).concat([
+
+{ ma: 'sinh-hinh-phahe-ds', chuong: 'Di truyền người', muc: 3, dang: 'ds',
+  tao(R) {
+    const nguoi = [
+      { id: '1', doi: 1, x: 1, nam: true, benh: false },
+      { id: '2', doi: 1, x: 2, nam: false, benh: false },
+      { id: '3', doi: 1, x: 4, nam: true, benh: false },
+      { id: '4', doi: 1, x: 5, nam: false, benh: false },
+      { id: '5', doi: 2, x: 1, nam: false, benh: true },
+      { id: '6', doi: 2, x: 2.5, nam: true, benh: false },
+      { id: '7', doi: 2, x: 4, nam: false, benh: false },
+      { id: '8', doi: 2, x: 5.5, nam: true, benh: false },
+      { id: '9', doi: 3, x: 3, nam: true, benh: true },
+      { id: '10', doi: 3, x: 4.5, nam: false, benh: false }
+    ];
+    const hinh = TD.hinhPhaHe(nguoi,
+      [['1', '2'], ['3', '4'], ['6', '7']],
+      [{ cha: '1', me: '2', ds: ['5', '6'] }, { cha: '3', me: '4', ds: ['7', '8'] }, { cha: '6', me: '7', ds: ['9', '10'] }]);
+    const xs = R.chon(['25%', '50%', '75%']);
+    const y = chon4(R, [
+      { t: 'Bệnh trên do một gen lặn nằm trên nhiễm sắc thể thường quy định.', a: true,
+        v: `cặp (1) × (2) đều bình thường mà sinh con (5) bị bệnh ⇒ gen gây bệnh là gen LẶN. `
+          + `Người (5) lại là NỮ; nếu gen lặn nằm trên X thì bố (1) phải bị bệnh, mà (1) bình thường ⇒ gen nằm trên nhiễm sắc thể THƯỜNG.` },
+      { t: 'Bệnh trên do gen lặn nằm trên vùng không tương đồng của nhiễm sắc thể X quy định.', a: false,
+        v: `nếu vậy thì người nữ (5) bị bệnh phải nhận allele bệnh từ bố, tức bố (1) cũng phải bị bệnh — trái với phả hệ.` },
+      { t: 'Người số (9) chắc chắn có kiểu gen đồng hợp lặn.', a: true,
+        v: `(9) biểu hiện bệnh mà bệnh do gen lặn quy định, nên chỉ có thể mang hai allele lặn.` },
+      { t: 'Cả hai người số (1) và số (2) đều có kiểu gen dị hợp.', a: true,
+        v: `hai người bình thường sinh ra con (5) đồng hợp lặn, nên mỗi người phải cho một allele lặn mà bản thân vẫn không biểu hiện bệnh.` },
+      { t: 'Người số (8) chắc chắn có kiểu gen dị hợp.', a: false,
+        v: `(8) là con của cặp (3) × (4), trong nhánh này chưa có ai biểu hiện bệnh nên (8) có thể đồng hợp trội hoặc dị hợp — không xác định chắc chắn được.` },
+      { t: `Nếu cặp vợ chồng số (6) và số (7) sinh thêm một người con thì xác suất người con đó bị bệnh là ${xs}.`, a: xs === '25%',
+        v: `(6) và (7) đều bình thường mà đã sinh con (9) bị bệnh nên cả hai đều dị hợp; phép lai giữa hai cơ thể dị hợp cho đời con `
+          + `có một phần tư đồng hợp lặn, tức xác suất bị bệnh là 25%${xs === '25%' ? '' : ` chứ không phải ${xs}`}.` },
+      { t: 'Người số (5) và người số (9) có kiểu gen giống nhau về gen gây bệnh.', a: true,
+        v: `cả hai đều biểu hiện bệnh do gen lặn nên đều mang hai allele lặn.` }
+    ]);
+    if (!y) return null;
+    return { q: `Cho sơ đồ phả hệ về một bệnh ở người, trong đó hình tô đậm là người bị bệnh:${hinh}Xét các phát biểu sau:`,
+      items: y, giai: ghepGiai(y),
+      meo: 'Trình tự đọc phả hệ không bao giờ đổi: ① bố mẹ bình thường sinh con bệnh ⇒ gen LẶN '
+        + '② tìm một người NỮ bị bệnh, nếu bố cô ấy bình thường thì gen nằm trên nhiễm sắc thể THƯỜNG '
+        + '③ người bệnh luôn đồng hợp lặn, bố mẹ bình thường của họ luôn dị hợp.' };
+  } }
+
+]);
+
+/* ============================================================
+   ĐỊA LÍ — ĐỌC BIỂU ĐỒ CỘT, SOI BỐN Ý
+   ============================================================ */
+TD.GEN.dia = (TD.GEN.dia || []).concat([
+
+{ ma: 'dia-hinh-cot-ds', chuong: 'Kỹ năng', muc: 2, dang: 'ds',
+  tao(R) {
+    const nam = [2015, 2018, 2020, 2022];
+    const doiTuong = R.chon([
+      { ten: 'sản lượng thuỷ sản nuôi trồng', dv: 'nghìn tấn' },
+      { ten: 'sản lượng điện', dv: 'tỉ kWh' },
+      { ten: 'số lượt khách du lịch quốc tế', dv: 'triệu lượt' },
+      { ten: 'giá trị xuất khẩu hàng dệt may', dv: 'tỉ USD' }
+    ]);
+    const v = [R.nguyen(20, 40)];
+    for (let i = 1; i < 4; i++) v.push(v[i - 1] + R.nguyen(-6, 22));
+    if (v.some(x => x <= 0)) return null;
+    const ds = nam.map((n, i) => ({ ten: String(n), v: v[i] }));
+    const hinh = TD.hinhCot(ds, doiTuong.dv);
+    const max = Math.max.apply(null, v), min = Math.min.apply(null, v);
+    const iMax = v.indexOf(max), iMin = v.indexOf(min);
+    const tang = v.every((x, i) => i === 0 || x > v[i - 1]);
+    const namHoi = R.nguyen(0, 3), namSo = R.nguyen(0, 3);
+    const gap = v[3] > 2 * v[0];
+    const y = chon4(R, [
+      { t: `Năm ${nam[iMax]} có ${doiTuong.ten} lớn nhất trong giai đoạn ${nam[0]} – ${nam[3]}.`, a: true,
+        v: `cột năm ${nam[iMax]} cao nhất trên biểu đồ, ứng với ${sn(max)} ${doiTuong.dv}.` },
+      { t: `Năm ${nam[iMin]} có ${doiTuong.ten} nhỏ nhất trong giai đoạn ${nam[0]} – ${nam[3]}.`, a: true,
+        v: `cột năm ${nam[iMin]} thấp nhất trên biểu đồ, ứng với ${sn(min)} ${doiTuong.dv}.` },
+      { t: `${doiTuong.ten.charAt(0).toUpperCase() + doiTuong.ten.slice(1)} tăng liên tục qua các năm.`, a: tang,
+        v: tang ? `bốn cột cao dần đều từ trái sang phải, không có năm nào giảm.`
+          : `có năm bị giảm so với năm trước đó (cột thấp hơn cột liền trước), nên không thể nói là tăng liên tục.` },
+      { t: `Năm ${nam[3]} có ${doiTuong.ten} gấp hơn hai lần năm ${nam[0]}.`, a: gap,
+        v: gap ? `so hai cột đầu và cuối: cột cuối cao hơn gấp đôi cột đầu.`
+          : `cột năm ${nam[3]} có tăng so với cột năm ${nam[0]} nhưng chưa đạt gấp đôi.` },
+      { t: `${doiTuong.ten.charAt(0).toUpperCase() + doiTuong.ten.slice(1)} năm ${nam[namHoi]} là ${sn(v[namSo])} ${doiTuong.dv}.`,
+        a: v[namHoi] === v[namSo],
+        v: v[namHoi] === v[namSo] ? `đọc số ghi ngay trên đỉnh cột năm ${nam[namHoi]}.`
+          : `số ghi trên đỉnh cột năm ${nam[namHoi]} là ${sn(v[namHoi])} ${doiTuong.dv}, còn ${sn(v[namSo])} là số của năm ${nam[namSo]}.` },
+      { t: 'Biểu đồ trên là dạng thích hợp nhất để thể hiện cơ cấu của đối tượng.', a: false,
+        v: `biểu đồ cột thể hiện QUY MÔ và sự thay đổi qua các năm; muốn thể hiện cơ cấu phải dùng biểu đồ tròn hoặc biểu đồ miền.` }
+    ]);
+    if (!y) return null;
+    return { q: `Cho biểu đồ về ${doiTuong.ten} của nước ta giai đoạn ${nam[0]} – ${nam[3]}:${hinh}Xét các phát biểu sau:`,
+      items: y, giai: ghepGiai(y),
+      meo: 'Câu biểu đồ chỉ có hai loại ý: ý ĐỌC SỐ (dóng đỉnh cột, so cao thấp) và ý NHẬN DẠNG biểu đồ. '
+        + 'Ý đọc số làm trước cho chắc; ý nhận dạng thì nhớ: cột là quy mô, tròn và miền là cơ cấu, đường là tốc độ tăng trưởng.' };
+  } }
+
+]);
+
+/* Đánh dấu mẫu có hình */
+(function () {
+  const MA = ['toan-hinh-dothi-ds', 'ly-hinh-pv-ds', 'hoa-hinh-kettua-ds',
+              'sinh-hinh-phahe-ds', 'dia-hinh-cot-ds'];
   for (const mon of Object.keys(TD.GEN))
     for (const t of TD.GEN[mon]) if (MA.indexOf(t.ma) >= 0) t._hinh = true;
 })();

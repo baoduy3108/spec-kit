@@ -747,7 +747,7 @@ themCam('gdkt', [
 
 /* ---------------- SINH HỌC ---------------- */
 themCam('sinh', [
-{ nhom: '👁 Nhìn là biết', ten: 'Sáu công thức ADN – gen ra đáp án trong một dòng', cap: 1,
+{ nhom: '👁 Nhìn là biết', ten: 'Sáu công thức DNA – gen ra đáp án trong một dòng', cap: 1,
   ct: '<b>N = 2A + 2G</b> · <b>A = T</b>, <b>G = X</b> · <b>%A + %G = 50%</b><br>'
     + '<b>Chiều dài</b> L = (N/2) × 3,4 Å ⇒ N = 2L/3,4<br>'
     + '<b>Số liên kết hiđrô</b> H = 2A + 3G<br>'
