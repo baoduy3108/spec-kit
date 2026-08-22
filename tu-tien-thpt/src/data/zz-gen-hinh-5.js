@@ -227,7 +227,8 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
     ]);
     const v = [R.nguyen(20, 40)];
     for (let i = 1; i < 4; i++) v.push(v[i - 1] + R.nguyen(-6, 22));
-    if (v.some(x => x <= 0)) return null;
+    /* mọi năm phải khác nhau, nếu không thì ý "năm nào lớn nhất" mất nghĩa */
+    if (v.some(x => x <= 0) || new Set(v).size < v.length) return null;
     const ds = nam.map((n, i) => ({ ten: String(n), v: v[i] }));
     const hinh = TD.hinhCot(ds, doiTuong.dv);
     const max = Math.max.apply(null, v), min = Math.min.apply(null, v);

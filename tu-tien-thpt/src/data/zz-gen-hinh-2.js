@@ -245,8 +245,11 @@ TD.GEN.hoa = (TD.GEN.hoa || []).concat([
 { ma: 'hoa-hinh-dotan', chuong: 'Đại cương', muc: 2, dang: 'mc',
   tao(R) {
     const nhiet = [20, 40, 60, 80];
-    const goc = R.nguyen(20, 40);
-    const ds = nhiet.map((n, i) => ({ ten: n + '°C', v: T(goc + i * R.nguyen(8, 20), 1) }));
+    /* Cộng DỒN từng nấc chứ không nhân bước với chỉ số: mỗi lần gọi R.nguyen
+       cho một bước khác nhau nên nhân với i có thể ra hai cột bằng nhau, mà độ
+       tan của muối rắn thì phải tăng đều theo nhiệt độ. */
+    const ds = []; let dt = R.nguyen(20, 40);
+    nhiet.forEach((n, i) => { if (i) dt += R.nguyen(8, 20); ds.push({ ten: n + '°C', v: dt }); });
     const hinh = TD.hinhCot(ds, 'g/100 g nước');
     const dau = ds[0].v, cuoi = ds[3].v;
     const dungPA = S(T(cuoi - dau, 1), 1) + ' g';
@@ -404,9 +407,16 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
 { ma: 'dia-hinh-mien', chuong: 'Kỹ năng', muc: 3, dang: 'mc',
   tao(R) {
     const nam = ['2010', '2015', '2020', '2024'];
-    const nn = nam.map((n, i) => T(22 - i * R.nguyen(2, 4), 1));
+    /* Cộng dồn từng nấc: nhân bước với chỉ số thì dãy có thể quay ngược chiều
+       (giảm rồi lại tăng), trong khi đề đang nói về một xu hướng chuyển dịch. */
+    const day = (dau, buoc, chieu) => {
+      const ra = [dau]; let v = dau;
+      for (let i = 1; i < nam.length; i++) { v = T(v + chieu * buoc(), 1); ra.push(v); }
+      return ra;
+    };
+    const nn = day(22, () => R.nguyen(2, 4), -1);
     if (nn[3] < 5) return null;
-    const cn = nam.map((n, i) => T(34 + i * R.nguyen(1, 3), 1));
+    const cn = day(34, () => R.nguyen(1, 3), 1);
     const dv = nam.map((n, i) => T(100 - nn[i] - cn[i], 1));
     if (dv.some(x => x < 30 || x > 60)) return null;
     const hinh = TD.hinhMien([
@@ -467,6 +477,8 @@ TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
   tao(R) {
     const nam = ['2020', '2021', '2022', '2023', '2024'];
     const v = nam.map(() => T(R.nguyen(20, 80) / 10, 1));
+    /* Hai năm bằng nhau thì câu "năm nào cao nhất" mất nghĩa — đổi hạt giống. */
+    if (new Set(v).size < v.length) return null;
     const hinh = TD.hinhCot(nam.map((n, i) => ({ ten: n, v: v[i] })), '%');
     const max = Math.max(...v), min = Math.min(...v);
     const namMax = nam[v.indexOf(max)], namMin = nam[v.indexOf(min)];

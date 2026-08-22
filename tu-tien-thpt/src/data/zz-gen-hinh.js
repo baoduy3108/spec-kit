@@ -212,8 +212,12 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
 { ma: 'dia-hinh-cot', chuong: 'Kỹ năng', muc: 3, dang: 'mc',
   tao(R) {
     const nam = [2015, 2018, 2020, 2022];
-    const goc = R.nguyen(30, 60);
-    const ds = nam.map((n, i) => ({ ten: String(n), v: T(goc * Math.pow(1 + R.nguyen(4, 12) / 100, i), 1) }));
+    /* Tăng theo LÃI KÉP từng năm một. Trước đây luỹ thừa chỉ số với một tỉ lệ
+       bốc lại mỗi vòng nên hai cột liền nhau có thể bằng nhau, thậm chí tụt
+       xuống — nhìn như biểu đồ vẽ sai. */
+    const ds = []; let sl = R.nguyen(30, 60);
+    nam.forEach((n, i) => { if (i) sl = T(sl * (1 + R.nguyen(4, 12) / 100), 1); ds.push({ ten: String(n), v: sl }); });
+    if (new Set(ds.map(x => x.v)).size < ds.length) return null;
     const hinh = TD.hinhCot(ds, 'triệu tấn');
     const dau = ds[0].v, cuoi = ds[ds.length - 1].v;
     const tang = T((cuoi - dau) / dau * 100, 1);
