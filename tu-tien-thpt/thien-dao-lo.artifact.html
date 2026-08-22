@@ -706,8 +706,10 @@ TD.lamTron = function (x, n) {
    rõ, chỉ dọn nhiễu dấu phẩy động (làm tròn 6 chữ số) và bỏ số 0 thừa. */
 TD.soVN = function (x, n) {
   if (n === undefined) {
-    const v = TD.lamTron(x, 6);
-    return String(v).replace('.', ',');
+    /* Trần 4 chữ số: đủ giữ nguyên mọi giá trị đã cố ý làm tròn bằng T(v, 4)
+       — mức sâu nhất mà bộ sinh đề dùng — mà không để lọt số lẻ 6 chữ số kiểu
+       "0,095238" vốn không đề thi nào in ra. */
+    return String(TD.lamTron(x, 4)).replace('.', ',');
   }
   return String(TD.lamTron(x, n)).replace('.', ',');
 };
