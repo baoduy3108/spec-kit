@@ -254,6 +254,188 @@ TD.hinhTron = function (ds) {
 };
 
 /* ============================================================
+   ⑦ KHỐI HÌNH HỌC KHÔNG GIAN — chóp và lăng trụ
+   Vẽ theo phép chiếu song song như SGK: cạnh khuất nét đứt.
+   ============================================================ */
+TD.hinhKhoi = function (kieu, nhan) {
+  const W = 300, H = 230;
+  const t = nhan || {};
+  const net = (x1, y1, x2, y2, dut) =>
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${M.truc}" stroke-width="1.7"${dut ? ' stroke-dasharray="5 4"' : ''}/>`;
+  const ten = (x, y, c) => `<text x="${x}" y="${y}" fill="${M.nhan}" font-size="11.5" text-anchor="middle">${c}</text>`;
+  const canh = (x1, y1, x2, y2, c) =>
+    c ? `<text x="${(x1 + x2) / 2 + 8}" y="${(y1 + y2) / 2}" fill="${M.chu}" font-size="10.5">${c}</text>` : '';
+  let ra = '';
+  if (kieu === 'chop') {
+    /* đáy ABCD là hình bình hành nhìn nghiêng, đỉnh S ở trên A */
+    const A = [70, 175], B = [200, 175], C = [245, 140], D = [115, 140], S = [70, 45];
+    ra += net(A[0], A[1], B[0], B[1]) + net(B[0], B[1], C[0], C[1]) + net(C[0], C[1], D[0], D[1], true)
+       + net(D[0], D[1], A[0], A[1], true)
+       + net(S[0], S[1], A[0], A[1]) + net(S[0], S[1], B[0], B[1]) + net(S[0], S[1], C[0], C[1])
+       + net(S[0], S[1], D[0], D[1], true);
+    /* dấu góc vuông tại A cho biết SA ⊥ đáy */
+    ra += `<path d="M ${A[0]} ${A[1] - 13} L ${A[0] + 13} ${A[1] - 13} L ${A[0] + 13} ${A[1]}" fill="none" stroke="${M.do}" stroke-width="1.4"/>`;
+    ra += ten(S[0] - 10, S[1] - 6, 'S') + ten(A[0] - 12, A[1] + 6, 'A') + ten(B[0] + 4, B[1] + 15, 'B')
+       + ten(C[0] + 12, C[1] - 2, 'C') + ten(D[0] - 6, D[1] - 8, 'D');
+    ra += canh(A[0], A[1], B[0], B[1], t.day) + canh(S[0], S[1], A[0], A[1], t.cao);
+  } else {
+    /* lăng trụ đứng đáy tam giác */
+    const A = [70, 180], B = [190, 180], C = [130, 148];
+    const d = -85;
+    const A2 = [A[0], A[1] + d], B2 = [B[0], B[1] + d], C2 = [C[0], C[1] + d];
+    ra += net(A[0], A[1], B[0], B[1]) + net(B[0], B[1], C[0], C[1]) + net(C[0], C[1], A[0], A[1], true)
+       + net(A2[0], A2[1], B2[0], B2[1]) + net(B2[0], B2[1], C2[0], C2[1]) + net(C2[0], C2[1], A2[0], A2[1])
+       + net(A[0], A[1], A2[0], A2[1]) + net(B[0], B[1], B2[0], B2[1]) + net(C[0], C[1], C2[0], C2[1], true);
+    ra += ten(A[0] - 12, A[1] + 6, 'A') + ten(B[0] + 12, B[1] + 6, 'B') + ten(C[0] + 12, C[1] + 2, 'C')
+       + ten(A2[0] - 12, A2[1], "A′") + ten(B2[0] + 12, B2[1], "B′") + ten(C2[0] + 12, C2[1] - 4, "C′");
+    ra += canh(A[0], A[1], B[0], B[1], t.day) + canh(A[0], A[1], A2[0], A2[1], t.cao);
+  }
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑧ BIỂU ĐỒ ĐƯỜNG / MIỀN / KẾT HỢP — cho Địa lí và GDKT
+   ds = [{ten, v:[...]}]  ·  nhan = [nhãn trục hoành]
+   ============================================================ */
+const MAU_DAY = [M.net, M.nhan, M.tim, 'var(--lam)', M.do];
+
+TD.hinhDuong = function (ds, nhan, donVi) {
+  const W = 340, H = 230, le = 46, day = H - 46;
+  const max = Math.max(...ds.flatMap(d => d.v)) * 1.15;
+  const X = i => le + i * (W - le - 14) / Math.max(1, nhan.length - 1);
+  const Y = v => day - v / max * (day - 24);
+  let ra = `<line x1="${le}" y1="${day}" x2="${W - 8}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<line x1="${le}" y1="16" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<text x="${le - 4}" y="12" fill="${M.chu}" font-size="10" text-anchor="end">${donVi || ''}</text>`;
+  for (let k = 0; k <= 4; k++) {
+    const y = day - k / 4 * (day - 24);
+    ra += `<line x1="${le}" y1="${so(y)}" x2="${W - 8}" y2="${so(y)}" stroke="${M.phu}" stroke-width="1"/>`
+       + `<text x="${le - 5}" y="${so(y + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${String(so(max * k / 4)).replace('.', ',')}</text>`;
+  }
+  nhan.forEach((n, i) => { ra += `<text x="${so(X(i))}" y="${day + 15}" fill="${M.chu}" font-size="10" text-anchor="middle">${n}</text>`; });
+  ds.forEach((d, k) => {
+    const mau = MAU_DAY[k % MAU_DAY.length];
+    ra += `<polyline points="${d.v.map((v, i) => so(X(i)) + ',' + so(Y(v))).join(' ')}" fill="none" stroke="${mau}" stroke-width="2.2"/>`;
+    d.v.forEach((v, i) => { ra += `<circle cx="${so(X(i))}" cy="${so(Y(v))}" r="3" fill="${mau}"/>`; });
+    ra += `<rect x="${le + k * 104}" y="6" width="10" height="10" fill="${mau}"/>`
+       + `<text x="${le + k * 104 + 14}" y="15" fill="${M.chu}" font-size="10">${d.ten}</text>`;
+  });
+  return boc(W, H, ra);
+};
+
+TD.hinhMien = function (ds, nhan) {
+  const W = 340, H = 220, le = 40, day = H - 42;
+  const X = i => le + i * (W - le - 14) / Math.max(1, nhan.length - 1);
+  const Y = v => day - v / 100 * (day - 20);
+  let ra = '', duoi = nhan.map(() => 0);
+  ds.forEach((d, k) => {
+    const tren = duoi.map((b, i) => b + d.v[i]);
+    const diem = tren.map((v, i) => so(X(i)) + ',' + so(Y(v)))
+      .concat(duoi.map((v, i) => so(X(i)) + ',' + so(Y(v))).reverse());
+    ra += `<polygon points="${diem.join(' ')}" fill="${MAU_DAY[k % MAU_DAY.length]}" opacity="0.8" stroke="var(--nen)" stroke-width="1"/>`;
+    ra += `<rect x="${le + k * 104}" y="4" width="10" height="10" fill="${MAU_DAY[k % MAU_DAY.length]}" opacity="0.8"/>`
+       + `<text x="${le + k * 104 + 14}" y="13" fill="${M.chu}" font-size="10">${d.ten}</text>`;
+    duoi = tren;
+  });
+  ra += `<line x1="${le}" y1="${day}" x2="${W - 8}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+     + `<line x1="${le}" y1="18" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+     + `<text x="${le - 4}" y="15" fill="${M.chu}" font-size="10" text-anchor="end">%</text>`;
+  [0, 25, 50, 75, 100].forEach(v => {
+    ra += `<text x="${le - 5}" y="${so(Y(v) + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${v}</text>`;
+  });
+  nhan.forEach((n, i) => { ra += `<text x="${so(X(i))}" y="${day + 15}" fill="${M.chu}" font-size="10" text-anchor="middle">${n}</text>`; });
+  return boc(W, H, ra);
+};
+
+TD.hinhKetHop = function (cot, duong, nhan, dvCot, dvDuong) {
+  const W = 340, H = 230, le = 46, phai = W - 42, day = H - 46;
+  const maxC = Math.max(...cot) * 1.2, maxD = Math.max(...duong) * 1.25;
+  const rong = (phai - le) / nhan.length;
+  const Yc = v => day - v / maxC * (day - 26);
+  const Yd = v => day - v / maxD * (day - 26);
+  let ra = `<line x1="${le}" y1="${day}" x2="${phai}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<line x1="${le}" y1="18" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<line x1="${phai}" y1="18" x2="${phai}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<text x="${le - 4}" y="14" fill="${M.nhan}" font-size="9.5" text-anchor="end">${dvCot || ''}</text>`
+    + `<text x="${phai + 4}" y="14" fill="${M.net}" font-size="9.5">${dvDuong || ''}</text>`;
+  cot.forEach((v, i) => {
+    const x = le + i * rong + rong * 0.24;
+    ra += `<rect x="${so(x)}" y="${so(Yc(v))}" width="${so(rong * 0.52)}" height="${so(day - Yc(v))}" fill="${M.nhan}" opacity="0.8"/>`
+       + `<text x="${so(x + rong * 0.26)}" y="${day + 15}" fill="${M.chu}" font-size="10" text-anchor="middle">${nhan[i]}</text>`;
+  });
+  const X = i => le + i * rong + rong * 0.5;
+  ra += `<polyline points="${duong.map((v, i) => so(X(i)) + ',' + so(Yd(v))).join(' ')}" fill="none" stroke="${M.net}" stroke-width="2.3"/>`;
+  duong.forEach((v, i) => {
+    ra += `<circle cx="${so(X(i))}" cy="${so(Yd(v))}" r="3.2" fill="${M.net}"/>`
+       + `<text x="${so(X(i))}" y="${so(Yd(v) - 7)}" fill="${M.net}" font-size="9.5" text-anchor="middle">${String(v).replace('.', ',')}</text>`;
+  });
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑨ LƯỚI THỨC ĂN & THÁP SINH THÁI — cho Sinh
+   ============================================================ */
+TD.hinhLuoi = function (nut, cung) {
+  const W = 340, H = 40 + Math.max(...nut.map(n => n.h)) * 62 + 26;
+  const X = x => 36 + x * 74;
+  const Y = h => H - 34 - h * 62;
+  const tim = id => nut.find(n => n.id === id);
+  let ra = `<defs><marker id="mtla" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto">`
+    + `<path d="M0,0 L8,3.5 L0,7 Z" fill="${M.net}"/></marker></defs>`;
+  cung.forEach(([a, b]) => {
+    const p = tim(a), q = tim(b); if (!p || !q) return;
+    const x1 = X(p.x), y1 = Y(p.h) - 11, x2 = X(q.x), y2 = Y(q.h) + 13;
+    ra += `<line x1="${so(x1)}" y1="${so(y1)}" x2="${so(x2)}" y2="${so(y2)}" stroke="${M.net}" stroke-width="1.6" marker-end="url(#mtla)"/>`;
+  });
+  nut.forEach(n => {
+    const x = X(n.x), y = Y(n.h);
+    const r = Math.max(30, n.ten.length * 3.4);
+    ra += `<rect x="${so(x - r)}" y="${so(y - 11)}" width="${so(r * 2)}" height="22" rx="5" fill="var(--nen2)" stroke="${n.h === 0 ? M.nhan : M.truc}" stroke-width="1.6"/>`
+       + `<text x="${so(x)}" y="${so(y + 4)}" fill="${M.chu}" font-size="10.5" text-anchor="middle">${n.ten}</text>`;
+  });
+  return boc(W, H, ra);
+};
+
+TD.hinhThap = function (bac, donVi) {
+  const W = 320, H = 40 + bac.length * 40;
+  const max = Math.max(...bac.map(b => b.v));
+  let ra = '';
+  bac.forEach((b, i) => {
+    const y = 22 + (bac.length - 1 - i) * 40;
+    const r = 18 + b.v / max * 116;
+    ra += `<rect x="${so(160 - r)}" y="${y}" width="${so(r * 2)}" height="30" fill="${MAU_DAY[i % MAU_DAY.length]}" opacity="0.82" stroke="var(--nen)" stroke-width="1.5"/>`
+       + `<text x="160" y="${y + 20}" fill="var(--nen)" font-size="10.5" font-weight="700" text-anchor="middle">${String(b.v).replace('.', ',')}</text>`
+       + `<text x="8" y="${y + 20}" fill="${M.chu}" font-size="10">${b.ten}</text>`;
+  });
+  ra += `<text x="${W - 6}" y="${H - 6}" fill="${M.chu}" font-size="9.5" text-anchor="end">${donVi || ''}</text>`;
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑩ GIẢN ĐỒ NĂNG LƯỢNG PHẢN ỨNG — cho Hoá
+   ============================================================ */
+TD.hinhGianDo = function (hDau, hCuoi, tenDau, tenCuoi) {
+  const W = 320, H = 220, le = 46, day = H - 34;
+  const lo = Math.min(hDau, hCuoi), hi = Math.max(hDau, hCuoi);
+  const bien = (hi - lo) * 0.55 + 1;
+  const Y = v => day - (v - (lo - bien)) / ((hi + bien) - (lo - bien)) * (day - 26);
+  let ra = `<line x1="${le}" y1="18" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<line x1="${le}" y1="${day}" x2="${W - 10}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<text x="${le - 6}" y="16" fill="${M.chu}" font-size="10.5" text-anchor="end">H</text>`
+    + `<text x="${W - 8}" y="${day + 14}" fill="${M.chu}" font-size="10.5" text-anchor="end">tiến trình phản ứng</text>`;
+  ra += `<line x1="${le + 20}" y1="${so(Y(hDau))}" x2="${le + 92}" y2="${so(Y(hDau))}" stroke="${M.nhan}" stroke-width="2.6"/>`
+     + `<text x="${le + 56}" y="${so(Y(hDau) - 8)}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${tenDau || 'chất đầu'}</text>`
+     + `<line x1="${W - 106}" y1="${so(Y(hCuoi))}" x2="${W - 34}" y2="${so(Y(hCuoi))}" stroke="${M.net}" stroke-width="2.6"/>`
+     + `<text x="${W - 70}" y="${so(Y(hCuoi) - 8)}" fill="${M.net}" font-size="10.5" text-anchor="middle">${tenCuoi || 'sản phẩm'}</text>`;
+  ra += `<line x1="${le + 92}" y1="${so(Y(hDau))}" x2="${W - 106}" y2="${so(Y(hCuoi))}" stroke="${M.chu}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+  const giua = (le + 92 + W - 106) / 2;
+  ra += `<line x1="${giua}" y1="${so(Y(hDau))}" x2="${giua}" y2="${so(Y(hCuoi))}" stroke="${M.do}" stroke-width="1.8" marker-end="url(#mtgd)"/>`
+     + `<defs><marker id="mtgd" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 Z" fill="${M.do}"/></marker></defs>`
+     + `<text x="${giua + 8}" y="${so((Y(hDau) + Y(hCuoi)) / 2)}" fill="${M.do}" font-size="11">ΔrH</text>`;
+  return boc(W, H, ra);
+};
+
+/* ============================================================
    ⑥ MẠCH ĐIỆN NỐI TIẾP / SONG SONG — cho Vật lí
    ============================================================ */
 TD.hinhMach = function (kieu, ds, nguon) {

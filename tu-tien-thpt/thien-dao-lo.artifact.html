@@ -402,7 +402,7 @@ TD.VAT_PHAM = {
    ngạch: đề Toán trung bình 0,01 câu có hình mỗi đề. Nên phải cấp
    phát chỗ riêng, đúng như cách Bộ ra đề.
    ============================================================ */
-TD.SO_CAU_HINH = { toan: 3, ly: 2, hoa: 1, sinh: 1, dia: 2 };
+TD.SO_CAU_HINH = { toan: 3, ly: 2, hoa: 2, sinh: 2, dia: 2, gdkt: 1 };
 /* tỉ lệ câu có hình trong một phiên Luyện Công của môn có hình */
 TD.TY_LE_HINH = 0.18;
 
@@ -7214,6 +7214,188 @@ TD.hinhTron = function (ds) {
     goc = het;
   });
   return boc(W, H, ra + chu);
+};
+
+/* ============================================================
+   ⑦ KHỐI HÌNH HỌC KHÔNG GIAN — chóp và lăng trụ
+   Vẽ theo phép chiếu song song như SGK: cạnh khuất nét đứt.
+   ============================================================ */
+TD.hinhKhoi = function (kieu, nhan) {
+  const W = 300, H = 230;
+  const t = nhan || {};
+  const net = (x1, y1, x2, y2, dut) =>
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${M.truc}" stroke-width="1.7"${dut ? ' stroke-dasharray="5 4"' : ''}/>`;
+  const ten = (x, y, c) => `<text x="${x}" y="${y}" fill="${M.nhan}" font-size="11.5" text-anchor="middle">${c}</text>`;
+  const canh = (x1, y1, x2, y2, c) =>
+    c ? `<text x="${(x1 + x2) / 2 + 8}" y="${(y1 + y2) / 2}" fill="${M.chu}" font-size="10.5">${c}</text>` : '';
+  let ra = '';
+  if (kieu === 'chop') {
+    /* đáy ABCD là hình bình hành nhìn nghiêng, đỉnh S ở trên A */
+    const A = [70, 175], B = [200, 175], C = [245, 140], D = [115, 140], S = [70, 45];
+    ra += net(A[0], A[1], B[0], B[1]) + net(B[0], B[1], C[0], C[1]) + net(C[0], C[1], D[0], D[1], true)
+       + net(D[0], D[1], A[0], A[1], true)
+       + net(S[0], S[1], A[0], A[1]) + net(S[0], S[1], B[0], B[1]) + net(S[0], S[1], C[0], C[1])
+       + net(S[0], S[1], D[0], D[1], true);
+    /* dấu góc vuông tại A cho biết SA ⊥ đáy */
+    ra += `<path d="M ${A[0]} ${A[1] - 13} L ${A[0] + 13} ${A[1] - 13} L ${A[0] + 13} ${A[1]}" fill="none" stroke="${M.do}" stroke-width="1.4"/>`;
+    ra += ten(S[0] - 10, S[1] - 6, 'S') + ten(A[0] - 12, A[1] + 6, 'A') + ten(B[0] + 4, B[1] + 15, 'B')
+       + ten(C[0] + 12, C[1] - 2, 'C') + ten(D[0] - 6, D[1] - 8, 'D');
+    ra += canh(A[0], A[1], B[0], B[1], t.day) + canh(S[0], S[1], A[0], A[1], t.cao);
+  } else {
+    /* lăng trụ đứng đáy tam giác */
+    const A = [70, 180], B = [190, 180], C = [130, 148];
+    const d = -85;
+    const A2 = [A[0], A[1] + d], B2 = [B[0], B[1] + d], C2 = [C[0], C[1] + d];
+    ra += net(A[0], A[1], B[0], B[1]) + net(B[0], B[1], C[0], C[1]) + net(C[0], C[1], A[0], A[1], true)
+       + net(A2[0], A2[1], B2[0], B2[1]) + net(B2[0], B2[1], C2[0], C2[1]) + net(C2[0], C2[1], A2[0], A2[1])
+       + net(A[0], A[1], A2[0], A2[1]) + net(B[0], B[1], B2[0], B2[1]) + net(C[0], C[1], C2[0], C2[1], true);
+    ra += ten(A[0] - 12, A[1] + 6, 'A') + ten(B[0] + 12, B[1] + 6, 'B') + ten(C[0] + 12, C[1] + 2, 'C')
+       + ten(A2[0] - 12, A2[1], "A′") + ten(B2[0] + 12, B2[1], "B′") + ten(C2[0] + 12, C2[1] - 4, "C′");
+    ra += canh(A[0], A[1], B[0], B[1], t.day) + canh(A[0], A[1], A2[0], A2[1], t.cao);
+  }
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑧ BIỂU ĐỒ ĐƯỜNG / MIỀN / KẾT HỢP — cho Địa lí và GDKT
+   ds = [{ten, v:[...]}]  ·  nhan = [nhãn trục hoành]
+   ============================================================ */
+const MAU_DAY = [M.net, M.nhan, M.tim, 'var(--lam)', M.do];
+
+TD.hinhDuong = function (ds, nhan, donVi) {
+  const W = 340, H = 230, le = 46, day = H - 46;
+  const max = Math.max(...ds.flatMap(d => d.v)) * 1.15;
+  const X = i => le + i * (W - le - 14) / Math.max(1, nhan.length - 1);
+  const Y = v => day - v / max * (day - 24);
+  let ra = `<line x1="${le}" y1="${day}" x2="${W - 8}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<line x1="${le}" y1="16" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<text x="${le - 4}" y="12" fill="${M.chu}" font-size="10" text-anchor="end">${donVi || ''}</text>`;
+  for (let k = 0; k <= 4; k++) {
+    const y = day - k / 4 * (day - 24);
+    ra += `<line x1="${le}" y1="${so(y)}" x2="${W - 8}" y2="${so(y)}" stroke="${M.phu}" stroke-width="1"/>`
+       + `<text x="${le - 5}" y="${so(y + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${String(so(max * k / 4)).replace('.', ',')}</text>`;
+  }
+  nhan.forEach((n, i) => { ra += `<text x="${so(X(i))}" y="${day + 15}" fill="${M.chu}" font-size="10" text-anchor="middle">${n}</text>`; });
+  ds.forEach((d, k) => {
+    const mau = MAU_DAY[k % MAU_DAY.length];
+    ra += `<polyline points="${d.v.map((v, i) => so(X(i)) + ',' + so(Y(v))).join(' ')}" fill="none" stroke="${mau}" stroke-width="2.2"/>`;
+    d.v.forEach((v, i) => { ra += `<circle cx="${so(X(i))}" cy="${so(Y(v))}" r="3" fill="${mau}"/>`; });
+    ra += `<rect x="${le + k * 104}" y="6" width="10" height="10" fill="${mau}"/>`
+       + `<text x="${le + k * 104 + 14}" y="15" fill="${M.chu}" font-size="10">${d.ten}</text>`;
+  });
+  return boc(W, H, ra);
+};
+
+TD.hinhMien = function (ds, nhan) {
+  const W = 340, H = 220, le = 40, day = H - 42;
+  const X = i => le + i * (W - le - 14) / Math.max(1, nhan.length - 1);
+  const Y = v => day - v / 100 * (day - 20);
+  let ra = '', duoi = nhan.map(() => 0);
+  ds.forEach((d, k) => {
+    const tren = duoi.map((b, i) => b + d.v[i]);
+    const diem = tren.map((v, i) => so(X(i)) + ',' + so(Y(v)))
+      .concat(duoi.map((v, i) => so(X(i)) + ',' + so(Y(v))).reverse());
+    ra += `<polygon points="${diem.join(' ')}" fill="${MAU_DAY[k % MAU_DAY.length]}" opacity="0.8" stroke="var(--nen)" stroke-width="1"/>`;
+    ra += `<rect x="${le + k * 104}" y="4" width="10" height="10" fill="${MAU_DAY[k % MAU_DAY.length]}" opacity="0.8"/>`
+       + `<text x="${le + k * 104 + 14}" y="13" fill="${M.chu}" font-size="10">${d.ten}</text>`;
+    duoi = tren;
+  });
+  ra += `<line x1="${le}" y1="${day}" x2="${W - 8}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+     + `<line x1="${le}" y1="18" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+     + `<text x="${le - 4}" y="15" fill="${M.chu}" font-size="10" text-anchor="end">%</text>`;
+  [0, 25, 50, 75, 100].forEach(v => {
+    ra += `<text x="${le - 5}" y="${so(Y(v) + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${v}</text>`;
+  });
+  nhan.forEach((n, i) => { ra += `<text x="${so(X(i))}" y="${day + 15}" fill="${M.chu}" font-size="10" text-anchor="middle">${n}</text>`; });
+  return boc(W, H, ra);
+};
+
+TD.hinhKetHop = function (cot, duong, nhan, dvCot, dvDuong) {
+  const W = 340, H = 230, le = 46, phai = W - 42, day = H - 46;
+  const maxC = Math.max(...cot) * 1.2, maxD = Math.max(...duong) * 1.25;
+  const rong = (phai - le) / nhan.length;
+  const Yc = v => day - v / maxC * (day - 26);
+  const Yd = v => day - v / maxD * (day - 26);
+  let ra = `<line x1="${le}" y1="${day}" x2="${phai}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<line x1="${le}" y1="18" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<line x1="${phai}" y1="18" x2="${phai}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
+    + `<text x="${le - 4}" y="14" fill="${M.nhan}" font-size="9.5" text-anchor="end">${dvCot || ''}</text>`
+    + `<text x="${phai + 4}" y="14" fill="${M.net}" font-size="9.5">${dvDuong || ''}</text>`;
+  cot.forEach((v, i) => {
+    const x = le + i * rong + rong * 0.24;
+    ra += `<rect x="${so(x)}" y="${so(Yc(v))}" width="${so(rong * 0.52)}" height="${so(day - Yc(v))}" fill="${M.nhan}" opacity="0.8"/>`
+       + `<text x="${so(x + rong * 0.26)}" y="${day + 15}" fill="${M.chu}" font-size="10" text-anchor="middle">${nhan[i]}</text>`;
+  });
+  const X = i => le + i * rong + rong * 0.5;
+  ra += `<polyline points="${duong.map((v, i) => so(X(i)) + ',' + so(Yd(v))).join(' ')}" fill="none" stroke="${M.net}" stroke-width="2.3"/>`;
+  duong.forEach((v, i) => {
+    ra += `<circle cx="${so(X(i))}" cy="${so(Yd(v))}" r="3.2" fill="${M.net}"/>`
+       + `<text x="${so(X(i))}" y="${so(Yd(v) - 7)}" fill="${M.net}" font-size="9.5" text-anchor="middle">${String(v).replace('.', ',')}</text>`;
+  });
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑨ LƯỚI THỨC ĂN & THÁP SINH THÁI — cho Sinh
+   ============================================================ */
+TD.hinhLuoi = function (nut, cung) {
+  const W = 340, H = 40 + Math.max(...nut.map(n => n.h)) * 62 + 26;
+  const X = x => 36 + x * 74;
+  const Y = h => H - 34 - h * 62;
+  const tim = id => nut.find(n => n.id === id);
+  let ra = `<defs><marker id="mtla" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto">`
+    + `<path d="M0,0 L8,3.5 L0,7 Z" fill="${M.net}"/></marker></defs>`;
+  cung.forEach(([a, b]) => {
+    const p = tim(a), q = tim(b); if (!p || !q) return;
+    const x1 = X(p.x), y1 = Y(p.h) - 11, x2 = X(q.x), y2 = Y(q.h) + 13;
+    ra += `<line x1="${so(x1)}" y1="${so(y1)}" x2="${so(x2)}" y2="${so(y2)}" stroke="${M.net}" stroke-width="1.6" marker-end="url(#mtla)"/>`;
+  });
+  nut.forEach(n => {
+    const x = X(n.x), y = Y(n.h);
+    const r = Math.max(30, n.ten.length * 3.4);
+    ra += `<rect x="${so(x - r)}" y="${so(y - 11)}" width="${so(r * 2)}" height="22" rx="5" fill="var(--nen2)" stroke="${n.h === 0 ? M.nhan : M.truc}" stroke-width="1.6"/>`
+       + `<text x="${so(x)}" y="${so(y + 4)}" fill="${M.chu}" font-size="10.5" text-anchor="middle">${n.ten}</text>`;
+  });
+  return boc(W, H, ra);
+};
+
+TD.hinhThap = function (bac, donVi) {
+  const W = 320, H = 40 + bac.length * 40;
+  const max = Math.max(...bac.map(b => b.v));
+  let ra = '';
+  bac.forEach((b, i) => {
+    const y = 22 + (bac.length - 1 - i) * 40;
+    const r = 18 + b.v / max * 116;
+    ra += `<rect x="${so(160 - r)}" y="${y}" width="${so(r * 2)}" height="30" fill="${MAU_DAY[i % MAU_DAY.length]}" opacity="0.82" stroke="var(--nen)" stroke-width="1.5"/>`
+       + `<text x="160" y="${y + 20}" fill="var(--nen)" font-size="10.5" font-weight="700" text-anchor="middle">${String(b.v).replace('.', ',')}</text>`
+       + `<text x="8" y="${y + 20}" fill="${M.chu}" font-size="10">${b.ten}</text>`;
+  });
+  ra += `<text x="${W - 6}" y="${H - 6}" fill="${M.chu}" font-size="9.5" text-anchor="end">${donVi || ''}</text>`;
+  return boc(W, H, ra);
+};
+
+/* ============================================================
+   ⑩ GIẢN ĐỒ NĂNG LƯỢNG PHẢN ỨNG — cho Hoá
+   ============================================================ */
+TD.hinhGianDo = function (hDau, hCuoi, tenDau, tenCuoi) {
+  const W = 320, H = 220, le = 46, day = H - 34;
+  const lo = Math.min(hDau, hCuoi), hi = Math.max(hDau, hCuoi);
+  const bien = (hi - lo) * 0.55 + 1;
+  const Y = v => day - (v - (lo - bien)) / ((hi + bien) - (lo - bien)) * (day - 26);
+  let ra = `<line x1="${le}" y1="18" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<line x1="${le}" y1="${day}" x2="${W - 10}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<text x="${le - 6}" y="16" fill="${M.chu}" font-size="10.5" text-anchor="end">H</text>`
+    + `<text x="${W - 8}" y="${day + 14}" fill="${M.chu}" font-size="10.5" text-anchor="end">tiến trình phản ứng</text>`;
+  ra += `<line x1="${le + 20}" y1="${so(Y(hDau))}" x2="${le + 92}" y2="${so(Y(hDau))}" stroke="${M.nhan}" stroke-width="2.6"/>`
+     + `<text x="${le + 56}" y="${so(Y(hDau) - 8)}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${tenDau || 'chất đầu'}</text>`
+     + `<line x1="${W - 106}" y1="${so(Y(hCuoi))}" x2="${W - 34}" y2="${so(Y(hCuoi))}" stroke="${M.net}" stroke-width="2.6"/>`
+     + `<text x="${W - 70}" y="${so(Y(hCuoi) - 8)}" fill="${M.net}" font-size="10.5" text-anchor="middle">${tenCuoi || 'sản phẩm'}</text>`;
+  ra += `<line x1="${le + 92}" y1="${so(Y(hDau))}" x2="${W - 106}" y2="${so(Y(hCuoi))}" stroke="${M.chu}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+  const giua = (le + 92 + W - 106) / 2;
+  ra += `<line x1="${giua}" y1="${so(Y(hDau))}" x2="${giua}" y2="${so(Y(hCuoi))}" stroke="${M.do}" stroke-width="1.8" marker-end="url(#mtgd)"/>`
+     + `<defs><marker id="mtgd" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 Z" fill="${M.do}"/></marker></defs>`
+     + `<text x="${giua + 8}" y="${so((Y(hDau) + Y(hCuoi)) / 2)}" fill="${M.do}" font-size="11">ΔrH</text>`;
+  return boc(W, H, ra);
 };
 
 /* ============================================================
@@ -21690,6 +21872,588 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
                    'dia-hinh-cot', 'dia-hinh-tron', 'ly-hinh-mach', 'ly-hinh-pv'];
   for (const mon of Object.keys(TD.GEN))
     for (const t of TD.GEN[mon]) if (MA_HINH.indexOf(t.ma) >= 0) t._hinh = true;
+})();
+
+</script>
+<script>
+/* ============================================================
+   CÂU HỎI CÓ HÌNH — ĐỢT 2: LẤP CÁC MỨC CÒN TRỐNG
+   Đợt 1 có 12 mẫu nhưng dồn cục: Toán chỉ có ở thông hiểu, Sinh và
+   Hoá chỉ có ở vận dụng cao, 13 trên 24 ô (môn × mức) hoàn toàn
+   trống. Người học bấm vào một mức bất kỳ là có thể không gặp hình
+   nào — đúng như phản ánh "chơi vận dụng cao mãi không thấy".
+   File này lấp đủ mọi ô, đồng thời bổ sung những dạng hình mà đề
+   thật hay ra nhưng app còn thiếu hẳn: đồ thị y = f′(x), khối chóp
+   và lăng trụ, đồ thị nhiệt độ – thời gian, đường cong phóng xạ,
+   giản đồ enthalpy, lưới thức ăn, tháp sinh thái, biểu đồ miền,
+   biểu đồ đường và biểu đồ kết hợp.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const S = TD.soVN, T = TD.lamTron, D = TD.dapSo;
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n`
+      + TD.khoiLoai(opts, it.d, it.sv, 'không đọc đúng thông tin trên hình.'),
+    meo: meo };
+};
+const baNhieu = (dung, ung) => {
+  const ra = [];
+  for (const x of ung) if (x !== dung && ra.indexOf(x) < 0) ra.push(x);
+  return ra.length >= 3 ? ra.slice(0, 3) : null;
+};
+
+/* ============================================================
+   TOÁN
+   ============================================================ */
+TD.GEN.toan = (TD.GEN.toan || []).concat([
+
+/* --- mức 1: nhận biết khối đa diện --- */
+{ ma: 'toan-hinh-khoi', chuong: 'Hình không gian', muc: 1, dang: 'mc',
+  tao(R) {
+    const chop = R() < 0.5;
+    const hinh = TD.hinhKhoi(chop ? 'chop' : 'lang');
+    if (chop) {
+      const hoi = R.chon(['soCanh', 'soMat', 'vuongGoc']);
+      if (hoi === 'soCanh')
+        return MC(R, `Cho hình chóp S.ABCD như hình vẽ.${hinh}Hình chóp này có bao nhiêu cạnh?`,
+          { d: '8', s: ['4', '5', '6'],
+            sv: { '4': 'mới đếm bốn cạnh đáy AB, BC, CD, DA', '5': 'đếm nhầm sang số MẶT của hình chóp tứ giác',
+                  '6': 'đây là số cạnh của hình chóp TAM giác S.ABC' },
+            v: `Hình chóp tứ giác S.ABCD gồm hai nhóm cạnh:\n`
+              + `· 4 cạnh đáy: AB, BC, CD, DA\n`
+              + `· 4 cạnh bên: SA, SB, SC, SD\n`
+              + `Tổng cộng 4 + 4 = 8 cạnh.` },
+          'Hình chóp có đáy n cạnh thì luôn có 2n cạnh, n + 1 mặt và n + 1 đỉnh. Nhớ công thức này là đếm không bao giờ sót.');
+      if (hoi === 'soMat')
+        return MC(R, `Cho hình chóp S.ABCD như hình vẽ.${hinh}Hình chóp này có bao nhiêu mặt?`,
+          { d: '5', s: ['4', '6', '8'],
+            sv: { '4': 'mới đếm bốn mặt bên, quên mất mặt đáy ABCD', '6': 'đây là số mặt của hình hộp chữ nhật',
+                  '8': 'đây là số CẠNH chứ không phải số mặt' },
+            v: `Bốn mặt bên SAB, SBC, SCD, SDA cộng với một mặt đáy ABCD ⇒ 5 mặt.` },
+          'Chóp đáy n cạnh có n + 1 mặt: n mặt bên và 1 mặt đáy. Người ta hay quên mặt đáy.');
+      return MC(R, `Cho hình chóp S.ABCD có SA vuông góc với mặt phẳng đáy (kí hiệu góc vuông trên hình).${hinh}Đường thẳng SA vuông góc với đường thẳng nào sau đây?`,
+        { d: 'AB', s: ['SB', 'SC', 'SD'],
+          sv: { 'SB': 'SB cùng đi qua S nên cắt SA, không thể vuông góc với SA theo giả thiết này',
+                'SC': 'SC là cạnh bên, không nằm trong mặt phẳng đáy',
+                'SD': 'SD cũng là cạnh bên, không nằm trong mặt phẳng đáy' },
+          v: `SA ⊥ (ABCD) nghĩa là SA vuông góc với MỌI đường thẳng nằm trong mặt phẳng đáy.\n`
+            + `Trong bốn phương án, chỉ AB nằm trong mặt phẳng đáy ABCD ⇒ SA ⊥ AB.` },
+        'Đường thẳng vuông góc với một mặt phẳng thì vuông góc với TẤT CẢ đường nằm trong mặt phẳng đó — kể cả đường không đi qua chân đường vuông góc.');
+    }
+    return MC(R, `Cho hình lăng trụ đứng tam giác ABC.A′B′C′ như hình vẽ.${hinh}Hình lăng trụ này có bao nhiêu cạnh?`,
+      { d: '9', s: ['6', '8', '12'],
+        sv: { '6': 'mới đếm hai đáy, quên ba cạnh bên', '8': 'đây là số cạnh của hình chóp tứ giác',
+              '12': 'đây là số cạnh của hình hộp chữ nhật (lăng trụ đáy TỨ giác)' },
+        v: `Lăng trụ tam giác gồm: 3 cạnh đáy dưới + 3 cạnh đáy trên + 3 cạnh bên = 9 cạnh.` },
+      'Lăng trụ đáy n cạnh có 3n cạnh, n + 2 mặt và 2n đỉnh.');
+  } },
+
+/* --- mức 4: đọc đồ thị y = f′(x), dạng phân hoá kinh điển --- */
+{ ma: 'toan-hinh-daoham', chuong: 'Đạo hàm – Khảo sát', muc: 4, dang: 'mc',
+  tao(R) {
+    /* f′(x) = a(x − p)(x − q) — parabol cắt trục hoành tại p và q */
+    const a = R.chon([1, -1]);
+    const p = R.nguyen(-3, 0), q = p + R.nguyen(2, 4);
+    const g = x => a * (x - p) * (x - q);
+    const hinh = TD.hinhDoThi(g, {
+      xMin: p - 2, xMax: q + 2,
+      yMin: -Math.max(6, Math.abs(g((p + q) / 2)) + 2), yMax: Math.max(6, Math.abs(g((p + q) / 2)) + 2)
+    });
+    /* f′ > 0 ⇒ f đồng biến. a>0: f′>0 ngoài [p;q]; a<0: f′>0 trong (p;q) */
+    const db = a > 0 ? `(${TD.so(q)}; +∞)` : `(${TD.so(p)}; ${TD.so(q)})`;
+    const nb = a > 0 ? `(${TD.so(p)}; ${TD.so(q)})` : `(${TD.so(q)}; +∞)`;
+    if (db === nb) return null;
+    const hoi = R.chon(['dongBien', 'cucDai']);
+    if (hoi === 'dongBien')
+      return MC(R, `Cho hàm số y = f(x) có đạo hàm f′(x) liên tục trên ℝ. Đồ thị của hàm số <b>y = f′(x)</b> như hình vẽ.${hinh}Hàm số <b>y = f(x)</b> đồng biến trên khoảng nào sau đây?`,
+        { d: db, s: baNhieu(db, [nb, `(−∞; ${TD.so(p)})`, `(${TD.so(q)}; ${TD.so(q + 2)})`,
+            `(−∞; ${TD.so(q)})`, `(${TD.so(p - 2)}; ${TD.so(p)})`]) || [],
+          v: `Đây là đồ thị của f′(x) chứ KHÔNG phải của f(x) — đọc nhầm là mất điểm ngay.\n`
+            + `Quy tắc: f đồng biến ở đâu thì f′(x) > 0 ở đó, tức phần đồ thị nằm PHÍA TRÊN trục hoành.\n`
+            + `Trên hình, đồ thị f′ cắt trục hoành tại x = ${TD.so(p)} và x = ${TD.so(q)}; phần nằm trên trục hoành ứng với khoảng ${db}.\n`
+            + `Vậy f(x) đồng biến trên ${db}.` },
+        'Ba chữ phải khoanh trong đề: "đồ thị của hàm số y = f′(x)". Thấy chữ f′ là đổi cách đọc — '
+        + 'trên trục hoành ⇒ f tăng · dưới trục hoành ⇒ f giảm · cắt trục hoành và ĐỔI DẤU ⇒ f có cực trị.');
+    const cd = a > 0 ? TD.so(p) : TD.so(q);
+    const ct = a > 0 ? TD.so(q) : TD.so(p);
+    return MC(R, `Cho hàm số y = f(x) có đạo hàm f′(x) liên tục trên ℝ. Đồ thị của hàm số <b>y = f′(x)</b> như hình vẽ.${hinh}Hàm số <b>y = f(x)</b> đạt cực đại tại điểm nào?`,
+      { d: `x = ${cd}`, s: baNhieu(`x = ${cd}`, [`x = ${ct}`, `x = ${TD.so(a > 0 ? q + 1 : p - 1)}`,
+          `x = ${TD.so(p - 1)}`, `x = ${TD.so(q + 2)}`, 'x = 0']) || [],
+        sv: { [`x = ${ct}`]: 'tại đó f′ đổi dấu từ ÂM sang DƯƠNG nên là điểm cực TIỂU',
+              'x = 0': 'x = 0 chỉ đặc biệt với đồ thị f, không phải nghiệm của f′ trên hình này' },
+        v: `f đạt cực ĐẠI tại điểm mà f′ đổi dấu từ DƯƠNG sang ÂM (đồ thị f′ cắt trục hoành theo chiều đi xuống).\n`
+          + `Trên hình, tại x = ${cd} đồ thị f′ đi từ trên trục hoành xuống dưới ⇒ đó là điểm cực đại của f.` },
+      'Cực đại ⇔ f′ đổi dấu + sang − (đồ thị f′ đi từ trên xuống). Cực tiểu thì ngược lại. '
+      + 'Chỉ CHẠM trục hoành mà không đổi dấu thì KHÔNG phải cực trị.');
+  } }
+
+]);
+
+/* ============================================================
+   LÝ
+   ============================================================ */
+TD.GEN.ly = (TD.GEN.ly || []).concat([
+
+/* --- mức 1: đọc đồ thị nhiệt độ – thời gian --- */
+{ ma: 'ly-hinh-nhietdo', chuong: 'Vật lí nhiệt', muc: 1, dang: 'mc',
+  tao(R) {
+    const t1 = R.nguyen(2, 5), t2 = t1 + R.nguyen(3, 6), t3 = t2 + R.nguyen(2, 4);
+    const nc = 0;                                    /* nóng chảy ở 0 °C */
+    const cuoi = R.nguyen(20, 60);
+    const f = x => x <= t1 ? -20 + (nc + 20) * x / t1
+                 : x <= t2 ? nc
+                 : nc + (cuoi - nc) * (x - t2) / (t3 - t2);
+    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: t3 + 1, yMin: -25, yMax: cuoi + 10, rong: 330, cao: 240 });
+    return MC(R, `Đồ thị sau biểu diễn nhiệt độ của một khối nước đá theo thời gian khi được đun nóng liên tục (trục hoành là thời gian, trục tung là nhiệt độ tính bằng °C).${hinh}Đoạn nằm ngang trên đồ thị ứng với quá trình nào?`,
+      { d: 'Nước đá đang nóng chảy, nhiệt độ không đổi dù vẫn nhận nhiệt',
+        s: ['Nước đang sôi và hoá hơi hoàn toàn', 'Khối nước đá ngừng nhận nhiệt từ bên ngoài',
+            'Nhiệt lượng cung cấp bị hao phí hết ra môi trường'],
+        sv: { 'Nước đang sôi và hoá hơi hoàn toàn': 'sôi xảy ra ở 100 °C, còn đoạn nằm ngang trên hình ở 0 °C',
+              'Khối nước đá ngừng nhận nhiệt từ bên ngoài': 'đề nói rõ đun nóng LIÊN TỤC nên vẫn nhận nhiệt suốt quá trình',
+              'Nhiệt lượng cung cấp bị hao phí hết ra môi trường': 'nhiệt không mất đi, nó được dùng để phá vỡ liên kết trong mạng tinh thể' },
+        v: `Đoạn nằm ngang ở 0 °C là giai đoạn NÓNG CHẢY.\n`
+          + `Trong suốt quá trình chuyển thể, nhiệt lượng nhận vào dùng để phá vỡ liên kết giữa các phân tử chứ không làm tăng động năng của chúng, `
+          + `nên nhiệt độ giữ nguyên. Nhiệt lượng này tính bằng Q = λm (λ là nhiệt nóng chảy riêng).` },
+      'Đồ thị nhiệt độ – thời gian: đoạn DỐC là đang nóng lên (Q = mcΔt) · đoạn NGANG là đang chuyển thể (Q = λm hoặc Q = Lm). '
+      + 'Nhìn giá trị nhiệt độ của đoạn ngang để biết là nóng chảy (0 °C) hay sôi (100 °C).');
+  } },
+
+/* --- mức 2: đọc đồ thị p–V ra công --- */
+{ ma: 'ly-hinh-dangap', chuong: 'Khí lí tưởng', muc: 2, dang: 'tln', duong: true,
+  tao(R) {
+    const p = R.nguyen(1, 5) * 20000;                /* Pa */
+    const V1 = R.nguyen(1, 4), V2 = V1 + R.nguyen(1, 5);   /* lít */
+    const A = T(p * (V2 - V1) / 1000, 2);            /* J */
+    const f = () => p / 20000;
+    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: V2 + 2, yMin: 0, yMax: 7, rong: 320, cao: 220,
+      diem: [{ x: V1, y: p / 20000, ten: '1' }, { x: V2, y: p / 20000, ten: '2' }] });
+    return {
+      q: `Một lượng khí lí tưởng giãn nở đẳng áp từ trạng thái 1 sang trạng thái 2 theo đồ thị sau `
+        + `(trục hoành là thể tích tính bằng lít, trục tung là áp suất, mỗi vạch trên trục tung ứng với 20 000 Pa).${hinh}`
+        + `Biết áp suất của khí là ${S(p)} Pa, thể tích tăng từ ${V1} lít lên ${V2} lít. `
+        + `Công mà khí thực hiện bằng bao nhiêu jun? (làm tròn đến hàng phần trăm)`,
+      ans: D(A, 2),
+      giai: `Bước 1 — đọc hình: đường biểu diễn NẰM NGANG nên áp suất không đổi, đây là quá trình đẳng áp.\n`
+        + `Bước 2 — công thức công trong quá trình đẳng áp: A = p·ΔV.\n`
+        + `Bước 3 — đổi đơn vị thể tích về mét khối trước khi thay số:\n`
+        + `  ΔV = ${V2} − ${V1} = ${V2 - V1} lít = ${S((V2 - V1) / 1000, 4)} m³\n`
+        + `Bước 4 — thay số: A = ${S(p)} × ${S((V2 - V1) / 1000, 4)} = ${D(A, 2)} J.\n`
+        + `Bước 5 — về mặt hình học, công chính là DIỆN TÍCH hình chữ nhật nằm dưới đường biểu diễn trên đồ thị p–V.`,
+      meo: 'Công trong quá trình đẳng áp bằng diện tích hình dưới đường biểu diễn trên đồ thị p–V. '
+        + 'Bẫy chết người là đơn vị: 1 lít = 10⁻³ m³, quên đổi là lệch đúng 1000 lần.'
+    };
+  } },
+
+/* --- mức 4: đường cong phóng xạ --- */
+{ ma: 'ly-hinh-phongxa', chuong: 'Vật lí hạt nhân', muc: 4, dang: 'tln', duong: true,
+  tao(R) {
+    const T2 = R.chon([2, 4, 5, 8, 10]);             /* chu kì bán rã, ngày */
+    const soT = R.nguyen(2, 4);
+    /* N₀ phải chia hết cho 2ⁿ, không thì số hạt nhân còn lại ra số lẻ vô lí */
+    const N0 = Math.pow(2, soT) * R.nguyen(8, 60) * 10;
+    const t = T2 * soT;
+    const conLai = N0 / Math.pow(2, soT);
+    const f = x => N0 * Math.pow(0.5, x / T2) / (N0 / 4);   /* thu nhỏ cho vừa khung */
+    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: T2 * 4.4, yMin: 0, yMax: 4.6, rong: 330, cao: 235,
+      diem: [{ x: T2, y: 2, ten: '' }, { x: 2 * T2, y: 1, ten: '' }] });
+    return {
+      q: `Đồ thị sau biểu diễn số hạt nhân còn lại N của một mẫu chất phóng xạ theo thời gian t (ngày). `
+        + `Trục tung được chia sao cho giá trị ban đầu N₀ ứng với vạch cao nhất.${hinh}`
+        + `Biết chu kì bán rã của chất này là ${T2} ngày và ban đầu mẫu có ${S(N0)} hạt nhân. `
+        + `Sau ${t} ngày, số hạt nhân đã bị phân rã là bao nhiêu?`,
+      ans: S(N0 - conLai),
+      giai: `Bước 1 — đọc hình: đường cong giảm theo quy luật hàm mũ, cứ sau mỗi chu kì bán rã thì số hạt nhân còn lại giảm một nửa.\n`
+        + `Bước 2 — đếm số chu kì đã trôi qua: t/T = ${t}/${T2} = ${soT} chu kì.\n`
+        + `Bước 3 — số hạt nhân CÒN LẠI: N = N₀/2ⁿ = ${S(N0)}/2^${soT} = ${S(conLai)} hạt.\n`
+        + `Bước 4 — đề hỏi số hạt ĐÃ PHÂN RÃ, tức phần mất đi:\n`
+        + `  ΔN = N₀ − N = ${S(N0)} − ${S(conLai)} = ${S(N0 - conLai)} hạt.`,
+      meo: 'Đọc kĩ đề hỏi "còn lại" hay "đã phân rã" — hai đáp án này luôn được đặt cạnh nhau để bẫy. '
+        + 'Còn lại là N₀/2ⁿ, đã phân rã là N₀(1 − 1/2ⁿ). Trên đồ thị, phần còn lại là tung độ, phần phân rã là khoảng cách từ đường cong lên tới N₀.'
+    };
+  } }
+
+]);
+
+/* ============================================================
+   HOÁ
+   ============================================================ */
+TD.GEN.hoa = (TD.GEN.hoa || []).concat([
+
+/* --- mức 1: đọc giản đồ toả nhiệt / thu nhiệt --- */
+{ ma: 'hoa-hinh-toanhiet', chuong: 'Nhiệt động – Tốc độ – Cân bằng', muc: 1, dang: 'mc',
+  tao(R) {
+    const toa = R() < 0.5;
+    const hDau = toa ? R.nguyen(40, 80) : R.nguyen(5, 30);
+    const hCuoi = toa ? R.nguyen(5, 30) : R.nguyen(40, 80);
+    const hinh = TD.hinhGianDo(hDau, hCuoi);
+    return MC(R, `Giản đồ sau biểu diễn biến thiên enthalpy của một phản ứng hoá học.${hinh}Phát biểu nào sau đây đúng?`,
+      { d: toa ? 'Phản ứng toả nhiệt, ΔrH < 0' : 'Phản ứng thu nhiệt, ΔrH > 0',
+        s: toa ? ['Phản ứng thu nhiệt, ΔrH > 0', 'Phản ứng toả nhiệt, ΔrH > 0', 'Phản ứng không kèm biến đổi năng lượng, ΔrH = 0']
+               : ['Phản ứng toả nhiệt, ΔrH < 0', 'Phản ứng thu nhiệt, ΔrH < 0', 'Phản ứng không kèm biến đổi năng lượng, ΔrH = 0'],
+        v: `Trên giản đồ, mức năng lượng của sản phẩm nằm ${toa ? 'THẤP HƠN' : 'CAO HƠN'} chất đầu.\n`
+          + `ΔrH = H(sản phẩm) − H(chất đầu) ${toa ? '< 0 ⇒ phản ứng TOẢ nhiệt, hệ nhả năng lượng ra môi trường' : '> 0 ⇒ phản ứng THU nhiệt, hệ lấy năng lượng từ môi trường'}.` },
+      'Nhìn mũi tên ΔrH trên giản đồ: chỉ XUỐNG là toả nhiệt và ΔrH mang dấu âm · chỉ LÊN là thu nhiệt và ΔrH mang dấu dương. '
+      + 'Nhớ mẹo "toả thì âm" vì hệ mất năng lượng.');
+  } },
+
+/* --- mức 3: tính ΔrH từ giản đồ --- */
+{ ma: 'hoa-hinh-enthalpy', chuong: 'Nhiệt động – Tốc độ – Cân bằng', muc: 3, dang: 'tln',
+  tao(R) {
+    const hDau = R.nguyen(-200, 100);
+    const hCuoi = hDau + R.chon([-1, 1]) * R.nguyen(60, 400);
+    const dH = hCuoi - hDau;
+    const hinh = TD.hinhGianDo(hDau, hCuoi, `chất đầu (${TD.so(hDau)} kJ)`, `sản phẩm (${TD.so(hCuoi)} kJ)`);
+    return {
+      q: `Giản đồ sau biểu diễn enthalpy của chất đầu và sản phẩm trong một phản ứng hoá học.${hinh}`
+        + `Biến thiên enthalpy ΔrH của phản ứng bằng bao nhiêu kJ?`,
+      ans: TD.dapSo(dH, 0),
+      giai: `Bước 1 — đọc hai mức năng lượng trên hình: chất đầu ở ${TD.so(hDau)} kJ, sản phẩm ở ${TD.so(hCuoi)} kJ.\n`
+        + `Bước 2 — công thức: ΔrH = H(sản phẩm) − H(chất đầu).\n`
+        + `Bước 3 — thay số: ΔrH = ${TD.so(hCuoi)} − (${TD.so(hDau)}) = ${TD.dapSo(dH, 0)} kJ.\n`
+        + `Bước 4 — kiểm lại bằng hình: mũi tên ΔrH chỉ ${dH < 0 ? 'XUỐNG nên giá trị phải ÂM' : 'LÊN nên giá trị phải DƯƠNG'} — khớp với kết quả.\n`
+        + `Bước 5 — kết luận: phản ứng ${dH < 0 ? 'TOẢ nhiệt' : 'THU nhiệt'}.`,
+      meo: 'Luôn lấy SẢN PHẨM trừ CHẤT ĐẦU, không được làm ngược. Trừ một số âm là cộng — đây là chỗ sai dấu phổ biến nhất.'
+    };
+  } },
+
+/* --- mức 2: biểu đồ cột về độ tan --- */
+{ ma: 'hoa-hinh-dotan', chuong: 'Đại cương', muc: 2, dang: 'mc',
+  tao(R) {
+    const nhiet = [20, 40, 60, 80];
+    const goc = R.nguyen(20, 40);
+    const ds = nhiet.map((n, i) => ({ ten: n + '°C', v: T(goc + i * R.nguyen(8, 20), 1) }));
+    const hinh = TD.hinhCot(ds, 'g/100 g nước');
+    const dau = ds[0].v, cuoi = ds[3].v;
+    const dungPA = S(T(cuoi - dau, 1), 1) + ' g';
+    const nhieu = baNhieu(dungPA, [S(T(cuoi + dau, 1), 1) + ' g', S(T(cuoi / dau, 2), 2) + ' g',
+      S(T(ds[2].v - ds[1].v, 1), 1) + ' g', S(cuoi, 1) + ' g']);
+    if (!nhieu) return null;
+    return MC(R, `Biểu đồ sau biểu diễn độ tan của một muối trong nước ở các nhiệt độ khác nhau.${hinh}Khi tăng nhiệt độ từ 20 °C lên 80 °C, độ tan của muối này tăng thêm bao nhiêu gam trên 100 gam nước?`,
+      { d: dungPA, s: nhieu,
+        sv: { [S(T(cuoi + dau, 1), 1) + ' g']: 'đây là tổng hai giá trị, không phải phần tăng thêm',
+              [S(T(cuoi / dau, 2), 2) + ' g']: 'đây là số LẦN tăng, đề hỏi tăng thêm bao nhiêu gam',
+              [S(cuoi, 1) + ' g']: 'đây là độ tan ở 80 °C, chưa trừ đi giá trị ban đầu' },
+        v: `Đọc số ghi trên đầu cột: ở 20 °C độ tan là ${S(dau, 1)} g, ở 80 °C là ${S(cuoi, 1)} g.\n`
+          + `Phần tăng thêm = ${S(cuoi, 1)} − ${S(dau, 1)} = ${S(T(cuoi - dau, 1), 1)} g.` },
+      'Độ tan của hầu hết muối rắn TĂNG khi nhiệt độ tăng, còn độ tan của CHẤT KHÍ thì ngược lại — giảm khi nóng lên. '
+      + 'Đọc số trên đầu cột thay vì ước lượng bằng mắt.');
+  } }
+
+]);
+
+/* ============================================================
+   SINH
+   ============================================================ */
+TD.GEN.sinh = (TD.GEN.sinh || []).concat([
+
+/* --- mức 1: đường cong tăng trưởng quần thể --- */
+{ ma: 'sinh-hinh-tangtruong', chuong: 'Sinh thái học', muc: 1, dang: 'mc',
+  tao(R) {
+    const chuS = R() < 0.5;
+    const K = R.nguyen(3, 5);
+    const f = chuS ? (x => K / (1 + 12 * Math.exp(-1.1 * x))) : (x => 0.12 * Math.exp(0.62 * x));
+    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: 6, yMin: 0, yMax: K + 1.4, rong: 330, cao: 235,
+      duongNgang: chuS ? [K] : [] });
+    return MC(R, `Đồ thị sau biểu diễn sự tăng trưởng số lượng cá thể của một quần thể theo thời gian.${hinh}Đồ thị trên mô tả kiểu tăng trưởng nào?`,
+      { d: chuS ? 'Tăng trưởng theo đường cong chữ S, trong điều kiện môi trường bị giới hạn'
+                : 'Tăng trưởng theo đường cong chữ J, trong điều kiện môi trường lí tưởng',
+        s: chuS ? ['Tăng trưởng theo đường cong chữ J, trong điều kiện môi trường lí tưởng',
+                   'Quần thể đang suy giảm số lượng liên tục',
+                   'Số lượng cá thể không thay đổi theo thời gian']
+                : ['Tăng trưởng theo đường cong chữ S, trong điều kiện môi trường bị giới hạn',
+                   'Quần thể đang suy giảm số lượng liên tục',
+                   'Số lượng cá thể không thay đổi theo thời gian'],
+        v: chuS
+          ? `Đường cong tăng nhanh ở giữa rồi CHỮNG LẠI, tiệm cận đường nằm ngang (đường nét đứt) — đó là sức chứa K của môi trường.\n`
+            + `Dáng chữ S xuất hiện khi nguồn sống bị giới hạn: cạnh tranh cùng loài tăng dần, tỉ lệ sinh giảm và tỉ lệ tử tăng cho tới khi cân bằng.`
+          : `Đường cong đi lên càng lúc càng dốc, không có dấu hiệu chững lại — đó là dáng chữ J.\n`
+            + `Kiểu này chỉ xảy ra khi nguồn sống dồi dào vô hạn, không có kẻ thù và không có cạnh tranh, tức điều kiện lí tưởng và chỉ duy trì được trong thời gian ngắn.` },
+      'Nhìn phần ĐUÔI của đường cong: chững lại và nằm ngang ⇒ chữ S (môi trường giới hạn, có sức chứa K) · '
+      + 'vẫn dốc lên mãi ⇒ chữ J (môi trường lí tưởng). Trong tự nhiên hầu hết quần thể tăng theo chữ S.');
+  } },
+
+/* --- mức 2: tháp sinh thái --- */
+{ ma: 'sinh-hinh-thap', chuong: 'Sinh thái học', muc: 2, dang: 'mc',
+  tao(R) {
+    const E0 = R.nguyen(20, 60) * 1000;
+    const h1 = R.chon([8, 10, 12]), h2 = R.chon([9, 10, 12]);
+    const E1 = Math.round(E0 * h1 / 100), E2 = Math.round(E1 * h2 / 100);
+    const hinh = TD.hinhThap([
+      { ten: 'Sinh vật sản xuất', v: E0 },
+      { ten: 'Tiêu thụ bậc 1', v: E1 },
+      { ten: 'Tiêu thụ bậc 2', v: E2 }
+    ], 'kcal/m²/năm');
+    const hs = T(E1 / E0 * 100, 1);
+    const dungPA = S(hs, 1) + '%';
+    const nhieu = baNhieu(dungPA, [S(T(E0 / E1 * 100, 1), 1) + '%', S(T(E2 / E1 * 100, 1), 1) + '%',
+      S(T(E2 / E0 * 100, 2), 2) + '%', S(T(hs * 2, 1), 1) + '%']);
+    if (!nhieu) return null;
+    return MC(R, `Tháp sinh thái sau biểu diễn năng lượng tích luỹ ở các bậc dinh dưỡng của một hệ sinh thái.${hinh}Hiệu suất sinh thái của sinh vật tiêu thụ bậc 1 so với sinh vật sản xuất là bao nhiêu?`,
+      { d: dungPA, s: nhieu,
+        sv: { [S(T(E0 / E1 * 100, 1), 1) + '%']: 'chia ngược: hiệu suất lấy bậc TRÊN chia bậc DƯỚI',
+              [S(T(E2 / E1 * 100, 1), 1) + '%']: 'đây là hiệu suất của bậc 2 so với bậc 1',
+              [S(T(E2 / E0 * 100, 2), 2) + '%']: 'đây là hiệu suất của bậc 2 so với sinh vật sản xuất' },
+        v: `Hiệu suất sinh thái = (năng lượng bậc trên / năng lượng bậc dưới) × 100%.\n`
+          + `Đọc số trên tháp: sinh vật sản xuất ${S(E0)} kcal, tiêu thụ bậc 1 ${S(E1)} kcal.\n`
+          + `H = ${S(E1)}/${S(E0)} × 100% = ${S(hs, 1)}%.` },
+      'Tháp năng lượng luôn có đáy rộng đỉnh hẹp và KHÔNG BAO GIỜ lộn ngược, vì năng lượng chỉ mất đi qua mỗi bậc. '
+      + 'Tháp số lượng và tháp sinh khối thì có thể lộn ngược.');
+  } },
+
+/* --- mức 3: lưới thức ăn có hình --- */
+{ ma: 'sinh-hinh-luoi', chuong: 'Sinh thái học', muc: 3, dang: 'mc',
+  tao(R) {
+    const nut = [
+      { id: 'co', ten: 'Cỏ', x: 1.2, h: 0 },
+      { id: 'cc', ten: 'Châu chấu', x: 0.4, h: 1 },
+      { id: 'th', ten: 'Thỏ', x: 2, h: 1 },
+      { id: 'ec', ten: 'Ếch', x: 0.4, h: 2 },
+      { id: 'ra', ten: 'Rắn', x: 1.3, h: 3 },
+      { id: 'db', ten: 'Đại bàng', x: 2.6, h: 3 }
+    ];
+    const cung = [['co', 'cc'], ['co', 'th'], ['cc', 'ec'], ['ec', 'ra'], ['th', 'db'], ['ra', 'db']];
+    const hinh = TD.hinhLuoi(nut, cung);
+    const hoi = R.chon(['soChuoi', 'bacDb', 'mat']);
+    if (hoi === 'soChuoi')
+      return MC(R, `Cho lưới thức ăn như hình vẽ (mũi tên chỉ chiều dòng năng lượng).${hinh}Lưới thức ăn trên có bao nhiêu chuỗi thức ăn?`,
+        { d: '2', s: ['1', '3', '4'],
+          sv: { '1': 'đếm sót: có hai đường đi khác nhau từ Cỏ tới Đại bàng',
+                '3': 'đếm thừa: mỗi chuỗi phải đi liên tục từ sinh vật sản xuất tới mắt xích cuối, không được cắt ngang',
+                '4': 'đếm thừa nhiều, lưới này chỉ có hai nhánh' },
+          v: `Mỗi chuỗi thức ăn là một đường đi liên tục từ sinh vật sản xuất (Cỏ) tới mắt xích cuối cùng (Đại bàng).\n`
+            + `· Chuỗi 1: Cỏ → Châu chấu → Ếch → Rắn → Đại bàng\n`
+            + `· Chuỗi 2: Cỏ → Thỏ → Đại bàng\n`
+            + `Vậy có 2 chuỗi thức ăn.` },
+        'Đếm chuỗi thức ăn là đếm số ĐƯỜNG ĐI từ sinh vật sản xuất tới mắt xích cuối, đi liên tục theo chiều mũi tên. '
+        + 'Vẽ lại lưới ra nháp rồi lần từng đường, đừng nhẩm trong đầu.');
+    if (hoi === 'bacDb')
+      return MC(R, `Cho lưới thức ăn như hình vẽ (mũi tên chỉ chiều dòng năng lượng).${hinh}Đại bàng thuộc những bậc dinh dưỡng nào?`,
+        { d: 'Bậc dinh dưỡng cấp 5 và cấp 3', s: ['Chỉ bậc dinh dưỡng cấp 5', 'Chỉ bậc dinh dưỡng cấp 3', 'Bậc dinh dưỡng cấp 4 và cấp 2'],
+          sv: { 'Chỉ bậc dinh dưỡng cấp 5': 'bỏ sót chuỗi ngắn Cỏ → Thỏ → Đại bàng',
+                'Chỉ bậc dinh dưỡng cấp 3': 'bỏ sót chuỗi dài qua Châu chấu, Ếch và Rắn',
+                'Bậc dinh dưỡng cấp 4 và cấp 2': 'đếm thiếu một bậc ở cả hai chuỗi — bậc dinh dưỡng cấp 1 là sinh vật SẢN XUẤT' },
+          v: `Một loài tham gia nhiều chuỗi thì thuộc nhiều bậc dinh dưỡng khác nhau.\n`
+            + `· Trong chuỗi Cỏ → Châu chấu → Ếch → Rắn → Đại bàng, đại bàng đứng thứ năm ⇒ bậc dinh dưỡng cấp 5.\n`
+            + `· Trong chuỗi Cỏ → Thỏ → Đại bàng, đại bàng đứng thứ ba ⇒ bậc dinh dưỡng cấp 3.` },
+        'Bậc dinh dưỡng cấp 1 luôn là sinh vật SẢN XUẤT. Sinh vật tiêu thụ bậc 1 tương ứng bậc dinh dưỡng cấp 2 — lệch nhau đúng một đơn vị.');
+    return MC(R, `Cho lưới thức ăn như hình vẽ (mũi tên chỉ chiều dòng năng lượng).${hinh}Nếu số lượng ếch trong hệ giảm mạnh thì hệ quả trực tiếp nào sau đây có khả năng xảy ra nhất?`,
+      { d: 'Châu chấu tăng số lượng, còn rắn giảm vì mất nguồn thức ăn',
+        s: ['Thỏ tăng mạnh vì được giải phóng khỏi cạnh tranh', 'Cỏ phát triển tốt hơn do ít bị ăn',
+            'Đại bàng tăng số lượng vì có thêm thức ăn'],
+        sv: { 'Thỏ tăng mạnh vì được giải phóng khỏi cạnh tranh': 'thỏ và ếch không dùng chung nguồn thức ăn nên không cạnh tranh nhau',
+              'Cỏ phát triển tốt hơn do ít bị ăn': 'ngược lại — châu chấu mất thiên địch sẽ tăng lên và ăn cỏ nhiều hơn',
+              'Đại bàng tăng số lượng vì có thêm thức ăn': 'ếch giảm làm rắn giảm, mà rắn là một nguồn thức ăn của đại bàng' },
+        v: `Đọc mũi tên quanh Ếch: ếch ăn châu chấu, và ếch bị rắn ăn.\n`
+          + `· Mất thiên địch ⇒ châu chấu bùng phát.\n`
+          + `· Mất nguồn thức ăn ⇒ rắn giảm, kéo theo đại bàng cũng bị ảnh hưởng.` },
+      'Loài nào biến động thì xét hai chiều mũi tên quanh nó: mũi tên ĐI VÀO là nguồn thức ăn của nó, mũi tên ĐI RA là loài ăn nó.');
+  } }
+
+]);
+
+/* ============================================================
+   ĐỊA LÍ
+   ============================================================ */
+TD.GEN.dia = (TD.GEN.dia || []).concat([
+
+/* --- mức 1: nhận dạng dạng biểu đồ cần vẽ --- */
+{ ma: 'dia-hinh-duong', chuong: 'Kỹ năng', muc: 1, dang: 'mc',
+  tao(R) {
+    const nam = ['2015', '2018', '2020', '2022', '2024'];
+    const a = R.nguyen(100, 140), b = R.nguyen(100, 140);
+    const d1 = nam.map((n, i) => T(a * Math.pow(1 + R.nguyen(3, 9) / 100, i) / a * 100, 1));
+    const d2 = nam.map((n, i) => T(b * Math.pow(1 + R.nguyen(2, 12) / 100, i) / b * 100, 1));
+    const hinh = TD.hinhDuong([{ ten: 'Công nghiệp', v: d1 }, { ten: 'Dịch vụ', v: d2 }], nam, '%');
+    return MC(R, `Cho biểu đồ sau về tốc độ tăng trưởng của hai ngành kinh tế nước ta (lấy năm 2015 = 100%).${hinh}Biểu đồ trên thuộc dạng biểu đồ nào?`,
+      { d: 'Biểu đồ đường', s: ['Biểu đồ cột', 'Biểu đồ miền', 'Biểu đồ tròn'],
+        sv: { 'Biểu đồ cột': 'biểu đồ cột dùng hình chữ nhật đứng, còn hình này dùng đường gấp khúc nối các điểm',
+              'Biểu đồ miền': 'biểu đồ miền tô kín các dải chồng lên nhau và tổng luôn bằng 100%',
+              'Biểu đồ tròn': 'biểu đồ tròn chỉ thể hiện cơ cấu tại một thời điểm, không có trục thời gian' },
+        v: `Biểu đồ dùng ĐƯỜNG gấp khúc nối các điểm theo thời gian, đơn vị là % với năm gốc bằng 100 — đó là biểu đồ ĐƯỜNG.\n`
+          + `Dạng này dùng khi thể hiện TỐC ĐỘ TĂNG TRƯỞNG của nhiều đối tượng qua nhiều năm.` },
+      'Từ khoá quyết định dạng biểu đồ: "tốc độ tăng trưởng" ⇒ ĐƯỜNG · "cơ cấu" từ 4 năm ⇒ MIỀN · "cơ cấu" 1–3 năm ⇒ TRÒN · '
+      + '"tình hình, so sánh" ⇒ CỘT · hai đối tượng khác đơn vị ⇒ KẾT HỢP.');
+  } },
+
+/* --- mức 3: đọc biểu đồ miền --- */
+{ ma: 'dia-hinh-mien', chuong: 'Kỹ năng', muc: 3, dang: 'mc',
+  tao(R) {
+    const nam = ['2010', '2015', '2020', '2024'];
+    const nn = nam.map((n, i) => T(22 - i * R.nguyen(2, 4), 1));
+    if (nn[3] < 5) return null;
+    const cn = nam.map((n, i) => T(34 + i * R.nguyen(1, 3), 1));
+    const dv = nam.map((n, i) => T(100 - nn[i] - cn[i], 1));
+    if (dv.some(x => x < 30 || x > 60)) return null;
+    const hinh = TD.hinhMien([
+      { ten: 'Nông – lâm – thuỷ sản', v: nn },
+      { ten: 'Công nghiệp – xây dựng', v: cn },
+      { ten: 'Dịch vụ', v: dv }
+    ], nam);
+    const giam = T(nn[0] - nn[3], 1);
+    const dungPA = S(giam, 1) + '%';
+    const nhieu = baNhieu(dungPA, [S(T(nn[0] + nn[3], 1), 1) + '%', S(nn[3], 1) + '%',
+      S(T(cn[3] - cn[0], 1), 1) + '%', S(T(giam * 2, 1), 1) + '%']);
+    if (!nhieu) return null;
+    return MC(R, `Cho biểu đồ cơ cấu GDP phân theo khu vực kinh tế của nước ta giai đoạn ${nam[0]} – ${nam[3]}.${hinh}Tỉ trọng khu vực nông – lâm – thuỷ sản đã giảm bao nhiêu phần trăm trong giai đoạn trên?`,
+      { d: dungPA, s: nhieu,
+        sv: { [S(T(nn[0] + nn[3], 1), 1) + '%']: 'đây là tổng hai giá trị đầu và cuối, không phải mức giảm',
+              [S(nn[3], 1) + '%']: 'đây là tỉ trọng năm cuối, chưa trừ đi năm đầu',
+              [S(T(cn[3] - cn[0], 1), 1) + '%']: 'đây là mức thay đổi của khu vực công nghiệp – xây dựng' },
+        v: `Biểu đồ miền đọc theo ĐỘ DÀY của mỗi dải, không đọc theo vị trí đường ranh giới.\n`
+          + `Dải nông – lâm – thuỷ sản: năm ${nam[0]} dày ${S(nn[0], 1)}%, năm ${nam[3]} dày ${S(nn[3], 1)}%.\n`
+          + `Mức giảm = ${S(nn[0], 1)} − ${S(nn[3], 1)} = ${S(giam, 1)}%.` },
+      'Biểu đồ miền: mỗi năm tổng luôn bằng 100%. Đọc ĐỘ DÀY của dải chứ đừng đọc vị trí đường ranh giới — '
+      + 'dải thứ hai và thứ ba bị đẩy lên bởi dải dưới nên nhìn vị trí là sai ngay.');
+  } },
+
+/* --- mức 4: biểu đồ kết hợp --- */
+{ ma: 'dia-hinh-kethop', chuong: 'Kỹ năng', muc: 4, dang: 'tln', duong: true,
+  tao(R) {
+    const nam = ['2018', '2020', '2022', '2024'];
+    const dt = nam.map((n, i) => T(R.nguyen(70, 78) + i * R.chon([-1, 0, 1]) * 0.6, 1));   /* nghìn ha */
+    const sl = nam.map((n, i) => T(dt[i] * (R.nguyen(48, 62) / 10), 1));                   /* nghìn tấn */
+    const hinh = TD.hinhKetHop(dt, sl, nam, 'nghìn ha', 'nghìn tấn');
+    const k = R.nguyen(0, 3);
+    const ns = T(sl[k] * 10 / dt[k], 2);                       /* tạ/ha */
+    return {
+      q: `Cho biểu đồ về diện tích (cột, đơn vị nghìn ha) và sản lượng (đường, đơn vị nghìn tấn) một loại cây trồng của nước ta.${hinh}`
+        + `Năng suất cây trồng này năm ${nam[k]} là bao nhiêu tạ/ha? (làm tròn đến hàng phần trăm)`,
+      ans: D(ns, 2),
+      giai: `Bước 1 — đọc hình cho đúng trục: CỘT gắn với trục trái (diện tích, nghìn ha), ĐƯỜNG gắn với trục phải (sản lượng, nghìn tấn). `
+        + `Đây là chỗ sai nhiều nhất của biểu đồ kết hợp.\n`
+        + `Bước 2 — lấy số liệu năm ${nam[k]}: diện tích ${S(dt[k], 1)} nghìn ha, sản lượng ${S(sl[k], 1)} nghìn tấn.\n`
+        + `Bước 3 — công thức: năng suất = sản lượng / diện tích.\n`
+        + `Bước 4 — thống nhất đơn vị. Năng suất tính bằng tạ/ha, mà 1 tấn = 10 tạ nên:\n`
+        + `  năng suất = ${S(sl[k], 1)} × 10 / ${S(dt[k], 1)} = ${S(ns, 4)} ≈ ${D(ns, 2)} tạ/ha.\n`
+        + `Bước 5 — kiểm tra tính hợp lí: năng suất cây lương thực ở nước ta thường nằm trong khoảng 40 – 70 tạ/ha, kết quả nằm trong khoảng đó nên hợp lí.`,
+      meo: 'Biểu đồ kết hợp có HAI trục tung khác đơn vị — luôn xác định cột đọc trục nào, đường đọc trục nào trước khi lấy số. '
+        + 'Năng suất = sản lượng / diện tích, nhớ đổi tấn sang tạ bằng cách nhân 10.'
+    };
+  } }
+
+]);
+
+/* ============================================================
+   GDKT & PHÁP LUẬT
+   ============================================================ */
+TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
+
+{ ma: 'gdkt-hinh-tangtruong', chuong: 'Tăng trưởng – Phát triển', muc: 2, dang: 'mc',
+  tao(R) {
+    const nam = ['2020', '2021', '2022', '2023', '2024'];
+    const v = nam.map(() => T(R.nguyen(20, 80) / 10, 1));
+    const hinh = TD.hinhCot(nam.map((n, i) => ({ ten: n, v: v[i] })), '%');
+    const max = Math.max(...v), min = Math.min(...v);
+    const namMax = nam[v.indexOf(max)], namMin = nam[v.indexOf(min)];
+    if (namMax === namMin) return null;
+    return MC(R, `Cho biểu đồ tốc độ tăng trưởng GDP của một quốc gia giai đoạn ${nam[0]} – ${nam[4]}.${hinh}Năm nào có tốc độ tăng trưởng GDP cao nhất và năm nào thấp nhất?`,
+      { d: `Cao nhất năm ${namMax}, thấp nhất năm ${namMin}`,
+        /* Nhiễu ghép từ MỌI cặp năm khác, nên dù năm cao nhất rơi vào đầu hay
+           cuối giai đoạn vẫn luôn đủ ba phương án khác nhau. */
+        s: baNhieu(`Cao nhất năm ${namMax}, thấp nhất năm ${namMin}`,
+            [`Cao nhất năm ${namMin}, thấp nhất năm ${namMax}`].concat(
+              nam.flatMap(a => nam.map(b => a === b ? null : `Cao nhất năm ${a}, thấp nhất năm ${b}`))
+                 .filter(Boolean).slice(0, 8),
+              [`Tốc độ tăng trưởng các năm là như nhau`])) || [],
+        v: `Đọc số ghi trên đầu mỗi cột: ${nam.map((n, i) => n + ' là ' + S(v[i], 1) + '%').join(', ')}.\n`
+          + `Cao nhất là năm ${namMax} với ${S(max, 1)}%, thấp nhất là năm ${namMin} với ${S(min, 1)}%.` },
+      'Tốc độ tăng trưởng GDP DƯƠNG nghĩa là nền kinh tế vẫn lớn lên, chỉ là nhanh hay chậm. '
+      + 'Chỉ khi giá trị ÂM thì quy mô nền kinh tế mới thực sự thu hẹp.');
+  } },
+
+{ ma: 'gdkt-hinh-lamphat', chuong: 'Tăng trưởng – Phát triển', muc: 3, dang: 'tln', duong: true,
+  tao(R) {
+    const nam = ['2021', '2022', '2023', '2024'];
+    const cpi = [100];
+    for (let i = 1; i < 4; i++) cpi.push(T(cpi[i - 1] * (1 + R.nguyen(15, 55) / 1000), 1));
+    const hinh = TD.hinhDuong([{ ten: 'Chỉ số giá tiêu dùng (CPI)', v: cpi }], nam, 'điểm');
+    const k = R.nguyen(1, 3);
+    const lp = T((cpi[k] - cpi[k - 1]) / cpi[k - 1] * 100, 2);
+    return {
+      q: `Cho biểu đồ chỉ số giá tiêu dùng (CPI) của một quốc gia, lấy năm ${nam[0]} làm gốc bằng 100 điểm.${hinh}`
+        + `Tỉ lệ lạm phát của năm ${nam[k]} so với năm ${nam[k - 1]} là bao nhiêu phần trăm? (làm tròn đến hàng phần trăm)`,
+      ans: D(lp, 2),
+      giai: `Bước 1 — đọc hai giá trị trên đồ thị: CPI năm ${nam[k - 1]} là ${S(cpi[k - 1], 1)} điểm, năm ${nam[k]} là ${S(cpi[k], 1)} điểm.\n`
+        + `Bước 2 — công thức tỉ lệ lạm phát:\n`
+        + `  lạm phát = (CPI năm sau − CPI năm trước) / CPI năm trước × 100%\n`
+        + `Bước 3 — thay số:\n`
+        + `  = (${S(cpi[k], 1)} − ${S(cpi[k - 1], 1)}) / ${S(cpi[k - 1], 1)} × 100% = ${D(lp, 2)}%.\n`
+        + `Bước 4 — đọc ý nghĩa: mức lạm phát ${lp < 10 ? 'dưới 10% là lạm phát VỪA PHẢI, nền kinh tế vẫn ổn định' : 'từ 10% trở lên đã là lạm phát phi mã, ảnh hưởng xấu tới đời sống'}.`,
+      meo: 'Mẫu số luôn là năm TRƯỚC. CPI tăng không có nghĩa lạm phát tăng — CPI tăng CHẬM LẠI thì lạm phát đang giảm, '
+        + 'đây là chỗ đề rất hay hỏi ngược để phân loại.'
+    };
+  } }
+
+]);
+
+/* --- GDKT mức 1: đọc cơ cấu chi tiêu --- */
+TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
+
+{ ma: 'gdkt-hinh-cocau', chuong: 'Quản lí thu chi', muc: 1, dang: 'mc',
+  tao(R) {
+    const an = R.nguyen(28, 40), o = R.nguyen(18, 26), hoc = R.nguyen(10, 18);
+    const tk = R.nguyen(10, 20);
+    const khac = 100 - an - o - hoc - tk;
+    if (khac < 6 || khac > 22) return null;
+    const ds = [{ ten: 'Ăn uống', v: an }, { ten: 'Nhà ở, điện nước', v: o },
+                { ten: 'Học tập', v: hoc }, { ten: 'Tiết kiệm', v: tk }, { ten: 'Khác', v: khac }];
+    const hinh = TD.hinhTron(ds);
+    const max = ds.slice().sort((a, b) => b.v - a.v)[0];
+    if (ds.filter(x => x.v === max.v).length > 1) return null;
+    return MC(R, `Biểu đồ sau thể hiện cơ cấu chi tiêu hằng tháng của một gia đình.${hinh}Khoản nào chiếm tỉ trọng lớn nhất trong tổng chi tiêu?`,
+      { d: max.ten, s: baNhieu(max.ten, ds.map(x => x.ten).concat(['Vay nợ'])) || [],
+        v: `Đọc số phần trăm trong phần chú giải bên phải: ${ds.map(x => x.ten + ' ' + x.v + '%').join(', ')}.
+`
+          + `Lớn nhất là ${max.ten} với ${max.v}%.` },
+      'Nguyên tắc lập kế hoạch thu chi: khoản TIẾT KIỆM phải được trích ra NGAY khi có thu nhập, '
+      + 'chứ không phải chi hết rồi thừa bao nhiêu mới để dành.');
+  } },
+
+{ ma: 'gdkt-hinh-tietkiem', chuong: 'Quản lí thu chi', muc: 4, dang: 'tln', duong: true,
+  tao(R) {
+    const thang = ['T1', 'T2', 'T3', 'T4'];
+    const thu = thang.map(() => R.nguyen(14, 26));
+    const chi = thu.map(x => T(x * R.nguyen(62, 88) / 100, 1));
+    const hinh = TD.hinhKetHop(thu, chi, thang, 'triệu · thu', 'triệu · chi');
+    const tongThu = T(thu.reduce((a, b) => a + b, 0), 1);
+    const tongChi = T(chi.reduce((a, b) => a + b, 0), 1);
+    const ty = T((tongThu - tongChi) / tongThu * 100, 2);
+    return {
+      q: `Biểu đồ sau thể hiện thu nhập (cột) và chi tiêu (đường) của một gia đình trong bốn tháng, đơn vị triệu đồng.${hinh}`
+        + `Tính tỉ lệ tiết kiệm của cả bốn tháng so với tổng thu nhập, theo phần trăm. (làm tròn đến hàng phần trăm)`,
+      ans: D(ty, 2),
+      giai: `Bước 1 — đọc hình cho đúng trục: CỘT là thu nhập (trục trái), ĐƯỜNG là chi tiêu (trục phải).
+`
+        + `Bước 2 — cộng tổng thu bốn tháng: ${thu.map(x => S(x)).join(' + ')} = ${S(tongThu, 1)} triệu.
+`
+        + `Bước 3 — cộng tổng chi bốn tháng: ${chi.map(x => S(x, 1)).join(' + ')} = ${S(tongChi, 1)} triệu.
+`
+        + `Bước 4 — số tiền tiết kiệm được = tổng thu − tổng chi = ${S(tongThu, 1)} − ${S(tongChi, 1)} = ${S(T(tongThu - tongChi, 1), 1)} triệu.
+`
+        + `Bước 5 — tỉ lệ tiết kiệm = tiết kiệm / TỔNG THU × 100% = ${S(T(tongThu - tongChi, 1), 1)}/${S(tongThu, 1)} × 100% = ${D(ty, 2)}%.
+`
+        + `Bước 6 — đối chiếu chuẩn: chuyên gia tài chính khuyên tiết kiệm tối thiểu 10 – 20% thu nhập, `
+        + `mức ${D(ty, 2)}% ${ty >= 20 ? 'là rất tốt' : ty >= 10 ? 'đạt mức khuyến nghị' : 'còn thấp hơn khuyến nghị'}.`,
+      meo: 'Tỉ lệ tiết kiệm luôn chia cho TỔNG THU, không chia cho tổng chi. '
+        + 'Với biểu đồ kết hợp, xác định cột đọc trục nào và đường đọc trục nào trước khi lấy số.'
+    };
+  } }
+
+]);
+
+/* Đánh dấu toàn bộ mẫu trong file này là mẫu CÓ HÌNH */
+(function () {
+  const MA = ['toan-hinh-khoi', 'toan-hinh-daoham', 'ly-hinh-nhietdo', 'ly-hinh-dangap', 'ly-hinh-phongxa',
+              'hoa-hinh-toanhiet', 'hoa-hinh-enthalpy', 'hoa-hinh-dotan',
+              'sinh-hinh-tangtruong', 'sinh-hinh-thap', 'sinh-hinh-luoi',
+              'dia-hinh-duong', 'dia-hinh-mien', 'dia-hinh-kethop',
+              'gdkt-hinh-tangtruong', 'gdkt-hinh-lamphat', 'gdkt-hinh-cocau', 'gdkt-hinh-tietkiem'];
+  for (const mon of Object.keys(TD.GEN))
+    for (const t of TD.GEN[mon]) if (MA.indexOf(t.ma) >= 0) t._hinh = true;
+})();
 })();
 
 </script>

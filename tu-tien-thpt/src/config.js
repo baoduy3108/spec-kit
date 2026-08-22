@@ -126,7 +126,7 @@ TD.VAT_PHAM = {
    ngạch: đề Toán trung bình 0,01 câu có hình mỗi đề. Nên phải cấp
    phát chỗ riêng, đúng như cách Bộ ra đề.
    ============================================================ */
-TD.SO_CAU_HINH = { toan: 3, ly: 2, hoa: 1, sinh: 1, dia: 2 };
+TD.SO_CAU_HINH = { toan: 3, ly: 2, hoa: 2, sinh: 2, dia: 2, gdkt: 1 };
 /* tỉ lệ câu có hình trong một phiên Luyện Công của môn có hình */
 TD.TY_LE_HINH = 0.18;
 
