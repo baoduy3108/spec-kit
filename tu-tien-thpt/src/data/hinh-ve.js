@@ -56,15 +56,19 @@ TD.hinhDoThi = function (f, cf) {
   };
   const bx = buocChia(c.xMin, c.xMax), by = buocChia(c.yMin, c.yMax);
   let luoi = '';
+  /* Vạch sát mép khung thì bỏ nhãn: chữ nằm chồng lên chính đường viền, in ra
+     giấy trông như số bị cắt mất một nửa. */
   for (let x = Math.ceil(c.xMin / bx) * bx; x <= c.xMax; x += bx) {
     if (x === 0) continue;
     luoi += `<line x1="${so(X(x))}" y1="${le}" x2="${so(X(x))}" y2="${H - le}" stroke="${M.phu}" stroke-width="1"/>`;
-    luoi += `<text x="${so(X(x))}" y="${so(yNhan)}" fill="${M.chu}" font-size="10" text-anchor="middle">${so(x)}</text>`;
+    if (X(x) > le + 7 && X(x) < W - le - 7)
+      luoi += `<text x="${so(X(x))}" y="${so(yNhan)}" fill="${M.chu}" font-size="10" text-anchor="middle">${so(x)}</text>`;
   }
   for (let y = Math.ceil(c.yMin / by) * by; y <= c.yMax; y += by) {
     if (y === 0) continue;
     luoi += `<line x1="${le}" y1="${so(Y(y))}" x2="${W - le}" y2="${so(Y(y))}" stroke="${M.phu}" stroke-width="1"/>`;
-    luoi += `<text x="${so(xNhan)}" y="${so(Y(y) + 3.5)}" fill="${M.chu}" font-size="10" text-anchor="end">${so(y)}</text>`;
+    if (Y(y) > le + 7 && Y(y) < H - le - 7)
+      luoi += `<text x="${so(xNhan)}" y="${so(Y(y) + 3.5)}" fill="${M.chu}" font-size="10" text-anchor="end">${so(y)}</text>`;
   }
   /* Trục chỉ vẽ khi nó thật sự nằm trong vùng hiển thị; nếu không thì thay
      bằng khung viền, và không ghi chữ O ở nơi không có gốc toạ độ. */

@@ -96,7 +96,9 @@ button.nut.lua{background:linear-gradient(135deg,var(--lua),#b93b2c);color:#fff}
   border-radius:10px;padding:11px 13px;margin:7px 0}
 .ds-y .noi{flex:1;font-size:14.3px}
 .ds-nut{display:flex;gap:5px;flex:0 0 auto}
-.ds-nut button{width:42px;padding:6px 0;border-radius:8px;border:1px solid var(--vien);
+/* Nút Đúng/Sai phải đủ lớn để bấm bằng ngón tay: cao 29px là hụt so với
+   ngưỡng chạm 32px, ngón cái hay bấm trượt sang ý bên cạnh. */
+.ds-nut button{width:46px;min-height:36px;padding:8px 0;border-radius:8px;border:1px solid var(--vien);
   background:var(--nen);color:var(--chu2);cursor:pointer;font-size:12.5px;font-weight:700;font-family:inherit}
 .ds-nut button.chon{background:var(--lam);color:#04140f;border-color:transparent}
 .ds-y.dung{border-color:var(--dung)} .ds-y.sai{border-color:var(--sai)}

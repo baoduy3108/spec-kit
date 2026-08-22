@@ -400,6 +400,8 @@ TD.BAN_DO_CD = {
     [/dien phan|pin dien|galvani|an mon|faraday|the dien cuc|ma dien|nhien lieu pin/, 'Điện phân – Pin điện'],
     [/\bsat\b|fe2|fe3|feo|crom|\bcr\b|gang|thep|quy doi hon hop/, 'Sắt – Crom'],
     [/nhom|al2o3|kiem tho|nuoc cung|thach cao|boxit|natri|kali|canxi|magnesium|\bco2\b|\bso2\b/, 'IA – IIA – Nhôm'],
+    [/dan xuat halogen|halogenoalkane|zaitsev|bromobutane|chloropropane/, 'Dẫn xuất halogen'],
+    [/cau hinh electron|bang tuan hoan|cau tao nguyen tu|dong vi|so khoi|do am dien|nguyen tu khoi trung binh/, 'Cấu tạo nguyên tử – Bảng tuần hoàn'],
     [/hno3|h2so4|nh3|nito|phosphor|photpho|luu huynh|halogen|\bclo\b|phan bon|\bph\b|acid|base|phi kim/, 'Phi kim – Vô cơ'],
     [/phuc chat|phoi tu|so phoi tri|cau noi|cau ngoai/, 'Phức chất'],
     [/enthalpy|nhiet phan ung|toc do phan ung|can bang hoa hoc|le chatelier|hang so can bang/, 'Nhiệt động – Tốc độ – Cân bằng'],
@@ -446,7 +448,11 @@ TD.BAN_DO_CD = {
     [/nhiet|noi nang|nhiet dong luc|chuyen the|nong chay|hoa hoi|nhiet dung|carnot|dong co nhiet/, 'Vật lí nhiệt'],
     [/tu truong|cam ung|tu thong|luc tu|lorentz|bien ap|truyen tai|xoay chieu/, 'Từ trường'],
     [/hat nhan|phong xa|phan hach|nhiet hach|lien ket rieng|hut khoi|chu ki ban ra/, 'Vật lí hạt nhân'],
-    [/dao dong|con lac|song|am|dong dien|dien truong|tu dien|quang dien|giao thoa|khuc xa|luong tu/, 'Lớp 10 – 11']
+    /* Hai chuyên đề riêng phải đứng TRƯỚC dòng gom "Lớp 10 – 11", nếu không thì
+       từ khoá "song" và "dien truong" trong dòng gom nuốt hết. */
+    [/\bsong\b|buoc song|song dung|song co|song dien tu|song ngang|song doc|giao thoa/, 'Sóng'],
+    [/dien truong|dien tich|duong suc dien|dien the|hieu dien the|coulomb/, 'Điện trường'],
+    [/dao dong|con lac|song|am|dong dien|tu dien|quang dien|khuc xa|luong tu/, 'Lớp 10 – 11']
   ],
   sinh: [
     [/dna|adn|arn|rna|gene|phien ma|dich ma|nhan doi|codon|nucleotide|dot bien gene|ma di truyen/, 'Di truyền phân tử'],
