@@ -7726,7 +7726,7 @@ TD.hinhDNA = function (kieu) {
       ra += `<line x1="${x2}" y1="${y2}" x2="${x1}" y2="${y1}" stroke="${M.nhan}" stroke-width="2.6" marker-end="url(#mtadn2)"/>`;
     });
     ra += `<text x="236" y="164" fill="${M.nhan}" font-size="10" text-anchor="middle">các đoạn Okazaki (mạch gián đoạn)</text>`
-       + `<text x="150" y="82" fill="${M.do}" font-size="10.5" text-anchor="middle">chạc</text>`;
+       + `<text x="150" y="82" fill="${M.do}" font-size="10.5" text-anchor="middle">chạc tái bản</text>`;
   } else if (kieu === 'phienma') {
     ra += `<text x="14" y="20" fill="${M.chu}" font-size="10.5">Phiên mã: RNA được tổng hợp từ mạch mã gốc</text>`;
     ra += `<line x1="24" y1="70" x2="300" y2="70" stroke="${M.truc}" stroke-width="2.4"/>`
@@ -7741,7 +7741,7 @@ TD.hinhDNA = function (kieu) {
     ra += `<line x1="112" y1="140" x2="240" y2="140" stroke="${M.net}" stroke-width="2.8" marker-end="url(#mtadn)"/>`
        + `<text x="176" y="158" fill="${M.net}" font-size="10" text-anchor="middle">mRNA mới (5′ → 3′)</text>`;
   } else {
-    ra += `<text x="14" y="20" fill="${M.chu}" font-size="10.5">Dịch mã: ribôxôm trượt trên mRNA theo chiều 5′ → 3′</text>`;
+    ra += `<text x="14" y="20" fill="${M.chu}" font-size="10.5">Dịch mã: ribosome trượt trên mRNA theo chiều 5′ → 3′</text>`;
     ra += `<line x1="20" y1="104" x2="310" y2="104" stroke="${M.truc}" stroke-width="2.6"/>`
        + `<text x="22" y="122" fill="${M.chu}" font-size="9.5">5′</text><text x="302" y="122" fill="${M.chu}" font-size="9.5">3′</text>`;
     const bo = ['AUG', 'GXU', 'AAA', 'XGU', 'UAA'];
@@ -7752,7 +7752,7 @@ TD.hinhDNA = function (kieu) {
     ra += `<text x="57" y="80" fill="${M.nhan}" font-size="9.5" text-anchor="middle">mở đầu</text>`
        + `<text x="273" y="80" fill="${M.do}" font-size="9.5" text-anchor="middle">kết thúc</text>`;
     ra += `<ellipse cx="150" cy="132" rx="46" ry="20" fill="${M.tim}" opacity="0.35" stroke="${M.tim}" stroke-width="1.6"/>`
-       + `<text x="150" y="136" fill="${M.chu}" font-size="9.5" text-anchor="middle">ribôxôm</text>`
+       + `<text x="150" y="136" fill="${M.chu}" font-size="9.5" text-anchor="middle">ribosome</text>`
        + `<line x1="200" y1="160" x2="262" y2="160" stroke="${M.net}" stroke-width="2.2" marker-end="url(#mtadn)"/>`
        + `<text x="180" y="176" fill="${M.net}" font-size="10" text-anchor="end">chiều trượt</text>`;
   }
@@ -20461,12 +20461,12 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
   tao(R) {
     const N = R.nguyen(30, 300) * 10;
     const L = N / 2 * 3.4;
-    return MC(R, `Một đoạn phân tử DNA có chiều dài ${S(L, 1)} Å. Tổng số nuclêôtit của đoạn DNA đó bằng bao nhiêu?`,
+    return MC(R, `Một đoạn phân tử DNA có chiều dài ${S(L, 1)} Å. Tổng số nucleotide của đoạn DNA đó bằng bao nhiêu?`,
       N, [N / 2, N * 2, Math.round(L / 3.4 * 2 / 3), N / 4],
       `L = (N/2)·3,4 Å ⇒ N = 2L/3,4\n`
-      + `N = 2·${S(L, 1)}/3,4 = ${N} nuclêôtit.`,
-      'DNA có HAI mạch nên chiều dài tính theo N/2 nuclêôtit của một mạch, mỗi nuclêôtit dài 3,4 Å. Quên nhân 2 là ra đúng một nửa.',
-      x => S(x) + ' nuclêôtit');
+      + `N = 2·${S(L, 1)}/3,4 = ${N} nucleotide.`,
+      'DNA có HAI mạch nên chiều dài tính theo N/2 nucleotide của một mạch, mỗi nucleotide dài 3,4 Å. Quên nhân 2 là ra đúng một nửa.',
+      x => S(x) + ' nucleotide');
   } },
 
 { ma: 'sinh-m1-bosung', chuong: 'Cơ sở phân tử', muc: 1, dang: 'mc',
@@ -20476,7 +20476,7 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
     const A = Math.round(N * pA / 100);
     const G = N / 2 - A;
     if (G <= 0) return null;
-    return MC(R, `Một phân tử DNA có tổng số ${N} nuclêôtit, trong đó ađênin chiếm ${pA}% tổng số nuclêôtit. Số nuclêôtit loại guanin của phân tử này bằng bao nhiêu?`,
+    return MC(R, `Một phân tử DNA có tổng số ${N} nucleotide, trong đó ađênin chiếm ${pA}% tổng số nucleotide. Số nucleotide loại guanin của phân tử này bằng bao nhiêu?`,
       G, [N / 2 + A, A, N - A, Math.round(N * (100 - pA) / 100)],
       `Theo nguyên tắc bổ sung: A = T, G = X và A + G = N/2.\n`
       + `A = ${pA}%·${N} = ${A}\n`
@@ -20489,9 +20489,9 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
   tao(R) {
     const A = R.nguyen(20, 150) * 10, G = R.nguyen(20, 150) * 10;
     const H = 2 * A + 3 * G;
-    return MC(R, `Một phân tử DNA có ${A} nuclêôtit loại A và ${G} nuclêôtit loại G. Số liên kết hiđrô của phân tử DNA này bằng bao nhiêu?`,
+    return MC(R, `Một phân tử DNA có ${A} nucleotide loại A và ${G} nucleotide loại G. Số liên kết hydrogen của phân tử DNA này bằng bao nhiêu?`,
       H, [3 * A + 2 * G, A + G, 2 * (A + G), 3 * (A + G)],
-      `Cặp A – T có 2 liên kết hiđrô, cặp G – X có 3 liên kết hiđrô.\n`
+      `Cặp A – T có 2 liên kết hydrogen, cặp G – X có 3 liên kết hydrogen.\n`
       + `H = 2A + 3G = 2·${A} + 3·${G} = ${2 * A} + ${3 * G} = ${H}.`,
       'A đi với 2, G đi với 3 — nhớ theo thứ tự bảng chữ cái là không đảo: A trước nên số nhỏ hơn.',
       x => S(x));
@@ -20501,13 +20501,13 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
   tao(R) {
     const aa = R.nguyen(98, 498);
     const N = (aa + 1) * 6;
-    return MC(R, `Một gen ở sinh vật nhân sơ có tổng số ${N} nuclêôtit. Chuỗi pôlipeptit hoàn chỉnh do gen này mã hoá có bao nhiêu axit amin?`,
+    return MC(R, `Một gen ở sinh vật nhân sơ có tổng số ${N} nucleotide. Chuỗi polypeptide hoàn chỉnh do gen này mã hoá có bao nhiêu amino acid?`,
       aa, [aa + 1, aa + 2, N / 3, N / 6],
       `Số bộ ba trên mạch mã gốc = N/6 = ${N}/6 = ${N / 6}.\n`
-      + `Trừ 1 bộ ba kết thúc (không mã hoá axit amin) ⇒ chuỗi pôlipeptit sơ khai có ${N / 6 - 1} axit amin.\n`
-      + `Chuỗi HOÀN CHỈNH bị cắt tiếp axit amin mở đầu ⇒ còn ${aa} axit amin.`,
-      'Đọc kĩ chữ "hoàn chỉnh": chuỗi sơ khai trừ 1 bộ ba kết thúc, chuỗi hoàn chỉnh trừ thêm axit amin mở đầu nữa, tức trừ tất cả 2.',
-      x => S(x) + ' axit amin');
+      + `Trừ 1 bộ ba kết thúc (không mã hoá amino acid) ⇒ chuỗi polypeptide sơ khai có ${N / 6 - 1} amino acid.\n`
+      + `Chuỗi HOÀN CHỈNH bị cắt tiếp amino acid mở đầu ⇒ còn ${aa} amino acid.`,
+      'Đọc kĩ chữ "hoàn chỉnh": chuỗi sơ khai trừ 1 bộ ba kết thúc, chuỗi hoàn chỉnh trừ thêm amino acid mở đầu nữa, tức trừ tất cả 2.',
+      x => S(x) + ' amino acid');
   } },
 
 { ma: 'sinh-m1-giaotu', chuong: 'Quy luật di truyền', muc: 1, dang: 'mc',
@@ -21300,14 +21300,14 @@ themCam('sinh', [
 { nhom: '👁 Nhìn là biết', ten: 'Sáu công thức DNA – gen ra đáp án trong một dòng', cap: 1,
   ct: '<b>N = 2A + 2G</b> · <b>A = T</b>, <b>G = X</b> · <b>%A + %G = 50%</b><br>'
     + '<b>Chiều dài</b> L = (N/2) × 3,4 Å ⇒ N = 2L/3,4<br>'
-    + '<b>Số liên kết hiđrô</b> H = 2A + 3G<br>'
+    + '<b>Số liên kết hydrogen</b> H = 2A + 3G<br>'
     + '<b>Khối lượng</b> M = N × 300 đvC<br>'
     + '<b>Số chu kì xoắn</b> C = N/20<br>'
-    + '<b>Số axit amin</b> chuỗi hoàn chỉnh = N/6 − 2 (trừ bộ ba kết thúc và axit amin mở đầu)<br>'
-    + '<b>Nhân đôi k lần</b>: số phân tử con = 2<sup>k</sup>, số nuclêôtit môi trường cung cấp = N(2<sup>k</sup> − 1).',
+    + '<b>Số amino acid</b> chuỗi hoàn chỉnh = N/6 − 2 (trừ bộ ba kết thúc và amino acid mở đầu)<br>'
+    + '<b>Nhân đôi k lần</b>: số phân tử con = 2<sup>k</sup>, số nucleotide môi trường cung cấp = N(2<sup>k</sup> − 1).',
   khi: 'Mọi bài tập phần Di truyền phân tử.',
   vd: 'Gen dài 4080 Å → N = 2 × 4080/3,4 = 2400 nu → C = 120 chu kì xoắn, M = 720 000 đvC.',
-  bay: 'Chuỗi pôlipeptit SƠ KHAI trừ 1, chuỗi HOÀN CHỈNH trừ 2. Đọc kĩ chữ trong đề trước khi trừ.',
+  bay: 'Chuỗi polypeptide SƠ KHAI trừ 1, chuỗi HOÀN CHỈNH trừ 2. Đọc kĩ chữ trong đề trước khi trừ.',
   meo: 'Từ một dữ kiện bất kì (L, M, C, H) đều quy được về N. Cứ đưa hết về N rồi mới tính tiếp, đỡ phải nhớ nhiều đường.' },
 
 { nhom: '👁 Nhìn là biết', ten: 'Nhìn tỉ lệ kiểu hình đoán ngay quy luật di truyền', cap: 3,
@@ -23095,10 +23095,10 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
     if (kieu === 'nhandoi')
       return MC(R, `Hình vẽ mô tả một chạc chữ Y trong quá trình nhân đôi DNA.${hinh}Vì sao một mạch mới được tổng hợp liên tục còn mạch kia lại tổng hợp thành từng đoạn ngắn?`,
         { d: 'Vì enzyme DNA polymerase chỉ tổng hợp mạch mới theo chiều 5′ → 3′, mà hai mạch khuôn ngược chiều nhau',
-          s: ['Vì hai mạch khuôn có số lượng nuclêôtit khác nhau',
+          s: ['Vì hai mạch khuôn có số lượng nucleotide khác nhau',
               'Vì chỉ một mạch khuôn mang thông tin di truyền, mạch kia thì không',
               'Vì enzyme DNA polymerase hoạt động lúc nhanh lúc chậm một cách ngẫu nhiên'],
-          sv: { 'Vì hai mạch khuôn có số lượng nuclêôtit khác nhau': 'hai mạch của DNA luôn dài bằng nhau vì liên kết bổ sung từng cặp',
+          sv: { 'Vì hai mạch khuôn có số lượng nucleotide khác nhau': 'hai mạch của DNA luôn dài bằng nhau vì liên kết bổ sung từng cặp',
                 'Vì chỉ một mạch khuôn mang thông tin di truyền, mạch kia thì không': 'trong nhân đôi, CẢ HAI mạch đều làm khuôn; chuyện chỉ một mạch làm khuôn là ở PHIÊN MÃ',
                 'Vì enzyme DNA polymerase hoạt động lúc nhanh lúc chậm một cách ngẫu nhiên': 'đây không phải hiện tượng ngẫu nhiên mà là hệ quả tất yếu của chiều tổng hợp' },
           v: `Hai mạch của DNA ngược chiều nhau (một mạch 3′ → 5′, mạch kia 5′ → 3′), trong khi DNA polymerase CHỈ có thể kéo dài mạch mới theo chiều 5′ → 3′.\n`
@@ -23119,17 +23119,17 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
             + `Mạch còn lại gọi là mạch bổ sung, có trình tự giống hệt mRNA (chỉ khác T thay bằng U) nên KHÔNG dùng làm khuôn.` },
         'Nhớ cặp đối lập: nhân đôi dùng CẢ HAI mạch làm khuôn, phiên mã chỉ dùng MỘT. '
         + 'Trình tự mRNA giống mạch BỔ SUNG (chỉ đổi T thành U) chứ không giống mạch mã gốc — đây là chỗ hay nhầm khi đề cho một mạch rồi bắt viết mRNA.');
-    return MC(R, `Hình vẽ mô tả quá trình dịch mã trên phân tử mRNA.${hinh}Chuỗi pôlipeptit hoàn chỉnh do phân tử mRNA này tổng hợp có bao nhiêu axit amin?`,
+    return MC(R, `Hình vẽ mô tả quá trình dịch mã trên phân tử mRNA.${hinh}Chuỗi polypeptide hoàn chỉnh do phân tử mRNA này tổng hợp có bao nhiêu amino acid?`,
       { d: '3', s: ['2', '4', '5'],
-        sv: { '2': 'trừ nhầm hai lần: bộ ba kết thúc vốn đã không mã hoá axit amin nào, chỉ trừ thêm axit amin mở đầu',
-              '4': 'chưa cắt bỏ axit amin mở đầu — đó mới là chuỗi SƠ KHAI',
+        sv: { '2': 'trừ nhầm hai lần: bộ ba kết thúc vốn đã không mã hoá amino acid nào, chỉ trừ thêm amino acid mở đầu',
+              '4': 'chưa cắt bỏ amino acid mở đầu — đó mới là chuỗi SƠ KHAI',
               '5': 'đây là tổng số bộ ba trên mRNA, kể cả bộ ba kết thúc' },
         v: `Đếm trên hình: mRNA có 5 bộ ba là AUG · GXU · AAA · XGU · UAA.\n`
-          + `· Bộ ba UAA ở cuối là bộ ba KẾT THÚC, không mã hoá axit amin nào ⇒ còn 4 bộ ba mã hoá.\n`
-          + `· Chuỗi pôlipeptit SƠ KHAI có 4 axit amin.\n`
-          + `· Chuỗi HOÀN CHỈNH bị cắt bỏ axit amin mở đầu (do AUG mã hoá) ⇒ còn 3 axit amin.` },
-      'Ba con số phải phân biệt: số bộ ba trên mRNA · số axit amin của chuỗi SƠ KHAI (trừ 1 bộ ba kết thúc) · '
-      + 'số axit amin của chuỗi HOÀN CHỈNH (trừ tiếp axit amin mở đầu). Đề hỏi cái nào phải đọc kĩ.');
+          + `· Bộ ba UAA ở cuối là bộ ba KẾT THÚC, không mã hoá amino acid nào ⇒ còn 4 bộ ba mã hoá.\n`
+          + `· Chuỗi polypeptide SƠ KHAI có 4 amino acid.\n`
+          + `· Chuỗi HOÀN CHỈNH bị cắt bỏ amino acid mở đầu (do AUG mã hoá) ⇒ còn 3 amino acid.` },
+      'Ba con số phải phân biệt: số bộ ba trên mRNA · số amino acid của chuỗi SƠ KHAI (trừ 1 bộ ba kết thúc) · '
+      + 'số amino acid của chuỗi HOÀN CHỈNH (trừ tiếp amino acid mở đầu). Đề hỏi cái nào phải đọc kĩ.');
   } },
 
 { ma: 'sinh-hinh-dotbien-nst', chuong: 'Di truyền NST', muc: 3, dang: 'mc',

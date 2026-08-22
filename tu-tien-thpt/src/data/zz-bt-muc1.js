@@ -296,12 +296,12 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
   tao(R) {
     const N = R.nguyen(30, 300) * 10;
     const L = N / 2 * 3.4;
-    return MC(R, `Một đoạn phân tử DNA có chiều dài ${S(L, 1)} Å. Tổng số nuclêôtit của đoạn DNA đó bằng bao nhiêu?`,
+    return MC(R, `Một đoạn phân tử DNA có chiều dài ${S(L, 1)} Å. Tổng số nucleotide của đoạn DNA đó bằng bao nhiêu?`,
       N, [N / 2, N * 2, Math.round(L / 3.4 * 2 / 3), N / 4],
       `L = (N/2)·3,4 Å ⇒ N = 2L/3,4\n`
-      + `N = 2·${S(L, 1)}/3,4 = ${N} nuclêôtit.`,
-      'DNA có HAI mạch nên chiều dài tính theo N/2 nuclêôtit của một mạch, mỗi nuclêôtit dài 3,4 Å. Quên nhân 2 là ra đúng một nửa.',
-      x => S(x) + ' nuclêôtit');
+      + `N = 2·${S(L, 1)}/3,4 = ${N} nucleotide.`,
+      'DNA có HAI mạch nên chiều dài tính theo N/2 nucleotide của một mạch, mỗi nucleotide dài 3,4 Å. Quên nhân 2 là ra đúng một nửa.',
+      x => S(x) + ' nucleotide');
   } },
 
 { ma: 'sinh-m1-bosung', chuong: 'Cơ sở phân tử', muc: 1, dang: 'mc',
@@ -311,7 +311,7 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
     const A = Math.round(N * pA / 100);
     const G = N / 2 - A;
     if (G <= 0) return null;
-    return MC(R, `Một phân tử DNA có tổng số ${N} nuclêôtit, trong đó ađênin chiếm ${pA}% tổng số nuclêôtit. Số nuclêôtit loại guanin của phân tử này bằng bao nhiêu?`,
+    return MC(R, `Một phân tử DNA có tổng số ${N} nucleotide, trong đó ađênin chiếm ${pA}% tổng số nucleotide. Số nucleotide loại guanin của phân tử này bằng bao nhiêu?`,
       G, [N / 2 + A, A, N - A, Math.round(N * (100 - pA) / 100)],
       `Theo nguyên tắc bổ sung: A = T, G = X và A + G = N/2.\n`
       + `A = ${pA}%·${N} = ${A}\n`
@@ -324,9 +324,9 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
   tao(R) {
     const A = R.nguyen(20, 150) * 10, G = R.nguyen(20, 150) * 10;
     const H = 2 * A + 3 * G;
-    return MC(R, `Một phân tử DNA có ${A} nuclêôtit loại A và ${G} nuclêôtit loại G. Số liên kết hiđrô của phân tử DNA này bằng bao nhiêu?`,
+    return MC(R, `Một phân tử DNA có ${A} nucleotide loại A và ${G} nucleotide loại G. Số liên kết hydrogen của phân tử DNA này bằng bao nhiêu?`,
       H, [3 * A + 2 * G, A + G, 2 * (A + G), 3 * (A + G)],
-      `Cặp A – T có 2 liên kết hiđrô, cặp G – X có 3 liên kết hiđrô.\n`
+      `Cặp A – T có 2 liên kết hydrogen, cặp G – X có 3 liên kết hydrogen.\n`
       + `H = 2A + 3G = 2·${A} + 3·${G} = ${2 * A} + ${3 * G} = ${H}.`,
       'A đi với 2, G đi với 3 — nhớ theo thứ tự bảng chữ cái là không đảo: A trước nên số nhỏ hơn.',
       x => S(x));
@@ -336,13 +336,13 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
   tao(R) {
     const aa = R.nguyen(98, 498);
     const N = (aa + 1) * 6;
-    return MC(R, `Một gen ở sinh vật nhân sơ có tổng số ${N} nuclêôtit. Chuỗi pôlipeptit hoàn chỉnh do gen này mã hoá có bao nhiêu axit amin?`,
+    return MC(R, `Một gen ở sinh vật nhân sơ có tổng số ${N} nucleotide. Chuỗi polypeptide hoàn chỉnh do gen này mã hoá có bao nhiêu amino acid?`,
       aa, [aa + 1, aa + 2, N / 3, N / 6],
       `Số bộ ba trên mạch mã gốc = N/6 = ${N}/6 = ${N / 6}.\n`
-      + `Trừ 1 bộ ba kết thúc (không mã hoá axit amin) ⇒ chuỗi pôlipeptit sơ khai có ${N / 6 - 1} axit amin.\n`
-      + `Chuỗi HOÀN CHỈNH bị cắt tiếp axit amin mở đầu ⇒ còn ${aa} axit amin.`,
-      'Đọc kĩ chữ "hoàn chỉnh": chuỗi sơ khai trừ 1 bộ ba kết thúc, chuỗi hoàn chỉnh trừ thêm axit amin mở đầu nữa, tức trừ tất cả 2.',
-      x => S(x) + ' axit amin');
+      + `Trừ 1 bộ ba kết thúc (không mã hoá amino acid) ⇒ chuỗi polypeptide sơ khai có ${N / 6 - 1} amino acid.\n`
+      + `Chuỗi HOÀN CHỈNH bị cắt tiếp amino acid mở đầu ⇒ còn ${aa} amino acid.`,
+      'Đọc kĩ chữ "hoàn chỉnh": chuỗi sơ khai trừ 1 bộ ba kết thúc, chuỗi hoàn chỉnh trừ thêm amino acid mở đầu nữa, tức trừ tất cả 2.',
+      x => S(x) + ' amino acid');
   } },
 
 { ma: 'sinh-m1-giaotu', chuong: 'Quy luật di truyền', muc: 1, dang: 'mc',

@@ -235,10 +235,10 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
     if (kieu === 'nhandoi')
       return MC(R, `Hình vẽ mô tả một chạc chữ Y trong quá trình nhân đôi DNA.${hinh}Vì sao một mạch mới được tổng hợp liên tục còn mạch kia lại tổng hợp thành từng đoạn ngắn?`,
         { d: 'Vì enzyme DNA polymerase chỉ tổng hợp mạch mới theo chiều 5′ → 3′, mà hai mạch khuôn ngược chiều nhau',
-          s: ['Vì hai mạch khuôn có số lượng nuclêôtit khác nhau',
+          s: ['Vì hai mạch khuôn có số lượng nucleotide khác nhau',
               'Vì chỉ một mạch khuôn mang thông tin di truyền, mạch kia thì không',
               'Vì enzyme DNA polymerase hoạt động lúc nhanh lúc chậm một cách ngẫu nhiên'],
-          sv: { 'Vì hai mạch khuôn có số lượng nuclêôtit khác nhau': 'hai mạch của DNA luôn dài bằng nhau vì liên kết bổ sung từng cặp',
+          sv: { 'Vì hai mạch khuôn có số lượng nucleotide khác nhau': 'hai mạch của DNA luôn dài bằng nhau vì liên kết bổ sung từng cặp',
                 'Vì chỉ một mạch khuôn mang thông tin di truyền, mạch kia thì không': 'trong nhân đôi, CẢ HAI mạch đều làm khuôn; chuyện chỉ một mạch làm khuôn là ở PHIÊN MÃ',
                 'Vì enzyme DNA polymerase hoạt động lúc nhanh lúc chậm một cách ngẫu nhiên': 'đây không phải hiện tượng ngẫu nhiên mà là hệ quả tất yếu của chiều tổng hợp' },
           v: `Hai mạch của DNA ngược chiều nhau (một mạch 3′ → 5′, mạch kia 5′ → 3′), trong khi DNA polymerase CHỈ có thể kéo dài mạch mới theo chiều 5′ → 3′.\n`
@@ -259,17 +259,17 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
             + `Mạch còn lại gọi là mạch bổ sung, có trình tự giống hệt mRNA (chỉ khác T thay bằng U) nên KHÔNG dùng làm khuôn.` },
         'Nhớ cặp đối lập: nhân đôi dùng CẢ HAI mạch làm khuôn, phiên mã chỉ dùng MỘT. '
         + 'Trình tự mRNA giống mạch BỔ SUNG (chỉ đổi T thành U) chứ không giống mạch mã gốc — đây là chỗ hay nhầm khi đề cho một mạch rồi bắt viết mRNA.');
-    return MC(R, `Hình vẽ mô tả quá trình dịch mã trên phân tử mRNA.${hinh}Chuỗi pôlipeptit hoàn chỉnh do phân tử mRNA này tổng hợp có bao nhiêu axit amin?`,
+    return MC(R, `Hình vẽ mô tả quá trình dịch mã trên phân tử mRNA.${hinh}Chuỗi polypeptide hoàn chỉnh do phân tử mRNA này tổng hợp có bao nhiêu amino acid?`,
       { d: '3', s: ['2', '4', '5'],
-        sv: { '2': 'trừ nhầm hai lần: bộ ba kết thúc vốn đã không mã hoá axit amin nào, chỉ trừ thêm axit amin mở đầu',
-              '4': 'chưa cắt bỏ axit amin mở đầu — đó mới là chuỗi SƠ KHAI',
+        sv: { '2': 'trừ nhầm hai lần: bộ ba kết thúc vốn đã không mã hoá amino acid nào, chỉ trừ thêm amino acid mở đầu',
+              '4': 'chưa cắt bỏ amino acid mở đầu — đó mới là chuỗi SƠ KHAI',
               '5': 'đây là tổng số bộ ba trên mRNA, kể cả bộ ba kết thúc' },
         v: `Đếm trên hình: mRNA có 5 bộ ba là AUG · GXU · AAA · XGU · UAA.\n`
-          + `· Bộ ba UAA ở cuối là bộ ba KẾT THÚC, không mã hoá axit amin nào ⇒ còn 4 bộ ba mã hoá.\n`
-          + `· Chuỗi pôlipeptit SƠ KHAI có 4 axit amin.\n`
-          + `· Chuỗi HOÀN CHỈNH bị cắt bỏ axit amin mở đầu (do AUG mã hoá) ⇒ còn 3 axit amin.` },
-      'Ba con số phải phân biệt: số bộ ba trên mRNA · số axit amin của chuỗi SƠ KHAI (trừ 1 bộ ba kết thúc) · '
-      + 'số axit amin của chuỗi HOÀN CHỈNH (trừ tiếp axit amin mở đầu). Đề hỏi cái nào phải đọc kĩ.');
+          + `· Bộ ba UAA ở cuối là bộ ba KẾT THÚC, không mã hoá amino acid nào ⇒ còn 4 bộ ba mã hoá.\n`
+          + `· Chuỗi polypeptide SƠ KHAI có 4 amino acid.\n`
+          + `· Chuỗi HOÀN CHỈNH bị cắt bỏ amino acid mở đầu (do AUG mã hoá) ⇒ còn 3 amino acid.` },
+      'Ba con số phải phân biệt: số bộ ba trên mRNA · số amino acid của chuỗi SƠ KHAI (trừ 1 bộ ba kết thúc) · '
+      + 'số amino acid của chuỗi HOÀN CHỈNH (trừ tiếp amino acid mở đầu). Đề hỏi cái nào phải đọc kĩ.');
   } },
 
 { ma: 'sinh-hinh-dotbien-nst', chuong: 'Di truyền NST', muc: 3, dang: 'mc',

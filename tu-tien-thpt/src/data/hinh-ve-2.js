@@ -247,7 +247,7 @@ TD.hinhDNA = function (kieu) {
       ra += `<line x1="${x2}" y1="${y2}" x2="${x1}" y2="${y1}" stroke="${M.nhan}" stroke-width="2.6" marker-end="url(#mtadn2)"/>`;
     });
     ra += `<text x="236" y="164" fill="${M.nhan}" font-size="10" text-anchor="middle">các đoạn Okazaki (mạch gián đoạn)</text>`
-       + `<text x="150" y="82" fill="${M.do}" font-size="10.5" text-anchor="middle">chạc</text>`;
+       + `<text x="150" y="82" fill="${M.do}" font-size="10.5" text-anchor="middle">chạc tái bản</text>`;
   } else if (kieu === 'phienma') {
     ra += `<text x="14" y="20" fill="${M.chu}" font-size="10.5">Phiên mã: RNA được tổng hợp từ mạch mã gốc</text>`;
     ra += `<line x1="24" y1="70" x2="300" y2="70" stroke="${M.truc}" stroke-width="2.4"/>`
@@ -262,7 +262,7 @@ TD.hinhDNA = function (kieu) {
     ra += `<line x1="112" y1="140" x2="240" y2="140" stroke="${M.net}" stroke-width="2.8" marker-end="url(#mtadn)"/>`
        + `<text x="176" y="158" fill="${M.net}" font-size="10" text-anchor="middle">mRNA mới (5′ → 3′)</text>`;
   } else {
-    ra += `<text x="14" y="20" fill="${M.chu}" font-size="10.5">Dịch mã: ribôxôm trượt trên mRNA theo chiều 5′ → 3′</text>`;
+    ra += `<text x="14" y="20" fill="${M.chu}" font-size="10.5">Dịch mã: ribosome trượt trên mRNA theo chiều 5′ → 3′</text>`;
     ra += `<line x1="20" y1="104" x2="310" y2="104" stroke="${M.truc}" stroke-width="2.6"/>`
        + `<text x="22" y="122" fill="${M.chu}" font-size="9.5">5′</text><text x="302" y="122" fill="${M.chu}" font-size="9.5">3′</text>`;
     const bo = ['AUG', 'GXU', 'AAA', 'XGU', 'UAA'];
@@ -273,7 +273,7 @@ TD.hinhDNA = function (kieu) {
     ra += `<text x="57" y="80" fill="${M.nhan}" font-size="9.5" text-anchor="middle">mở đầu</text>`
        + `<text x="273" y="80" fill="${M.do}" font-size="9.5" text-anchor="middle">kết thúc</text>`;
     ra += `<ellipse cx="150" cy="132" rx="46" ry="20" fill="${M.tim}" opacity="0.35" stroke="${M.tim}" stroke-width="1.6"/>`
-       + `<text x="150" y="136" fill="${M.chu}" font-size="9.5" text-anchor="middle">ribôxôm</text>`
+       + `<text x="150" y="136" fill="${M.chu}" font-size="9.5" text-anchor="middle">ribosome</text>`
        + `<line x1="200" y1="160" x2="262" y2="160" stroke="${M.net}" stroke-width="2.2" marker-end="url(#mtadn)"/>`
        + `<text x="180" y="176" fill="${M.net}" font-size="10" text-anchor="end">chiều trượt</text>`;
   }

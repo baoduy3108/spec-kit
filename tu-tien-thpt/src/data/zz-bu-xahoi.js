@@ -750,14 +750,14 @@ themCam('sinh', [
 { nhom: '👁 Nhìn là biết', ten: 'Sáu công thức DNA – gen ra đáp án trong một dòng', cap: 1,
   ct: '<b>N = 2A + 2G</b> · <b>A = T</b>, <b>G = X</b> · <b>%A + %G = 50%</b><br>'
     + '<b>Chiều dài</b> L = (N/2) × 3,4 Å ⇒ N = 2L/3,4<br>'
-    + '<b>Số liên kết hiđrô</b> H = 2A + 3G<br>'
+    + '<b>Số liên kết hydrogen</b> H = 2A + 3G<br>'
     + '<b>Khối lượng</b> M = N × 300 đvC<br>'
     + '<b>Số chu kì xoắn</b> C = N/20<br>'
-    + '<b>Số axit amin</b> chuỗi hoàn chỉnh = N/6 − 2 (trừ bộ ba kết thúc và axit amin mở đầu)<br>'
-    + '<b>Nhân đôi k lần</b>: số phân tử con = 2<sup>k</sup>, số nuclêôtit môi trường cung cấp = N(2<sup>k</sup> − 1).',
+    + '<b>Số amino acid</b> chuỗi hoàn chỉnh = N/6 − 2 (trừ bộ ba kết thúc và amino acid mở đầu)<br>'
+    + '<b>Nhân đôi k lần</b>: số phân tử con = 2<sup>k</sup>, số nucleotide môi trường cung cấp = N(2<sup>k</sup> − 1).',
   khi: 'Mọi bài tập phần Di truyền phân tử.',
   vd: 'Gen dài 4080 Å → N = 2 × 4080/3,4 = 2400 nu → C = 120 chu kì xoắn, M = 720 000 đvC.',
-  bay: 'Chuỗi pôlipeptit SƠ KHAI trừ 1, chuỗi HOÀN CHỈNH trừ 2. Đọc kĩ chữ trong đề trước khi trừ.',
+  bay: 'Chuỗi polypeptide SƠ KHAI trừ 1, chuỗi HOÀN CHỈNH trừ 2. Đọc kĩ chữ trong đề trước khi trừ.',
   meo: 'Từ một dữ kiện bất kì (L, M, C, H) đều quy được về N. Cứ đưa hết về N rồi mới tính tiếp, đỡ phải nhớ nhiều đường.' },
 
 { nhom: '👁 Nhìn là biết', ten: 'Nhìn tỉ lệ kiểu hình đoán ngay quy luật di truyền', cap: 3,

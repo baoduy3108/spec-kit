@@ -37,7 +37,7 @@ const LUAT_TRINH_BAY = [
    từng bước lại ra kết quả khác đáp án. Ở đây tách mọi biểu thức dạng
    "<phép tính> = <số>" rồi tính lại bằng máy.
    ============================================================ */
-const DON_VI = /\s*\(?(mol|gam|g|kg|lít|L|mL|ml|cm³|cm2|cm|m³|m2|m|kJ|J|kcal|K|°C|tạ\/ha|tấn|Wb|A|V|s|giây|phút|năm|người|câu|điểm|nuclêôtit|axit amin|loại|triệu đồng|tỉ USD|M|nghìn|đvC|Å|chu kì xoắn)\)?\s*\.?$/;
+const DON_VI = /\s*\(?(mol|gam|g|kg|lít|L|mL|ml|cm³|cm2|cm|m³|m2|m|kJ|J|kcal|K|°C|tạ\/ha|tấn|Wb|A|V|s|giây|phút|năm|người|câu|điểm|nucleotide|amino acid|loại|triệu đồng|tỉ USD|M|nghìn|đvC|Å|chu kì xoắn)\)?\s*\.?$/;
 const doiSoVN = t => t
   .replace(/<sup>(\d+)<\/sup>/g, '**$1')
   .replace(/<[^>]+>/g, '')
