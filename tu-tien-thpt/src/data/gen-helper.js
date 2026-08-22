@@ -107,3 +107,22 @@ TD.nhanTu = function (r, an) {
 TD.cong = function (a, b) {
   return TD.so(a) + (b < 0 ? ' − ' + String(-b).replace('.', ',') : ' + ' + String(b).replace('.', ','));
 };
+
+/* ============================================================
+   KHỐI "VÌ SAO PHƯƠNG ÁN CÒN LẠI BỊ LOẠI"
+   Trước đây mỗi phương án chiếm hai dòng, dòng dưới thụt vào sau mũi
+   tên. Trên màn hình điện thoại ba phương án thành sáu dòng ngoằn
+   ngoèo, rất khó soi. Lí do NGẮN thì gộp thẳng vào một dòng, chỉ lí
+   do dài mới xuống dòng.
+   ============================================================ */
+TD.khoiLoai = function (opts, dung, sv, macDinh) {
+  return opts.filter(x => x !== dung).map(x => {
+    const ly = (sv && sv[x]) || (typeof macDinh === 'function' ? macDinh(x) : macDinh)
+      || 'không thoả yêu cầu của đề.';
+    /* đo độ dài phần chữ thật, bỏ thẻ HTML ra khỏi phép đếm */
+    const tho = String(ly).replace(/<[^>]+>/g, '');
+    return (tho.length <= 58 && tho.indexOf('\n') < 0)
+      ? `· ${x} — ${ly}`
+      : `· ${x}\n  → ${ly}`;
+  }).join('\n');
+};

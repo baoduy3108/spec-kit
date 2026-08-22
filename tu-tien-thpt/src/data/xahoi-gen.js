@@ -19,9 +19,7 @@ const D = TD.dapSo;
    it.sv (nếu có) là lí do riêng cho từng phương án nhiễu. */
 const MC = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
-  const loai = opts.filter(x => x !== it.d)
-    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không phù hợp với dữ kiện đề đưa ra.'}`)
-    .join('\n');
+  const loai = TD.khoiLoai(opts, it.d, it.sv, 'không phù hợp với dữ kiện đề đưa ra.');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
     meo: meo };

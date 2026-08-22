@@ -6823,6 +6823,25 @@ TD.cong = function (a, b) {
   return TD.so(a) + (b < 0 ? ' − ' + String(-b).replace('.', ',') : ' + ' + String(b).replace('.', ','));
 };
 
+/* ============================================================
+   KHỐI "VÌ SAO PHƯƠNG ÁN CÒN LẠI BỊ LOẠI"
+   Trước đây mỗi phương án chiếm hai dòng, dòng dưới thụt vào sau mũi
+   tên. Trên màn hình điện thoại ba phương án thành sáu dòng ngoằn
+   ngoèo, rất khó soi. Lí do NGẮN thì gộp thẳng vào một dòng, chỉ lí
+   do dài mới xuống dòng.
+   ============================================================ */
+TD.khoiLoai = function (opts, dung, sv, macDinh) {
+  return opts.filter(x => x !== dung).map(x => {
+    const ly = (sv && sv[x]) || (typeof macDinh === 'function' ? macDinh(x) : macDinh)
+      || 'không thoả yêu cầu của đề.';
+    /* đo độ dài phần chữ thật, bỏ thẻ HTML ra khỏi phép đếm */
+    const tho = String(ly).replace(/<[^>]+>/g, '');
+    return (tho.length <= 58 && tho.indexOf('\n') < 0)
+      ? `· ${x} — ${ly}`
+      : `· ${x}\n  → ${ly}`;
+  }).join('\n');
+};
+
 </script>
 <script>
 /* ============================================================
@@ -11782,35 +11801,42 @@ window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
    biết thêm gì. Ở đây lần lượt: ① gọi tên DẠNG NGỮ PHÁP nếu phương án là một
    cụm động từ (đây mới là thứ đề kiểm tra) ② tra kho 2000 từ để cho NGHĨA
    ③ đoán từ loại theo hậu tố. */
+/* Trạng từ hay chen vào giữa (has ALREADY started, was STILL working) nên mọi
+   mẫu đều phải cho phép một từ đệm, không thì "was already starting" bị nhận
+   nhầm thành bị động quá khứ thay vì quá khứ tiếp diễn. */
+const D = '(?:\\w+\\s+)?';
+const nb = re => new RegExp(re, 'i');
 const DANG_NP = [
-  [/^(has|have)\s+been\s+\w+ing$/i, 'hiện tại hoàn thành tiếp diễn (has/have been + V-ing) — nhấn mạnh quá trình kéo dài tới hiện tại'],
-  [/^had\s+been\s+\w+ing$/i, 'quá khứ hoàn thành tiếp diễn (had been + V-ing) — quá trình kéo dài tới một mốc quá khứ'],
-  [/^will\s+have\s+\w+/i, 'tương lai hoàn thành (will have + V3) — hoàn tất trước một mốc tương lai'],
-  [/^will\s+be\s+\w+ing$/i, 'tương lai tiếp diễn (will be + V-ing) — đang diễn ra tại một mốc tương lai'],
-  [/^(is|are|am)\s+being\s+\w+/i, 'bị động tiếp diễn (is/are being + V3)'],
-  [/^(has|have)\s+been\s+\w+/i, 'bị động hoàn thành (has/have been + V3)'],
-  [/^(has|have)\s+\w+/i, 'hiện tại hoàn thành (has/have + V3) — nối quá khứ với hiện tại'],
-  [/^had\s+\w+/i, 'quá khứ hoàn thành (had + V3) — xảy ra TRƯỚC một mốc quá khứ khác'],
-  [/^(is|are|am)\s+going\s+to/i, 'be going to + V — dự định có sẵn hoặc dự đoán CÓ dấu hiệu trước mắt'],
-  [/^(is|are|am)\s+\w+ing$/i, 'hiện tại tiếp diễn (is/are/am + V-ing) — đang xảy ra lúc nói'],
-  [/^(was|were)\s+\w+ing$/i, 'quá khứ tiếp diễn (was/were + V-ing) — đang xảy ra tại một mốc quá khứ'],
-  [/^(is|are|am)\s+\w+/i, 'bị động hiện tại đơn (is/are/am + V3)'],
-  [/^(was|were)\s+\w+/i, 'bị động quá khứ đơn (was/were + V3)'],
-  [/^will\s+\w+/i, 'tương lai đơn (will + V) — quyết định tức thì hoặc dự đoán không có căn cứ trước mắt'],
-  [/^would\s+\w+/i, 'dạng "would + V" — câu điều kiện loại 2 hoặc tương lai trong quá khứ'],
-  [/^(could|might|may|should|must|can)\s+have\s+\w+/i, 'động từ khuyết thiếu + have + V3 — suy đoán về QUÁ KHỨ'],
-  [/^(could|might|may|should|must|can|need|ought)\b/i, 'động từ khuyết thiếu + V nguyên thể — nói về hiện tại hoặc tương lai'],
-  [/^to\s+\w+/i, 'động từ nguyên thể có "to"'],
-  [/^being\s+\w+/i, 'dạng "being + V3" — phân từ bị động rút gọn'],
-  [/^having\s+\w+/i, 'dạng "having + V3" — phân từ hoàn thành, hành động xảy ra TRƯỚC vế chính'],
-  [/^(who|whom|whose|which|that|where|when|why)$/i, 'đại từ quan hệ — chọn sai thì mệnh đề không nối đúng vào danh từ đứng trước']
+  [nb('^(has|have)\\s+been\\s+' + D + '\\w+ing$'), 'hiện tại hoàn thành tiếp diễn (has/have been + V-ing)'],
+  [nb('^had\\s+been\\s+' + D + '\\w+ing$'), 'quá khứ hoàn thành tiếp diễn (had been + V-ing)'],
+  [nb('^will\\s+have\\s+been\\s+' + D + '\\w+ing$'), 'tương lai hoàn thành tiếp diễn (will have been + V-ing)'],
+  [nb('^will\\s+have\\s+' + D + '\\w+'), 'tương lai hoàn thành (will have + V3)'],
+  [nb('^will\\s+be\\s+' + D + '\\w+ing$'), 'tương lai tiếp diễn (will be + V-ing)'],
+  [nb('^(is|are|am)\\s+being\\s+' + D + '\\w+'), 'bị động tiếp diễn (is/are being + V3)'],
+  [nb('^(has|have)\\s+been\\s+' + D + '\\w+'), 'bị động hoàn thành (has/have been + V3)'],
+  [nb('^(has|have)\\s+' + D + '\\w+'), 'hiện tại hoàn thành (has/have + V3)'],
+  [nb('^had\\s+' + D + '\\w+'), 'quá khứ hoàn thành (had + V3)'],
+  [nb('^(is|are|am)\\s+going\\s+to'), 'be going to + V — dự đoán CÓ dấu hiệu trước mắt'],
+  [nb('^(is|are|am)\\s+' + D + '\\w+ing$'), 'hiện tại tiếp diễn (is/are/am + V-ing)'],
+  [nb('^(was|were)\\s+' + D + '\\w+ing$'), 'quá khứ tiếp diễn (was/were + V-ing)'],
+  [nb('^(is|are|am)\\s+' + D + '\\w+'), 'bị động hiện tại đơn (is/are/am + V3)'],
+  [nb('^(was|were)\\s+' + D + '\\w+'), 'bị động quá khứ đơn (was/were + V3)'],
+  [nb('^will\\s+' + D + '\\w+'), 'tương lai đơn (will + V)'],
+  [nb('^would\\s+have\\s+' + D + '\\w+'), 'would have + V3 — điều kiện loại 3'],
+  [nb('^would\\s+' + D + '\\w+'), 'would + V — điều kiện loại 2'],
+  [nb('^(could|might|may|should|must|can)\\s+have\\s+' + D + '\\w+'), 'khuyết thiếu + have + V3 — suy đoán về QUÁ KHỨ'],
+  [nb('^(could|might|may|should|must|can|need|ought)\\b'), 'khuyết thiếu + V nguyên thể — nói về hiện tại/tương lai'],
+  [nb('^to\\s+\\w+'), 'nguyên thể có "to" — thường chỉ mục đích'],
+  [nb('^being\\s+\\w+'), 'being + V3 — phân từ bị động rút gọn'],
+  [nb('^having\\s+\\w+'), 'having + V3 — xảy ra TRƯỚC vế chính'],
+  [nb('^(who|whom|whose|which|that|where|when|why)$'), 'đại từ quan hệ']
 ];
 TD.nghiaTuAnh = function (x) {
   const chu = String(x).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
   for (const [re, mo] of DANG_NP)
-    if (re.test(chu)) return `"${chu}" là ${mo} — không hợp với dấu hiệu trong câu.`;
+    if (re.test(chu)) return mo;
   const t = (TD.KHO_TU || []).find(y => y.w.toLowerCase() === chu.toLowerCase());
-  if (t) return `<b>${t.w}</b> (${t.l}) = ${t.n} — không hợp nghĩa ở đây.`;
+  if (t) return `(${t.l}) = ${t.n}`;
   const HAU_TO = [
     [/ly$/, 'trạng từ'],
     [/(tion|sion|ment|ness|ity|ance|ence|ship|hood|ism|ist)$/, 'danh từ'],
@@ -11818,20 +11844,18 @@ TD.nghiaTuAnh = function (x) {
     [/(ise|ize|ify|ate|en)$/, 'động từ'],
     [/ing$/, 'dạng V-ing (phân từ hiện tại hoặc danh động từ)'],
     [/ed$/, 'dạng V-ed (quá khứ đơn hoặc phân từ hai)'],
-    [/s$/, 'dạng số nhiều hoặc động từ chia ngôi thứ ba số ít']
+    [/s$/, 'chia ngôi 3 số ít hoặc danh từ số nhiều']
   ];
   if (/^[a-zA-Z][a-zA-Z '-]*$/.test(chu))
     for (const [re, loai] of HAU_TO)
       if (re.test(chu.toLowerCase()))
-        return `"${chu}" là ${loai}, không đúng dạng mà chỗ trống cần.`;
-  return `"${chu}" không hợp với cấu trúc câu ở đây.`;
+        return loai + ', sai dạng';
+  return 'không hợp với cấu trúc câu ở đây';
 };
 
 const MC = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
-  const loai = opts.filter(x => x !== it.d)
-    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || TD.nghiaTuAnh(x)}`)
-    .join('\n');
+  const loai = TD.khoiLoai(opts, it.d, it.sv, TD.nghiaTuAnh);
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
     meo: meo };
@@ -11872,7 +11896,7 @@ TD.cauTuAnh = function (R, x) {                 /* Anh → Việt */
   const o = nhieuTuObj(R, x, y => y.n);
   if (!o) return null;
   const sv = {};
-  o.forEach(y => { sv[y.n] = `đây là nghĩa của <b>${y.w}</b> (${y.l}) — học luôn từ này.`; });
+  o.forEach(y => { sv[y.n] = `nghĩa của <b>${y.w}</b> (${y.l})`; });
   return MC(R, `Từ "<b>${x.w}</b>" (${x.l}) có nghĩa là gì?`,
     { d: x.n, s: o.map(y => y.n), sv: sv, v: `${x.w} (${x.l}) = ${x.n}. Thuộc chủ đề: ${x.cd}.` },
     'Học từ theo CHỦ ĐỀ và theo CỤM, đừng học rời từng từ — đề đọc hiểu luôn xoay quanh một chủ đề nhất định.');
@@ -11881,7 +11905,7 @@ TD.cauTuViet = function (R, x) {                /* Việt → Anh */
   const o = nhieuTuObj(R, x, y => y.w);
   if (!o) return null;
   const sv = {};
-  o.forEach(y => { sv[y.w] = `<b>${y.w}</b> (${y.l}) = ${y.n} — nghĩa khác hẳn.`; });
+  o.forEach(y => { sv[y.w] = `(${y.l}) = ${y.n}`; });
   return MC(R, `Từ tiếng Anh nào mang nghĩa "<b>${x.n}</b>"? (${x.l})`,
     { d: x.w, s: o.map(y => y.w), sv: sv, v: `${x.n} = ${x.w} (${x.l}). Thuộc chủ đề: ${x.cd}.` },
     'Nhớ được nghĩa Việt → Anh mới viết được câu. Chỉ nhận ra mặt chữ thì chỉ đủ cho phần đọc hiểu.');
@@ -11894,7 +11918,7 @@ TD.cauCollocation = function (R, x) {
   const s = o3.map(y => y.n);
   if (new Set(s.concat([x.n])).size !== 4) return null;
   const sv = {};
-  o3.forEach(y => { sv[y.n] = `đây là nghĩa của cụm <b>${y.tu} ${y.cum}</b> — học luôn cụm này.`; });
+  o3.forEach(y => { sv[y.n] = `nghĩa của cụm <b>${y.tu} ${y.cum}</b>`; });
   return MC(R, `Cụm "<b>${x.tu} ${x.cum}</b>" có nghĩa là gì?`,
     { d: x.n, s: s, sv: sv, v: `${x.tu} ${x.cum} = ${x.n}. Nhóm: ${x.nhom}.` },
     'Biết nghĩa của cụm mới dùng đúng trong bài điền từ. Nhiều cụm nghĩa không suy ra được từ nghĩa các từ thành phần.');
@@ -11911,7 +11935,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const o = nhieuTuObj(R, x, y => y.n);
     if (!o) return null;
     const s = o.map(y => y.n), sv = {};
-    o.forEach(y => { sv[y.n] = `đây là nghĩa của <b>${y.w}</b> (${y.l}) — học luôn từ này.`; });
+    o.forEach(y => { sv[y.n] = `nghĩa của <b>${y.w}</b> (${y.l})`; });
     return MC(R, `Từ "<b>${x.w}</b>" (${x.l}) có nghĩa là gì?`,
       { d: x.n, s: s, sv: sv, v: `${x.w} (${x.l}) = ${x.n}. Thuộc chủ đề: ${x.cd}.` },
       'Học từ theo CHỦ ĐỀ và theo CỤM, đừng học rời từng từ — đề đọc hiểu luôn xoay quanh một chủ đề nhất định.');
@@ -11925,7 +11949,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const o = nhieuTuObj(R, x, y => y.w);
     if (!o) return null;
     const s = o.map(y => y.w), sv = {};
-    o.forEach(y => { sv[y.w] = `<b>${y.w}</b> (${y.l}) = ${y.n} — nghĩa khác hẳn.`; });
+    o.forEach(y => { sv[y.w] = `(${y.l}) = ${y.n}`; });
     return MC(R, `Từ tiếng Anh nào mang nghĩa "<b>${x.n}</b>"? (${x.l})`,
       { d: x.w, s: s, sv: sv, v: `${x.n} = ${x.w} (${x.l}). Thuộc chủ đề: ${x.cd}.` },
       'Nhớ được nghĩa Việt → Anh mới viết được câu. Chỉ nhận ra mặt chữ thì chỉ đủ cho phần đọc hiểu.');
@@ -11940,7 +11964,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const sv = {};
     s.forEach(v => {
       const vd = kho.filter(y => y.tu === v).slice(0, 2).map(y => `${v} ${y.cum}`).join(' · ');
-      sv[v] = `"${v} ${x.cum}" không phải cụm chuẩn.` + (vd ? ` "${v}" đi với: ${vd}.` : '');
+      sv[v] = vd ? `"${v}" đi với: ${vd}` : 'không phải cụm chuẩn';
     });
     return MC(R, `Chọn động từ đúng: "____ ${x.cum}" (${x.n})`,
       { d: x.tu, s: s, sv: sv, v: `Cụm chuẩn là "<b>${x.tu} ${x.cum}</b>" = ${x.n}.\n`
@@ -11963,7 +11987,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const s = o3.map(y => y.tu);
     if (new Set(s.concat([x.tu])).size !== 4) return null;
     const sv = {};
-    o3.forEach(y => { sv[y.tu] = `"${y.tu}" đi với cụm khác: <b>${y.tu} ${y.cum}</b> = ${y.n}.`; });
+    o3.forEach(y => { sv[y.tu] = `đi với cụm khác: <b>${y.tu} ${y.cum}</b> = ${y.n}`; });
     return MC(R, `Chọn từ đúng để hoàn thành cụm: "____ ${x.cum}" (${x.n})`,
       { d: x.tu, s: s, sv: sv, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.\nNhóm: ${x.nhom}.` },
       'Collocation là chỗ người Việt hay dịch từng chữ rồi ghép sai. '
@@ -11981,7 +12005,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const s = o3.map(y => y.n);
     if (new Set(s.concat([x.n])).size !== 4) return null;
     const sv = {};
-    o3.forEach(y => { sv[y.n] = `đây là nghĩa của cụm <b>${y.tu} ${y.cum}</b> — học luôn cụm này.`; });
+    o3.forEach(y => { sv[y.n] = `nghĩa của cụm <b>${y.tu} ${y.cum}</b>`; });
     return MC(R, `Cụm "<b>${x.tu} ${x.cum}</b>" có nghĩa là gì?`,
       { d: x.n, s: s, sv: sv, v: `${x.tu} ${x.cum} = ${x.n}. Nhóm: ${x.nhom}.` },
       'Biết nghĩa của cụm mới dùng đúng trong bài điền từ. '
@@ -11998,7 +12022,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     const sv = {};
     s.forEach(g => {
       const vd = kho.filter(y => y.cum === g && y.tu !== x.tu).slice(0, 2).map(y => `${y.tu} ${g}`).join(' · ');
-      sv[g] = `"${x.tu} ${g}" không phải cụm chuẩn.` + (vd ? ` "${g}" thường đi với: ${vd}.` : '');
+      sv[g] = vd ? `"${g}" đi với: ${vd}` : 'không phải cụm chuẩn';
     });
     return MC(R, `Điền giới từ đúng: "${x.tu} ____" (${x.n})`,
       { d: x.cum, s: s, sv: sv, v: `Cụm chuẩn: <b>${x.tu} ${x.cum}</b> = ${x.n}.` },
@@ -12461,9 +12485,7 @@ const D = TD.dapSo;
    it.sv (nếu có) là lí do riêng cho từng phương án nhiễu. */
 const MC = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
-  const loai = opts.filter(x => x !== it.d)
-    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không phù hợp với dữ kiện đề đưa ra.'}`)
-    .join('\n');
+  const loai = TD.khoiLoai(opts, it.d, it.sv, 'không phù hợp với dữ kiện đề đưa ra.');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
     meo: meo };
@@ -14985,9 +15007,7 @@ const D = TD.dapSo;
 /* Khuôn trắc nghiệm dùng chung của khối xã hội: một phương án đúng + ba nhiễu đã soạn sẵn */
 const MC = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
-  const loai = opts.filter(x => x !== it.d)
-    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không phù hợp với dữ kiện đề đưa ra.'}`)
-    .join('\n');
+  const loai = TD.khoiLoai(opts, it.d, it.sv, 'không phù hợp với dữ kiện đề đưa ra.');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`,
     meo: meo };
@@ -18726,8 +18746,8 @@ window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
 /* Khuôn trắc nghiệm: luôn nêu vì sao từng phương án còn lại bị loại */
 const MC = (R, de, it, meo, pt) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
-  const loai = opts.filter(x => x !== it.d)
-    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || (TD.nghiaTuAnh ? TD.nghiaTuAnh(x) : 'không đúng ngữ pháp trong ngữ cảnh này.')}`).join('\n');
+  const loai = TD.khoiLoai(opts, it.d, it.sv,
+    x => (TD.nghiaTuAnh ? TD.nghiaTuAnh(x) : 'không đúng ngữ pháp trong ngữ cảnh này.'));
   const them = (it.pt || pt) ? `\n\nCách phân tích từng bước:\n${it.pt || pt}` : '';
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}${them}\n\nVì sao các phương án còn lại bị loại:\n${loai}`, meo: meo };
@@ -19574,8 +19594,7 @@ const S = TD.soVN, D = TD.dapSo;
 const bu = (mon, ds) => { TD.KHO_LT[mon] = (TD.KHO_LT[mon] || []).concat(ds); };
 const MC = (R, de, it, meo) => {
   const opts = TD.xaoR(R, [it.d].concat(it.s));
-  const loai = opts.filter(x => x !== it.d)
-    .map(x => `· ${x}\n  → ${(it.sv && it.sv[x]) || 'không phù hợp với dữ kiện đề đưa ra.'}`).join('\n');
+  const loai = TD.khoiLoai(opts, it.d, it.sv, 'không phù hợp với dữ kiện đề đưa ra.');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`, meo: meo };
 };
