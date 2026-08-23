@@ -595,4 +595,106 @@ them('van_ct', [
   bay: 'Phân biệt ẩn dụ với hoán dụ bằng một câu: ẩn dụ dựa trên nét GIỐNG NHAU, hoán dụ dựa trên quan hệ GẦN NHAU '
      + '(bộ phận – toàn thể, vật chứa – vật bị chứa, dấu hiệu – sự vật).' }
 ]);
+
+/* ============================================================
+   BÙ THẺ CHO MẤY CHUYÊN ĐỀ HOÁ HỮU CƠ CÒN MỎNG
+   Thẻ Ester trước đây chỉ có phần tính toán xà phòng hoá, không có
+   bảng mùi đặc trưng — thứ đề nhận biết năm nào cũng hỏi.
+   ============================================================ */
+them('hoa_ct', [
+{ nhom: 'Hữu cơ', cd: 'Ester – Lipid', ten: 'Ester — danh pháp, mùi đặc trưng và tính chất', cap: 1,
+  ct: '<b>Công thức chung ester no, đơn chức, mạch hở:</b> C<sub>n</sub>H<sub>2n</sub>O₂ (n ≥ 2), độ bất bão hoà k = 1.<br>'
+    + '<b>Gọi tên:</b> tên gốc alkyl (phần R′ của alcohol) + tên gốc acid đổi đuôi <i>ic</i> thành <b>ate</b>. '
+    + 'CH₃COOC₂H₅ là ethyl acetate.<br>'
+    + '<b>Bảng mùi phải thuộc — đề nhận biết hỏi hằng năm:</b>'
+    + '<table class="kq">'
+    + '<tr><td>Isoamyl acetate<br>CH₃COOCH₂CH₂CH(CH₃)₂</td><td><b>mùi chuối chín</b> (dầu chuối)</td></tr>'
+    + '<tr><td>Ethyl butyrate<br>CH₃CH₂CH₂COOC₂H₅</td><td><b>mùi dứa</b></td></tr>'
+    + '<tr><td>Benzyl acetate<br>CH₃COOCH₂C₆H₅</td><td><b>mùi hoa nhài</b></td></tr>'
+    + '<tr><td>Geranyl acetate</td><td><b>mùi hoa hồng</b></td></tr>'
+    + '<tr><td>Ethyl formate HCOOC₂H₅</td><td>mùi rượu rum, <b>có tráng bạc</b></td></tr>'
+    + '</table>'
+    + '<b>Tính chất vật lí:</b> nhiệt độ sôi THẤP hơn hẳn alcohol và acid cùng số carbon vì giữa các phân tử ester '
+    + 'không tạo được liên kết hydrogen với nhau. Ít tan trong nước, nhẹ hơn nước, tan tốt trong dung môi hữu cơ.<br>'
+    + '<b>Điều chế:</b> ester hoá acid với alcohol, xúc tác H₂SO₄ đặc, đun nóng — phản ứng THUẬN NGHỊCH nên hiệu suất không đạt 100%.<br>'
+    + '<b>Thuỷ phân:</b> trong acid thì thuận nghịch, trong kiềm (xà phòng hoá) thì một chiều.',
+  khi: 'Câu nhận biết mở đầu phần hữu cơ: hỏi mùi, hỏi tên gọi, hỏi so sánh nhiệt độ sôi.',
+  vd: 'Chất có mùi chuối chín dùng làm hương liệu bánh kẹo là isoamyl acetate, công thức CH₃COOCH₂CH₂CH(CH₃)₂.',
+  bay: 'Chỉ ester của formic acid (HCOOR) mới tráng bạc, vì nó còn giữ nhóm –CHO. '
+     + 'Và nhớ: ester sôi thấp hơn alcohol cùng số carbon — nhiều bạn nhầm vì ester phân tử khối lớn hơn.' },
+
+{ nhom: 'Hữu cơ', cd: 'Ester – Lipid', ten: 'Chất béo — chỉ số, trạng thái và các phản ứng', cap: 2,
+  ct: '<b>Chất béo</b> là trieste của glycerol với acid béo, gọi chung là triglyceride.<br>'
+    + '<b>Bốn acid béo phải thuộc:</b> palmitic C₁₅H₃₁COOH (no) · stearic C₁₇H₃₅COOH (no) · '
+    + 'oleic C₁₇H₃₃COOH (1 nối đôi) · linoleic C₁₇H₃₁COOH (2 nối đôi).<br>'
+    + '<b>Trạng thái:</b> gốc acid béo NO ⇒ chất béo rắn (mỡ động vật, tristearin, tripalmitin). '
+    + 'Gốc KHÔNG NO ⇒ chất béo lỏng (dầu thực vật, triolein).<br>'
+    + '<b>Phản ứng đặc trưng:</b><br>'
+    + '· Thuỷ phân trong kiềm ⇒ xà phòng + glycerol; n<sub>NaOH</sub> = 3n<sub>chất béo</sub>.<br>'
+    + '· Cộng hydrogen vào gốc không no ⇒ chuyển dầu lỏng thành mỡ rắn, dùng sản xuất bơ nhân tạo.<br>'
+    + '· Ôi thiu: nối đôi bị oxi hoá bởi oxygen không khí sinh aldehyde và ketone có mùi khó chịu.<br>'
+    + '<b>Chỉ số acid</b> = số mg KOH trung hoà acid béo TỰ DO trong 1 gam chất béo. '
+    + '<b>Chỉ số xà phòng hoá</b> = số mg KOH để xà phòng hoá hoàn toàn 1 gam chất béo.',
+  khi: 'Câu nhận biết trạng thái, hoặc bài tính số mol NaOH và khối lượng xà phòng.',
+  vd: 'Triolein (C₁₇H₃₃COO)₃C₃H₅ ở thể lỏng vì cả ba gốc acid béo đều có nối đôi.',
+  bay: 'Xà phòng là muối natri hoặc kali của acid béo; chất giặt rửa tổng hợp thì KHÔNG phải muối của acid béo. '
+     + 'Xà phòng mất tác dụng trong nước cứng vì tạo kết tủa với ion calcium và magnesium — chất giặt rửa tổng hợp thì không.' }
+]);
+
+them('hoa_ct', [
+{ nhom: 'Nền tảng', cd: 'Nhiệt động – Tốc độ – Cân bằng', ten: 'Cân bằng hoá học và nguyên lí chuyển dịch', cap: 2,
+  ct: '<b>Cân bằng hoá học</b> là trạng thái tốc độ phản ứng thuận bằng tốc độ phản ứng nghịch; nồng độ các chất '
+    + 'không đổi nhưng phản ứng vẫn xảy ra theo cả hai chiều — cân bằng ĐỘNG.<br>'
+    + '<b>Hằng số cân bằng:</b> với aA + bB ⇌ cC + dD thì K<sub>C</sub> = [C]<sup>c</sup>[D]<sup>d</sup> / ([A]<sup>a</sup>[B]<sup>b</sup>). '
+    + 'Chất rắn và dung môi KHÔNG có mặt trong biểu thức. K chỉ phụ thuộc nhiệt độ.<br>'
+    + '<b>Nguyên lí Le Chatelier:</b> khi tác động vào hệ đang cân bằng, cân bằng chuyển dịch theo chiều LÀM GIẢM tác động đó.'
+    + '<table class="kq">'
+    + '<tr><td>Tăng nồng độ một chất</td><td>chuyển dịch theo chiều làm giảm chất đó</td></tr>'
+    + '<tr><td>Tăng áp suất chung</td><td>chuyển về phía có TỔNG SỐ MOL KHÍ ít hơn</td></tr>'
+    + '<tr><td>Tăng nhiệt độ</td><td>chuyển theo chiều THU nhiệt (ΔrH &gt; 0)</td></tr>'
+    + '<tr><td>Thêm chất xúc tác</td><td><b>KHÔNG</b> làm chuyển dịch, chỉ đến cân bằng nhanh hơn</td></tr>'
+    + '</table>'
+    + '<b>Tốc độ phản ứng</b> tăng khi: tăng nồng độ · tăng áp suất (với chất khí) · tăng nhiệt độ · tăng diện tích bề mặt · dùng xúc tác.<br>'
+    + '<b>Hệ số nhiệt độ Van’t Hoff:</b> nhiệt độ tăng 10 °C thì tốc độ tăng γ lần, với γ thường từ 2 đến 4.',
+  khi: 'Câu hỏi chiều chuyển dịch khi đổi nhiệt độ, áp suất, nồng độ; hoặc so sánh tốc độ.',
+  vd: 'N₂ + 3H₂ ⇌ 2NH₃ toả nhiệt. Tăng áp suất ⇒ chuyển sang phải (4 mol khí thành 2 mol). Tăng nhiệt độ ⇒ chuyển sang trái.',
+  bay: 'Hai bẫy đắt nhất: ① xúc tác KHÔNG làm chuyển dịch cân bằng ② áp suất chỉ có tác dụng khi hai vế CHÊNH LỆCH tổng số mol khí — '
+     + 'phản ứng H₂ + I₂ ⇌ 2HI có hai vế bằng nhau nên đổi áp suất không ăn thua.' },
+
+{ nhom: 'Kỹ thuật', cd: 'Phức chất', ten: 'Phức chất — nhận biết bằng màu và bằng hiện tượng tan', cap: 2,
+  ct: '<b>Cấu tạo:</b> nguyên tử trung tâm là ion kim loại chuyển tiếp, quanh nó là các phối tử cho cặp electron '
+    + 'tạo liên kết cho – nhận. Số phối tử gắn trực tiếp gọi là <b>số phối trí</b>.<br>'
+    + '<b>Vì sao kim loại chuyển tiếp dễ tạo phức:</b> ion của chúng có orbital d còn trống và bán kính nhỏ, điện tích lớn nên hút phối tử mạnh.<br>'
+    + '<b>Hiện tượng đề hay mô tả — nhớ theo cặp "kết tủa rồi TAN LẠI":</b>'
+    + '<table class="kq">'
+    + '<tr><td>CuSO₄ + NH₃ ít</td><td>kết tủa xanh Cu(OH)₂</td></tr>'
+    + '<tr><td>rồi thêm NH₃ dư</td><td>kết tủa <b>tan</b>, dung dịch <b>xanh lam đậm</b></td></tr>'
+    + '<tr><td>AgCl + NH₃ dư</td><td>kết tủa trắng <b>tan</b> tạo phức bạc</td></tr>'
+    + '<tr><td>Fe³⁺ + SCN⁻</td><td>dung dịch <b>đỏ máu</b> — nhận biết Fe(III)</td></tr>'
+    + '</table>'
+    + '<b>Màu quen thuộc:</b> Cu²⁺ xanh lam · Fe²⁺ lục nhạt · Fe³⁺ vàng nâu · Cr³⁺ lục · MnO₄⁻ tím · Cr₂O₇²⁻ da cam.<br>'
+    + '<b>Ứng dụng:</b> phức chất dùng trong phân tích nhận biết ion, trong mạ điện, và trong sinh học — '
+    + 'hemoglobin là phức của sắt, diệp lục là phức của magnesium.',
+  khi: 'Câu mô tả thí nghiệm rồi hỏi hiện tượng, hoặc hỏi nhận biết ion.',
+  vd: 'Nhỏ từ từ NH₃ vào CuSO₄: đầu tiên xuất hiện kết tủa xanh, sau đó kết tủa tan dần cho dung dịch xanh lam đậm.',
+  bay: 'Đặc điểm nhận dạng câu phức chất trong đề: hiện tượng luôn có HAI GIAI ĐOẠN — tạo kết tủa trước rồi kết tủa TAN khi thêm dư. '
+     + 'Thấy mô tả kiểu đó là nghĩ ngay tới phức, đừng đi tìm phản ứng trao đổi.' },
+
+{ nhom: 'Nền tảng', cd: 'Cấu tạo nguyên tử – Bảng tuần hoàn', ten: 'Liên kết hoá học và hình dạng phân tử', cap: 2,
+  ct: '<b>Liên kết ion</b> hình thành giữa kim loại điển hình và phi kim điển hình, do lực hút tĩnh điện giữa các ion trái dấu. '
+    + 'Hiệu độ âm điện thường ≥ 1,7.<br>'
+    + '<b>Liên kết cộng hoá trị</b> là dùng chung cặp electron. Hiệu độ âm điện dưới 0,4 thì không cực, từ 0,4 đến dưới 1,7 thì có cực.<br>'
+    + '<b>Liên kết hydrogen</b> hình thành khi H đã gắn với F, O hoặc N gặp cặp electron chưa liên kết của F, O, N ở phân tử khác. '
+    + 'Đây là lí do H₂O sôi ở 100 °C còn H₂S thì không.<br>'
+    + '<b>Quy tắc so nhiệt độ sôi của chất hữu cơ:</b> acid &gt; alcohol &gt; amine &gt; ester ≈ aldehyde &gt; hydrocarbon. '
+    + 'Chất nào tạo được liên kết hydrogen giữa các phân tử thì sôi cao hơn hẳn.<br>'
+    + '<b>Hoá trị và số oxi hoá:</b> hoá trị trong hợp chất cộng hoá trị là số liên kết tạo ra; số oxi hoá là điện tích quy ước '
+    + 'khi coi mọi cặp electron chung đều thuộc về nguyên tử có độ âm điện lớn hơn.<br>'
+    + '<b>Quy tắc tính nhanh số oxi hoá:</b> đơn chất bằng 0 · tổng trong phân tử trung hoà bằng 0 · trong ion bằng điện tích ion · '
+    + 'H thường +1 (trừ hydride kim loại là −1) · O thường −2 (trừ peroxide là −1).',
+  khi: 'Câu nhận biết loại liên kết, hoặc so sánh nhiệt độ sôi giữa các chất hữu cơ.',
+  vd: 'Ethanol C₂H₅OH sôi ở 78 °C còn dimethyl ether CH₃OCH₃ cùng công thức phân tử chỉ sôi ở −24 °C, vì chỉ ethanol tạo được liên kết hydrogen.',
+  bay: 'Ester KHÔNG tạo được liên kết hydrogen giữa các phân tử với nhau (không còn H linh động) nên sôi thấp hơn alcohol '
+     + 'và acid cùng số carbon — dù phân tử khối lớn hơn. Đây là chỗ đề bẫy nhiều nhất.' }
+]);
 })();

@@ -25,16 +25,19 @@ const baNhieu = (dung, ung) => {
 
 /* Mỗi lưới viết tay và soi từng cạnh. Ghi chú bên cạnh là căn cứ sinh học. */
 const HE = [
+  /* Lưới kinh điển của SGK. Đã bỏ hai lưới đợt trước (rừng ngập mặn, thảo
+     nguyên) vì có cạnh không chắc: chim ưng biển ăn CÁ chứ không ăn cò, còn
+     báo ăn cáo thì không phải quan hệ điển hình. Thà ít lưới mà đúng. */
   { ten: 'đồng cỏ',
     v: ['Cỏ', 'Châu chấu', 'Thỏ', 'Ếch', 'Rắn', 'Đại bàng'],
     c: [[0, 1], [0, 2],          /* châu chấu và thỏ đều ăn cỏ */
         [1, 3],                  /* ếch bắt côn trùng */
-        [3, 4], [2, 4],          /* rắn ăn ếch và ăn thỏ */
+        [3, 4],                  /* rắn ăn ếch */
         [4, 5], [2, 5]],         /* đại bàng ăn rắn và ăn thỏ */
-    o: [[1.15, 0], [0.3, 1], [2.2, 1], [0.3, 2], [1.0, 3], [2.2, 4]] },
+    o: [[1.15, 0], [0.3, 1], [2.2, 1], [0.3, 2], [0.3, 3], [1.6, 4]] },
 
   { ten: 'ruộng lúa',
-    v: ['Lúa', 'Sâu hại lúa', 'Chuột đồng', 'Nhái', 'Rắn nước', 'Diều hâu'],
+    v: ['Lúa', 'Sâu hại lúa', 'Chuột đồng', 'Nhái', 'Rắn', 'Diều hâu'],
     c: [[0, 1], [0, 2],
         [1, 3],                  /* nhái bắt sâu */
         [3, 4], [2, 4],          /* rắn ăn nhái và ăn chuột */
@@ -45,34 +48,25 @@ const HE = [
     v: ['Cây gỗ', 'Sâu ăn lá', 'Sóc', 'Chim sâu', 'Rắn', 'Đại bàng'],
     c: [[0, 1], [0, 2],
         [1, 3],                  /* chim sâu bắt sâu ăn lá */
-        [3, 4], [2, 4],          /* rắn ăn chim sâu và ăn sóc */
-        [4, 5]],                 /* đại bàng ăn rắn */
-    o: [[1.15, 0], [0.3, 1], [2.1, 1], [0.3, 2], [1.15, 3], [1.15, 4]] },
+        [3, 4],                  /* rắn ăn chim sâu và trứng chim */
+        [4, 5], [2, 5]],         /* đại bàng ăn rắn và ăn sóc */
+    o: [[1.15, 0], [0.3, 1], [2.2, 1], [0.3, 2], [0.3, 3], [1.6, 4]] },
 
   { ten: 'ao hồ',
-    v: ['Tảo', 'Giáp xác', 'Ốc', 'Cá rô', 'Cá quả', 'Rái cá'],
+    v: ['Tảo', 'Giáp xác', 'Ốc', 'Cá chép', 'Cá quả', 'Rái cá'],
     c: [[0, 1], [0, 2],          /* giáp xác và ốc đều ăn tảo */
-        [1, 3], [2, 3],          /* cá rô ăn tạp: ăn cả giáp xác lẫn ốc nhỏ */
-        [3, 4],                  /* cá quả ăn cá nhỏ */
+        [1, 3], [2, 3],          /* cá chép ăn giáp xác và nghiền được vỏ ốc */
+        [3, 4],                  /* cá quả ăn cá nhỏ hơn */
         [4, 5]],                 /* rái cá bắt cá quả */
     o: [[1.15, 0], [0.3, 1], [2.1, 1], [1.15, 2], [1.15, 3], [1.15, 4]] },
 
-  { ten: 'rừng ngập mặn',
-    v: ['Cây đước', 'Cua còng', 'Cá bống', 'Cò', 'Rắn', 'Chim ưng biển'],
-    c: [[0, 1],                  /* cua còng ăn lá rụng và mùn bã của đước */
-        [0, 2],                  /* cá bống ăn mùn bã hữu cơ */
-        [1, 3], [2, 3],          /* cò bắt cả cua lẫn cá */
-        [3, 4],                  /* rắn ăn cò non và trứng trong tổ */
-        [4, 5], [3, 5]],         /* chim ưng ăn rắn và ăn cò */
-    o: [[1.15, 0], [0.3, 1], [2.1, 1], [1.15, 2], [0.35, 3], [1.7, 4]] },
-
-  { ten: 'thảo nguyên',
-    v: ['Cỏ', 'Linh dương', 'Chuột', 'Cáo', 'Báo', 'Kền kền'],
-    c: [[0, 1], [0, 2],
-        [2, 3],                  /* cáo bắt chuột */
-        [1, 4], [3, 4],          /* báo săn linh dương và bắt cả cáo */
-        [4, 5]],                 /* kền kền ăn xác con mồi của báo */
-    o: [[1.15, 0], [2.15, 1], [0.3, 1], [0.3, 2], [1.15, 3], [1.15, 4]] }
+  { ten: 'vườn rau',
+    v: ['Rau cải', 'Sâu xanh', 'Rệp', 'Bọ rùa', 'Chim sâu', 'Rắn'],
+    c: [[0, 1], [0, 2],          /* sâu xanh và rệp đều ăn rau */
+        [2, 3],                  /* bọ rùa là thiên địch của rệp */
+        [1, 4],                  /* chim sâu bắt sâu xanh */
+        [4, 5]],                 /* rắn ăn chim sâu và trứng chim */
+    o: [[1.15, 0], [0.3, 1], [2.1, 1], [2.1, 2], [0.3, 2], [0.3, 3]] }
 ];
 
 /* dò mọi chuỗi thức ăn: đường đi liên tục từ sinh vật sản xuất tới loài
