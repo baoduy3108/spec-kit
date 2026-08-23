@@ -1221,13 +1221,16 @@ TD.moThe = function (khoa, i) {
      tổng hợp cả môn, chứ không gán bừa một chủ đề rồi hỏi lạc đề. */
   const monTK = TD.monTK || 'hoa';
   const khoLT = TD.KHO_LT[monTK] || [];
-  const khop = TD.chuDeCuaThe(monTK, x);
+  const pv = TD.phamViThe(monTK, x);
   if (khoLT.length >= 8) {
-    const du = khop && khoLT.filter(z => z.cd === khop).length >= 4;
+    const du = pv.cd && khoLT.filter(z => z.cd === pv.cd).length >= 4;
+    /* Nút ghi đúng cái sẽ được hỏi: tên THẺ khi đủ mệnh đề sát thẻ, tên
+       CHUYÊN ĐỀ khi phải hỏi rộng ra, và nói thẳng là tổng hợp khi không ghép
+       được chuyên đề nào. */
     const nut2 = el('button', 'nut kim', du
-      ? `📝 Kiểm tra ngay — ${khop}`
+      ? `📝 Kiểm tra ngay — ${pv.rieng ? pv.ten : pv.cd}`
       : `📝 Kiểm tra tổng hợp ${TD.MON[monTK].ten}`);
-    nut2.onclick = () => TD.kiemTraNhanh(monTK, du ? khop : null);
+    nut2.onclick = () => TD.kiemTraNhanh(monTK, du ? pv.cd : null, du && pv.rieng ? x : null);
     $('#tk-thu').replaceWith(nut2);
   }
 
@@ -1716,8 +1719,10 @@ TD.moDeTaDao = function (mon, so, loai) {
 };
 
 /* Kiểm tra nhanh ngay trong Tàng Kinh Các: bốc câu hỏi đúng chủ đề vừa đọc */
-TD.kiemTraNhanh = function (mon, cd) {
-  const ds = TD.deChuyenDe(mon, cd, TD.SO_CAU_KIEM_TRA);
+TD.kiemTraNhanh = function (mon, cd, the) {
+  /* Có thẻ thì hỏi đúng nội dung thẻ trước, cạn rồi mới nới ra cả chuyên đề */
+  const ds = the ? TD.deTheNay(mon, the, TD.SO_CAU_KIEM_TRA).ds
+                 : TD.deChuyenDe(mon, cd, TD.SO_CAU_KIEM_TRA);
   if (ds.length < 4) { TD.bao('Chuyên đề này chưa đủ câu để kiểm tra.', 'lua'); return; }
   TD.batDauPhien(mon, null, 'luyen', ds);
 };

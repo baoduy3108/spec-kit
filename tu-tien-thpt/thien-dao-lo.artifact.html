@@ -855,6 +855,9 @@ TD.BAN_DO_CD = {
     [/vecto|he thuc luong|dinh li cosin|dinh li sin|trung tuyen|tich vo huong/, 'Vecto và hệ thức lượng'],
     [/bat phuong trinh|tam thuc|xet dau|viete|mien nghiem|toi uu tuyen tinh/, 'Bất phương trình bậc hai'],
     [/thong ke|xac suat|ghep nhom|trung vi|tu phan vi|phuong sai|do lech chuan|bayes|to hop|chinh hop|hoan vi|nhi thuc/, 'Thống kê – Xác suất'],
+    /* Mũ – logarit phải đứng TRƯỚC bất phương trình: thẻ "bất phương trình mũ –
+       log" mà để dòng bất phương trình bắt trước thì bị xếp nhầm sang tam thức. */
+    [/logarit|\bmu\b|lai kep/, 'Mũ – Logarit'],
     [/tich phan|nguyen ham|dien tich hinh phang|the tich tron xoay|ung dung tich phan/, 'Nguyên hàm – Tích phân'],
     [/oxyz|mat phang|mat cau|vecto|toa do/, 'Oxyz'],
     [/luong giac|he thuc luong|tam giac|khoi chop|khoi lang tru|hinh khong gian|khoi tron xoay|non|tru|cau|goc|khoang cach/, 'Hình không gian'],
@@ -988,6 +991,119 @@ TD.deChuyenDe = function (mon, cd, soCau) {
   return TD.xao(ds).slice(0, n);
 };
 
+/* ============================================================
+   PHẠM VI CỦA MỘT THẺ TÀNG KINH CÁC
+   Đọc xong thẻ "Dãy điện hoá" mà bị hỏi về điều chế kim loại hay ăn mòn thì
+   người học thấy lạc đề ngay — đúng như phản ánh. Chuyên đề là cái RỔ (Đại
+   cương kim loại), còn thẻ là một MỤC trong rổ đó. Vì vậy phải chấm điểm độ
+   sát giữa từng mệnh đề với chính nội dung thẻ, ưu tiên hỏi phần sát trước
+   rồi mới nới ra cả chuyên đề khi đã cạn.
+   ============================================================ */
+TD.NGUONG_SAT_THE = 4;
+
+TD.tuKhoaThe = function (the) {
+  const ten = String((the && (the.chu_de || the.ten || the.nhom)) || '');
+  const phu = String((the && (the.hoi || the.khi)) || '');
+  return {
+    cum: TD.khongDau(ten).replace(/[^a-z0-9]+/g, ' ').trim(),
+    chinh: TD.tuKhoa(ten),
+    phu: TD.tuKhoa(phu).slice(0, 14)
+  };
+};
+
+/* Điểm càng cao thì mệnh đề càng nói đúng thứ mà thẻ dạy.
+   Trùng NGUYÊN CỤM tên thẻ ăn 5 điểm — đây mới là tín hiệu chắc; từ lẻ chỉ
+   tính thêm cho đủ độ mịn vì "hoá" hay "điện" xuất hiện ở khắp nơi. */
+TD.diemSatThe = function (tk, van) {
+  const v = ' ' + TD.khongDau(String(van || '')).replace(/[^a-z0-9]+/g, ' ') + ' ';
+  let d = 0;
+  if (tk.cum.length >= 6 && v.indexOf(' ' + tk.cum + ' ') >= 0) d += 5;
+  tk.chinh.forEach(w => { if (v.indexOf(' ' + w + ' ') >= 0) d += 1; });
+  tk.phu.forEach(w => { if (v.indexOf(' ' + w + ' ') >= 0) d += 0.35; });
+  return d;
+};
+
+/* Trả về phạm vi kiểm tra của một thẻ, KHÔNG dựng câu — dùng để đặt tên nút. */
+TD.phamViThe = function (mon, the) {
+  const cd = TD.chuDeCuaThe(mon, the);
+  const kho = TD.KHO_LT[mon] || [];
+  const ten = String((the && (the.chu_de || the.ten)) || '').replace(/^\d+[.\s-]*/, '').trim();
+  const chiSo = [];
+  kho.forEach((z, i) => { if (cd && (z.cd || '') === cd) chiSo.push(i); });
+  if (!cd || chiSo.length < 4) return { cd: cd, ten: ten, nong: [], rieng: false };
+  const tk = TD.tuKhoaThe(the);
+  const nong = chiSo.filter(i => TD.diemSatThe(tk, (kho[i].t || '') + ' ' + (kho[i].v || '')) >= TD.NGUONG_SAT_THE);
+  /* Bộ sinh đề khai thẳng tên thẻ ở trường chuong thì chắc chắn là của thẻ đó */
+  const goc = TD.khongDau(ten);
+  const mau = (TD.GEN[mon] || []).filter(t => !t._tuLT && goc && TD.khongDau(t.chuong || '') === goc);
+  /* Dưới bốn mệnh đề sát thẻ và cũng không có bộ sinh riêng thì không dựng nổi
+     một lượt riêng, đành hỏi cả chuyên đề — lúc đó nút phải ghi đúng tên chuyên
+     đề để khỏi hứa hão. */
+  /* Ngưỡng 6 mệnh đề (hoặc 2 bộ sinh riêng) mới đủ dựng trọn phần đầu lượt kiểm
+     tra bằng câu của chính thẻ. Ít hơn thế mà vẫn ghi tên thẻ lên nút thì chỉ
+     vài câu đầu là đúng, phần sau lạc sang chuyên đề — đúng cái người học kêu. */
+  return { cd: cd, ten: ten, nong: nong, mau: mau,
+           rieng: !!ten && ten !== cd && (nong.length >= 6 || mau.length >= 2) };
+};
+
+/* Bộ câu hỏi cho ĐÚNG thẻ vừa đọc: phần sát thẻ xếp trước, hết mới nới ra. */
+TD.deTheNay = function (mon, the, soCau) {
+  const n = soCau || TD.SO_CAU_KIEM_TRA;
+  const pv = TD.phamViThe(mon, the);
+  const kho = TD.KHO_LT[mon] || [];
+  const ds = [];
+  if (pv.rieng) {
+    const nong = pv.nong;
+    /* ① bài tập của CHÍNH thẻ này trước — đây mới là thứ người học vừa đọc */
+    if (pv.mau.length) {
+      const can = Math.min(Math.round(n * 0.4), pv.mau.length * 6);
+      let vt = 0, quay = TD.xao(pv.mau.slice());
+      for (let k = 0, thu = 0; k < can && thu < can * 8; thu++) {
+        if (vt >= quay.length) { quay = TD.xao(pv.mau.slice()); vt = 0; }
+        const t = quay[vt++], seed = (Math.random() * 4294967295) >>> 0;
+        if (TD.sinhCau(t, seed)) { ds.push({ mon: mon, g: t.ma, s: seed }); k++; }
+      }
+    }
+    /* ② mệnh đề sát thẻ, hỏi thẳng tên thẻ */
+    TD.xao(nong.slice()).slice(0, Math.max(0, n - ds.length)).forEach(i => ds.push({
+      mon: mon, lt: i, c: kho[i].a ? 'd' : 's',
+      s: (Math.random() * 4294967295) >>> 0, nhan: pv.ten, loc: nong
+    }));
+    /* thêm vài câu đúng/sai 4 ý gom từ chính nhóm mệnh đề sát thẻ */
+    /* ③ vài câu đúng/sai 4 ý gom từ chính nhóm mệnh đề sát thẻ */
+    const da = {}; let thu = 0;
+    const tran = Math.min(n, Math.max(ds.length + 6, 14));
+    while (ds.length < tran && thu++ < 240) {
+      const bo = TD.xao(nong.slice()).slice(0, 4).sort((a, b) => a - b), k = bo.join('-');
+      if (da[k]) continue;
+      da[k] = 1;
+      ds.push({ mon: mon, dsy: bo, cd: pv.cd, nhan: pv.ten, s: (Math.random() * 4294967295) >>> 0 });
+    }
+  }
+  /* ③b Thẻ chưa đủ 6 mệnh đề riêng thì nút vẫn ghi tên chuyên đề cho thật thà,
+     nhưng mấy mệnh đề sát thẻ vẫn được xếp LÊN ĐẦU — hỏi cái vừa đọc trước
+     bao giờ cũng hơn bốc ngẫu nhiên cả rổ. */
+  if (!pv.rieng && pv.nong.length >= 2) {
+    TD.xao(pv.nong.slice()).slice(0, Math.min(pv.nong.length, n)).forEach(i => ds.push({
+      mon: mon, lt: i, c: kho[i].a ? 'd' : 's', s: (Math.random() * 4294967295) >>> 0
+    }));
+  }
+
+  /* ④ hết phần sát thẻ thì nới ra cả chuyên đề. Phải bốc DƯ rồi mới lọc trùng,
+     nếu không thì mỗi câu bị loại là hụt một câu của lượt kiểm tra. */
+  for (let vong = 0; vong < 3 && ds.length < n; vong++) {
+    const daCo = {};
+    ds.forEach(x => { if (x.lt !== undefined) daCo[x.lt] = 1; });
+    TD.deChuyenDe(mon, pv.cd, n).forEach(x => {
+      if (ds.length >= n) return;
+      if (x.lt !== undefined && daCo[x.lt]) return;
+      if (x.lt !== undefined) daCo[x.lt] = 1;
+      ds.push(x);
+    });
+  }
+  return { ds: ds.slice(0, n), nhan: pv.rieng ? pv.ten : pv.cd, sat: pv.rieng ? pv.nong.length : 0, cd: pv.cd };
+};
+
 TD.timMau = function (mon, ma) {
   return (TD.GEN[mon] || []).find(t => t.ma === ma);
 };
@@ -1030,8 +1146,8 @@ TD.sinhCau = function (mau, seed) {
 TD.layCau = function (it) {
   if (!it) return null;
   if (it.cau) return it.cau;          /* câu đã dựng sẵn (kiểm tra từ vựng theo phạm vi) */
-  if (it.dsy) return TD.cauDsTuMenhDe(it.mon, it.dsy, it.cd, it.s);
-  if (it.lt !== undefined) return TD.cauTuMenhDe(it.mon, it.lt, it.c, it.s);
+  if (it.dsy) return TD.cauDsTuMenhDe(it.mon, it.dsy, it.cd, it.s, it.nhan);
+  if (it.lt !== undefined) return TD.cauTuMenhDe(it.mon, it.lt, it.c, it.s, it.nhan, it.loc);
   if (it.g) {
     const mau = TD.timMau(it.mon, it.g);
     return mau ? TD.sinhCau(mau, it.s) : null;
@@ -1251,7 +1367,7 @@ TD.mucLT = function (mon, m) {
 };
 
 /* Dựng câu Đúng/Sai 4 ý từ bốn mệnh đề trong kho */
-TD.cauDsTuMenhDe = function (mon, chiSos, cd, seed) {
+TD.cauDsTuMenhDe = function (mon, chiSos, cd, seed, nhan) {
   const kho = TD.KHO_LT[mon] || [];
   const y = chiSos.map(i => kho[i]);
   if (y.some(x => !x)) return null;
@@ -1265,7 +1381,7 @@ TD.cauDsTuMenhDe = function (mon, chiSos, cd, seed) {
     muc: TD.mucLT(mon, Math.round(t.reduce((s2, x) => s2 + (x.m || 2), 0) / t.length)),
     dang: 'ds',
     _lt: true,
-    q: `Về chủ đề <b>${cd}</b>, xét tính đúng/sai của từng phát biểu sau:`,
+    q: `Về chủ đề <b>${nhan || cd}</b>, xét tính đúng/sai của từng phát biểu sau:`,
     items: t.map(x => ({ t: x.t, a: !!x.a })),
     giai: t.map((x, i) => `Ý ${'abcd'[i]}) ${x.a ? 'ĐÚNG' : 'SAI'} — ${x.v}`).join('\n'),
     meo: 'Xét từng ý ĐỘC LẬP với nhau. Đừng nghĩ "chắc phải có 2 đúng 2 sai" — cả 4 ý cùng đúng là hoàn toàn có thể.'
@@ -1273,7 +1389,7 @@ TD.cauDsTuMenhDe = function (mon, chiSos, cd, seed) {
 };
 
 /* Dựng câu hỏi trắc nghiệm từ một mệnh đề trong kho */
-TD.cauTuMenhDe = function (mon, chiSo, chieu, seed) {
+TD.cauTuMenhDe = function (mon, chiSo, chieu, seed, nhan, loc) {
   const kho = TD.KHO_LT[mon] || [];
   const goc = kho[chiSo];
   if (!goc) return null;
@@ -1283,9 +1399,12 @@ TD.cauTuMenhDe = function (mon, chiSo, chieu, seed) {
   const R = TD.rng(seed >>> 0);
   const nguoc = kho.filter(x => !!x.a !== !!goc.a);
   if (nguoc.length < 3) return null;
-  /* ưu tiên phương án nhiễu cùng chủ đề cho câu hỏi có sức nặng */
+  /* Khi câu được dựng cho MỘT THẺ cụ thể (loc là danh sách mệnh đề sát thẻ đó),
+     phương án nhiễu cũng phải nằm trong phạm vi ấy — nếu không thì đề ghi tên
+     thẻ mà ba phương án còn lại nói chuyện khác, thành ra tự lộ đáp án. */
+  const trongThe = loc ? nguoc.filter((x, i) => loc.indexOf(kho.indexOf(x)) >= 0) : [];
   const cungCD = nguoc.filter(x => x.cd === goc.cd);
-  const nguon = cungCD.length >= 3 ? cungCD : nguoc;
+  const nguon = trongThe.length >= 3 ? trongThe : (cungCD.length >= 3 ? cungCD : nguoc);
   const nhieu = R.chonNhieu(nguon, 3);
 
   const opts = TD.xaoR(R, [goc].concat(nhieu));
@@ -1294,20 +1413,22 @@ TD.cauTuMenhDe = function (mon, chiSo, chieu, seed) {
      câu hỏi luôn khoanh vùng chủ đề. Chỉ nêu tên chủ đề khi CẢ BỐN phương án cùng
      thuộc chủ đề đó, nếu không thì tên chủ đề lại thành gợi ý loại trừ. */
   const cungChuDe = nhieu.every(x => x.cd === goc.cd) && goc.cd;
+  /* Chỉ nêu tên thẻ khi CẢ BỐN phương án đều lấy trong phạm vi thẻ đó */
+  const tenCD = (nhan && loc && nhieu.every(x => loc.indexOf(kho.indexOf(x)) >= 0)) ? nhan : goc.cd;
   const MAU_HOI = {
     d: cungChuDe
-      ? [`Nội dung nào sau đây <b>phản ánh đúng</b> về <b>${goc.cd}</b>?`,
-         `Nhận định nào sau đây về <b>${goc.cd}</b> là <b>đúng</b>?`,
-         `Phát biểu nào sau đây <b>đúng</b> khi nói về <b>${goc.cd}</b>?`,
-         `Khi tìm hiểu về <b>${goc.cd}</b>, nội dung nào sau đây là <b>chính xác</b>?`]
+      ? [`Nội dung nào sau đây <b>phản ánh đúng</b> về <b>${tenCD}</b>?`,
+         `Nhận định nào sau đây về <b>${tenCD}</b> là <b>đúng</b>?`,
+         `Phát biểu nào sau đây <b>đúng</b> khi nói về <b>${tenCD}</b>?`,
+         `Khi tìm hiểu về <b>${tenCD}</b>, nội dung nào sau đây là <b>chính xác</b>?`]
       : ['Phát biểu nào sau đây <b>đúng</b>?',
          'Nội dung nào sau đây <b>phản ánh đúng</b> thực tế?',
          'Nhận định nào sau đây là <b>đúng</b>?'],
     s: cungChuDe
-      ? [`Nội dung nào sau đây <b>không đúng</b> về <b>${goc.cd}</b>?`,
-         `Nhận định nào sau đây về <b>${goc.cd}</b> là <b>sai</b>?`,
-         `Phát biểu nào sau đây <b>sai</b> khi nói về <b>${goc.cd}</b>?`,
-         `Khi tìm hiểu về <b>${goc.cd}</b>, nội dung nào sau đây <b>không chính xác</b>?`]
+      ? [`Nội dung nào sau đây <b>không đúng</b> về <b>${tenCD}</b>?`,
+         `Nhận định nào sau đây về <b>${tenCD}</b> là <b>sai</b>?`,
+         `Phát biểu nào sau đây <b>sai</b> khi nói về <b>${tenCD}</b>?`,
+         `Khi tìm hiểu về <b>${tenCD}</b>, nội dung nào sau đây <b>không chính xác</b>?`]
       : ['Phát biểu nào sau đây <b>sai</b>?',
          'Nội dung nào sau đây <b>không đúng</b>?',
          'Nhận định nào sau đây là <b>sai</b>?']
@@ -1701,7 +1822,10 @@ TD.KHO.hoa_kq = [
 <div class="dayvt"><div class="dvt-row"><span class="dvt-l">Oxh ↑</span> Li⁺ K⁺ Ba²⁺ Ca²⁺ Na⁺ Mg²⁺ Al³⁺ Mn²⁺ Zn²⁺ Fe²⁺ Ni²⁺ Sn²⁺ Pb²⁺ <b>H⁺</b> Cu²⁺ Fe³⁺ Ag⁺ Hg²⁺ Pt²⁺ Au³⁺</div>
 <div class="dvt-row"><span class="dvt-l">Khử ↓</span> Li K Ba Ca Na Mg Al Mn Zn Fe Ni Sn Pb <b>H₂</b> Cu Fe²⁺ Ag Hg Pt Au</div></div>
 <b>Kim loại luôn là:</b> chất khử · chất bị oxi hoá · nhường e · số oxi hoá tăng (quá trình oxi hoá).`,
-  meo: 'Thần chú: "Khi Ba Con Nào May Áo Măng Zin Sắt Nên Sang Phố Hỏi Cửa Hàng Á Phi Âu" – K Ba Ca Na Mg Al Mn Zn Fe Ni Sn Pb H Cu Hg Ag Pt Au.' },
+  meo: 'Thần chú: "Khi Ba Con Nào May Áo Măng Zin Sắt Nên Sang Phố Hỏi Cửa Á Hàng Phi Âu" – '
+    + 'K Ba Ca Na Mg Al Mn Zn Fe Ni Sn Pb H Cu Ag Hg Pt Au. '
+    + 'Lưu ý: nhiều bản chép tay đọc "Cửa Hàng Á" tức Cu Hg Ag — SAI thứ tự. Theo thế điện cực chuẩn thì '
+    + 'Ag⁺/Ag là +0,80 V còn Hg²⁺/Hg là +0,85 V, nên BẠC đứng trước THUỶ NGÂN.' },
 
 { so: 2, chu_de: 'Kim loại – phản ứng với axit', cap: 1,
   hoi: 'Đám cháy kim loại nào KHÔNG dập bằng CO₂? Kim loại nào không tan HCl / H₂SO₄ loãng / H₂SO₄ đặc nóng / HNO₃ đặc nguội?',
@@ -24543,6 +24667,187 @@ bu('ly', [
 </script>
 <script>
 /* ============================================================
+   HOÁ — DÃY ĐIỆN HOÁ: TRẮC NGHIỆM TRÍ NHỚ ĐÚNG NGHĨA
+   Thẻ "Dãy điện hoá" trong Tàng Kinh Các trước đây không có câu hỏi nào
+   thật sự hỏi về dãy điện hoá, nên bấm "Kiểm tra ngay" là ra câu của cả
+   chuyên đề Đại cương kim loại — đọc một đằng kiểm tra một nẻo.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {}; TD.KHO_LT = TD.KHO_LT || {};
+
+(function () {
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n`
+      + TD.khoiLoai(opts, it.d, it.sv, 'không thoả yêu cầu của đề.'),
+    meo: meo };
+};
+const baNhieu = (dung, ung) => {
+  const ra = [];
+  for (const x of ung) if (x !== dung && ra.indexOf(x) < 0) ra.push(x);
+  return ra.length >= 3 ? ra.slice(0, 3) : null;
+};
+
+/* Dãy điện hoá theo thế điện cực chuẩn tăng dần (trái sang phải).
+   Tính khử của kim loại GIẢM dần, tính oxi hoá của ion TĂNG dần. */
+const DAY = [
+  { kl: 'K',  ion: 'K⁺',   nuoc: true },
+  { kl: 'Ba', ion: 'Ba²⁺', nuoc: true },
+  { kl: 'Ca', ion: 'Ca²⁺', nuoc: true },
+  { kl: 'Na', ion: 'Na⁺',  nuoc: true },
+  { kl: 'Mg', ion: 'Mg²⁺' },
+  { kl: 'Al', ion: 'Al³⁺' },
+  { kl: 'Mn', ion: 'Mn²⁺' },
+  { kl: 'Zn', ion: 'Zn²⁺' },
+  { kl: 'Cr', ion: 'Cr³⁺' },
+  { kl: 'Fe', ion: 'Fe²⁺' },
+  { kl: 'Ni', ion: 'Ni²⁺' },
+  { kl: 'Sn', ion: 'Sn²⁺' },
+  { kl: 'Pb', ion: 'Pb²⁺' },
+  { kl: 'H',  ion: 'H⁺', moc: true },
+  { kl: 'Cu', ion: 'Cu²⁺' },
+  { kl: 'Ag', ion: 'Ag⁺' },
+  { kl: 'Hg', ion: 'Hg²⁺' },
+  { kl: 'Pt', ion: 'Pt²⁺' },
+  { kl: 'Au', ion: 'Au³⁺' }
+];
+const viTri = {}; DAY.forEach((x, i) => { viTri[x.kl] = i; });
+const MOC_H = viTri['H'];
+const KL = DAY.filter(x => !x.moc);                       /* bỏ mốc hydrogen */
+const truocH = KL.filter(x => viTri[x.kl] < MOC_H);
+const sauH = KL.filter(x => viTri[x.kl] > MOC_H);
+/* kim loại đẩy được ion khác ra khỏi dung dịch muối: phải không tan trong nước */
+const dayDuoc = KL.filter(x => !x.nuoc);
+const ds = a => a.join(' → ');
+
+TD.GEN.hoa = (TD.GEN.hoa || []).concat([
+
+/* ---------- mức 1: đứng trước hay đứng sau hydrogen ---------- */
+{ ma: 'hoa-dayvt-moc', chuong: 'Dãy điện hoá', muc: 1, dang: 'mc',
+  tao(R) {
+    const sau = R.chon(sauH).kl;
+    const truoc = R.chonNhieu(truocH, 3).map(x => x.kl);
+    if (R.chon([0, 1])) {
+      return MC(R, `Kim loại nào sau đây <b>không</b> tan trong dung dịch HCl loãng?`,
+        { d: sau, s: truoc,
+          sv: Object.fromEntries(truoc.map(k => [k, `${k} đứng TRƯỚC hydrogen trong dãy điện hoá nên khử được ion H⁺, tức là tan và giải phóng khí hydrogen`])),
+          v: `Kim loại chỉ đẩy được hydrogen ra khỏi dung dịch acid loãng khi nó đứng TRƯỚC hydrogen trong dãy điện hoá.\n`
+            + `${sau} đứng SAU hydrogen ⇒ không khử được ion H⁺ ⇒ không tan trong HCl loãng.` },
+        'Cột mốc quan trọng nhất của dãy điện hoá là hydrogen. Đứng trước H thì tan trong HCl và H₂SO₄ loãng, '
+        + 'đứng sau H thì không. Nhóm đứng sau H cần thuộc lòng: Cu, Ag, Hg, Pt, Au.');
+    }
+    const t = R.chon(truocH).kl;
+    const nhieu = R.chonNhieu(sauH, 3).map(x => x.kl);
+    return MC(R, `Kim loại nào sau đây tan được trong dung dịch H₂SO₄ loãng và giải phóng khí H₂?`,
+      { d: t, s: nhieu,
+        sv: Object.fromEntries(nhieu.map(k => [k, `${k} đứng SAU hydrogen trong dãy điện hoá nên không khử được ion H⁺`])),
+        v: `${t} đứng TRƯỚC hydrogen trong dãy điện hoá nên khử được ion H⁺ thành khí hydrogen.` },
+      'Vẫn là cột mốc hydrogen: trước H thì tan trong acid loãng, sau H thì chịu. '
+      + 'Với acid có tính oxi hoá mạnh như HNO₃ thì luật này KHÔNG áp dụng — Cu và Ag vẫn tan.');
+  } },
+
+/* ---------- mức 1: so tính khử, tính oxi hoá ---------- */
+{ ma: 'hoa-dayvt-so', chuong: 'Dãy điện hoá', muc: 1, dang: 'mc',
+  tao(R) {
+    const bo = R.chonNhieu(KL, 4).sort((a, b) => viTri[a.kl] - viTri[b.kl]);
+    const ten = bo.map(x => x.kl);
+    const hoi = R.chon(['khuManh', 'khuYeu', 'oxhManh']);
+    if (hoi === 'khuManh')
+      return MC(R, `Cho các kim loại: ${ten.join(', ')}. Kim loại nào có tính khử <b>mạnh nhất</b>?`,
+        { d: bo[0].kl, s: ten.slice(1),
+          sv: Object.fromEntries(bo.slice(1).map(x => [x.kl, `${x.kl} đứng SAU ${bo[0].kl} trong dãy điện hoá nên tính khử yếu hơn`])),
+          v: `Trong dãy điện hoá, đi từ trái sang phải thì tính khử của kim loại GIẢM dần.\n`
+            + `Thứ tự của bốn kim loại trên trong dãy là ${ds(ten)} ⇒ đứng đầu là ${bo[0].kl} nên có tính khử mạnh nhất.` },
+        'Một câu thần chú cho cả dãy: sang PHẢI thì kim loại yếu đi (tính khử giảm), còn ion mạnh lên (tính oxi hoá tăng).');
+    if (hoi === 'khuYeu')
+      return MC(R, `Cho các kim loại: ${ten.join(', ')}. Kim loại nào có tính khử <b>yếu nhất</b>?`,
+        { d: bo[3].kl, s: ten.slice(0, 3),
+          sv: Object.fromEntries(bo.slice(0, 3).map(x => [x.kl, `${x.kl} đứng TRƯỚC ${bo[3].kl} trong dãy điện hoá nên tính khử mạnh hơn`])),
+          v: `Tính khử giảm dần khi đi sang phải. Thứ tự trong dãy là ${ds(ten)} ⇒ đứng cuối là ${bo[3].kl}.` },
+        'Kim loại đứng càng về cuối dãy thì càng "quý" và càng lười nhường electron — vàng và bạch kim ở tận cùng.');
+    const ion = bo.map(x => x.ion);
+    return MC(R, `Cho các ion kim loại: ${ion.join(', ')}. Ion nào có tính oxi hoá <b>mạnh nhất</b>?`,
+      { d: bo[3].ion, s: ion.slice(0, 3),
+        sv: Object.fromEntries(bo.slice(0, 3).map(x => [x.ion, `${x.ion} nằm bên TRÁI ${bo[3].ion} trong dãy điện hoá nên tính oxi hoá yếu hơn`])),
+        v: `Hàng ion trong dãy điện hoá có tính oxi hoá TĂNG dần từ trái sang phải — ngược chiều với hàng kim loại.\n`
+          + `Thứ tự các ion đã cho là ${ds(ion)} ⇒ mạnh nhất là ${bo[3].ion}.` },
+      'Hai hàng của dãy điện hoá đọc NGƯỢC chiều nhau: kim loại mạnh dần khi sang trái, ion mạnh dần khi sang phải. '
+      + 'Đề hay đổi từ hỏi kim loại sang hỏi ion để bẫy.');
+  } },
+
+/* ---------- mức 2: sắp thứ tự ---------- */
+{ ma: 'hoa-dayvt-sapxep', chuong: 'Dãy điện hoá', muc: 2, dang: 'mc',
+  tao(R) {
+    const bo = R.chonNhieu(KL, 3).sort((a, b) => viTri[a.kl] - viTri[b.kl]).map(x => x.kl);
+    const giam = R.chon([true, false]);
+    const dung = ds(giam ? bo : bo.slice().reverse());
+    const hv = [[bo[1], bo[0], bo[2]], [bo[0], bo[2], bo[1]], [bo[2], bo[1], bo[0]], [bo[1], bo[2], bo[0]]];
+    const nhieu = baNhieu(dung, hv.map(ds));
+    if (!nhieu) return null;
+    return MC(R, `Dãy nào sau đây sắp xếp các kim loại theo chiều tính khử <b>${giam ? 'giảm' : 'tăng'} dần</b>?`,
+      { d: dung, s: nhieu,
+        sv: { [ds(giam ? bo.slice().reverse() : bo)]: `đây đúng là ba kim loại đó nhưng xếp NGƯỢC chiều — đề hỏi ${giam ? 'giảm' : 'tăng'} dần` },
+        v: `Vị trí ba kim loại trong dãy điện hoá theo thứ tự trái sang phải là ${ds(bo)}.\n`
+          + `Sang phải thì tính khử giảm, nên chiều ${giam ? 'GIẢM' : 'TĂNG'} dần là ${dung}.` },
+      'Bước một: xếp lại đúng vị trí trong dãy. Bước hai: đọc kỹ đề hỏi TĂNG hay GIẢM. '
+      + 'Phương án nhiễu nặng nhất luôn là dãy đúng nhưng đảo chiều.');
+  } },
+
+/* ---------- mức 2: quy tắc alpha ---------- */
+{ ma: 'hoa-dayvt-alpha', chuong: 'Dãy điện hoá', muc: 2, dang: 'mc',
+  tao(R) {
+    /* kim loại X đẩy được ion Y⁺ khi X đứng TRƯỚC Y và X không tan trong nước */
+    const y = R.chon(KL.filter(x => viTri[x.kl] > viTri['Zn']));
+    const truoc = dayDuoc.filter(x => viTri[x.kl] < viTri[y.kl]);
+    const sau = dayDuoc.filter(x => viTri[x.kl] > viTri[y.kl]);
+    if (!truoc.length || sau.length < 3) return null;
+    const dung = R.chon(truoc).kl;
+    const nhieu = R.chonNhieu(sau, 3).map(x => x.kl);
+    return MC(R, `Kim loại nào sau đây đẩy được ${y.kl} ra khỏi dung dịch muối ${y.ion.replace(/[⁺²³]/g, '')} tương ứng?`,
+      { d: dung, s: nhieu,
+        sv: Object.fromEntries(nhieu.map(k => [k, `${k} đứng SAU ${y.kl} trong dãy điện hoá nên tính khử yếu hơn, không khử nổi ion ${y.ion}`])),
+        v: `Quy tắc alpha: chất khử mạnh cộng chất oxi hoá mạnh cho chất khử yếu và chất oxi hoá yếu.\n`
+          + `${dung} đứng TRƯỚC ${y.kl} trong dãy điện hoá nên có tính khử mạnh hơn ⇒ khử được ion ${y.ion} thành ${y.kl}.` },
+      'Quy tắc alpha vẽ thành chữ α: kim loại ở góc dưới bên TRÁI đẩy được ion ở góc trên bên PHẢI. '
+      + 'Nhưng nhớ loại trừ K, Ba, Ca, Na — mấy kim loại này gặp nước là phản ứng ngay chứ không đẩy được kim loại nào ra khỏi dung dịch muối.');
+  } },
+
+/* ---------- mức 2: kim loại tan trong nước ---------- */
+{ ma: 'hoa-dayvt-nuoc', chuong: 'Dãy điện hoá', muc: 2, dang: 'mc',
+  tao(R) {
+    const dung = R.chon(DAY.filter(x => x.nuoc)).kl;
+    const nhieu = R.chonNhieu(KL.filter(x => !x.nuoc && viTri[x.kl] < MOC_H), 3).map(x => x.kl);
+    return MC(R, `Cho kim loại X vào lượng dư dung dịch CuSO₄, thấy có khí thoát ra và thu được kết tủa. Kim loại X là chất nào sau đây?`,
+      { d: dung, s: nhieu,
+        sv: Object.fromEntries(nhieu.map(k => [k, `${k} không phản ứng với nước ở điều kiện thường nên chỉ đẩy đồng ra khỏi muối, không có khí thoát ra`])),
+        v: `Bốn kim loại đứng đầu dãy điện hoá là K, Ba, Ca, Na phản ứng ngay với NƯỚC trong dung dịch chứ không đẩy được kim loại ra khỏi muối.\n`
+          + `${dung} + nước cho base tan và khí hydrogen; base sinh ra tiếp tục tạo kết tủa Cu(OH)₂ với muối.\n`
+          + `Vậy hiện tượng vừa có khí vừa có kết tủa ứng với ${dung}.` },
+      'Đây là bẫy kinh điển của quy tắc alpha: K, Ba, Ca, Na tuy đứng đầu dãy nhưng KHÔNG dùng để đẩy kim loại ra khỏi dung dịch muối, '
+      + 'vì chúng phản ứng với nước trước. Dấu hiệu nhận ra trong đề: vừa có khí thoát ra vừa có kết tủa.');
+  } }
+
+]);
+
+TD.KHO_LT.hoa = (TD.KHO_LT.hoa || []).concat([
+{ cd: 'Đại cương kim loại', m: 1, a: true,  t: 'Trong dãy điện hoá, đi từ trái sang phải thì tính khử của kim loại giảm dần.', v: 'Đồng thời tính oxi hoá của ion kim loại tương ứng tăng dần — hai hàng đọc ngược chiều nhau.' },
+{ cd: 'Đại cương kim loại', m: 1, a: false, t: 'Trong dãy điện hoá, đi từ trái sang phải thì tính khử của kim loại tăng dần.', v: 'Ngược lại — tính khử GIẢM dần. Kim loại càng về cuối dãy càng khó nhường electron.' },
+{ cd: 'Đại cương kim loại', m: 1, a: true,  t: 'Trong dãy điện hoá, tính oxi hoá của các ion kim loại tăng dần từ trái sang phải.', v: 'Vì thế ion Au³⁺ ở cuối dãy có tính oxi hoá mạnh nhất, còn K⁺ ở đầu dãy yếu nhất.' },
+{ cd: 'Đại cương kim loại', m: 2, a: true,  t: 'Kim loại đứng trước hydrogen trong dãy điện hoá thì khử được ion H⁺ của dung dịch HCl và H₂SO₄ loãng.', v: 'Đây là ý nghĩa của cột mốc hydrogen giữa dãy.' },
+{ cd: 'Đại cương kim loại', m: 2, a: false, t: 'Mọi kim loại trong dãy điện hoá đều tan được trong dung dịch HCl loãng.', v: 'Chỉ kim loại đứng trước hydrogen mới tan. Cu, Ag, Hg, Pt, Au đứng sau H nên không tan.' },
+{ cd: 'Đại cương kim loại', m: 2, a: true,  t: 'Theo quy tắc alpha, kim loại đứng trước đẩy được kim loại đứng sau ra khỏi dung dịch muối của nó.', v: 'Chất khử mạnh cộng chất oxi hoá mạnh cho chất khử yếu và chất oxi hoá yếu.' },
+{ cd: 'Đại cương kim loại', m: 3, a: false, t: 'Có thể dùng Na để đẩy Cu ra khỏi dung dịch CuSO₄ vì Na đứng trước Cu trong dãy điện hoá.', v: 'Na phản ứng với NƯỚC trước, tạo NaOH rồi mới tạo kết tủa Cu(OH)₂ — không thu được Cu kim loại. Quy tắc alpha loại trừ K, Ba, Ca, Na.' },
+{ cd: 'Đại cương kim loại', m: 3, a: true,  t: 'Bốn kim loại K, Ba, Ca, Na đứng đầu dãy điện hoá không dùng để đẩy kim loại khác ra khỏi dung dịch muối.', v: 'Vì chúng khử nước ngay ở điều kiện thường, sinh khí hydrogen và base tan.' },
+{ cd: 'Đại cương kim loại', m: 2, a: true,  t: 'Trong dãy điện hoá, cặp Ag⁺/Ag đứng trước cặp Hg²⁺/Hg.', v: 'Theo thế điện cực chuẩn: Ag⁺/Ag bằng +0,80 V còn Hg²⁺/Hg bằng +0,85 V.' },
+{ cd: 'Đại cương kim loại', m: 3, a: true,  t: 'Cặp Fe³⁺/Fe²⁺ nằm giữa cặp Cu²⁺/Cu và cặp Ag⁺/Ag trong dãy điện hoá.', v: 'Nhờ vậy Cu khử được Fe³⁺ thành Fe²⁺, còn Ag⁺ lại oxi hoá được Fe²⁺ thành Fe³⁺.' },
+{ cd: 'Đại cương kim loại', m: 3, a: true,  t: 'Kim loại đứng sau hydrogen trong dãy điện hoá vẫn có thể tan trong dung dịch HNO₃ loãng.', v: 'Vì chất oxi hoá lúc này là ion nitrate trong môi trường acid chứ không phải ion H⁺.' },
+{ cd: 'Đại cương kim loại', m: 2, a: false, t: 'Trong dãy điện hoá, kim loại đứng càng về sau thì càng dễ bị ăn mòn.', v: 'Ngược lại — càng về sau càng kém hoạt động nên càng bền. Trong ăn mòn điện hoá, kim loại đứng TRƯỚC bị ăn mòn.' }
+]);
+})();
+
+</script>
+<script>
+/* ============================================================
    SINH CÂU VẬN DỤNG CAO DẠNG TRẮC NGHIỆM CHO MÔN TỰ NHIÊN
    Toán, Lí, Hoá, Sinh có hàng chục mẫu vận dụng cao nhưng TOÀN BỘ
    đều là dạng trả lời ngắn. Phần I của bốn môn này (12–18 câu trắc
@@ -26335,13 +26640,16 @@ TD.moThe = function (khoa, i) {
      tổng hợp cả môn, chứ không gán bừa một chủ đề rồi hỏi lạc đề. */
   const monTK = TD.monTK || 'hoa';
   const khoLT = TD.KHO_LT[monTK] || [];
-  const khop = TD.chuDeCuaThe(monTK, x);
+  const pv = TD.phamViThe(monTK, x);
   if (khoLT.length >= 8) {
-    const du = khop && khoLT.filter(z => z.cd === khop).length >= 4;
+    const du = pv.cd && khoLT.filter(z => z.cd === pv.cd).length >= 4;
+    /* Nút ghi đúng cái sẽ được hỏi: tên THẺ khi đủ mệnh đề sát thẻ, tên
+       CHUYÊN ĐỀ khi phải hỏi rộng ra, và nói thẳng là tổng hợp khi không ghép
+       được chuyên đề nào. */
     const nut2 = el('button', 'nut kim', du
-      ? `📝 Kiểm tra ngay — ${khop}`
+      ? `📝 Kiểm tra ngay — ${pv.rieng ? pv.ten : pv.cd}`
       : `📝 Kiểm tra tổng hợp ${TD.MON[monTK].ten}`);
-    nut2.onclick = () => TD.kiemTraNhanh(monTK, du ? khop : null);
+    nut2.onclick = () => TD.kiemTraNhanh(monTK, du ? pv.cd : null, du && pv.rieng ? x : null);
     $('#tk-thu').replaceWith(nut2);
   }
 
@@ -26830,8 +27138,10 @@ TD.moDeTaDao = function (mon, so, loai) {
 };
 
 /* Kiểm tra nhanh ngay trong Tàng Kinh Các: bốc câu hỏi đúng chủ đề vừa đọc */
-TD.kiemTraNhanh = function (mon, cd) {
-  const ds = TD.deChuyenDe(mon, cd, TD.SO_CAU_KIEM_TRA);
+TD.kiemTraNhanh = function (mon, cd, the) {
+  /* Có thẻ thì hỏi đúng nội dung thẻ trước, cạn rồi mới nới ra cả chuyên đề */
+  const ds = the ? TD.deTheNay(mon, the, TD.SO_CAU_KIEM_TRA).ds
+                 : TD.deChuyenDe(mon, cd, TD.SO_CAU_KIEM_TRA);
   if (ds.length < 4) { TD.bao('Chuyên đề này chưa đủ câu để kiểm tra.', 'lua'); return; }
   TD.batDauPhien(mon, null, 'luyen', ds);
 };

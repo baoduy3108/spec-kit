@@ -13,7 +13,10 @@ TD.KHO.hoa_kq = [
 <div class="dayvt"><div class="dvt-row"><span class="dvt-l">Oxh ↑</span> Li⁺ K⁺ Ba²⁺ Ca²⁺ Na⁺ Mg²⁺ Al³⁺ Mn²⁺ Zn²⁺ Fe²⁺ Ni²⁺ Sn²⁺ Pb²⁺ <b>H⁺</b> Cu²⁺ Fe³⁺ Ag⁺ Hg²⁺ Pt²⁺ Au³⁺</div>
 <div class="dvt-row"><span class="dvt-l">Khử ↓</span> Li K Ba Ca Na Mg Al Mn Zn Fe Ni Sn Pb <b>H₂</b> Cu Fe²⁺ Ag Hg Pt Au</div></div>
 <b>Kim loại luôn là:</b> chất khử · chất bị oxi hoá · nhường e · số oxi hoá tăng (quá trình oxi hoá).`,
-  meo: 'Thần chú: "Khi Ba Con Nào May Áo Măng Zin Sắt Nên Sang Phố Hỏi Cửa Hàng Á Phi Âu" – K Ba Ca Na Mg Al Mn Zn Fe Ni Sn Pb H Cu Hg Ag Pt Au.' },
+  meo: 'Thần chú: "Khi Ba Con Nào May Áo Măng Zin Sắt Nên Sang Phố Hỏi Cửa Á Hàng Phi Âu" – '
+    + 'K Ba Ca Na Mg Al Mn Zn Fe Ni Sn Pb H Cu Ag Hg Pt Au. '
+    + 'Lưu ý: nhiều bản chép tay đọc "Cửa Hàng Á" tức Cu Hg Ag — SAI thứ tự. Theo thế điện cực chuẩn thì '
+    + 'Ag⁺/Ag là +0,80 V còn Hg²⁺/Hg là +0,85 V, nên BẠC đứng trước THUỶ NGÂN.' },
 
 { so: 2, chu_de: 'Kim loại – phản ứng với axit', cap: 1,
   hoi: 'Đám cháy kim loại nào KHÔNG dập bằng CO₂? Kim loại nào không tan HCl / H₂SO₄ loãng / H₂SO₄ đặc nóng / HNO₃ đặc nguội?',
