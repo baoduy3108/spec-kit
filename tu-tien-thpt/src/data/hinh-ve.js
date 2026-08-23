@@ -162,7 +162,11 @@ TD.hinhPhaHe = function (nguoi, cap, con) {
   });
   /* đường nối vợ chồng và xuống con */
   cap.forEach(([a, b]) => {
-    const p = tim(a), q = tim(b); if (!p || !q) return;
+    let p = tim(a), q = tim(b); if (!p || !q) return;
+    /* Phải xác định ai đứng BÊN TRÁI rồi mới lùi 11px mỗi đầu. Trước đây cứ lấy
+       người thứ nhất cộng 11 và người thứ hai trừ 11; gặp cặp mà chồng đứng bên
+       phải thì đoạn thẳng bị kéo dài ra hai đầu, đâm xuyên qua chính hai ký hiệu. */
+    if (X(p.x) > X(q.x)) { const t2 = p; p = q; q = t2; }
     ra += `<line x1="${X(p.x) + 11}" y1="${Y(p.doi)}" x2="${X(q.x) - 11}" y2="${Y(q.doi)}" stroke="${M.truc}" stroke-width="1.6"/>`;
   });
   con.forEach(nh => {
@@ -171,7 +175,9 @@ TD.hinhPhaHe = function (nguoi, cap, con) {
     const ds = nh.ds.map(tim).filter(Boolean); if (!ds.length) return;
     const cy = Y(ds[0].doi);
     ra += `<line x1="${gx}" y1="${gy}" x2="${gx}" y2="${(gy + cy) / 2}" stroke="${M.truc}" stroke-width="1.6"/>`;
-    const xs = ds.map(d => X(d.x));
+    /* Thanh ngang phải với TỚI chỗ đường từ bố mẹ thả xuống, nếu không thì bố mẹ
+       đứng lệch sang bên là thanh treo lơ lửng, nhìn như đứt nét. */
+    const xs = ds.map(d => X(d.x)).concat([gx]);
     ra += `<line x1="${Math.min(...xs)}" y1="${(gy + cy) / 2}" x2="${Math.max(...xs)}" y2="${(gy + cy) / 2}" stroke="${M.truc}" stroke-width="1.6"/>`;
     ds.forEach(d => { ra += `<line x1="${X(d.x)}" y1="${(gy + cy) / 2}" x2="${X(d.x)}" y2="${cy - 11}" stroke="${M.truc}" stroke-width="1.6"/>`; });
   });
@@ -435,6 +441,8 @@ TD.hinhLuoi = function (nut, cung) {
   cung.forEach(([a, b]) => {
     const p = tim(a), q = tim(b); if (!p || !q) return;
     const x1 = X(p.x), y1 = Y(p.h) - 11, x2 = X(q.x), y2 = Y(q.h) + 13;
+    /* Mũi tên luôn THẲNG như lưới thức ăn trong sách. Cung nhảy cách tầng không
+       cắt qua ô nào vì vị trí các loài đã được đặt sẵn theo từng lưới. */
     ra += `<line x1="${so(x1)}" y1="${so(y1)}" x2="${so(x2)}" y2="${so(y2)}" stroke="${M.net}" stroke-width="1.6" marker-end="url(#mtla)"/>`;
   });
   nut.forEach(n => {

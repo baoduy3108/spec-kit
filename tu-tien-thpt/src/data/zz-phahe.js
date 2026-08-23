@@ -66,6 +66,8 @@ const dungPhaHe = (R, kieu) => {
     ong: a1, ba: a2, ongB: b1, baB: b2,
     benh2: conA[iBenh], benh3: conC[jBenh],
     cha2: cha2, me2: me2,
+    /* in tên cặp vợ chồng theo thứ tự số nhỏ trước cho dễ dò trên hình */
+    capA: (+cha2 < +me2 ? cha2 : me2), capB: (+cha2 < +me2 ? me2 : cha2),
     namBenh2: kieu === 'x'
   };
 };
@@ -112,12 +114,12 @@ TD.GEN.sinh = TD.GEN.sinh.concat([
         'Chỉ hai nguồn cho kiểu gen CHẮC CHẮN: người bị bệnh luôn đồng hợp lặn, còn bố mẹ bình thường của họ luôn dị hợp. '
         + 'Mọi người bình thường khác đều là ẩn số.');
     return MC(R, `Cho sơ đồ phả hệ về một bệnh do gen lặn nằm trên nhiễm sắc thể thường quy định:${p.hinh}`
-      + `Cặp vợ chồng ${t(p.cha2)} × ${t(p.me2)} dự định sinh thêm một người con. Xác suất người con đó không bị bệnh là bao nhiêu?`,
+      + `Cặp vợ chồng ${t(p.capA)} × ${t(p.capB)} dự định sinh thêm một người con. Xác suất người con đó không bị bệnh là bao nhiêu?`,
       { d: '75%', s: ['25%', '50%', '100%'],
         sv: { '25%': 'đây là xác suất con BỊ bệnh, đề hỏi ngược lại',
               '50%': 'chỉ đúng với phép lai giữa một cơ thể dị hợp và một cơ thể đồng hợp lặn, không phải trường hợp này',
               '100%': 'cả hai bố mẹ đều mang allele lặn nên vẫn có khả năng sinh con bị bệnh' },
-        v: `Bước 1 — cặp ${t(p.cha2)} × ${t(p.me2)} đều bình thường mà đã sinh con ${t(p.benh3)} bị bệnh ⇒ kiểu gen cả hai đều dị hợp.\n`
+        v: `Bước 1 — cặp ${t(p.capA)} × ${t(p.capB)} đều bình thường mà đã sinh con ${t(p.benh3)} bị bệnh ⇒ kiểu gen cả hai đều dị hợp.\n`
           + `Bước 2 — phép lai giữa hai cơ thể dị hợp cho đời con theo tỉ lệ 1 đồng hợp trội : 2 dị hợp : 1 đồng hợp lặn.\n`
           + `Bước 3 — không bị bệnh gồm đồng hợp trội và dị hợp, chiếm 3/4 tức 75%.` },
       'Đọc kĩ đề hỏi "bị bệnh" hay "KHÔNG bị bệnh" — hai đáp án 25% và 75% luôn được đặt cạnh nhau để bẫy.');
@@ -144,7 +146,7 @@ TD.GEN.sinh = TD.GEN.sinh.concat([
         + 'chỉ toàn NAM bị bệnh ⇒ nghĩ ngay tới gen lặn trên X.');
     if (hoi === 'conTrai')
       return MC(R, `Cho sơ đồ phả hệ về một bệnh do gen lặn nằm trên vùng không tương đồng của nhiễm sắc thể X quy định:${p.hinh}`
-        + `Cặp vợ chồng ${t(p.cha2)} × ${t(p.me2)} sinh thêm một người con TRAI. Xác suất người con trai đó bị bệnh là bao nhiêu?`,
+        + `Cặp vợ chồng ${t(p.capA)} × ${t(p.capB)} sinh thêm một người con TRAI. Xác suất người con trai đó bị bệnh là bao nhiêu?`,
         { d: '50%', s: ['25%', '75%', '100%'],
           sv: { '25%': 'đây là xác suất sinh được một người con vừa là trai vừa bị bệnh tính trên TỔNG số con; đề đã cho biết là con trai nên không nhân thêm một nửa nữa',
                 '75%': 'đây là tỉ lệ của phép lai giữa hai cơ thể dị hợp trên nhiễm sắc thể thường, không áp dụng cho gen trên X',
@@ -186,7 +188,7 @@ TD.GEN.sinh = TD.GEN.sinh.concat([
         v: `hai người bình thường sinh ra con ${t(p.benh2)} đồng hợp lặn, nên mỗi người phải cho một allele lặn mà bản thân vẫn không biểu hiện bệnh.` },
       { t: `Người số ${t(p.ongB)} chắc chắn có kiểu gen dị hợp.`, a: false,
         v: `${t(p.ongB)} thuộc nhánh gia đình chưa có ai biểu hiện bệnh nên có thể đồng hợp trội hoặc dị hợp — không xác định chắc chắn được.` },
-      { t: `Nếu cặp vợ chồng ${t(p.cha2)} × ${t(p.me2)} sinh thêm một người con thì xác suất người con đó bị bệnh là ${xs}.`, a: xs === '25%',
+      { t: `Nếu cặp vợ chồng ${t(p.capA)} × ${t(p.capB)} sinh thêm một người con thì xác suất người con đó bị bệnh là ${xs}.`, a: xs === '25%',
         v: `hai người đều bình thường mà đã sinh con ${t(p.benh3)} bị bệnh nên cả hai đều dị hợp; phép lai giữa hai cơ thể dị hợp cho một phần tư `
           + `số con đồng hợp lặn ⇒ xác suất bị bệnh là 25%${xs === '25%' ? '' : ` chứ không phải ${xs}`}.` },
       { t: `Người số ${t(p.benh2)} và người số ${t(p.benh3)} có cùng kiểu gen về gen gây bệnh.`, a: true,
