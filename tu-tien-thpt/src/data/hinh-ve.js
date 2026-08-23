@@ -420,8 +420,14 @@ TD.hinhKetHop = function (cot, duong, nhan, dvCot, dvDuong) {
    ⑨ LƯỚI THỨC ĂN & THÁP SINH THÁI — cho Sinh
    ============================================================ */
 TD.hinhLuoi = function (nut, cung) {
-  const W = 340, H = 40 + Math.max(...nut.map(n => n.h)) * 62 + 26;
-  const X = x => 36 + x * 74;
+  /* Khoảng cách cột phải nới theo tên DÀI NHẤT, nếu không thì hai ô cạnh nhau
+     chồng lên nhau và chữ của ô này bị ô kia đè mất. */
+  const beRong = n => Math.max(30, n.ten.length * 3.4);
+  const buoc = Math.max(74, 2 * Math.max.apply(null, nut.map(beRong)) + 12);
+  const cotMax = Math.max.apply(null, nut.map(n => n.x));
+  const W = Math.max(340, 36 + buoc * cotMax + 2 * Math.max.apply(null, nut.map(beRong)) + 20);
+  const H = 40 + Math.max(...nut.map(n => n.h)) * 62 + 26;
+  const X = x => 36 + x * buoc;
   const Y = h => H - 34 - h * 62;
   const tim = id => nut.find(n => n.id === id);
   let ra = `<defs><marker id="mtla" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto">`
@@ -433,7 +439,7 @@ TD.hinhLuoi = function (nut, cung) {
   });
   nut.forEach(n => {
     const x = X(n.x), y = Y(n.h);
-    const r = Math.max(30, n.ten.length * 3.4);
+    const r = beRong(n);
     ra += `<rect x="${so(x - r)}" y="${so(y - 11)}" width="${so(r * 2)}" height="22" rx="5" fill="var(--nen2)" stroke="${n.h === 0 ? M.nhan : M.truc}" stroke-width="1.6"/>`
        + `<text x="${so(x)}" y="${so(y + 4)}" fill="${M.chu}" font-size="10.5" text-anchor="middle">${n.ten}</text>`;
   });

@@ -409,6 +409,15 @@ TD.BAN_DO_CD = {
     [/kim loai|dien hoa|hop kim|dieu che|bao toan electron|tang giam khoi luong/, 'Đại cương kim loại'],
     [/huu co|dong phan|danh phap|cong thuc phan tu|bat bao hoa|hydrocarbon|alkane|alkene|alkyne|arene|benzen|alcohol|phenol|aldehyde|ketone|carboxylic|\bir\b|pho khoi|dot chay/, 'Đại cương hữu cơ']
   ],
+  /* Từ khoá phải có ranh giới từ: "tho" không gắn \b sẽ khớp luôn "thời gian",
+     kéo thẻ về bảng phân bổ thời gian sang nhóm nghị luận văn học. */
+  van: [
+    [/cau truc de|phan bo thoi gian|tieu chi cham|ban do de thi|ma tran de/, 'Cấu trúc đề'],
+    [/nghi luan xa hoi|doan van 200|hien tuong doi song|tu tuong dao li/, 'Nghị luận xã hội'],
+    [/nghi luan van hoc|phan tich nhan vat|doan trich|van xuoi/, 'Nghị luận văn học'],
+    [/doc hieu|bien phap tu tu|phuong thuc bieu dat|phep lien ket|nghia ham an|the tho/, 'Đọc hiểu'],
+    [/tieng viet|tu loai|nghia cua tu|phong cach ngon ngu|loi dien dat|thanh ngu/, 'Tiếng Việt']
+  ],
   toan: [
     [/luong giac|cung goc|radian/, 'Lượng giác'],
     [/gioi han|lien tuc|vo dinh/, 'Giới hạn – Liên tục'],
@@ -497,7 +506,10 @@ TD.chuDeCuaThe = function (mon, x) {
   if (!nguon.length) return null;
   let tot = null, diemTot = 0;
   for (const cd of dsCD) {
-    const dich = TD.tuKhoa(cd);
+    /* Bỏ từ lặp trong tên chuyên đề: "Điện phân – Pin điện" có chữ "điện" hai
+       lần, khớp trúng một chữ đó thôi đã được 2/4 điểm và lọt ngưỡng — thẻ
+       "Bảo toàn điện tích" bị gán nhầm sang đó vì vậy. */
+    const dich = TD.tuKhoa(cd).filter((w, i, a) => a.indexOf(w) === i);
     if (!dich.length) continue;
     let trung = 0;
     for (const w of dich) if (nguon.indexOf(w) >= 0) trung++;
@@ -531,11 +543,20 @@ TD.deChuyenDe = function (mon, cd, soCau) {
     !t._tuLT && (!cd || TD.chuDeCuaThe(mon, { nhom: t.chuong }) === cd));
   if (mau.length) {
     const soBT = Math.min(Math.round(n * 0.3), n - ds.length);
+    /* Chuyên đề chỉ có một hai bộ sinh mà phải rút mười lăm câu thì rất dễ bốc
+       trúng hai lần cùng một bài — phải so NỘI DUNG đã sinh chứ không chỉ đổi
+       hạt giống cho có. */
+    const daRa = new Set();
     let vt = 0, quay = TD.xao(mau);
-    for (let k = 0, thu = 0; k < soBT && thu < soBT * 8; thu++) {
+    for (let k = 0, thu = 0; k < soBT && thu < soBT * 12; thu++) {
       if (vt >= quay.length) { quay = TD.xao(mau); vt = 0; }
       const t = quay[vt++], seed = (Math.random() * 4294967295) >>> 0;
-      if (TD.sinhCau(t, seed)) { ds.push({ mon: mon, g: t.ma, s: seed }); k++; }
+      const q = TD.sinhCau(t, seed);
+      if (!q) continue;
+      const vtay = TD.vanTayCau(q);
+      if (daRa.has(vtay)) continue;
+      daRa.add(vtay);
+      ds.push({ mon: mon, g: t.ma, s: seed }); k++;
     }
   }
 

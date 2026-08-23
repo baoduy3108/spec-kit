@@ -575,4 +575,24 @@ bu('ly', [
 { cd: 'Sóng', m: 3, a: true,  t: 'Sóng dừng là kết quả giao thoa của sóng tới và sóng phản xạ trên cùng một phương truyền.', v: 'Những điểm luôn đứng yên là nút, những điểm dao động mạnh nhất là bụng.' },
 { cd: 'Sóng', m: 2, a: false, t: 'Khi sóng truyền đi, các phần tử của môi trường bị sóng mang theo về phía trước.', v: 'Phần tử chỉ dao động quanh vị trí cân bằng của nó; cái lan truyền đi là dao động và năng lượng, không phải vật chất.' }
 ]);
+
+/* Chuyên đề Tiếng Việt trước chỉ có một thẻ — thẻ "Khung phân tích nhân vật"
+   bị ghép nhầm vào đây nên nhìn tưởng đủ hai. */
+them('van_ct', [
+{ nhom: 'Tiếng Việt', cd: 'Tiếng Việt', ten: 'Từ loại, nghĩa của từ và lỗi diễn đạt', cap: 2,
+  ct: '<b>Nghĩa của từ:</b> nghĩa gốc là nghĩa ban đầu, nghĩa chuyển suy ra từ nghĩa gốc theo ẩn dụ '
+    + '(giống nhau về đặc điểm) hoặc hoán dụ (gần nhau về quan hệ). Ví dụ "chân" trong "chân bàn" là nghĩa chuyển theo ẩn dụ.<br>'
+    + '<b>Từ đồng âm</b> khác <b>từ nhiều nghĩa</b>: đồng âm thì các nghĩa KHÔNG liên quan gì nhau '
+    + '("đường" đi và "đường" ăn), còn nhiều nghĩa thì các nghĩa có mối liên hệ ("mũi" người và "mũi" thuyền).<br>'
+    + '<b>Bốn lỗi diễn đạt hay bị trừ điểm:</b><br>'
+    + '· lặp từ · dùng từ không đúng nghĩa · thiếu thành phần câu (thường thiếu chủ ngữ sau trạng ngữ) '
+    + '· không tương hợp giữa chủ ngữ và vị ngữ.<br>'
+    + '<b>Nghĩa tường minh</b> là nghĩa nói thẳng ra bằng từ ngữ; <b>nghĩa hàm ẩn</b> phải suy ra từ ngữ cảnh.<br>'
+    + '<b>Biện pháp tu từ về từ:</b> so sánh · ẩn dụ · hoán dụ · nhân hoá · nói quá · nói giảm nói tránh · '
+    + 'điệp · chơi chữ. <b>Về câu:</b> đảo ngữ · liệt kê · câu hỏi tu từ · phép đối.',
+  khi: 'Câu đọc hiểu hỏi nghĩa của từ trong ngữ cảnh, hoặc yêu cầu chỉ ra và sửa lỗi diễn đạt.',
+  vd: '"Qua tác phẩm cho thấy tấm lòng nhà văn" — thiếu chủ ngữ. Sửa: bỏ "qua", hoặc thêm "tác giả" làm chủ ngữ.',
+  bay: 'Phân biệt ẩn dụ với hoán dụ bằng một câu: ẩn dụ dựa trên nét GIỐNG NHAU, hoán dụ dựa trên quan hệ GẦN NHAU '
+     + '(bộ phận – toàn thể, vật chứa – vật bị chứa, dấu hiệu – sự vật).' }
+]);
 })();

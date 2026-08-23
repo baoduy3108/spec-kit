@@ -19,13 +19,13 @@ TD.KHO.hoa_ct = [
   vd: 'Đốt m g ester no đơn hở thu 0,3 mol CO₂ và 0,3 mol H₂O. BTNT O: 2n<sub>ester</sub> + 2n<sub>O₂</sub> = 2·0,3 + 0,3.',
   bay: 'Bỏ sót nguồn O trong chính chất hữu cơ, hoặc quên O trong H₂O của dung dịch.' },
 
-{ nhom: 'Bảo toàn', ten: 'Bảo toàn electron (BTE)', cap: 3,
+{ nhom: 'Bảo toàn', ten: 'Bảo toàn electron (BTE)', cd: '*', cap: 3,
   ct: '<b>Σn<sub>e cho</sub> = Σn<sub>e nhận</sub></b><br>n<sub>e</sub> = n<sub>chất</sub> × |Δ số oxi hoá|<br>Điện phân: n<sub>e</sub> = <b>It/96500</b>',
   khi: 'Mọi bài oxi hoá – khử: KL + HNO₃/H₂SO₄ đặc, điện phân, nhiệt nhôm, hỗn hợp khử oxit.',
   vd: 'Hỗn hợp Mg, Al + HNO₃ → 0,1 mol NO. Σn<sub>e cho</sub> = 2n<sub>Mg</sub> + 3n<sub>Al</sub> = 3·0,1 = <b>0,3 mol</b>.',
   bay: 'Quên sản phẩm khử <b>NH₄NO₃</b> (nhận 8e) khi bài có kim loại mạnh (Mg, Al, Zn) và dung dịch không có khí thoát ra hết.' },
 
-{ nhom: 'Bảo toàn', ten: 'Bảo toàn điện tích (BTĐT)', cap: 2,
+{ nhom: 'Bảo toàn', ten: 'Bảo toàn điện tích (BTĐT)', cd: '*', cap: 2,
   ct: '<b>Σ(n<sub>cation</sub> × điện tích) = Σ(n<sub>anion</sub> × điện tích)</b><br>VD: 2n<sub>Ca²⁺</sub> + n<sub>Na⁺</sub> + 3n<sub>Al³⁺</sub> = n<sub>Cl⁻</sub> + 2n<sub>SO₄²⁻</sub> + n<sub>NO₃⁻</sub>',
   khi: 'Bài cho dung dịch chứa nhiều ion, hỏi nồng độ/khối lượng muối khan.',
   vd: 'Dung dịch có 0,1 mol Na⁺; 0,2 mol Mg²⁺; x mol Cl⁻; 0,15 mol SO₄²⁻ ⇒ 0,1 + 0,4 = x + 0,3 ⇒ x = <b>0,2</b>.',
