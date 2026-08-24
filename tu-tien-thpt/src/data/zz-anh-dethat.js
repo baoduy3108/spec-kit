@@ -21,6 +21,12 @@ const MC = (R, de, it, meo) => {
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`, meo: meo };
 };
+/* Bản dịch tra theo TÊN văn bản, hiện ở phần chữa sau khi đã trả lời.
+   Làm xong câu mà không hiểu đoạn nói gì thì chỉ là đoán theo dấu hiệu. */
+const kemDich = (v, ten) => {
+  const d = (TD.DICH_ANH || {})[ten];
+  return d ? v + '\n\nDỊCH VĂN BẢN:\n' + d : v;
+};
 const khungVB = (tieuDe, than) =>
   `<div style="border:1px solid var(--vien);border-radius:10px;padding:12px 14px;margin:10px 0;`
   + `background:var(--nen2);font-size:14.5px;line-height:1.75">`
@@ -260,6 +266,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     /* làm nổi chỗ trống đang hỏi, các chỗ còn lại để nguyên số thứ tự */
     const than = vb.than.replace(new RegExp('\\(' + c.so + '\\)____', 'g'),
       '<b style="color:var(--kim)">(' + c.so + ') ______</b>');
+    c.v = kemDich(c.v, vb.ten);
     const o = MC(R,
       `Đọc văn bản sau và chọn phương án đúng cho chỗ trống <b>(${c.so})</b>:`
       + khungVB(vb.ten, than), c,
@@ -365,6 +372,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     ];
     const it = R.chon(ds);
     const than = it.than.replace('______', '<b style="color:var(--kim)">______</b>');
+    it.v = kemDich(it.v, it.ten);
     const o = MC(R, 'Đọc đoạn văn sau và chọn câu thích hợp nhất điền vào chỗ trống:'
       + khungVB(it.ten, than), it,
       'Dạng này 5 câu trong đề. Luôn đọc CÂU NGAY SAU chỗ trống trước: từ nối (For example, In other words, '
@@ -596,6 +604,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     ];
     const bai = R.chon(BAI);
     const h = R.chon(bai.hoi);
+    h.v = kemDich(h.v, bai.ten);
     const o = MC(R, 'Đọc bài sau và chọn phương án đúng:' + khungVB(bai.ten, bai.than)
       + `<div style="margin-top:8px"><b>${h.q}</b></div>`, h,
       'Đọc hiểu chiếm 18 trên 40 câu — gần một nửa đề. Thứ tự câu hỏi thường bám theo thứ tự đoạn văn, '

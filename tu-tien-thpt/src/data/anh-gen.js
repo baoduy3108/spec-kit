@@ -20,6 +20,29 @@ window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
 /* Trạng từ hay chen vào giữa (has ALREADY started, was STILL working) nên mọi
    mẫu đều phải cho phép một từ đệm, không thì "was already starting" bị nhận
    nhầm thành bị động quá khứ thay vì quá khứ tiếp diễn. */
+/* Đoạn văn dài in liền một khối thì không nhìn ra ranh giới câu, mà dạng chèn
+   câu lại đòi đúng cái đó: phải thấy vị trí [n] nằm giữa hai câu nào. Tách mỗi
+   câu một dòng, số vị trí cho nổi hẳn lên. */
+const khungDoan = (doan, tieuDe) => {
+  const phan = String(doan).split(/(\[\d\])/).filter(x => x.trim());
+  let ra = '', dong = '';
+  phan.forEach(x => {
+    if (/^\[\d\]$/.test(x)) {
+      ra += `<div style="margin:5px 0">${dong.trim()} `
+         + `<b style="color:var(--kim);background:var(--nen);padding:1px 6px;border-radius:5px">${x}</b></div>`;
+      dong = '';
+    } else dong += x;
+  });
+  if (dong.trim()) ra += `<div style="margin:5px 0">${dong.trim()}</div>`;
+  return `<div style="border:1px solid var(--vien);border-radius:10px;padding:12px 14px;margin:10px 0;`
+    + `background:var(--nen2);font-size:14.5px;line-height:1.7">`
+    + (tieuDe ? `<div style="font-weight:700;color:var(--kim);margin-bottom:8px">${tieuDe}</div>` : '')
+    + ra + `</div>`;
+};
+/* Học xong câu mà không hiểu đoạn nói gì thì chỉ là đoán mò — kèm bản dịch
+   vào phần chữa để đọc lại cho vỡ nghĩa. */
+const kemDich = (v, vi) => vi ? v + `\n\nDỊCH ĐOẠN VĂN:\n${vi}` : v;
+
 const D = '(?:\\w+\\s+)?';
 const nb = re => new RegExp(re, 'i');
 const DANG_NP = [
@@ -578,39 +601,49 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
             + 'costs almost nothing to run. [2] It also keeps people healthier than sitting in a car. [3] '
             + 'Yet in heavy rain or extreme heat, cycling becomes far less attractive. [4]',
         cau: 'For this reason, some cities have begun to cover their busiest bicycle lanes.',
+        cauVi: 'Vì lẽ đó, một số thành phố đã bắt đầu làm mái che cho những làn xe đạp đông nhất.',
         d: 'Vị trí [4]',
         v: 'Câu cần chèn bắt đầu bằng "For this reason" nên phải đứng NGAY SAU lí do — chính là câu nói mưa và nắng '
          + 'làm việc đạp xe kém hấp dẫn. Vậy chèn vào [4].',
+        vi: 'Nhiều thành phố hiện đang xây làn đường riêng cho xe đạp. [1] Đi xe đạp không thải khí và giúp giảm ùn tắc trong giờ cao điểm. [2] Tuy nhiên, người đi xe vẫn than phiền rằng các làn này thường đứt quãng giữa chừng. [3] Cho tới khi mạng lưới được nối liền, nhiều người vẫn thấy đi xe đạp là chuyện mạo hiểm. [4]',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
       { doan: 'Homework has been part of school life for over a century. [1] Supporters argue that it helps '
             + 'students revise what they have learnt. [2] Critics reply that it eats into the time children '
             + 'need for sport and family. [3] Recent studies suggest that short, focused tasks work best. [4]',
         cau: 'Both sides, however, agree that the amount matters more than the existence of homework itself.',
+        cauVi: 'Tuy nhiên cả hai bên đều đồng ý rằng lượng bài mới là điều quan trọng, chứ không phải chuyện có hay không có bài tập về nhà.',
         d: 'Vị trí [3]',
         v: 'Câu chứa "Both sides" nên phải đứng SAU khi đã nêu đủ CẢ HAI phía (supporters và critics) và TRƯỚC câu '
          + 'nói về nghiên cứu. Vậy chèn vào [3].',
+        vi: 'Bài tập về nhà đã là một phần của đời sống học đường suốt hơn một thế kỷ. [1] Người ủng hộ cho rằng nó giúp học sinh ôn lại bài trên lớp. [2] Người phản đối thì nói nó lấy mất thời gian nghỉ ngơi và chơi thể thao. [3] Điều mà cả hai bên đều đồng ý là chất lượng quan trọng hơn số lượng. [4]',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [4]'] },
       { doan: 'Street food is a familiar part of life in Vietnamese cities. [1] A bowl of noodles on the pavement '
             + 'often costs less than a coffee in a chain café. [2] Tourists love it because it lets them taste '
             + 'the city the way local people do. [3] Hygiene, on the other hand, is not always guaranteed. [4]',
         cau: 'Choosing a stall that is crowded with local customers is usually the safest bet.',
+        cauVi: 'Chọn một hàng đông khách bản địa thường là cách chắc ăn nhất.',
         d: 'Vị trí [4]',
         v: 'Câu này đưa ra CÁCH XỬ LÍ cho vấn đề vệ sinh vừa nêu, nên phải đứng ngay sau câu về hygiene ⇒ [4].',
+        vi: 'Ăn hàng vỉa hè là chuyện quen thuộc ở các đô thị Việt Nam. [1] Một tô phở ngoài hè phố nhiều khi còn rẻ hơn một ly cà phê trong quán chuỗi. [2] Khách du lịch rất thích vì được nếm thành phố theo đúng cách người bản địa vẫn ăn. [3] Nhưng mặt khác, vệ sinh thì không phải lúc nào cũng bảo đảm. [4]',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
       { doan: 'Learning a second language changes the way you think. [1] Bilingual people often switch between '
             + 'two sets of cultural habits without noticing. [2] Research also links bilingualism to a later '
             + 'onset of memory problems in old age. [3] None of these benefits, though, appear overnight. [4]',
         cau: 'They take years of steady, everyday practice.',
+        cauVi: 'Chúng cần nhiều năm luyện tập đều đặn, mỗi ngày.',
         d: 'Vị trí [4]',
         v: 'Đại từ "They" thay cho "these benefits" ở câu trước nên phải đứng NGAY SAU câu đó ⇒ [4].',
+        vi: 'Học một ngoại ngữ thứ hai làm thay đổi cả cách bạn suy nghĩ. [1] Người song ngữ thường chuyển qua lại giữa hai bộ thói quen văn hoá mà không hề để ý. [2] Nghiên cứu còn cho thấy song ngữ gắn với việc các vấn đề trí nhớ ở tuổi già xuất hiện muộn hơn. [3] Tuy vậy, không lợi ích nào trong số đó đến sau một đêm. [4]',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
       { doan: 'Volunteering is becoming popular among Vietnamese teenagers. [1] Some spend their summer teaching '
             + 'children in remote villages. [2] Others join clean-up campaigns along rivers and beaches. [3] '
             + 'What they gain is often more than what they give. [4]',
         cau: 'Such experiences build confidence and teach them how to work with strangers.',
+        cauVi: 'Những trải nghiệm như thế xây dựng sự tự tin và dạy các bạn cách làm việc với người lạ.',
         d: 'Vị trí [4]',
         v: '"Such experiences" thay cho hai hoạt động vừa liệt kê (dạy học, dọn rác) và câu này giải thích cho '
          + 'câu "gain more than they give" nên đặt ở [4] là hợp mạch nhất.',
+        vi: 'Làm tình nguyện đang trở nên phổ biến trong giới trẻ Việt Nam. [1] Có bạn dành cả mùa hè đi dạy trẻ em ở các bản làng xa. [2] Bạn khác thì tham gia các đợt dọn rác dọc sông và bãi biển. [3] Cái các bạn nhận về thường nhiều hơn cái các bạn cho đi. [4]',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] }
     ]);
     /* Nêu luôn nội dung câu đứng ngay trước từng vị trí bị loại — học sinh thấy được
@@ -623,8 +656,12 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
       bo.sv[x] = `đứng ngay sau câu "${truoc.slice(0, 70)}${truoc.length > 70 ? '…' : ''}" — `
         + `nội dung câu đó không phải là điều mà câu cần chèn đang nối tiếp, nên mạch ý bị đứt.`;
     });
-    return MC(R, `Chọn vị trí thích hợp nhất để chèn câu cho sẵn vào đoạn văn.\n\n`
-      + `<b>Câu cần chèn:</b> "${bo.cau}"\n\n<b>Đoạn văn:</b> ${bo.doan}`, bo,
+    /* dịch cả CÂU CẦN CHÈN, không chỉ đoạn văn — không hiểu câu ấy nói gì thì
+       không thể biết nó nối tiếp ý nào */
+    bo.v = kemDich(bo.v, (bo.cauVi ? 'Câu cần chèn: ' + bo.cauVi + '\n\n' : '') + (bo.vi || ''));
+    return MC(R, `Chọn vị trí thích hợp nhất để chèn câu cho sẵn vào đoạn văn.`
+      + `<div style="margin:10px 0"><b>Câu cần chèn:</b> <i>"${bo.cau}"</i></div>`
+      + khungDoan(bo.doan, 'Đoạn văn'), bo,
       'Ba dấu hiệu quyết định vị trí: ① TỪ NỐI đầu câu (For this reason, However, Therefore) chỉ quan hệ với câu '
       + 'liền trước ② ĐẠI TỪ (they, this, such) phải có danh từ tương ứng ở câu ngay trước ③ câu chèn vào không được '
       + 'cắt đứt mạch giữa hai câu vốn dính nhau.');
@@ -639,8 +676,10 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
             + 'prices, but the industry now produces more textile waste than almost any other. Some brands have '
             + 'started take-back schemes, yet the volume they recycle is tiny compared with what they sell.',
         d: 'Fast fashion is popular because it is cheap, but it creates huge waste that current recycling efforts barely reduce.',
+        dVi: 'Thời trang nhanh được ưa chuộng vì rẻ, nhưng nó tạo ra lượng rác khổng lồ mà các nỗ lực tái chế hiện nay gần như không giảm được bao nhiêu.',
         v: 'Bản tóm tắt phải gồm CẢ BA ý của đoạn: rẻ và hợp mốt · gây rác thải lớn · nỗ lực tái chế chưa đáng kể. '
          + 'Ba phương án còn lại chỉ lấy MỘT ý hoặc nói sai kết luận.',
+        vi: 'Thời trang nhanh bán quần áo rẻ, hợp mốt và bị thay mới sau vài tuần. Người mua thích giá rẻ, nhưng ngành này giờ thải ra nhiều rác dệt may hơn gần như mọi ngành khác. Một số hãng đã mở chương trình thu hồi hàng cũ, song lượng tái chế được vẫn quá nhỏ so với lượng bán ra.',
         s: ['Fast fashion brands have successfully solved the problem of textile waste through take-back schemes.',
             'Shoppers should stop buying clothes altogether in order to protect the environment.',
             'Clothes today are cheaper than they have ever been in history.'] },
@@ -648,7 +687,9 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
             + 'report that new staff learn much more slowly when they never sit beside experienced colleagues. '
             + 'Most companies have therefore settled on a mix of office and home days.',
         d: 'Remote work brings flexibility but slows down the training of new staff, so most firms now combine both ways of working.',
+        dVi: 'Làm việc từ xa mang lại sự linh hoạt nhưng làm chậm việc đào tạo nhân viên mới, nên phần lớn công ty nay kết hợp cả hai cách làm.',
         v: 'Đoạn có ba tầng: ưu điểm → nhược điểm cụ thể → giải pháp thoả hiệp. Tóm tắt đúng phải giữ đủ ba tầng.',
+        vi: 'Làm việc tại nhà tiết kiệm thời gian đi lại và cho nhân viên tự sắp xếp ngày làm. Tuy nhiên, các quản lý cho biết nhân viên mới học việc chậm hơn hẳn khi không bao giờ ngồi cạnh đồng nghiệp có kinh nghiệm. Vì thế phần lớn công ty đã chốt phương án kết hợp: vừa lên văn phòng vừa làm ở nhà.',
         s: ['Working from home is better than working in an office in every respect.',
             'New employees are no longer needed in companies that allow remote work.',
             'Managers dislike remote work because they cannot control their staff.'] },
@@ -656,7 +697,9 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
             + 'batteries, however, requires mining rare metals and a great deal of energy. Whether they are truly '
             + 'greener depends on how the electricity that charges them is generated.',
         d: 'Electric cars clean up city air but their overall benefit depends on how batteries are made and how the electricity is produced.',
+        dVi: 'Xe điện làm sạch không khí đô thị nhưng lợi ích tổng thể còn tuỳ vào cách sản xuất pin và cách làm ra nguồn điện.',
         v: 'Đoạn không kết luận xe điện tốt hay xấu mà đặt điều kiện. Tóm tắt phải giữ chữ "depends on".',
+        vi: 'Xe điện không xả khói trên đường nên làm không khí đô thị sạch hơn. Nhưng sản xuất pin cho chúng lại đòi hỏi khai thác kim loại hiếm và tiêu tốn rất nhiều năng lượng. Xe điện có thật sự xanh hơn hay không còn tuỳ vào cách sản xuất ra chính nguồn điện dùng để sạc.',
         s: ['Electric cars are completely harmless to the environment.',
             'Electric cars pollute more than petrol cars in every situation.',
             'Mining rare metals is the only environmental issue worth discussing.'] },
@@ -664,12 +707,15 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
             + 'time, constantly comparing your life with carefully edited photographs can damage self-esteem. '
             + 'Researchers suggest that how long you spend online matters less than what you do while you are there.',
         d: 'Social media connects people but can harm self-esteem, and researchers say the way it is used matters more than the time spent on it.',
+        dVi: 'Mạng xã hội kết nối con người nhưng có thể làm tổn thương lòng tự trọng, và các nhà nghiên cứu nói cách dùng quan trọng hơn thời lượng dùng.',
         v: 'Ý chốt của đoạn nằm ở câu cuối: CÁCH dùng quan trọng hơn THỜI LƯỢNG. Tóm tắt bỏ ý này là mất trọng tâm.',
+        vi: 'Mạng xã hội giúp người ta giữ liên lạc qua khoảng cách xa và chia sẻ tin tức trong vài giây. Nhưng cùng lúc đó, việc liên tục đem đời mình ra so với những tấm ảnh đã chỉnh sửa kỹ có thể làm tổn thương lòng tự trọng. Các nhà nghiên cứu cho rằng bạn ở trên mạng bao lâu không quan trọng bằng bạn làm gì trong lúc đó.',
         s: ['Social media should be banned for young people because it harms self-esteem.',
             'The longer people stay online, the more damage social media does.',
             'Social media is only useful for keeping in touch with distant friends.'] }
     ].filter(x => !x.skip));
-    return MC(R, `Đọc đoạn văn rồi chọn câu TÓM TẮT đúng nhất.\n\n${bo.doan}`, bo,
+    bo.v = kemDich(bo.v, (bo.dVi ? 'Câu tóm tắt đúng: ' + bo.dVi + '\n\n' : '') + (bo.vi || ''));
+    return MC(R, `Đọc đoạn văn rồi chọn câu TÓM TẮT đúng nhất.` + khungDoan(bo.doan, 'Đoạn văn'), bo,
       'Tóm tắt đúng phải bao được MỌI ý chính của đoạn, không thêm ý ngoài và không đổi mức độ khẳng định. '
       + 'Phương án chứa "completely", "every", "only", "should be banned" thường quá mạnh so với giọng điệu của bài.');
   } }

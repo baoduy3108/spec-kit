@@ -13307,6 +13307,29 @@ window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
 /* Trạng từ hay chen vào giữa (has ALREADY started, was STILL working) nên mọi
    mẫu đều phải cho phép một từ đệm, không thì "was already starting" bị nhận
    nhầm thành bị động quá khứ thay vì quá khứ tiếp diễn. */
+/* Đoạn văn dài in liền một khối thì không nhìn ra ranh giới câu, mà dạng chèn
+   câu lại đòi đúng cái đó: phải thấy vị trí [n] nằm giữa hai câu nào. Tách mỗi
+   câu một dòng, số vị trí cho nổi hẳn lên. */
+const khungDoan = (doan, tieuDe) => {
+  const phan = String(doan).split(/(\[\d\])/).filter(x => x.trim());
+  let ra = '', dong = '';
+  phan.forEach(x => {
+    if (/^\[\d\]$/.test(x)) {
+      ra += `<div style="margin:5px 0">${dong.trim()} `
+         + `<b style="color:var(--kim);background:var(--nen);padding:1px 6px;border-radius:5px">${x}</b></div>`;
+      dong = '';
+    } else dong += x;
+  });
+  if (dong.trim()) ra += `<div style="margin:5px 0">${dong.trim()}</div>`;
+  return `<div style="border:1px solid var(--vien);border-radius:10px;padding:12px 14px;margin:10px 0;`
+    + `background:var(--nen2);font-size:14.5px;line-height:1.7">`
+    + (tieuDe ? `<div style="font-weight:700;color:var(--kim);margin-bottom:8px">${tieuDe}</div>` : '')
+    + ra + `</div>`;
+};
+/* Học xong câu mà không hiểu đoạn nói gì thì chỉ là đoán mò — kèm bản dịch
+   vào phần chữa để đọc lại cho vỡ nghĩa. */
+const kemDich = (v, vi) => vi ? v + `\n\nDỊCH ĐOẠN VĂN:\n${vi}` : v;
+
 const D = '(?:\\w+\\s+)?';
 const nb = re => new RegExp(re, 'i');
 const DANG_NP = [
@@ -13865,39 +13888,49 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
             + 'costs almost nothing to run. [2] It also keeps people healthier than sitting in a car. [3] '
             + 'Yet in heavy rain or extreme heat, cycling becomes far less attractive. [4]',
         cau: 'For this reason, some cities have begun to cover their busiest bicycle lanes.',
+        cauVi: 'Vì lẽ đó, một số thành phố đã bắt đầu làm mái che cho những làn xe đạp đông nhất.',
         d: 'Vị trí [4]',
         v: 'Câu cần chèn bắt đầu bằng "For this reason" nên phải đứng NGAY SAU lí do — chính là câu nói mưa và nắng '
          + 'làm việc đạp xe kém hấp dẫn. Vậy chèn vào [4].',
+        vi: 'Nhiều thành phố hiện đang xây làn đường riêng cho xe đạp. [1] Đi xe đạp không thải khí và giúp giảm ùn tắc trong giờ cao điểm. [2] Tuy nhiên, người đi xe vẫn than phiền rằng các làn này thường đứt quãng giữa chừng. [3] Cho tới khi mạng lưới được nối liền, nhiều người vẫn thấy đi xe đạp là chuyện mạo hiểm. [4]',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
       { doan: 'Homework has been part of school life for over a century. [1] Supporters argue that it helps '
             + 'students revise what they have learnt. [2] Critics reply that it eats into the time children '
             + 'need for sport and family. [3] Recent studies suggest that short, focused tasks work best. [4]',
         cau: 'Both sides, however, agree that the amount matters more than the existence of homework itself.',
+        cauVi: 'Tuy nhiên cả hai bên đều đồng ý rằng lượng bài mới là điều quan trọng, chứ không phải chuyện có hay không có bài tập về nhà.',
         d: 'Vị trí [3]',
         v: 'Câu chứa "Both sides" nên phải đứng SAU khi đã nêu đủ CẢ HAI phía (supporters và critics) và TRƯỚC câu '
          + 'nói về nghiên cứu. Vậy chèn vào [3].',
+        vi: 'Bài tập về nhà đã là một phần của đời sống học đường suốt hơn một thế kỷ. [1] Người ủng hộ cho rằng nó giúp học sinh ôn lại bài trên lớp. [2] Người phản đối thì nói nó lấy mất thời gian nghỉ ngơi và chơi thể thao. [3] Điều mà cả hai bên đều đồng ý là chất lượng quan trọng hơn số lượng. [4]',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [4]'] },
       { doan: 'Street food is a familiar part of life in Vietnamese cities. [1] A bowl of noodles on the pavement '
             + 'often costs less than a coffee in a chain café. [2] Tourists love it because it lets them taste '
             + 'the city the way local people do. [3] Hygiene, on the other hand, is not always guaranteed. [4]',
         cau: 'Choosing a stall that is crowded with local customers is usually the safest bet.',
+        cauVi: 'Chọn một hàng đông khách bản địa thường là cách chắc ăn nhất.',
         d: 'Vị trí [4]',
         v: 'Câu này đưa ra CÁCH XỬ LÍ cho vấn đề vệ sinh vừa nêu, nên phải đứng ngay sau câu về hygiene ⇒ [4].',
+        vi: 'Ăn hàng vỉa hè là chuyện quen thuộc ở các đô thị Việt Nam. [1] Một tô phở ngoài hè phố nhiều khi còn rẻ hơn một ly cà phê trong quán chuỗi. [2] Khách du lịch rất thích vì được nếm thành phố theo đúng cách người bản địa vẫn ăn. [3] Nhưng mặt khác, vệ sinh thì không phải lúc nào cũng bảo đảm. [4]',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
       { doan: 'Learning a second language changes the way you think. [1] Bilingual people often switch between '
             + 'two sets of cultural habits without noticing. [2] Research also links bilingualism to a later '
             + 'onset of memory problems in old age. [3] None of these benefits, though, appear overnight. [4]',
         cau: 'They take years of steady, everyday practice.',
+        cauVi: 'Chúng cần nhiều năm luyện tập đều đặn, mỗi ngày.',
         d: 'Vị trí [4]',
         v: 'Đại từ "They" thay cho "these benefits" ở câu trước nên phải đứng NGAY SAU câu đó ⇒ [4].',
+        vi: 'Học một ngoại ngữ thứ hai làm thay đổi cả cách bạn suy nghĩ. [1] Người song ngữ thường chuyển qua lại giữa hai bộ thói quen văn hoá mà không hề để ý. [2] Nghiên cứu còn cho thấy song ngữ gắn với việc các vấn đề trí nhớ ở tuổi già xuất hiện muộn hơn. [3] Tuy vậy, không lợi ích nào trong số đó đến sau một đêm. [4]',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] },
       { doan: 'Volunteering is becoming popular among Vietnamese teenagers. [1] Some spend their summer teaching '
             + 'children in remote villages. [2] Others join clean-up campaigns along rivers and beaches. [3] '
             + 'What they gain is often more than what they give. [4]',
         cau: 'Such experiences build confidence and teach them how to work with strangers.',
+        cauVi: 'Những trải nghiệm như thế xây dựng sự tự tin và dạy các bạn cách làm việc với người lạ.',
         d: 'Vị trí [4]',
         v: '"Such experiences" thay cho hai hoạt động vừa liệt kê (dạy học, dọn rác) và câu này giải thích cho '
          + 'câu "gain more than they give" nên đặt ở [4] là hợp mạch nhất.',
+        vi: 'Làm tình nguyện đang trở nên phổ biến trong giới trẻ Việt Nam. [1] Có bạn dành cả mùa hè đi dạy trẻ em ở các bản làng xa. [2] Bạn khác thì tham gia các đợt dọn rác dọc sông và bãi biển. [3] Cái các bạn nhận về thường nhiều hơn cái các bạn cho đi. [4]',
         s: ['Vị trí [1]', 'Vị trí [2]', 'Vị trí [3]'] }
     ]);
     /* Nêu luôn nội dung câu đứng ngay trước từng vị trí bị loại — học sinh thấy được
@@ -13910,8 +13943,12 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
       bo.sv[x] = `đứng ngay sau câu "${truoc.slice(0, 70)}${truoc.length > 70 ? '…' : ''}" — `
         + `nội dung câu đó không phải là điều mà câu cần chèn đang nối tiếp, nên mạch ý bị đứt.`;
     });
-    return MC(R, `Chọn vị trí thích hợp nhất để chèn câu cho sẵn vào đoạn văn.\n\n`
-      + `<b>Câu cần chèn:</b> "${bo.cau}"\n\n<b>Đoạn văn:</b> ${bo.doan}`, bo,
+    /* dịch cả CÂU CẦN CHÈN, không chỉ đoạn văn — không hiểu câu ấy nói gì thì
+       không thể biết nó nối tiếp ý nào */
+    bo.v = kemDich(bo.v, (bo.cauVi ? 'Câu cần chèn: ' + bo.cauVi + '\n\n' : '') + (bo.vi || ''));
+    return MC(R, `Chọn vị trí thích hợp nhất để chèn câu cho sẵn vào đoạn văn.`
+      + `<div style="margin:10px 0"><b>Câu cần chèn:</b> <i>"${bo.cau}"</i></div>`
+      + khungDoan(bo.doan, 'Đoạn văn'), bo,
       'Ba dấu hiệu quyết định vị trí: ① TỪ NỐI đầu câu (For this reason, However, Therefore) chỉ quan hệ với câu '
       + 'liền trước ② ĐẠI TỪ (they, this, such) phải có danh từ tương ứng ở câu ngay trước ③ câu chèn vào không được '
       + 'cắt đứt mạch giữa hai câu vốn dính nhau.');
@@ -13926,8 +13963,10 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
             + 'prices, but the industry now produces more textile waste than almost any other. Some brands have '
             + 'started take-back schemes, yet the volume they recycle is tiny compared with what they sell.',
         d: 'Fast fashion is popular because it is cheap, but it creates huge waste that current recycling efforts barely reduce.',
+        dVi: 'Thời trang nhanh được ưa chuộng vì rẻ, nhưng nó tạo ra lượng rác khổng lồ mà các nỗ lực tái chế hiện nay gần như không giảm được bao nhiêu.',
         v: 'Bản tóm tắt phải gồm CẢ BA ý của đoạn: rẻ và hợp mốt · gây rác thải lớn · nỗ lực tái chế chưa đáng kể. '
          + 'Ba phương án còn lại chỉ lấy MỘT ý hoặc nói sai kết luận.',
+        vi: 'Thời trang nhanh bán quần áo rẻ, hợp mốt và bị thay mới sau vài tuần. Người mua thích giá rẻ, nhưng ngành này giờ thải ra nhiều rác dệt may hơn gần như mọi ngành khác. Một số hãng đã mở chương trình thu hồi hàng cũ, song lượng tái chế được vẫn quá nhỏ so với lượng bán ra.',
         s: ['Fast fashion brands have successfully solved the problem of textile waste through take-back schemes.',
             'Shoppers should stop buying clothes altogether in order to protect the environment.',
             'Clothes today are cheaper than they have ever been in history.'] },
@@ -13935,7 +13974,9 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
             + 'report that new staff learn much more slowly when they never sit beside experienced colleagues. '
             + 'Most companies have therefore settled on a mix of office and home days.',
         d: 'Remote work brings flexibility but slows down the training of new staff, so most firms now combine both ways of working.',
+        dVi: 'Làm việc từ xa mang lại sự linh hoạt nhưng làm chậm việc đào tạo nhân viên mới, nên phần lớn công ty nay kết hợp cả hai cách làm.',
         v: 'Đoạn có ba tầng: ưu điểm → nhược điểm cụ thể → giải pháp thoả hiệp. Tóm tắt đúng phải giữ đủ ba tầng.',
+        vi: 'Làm việc tại nhà tiết kiệm thời gian đi lại và cho nhân viên tự sắp xếp ngày làm. Tuy nhiên, các quản lý cho biết nhân viên mới học việc chậm hơn hẳn khi không bao giờ ngồi cạnh đồng nghiệp có kinh nghiệm. Vì thế phần lớn công ty đã chốt phương án kết hợp: vừa lên văn phòng vừa làm ở nhà.',
         s: ['Working from home is better than working in an office in every respect.',
             'New employees are no longer needed in companies that allow remote work.',
             'Managers dislike remote work because they cannot control their staff.'] },
@@ -13943,7 +13984,9 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
             + 'batteries, however, requires mining rare metals and a great deal of energy. Whether they are truly '
             + 'greener depends on how the electricity that charges them is generated.',
         d: 'Electric cars clean up city air but their overall benefit depends on how batteries are made and how the electricity is produced.',
+        dVi: 'Xe điện làm sạch không khí đô thị nhưng lợi ích tổng thể còn tuỳ vào cách sản xuất pin và cách làm ra nguồn điện.',
         v: 'Đoạn không kết luận xe điện tốt hay xấu mà đặt điều kiện. Tóm tắt phải giữ chữ "depends on".',
+        vi: 'Xe điện không xả khói trên đường nên làm không khí đô thị sạch hơn. Nhưng sản xuất pin cho chúng lại đòi hỏi khai thác kim loại hiếm và tiêu tốn rất nhiều năng lượng. Xe điện có thật sự xanh hơn hay không còn tuỳ vào cách sản xuất ra chính nguồn điện dùng để sạc.',
         s: ['Electric cars are completely harmless to the environment.',
             'Electric cars pollute more than petrol cars in every situation.',
             'Mining rare metals is the only environmental issue worth discussing.'] },
@@ -13951,12 +13994,15 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
             + 'time, constantly comparing your life with carefully edited photographs can damage self-esteem. '
             + 'Researchers suggest that how long you spend online matters less than what you do while you are there.',
         d: 'Social media connects people but can harm self-esteem, and researchers say the way it is used matters more than the time spent on it.',
+        dVi: 'Mạng xã hội kết nối con người nhưng có thể làm tổn thương lòng tự trọng, và các nhà nghiên cứu nói cách dùng quan trọng hơn thời lượng dùng.',
         v: 'Ý chốt của đoạn nằm ở câu cuối: CÁCH dùng quan trọng hơn THỜI LƯỢNG. Tóm tắt bỏ ý này là mất trọng tâm.',
+        vi: 'Mạng xã hội giúp người ta giữ liên lạc qua khoảng cách xa và chia sẻ tin tức trong vài giây. Nhưng cùng lúc đó, việc liên tục đem đời mình ra so với những tấm ảnh đã chỉnh sửa kỹ có thể làm tổn thương lòng tự trọng. Các nhà nghiên cứu cho rằng bạn ở trên mạng bao lâu không quan trọng bằng bạn làm gì trong lúc đó.',
         s: ['Social media should be banned for young people because it harms self-esteem.',
             'The longer people stay online, the more damage social media does.',
             'Social media is only useful for keeping in touch with distant friends.'] }
     ].filter(x => !x.skip));
-    return MC(R, `Đọc đoạn văn rồi chọn câu TÓM TẮT đúng nhất.\n\n${bo.doan}`, bo,
+    bo.v = kemDich(bo.v, (bo.dVi ? 'Câu tóm tắt đúng: ' + bo.dVi + '\n\n' : '') + (bo.vi || ''));
+    return MC(R, `Đọc đoạn văn rồi chọn câu TÓM TẮT đúng nhất.` + khungDoan(bo.doan, 'Đoạn văn'), bo,
       'Tóm tắt đúng phải bao được MỌI ý chính của đoạn, không thêm ý ngoài và không đổi mức độ khẳng định. '
       + 'Phương án chứa "completely", "every", "only", "should be banned" thường quá mạnh so với giọng điệu của bài.');
   } }
@@ -26775,6 +26821,150 @@ them('toan_cam', [
 </script>
 <script>
 /* ============================================================
+   BẢN DỊCH CÁC VĂN BẢN TIẾNG ANH
+   Làm xong một câu mà không hiểu đoạn văn nói gì thì chỉ là đoán mò theo
+   dấu hiệu ngữ pháp. Mỗi văn bản trong đề tự sinh đều có bản dịch, hiện
+   ra ở phần chữa sau khi đã trả lời — đọc lại cho vỡ nghĩa rồi mới sang
+   câu tiếp.
+   Tra theo TÊN văn bản để không phải sửa xen vào dữ liệu gốc.
+   ============================================================ */
+window.TD = window.TD || {};
+
+TD.DICH_ANH = {
+
+/* ---------- ① tám văn bản của dạng ĐIỀN TỪ ---------- */
+'GREEN CAMPUS VOLUNTEER PROGRAMME':
+  'CHƯƠNG TRÌNH TÌNH NGUYỆN XANH HOÁ KHUÔN VIÊN TRƯỜNG\n'
+  + 'Bạn đang tìm một cách để tạo ra khác biệt? Chương trình Xanh hoá Khuôn viên (1) mời sinh viên tham gia '
+  + 'những ngày cuối tuần trồng cây của chúng tôi. Không (2) đòi hỏi kinh nghiệm — chúng tôi sẽ hướng dẫn bạn '
+  + 'ngay hôm đầu. Tình nguyện viên tham gia ít nhất năm buổi (3) sẽ nhận giấy chứng nhận của trường. '
+  + 'Số chỗ có hạn, (4) vì vậy hãy đăng ký trước ngày 30 tháng 9.',
+
+'NOTICE — LIBRARY OPENING HOURS':
+  'THÔNG BÁO — GIỜ MỞ CỬA THƯ VIỆN\n'
+  + 'Từ ngày 1 tháng 10, Thư viện Trung tâm (1) sẽ mở cửa tới 22 giờ vào các ngày trong tuần. Bạn đọc được '
+  + 'nhắc (2) xuất trình thẻ sinh viên ở cửa vào. Sách mượn trong kỳ thi phải (3) được trả trong vòng hai tuần. '
+  + 'Để biết (4) thêm thông tin, xin liên hệ quầy tiếp đón.',
+
+'PART-TIME JOB ADVERTISEMENT — CAFÉ ASSISTANT':
+  'TIN TUYỂN DỤNG BÁN THỜI GIAN — NHÂN VIÊN QUÁN CÀ PHÊ\n'
+  + 'Quán Sunrise đang tìm một nhân viên bán thời gian (1) có thể làm hai buổi tối mỗi tuần. Người trúng tuyển '
+  + 'sẽ chịu trách (2) nhiệm phục vụ khách và giữ quầy gọn gàng. Việc đào tạo (3) được cung cấp sẵn, nên sinh '
+  + 'viên chưa có kinh nghiệm vẫn được hoan nghênh. Nếu bạn quan tâm, hãy gửi hồ sơ (4) trước thứ Sáu.',
+
+'EMAIL — SCHOOL TRIP CONFIRMATION':
+  'THƯ ĐIỆN TỬ — XÁC NHẬN CHUYẾN THAM QUAN CỦA TRƯỜNG\n'
+  + 'Kính gửi quý phụ huynh,\n'
+  + 'Tôi viết thư này để xác nhận chi tiết chuyến đi thực địa (1) sẽ diễn ra vào ngày 12 tháng 11. Xe khách '
+  + '(2) sẽ khởi hành đúng 7 giờ sáng, nên xin quý vị bảo đảm cho cháu đến sớm. Học sinh cần mang theo suất ăn '
+  + 'trưa và (3) quần áo phù hợp, vì một phần thời gian trong ngày sẽ ở ngoài trời. Chúng tôi mong (4) có một '
+  + 'ngày bổ ích cùng cả lớp.',
+
+'FLYER — CITY MARATHON 2026':
+  'TỜ RƠI — GIẢI MARATHON THÀNH PHỐ 2026\n'
+  + 'Hãy nhập cuộc cùng hàng nghìn vận động viên tại Giải Marathon Thành phố! Việc đăng ký (1) mở trực tuyến '
+  + 'tới ngày 15 tháng 3. Tất cả người tham gia (2) sẽ nhận một áo phông và một huy chương về đích. Đường chạy '
+  + 'đi qua khu phố cổ, (3) điều đó làm nên một trong những giải chạy đẹp nhất vùng. Tiền thu được sẽ dành cho '
+  + 'một quỹ từ thiện (4) hỗ trợ trẻ em khuyết tật.',
+
+'ANNOUNCEMENT — SCHOOL CLUB FAIR':
+  'THÔNG BÁO — NGÀY HỘI CÂU LẠC BỘ CỦA TRƯỜNG\n'
+  + 'Ngày hội Câu lạc bộ thường niên (1) sẽ diễn ra tại hội trường lớn vào thứ Ba tới. Hơn hai mươi câu lạc bộ '
+  + 'sẽ dựng gian trưng bày để học sinh mới tìm được một hoạt động (2) hợp với sở thích của mình. Các thành viên '
+  + 'ban tổ chức đã làm việc vất vả (3) suốt tháng qua để chuẩn bị sự kiện. Đồ ăn nhẹ sẽ (4) được phục vụ miễn '
+  + 'phí cho mọi khách tham quan.',
+
+'NOTICE — RECYCLING RULES IN THE DORMITORY':
+  'THÔNG BÁO — QUY ĐỊNH PHÂN LOẠI RÁC TRONG KÝ TÚC XÁ\n'
+  + 'Sinh viên được yêu cầu (1) phân loại rác vào ba thùng. Giấy và bìa các-tông bỏ vào thùng xanh, (2) còn '
+  + 'chai nhựa thuộc về thùng vàng. Ai để rác ngoài hành lang (3) sẽ bị phạt. Hệ thống mới nhằm cắt giảm lượng '
+  + 'rác đưa ra bãi chôn lấp (4) xuống một nửa vào cuối năm.',
+
+'ADVERTISEMENT — ONLINE ENGLISH COURSE':
+  'QUẢNG CÁO — KHOÁ TIẾNG ANH TRỰC TUYẾN\n'
+  + 'Muốn giỏi tiếng Anh hơn (1) mà không phải ra khỏi nhà? Khoá học trực tuyến mười tuần của chúng tôi được '
+  + 'thiết kế cho người học (2) muốn xây dựng sự tự tin khi nói. Mỗi buổi kéo dài năm mươi phút và (3) được '
+  + 'giảng bởi một giáo viên giàu kinh nghiệm. Đăng ký ngay hôm nay và bạn (4) sẽ được giảm hai mươi phần trăm '
+  + 'cho tháng đầu tiên.',
+
+/* ---------- ② sáu đoạn của dạng HOÀN THÀNH ĐOẠN VĂN ---------- */
+'Working from home':
+  'LÀM VIỆC TẠI NHÀ\n'
+  + 'Làm việc tại nhà đã trở nên phổ biến ở nhiều nước. ______ Chẳng hạn, người lao động tiết kiệm được thời '
+  + 'gian và tiền bạc trước đây phải bỏ ra cho việc đi lại, và họ có thể sắp xếp một ngày của mình xoay quanh '
+  + 'việc gia đình. Người sử dụng lao động cũng có lợi, vì họ cần ít diện tích văn phòng hơn.',
+
+'Plastic waste':
+  'RÁC THẢI NHỰA\n'
+  + 'Mỗi năm hàng triệu tấn nhựa trôi ra đại dương. Túi và chai vỡ vụn thành những mảnh li ti mà cá tưởng nhầm '
+  + 'là thức ăn. ______ Các nhà khoa học cảnh báo rằng những hạt nhựa này sau đó đi ngược lên chuỗi thức ăn và '
+  + 'có mặt trong chính bữa cơm trên bàn ăn của chúng ta.',
+
+'Learning a second language':
+  'HỌC MỘT NGOẠI NGỮ THỨ HAI\n'
+  + 'Học một ngoại ngữ thứ hai không chỉ mở ra cánh cửa đi đây đi đó. Các nghiên cứu cho thấy người song ngữ '
+  + 'chuyển đổi giữa các việc dễ dàng hơn và nhớ chỉ dẫn tốt hơn. ______ Nói cách khác, công sức bạn bỏ ra cho '
+  + 'những danh sách từ vựng có thể sinh lời theo những cách bạn chưa từng ngờ tới.',
+
+'Night-time light pollution':
+  'Ô NHIỄM ÁNH SÁNG BAN ĐÊM\n'
+  + 'Đèn thành phố làm đường phố an toàn hơn, nhưng cũng che mất bầu trời đêm. ______ Những đàn chim di cư, vốn '
+  + 'định hướng bằng các vì sao, bị mất phương hướng phía trên các đô thị sáng rực và đâm vào các toà nhà. Một '
+  + 'số thành phố đã bắt đầu giảm độ sáng đèn trong mùa chim di cư.',
+
+'The four-day week':
+  'TUẦN LÀM VIỆC BỐN NGÀY\n'
+  + 'Một số công ty đã thử nghiệm tuần làm việc bốn ngày mà không cắt lương. ______ Nhân viên cho biết mức căng '
+  + 'thẳng giảm xuống, và trong phần lớn các đợt thử nghiệm, sản lượng giữ nguyên hoặc nhích lên đôi chút. Tuy '
+  + 'nhiên, người phê phán lập luận rằng mô hình này hợp với công việc văn phòng hơn hẳn so với bệnh viện hay '
+  + 'nhà máy.',
+
+'Street food and tourism':
+  'ẨM THỰC ĐƯỜNG PHỐ VÀ DU LỊCH\n'
+  + 'Với nhiều du khách, một tô mì trên chiếc ghế nhựa mới là điểm nhấn của cả chuyến đi. ______ Chính quyền ở '
+  + 'một số thành phố đã hưởng ứng bằng cách lập bản đồ các phố ẩm thực và mở lớp tập huấn vệ sinh cho người '
+  + 'bán, để cái nếp ấy sống được mà không đẩy ai vào rủi ro.',
+
+/* ---------- ③ ba bài của dạng ĐỌC HIỂU ---------- */
+'Reading Passage — Urban farming':
+  'BÀI ĐỌC — NÔNG NGHIỆP ĐÔ THỊ\n'
+  + 'Ở các thành phố khắp thế giới, sân thượng và những mảnh đất trống đang được biến thành nông trại. Nông '
+  + 'nghiệp đô thị khởi đầu như thú vui của một nhúm người say mê, nhưng nay đã lớn thành một ngành nhỏ. Người '
+  + 'ủng hộ chỉ ra rằng thực phẩm trồng cách đó vài dãy phố không cần xe tải đông lạnh, nên đến tay tươi hơn và '
+  + 'để lại dấu chân các-bon nhỏ hơn nhiều. Nông trại thành phố còn cho hàng xóm một việc chung, và vài nghiên '
+  + 'cứu đã thấy rằng những người cùng nhau làm vườn cảm thấy gắn bó hơn với nơi mình sống.\n\n'
+  + 'Không phải ai cũng bị thuyết phục. Đất ở trung tâm thành phố thì đắt, và một mảnh sân thượng hiếm khi sản '
+  + 'xuất đủ để nuôi nổi chính toà nhà bên dưới. Người phê phán lập luận rằng cùng số tiền ấy nếu bỏ vào nông '
+  + 'nghiệp nông thôn sẽ cho ra nhiều lương thực hơn hẳn. Giá trị thật của nông nghiệp đô thị, vì thế, có lẽ '
+  + 'nằm ở chỗ khác: nó dạy người thành phố biết thức ăn từ đâu mà ra, và giữ cho một mảnh xanh khỏi bị bê tông '
+  + 'hoá.',
+
+'Reading Passage — The rise of the second-hand market':
+  'BÀI ĐỌC — SỰ TRỖI DẬY CỦA THỊ TRƯỜNG ĐỒ CŨ\n'
+  + 'Mười năm trước, mua quần áo cũ chủ yếu là cách tiết kiệm tiền. Ngày nay nó đã thành một tuyên ngôn. Các '
+  + 'nền tảng trực tuyến cho phép người bán chụp chiếc áo khoác vào buổi sáng và gửi tới người mua ở thành phố '
+  + 'khác ngay trong buổi tối, và thị trường thời trang cũ hiện tăng trưởng nhanh gấp mấy lần thị trường quần '
+  + 'áo mới.\n\n'
+  + 'Hai lực đẩy giải thích sự chuyển dịch này. Thứ nhất là giá: người mua trẻ đang è cổ vì tiền thuê nhà rất '
+  + 'nhanh nhận ra một chiếc áo khoác cũ chỉ bằng một phần nhỏ giá áo mới. Thứ hai là lương tâm. Sản xuất vải '
+  + 'ngốn lượng nước và thuốc nhuộm khổng lồ, và một món đồ mặc hai lần rồi vứt thì khó mà biện minh. Mua đồ cũ '
+  + 'cho phép người ta chạy theo mốt mà không phải góp thêm vào đống rác ấy.',
+
+'Reading Passage — Sleep and the teenage brain':
+  'BÀI ĐỌC — GIẤC NGỦ VÀ BỘ NÃO TUỔI TEEN\n'
+  + 'Cha mẹ hay than rằng thiếu niên không sao dậy nổi. Các nhà nghiên cứu giấc ngủ nói vấn đề không phải lười '
+  + 'mà là sinh học. Trong tuổi dậy thì, đồng hồ sinh học của cơ thể dịch đi một đến hai giờ, nên một thiếu '
+  + 'niên còn tỉnh như sáo lúc mười một giờ đêm không phải đang bướng; đơn giản là hoóc-môn gây buồn ngủ đến '
+  + 'muộn hơn so với hồi bé.\n\n'
+  + 'Rắc rối ở chỗ trường học vẫn vào sớm. Một học sinh ngủ lúc nửa đêm và bị đánh thức lúc sáu giờ mất khoảng '
+  + 'hai tiếng của giấc ngủ mà bộ não dùng để cất giữ những gì đã học hôm trước. Vài học khu ở Mỹ đã lùi giờ '
+  + 'vào học lại một tiếng và ghi nhận số ca đi muộn giảm, chuyên cần tốt hơn, và ở một số trường là điểm số '
+  + 'nhích lên.'
+};
+
+</script>
+<script>
+/* ============================================================
    TIẾNG ANH — DỰNG LẠI THEO ĐÚNG BỐN DẠNG CỦA ĐỀ THẬT
    Đề tốt nghiệp từ 2025 (và giữ nguyên ở 2026) KHÔNG còn một câu
    ngữ pháp đơn lẻ nào. Bốn mươi câu chia đúng như sau:
@@ -26796,6 +26986,12 @@ const MC = (R, de, it, meo) => {
     .map(o => `• ${o} — ${(it.sv && it.sv[o]) || 'không hợp với ngữ cảnh của chỗ trống này.'}`).join('\n');
   return { q: de, opts: opts, ans: opts.indexOf(it.d),
     giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`, meo: meo };
+};
+/* Bản dịch tra theo TÊN văn bản, hiện ở phần chữa sau khi đã trả lời.
+   Làm xong câu mà không hiểu đoạn nói gì thì chỉ là đoán theo dấu hiệu. */
+const kemDich = (v, ten) => {
+  const d = (TD.DICH_ANH || {})[ten];
+  return d ? v + '\n\nDỊCH VĂN BẢN:\n' + d : v;
 };
 const khungVB = (tieuDe, than) =>
   `<div style="border:1px solid var(--vien);border-radius:10px;padding:12px 14px;margin:10px 0;`
@@ -27036,6 +27232,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     /* làm nổi chỗ trống đang hỏi, các chỗ còn lại để nguyên số thứ tự */
     const than = vb.than.replace(new RegExp('\\(' + c.so + '\\)____', 'g'),
       '<b style="color:var(--kim)">(' + c.so + ') ______</b>');
+    c.v = kemDich(c.v, vb.ten);
     const o = MC(R,
       `Đọc văn bản sau và chọn phương án đúng cho chỗ trống <b>(${c.so})</b>:`
       + khungVB(vb.ten, than), c,
@@ -27141,6 +27338,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     ];
     const it = R.chon(ds);
     const than = it.than.replace('______', '<b style="color:var(--kim)">______</b>');
+    it.v = kemDich(it.v, it.ten);
     const o = MC(R, 'Đọc đoạn văn sau và chọn câu thích hợp nhất điền vào chỗ trống:'
       + khungVB(it.ten, than), it,
       'Dạng này 5 câu trong đề. Luôn đọc CÂU NGAY SAU chỗ trống trước: từ nối (For example, In other words, '
@@ -27372,6 +27570,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
     ];
     const bai = R.chon(BAI);
     const h = R.chon(bai.hoi);
+    h.v = kemDich(h.v, bai.ten);
     const o = MC(R, 'Đọc bài sau và chọn phương án đúng:' + khungVB(bai.ten, bai.than)
       + `<div style="margin-top:8px"><b>${h.q}</b></div>`, h,
       'Đọc hiểu chiếm 18 trên 40 câu — gần một nửa đề. Thứ tự câu hỏi thường bám theo thứ tự đoạn văn, '
