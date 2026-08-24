@@ -536,30 +536,49 @@ TD.hinhThap = function (bac, donVi) {
 /* ============================================================
    ⑩ GIẢN ĐỒ NĂNG LƯỢNG PHẢN ỨNG — cho Hoá
    ============================================================ */
-TD.hinhGianDo = function (hDau, hCuoi, tenDau, tenCuoi) {
-  const W = 320, H = 220, le = 46, day = H - 34;
-  const lo = Math.min(hDau, hCuoi), hi = Math.max(hDau, hCuoi);
-  const bien = (hi - lo) * 0.55 + 1;
-  const Y = v => day - (v - (lo - bien)) / ((hi + bien) - (lo - bien)) * (day - 26);
-  let ra = `<line x1="${le}" y1="18" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
-    + `<line x1="${le}" y1="${day}" x2="${W - 10}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
-    + `<text x="${le - 6}" y="16" fill="${M.chu}" font-size="10.5" text-anchor="end">H</text>`
-    + `<text x="${W - 8}" y="${day + 14}" fill="${M.chu}" font-size="10.5" text-anchor="end">tiến trình phản ứng</text>`;
-  /* Nhãn phải nằm PHÍA ĐỐI DIỆN với đường nối hai mức, nếu không thì nét đứt
-     chạy xuyên qua chữ. Phản ứng toả nhiệt: đường nối đi xuống nên nhãn chất
-     đầu ở trên, nhãn sản phẩm ở dưới; thu nhiệt thì ngược lại. */
-  const thuNhiet = hCuoi > hDau;
-  const yDau = thuNhiet ? Y(hDau) + 16 : Y(hDau) - 9;
-  const yCuoi = thuNhiet ? Y(hCuoi) - 9 : Y(hCuoi) + 16;
-  ra += `<line x1="${le + 20}" y1="${so(Y(hDau))}" x2="${le + 92}" y2="${so(Y(hDau))}" stroke="${M.nhan}" stroke-width="2.6"/>`
-     + `<text x="${le + 56}" y="${so(yDau)}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${tenDau || 'chất đầu'}</text>`
-     + `<line x1="${W - 106}" y1="${so(Y(hCuoi))}" x2="${W - 34}" y2="${so(Y(hCuoi))}" stroke="${M.net}" stroke-width="2.6"/>`
-     + `<text x="${W - 70}" y="${so(yCuoi)}" fill="${M.net}" font-size="10.5" text-anchor="middle">${tenCuoi || 'sản phẩm'}</text>`;
-  ra += `<line x1="${le + 92}" y1="${so(Y(hDau))}" x2="${W - 106}" y2="${so(Y(hCuoi))}" stroke="${M.chu}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
-  const giua = (le + 92 + W - 106) / 2;
-  ra += `<line x1="${giua}" y1="${so(Y(hDau))}" x2="${giua}" y2="${so(Y(hCuoi))}" stroke="${M.do}" stroke-width="1.8" marker-end="url(#mtgd)"/>`
-     + `<defs><marker id="mtgd" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 Z" fill="${M.do}"/></marker></defs>`
-     + `<text x="${giua + 13}" y="${so((Y(hDau) + Y(hCuoi)) / 2)}" fill="${M.do}" font-size="11">ΔrH</text>`;
+/* Giản đồ biến thiên enthalpy — vẽ theo đúng kiểu SGK Hoá 10:
+   trục "Năng lượng (kJ)" và "Tiến trình phản ứng", hai mức nằm ngang có ghi
+   CÔNG THỨC CHẤT thật, nét đứt gióng về trục ghi ΔfH°298(cđ) / (sp), mũi tên
+   ΔrH°298 nối hai mức kèm giá trị.
+   Hai mức đặt ở độ cao CỐ ĐỊNH (giản đồ SGK là sơ đồ, không vẽ theo tỉ lệ) nên
+   chữ không bao giờ chạm nhau dù hai giá trị enthalpy cách nhau bao nhiêu. */
+TD.hinhGianDo = function (hDau, hCuoi, tenDau, tenCuoi, nhanDH) {
+  const W = 366, H = 236, le = 76, day = H - 36;
+  const thu = hCuoi > hDau;                       /* thu nhiệt ⇒ sản phẩm ở trên */
+  const yTren = 56, yDuoi = day - 40;
+  const yDau = thu ? yDuoi : yTren, yCuoi = thu ? yTren : yDuoi;
+  const tDau = le + 10, pDau = le + 128;          /* đoạn mức chất đầu */
+  const tCuoi = W - 140, pCuoi = W - 12;          /* đoạn mức sản phẩm */
+  const xMui = (pDau + tCuoi) / 2;
+
+  const dut = (y) => `<line x1="${le}" y1="${y}" x2="${y === yDau ? tDau : tCuoi}" y2="${y}" `
+    + `stroke="${M.chu3 || M.chu}" stroke-width="1.1" stroke-dasharray="4 3"/>`;
+  const muc = (x1, x2, y, mau) =>
+    `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${mau}" stroke-width="2.8"/>`;
+
+  let ra = `<line x1="${le}" y1="26" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<line x1="${le}" y1="${day}" x2="${W - 8}" y2="${day}" stroke="${M.truc}" stroke-width="1.6"/>`
+    + `<text x="4" y="16" fill="${M.chu}" font-size="10.5">Năng lượng (kJ)</text>`
+    + `<text x="${W - 8}" y="${day + 15}" fill="${M.chu}" font-size="10.5" text-anchor="end">Tiến trình phản ứng</text>`;
+
+  /* nhãn ΔfH nằm bên trái trục, không đụng gì trong khung vẽ */
+  ra += `<text x="${le - 5}" y="${yDau + 3.5}" fill="${M.chu}" font-size="9" text-anchor="end">`
+      + `Δ<tspan font-size="7" dy="2">f</tspan><tspan dy="-2">H°(cđ)</tspan></text>`
+     + `<text x="${le - 5}" y="${yCuoi + 3.5}" fill="${M.chu}" font-size="9" text-anchor="end">`
+      + `Δ<tspan font-size="7" dy="2">f</tspan><tspan dy="-2">H°(sp)</tspan></text>`;
+
+  ra += dut(yDau) + dut(yCuoi)
+     + muc(tDau, pDau, yDau, M.nhan) + muc(tCuoi, pCuoi, yCuoi, M.net)
+     + `<text x="${(tDau + pDau) / 2}" y="${yDau - 9}" fill="${M.nhan}" font-size="11" text-anchor="middle">${tenDau || 'chất đầu'}</text>`
+     + `<text x="${(tCuoi + pCuoi) / 2}" y="${yCuoi - 9}" fill="${M.net}" font-size="11" text-anchor="middle">${tenCuoi || 'sản phẩm'}</text>`;
+
+  /* mũi tên ΔrH đi từ mức chất đầu sang mức sản phẩm */
+  ra += `<line x1="${xMui}" y1="${yDau}" x2="${xMui}" y2="${yCuoi + (thu ? 7 : -7)}" `
+      + `stroke="${M.do}" stroke-width="2" marker-end="url(#mtgd)"/>`
+     + `<defs><marker id="mtgd" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto">`
+      + `<path d="M0,0 L8,3.5 L0,7 Z" fill="${M.do}"/></marker></defs>`
+     + `<text x="${xMui + 8}" y="${(yTren + yDuoi) / 2 + 4}" fill="${M.do}" font-size="10.5">`
+      + `${nhanDH || 'Δ<tspan font-size="8" dy="2">r</tspan><tspan dy="-2">H°</tspan>'}</text>`;
   return boc(W, H, ra);
 };
 

@@ -1236,19 +1236,23 @@ TD.moThe = function (khoa, i) {
     boc.style.display = 'inline-flex';
     /* dựng SẴN bộ câu rồi mới ghi số lên nút — nút và lượt kiểm tra phải là
        cùng một bộ, không được đếm một đằng hỏi một nẻo */
-    const boRieng = pv.rieng ? TD.deRiengThe(monTK, x) : null;
-    const soRieng = boRieng ? boRieng.ds.length : 0;
-    if (soRieng >= 6) {
-      const n1 = el('button', 'nut kim', `📝 Kiểm tra thẻ này — ${soRieng} câu`);
+    const boRieng = pv.rieng ? TD.deRiengThe(monTK, x, TD.SO_CAU_KIEM_TRA) : null;
+    const coRieng = !!boRieng && boRieng.sat >= 5 && boRieng.ds.length >= TD.SO_CAU_KIEM_TRA;
+    if (coRieng) {
+      /* vẫn đủ 50 câu như mọi lượt kiểm tra khác, chỉ khác ở chỗ bao nhiêu câu
+         ĐẦU là của chính thẻ này — ghi rõ ra để không ai phải đoán */
+      const n1 = el('button', 'nut kim', `📝 Kiểm tra thẻ này — ${boRieng.ds.length} câu`
+        + (boRieng.sat >= boRieng.ds.length ? ' · toàn bộ bám sát thẻ'
+                                            : ` · ${boRieng.sat} câu đầu bám sát thẻ`));
       n1.onclick = () => TD.kiemTraThe(monTK, x, boRieng);
       boc.appendChild(n1);
     }
     if (du) {
-      const n2 = el('button', soRieng >= 6 ? 'nut phu' : 'nut kim',
+      const n2 = el('button', coRieng ? 'nut phu' : 'nut kim',
         `📚 Kiểm tra cả chuyên đề «${pv.cd}» — ${TD.SO_CAU_KIEM_TRA} câu`);
       n2.onclick = () => TD.kiemTraNhanh(monTK, pv.cd);
       boc.appendChild(n2);
-    } else if (soRieng < 6) {
+    } else if (!coRieng) {
       const n3 = el('button', 'nut kim', `📝 Kiểm tra tổng hợp ${TD.MON[monTK].ten}`);
       n3.onclick = () => TD.kiemTraNhanh(monTK, null);
       boc.appendChild(n3);
@@ -1867,7 +1871,7 @@ TD.kiemTraNhanh = function (mon, cd) {
 
 /* Kiểm tra ĐÚNG một thẻ: chỉ hỏi thứ được viết trong chính thẻ vừa đọc */
 TD.kiemTraThe = function (mon, the, sanCo) {
-  const d = sanCo || TD.deRiengThe(mon, the);
+  const d = sanCo || TD.deRiengThe(mon, the, TD.SO_CAU_KIEM_TRA);
   if (d.ds.length < 4) { TD.bao('Thẻ này chưa đủ câu để kiểm tra riêng.', 'lua'); return; }
   TD.batDauPhien(mon, null, 'luyen', d.ds);
 };

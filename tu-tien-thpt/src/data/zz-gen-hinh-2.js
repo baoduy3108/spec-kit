@@ -202,42 +202,150 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
 /* ============================================================
    HOÁ
    ============================================================ */
+/* Giản đồ enthalpy trong SGK Hoá 10 luôn gắn với MỘT phản ứng cụ thể, có công
+   thức chất ở hai mức và giá trị ΔrH kèm theo — chứ không phải hai vạch trống
+   ghi "chất đầu / sản phẩm". Bảng dưới lấy enthalpy tạo thành chuẩn ΔfH°298
+   (kJ/mol) của từng chất, mức năng lượng mỗi bên là TỔNG có nhân hệ số, nên số
+   trên hình và số trong lời giải luôn khớp nhau. */
+const PU_NHIET = [
+  { cd: [[1, 'CaCO₃(s)', -1206.9]], sp: [[1, 'CaO(s)', -635.1], [1, 'CO₂(g)', -393.5]],
+    ten: 'nhiệt phân đá vôi' },
+  { cd: [[1, 'CH₄(g)', -74.8], [2, 'O₂(g)', 0]], sp: [[1, 'CO₂(g)', -393.5], [2, 'H₂O(l)', -285.8]],
+    ten: 'đốt cháy khí methane' },
+  { cd: [[2, 'H₂(g)', 0], [1, 'O₂(g)', 0]], sp: [[2, 'H₂O(l)', -285.8]],
+    ten: 'đốt cháy khí hydrogen' },
+  { cd: [[1, 'C(graphite)', 0], [1, 'O₂(g)', 0]], sp: [[1, 'CO₂(g)', -393.5]],
+    ten: 'đốt cháy than' },
+  { cd: [[1, 'N₂(g)', 0], [3, 'H₂(g)', 0]], sp: [[2, 'NH₃(g)', -45.9]],
+    ten: 'tổng hợp ammonia' },
+  { cd: [[2, 'NH₃(g)', -45.9]], sp: [[1, 'N₂(g)', 0], [3, 'H₂(g)', 0]],
+    ten: 'phân huỷ ammonia' },
+  { cd: [[1, 'N₂(g)', 0], [1, 'O₂(g)', 0]], sp: [[2, 'NO(g)', 90.3]],
+    ten: 'nitrogen cháy trong không khí ở nhiệt độ cao' },
+  { cd: [[1, 'H₂(g)', 0], [1, 'Cl₂(g)', 0]], sp: [[2, 'HCl(g)', -92.31]],
+    ten: 'hydrogen tác dụng với chlorine' },
+  { cd: [[1, 'S(s)', 0], [1, 'O₂(g)', 0]], sp: [[1, 'SO₂(g)', -296.8]],
+    ten: 'đốt cháy lưu huỳnh' },
+  { cd: [[2, 'Al(s)', 0], [1, 'Fe₂O₃(s)', -825.5]], sp: [[1, 'Al₂O₃(s)', -1675.7], [2, 'Fe(s)', 0]],
+    ten: 'phản ứng nhiệt nhôm' },
+  { cd: [[1, 'C₂H₅OH(l)', -277.63], [3, 'O₂(g)', 0]],
+    sp: [[2, 'CO₂(g)', -393.5], [3, 'H₂O(l)', -285.8]], ten: 'đốt cháy ethanol' }
+];
+const ve = ds => ds.map(([h, t]) => (h > 1 ? String(h) : '') + t).join(' + ');
+/* đề thi in enthalpy dương kèm dấu cộng: ΔrH°₂₉₈ = +178,49 kJ */
+const soKy = v => (v > 0 ? '+' : '') + TD.so(v);
+const tong = ds => ds.reduce((z, [h, , v]) => z + h * v, 0);
+const lam1 = v => Math.round(v * 100) / 100;
+/* hệ số 1 thì không viết ra, đề thi không bao giờ in "1 × (−74,8)" hay "1x" */
+const hs1 = h => h === 1 ? '' : h + ' ';
+const nhan = (h, v) => h === 1 ? `(${TD.so(v)})` : `${h} × (${TD.so(v)})`;
+const MEO_ENTHALPY = 'Ba chỗ mất điểm của dạng này: ① lấy chất đầu trừ sản phẩm (ngược dấu) ② quên nhân hệ '
+  + 'số của phương trình ③ trừ một số âm mà không đổi thành cộng. Đơn chất bền (O₂, H₂, N₂, C graphite, kim '
+  + 'loại) có ΔfH°₂₉₈ = 0, đừng đi tìm số cho chúng.';
+
 TD.GEN.hoa = (TD.GEN.hoa || []).concat([
 
 /* --- mức 1: đọc giản đồ toả nhiệt / thu nhiệt --- */
 { ma: 'hoa-hinh-toanhiet', chuong: 'Nhiệt động – Tốc độ – Cân bằng', muc: 1, dang: 'mc',
   tao(R) {
-    const toa = R() < 0.5;
-    const hDau = toa ? R.nguyen(40, 80) : R.nguyen(5, 30);
-    const hCuoi = toa ? R.nguyen(5, 30) : R.nguyen(40, 80);
-    const hinh = TD.hinhGianDo(hDau, hCuoi);
-    return MC(R, `Giản đồ sau biểu diễn biến thiên enthalpy của một phản ứng hoá học.${hinh}Phát biểu nào sau đây đúng?`,
-      { d: toa ? 'Phản ứng toả nhiệt, ΔrH < 0' : 'Phản ứng thu nhiệt, ΔrH > 0',
-        s: toa ? ['Phản ứng thu nhiệt, ΔrH > 0', 'Phản ứng toả nhiệt, ΔrH > 0', 'Phản ứng không kèm biến đổi năng lượng, ΔrH = 0']
-               : ['Phản ứng toả nhiệt, ΔrH < 0', 'Phản ứng thu nhiệt, ΔrH < 0', 'Phản ứng không kèm biến đổi năng lượng, ΔrH = 0'],
-        v: `Trên giản đồ, mức năng lượng của sản phẩm nằm ${toa ? 'THẤP HƠN' : 'CAO HƠN'} chất đầu.\n`
-          + `ΔrH = H(sản phẩm) − H(chất đầu) ${toa ? '< 0 ⇒ phản ứng TOẢ nhiệt, hệ nhả năng lượng ra môi trường' : '> 0 ⇒ phản ứng THU nhiệt, hệ lấy năng lượng từ môi trường'}.` },
-      'Nhìn mũi tên ΔrH trên giản đồ: chỉ XUỐNG là toả nhiệt và ΔrH mang dấu âm · chỉ LÊN là thu nhiệt và ΔrH mang dấu dương. '
-      + 'Nhớ mẹo "toả thì âm" vì hệ mất năng lượng.');
+    const P = R.chon(PU_NHIET);
+    const hDau = lam1(tong(P.cd)), hCuoi = lam1(tong(P.sp));
+    const dH = lam1(hCuoi - hDau), toa = dH < 0;
+    const hinh = TD.hinhGianDo(hDau, hCuoi, ve(P.cd), ve(P.sp),
+      `Δ<tspan font-size="8" dy="2">r</tspan><tspan dy="-2">H° = ${soKy(dH)} kJ</tspan>`);
+    return MC(R, `Cho sơ đồ biểu diễn biến thiên enthalpy của phản ứng ${ve(P.cd)} → ${ve(P.sp)}:${hinh}`
+      + `Phát biểu nào sau đây đúng?`,
+      { d: toa ? 'Phản ứng toả nhiệt, ΔrH°₂₉₈ < 0' : 'Phản ứng thu nhiệt, ΔrH°₂₉₈ > 0',
+        s: toa ? ['Phản ứng thu nhiệt, ΔrH°₂₉₈ > 0', 'Phản ứng toả nhiệt, ΔrH°₂₉₈ > 0',
+                  'Phản ứng không kèm biến đổi năng lượng, ΔrH°₂₉₈ = 0']
+               : ['Phản ứng toả nhiệt, ΔrH°₂₉₈ < 0', 'Phản ứng thu nhiệt, ΔrH°₂₉₈ < 0',
+                  'Phản ứng không kèm biến đổi năng lượng, ΔrH°₂₉₈ = 0'],
+        v: `Trên sơ đồ, mức năng lượng của sản phẩm ${ve(P.sp)} nằm ${toa ? 'THẤP HƠN' : 'CAO HƠN'} `
+          + `mức của chất đầu ${ve(P.cd)}, mũi tên ΔrH chỉ ${toa ? 'XUỐNG' : 'LÊN'}.\n`
+          + `ΔrH°₂₉₈ = ΣΔfH°₂₉₈(sản phẩm) − ΣΔfH°₂₉₈(chất đầu) = ${TD.so(hCuoi)} − (${TD.so(hDau)}) = ${TD.so(dH)} kJ `
+          + `${toa ? '< 0 ⇒ phản ứng TOẢ nhiệt, hệ nhả năng lượng ra môi trường'
+                   : '> 0 ⇒ phản ứng THU nhiệt, hệ lấy năng lượng từ môi trường'}.\n`
+          + `Đây là phản ứng ${P.ten}.` },
+      'Nhìn mũi tên ΔrH trên giản đồ: chỉ XUỐNG (sản phẩm thấp hơn) là toả nhiệt, ΔrH mang dấu ÂM · chỉ LÊN '
+      + 'là thu nhiệt, ΔrH mang dấu DƯƠNG. Nhớ mẹo "toả thì âm" vì hệ mất năng lượng. Phản ứng cháy và phản '
+      + 'ứng trung hoà luôn toả nhiệt; phản ứng nhiệt phân luôn thu nhiệt.');
   } },
 
-/* --- mức 3: tính ΔrH từ giản đồ --- */
+/* --- mức 3: tính ΔrH từ giản đồ có số liệu enthalpy tạo thành --- */
 { ma: 'hoa-hinh-enthalpy', chuong: 'Nhiệt động – Tốc độ – Cân bằng', muc: 3, dang: 'tln',
   tao(R) {
-    const hDau = R.nguyen(-200, 100);
-    const hCuoi = hDau + R.chon([-1, 1]) * R.nguyen(60, 400);
-    const dH = hCuoi - hDau;
-    const hinh = TD.hinhGianDo(hDau, hCuoi, `chất đầu (${TD.so(hDau)} kJ)`, `sản phẩm (${TD.so(hCuoi)} kJ)`);
+    const P = R.chon(PU_NHIET);
+    const hDau = lam1(tong(P.cd)), hCuoi = lam1(tong(P.sp));
+    const dH = lam1(hCuoi - hDau);
+    const bang = ds => ds.filter(([, , v]) => v !== 0)
+      .map(([, t, v]) => `ΔfH°₂₉₈(${t}) = ${TD.so(v)} kJ/mol`).join(' · ');
+    const dHtxt = t => `Δ<tspan font-size="8" dy="2">r</tspan><tspan dy="-2">H° = ${t}</tspan>`;
+    const kieu = R.chon(['dH', 'nhiet', 'nguoc']);
+
+    /* ① hỏi thẳng ΔrH — dạng gốc trong SGK */
+    if (kieu === 'dH') {
+      const hinh = TD.hinhGianDo(hDau, hCuoi, ve(P.cd), ve(P.sp), dHtxt('?'));
+      const moc = [bang(P.cd), bang(P.sp)].filter(Boolean).join(' · ');
+      return {
+        q: `Cho phản ứng ${P.ten}: ${ve(P.cd)} → ${ve(P.sp)}${hinh}`
+          + `Biết ${moc}; các đơn chất bền ở điều kiện chuẩn có ΔfH°₂₉₈ = 0.<br>`
+          + `Biến thiên enthalpy chuẩn ΔrH°₂₉₈ của phản ứng bằng bao nhiêu kJ?`,
+        ans: TD.dapSo(dH, 2),
+        giai: `Bước 1 — công thức: ΔrH°₂₉₈ = ΣΔfH°₂₉₈(sản phẩm) − ΣΔfH°₂₉₈(chất đầu), nhớ NHÂN HỆ SỐ.\n`
+          + `Bước 2 — tổng của chất đầu: ${P.cd.map(([h, t, v]) => nhan(h, v)).join(' + ')} = ${TD.so(hDau)} kJ.\n`
+          + `Bước 3 — tổng của sản phẩm: ${P.sp.map(([h, t, v]) => nhan(h, v)).join(' + ')} = ${TD.so(hCuoi)} kJ.\n`
+          + `Bước 4 — thay số: ΔrH°₂₉₈ = ${TD.so(hCuoi)} − (${TD.so(hDau)}) = ${TD.dapSo(dH, 2)} kJ.\n`
+          + `Bước 5 — soi lại hình: mức sản phẩm nằm ${dH < 0 ? 'THẤP hơn' : 'CAO hơn'} mức chất đầu nên ΔrH phải `
+          + `${dH < 0 ? 'ÂM' : 'DƯƠNG'} — khớp. Vậy phản ứng ${dH < 0 ? 'TOẢ' : 'THU'} nhiệt.`,
+        meo: MEO_ENTHALPY
+      };
+    }
+
+    /* ② từ giản đồ suy ra nhiệt lượng cho một lượng chất cụ thể */
+    if (kieu === 'nhiet') {
+      const [heSo, tenX] = P.cd[0];
+      const soMol = lam1(heSo * R.chon([0.5, 1.5, 2, 2.5, 3, 4]));
+      const Q = lam1(Math.abs(dH) * soMol / heSo);
+      const hinh = TD.hinhGianDo(hDau, hCuoi, ve(P.cd), ve(P.sp), dHtxt(soKy(dH) + ' kJ'));
+      return {
+        q: `Sơ đồ sau biểu diễn biến thiên enthalpy của phản ứng ${P.ten}:${hinh}`
+          + `Nhiệt lượng ${dH < 0 ? 'toả ra' : 'cần cung cấp'} khi có ${TD.so(soMol)} mol ${tenX} phản ứng `
+          + `là bao nhiêu kJ?`,
+        ans: TD.dapSo(Q, 2),
+        giai: `Bước 1 — đọc hình: ΔrH°₂₉₈ = ${TD.so(dH)} kJ ứng với ĐÚNG phương trình đã cho, tức là ứng với `
+          + `${heSo} mol ${tenX}.\n`
+          + `Bước 2 — lập tỉ lệ: ${heSo === 1 ? '' : heSo + ' '}mol ${tenX} ứng với ${TD.so(Math.abs(dH))} kJ, `
+          + `vậy ${TD.so(soMol)} mol ứng với ${TD.so(Math.abs(dH))} × ${TD.so(soMol)}`
+          + `${heSo === 1 ? '' : ' ÷ ' + heSo}.\n`
+          + `Bước 3 — tính: Q = ${TD.dapSo(Q, 2)} kJ.\n`
+          + `Bước 4 — kết luận: phản ứng ${dH < 0 ? 'TOẢ nhiệt (ΔrH < 0) nên đây là nhiệt lượng nhả ra môi trường'
+             : 'THU nhiệt (ΔrH > 0) nên đây là nhiệt lượng phải cung cấp'}.`,
+        meo: 'Nhiệt lượng hỏi trong đề luôn là SỐ DƯƠNG (bao nhiêu kJ toả ra / cần cung cấp), còn ΔrH mới mang '
+          + 'dấu. Và ΔrH ứng với đúng hệ số của phương trình — có 2 mol thì phải chia 2 trước khi nhân.'
+      };
+    }
+
+    /* ③ ngược lại: biết ΔrH, tìm ΔfH của một chất trong phương trình */
+    const ben = P.sp.filter(([, , v]) => v !== 0).length ? P.sp : P.cd;
+    const an = ben.filter(([, , v]) => v !== 0)[0];
+    const laSP = ben === P.sp;
+    const conLai = (laSP ? P.sp : P.cd).filter(x => x !== an);
+    const tongConLai = lam1(tong(conLai));
+    const hinh = TD.hinhGianDo(hDau, hCuoi, ve(P.cd), ve(P.sp), dHtxt(soKy(dH) + ' kJ'));
+    const moc2 = [bang(laSP ? P.cd : P.sp), bang(conLai)].filter(Boolean).join(' · ');
     return {
-      q: `Giản đồ sau biểu diễn enthalpy của chất đầu và sản phẩm trong một phản ứng hoá học.${hinh}`
-        + `Biến thiên enthalpy ΔrH của phản ứng bằng bao nhiêu kJ?`,
-      ans: TD.dapSo(dH, 0),
-      giai: `Bước 1 — đọc hai mức năng lượng trên hình: chất đầu ở ${TD.so(hDau)} kJ, sản phẩm ở ${TD.so(hCuoi)} kJ.\n`
-        + `Bước 2 — công thức: ΔrH = H(sản phẩm) − H(chất đầu).\n`
-        + `Bước 3 — thay số: ΔrH = ${TD.so(hCuoi)} − (${TD.so(hDau)}) = ${TD.dapSo(dH, 0)} kJ.\n`
-        + `Bước 4 — kiểm lại bằng hình: mũi tên ΔrH chỉ ${dH < 0 ? 'XUỐNG nên giá trị phải ÂM' : 'LÊN nên giá trị phải DƯƠNG'} — khớp với kết quả.\n`
-        + `Bước 5 — kết luận: phản ứng ${dH < 0 ? 'TOẢ nhiệt' : 'THU nhiệt'}.`,
-      meo: 'Luôn lấy SẢN PHẨM trừ CHẤT ĐẦU, không được làm ngược. Trừ một số âm là cộng — đây là chỗ sai dấu phổ biến nhất.'
+      q: `Cho phản ứng ${P.ten}: ${ve(P.cd)} → ${ve(P.sp)}${hinh}`
+        + `Biết ΔrH°₂₉₈ = ${soKy(dH)} kJ${moc2 ? ' và ' + moc2 : ''}; các đơn chất bền có ΔfH°₂₉₈ = 0.<br>`
+        + `Enthalpy tạo thành chuẩn ΔfH°₂₉₈ của ${an[1]} bằng bao nhiêu kJ/mol?`,
+      ans: TD.dapSo(an[2], 2),
+      giai: `Bước 1 — công thức: ΔrH°₂₉₈ = ΣΔfH°₂₉₈(sp) − ΣΔfH°₂₉₈(cđ).\n`
+        + `Bước 2 — gọi x = ΔfH°₂₉₈(${an[1]}). Thay vào:\n`
+        + `   ${TD.so(dH)} = ${laSP ? `[${an[0]}x + (${TD.so(tongConLai)})] − (${TD.so(tong(P.cd))})`
+              : `(${TD.so(tong(P.sp))}) − [${hs1(an[0])}x + (${TD.so(tongConLai)})]`}\n`
+        + `Bước 3 — giải ra: ${hs1(an[0])}x = ${TD.so(lam1(an[0] * an[2]))} ⇒ x = ${TD.dapSo(an[2], 2)} kJ/mol.\n`
+        + `Bước 4 — kiểm tra bằng hình: mức ${laSP ? 'sản phẩm' : 'chất đầu'} phải ra ${TD.so(laSP ? hCuoi : hDau)} kJ — khớp.`,
+      meo: 'Dạng ngược này chỉ là giải phương trình bậc nhất. Đặt ẩn x cho chất chưa biết, viết đủ hệ số, rồi '
+        + 'chuyển vế. Sai nhiều nhất là quên rằng ẩn cũng phải nhân hệ số.'
     };
   } },
 
