@@ -421,12 +421,17 @@ TD.BAN_DO_CD = {
   toan: [
     [/luong giac|cung goc|radian/, 'Lượng giác'],
     [/gioi han|lien tuc|vo dinh/, 'Giới hạn – Liên tục'],
+    /* "Vectơ trong không gian" là bài mở đầu của Oxyz lớp 12, không phải
+       vectơ hình phẳng lớp 10. Luật hẹp phải đứng trước luật rộng, không
+       thì thẻ Oxyz bị xếp nhầm sang hệ thức lượng trong tam giác. */
+    [/vecto trong khong gian|toa do trong khong gian|oxyz|tich co huong/, 'Oxyz'],
     [/vecto|he thuc luong|dinh li cosin|dinh li sin|trung tuyen|tich vo huong/, 'Vecto và hệ thức lượng'],
+    /* Mũ – logarit đứng TRƯỚC bất phương trình: thẻ "phương trình & bất
+       phương trình mũ – log" mà để dòng bất phương trình bắt trước thì bị
+       xếp nhầm sang tam thức bậc hai. */
+    [/logarit|\bmu\b|lai kep/, 'Mũ – Logarit'],
     [/bat phuong trinh|tam thuc|xet dau|viete|mien nghiem|toi uu tuyen tinh/, 'Bất phương trình bậc hai'],
     [/thong ke|xac suat|ghep nhom|trung vi|tu phan vi|phuong sai|do lech chuan|bayes|to hop|chinh hop|hoan vi|nhi thuc/, 'Thống kê – Xác suất'],
-    /* Mũ – logarit phải đứng TRƯỚC bất phương trình: thẻ "bất phương trình mũ –
-       log" mà để dòng bất phương trình bắt trước thì bị xếp nhầm sang tam thức. */
-    [/logarit|\bmu\b|lai kep/, 'Mũ – Logarit'],
     [/tich phan|nguyen ham|dien tich hinh phang|the tich tron xoay|ung dung tich phan/, 'Nguyên hàm – Tích phân'],
     [/oxyz|mat phang|mat cau|vecto|toa do/, 'Oxyz'],
     [/luong giac|he thuc luong|tam giac|khoi chop|khoi lang tru|hinh khong gian|khoi tron xoay|non|tru|cau|goc|khoang cach/, 'Hình không gian'],
@@ -456,13 +461,15 @@ TD.BAN_DO_CD = {
     [/tang truong|phat trien|gdp|gni|cpi|lam phat|chi tieu kinh te/, 'Tăng trưởng – Phát triển']
   ],
   ly: [
-    [/khi li tuong|dang nhiet|dang tich|dang ap|boyle|charles|clapeyron|phan tu khi/, 'Khí lí tưởng'],
+    /* "Nhiệt hạch" có chữ "nhiet" nên nếu dòng Vật lí nhiệt đứng trước thì
+       thẻ phân hạch – nhiệt hạch bị lôi sang chuyên đề nhiệt. Hạt nhân lên đầu. */
+    [/hat nhan|phong xa|phan hach|nhiet hach|lien ket rieng|hut khoi|chu ki ban ra|einstein/, 'Vật lí hạt nhân'],
+    [/khi li tuong|dang nhiet|dang tich|dang ap|boyle|charles|clapeyron|phan tu khi|so mol|so phan tu|dong hoc phan tu/, 'Khí lí tưởng'],
     [/nhiet|noi nang|nhiet dong luc|chuyen the|nong chay|hoa hoi|nhiet dung|carnot|dong co nhiet/, 'Vật lí nhiệt'],
     [/tu truong|cam ung|tu thong|luc tu|lorentz|bien ap|truyen tai|xoay chieu/, 'Từ trường'],
-    [/hat nhan|phong xa|phan hach|nhiet hach|lien ket rieng|hut khoi|chu ki ban ra/, 'Vật lí hạt nhân'],
     /* Hai chuyên đề riêng phải đứng TRƯỚC dòng gom "Lớp 10 – 11", nếu không thì
        từ khoá "song" và "dien truong" trong dòng gom nuốt hết. */
-    [/\bsong\b|buoc song|song dung|song co|song dien tu|song ngang|song doc|giao thoa/, 'Sóng'],
+    [/\bsong\b|buoc song|song dung|song co|song dien tu|song ngang|song doc|giao thoa|dao dong dieu hoa|con lac/, 'Sóng'],
     [/dien truong|dien tich|duong suc dien|dien the|hieu dien the|coulomb/, 'Điện trường'],
     [/dao dong|con lac|song|am|dong dien|tu dien|quang dien|khuc xa|luong tu/, 'Lớp 10 – 11']
   ],
@@ -696,6 +703,62 @@ TD.timMau = function (mon, ma) {
    khỏi phải nhớ trong từng mẫu đề.
    Chỉ đụng vào phần HIỂN THỊ — đáp án để nguyên vì còn phải so khớp
    với những gì học sinh gõ vào. */
+/* ============================================================
+   CHUẨN HOÁ CHỮ TRƯỚC KHI ĐƯA LÊN MÀN HÌNH
+   Ba thứ đã làm hỏng bảng công thức trên máy thật:
+
+   ① Dấu ngăn giữa hai công thức trước đây là "•" (hoặc "·"), mà "·" lại
+      chính là dấu NHÂN. Đọc "n · xⁿ⁻¹ • (√x)′ = …" không biết chấm nào
+      là nhân, chấm nào là hết công thức. Nay mỗi công thức xuống một dòng.
+   ② Mũi tên vectơ viết bằng dấu ghép U+20D7 (u⃗). Font của khá nhiều máy
+      Android không có glyph này, và khi thiếu thì nó nuốt luôn cả chữ cái
+      đứng trước — "u⃗·v⃗ = |u⃗||v⃗|" hiện ra thành "· = ||||". Nay vẽ mũi
+      tên bằng CSS, chữ cái nằm nguyên trong DOM.
+   ③ Chỉ số dưới viết bằng ký tự Unicode ₁ ₂ (U+2080…) cũng bị nuốt trên
+      chính những máy đó: x₁x₂ hiện ra "xx". Nay đổi sang thẻ <sub>.
+
+   Chỉ chạy ở tầng HIỂN THỊ. Dữ liệu gốc giữ nguyên để còn so khớp đáp án,
+   và mọi đoạn <svg> được chừa ra vì trong SVG không có <sub> với <span>.
+   ============================================================ */
+const CS_DUOI = '₀₁₂₃₄₅₆₇₈₉';
+const CS_TREN = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+  '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+  'ⁿ': 'n', '⁺': '+', '⁻': '−',
+  /* mấy chữ cái mũ nhỏ cũng hay thiếu font y như chỉ số dưới */
+  'ˣ': 'x', 'ʸ': 'y', 'ᵃ': 'a', 'ᵇ': 'b', 'ᶜ': 'c', 'ᵏ': 'k', 'ᵐ': 'm', 'ᵗ': 't' };
+TD.chuanChu = function (t) {
+  if (typeof t !== 'string' || !t) return t;
+  if (t.indexOf('<svg') >= 0)
+    return t.split(/(<svg[\s\S]*?<\/svg>)/i)
+      .map(x => (/^<svg/i.test(x) ? x : TD.chuanChu(x))).join('');
+  let r = t;
+  /* ① dấu ngăn công thức → xuống dòng.
+     Khoảng trắng quanh dấu ngăn trong dữ liệu là &nbsp; chứ không phải dấu
+     cách thường, nên phải bắt cả hai kiểu. */
+  const TRONG = '(?:&nbsp;|\\s)';
+  r = r.replace(new RegExp(TRONG + '*•' + TRONG + '*', 'g'), '<br>');
+  /* Dấu "·" có hai vai: ngăn hai công thức, và dấu NHÂN. Chỉ khi mọi mảnh
+     tách ra đều là một đẳng thức thì nó mới là dấu ngăn. */
+  const NGAN = new RegExp(TRONG + '+·' + TRONG + '+');
+  const NGAN_G = new RegExp(TRONG + '+·' + TRONG + '+', 'g');
+  r = r.split('<br>').map(dong => {
+    if (!NGAN.test(dong)) return dong;
+    const manh = dong.split(NGAN_G);
+    if (manh.length < 2) return dong;
+    return manh.every(x => /[=⇔]/.test(x)) ? manh.join('<br>') : dong;
+  }).join('<br>');
+  /* ② mũi tên vectơ */
+  r = r.replace(/([A-Za-zÀ-ỹ]{1,3})⃗/g, '<span class="vt">$1</span>');
+  r = r.replace(/⃗/g, '');
+  /* ③ chỉ số trên – dưới bằng ký tự lạ → thẻ HTML */
+  r = r.replace(new RegExp('[' + CS_DUOI + ']+', 'g'),
+    m => '<sub>' + [...m].map(c => CS_DUOI.indexOf(c)).join('') + '</sub>');
+  r = r.replace(/[⁰¹²³⁴-⁹ⁿ⁺⁻ˣʸᵃᵇᶜᵏᵐᵗ]+/g,
+    m => '<sup>' + [...m].map(c => CS_TREN[c]).join('') + '</sup>');
+  /* <sub>2</sub><sub>3</sub> liền nhau thì gộp cho khỏi hở chữ */
+  return r.replace(/<\/sub><sub>/g, '').replace(/<\/sup><sup>/g, '');
+};
+
 TD.chuanDau = function (t) {
   if (typeof t !== 'string') return t;
   /* Trong hình vẽ SVG, dấu trừ ASCII là CÚ PHÁP toạ độ (d="M 52 176 q 10 -16 20 0").

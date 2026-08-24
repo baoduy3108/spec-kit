@@ -236,7 +236,7 @@ TD.KHO.anh_ct.push(
   vd: 'Although it rained, we went out. = <b>Despite the rain</b>, we went out.',
   bay: 'Sau despite/in spite of KHÔNG được dùng mệnh đề. Muốn dùng mệnh đề phải thêm "the fact that".' },
 
-{ nhom: 'C. Từ vựng', ten: 'Collocation & cụm từ hay ra thi', cap: 2,
+{ nhom: 'C. Từ vựng', ten: 'Collocation & cụm từ hay ra thi', cd: '*', cap: 2,
   ct: '<b>make</b>: a decision, an effort, progress, a mistake, friends<br><b>do</b>: homework, housework, research, business, a favour<br><b>take</b>: care of, part in, place, advantage of, responsibility<br><b>have</b>: a good time, an effect on, difficulty in, access to<br><b>pay</b>: attention to, a visit, a compliment<br><b>Giới từ:</b> interested IN · good AT · afraid OF · depend ON · responsible FOR · famous FOR · different FROM.',
   khi: 'Câu từ vựng và câu điền giới từ — dễ mất điểm vì học vẹt không kĩ.',
   vd: 'She takes <b>part in</b> the competition, not "joins in the competition" trong ngữ cảnh trang trọng.',

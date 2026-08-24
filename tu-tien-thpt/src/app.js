@@ -4,7 +4,9 @@
 window.TD = window.TD || {};
 
 const $ = s => document.querySelector(s);
-const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+/* Mọi khối HTML của ứng dụng đều dựng qua el(), nên chuẩn hoá chữ ở đây là
+   phủ hết một lượt: thẻ Tàng Kinh Các, đề bài, lời giải, Cấm Thư. */
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = TD.chuanChu(h); return e; };
 
 /* ---------------- THÔNG BÁO ---------------- */
 TD.bao = function (chu, loai) {

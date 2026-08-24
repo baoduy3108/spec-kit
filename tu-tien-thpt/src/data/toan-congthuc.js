@@ -239,7 +239,7 @@ TD.KHO.toan_ct.push(
   vd: 'Tung một con xúc xắc cân đối: E(X) = (1+2+3+4+5+6)/6 = <b>3,5</b>.',
   bay: 'Luôn kiểm tra Σpᵢ = 1 trước khi tính. Công thức phương sai là "trung bình của bình phương trừ bình phương của trung bình".' },
 
-{ nhom: 'VI. Hình không gian', ten: 'Mặt cầu ngoại tiếp khối đa diện', cap: 4,
+{ nhom: 'VI. Hình không gian', ten: 'Mặt cầu ngoại tiếp khối đa diện', cap: 4, cd: 'Hình không gian',
   ct: '<b>Hình hộp chữ nhật a×b×c:</b> R = ½√(a² + b² + c²)<br>' +
       '<b>Chóp có cạnh bên vuông góc đáy (SA ⊥ đáy):</b> R = ½√(R<sub>đ</sub>² ·4 + SA²) với R<sub>đ</sub> là bán kính đường tròn ngoại tiếp đáy.<br>' +
       '&nbsp;&nbsp;Viết gọn: <b>R = √(R<sub>đ</sub>² + SA²/4)</b><br>' +
@@ -259,7 +259,7 @@ TD.KHO.toan_ct.push(
   vd: 'Tam giác vuông cân cạnh góc vuông a: S = a²/2.',
   bay: 'Nhớ tam giác ĐỀU cạnh a có S = a²√3/4 — công thức xuất hiện dày đặc trong hình không gian.' },
 
-{ nhom: 'VII. Dãy số', ten: 'Bất đẳng thức & giá trị lớn nhất nhỏ nhất', cap: 3,
+{ nhom: 'VII. Dãy số', ten: 'Bất đẳng thức & giá trị lớn nhất nhỏ nhất', cap: 3, cd: 'Đạo hàm – Khảo sát',
   ct: '<b>AM–GM (Cauchy) hai số:</b> a + b ≥ 2√(ab), dấu "=" khi a = b (a, b ≥ 0)<br>' +
       '<b>Ba số:</b> a + b + c ≥ 3∛(abc)<br>' +
       '<b>Hệ quả hay dùng:</b> a + 1/a ≥ 2 với a > 0<br>' +

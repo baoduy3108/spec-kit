@@ -211,7 +211,7 @@ Với HCl/H₂SO₄ loãng: Cr → <b>Cr(II)</b>.<br>
 <tr><td>Kali pemanganat KMnO₄</td><td>tím</td></tr></table>Cả 3 đều là <b>chất oxi hoá mạnh</b>.`,
   meo: 'Nhớ vần: "Bazơ – vàng" (BA–VA).' },
 
-{ so: 23, chu_de: 'Kim loại + dung dịch muối', cap: 3,
+{ so: 23, chu_de: 'Kim loại + dung dịch muối', cd: 'Đại cương kim loại', cap: 3,
   hoi: 'Cho hỗn hợp Al, Fe vào dung dịch AgNO₃ — phản ứng nào trước? Nếu thu 2 kim loại / 2 muối thì là gì?',
   dap: `Thứ tự: <b>KL khử mạnh nhất phản ứng với ion oxi hoá mạnh nhất trước.</b><br>
 <table class="kq"><tr><td>Phản ứng đầu tiên</td><td>Al + 3Ag⁺ → Al³⁺ + 3Ag↓</td></tr>
@@ -220,7 +220,7 @@ Với HCl/H₂SO₄ loãng: Cr → <b>Cr(II)</b>.<br>
 <tr><td>Nếu thu 2 muối</td><td>Al³⁺ và <b>Fe²⁺</b></td></tr></table>`,
   meo: 'Quy tắc "trước – trước, sau – sau": KL mạnh nhất tan trước, ion mạnh nhất bị khử trước.' },
 
-{ so: 24, chu_de: 'Kim loại + các dung dịch', cap: 2,
+{ so: 24, chu_de: 'Kim loại + các dung dịch', cd: 'Đại cương kim loại', cap: 2,
   hoi: 'Trong Al, Na, Ag, Cu, Fe, Zn, Mg, Ca — chất nào tác dụng CuCl₂ / NaOH / FeCl₃ / FeCl₂ / HCl?',
   dap: `<table class="kq"><tr><th>Dung dịch</th><th>Kim loại phản ứng</th></tr>
 <tr><td>CuCl₂</td><td>Al, Na, Fe, Zn, Mg, Ca <i>(Na, Ca phản ứng với H₂O trước)</i></td></tr>
@@ -342,7 +342,7 @@ Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của
 <tr><td>Cl₂</td><td><b>vàng lục</b></td><td>làm mất màu quỳ ẩm; vừa khử vừa oxh</td></tr></table>`,
   meo: 'Phân biệt CO₂ và SO₂: cả hai làm đục nước vôi, nhưng <b>chỉ SO₂ làm mất màu nước brom</b>.' },
 
-{ so: 35, cd: 'Sắt – Crom', chu_de: 'Màu sắc kết tủa & dung dịch', cap: 1,
+{ so: 35, cd: 'Sắt – Crom', chu_de: 'Màu sắc kết tủa & dung dịch', cd: '*', cap: 1,
   hoi: 'Vì sao Al và Cr bền trong không khí? Màu của các kết tủa hay gặp?',
   dap: `Al và Cr bền vì có <b>màng oxit Al₂O₃, Cr₂O₃ đặc khít</b> bảo vệ.<br>
 <table class="kq small"><tr><td>Al(OH)₃, Zn(OH)₂, BaSO₄, AgCl, CaCO₃</td><td>↓ <b>trắng</b></td></tr>
@@ -494,7 +494,7 @@ C₂H₄(OH)₂ + 2CuO <span class="ar">t°</span> (CHO)₂ + 2Cu + 2H₂O<br>
 <tr><td>H₂ (Ni, t°)</td><td>tạo alcohol bậc I</td><td><b>chất oxi hoá</b></td></tr></table>`,
   meo: 'Aldehyde vừa khử vừa oxi hoá — nhưng trong đề "tráng bạc/Br₂/Cu(OH)₂" thì nó LUÔN là chất khử.' },
 
-{ so: 47, chu_de: 'Carboxylic acid', cap: 2,
+{ so: 47, chu_de: 'Carboxylic acid', cd: 'Đại cương hữu cơ', cap: 2,
   hoi: 'So sánh acid acetic và acid formic qua các thuốc thử.',
   dap: `Acid tác dụng kim loại <b>đứng trước H</b>.<br>
 <table class="kq small"><tr><th></th><th>CaCO₃</th><th>Tráng bạc</th><th>Quỳ tím</th><th>Na</th><th>Cu</th><th>Cu(OH)₂</th><th>NaOH</th><th>Nước Br₂</th></tr>
@@ -702,7 +702,7 @@ C₆H₁₂O₆ <span class="ar">men</span> 2C₂H₅OH + 2CO₂
 n<sub>Ag</sub>/n<sub>chất</sub> = 4 ⇒ chất là HCHO hoặc aldehyde 2 chức.`,
   meo: 'Thấy tỉ lệ n<sub>Ag</sub> = 4n<sub>X</sub> mà X đơn chức ⇒ X là <b>HCHO</b> (hoặc HCOOH nếu đề hỏi acid... nhưng HCOOH chỉ cho 2Ag).' },
 
-{ so: 65, chu_de: 'Phản ứng với AgNO₃/NH₃', cap: 2,
+{ so: 65, chu_de: 'Phản ứng với AgNO₃/NH₃', cd: 'Đại cương hữu cơ', cap: 2,
   hoi: 'Nhóm chức nào tác dụng AgNO₃/NH₃? Hiện tượng khác nhau ra sao?',
   dap: `<b>2 trường hợp:</b> ① có <b>–CHO</b> → ↓ Ag trắng bạc (tráng bạc) · ② có <b>liên kết ba đầu mạch (C≡CH)</b> → ↓ <b>vàng</b> (kết tủa acetylide).<br>
 <table class="kq small"><tr><th>Chất</th><th>Hiện tượng / sản phẩm</th></tr>
@@ -715,7 +715,7 @@ n<sub>Ag</sub>/n<sub>chất</sub> = 4 ⇒ chất là HCHO hoặc aldehyde 2 ch�
 <tr><td>CH₃COOH</td><td>không tráng bạc, chỉ tạo muối CH₃COONH₄</td></tr></table>`,
   meo: 'Bẫy: but-2-yne có nối ba nhưng ở GIỮA mạch ⇒ không tạo kết tủa vàng.' },
 
-{ so: 66, chu_de: 'So sánh n(H₂O) và n(CO₂) khi đốt cháy', cap: 3,
+{ so: 66, chu_de: 'So sánh n(H₂O) và n(CO₂) khi đốt cháy', cd: 'Đại cương hữu cơ', cap: 3,
   hoi: 'Đốt cháy dãy nào cho nH₂O > nCO₂, = , < ? Suy ra công thức tính số mol.',
   dap: `<table class="kq"><tr><th>Chất đốt cháy</th><th>Quan hệ</th><th>Công thức</th></tr>
 <tr><td>Alkane</td><td>n<sub>H₂O</sub> &gt; n<sub>CO₂</sub></td><td><b>n<sub>alkane</sub> = n<sub>H₂O</sub> − n<sub>CO₂</sub></b></td></tr>
@@ -727,7 +727,7 @@ n<sub>Ag</sub>/n<sub>chất</sub> = 4 ⇒ chất là HCHO hoặc aldehyde 2 ch�
 <b>Tổng quát:</b> n<sub>chất</sub> · (k − 1) = n<sub>CO₂</sub> − n<sub>H₂O</sub> &nbsp;(k = độ bất bão hoà).`,
   meo: 'Công thức tổng quát trên giải được MỌI bài đốt cháy — chỉ cần biết k. Học thuộc nó thay vì học 6 dòng riêng lẻ.' },
 
-{ so: 67, chu_de: 'So sánh nhiệt độ sôi, tính base, tính acid', cap: 2,
+{ so: 67, chu_de: 'So sánh nhiệt độ sôi, tính base, tính acid', cd: 'Đại cương hữu cơ', cap: 2,
   hoi: 'Sắp xếp nhiệt độ sôi, tính base của amine, tính acid của các chất.',
   dap: `<b>Nhiệt độ sôi</b> (cùng số C): <b>acid &gt; alcohol &gt; amine &gt; ester &gt; aldehyde/ketone &gt; hydrocarbon</b> (do liên kết hydrogen mạnh dần).<br>
 <b>Tính base:</b> (CH₃)₂NH &gt; C₂H₅NH₂ &gt; CH₃NH₂ &gt; NH₃ &gt; C₆H₅NH₂<br>
@@ -848,7 +848,7 @@ Phản ứng tự xảy ra khi E°<sub>pin</sub> &gt; 0, tức chất khử củ
 <b>m<sub>dd giảm</sub> = m<sub>KL bám catot</sub> + m<sub>khí thoát ra</sub></b>`,
   meo: 'Bài điện phân luôn quy về n<sub>e</sub> = It/96500 rồi "chia" cho 2 cực. Vẽ 2 cột catot/anot trên nháp là xong.' },
 
-{ so: 78, cd: 'Sắt – Crom', moi: true, chu_de: 'Phức chất', cap: 2,
+{ so: 78, cd: 'Sắt – Crom', moi: true, chu_de: 'Phức chất', cd: 'Phức chất', cap: 2,
   hoi: 'Phức chất gồm những thành phần nào? Số phối trí và dạng hình học thường gặp?',
   dap: `<b>Phức chất</b> = <b>nguyên tử/ion trung tâm</b> (thường là ion kim loại chuyển tiếp) + các <b>phối tử (ligand)</b> liên kết bằng <b>liên kết cho – nhận</b> (phối tử cho cặp e).<br>
 <table class="kq"><tr><td>Phối tử hay gặp</td><td>H₂O (aqua), NH₃ (ammine), Cl⁻ (chlorido), OH⁻, CN⁻</td></tr>

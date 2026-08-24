@@ -43,7 +43,7 @@ TD.KHO.sinh_ct = [
   vd: 'AaBbCc (3 cặp dị hợp) tự thụ ⇒ 2³ = <b>8 loại giao tử</b>, 3³ = <b>27 kiểu gene</b>, 2³ = <b>8 kiểu hình</b>.',
   bay: 'Công thức 3ⁿ, 2ⁿ chỉ đúng khi các gene <b>phân li độc lập</b> và <b>trội hoàn toàn</b>. Trội không hoàn toàn thì số kiểu hình = số kiểu gene.' },
 
-{ nhom: 'II. Di truyền NST', ten: 'Liên kết gene & hoán vị gene', cap: 4,
+{ nhom: 'II. Di truyền NST', ten: 'Liên kết gene & hoán vị gene', cd: 'Di truyền NST', cap: 4,
   ct: '<b>Tần số hoán vị: f = (số cá thể tái tổ hợp / tổng số cá thể) × 100%</b> &nbsp;(0% ≤ f ≤ 50%)<br><b>Tỉ lệ giao tử ở cơ thể dị hợp 2 cặp có hoán vị:</b><br>&nbsp;&nbsp;• 2 giao tử <b>liên kết</b> (giống bố mẹ): mỗi loại = <b>(1 − f)/2</b><br>&nbsp;&nbsp;• 2 giao tử <b>hoán vị</b>: mỗi loại = <b>f/2</b><br><b>Khoảng cách gene trên NST = f (đơn vị cM — centiMorgan)</b><br>Liên kết hoàn toàn (f = 0): AB/ab chỉ cho 2 loại giao tử AB và ab.',
   khi: 'Câu VDC di truyền — dạng khó nhất.',
   vd: 'f = 20% ⇒ giao tử AB = ab = 40%; Ab = aB = <b>10%</b> (nếu kiểu gene AB/ab).',
@@ -88,7 +88,7 @@ TD.KHO.sinh_ct = [
   bay: 'Lai xa + đa bội hoá hình thành loài mới <b>ngay lập tức</b> — nhanh nhất trong các con đường.' },
 
 /* ============ V. SINH THÁI HỌC ============ */
-{ nhom: 'V. Sinh thái', ten: 'Quần thể sinh vật', cap: 2,
+{ nhom: 'V. Sinh thái', ten: 'Quần thể sinh vật', cd: 'Sinh thái học', cap: 2,
   ct: '<b>Kích thước quần thể: N<sub>t</sub> = N₀ + B − D + I − E</b><br>&nbsp;&nbsp;(B: sinh, D: tử, I: nhập cư, E: xuất cư)<br><b>Mật độ = số cá thể / đơn vị diện tích (thể tích)</b> — đặc trưng quan trọng nhất.<br><b>Tăng trưởng:</b> đường cong <b>J</b> (môi trường lí tưởng, không giới hạn) · đường cong <b>S</b> (có giới hạn, tiệm cận sức chứa K).<br>3 kiểu phân bố: đồng đều (cạnh tranh gay gắt) · <b>theo nhóm (phổ biến nhất)</b> · ngẫu nhiên.<br>3 dạng tháp tuổi: phát triển · ổn định · suy thoái.',
   khi: 'Câu về quần thể, biểu đồ tăng trưởng.',
   vd: 'Tăng trưởng thực tế của quần thể luôn theo <b>đường cong chữ S</b> vì nguồn sống có hạn.',
@@ -137,13 +137,13 @@ TD.KHO.sinh_ct = [
 TD.KHO.sinh_ct.push(
 
 /* ============ BỔ SUNG: PHỦ KÍN CÔNG THỨC CÓ THỂ RA THI ============ */
-{ nhom: 'II. Di truyền NST', ten: 'Số loại kiểu gene & kiểu hình', cap: 2,
+{ nhom: 'II. Di truyền NST', ten: 'Số loại kiểu gene & kiểu hình', cd: 'Di truyền NST', cap: 2,
   ct: '<b>Một gene có n allele</b> ⇒ số kiểu gene = n(n+1)/2 (trên NST thường)<br>Nhiều gene phân li độc lập: nhân số kiểu gene của từng gene.<br>Gene trên X (không có allele trên Y): số KG = n(n+1)/2 (giới XX) + n (giới XY).<br>Phép lai nhiều cặp tính trạng PLĐL: tách riêng từng cặp rồi NHÂN kết quả.',
   khi: 'Bài đếm số kiểu gene tối đa trong quần thể.',
   vd: 'Gene có 3 allele trên NST thường ⇒ 3·4/2 = <b>6 kiểu gene</b>.',
   bay: 'Gene trên vùng tương đồng X–Y thì công thức khác. Đọc kĩ đề nói gene nằm ở vùng nào.' },
 
-{ nhom: 'II. Di truyền NST', ten: 'Tương tác gene & tỉ lệ biến dạng', cap: 3,
+{ nhom: 'II. Di truyền NST', ten: 'Tương tác gene & tỉ lệ biến dạng', cd: 'Di truyền NST', cap: 3,
   ct: 'F₂ của phép lai 2 cặp gene (AaBb × AaBb) luôn có nền 9 : 3 : 3 : 1, các kiểu tương tác chỉ gộp lại:<br>· <b>9 : 7</b> bổ sung · <b>9 : 6 : 1</b> bổ sung · <b>9 : 3 : 4</b> át chế lặn<br>· <b>12 : 3 : 1</b> át chế trội · <b>13 : 3</b> át chế trội · <b>15 : 1</b> cộng gộp<br>Tổng luôn bằng 16 ⇒ nhận ra ngay là tương tác gene.',
   khi: 'Câu vận dụng cao về quy luật di truyền.',
   vd: 'F₂ có tỉ lệ 9 : 7 ⇒ tương tác BỔ SUNG, cần cả A và B mới cho kiểu hình trội.',
@@ -167,13 +167,13 @@ TD.KHO.sinh_ct.push(
   vd: 'Aa tự thụ 3 thế hệ ⇒ Aa = 1/8 = <b>12,5 %</b>, AA = aa = 43,75 %.',
   bay: 'Tự thụ phấn KHÔNG làm đổi tần số allele — chỉ đổi cấu trúc kiểu gene. Nhiều bạn nhầm chỗ này.' },
 
-{ nhom: 'III. Di truyền quần thể', ten: 'Hardy – Weinberg cho gene trên X', cap: 3,
+{ nhom: 'III. Di truyền quần thể', ten: 'Hardy – Weinberg cho gene trên X', cd: 'Di truyền quần thể', cap: 3,
   ct: 'Giới XY: tần số kiểu hình = tần số allele (X^A Y và X^a Y ⇒ p và q).<br>Giới XX: p² X^A X^A + 2pq X^A X^a + q² X^a X^a.<br>Tần số allele chung của quần thể: p = (2·p<sub>XX</sub> + p<sub>XY</sub>)/3 khi tỉ lệ giới 1 : 1.<br>Vì vậy bệnh lặn trên X biểu hiện ở nam nhiều hơn nữ rất nhiều khi q nhỏ.',
   khi: 'Bài quần thể có gene trên NST giới tính.',
   vd: 'q = 0,1 ⇒ nam bệnh 10 %, nữ bệnh chỉ q² = <b>1 %</b>.',
   bay: 'Đừng áp p² + 2pq + q² cho giới XY — giới đó chỉ có một allele nên tần số kiểu hình bằng luôn tần số allele.' },
 
-{ nhom: 'V. Sinh thái', ten: 'Tăng trưởng & kích thước quần thể', cap: 2,
+{ nhom: 'V. Sinh thái', ten: 'Tăng trưởng & kích thước quần thể', cd: 'Sinh thái học', cap: 2,
   ct: '<b>N<sub>t</sub> = N₀ + B − D + I − E</b> (sinh − tử + nhập cư − xuất cư)<br>Tăng trưởng theo tiềm năng sinh học (đường cong J): dN/dt = rN<br>Tăng trưởng thực tế (đường cong S): dN/dt = rN(K − N)/K, K là sức chứa môi trường.<br>Mật độ = số cá thể / đơn vị diện tích (hoặc thể tích).',
   khi: 'Bài về biến động số lượng cá thể, khai thác hợp lí.',
   vd: 'Khai thác hợp lí nên giữ quần thể ở khoảng <b>N = K/2</b> — nơi tốc độ tăng trưởng lớn nhất.',

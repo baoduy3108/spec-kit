@@ -32,7 +32,7 @@ TD.KHO.hoa_ct = [
   bay: 'Quên rằng dung dịch LUÔN trung hoà điện — kể cả khi đề không nhắc.' },
 
 /* ---------- II. KỸ THUẬT NÂNG CAO ---------- */
-{ nhom: 'Kỹ thuật', ten: 'Quy đổi hỗn hợp', cap: 4,
+{ nhom: 'Kỹ thuật', ten: 'Quy đổi hỗn hợp', cd: '*', cap: 4,
   ct: 'Quy hỗn hợp phức tạp về <b>các nguyên tố đơn giản</b> hoặc <b>ít chất hơn</b>, giữ nguyên tổng khối lượng và số mol nguyên tố.<br>VD: {Fe, FeO, Fe₂O₃, Fe₃O₄} → quy về <b>{Fe: a; O: b}</b>',
   khi: 'Hỗn hợp oxit sắt nhiều loại; hỗn hợp peptide; hỗn hợp chất béo; hỗn hợp S và hợp chất S.',
   vd: 'Hoà tan 11,2 g hỗn hợp oxit sắt bằng HNO₃ → 0,05 mol NO. Đặt Fe = a, O = b: 56a + 16b = 11,2 và 3a = 2b + 3·0,05.',
@@ -106,7 +106,7 @@ TD.KHO.hoa_ct = [
   vd: 'X là amine no đơn hở, đốt cho 0,2 mol CO₂ và 0,35 mol H₂O ⇒ n<sub>X</sub> = (0,35−0,2)/1,5 = 0,1 ⇒ C = 2 ⇒ <b>C₂H₇N</b>.',
   bay: 'Muối amoni hữu cơ (CH₃COONH₄, HCOOH₃NCH₃) cũng + NaOH cho khí — dễ nhầm với ester.' },
 
-{ nhom: 'Hữu cơ', ten: 'Bài toán hiệu suất', cap: 2,
+{ nhom: 'Hữu cơ', ten: 'Bài toán hiệu suất', cd: '*', cap: 2,
   ct: 'H% = (lượng thực tế / lượng lý thuyết) × 100%<br>Đi <b>xuôi</b> (từ đầu → sản phẩm): <b>nhân</b> H%<br>Đi <b>ngược</b> (từ sản phẩm → nguyên liệu): <b>chia</b> H%<br>Qua nhiều giai đoạn: H<sub>tổng</sub> = H₁ × H₂ × …',
   khi: 'Bài lên men, ester hoá, tổng hợp NH₃, sản xuất polymer.',
   vd: 'Từ 162 g tinh bột, H = 80% ⇒ m<sub>ethanol</sub> = 162 · (92/162) · 0,8 = <b>73,6 g</b>.',
@@ -189,7 +189,7 @@ TD.KHO.hoa_ct.push(
   vd: 'PE có M = 56 000 ⇒ n = 56 000/28 = <b>2000</b>.',
   bay: 'Trùng ngưng LUÔN giải phóng phân tử nhỏ (thường là H₂O); trùng hợp thì không.' },
 
-{ nhom: 'Bảo toàn', ten: 'Kim loại tác dụng acid & muối', cap: 2,
+{ nhom: 'Bảo toàn', ten: 'Kim loại tác dụng acid & muối', cd: 'Đại cương kim loại', cap: 2,
   ct: '<b>Với HCl, H₂SO₄ loãng:</b> n<sub>H₂</sub> = ½ n<sub>e nhường</sub> = ½ n<sub>HCl</sub> = n<sub>H₂SO₄</sub><br>m<sub>muối</sub> = m<sub>KL</sub> + 71·n<sub>H₂</sub> (clorua) = m<sub>KL</sub> + 96·n<sub>H₂</sub> (sunfat)<br><b>Kim loại đẩy kim loại:</b> áp dụng tăng giảm khối lượng theo chênh lệch nguyên tử khối.<br>Thứ tự phản ứng: kim loại mạnh nhất đẩy ion kim loại yếu nhất trước.',
   khi: 'Bài kim loại + acid, kim loại + dung dịch muối.',
   vd: 'n<sub>H₂</sub> = 0,1 mol từ hỗn hợp KL nặng 5 g ⇒ m<sub>muối clorua</sub> = 5 + 7,1 = <b>12,1 g</b>.',
