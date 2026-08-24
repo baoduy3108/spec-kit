@@ -627,6 +627,231 @@ TD.diemSatThe = function (tk, van) {
   return d;
 };
 
+/* ------------------------------------------------------------
+   CÂU HỎI BẺ NHỎ TỪ CHÍNH NỘI DUNG THẺ
+   Bấm "Kiểm tra thẻ này" ở thẻ Phân bón hoá học thì phải bị hỏi "chất nào là
+   đạm nitrat", "Ca(H₂PO₄)₂ thuộc loại phân nào" — tức là chính mấy dòng vừa
+   đọc, bẻ nhỏ ra thành từng câu. Nguồn duy nhất là bảng trong thân thẻ nên
+   không bịa một chữ nào: đáp án lấy nguyên văn, phương án nhiễu lấy từ dòng
+   khác của cùng bảng.
+   ------------------------------------------------------------ */
+TD._boNhoBang = (typeof WeakMap === 'function') ? new WeakMap() : null;
+
+/* Bóc bảng hai cột "nhãn — nội dung" trong thân thẻ */
+TD.bangCuaThe = function (the) {
+  if (TD._boNhoBang && the && typeof the === 'object' && TD._boNhoBang.has(the))
+    return TD._boNhoBang.get(the);
+  const than = String((the && (the.dap || the.ct)) || '');
+  const ra = [];
+  (than.match(/<table[\s\S]*?<\/table>/g) || []).forEach(b => {
+    (b.match(/<tr[\s\S]*?<\/tr>/g) || []).forEach(tr => {
+      /* chỉ nhận dòng ĐÚNG HAI ô <td>; dòng tiêu đề <th> và bảng ba cột bỏ qua
+         cho chắc, thà ít câu còn hơn ghép nhãn với nội dung sai cột */
+      if (/<th[\s>]/.test(tr)) return;
+      const o = tr.match(/<td[^>]*>[\s\S]*?<\/td>/g) || [];
+      if (o.length !== 2) return;
+      const boThe = t => t.replace(/<td[^>]*>|<\/td>/g, '').replace(/<\/?(b|i|em|strong|u)>/g, '').trim();
+      const nhan = boThe(o[0]).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const noi = boThe(o[1]);
+      const tran = noi.replace(/<[^>]+>/g, '').trim();
+      if (!nhan || nhan.length > 44 || tran.length < 3 || tran.length > 150) return;
+      if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
+      ra.push({ nhan: nhan, noi: noi, tran: tran, chat: TD.chatTrongO(tran) });
+    });
+  });
+  const da = {};
+  const loc = ra.filter(d => {
+    const k = TD.khongDau(d.tran);
+    if (da[k]) return false; da[k] = 1; return true;
+  });
+  if (TD._boNhoBang && the && typeof the === 'object') TD._boNhoBang.set(the, loc);
+  return loc;
+};
+
+/* Tách một ô thành danh sách CÔNG THỨC/CHẤT riêng lẻ.
+   Chỉ nhận khi TOÀN BỘ phần đầu ô là danh sách chất — lẫn chữ tiếng Việt thì
+   trả mảng rỗng, vì "làm chua đất" mà đem ra hỏi "chất nào" là vô nghĩa. */
+TD.chatTrongO = function (tran) {
+  let t = String(tran).split(/[—–:]/)[0].split('…')[0].split('...')[0];
+  t = t.replace(/^\s*(chỉ|gồm|là|chủ yếu|có)\s+/i, '').trim();
+  if (!t) return [];
+  const manh = t.split(/[,;]|\s+và\s+|\s+hoặc\s+|\s·\s/)
+    .map(x => x.replace(/\([^)]{0,18}(chất|tạp|dư|đặc|loãng|nguội|nóng)[^)]{0,18}\)/gi, '').trim())
+    .filter(Boolean);
+  if (manh.length < 2 || manh.length > 9) return [];
+  const CT = /^[A-Z(\[][A-Za-z0-9₀-₉⁰-⁹⁺⁻⁄()\[\]·']*$/;
+  const dat = manh.filter(x => x.length >= 2 && x.length <= 20 && CT.test(x));
+  return dat.length === manh.length ? dat : [];
+};
+
+/* Gom bảng của các thẻ khác để có đủ phương án nhiễu */
+TD.bangCungChuDe = function (mon, the, cd) {
+  const ten = String((the && (the.chu_de || the.ten)) || '');
+  const ra = [];
+  ((TD.NGUON_LT || {})[mon] || []).forEach(([khoa]) => {
+    (TD.KHO[khoa] || []).forEach(z => {
+      if (String(z.chu_de || z.ten || '') === ten) return;
+      if (cd && (z.cd || '') !== cd) return;
+      TD.bangCuaThe(z).forEach(d => ra.push(d));
+    });
+  });
+  return ra;
+};
+
+/* Dựng câu hỏi từ bảng trong thẻ. Năm kiểu hỏi để 50 câu không bị lặp:
+   ① chất nào thuộc mục X   ② chất X thuộc mục nào   ③ chất nào KHÔNG thuộc mục X
+   ④ mục X gồm những gì     ⑤ nội dung này thuộc mục nào  + câu đúng/sai bốn ý */
+TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
+  const dong = TD.bangCuaThe(the);
+  if (!dong.length) return [];
+  const ten = String((the && (the.chu_de || the.ten)) || '').replace(/^\d+[.\s-]*/, '').trim();
+  const ngoai = TD.bangCungChuDe(mon, the, cd);
+  const xa = TD.bangCungChuDe(mon, the, null);
+  const R = TD.rng(seed || ((Math.random() * 4294967295) >>> 0));
+  const ra = [];
+  const meoThe = the.dc || the.meo || '';
+
+  const tach = t => TD.khongDau(String(t).replace(/<[^>]+>/g, ' '))
+    .replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
+  /* So bộ từ chỉ hợp với phương án DÀI (một dãy chất, một câu mô tả). Với hai
+     CÔNG THỨC ngắn thì nó phá: Pb(OH)₂ và Be(OH)₂ cùng có "oh" và "2" nên bị
+     coi là trùng nghĩa, trong khi đó là hai chất khác hẳn — và đó lại đúng là
+     kiểu phương án nhiễu tốt nhất. Công thức thì so nguyên văn. */
+  const ctDon = t => {
+    const v = String(t).replace(/<[^>]+>/g, '').trim();
+    return v.length <= 20 && v.indexOf(' ') < 0 && v.indexOf(',') < 0;
+  };
+  const dungDo = (a, b) => {
+    const va = String(a).replace(/<[^>]+>/g, '').trim(), vb = String(b).replace(/<[^>]+>/g, '').trim();
+    if (ctDon(va) && ctDon(vb)) return va === vb;
+    const A = new Set(tach(a)), B = new Set(tach(b));
+    if (!A.size || !B.size) return true;
+    let c = 0; A.forEach(w => { if (B.has(w)) c++; });
+    return c === Math.min(A.size, B.size) || c / (A.size + B.size - c) >= 0.5;
+  };
+  /* nhiễu lấy từ CHÍNH bảng này trước, cạn mới mượn thẻ cùng chuyên đề rồi cả môn */
+  const nhieu = (nhom, dung, can) => {
+    const ds = [];
+    nhom.forEach(kho => TD.xaoR(R, kho.slice()).forEach(v => {
+      if (ds.length >= can || dungDo(v, dung) || ds.some(z => dungDo(v, z))) return;
+      ds.push(v);
+    }));
+    return ds;
+  };
+  const themMC = (q, dung, s, giai, muc) => {
+    if (s.length !== 3) return;
+    const opts = TD.xaoR(R, [dung].concat(s));
+    ra.push({ q: q, opts: opts, ans: opts.indexOf(dung), muc: muc || 1, dang: 'mc',
+      giai: giai, meo: meoThe });
+  };
+
+  const coChat = dong.filter(d => d.chat.length);
+  /* Một chất nằm ở HAI dòng thì không được đem ra hỏi "thuộc nhóm nào" — ví dụ
+     Ca(H₂PO₄)₂ có mặt ở cả supephotphat đơn lẫn kép, hỏi kiểu đó là câu có hai
+     đáp án cùng đúng. */
+  const CHU = /[A-Za-z0-9₀-₉⁰-⁹]/;
+  /* có mặt như một CÔNG THỨC TRỌN VẸN, không phải trùng một đoạn của công thức
+     dài hơn (NaHS không được tính là có trong NaHSO₄) */
+  const coTrong = (van, c) => {
+    let i = van.indexOf(c);
+    while (i >= 0) {
+      const sau = van.charAt(i + c.length);
+      if (!sau || !CHU.test(sau)) return true;
+      i = van.indexOf(c, i + 1);
+    }
+    return false;
+  };
+  /* Đếm trên VĂN BẢN của mọi dòng, kể cả dòng không tách được thành chất: dòng
+     "chỉ Ca(H₂PO₄)₂ — hàm lượng cao hơn" không tách được nhưng vẫn chứa chất
+     đó, nếu bỏ qua thì lại đẻ ra câu hai đáp án cùng đúng. */
+  const demDong = {};
+  coChat.forEach(d => new Set(d.chat).forEach(c => {
+    const k = TD.khongDau(c);
+    if (demDong[k] === undefined) demDong[k] = dong.filter(z => coTrong(z.tran, c)).length;
+  }));
+  const riengMot = c => demDong[TD.khongDau(c)] === 1;
+  const moiChat = [];
+  coChat.forEach(d => d.chat.forEach(c => { if (riengMot(c)) moiChat.push({ c: c, d: d }); }));
+
+  /* ① + ② + ③ — hỏi từng CHẤT một, đây là phần đẻ ra nhiều câu nhất */
+  TD.xaoR(R, moiChat.slice()).forEach(({ c, d }) => {
+    const chatKhac = moiChat.filter(z => z.d !== d).map(z => z.c);
+    const chatNgoai = ngoai.concat(xa).reduce((z, r) => z.concat(r.chat || []), []);
+    /* ① chất nào thuộc mục này */
+    themMC(`Theo thẻ <b>«${ten}»</b>, chất nào sau đây thuộc nhóm <b>${d.nhan}</b>?`,
+      c, nhieu([chatKhac, chatNgoai], c, 3),
+      `Bảng trong thẻ «${ten}» xếp <b>${c}</b> vào nhóm <b>${d.nhan}</b>.\n`
+      + `Cả nhóm này gồm: ${d.tran}.`, 1);
+    /* ② chất này thuộc mục nào */
+    const nhanKhac = dong.filter(z => z !== d).map(z => z.nhan);
+    /* Phương án nhiễu là NHÃN thì tuyệt đối không mượn thẻ khác chuyên đề:
+       hỏi "NaHS thuộc nhóm nào" mà bày ra "Tạo nilon-6,6" thì lộ đáp án ngay,
+       chưa kể trông như lỗi. Không đủ nhãn cùng chuyên đề thì bỏ câu này. */
+    themMC(`Theo thẻ <b>«${ten}»</b>, <b>${c}</b> thuộc nhóm nào sau đây?`,
+      d.nhan, nhieu([nhanKhac, ngoai.map(z => z.nhan)], d.nhan, 3),
+      `Bảng trong thẻ «${ten}» xếp <b>${c}</b> vào nhóm <b>${d.nhan}</b>.\n`
+      + `Nhóm ${d.nhan} gồm: ${d.tran}.`, 2);
+  });
+
+  /* ③ chất nào KHÔNG thuộc mục này — mỗi mục một câu */
+  coChat.forEach(d => {
+    if (d.chat.length < 3) return;
+    const ngoaiNhom = moiChat.filter(z => z.d !== d).map(z => z.c);
+    if (!ngoaiNhom.length) return;
+    const dung = TD.xaoR(R, ngoaiNhom.slice())[0];
+    /* ba phương án còn lại phải chắc chắn THUỘC nhóm này, nên cũng loại chất
+       nằm ở nhiều dòng */
+    const s = TD.xaoR(R, d.chat.filter(riengMot)).slice(0, 3);
+    if (s.length !== 3) return;
+    const opts = TD.xaoR(R, [dung].concat(s));
+    const cua = (dong.find(z => (z.chat || []).indexOf(dung) >= 0) || {}).nhan || '';
+    ra.push({ q: `Theo thẻ <b>«${ten}»</b>, chất nào sau đây <b>KHÔNG</b> thuộc nhóm <b>${d.nhan}</b>?`,
+      opts: opts, ans: opts.indexOf(dung), muc: 2, dang: 'mc',
+      giai: `Nhóm ${d.nhan} trong thẻ «${ten}» gồm: ${d.tran}.\n`
+        + `<b>${dung}</b> không nằm trong dãy đó${cua ? ` — nó thuộc nhóm <b>${cua}</b>` : ''}.`,
+      meo: meoThe });
+  });
+
+  /* ④ + ⑤ — hỏi cả dòng, dùng được cho cả những ô không tách được thành chất */
+  dong.forEach(d => {
+    const khac = dong.filter(z => z !== d);
+    /* xếp trước những dòng CÙNG kiểu (cũng là danh sách chất) để bốn phương án
+       trông đồng nhất, không lộ đáp án vì ba phương án kia toàn chữ */
+    const cungKieu = z => (z.chat.length > 0) === (d.chat.length > 0);
+    themMC(`Theo bảng trong thẻ <b>«${ten}»</b>, mục <b>${d.nhan}</b> ứng với nội dung nào sau đây?`,
+      d.noi, nhieu([khac.filter(cungKieu).map(z => z.noi), ngoai.filter(cungKieu).map(z => z.noi),
+                    khac.map(z => z.noi), ngoai.map(z => z.noi), xa.filter(cungKieu).map(z => z.noi)], d.noi, 3),
+      `Bảng trong thẻ «${ten}» ghi rõ:\n${d.nhan} → ${d.tran}`, 1);
+    themMC(`Nội dung sau thuộc mục nào trong thẻ <b>«${ten}»</b>?<br><b>${d.noi}</b>`,
+      d.nhan, nhieu([khac.map(z => z.nhan), ngoai.map(z => z.nhan)], d.nhan, 3),
+      `Bảng trong thẻ «${ten}» xếp ${d.tran} vào mục <b>${d.nhan}</b>.`, 2);
+  });
+
+  /* ⑥ câu đúng/sai bốn ý ghép từ chính bảng: "X thuộc nhóm Y" đúng hay sai */
+  if (moiChat.length >= 6 && dong.length >= 2) {
+    const daBo = {};
+    for (let lan = 0; lan < 40 && ra.length < (canBaoNhieu || 50) + 12; lan++) {
+      const bo = TD.xaoR(R, moiChat.slice()).slice(0, 4);
+      if (bo.length < 4) break;
+      const items = bo.map(z => {
+        const that = R() < 0.5;
+        const nhanSai = TD.xaoR(R, dong.filter(x => x !== z.d))[0];
+        const dat = that || !nhanSai ? z.d : nhanSai;
+        return { t: `${z.c} thuộc nhóm ${dat.nhan}.`, a: dat === z.d, _c: z.c, _d: z.d, _dat: dat };
+      });
+      const khoa = items.map(x => x.t).join('|');
+      if (daBo[khoa]) continue;
+      daBo[khoa] = 1;
+      ra.push({ q: `Về thẻ <b>«${ten}»</b>, xét tính đúng/sai của từng phát biểu sau:`,
+        items: items.map(x => ({ t: x.t, a: x.a })), muc: 2, dang: 'ds',
+        giai: items.map((x, i) => `Ý ${'abcd'[i]}) ${x.a ? 'ĐÚNG' : 'SAI'} — theo bảng trong thẻ, `
+          + `${x._c} thuộc nhóm ${x._d.nhan}${x.a ? '' : ` chứ không phải ${x._dat.nhan}`}.`).join('\n'),
+        meo: 'Xét từng ý ĐỘC LẬP với nhau. Cả bốn ý cùng đúng là hoàn toàn có thể.' });
+    }
+  }
+  return TD.xaoR(R, ra);
+};
+
 /* Trả về phạm vi kiểm tra của một thẻ, KHÔNG dựng câu — dùng để đặt tên nút. */
 TD.phamViThe = function (mon, the) {
   const cd = TD.chuDeCuaThe(mon, the);
@@ -634,7 +859,13 @@ TD.phamViThe = function (mon, the) {
   const ten = String((the && (the.chu_de || the.ten)) || '').replace(/^\d+[.\s-]*/, '').trim();
   const chiSo = [];
   kho.forEach((z, i) => { if (cd && (z.cd || '') === cd) chiSo.push(i); });
-  if (!cd || chiSo.length < 4) return { cd: cd, ten: ten, nong: [], mau: [], rieng: false };
+  /* Bảng trong thân thẻ là nguồn câu sát thẻ nhất và không phụ thuộc kho mệnh
+     đề — bóc trước, vì nhiều thẻ không ghép được chuyên đề nào nhưng vẫn có
+     bảng để hỏi. */
+  const bangT = TD.bangCuaThe(the);
+  if (!cd || chiSo.length < 4)
+    return { cd: cd, ten: ten, nong: [], mau: [], bang: bangT,
+             rieng: !!ten && ten !== cd && bangT.length >= 2 };
   const tk = TD.tuKhoaThe(the);
   const nong = chiSo.filter(i => TD.diemSatThe(tk, (kho[i].t || '') + ' ' + (kho[i].v || '')) >= TD.NGUONG_SAT_THE);
   /* Bộ sinh đề khai thẳng tên thẻ ở trường chuong thì chắc chắn là của thẻ đó */
@@ -646,8 +877,73 @@ TD.phamViThe = function (mon, the) {
   /* Ngưỡng 6 mệnh đề (hoặc 2 bộ sinh riêng) mới đủ dựng trọn phần đầu lượt kiểm
      tra bằng câu của chính thẻ. Ít hơn thế mà vẫn ghi tên thẻ lên nút thì chỉ
      vài câu đầu là đúng, phần sau lạc sang chuyên đề — đúng cái người học kêu. */
-  return { cd: cd, ten: ten, nong: nong, mau: mau,
-           rieng: !!ten && ten !== cd && nong.length >= 6 };
+  return { cd: cd, ten: ten, nong: nong, mau: mau, bang: bangT,
+           rieng: !!ten && ten !== cd && (nong.length >= 6 || bangT.length >= 2) };
+};
+
+/* Lượt kiểm tra của MỘT thẻ: 50 câu như mọi lượt khác, nhưng bẻ nhỏ từ chính
+   kiến thức trong thẻ. Trần cho từng nguồn để không lượt nào biến thành 50 lần
+   cùng một dạng bài chỉ đổi số. Thẻ nào không đẻ đủ 50 câu thì mới nới ra
+   chuyên đề, và nút sẽ ghi rõ bao nhiêu câu đầu bám sát thẻ. */
+TD.deRiengThe = function (mon, the, soCau) {
+  const n = soCau || TD.SO_CAU_KIEM_TRA;
+  const pv = TD.phamViThe(mon, the);
+  const kho = TD.KHO_LT[mon] || [];
+  const hat = () => (Math.random() * 4294967295) >>> 0;
+  /* Ba giỏ theo DẠNG câu. Đề thật chỉ dành khoảng 1/4 số câu cho dạng đúng/sai
+     bốn ý, nên phải chia giỏ rồi mới trộn — không thì thẻ nào bảng to là cả
+     lượt kiểm tra thành ba chục câu đúng/sai liên tiếp. */
+  const gio = { mc: [], ds: [], tln: [] };
+  const bo = (k, x) => gio[k].push(x);
+
+  /* ① bài tập của bộ sinh mang đúng tên thẻ — mỗi bộ tối đa 1/8 lượt */
+  const tranMau = Math.max(2, Math.round(n / 8));
+  (pv.mau || []).forEach(t => {
+    const k = t.dang === 'ds' ? 'ds' : (t.dang === 'tln' ? 'tln' : 'mc');
+    for (let i = 0, thu = 0; i < tranMau && thu < tranMau * 8; thu++) {
+      const seed = hat();
+      if (TD.sinhCau(t, seed)) { bo(k, { mon: mon, g: t.ma, s: seed }); i++; }
+    }
+  });
+  /* ② mệnh đề sát thẻ hỏi thành câu trắc nghiệm */
+  (pv.nong || []).forEach(i => bo('mc', {
+    mon: mon, lt: i, c: kho[i].a ? 'd' : 's', s: hat(), nhan: pv.ten, loc: pv.nong
+  }));
+  /* ③ đúng/sai bốn ý gom từ nhóm mệnh đề sát thẻ */
+  if ((pv.nong || []).length >= 4) {
+    const da = {};
+    for (let thu = 0; thu < 90 && Object.keys(da).length < 6; thu++) {
+      const b2 = TD.xao(pv.nong.slice()).slice(0, 4).sort((x, y) => x - y), k = b2.join('-');
+      if (da[k]) continue;
+      da[k] = 1;
+      bo('ds', { mon: mon, dsy: b2, cd: pv.cd, nhan: pv.ten, s: hat() });
+    }
+  }
+  /* ④ câu bẻ nhỏ từ bảng trong thẻ — nguồn chính */
+  TD.cauBangThe(mon, the, pv.cd, hat(), n).forEach((c, k) =>
+    bo(c.dang === 'ds' ? 'ds' : 'mc', { mon: mon, cau: c, khoaTu: pv.ten + '/' + k }));
+
+  /* Hạn ngạch: đúng/sai bốn ý và tự luận mỗi loại tối đa 1/4 lượt kiểm tra,
+     phần còn lại là trắc nghiệm — đúng dáng đề thi. */
+  const lay = (k, tran) => TD.xao(gio[k]).slice(0, tran);
+  const rieng = TD.xao(lay('mc', n)
+    .concat(lay('ds', Math.round(n * 0.25)))
+    .concat(lay('tln', Math.round(n * 0.25)))).slice(0, n);
+  const sat = rieng.length;
+
+  /* ⑤ chưa đủ thì nới ra chuyên đề, xếp SAU phần sát thẻ */
+  const them = [];
+  if (rieng.length < n && pv.cd) {
+    const daCo = {};
+    rieng.forEach(x => { if (x.lt !== undefined) daCo[x.lt] = 1; });
+    for (let vong = 0; vong < 3 && rieng.length + them.length < n; vong++)
+      TD.deChuyenDe(mon, pv.cd, n).forEach(x => {
+        if (rieng.length + them.length >= n) return;
+        if (x.lt !== undefined) { if (daCo[x.lt]) return; daCo[x.lt] = 1; }
+        them.push(x);
+      });
+  }
+  return { ds: rieng.concat(them), ten: pv.ten, cd: pv.cd, sat: sat };
 };
 
 TD.timMau = function (mon, ma) {
