@@ -1,116 +1,123 @@
 /* ============================================================
-   NGỮ VĂN — BÙ CÁC THỂ LOẠI MỚI CỦA SGK 12 (CT 2018)
-   Ngữ liệu đọc hiểu lấy hoàn toàn NGOÀI sách giáo khoa, nhưng THỂ LOẠI
-   thì vẫn nằm trong danh mục chương trình. Kho cũ thiếu hẳn bốn thể loại
-   mà cả ba bộ sách lớp 12 đều dạy: truyện truyền kì · hài kịch · văn tế ·
-   tuỳ bút. Không nhận ra thể loại là hỏng ngay câu đầu phần Đọc hiểu.
+   NGỮ VĂN — NHẬN DIỆN THỂ LOẠI TRONG MƯỜI GIÂY
+   Câu 1 phần Đọc hiểu gần như năm nào cũng hỏi "xác định thể thơ" hoặc
+   "xác định thể loại / phương thức biểu đạt". Đó là 0,5 điểm cho không,
+   nhưng chỉ ăn được nếu nhận ra ngay mà không phải đọc hết bài.
+   Bốn thẻ dưới đây là quy trình đếm — nhìn hình dáng văn bản là ra.
    ============================================================ */
-window.TD = window.TD || {}; TD.KHO = TD.KHO || {}; TD.KHO_LT = TD.KHO_LT || {}; TD.GEN = TD.GEN || {};
+window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
 
 (function () {
-const CD = 'Thể loại';
+const them = (khoa, ds) => { TD.KHO[khoa] = (TD.KHO[khoa] || []).concat(ds); };
 
-TD.KHO.van_ct = (TD.KHO.van_ct || []).concat([
+them('van_ct', [
 
-{ nhom: 'Đọc hiểu', cd: CD, ten: 'Bốn thể loại của SGK 12 mà đề hay lấy ngữ liệu', cap: 2,
-  ct: '<b>① TRUYỆN TRUYỀN KÌ</b><br>'
-    + '&nbsp;&nbsp;Dấu hiệu: có yếu tố <b>KÌ ẢO</b> (thần tiên, ma quỷ, hoá thân, báo mộng) đan xen với chuyện đời thực.<br>'
-    + '&nbsp;&nbsp;Cốt truyện thường theo trục: gặp nạn → yếu tố kì ảo can thiệp → kết thúc có tính răn dạy.<br>'
-    + '&nbsp;&nbsp;Chức năng của cái kì ảo: KHÔNG phải để doạ, mà để nói điều hiện thực không nói thẳng được — '
-    + 'phê phán bất công, bênh vực người yếu thế.<br>'
-    + '&nbsp;&nbsp;Khi phân tích phải chỉ ra: yếu tố kì ảo là gì · nó xuất hiện lúc nào · nó phục vụ ý nghĩa nào.<br>'
-    + '<b>② HÀI KỊCH</b><br>'
-    + '&nbsp;&nbsp;Dấu hiệu: viết bằng LỜI THOẠI, có chỉ dẫn sân khấu đặt trong ngoặc đơn.<br>'
-    + '&nbsp;&nbsp;Cốt lõi là <b>XUNG ĐỘT giữa cái đáng cười với chuẩn mực</b>: nhân vật tự cho mình là gì đó '
-    + 'mà thực chất không phải.<br>'
-    + '&nbsp;&nbsp;Thủ pháp gây cười: phóng đại · tương phản giữa lời nói và hành động · hiểu lầm · lặp lại.<br>'
-    + '&nbsp;&nbsp;Mục đích: cười để SỬA, nên bao giờ cũng có ý phê phán một thói tật xã hội.<br>'
-    + '<b>③ VĂN TẾ</b><br>'
-    + '&nbsp;&nbsp;Là bài văn đọc khi tế người đã mất, viết theo lối biền ngẫu, có vần và đối.<br>'
-    + '&nbsp;&nbsp;Bố cục bốn phần: <b>Lung khởi</b> (mở đầu khái quát lẽ sống chết) → <b>Thích thực</b> '
-    + '(kể lại cuộc đời, công đức người mất) → <b>Ai vãn</b> (bày tỏ niềm thương tiếc) → '
-    + '<b>Kết</b> (lời cầu nguyện, khẳng định).<br>'
-    + '&nbsp;&nbsp;Giọng điệu: bi tráng — vừa xót thương vừa ngợi ca.<br>'
-    + '<b>④ TUỲ BÚT và TẢN VĂN</b><br>'
-    + '&nbsp;&nbsp;Đều thuộc loại KÍ, ghi chép người thật việc thật nhưng đậm chất trữ tình.<br>'
-    + '&nbsp;&nbsp;Tuỳ bút: mạch theo <b>CẢM XÚC</b> của cái tôi tác giả, tự do liên tưởng, ngôn ngữ giàu hình ảnh.<br>'
-    + '&nbsp;&nbsp;Tản văn: ngắn hơn, bám vào một sự việc hoặc một đối tượng cụ thể rồi bàn rộng ra.<br>'
-    + '&nbsp;&nbsp;Cả hai đều KHÔNG có cốt truyện hoàn chỉnh — đó là dấu hiệu phân biệt với truyện ngắn.',
-  khi: 'Câu đầu phần Đọc hiểu gần như luôn hỏi thể loại hoặc đặc điểm thể loại.',
-  vd: 'Ngữ liệu có lời thoại kèm chỉ dẫn "(cười khẩy, quay sang khán giả)" ⇒ hài kịch, không phải truyện ngắn.',
-  bay: 'Có yếu tố kì ảo CHƯA CHẮC là truyện truyền kì — truyện ngắn hiện đại cũng dùng. Phải xem cái kì ảo có '
-     + 'đóng vai trò chuyển hướng số phận nhân vật và mang ý răn dạy hay không.' },
+{ nhom: 'A. Đọc hiểu', cd: 'Thể loại', ten: 'Nhận diện thể thơ — đếm chữ trước, đếm câu sau', cap: 1,
+  ct: '<b>Bước 1 — đếm số chữ của DÒNG ĐẦU.</b> Đó là dấu hiệu mạnh nhất.<br>'
+    + '&nbsp;&nbsp;<b>6 chữ rồi 8 chữ xen kẽ</b> → <b>lục bát</b>. Kiểm lại: chữ thứ 6 dòng sáu vần với chữ thứ 6 dòng tám.<br>'
+    + '&nbsp;&nbsp;<b>7 – 7 – 6 – 8</b> lặp thành khổ bốn dòng → <b>song thất lục bát</b>.<br>'
+    + '&nbsp;&nbsp;<b>Mọi dòng đều 7 chữ</b> → xuống bước 2 để tách Đường luật với thất ngôn hiện đại.<br>'
+    + '&nbsp;&nbsp;<b>Mọi dòng đều 5 chữ</b> → <b>thơ năm chữ</b> (ngũ ngôn).<br>'
+    + '&nbsp;&nbsp;<b>Mọi dòng đều 4 chữ</b> → <b>thơ bốn chữ</b>.<br>'
+    + '&nbsp;&nbsp;<b>Mọi dòng đều 8 chữ</b> → <b>thơ tám chữ</b>.<br>'
+    + '&nbsp;&nbsp;<b>Số chữ mỗi dòng KHÁC nhau</b>, không theo khuôn → <b>thơ tự do</b>.<br>'
+    + '<b>Bước 2 — nếu toàn dòng 7 chữ thì đếm số DÒNG:</b><br>'
+    + '&nbsp;&nbsp;<b>đúng 8 dòng</b> → <b>thất ngôn bát cú Đường luật</b>.<br>'
+    + '&nbsp;&nbsp;<b>đúng 4 dòng</b> → <b>thất ngôn tứ tuyệt</b>.<br>'
+    + '&nbsp;&nbsp;<b>chia thành nhiều khổ 4 dòng</b>, dài hơn 8 dòng → <b>thơ bảy chữ hiện đại</b>.<br>'
+    + '<b>Bước 3 — kiểm chứng bằng vần.</b> Đường luật gieo vần CHÂN, chỉ một vần bằng, ở các dòng 1, 2, 4, 6, 8.',
+  khi: 'Câu 1 phần Đọc hiểu. Làm trong 10 giây rồi sang câu khác.',
+  vd: 'Dòng đầu 6 chữ, dòng sau 8 chữ, hết khổ lại 6 rồi 8 ⇒ lục bát. Không cần đọc hiểu nội dung mới trả lời được.',
+  bay: 'Đừng gọi "thơ thất ngôn bát cú" là "thơ Đường" — <b>thơ Đường</b> là thơ đời Đường của Trung Quốc, còn '
+     + '<b>thơ Đường luật</b> là thể thơ làm theo luật ấy. Người Việt viết thì phải gọi là thơ Đường luật, hoặc '
+     + 'nói đủ "thất ngôn bát cú Đường luật".' },
 
-{ nhom: 'Đọc hiểu', cd: CD, ten: 'Ba loại văn bản của đề và cách soi mỗi loại', cap: 1,
-  ct: 'Đề chỉ lấy ngữ liệu thuộc <b>ba loại</b>, nhận ra loại nào là biết ngay phải soi cái gì.<br>'
-    + '<b>① VĂN BẢN VĂN HỌC</b> (thơ, truyện, kí, kịch)<br>'
-    + '&nbsp;&nbsp;Soi: nhân vật · tình huống · hình ảnh · biện pháp tu từ · giọng điệu · thông điệp.<br>'
-    + '&nbsp;&nbsp;Với thơ soi thêm: thể thơ, vần, nhịp, chủ thể trữ tình.<br>'
-    + '<b>② VĂN BẢN NGHỊ LUẬN</b><br>'
-    + '&nbsp;&nbsp;Soi: <b>luận đề</b> (vấn đề bàn) → <b>luận điểm</b> (các ý lớn) → <b>lí lẽ</b> → <b>bằng chứng</b>.<br>'
-    + '&nbsp;&nbsp;Hay hỏi: mục đích của tác giả · cách lập luận (diễn dịch, quy nạp, tổng – phân – hợp) · '
-    + 'yếu tố biểu cảm dùng để làm gì.<br>'
-    + '<b>③ VĂN BẢN THÔNG TIN</b><br>'
-    + '&nbsp;&nbsp;Soi: cách trình bày (theo trình tự thời gian, theo quan hệ nhân quả, theo mức độ quan trọng) · '
-    + 'phương tiện phi ngôn ngữ (sơ đồ, bảng, số liệu, ảnh) · tính chính xác và khách quan của dữ liệu.<br>'
-    + '&nbsp;&nbsp;Hay hỏi: số liệu trong bài có tác dụng gì · nhan đề và sa-pô cho biết điều gì.<br>'
-    + '<b>Ba câu hỏi luôn xuất hiện dù là loại nào:</b> ① xác định thể loại hoặc phương thức biểu đạt · '
-    + '② tìm chi tiết có sẵn trong văn bản · ③ nêu tác dụng của một yếu tố ngôn ngữ.',
-  khi: 'Ngay khi đọc dòng đầu ngữ liệu — nhận loại rồi mới đọc kỹ.',
-  vd: 'Ngữ liệu 2026 là văn bản THÔNG TIN về quyền lực công nghệ, nên câu hỏi xoay quanh số liệu và cách trình bày '
-    + 'chứ không hỏi hình ảnh thơ.',
-  bay: 'Văn bản thông tin vẫn có thể dùng biện pháp tu từ, nhưng đừng phân tích nó như văn bản văn học — '
-     + 'phải trả lời theo hướng "giúp thông tin dễ hiểu, tăng sức thuyết phục".' }
+{ nhom: 'A. Đọc hiểu', cd: 'Thể loại', ten: 'Thơ Đường luật — bố cục, niêm, luật, đối', cap: 2,
+  ct: '<b>Bố cục bốn phần</b> của bài thất ngôn bát cú:<br>'
+    + '&nbsp;&nbsp;dòng 1 – 2 <b>đề</b> (mở ra) · dòng 3 – 4 <b>thực</b> (tả cụ thể) · dòng 5 – 6 <b>luận</b> (bàn rộng) · '
+    + 'dòng 7 – 8 <b>kết</b> (khép lại, thường là chỗ gửi tình).<br>'
+    + '<b>Đối:</b> bắt buộc ở hai cặp <b>3 – 4</b> và <b>5 – 6</b>. Đối là: cùng vị trí thì cùng từ loại, ngược hoặc '
+    + 'song song về nghĩa, và trái thanh bằng – trắc. Thấy hai dòng cân nhau như hai vế câu đối là nhận ra ngay.<br>'
+    + '<b>Luật bằng – trắc:</b> xét chữ thứ HAI của dòng đầu — thanh bằng thì bài "luật bằng", thanh trắc thì "luật trắc". '
+    + 'Quy ước cho phép co giãn: <i>nhất – tam – ngũ bất luận, nhị – tứ – lục phân minh</i> (chữ 1, 3, 5 tự do; chữ 2, 4, 6 phải đúng luật).<br>'
+    + '<b>Niêm:</b> các dòng dính nhau về thanh theo cặp 1–8, 2–3, 4–5, 6–7.<br>'
+    + '<b>Vần:</b> một vần bằng duy nhất, gieo ở cuối các dòng 1, 2, 4, 6, 8.<br>'
+    + '<b>Tứ tuyệt</b> là nửa bài bát cú: 4 dòng, vần ở dòng 1, 2, 4; không bắt buộc đối.',
+  khi: 'Câu hỏi về bố cục, về phép đối, hoặc câu yêu cầu phân tích một cặp câu trong bài Đường luật.',
+  vd: 'Đề hỏi "chỉ ra phép đối trong bài" thì cứ tìm ở cặp 3 – 4 và 5 – 6, gần như luôn có.',
+  bay: 'Nhiều bạn nhầm bố cục thành "mở – thân – kết" ba phần. Đường luật là BỐN phần: đề – thực – luận – kết. '
+     + 'Và đối chỉ bắt buộc ở hai cặp giữa, không phải cả bài.' },
 
-]);
+{ nhom: 'A. Đọc hiểu', cd: 'Thể loại', ten: 'Truyện — tuỳ bút — tản văn: phân biệt bằng ba câu hỏi', cap: 2,
+  ct: 'Đọc bốn năm dòng đầu rồi hỏi lần lượt:<br>'
+    + '<b>① Có nhân vật có tên và có việc xảy ra nối tiếp nhau không?</b><br>'
+    + '&nbsp;&nbsp;Có → <b>truyện</b> (truyện ngắn, truyện dài, tiểu thuyết). Dấu hiệu kèm theo: có lời thoại đặt sau '
+    + 'dấu gạch ngang, có mốc thời gian đẩy sự việc đi, có mở đầu – diễn biến – kết thúc.<br>'
+    + '<b>② Không có cốt truyện, người viết xưng "tôi" và đang kể một trải nghiệm rồi từ đó nghĩ ngợi?</b><br>'
+    + '&nbsp;&nbsp;Có → <b>tuỳ bút</b> hoặc <b>tản văn</b>. Phân biệt tiếp: <b>tuỳ bút</b> nghiêng về cảm xúc và cái tôi trữ '
+    + 'tình, mạch viết tuỳ theo dòng cảm nghĩ, thường dài; <b>tản văn</b> ngắn hơn, bám một sự việc đời thường nhỏ và '
+    + 'chốt lại một ý.<br>'
+    + '<b>③ Không kể chuyện, không tả cảm xúc, mà đang thuyết phục người đọc tin một điều?</b><br>'
+    + '&nbsp;&nbsp;Có luận điểm, lí lẽ, dẫn chứng → <b>văn bản nghị luận</b>.<br>'
+    + '&nbsp;&nbsp;Chỉ cung cấp thông tin, số liệu, quy trình, không bàn luận → <b>văn bản thông tin</b>.<br>'
+    + '<b>Ký</b> là tên gọi chung của nhóm ghi chép người thật việc thật: bút ký, phóng sự, hồi ký, tuỳ bút.',
+  khi: 'Câu "xác định thể loại của văn bản" và câu "xác định phương thức biểu đạt chính".',
+  vd: 'Văn bản mở bằng "Tôi nhớ những buổi chiều mẹ tôi nhóm bếp…", không có sự việc nối tiếp, chỉ có hồi tưởng và '
+    + 'cảm xúc ⇒ tản văn hoặc tuỳ bút, phương thức biểu đạt chính là biểu cảm.',
+  bay: 'Thể loại và phương thức biểu đạt là HAI câu hỏi khác nhau. Một truyện ngắn có thể loại là truyện ngắn nhưng '
+     + 'phương thức biểu đạt chính là tự sự. Trả lời nhầm ô là mất trọn 0,5 điểm.' },
 
-TD.KHO_LT.van = (TD.KHO_LT.van || []).concat([
-{ cd: CD, m: 2, a: true,  t: 'Yếu tố kì ảo trong truyện truyền kì thường dùng để phản ánh hiện thực và gửi gắm thái độ của tác giả.', v: 'Cái kì ảo là phương tiện nói điều hiện thực không nói thẳng được.' },
-{ cd: CD, m: 2, a: false, t: 'Truyện truyền kì chỉ nhằm mục đích gây sợ hãi cho người đọc.', v: 'Mục đích chính là phê phán bất công và bênh vực người yếu thế thông qua yếu tố kì ảo.' },
-{ cd: CD, m: 1, a: true,  t: 'Hài kịch được viết chủ yếu bằng lời thoại kèm chỉ dẫn sân khấu.', v: 'Đây là dấu hiệu hình thức để nhận ra kịch ngay từ cái nhìn đầu tiên.' },
-{ cd: CD, m: 2, a: true,  t: 'Xung đột trong hài kịch nảy sinh giữa cái đáng cười và chuẩn mực xã hội.', v: 'Nhân vật tự cho mình là gì đó mà thực chất không phải — mâu thuẫn đó tạo tiếng cười.' },
-{ cd: CD, m: 2, a: true,  t: 'Bố cục bài văn tế gồm bốn phần: lung khởi, thích thực, ai vãn và kết.', v: 'Đây là bố cục cố định của thể văn tế.' },
-{ cd: CD, m: 2, a: false, t: 'Văn tế là thể loại viết để ca ngợi người đang sống.', v: 'Văn tế đọc trong lễ tế NGƯỜI ĐÃ MẤT, giọng bi tráng.' },
-{ cd: CD, m: 2, a: true,  t: 'Tuỳ bút triển khai theo mạch cảm xúc của cái tôi tác giả chứ không theo cốt truyện.', v: 'Đó là điểm phân biệt tuỳ bút với truyện ngắn.' },
-{ cd: CD, m: 2, a: false, t: 'Tuỳ bút bắt buộc phải có cốt truyện hoàn chỉnh với mở đầu, cao trào và kết thúc.', v: 'Tuỳ bút KHÔNG có cốt truyện hoàn chỉnh; nó đi theo mạch cảm xúc và liên tưởng.' },
-{ cd: CD, m: 1, a: true,  t: 'Ngữ liệu đọc hiểu của đề tốt nghiệp được lấy hoàn toàn ngoài sách giáo khoa.', v: 'Nhằm triệt tiêu học tủ và văn mẫu; nhưng THỂ LOẠI vẫn nằm trong chương trình.' },
-{ cd: CD, m: 2, a: true,  t: 'Văn bản thông tin thường dùng phương tiện phi ngôn ngữ như sơ đồ, bảng, số liệu.', v: 'Chúng làm thông tin trực quan và tăng độ tin cậy.' },
-{ cd: CD, m: 2, a: true,  t: 'Khi đọc văn bản nghị luận cần xác định luận đề, luận điểm, lí lẽ và bằng chứng.', v: 'Đó là bốn thành tố của một văn bản nghị luận.' }
-]);
+{ nhom: 'A. Đọc hiểu', cd: 'Thể loại', ten: 'Sáu phương thức biểu đạt — nhận ra bằng động từ trung tâm', cap: 1,
+  ct: '<b>Tự sự</b> — kể lại chuỗi sự việc. Động từ trung tâm: kể, xảy ra, rồi, sau đó. Có nhân vật và diễn biến.<br>'
+    + '<b>Miêu tả</b> — dựng lại hình ảnh cho người đọc thấy. Dày đặc tính từ chỉ màu sắc, âm thanh, hình khối.<br>'
+    + '<b>Biểu cảm</b> — bộc lộ tình cảm. Nhiều câu cảm thán, câu hỏi tu từ, đại từ "tôi", "ta".<br>'
+    + '<b>Nghị luận</b> — thuyết phục. Có luận điểm, có lí lẽ, có dẫn chứng, có từ nối lập luận (vì vậy, tuy nhiên, trước hết).<br>'
+    + '<b>Thuyết minh</b> — cung cấp tri thức khách quan. Có định nghĩa, phân loại, số liệu, quy trình; không có cái tôi.<br>'
+    + '<b>Hành chính – công vụ</b> — đơn, biên bản, thông báo, nghị quyết. Có quốc hiệu, số văn bản, nơi nhận.<br>'
+    + '<b>Cách trả lời cho chắc điểm:</b> đề hỏi "phương thức biểu đạt CHÍNH" thì chỉ ghi MỘT; hỏi "các phương thức" '
+    + 'thì ghi từ hai trở lên, xếp cái chính lên trước.',
+  khi: 'Câu 1 hoặc câu 2 phần Đọc hiểu.',
+  vd: 'Đoạn văn có nhân vật, có đối thoại, có sự việc nối nhau ⇒ phương thức chính là tự sự, kèm miêu tả và biểu cảm.',
+  bay: 'Thơ trữ tình thì phương thức chính là BIỂU CẢM chứ không phải miêu tả, dù bài có tả cảnh. Cảnh trong thơ trữ '
+     + 'tình là để chở tình, tả chỉ là phương tiện.' },
 
-TD.GEN.van = (TD.GEN.van || []).concat([
-{ ma: 'van-theloai-moi', chuong: 'Thể loại', muc: 2, dang: 'mc',
-  tao(R) {
-    const ds = [
-    { q: 'Một ngữ liệu có lời thoại nhân vật kèm chỉ dẫn đặt trong ngoặc đơn như "(cười khẩy, quay sang khán giả)". Ngữ liệu đó nhiều khả năng thuộc thể loại nào?',
-      d: 'Hài kịch', s: ['Truyện ngắn', 'Tuỳ bút', 'Văn tế'],
-      v: 'Lời thoại kèm CHỈ DẪN SÂN KHẤU là dấu hiệu hình thức của kịch; chi tiết "quay sang khán giả" và giọng giễu cho biết là hài kịch.' },
-    { q: 'Phần "ai vãn" trong bài văn tế có nội dung gì?',
-      d: 'Bày tỏ niềm thương tiếc đối với người đã mất',
-      s: ['Khái quát lẽ sống chết ở đời', 'Kể lại cuộc đời và công đức người mất', 'Lời cầu nguyện kết thúc'],
-      v: 'Bố cục văn tế: lung khởi (khái quát) – thích thực (kể công đức) – ai vãn (thương tiếc) – kết (cầu nguyện).' },
-    { q: 'Đặc điểm nào KHÔNG phải của tuỳ bút?',
-      d: 'Có cốt truyện hoàn chỉnh với cao trào và kết thúc',
-      s: ['Triển khai theo mạch cảm xúc của tác giả', 'Ghi chép người thật việc thật', 'Ngôn ngữ giàu hình ảnh, đậm chất trữ tình'],
-      v: 'Tuỳ bút không có cốt truyện hoàn chỉnh — đó chính là điểm phân biệt với truyện ngắn.' },
-    { q: 'Yếu tố kì ảo trong truyện truyền kì chủ yếu có tác dụng gì?',
-      d: 'Phản ánh hiện thực và gửi gắm thái độ của tác giả',
-      s: ['Chỉ để gây sợ hãi cho người đọc', 'Làm cho câu chuyện dài thêm', 'Thay thế cho việc xây dựng nhân vật'],
-      v: 'Cái kì ảo là phương tiện nói điều mà hiện thực không cho phép nói thẳng: phê phán bất công, bênh vực người yếu.' },
-    { q: 'Với một văn bản THÔNG TIN, câu hỏi đọc hiểu thường xoay quanh điều gì?',
-      d: 'Cách trình bày thông tin và tác dụng của số liệu, sơ đồ',
-      s: ['Hình ảnh thơ và nhịp điệu', 'Diễn biến tâm lí nhân vật', 'Xung đột kịch giữa các tuyến nhân vật'],
-      v: 'Văn bản thông tin được soi ở cách tổ chức thông tin và các phương tiện phi ngôn ngữ.' },
-    { q: 'Bốn thành tố cần xác định khi đọc một văn bản nghị luận là',
-      d: 'luận đề, luận điểm, lí lẽ, bằng chứng',
-      s: ['nhân vật, tình huống, cốt truyện, chủ đề', 'vần, nhịp, hình ảnh, giọng điệu',
-          'sa-pô, tiêu đề, sơ đồ, chú thích'],
-      v: 'Luận đề là vấn đề bàn; luận điểm là các ý lớn; lí lẽ và bằng chứng làm sáng tỏ luận điểm.' }];
-    const it = R.chon(ds);
-    const opts = TD.xaoR(R, [it.d].concat(it.s));
-    return { q: it.q, opts: opts, ans: opts.indexOf(it.d), giai: `Đáp án: ${it.d}\n${it.v}`,
-      meo: 'Câu số 1 phần Đọc hiểu gần như luôn hỏi thể loại hoặc phương thức biểu đạt — đó là điểm cho không, '
-        + 'miễn là thuộc dấu hiệu hình thức của từng thể loại.' };
-  } }
+{ nhom: 'A. Đọc hiểu', cd: 'Thể loại', ten: 'Ngôi kể và điểm nhìn — hai thứ đề hay hỏi mà dễ nhầm', cap: 2,
+  ct: '<b>Ngôi kể</b> — người kể tự xưng thế nào:<br>'
+    + '&nbsp;&nbsp;<b>Ngôi thứ nhất:</b> người kể xưng "tôi", "tớ", "chúng tôi" và có mặt trong truyện.<br>'
+    + '&nbsp;&nbsp;<b>Ngôi thứ ba:</b> người kể đứng ngoài, gọi nhân vật bằng tên hoặc "hắn", "nàng", "ông ấy".<br>'
+    + '<b>Điểm nhìn</b> — câu chuyện được nhìn qua mắt AI:<br>'
+    + '&nbsp;&nbsp;<b>Điểm nhìn bên ngoài:</b> chỉ thuật hành động và lời nói, không vào được ý nghĩ ai.<br>'
+    + '&nbsp;&nbsp;<b>Điểm nhìn bên trong:</b> biết ý nghĩ, cảm giác của một nhân vật.<br>'
+    + '&nbsp;&nbsp;<b>Điểm nhìn toàn tri:</b> biết hết mọi nhân vật, mọi nơi, mọi lúc.<br>'
+    + '<b>Tác dụng thường gặp</b> — dùng luôn mấy ý này khi đề hỏi "nêu tác dụng":<br>'
+    + '&nbsp;&nbsp;ngôi thứ nhất ⇒ tăng độ tin cậy, tạo cảm giác thân mật, bộc lộ nội tâm trực tiếp; nhưng bị giới hạn '
+    + 'ở những gì "tôi" biết.<br>'
+    + '&nbsp;&nbsp;ngôi thứ ba toàn tri ⇒ bao quát được nhiều tuyến, khách quan hơn, dựng được bức tranh rộng.<br>'
+    + '<b>Dịch chuyển điểm nhìn</b> là khi truyện kể ngôi ba nhưng có đoạn chui hẳn vào ý nghĩ một nhân vật — đây là '
+    + 'chi tiết đắt, nêu ra là được điểm sáng tạo.',
+  khi: 'Câu hỏi "xác định ngôi kể", "nhận xét điểm nhìn", và câu phân tích nhân vật.',
+  vd: 'Truyện gọi nhân vật là "ông Tần", "thằng Sáu" ⇒ ngôi thứ ba; nhưng có câu cho biết thằng Sáu "chán" ⇒ '
+    + 'điểm nhìn đã dịch vào bên trong nhân vật.',
+  bay: 'Ngôi kể và điểm nhìn KHÔNG phải một. Truyện kể ngôi thứ ba vẫn có thể mang điểm nhìn bên trong của một nhân '
+     + 'vật — trả lời gộp hai khái niệm là mất ý.' },
+
+{ nhom: 'A. Đọc hiểu', cd: 'Thể loại', ten: 'Nhận diện thơ trung đại và thơ hiện đại', cap: 2,
+  ct: '<b>Dấu hiệu thơ trung đại</b> (từ thế kỷ X đến hết thế kỷ XIX):<br>'
+    + '&nbsp;&nbsp;· thể Đường luật hoặc lục bát, song thất lục bát — khuôn rất chặt;<br>'
+    + '&nbsp;&nbsp;· nhiều từ Hán Việt, điển cố, ước lệ (tùng – cúc – trúc – mai, ngư – tiều – canh – mục);<br>'
+    + '&nbsp;&nbsp;· cái tôi ẩn đi, nói chí, tỏ lòng, gửi gắm đạo lí;<br>'
+    + '&nbsp;&nbsp;· thiên nhiên mang tính tượng trưng cho phẩm chất con người.<br>'
+    + '<b>Dấu hiệu thơ hiện đại</b> (từ đầu thế kỷ XX):<br>'
+    + '&nbsp;&nbsp;· thể tự do hoặc số chữ đều nhưng không theo niêm luật;<br>'
+    + '&nbsp;&nbsp;· từ ngữ đời thường, hình ảnh cụ thể, cá biệt;<br>'
+    + '&nbsp;&nbsp;· cái tôi hiện rõ, xưng "tôi", nói cảm xúc riêng;<br>'
+    + '&nbsp;&nbsp;· có thể vắt dòng, xuống dòng bất thường, dùng dấu câu để tạo nhịp.<br>'
+    + '<b>Chú ý:</b> lục bát có ở CẢ hai thời kỳ, nên thấy lục bát thì phải xét thêm từ ngữ và cái tôi mới kết luận được.',
+  khi: 'Câu hỏi về đặc điểm ngôn ngữ, về cái tôi trữ tình, và khi cần đặt bài thơ vào đúng bối cảnh để phân tích.',
+  vd: 'Bài thơ lục bát nhưng dùng từ "xe máy", "điện thoại", xưng "tôi" và kể chuyện riêng ⇒ thơ hiện đại viết theo '
+    + 'thể lục bát, không phải thơ trung đại.',
+  bay: 'Không suy ra thời kỳ chỉ từ THỂ THƠ. Người hiện đại vẫn làm Đường luật, và ngược lại thơ trung đại cũng có '
+     + 'bài rất đời thường. Phải xét cả ngôn ngữ lẫn cách bộc lộ cái tôi.' }
+
 ]);
 })();
