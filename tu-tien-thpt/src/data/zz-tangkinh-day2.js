@@ -234,3 +234,69 @@ them('dia_ct', [
 
 ]);
 })();
+
+/* ============================================================
+   BỔ SUNG SAU KHI ĐỐI CHIẾU VỚI KỲ THI 2025 VÀ 2026 THẬT
+   ============================================================ */
+(function () {
+const them = (khoa, ds) => { TD.KHO[khoa] = (TD.KHO[khoa] || []).concat(ds); };
+
+them('anh_ct', [
+{ nhom: 'Chiến thuật', cd: 'Cấu trúc – Chiến thuật', ten: 'Bốn dạng bài của đề thật — 12 · 5 · 5 · 18', cap: 1,
+  ct: '<b>Đề tiếng Anh có đúng 40 câu, 50 phút, và chỉ có BỐN dạng:</b><br>'
+    + '① <b>Điền từ vào văn bản — 12 câu.</b> Một mẩu quảng cáo, thông báo, email hoặc tờ rơi có 4 chỗ trống. '
+    + 'Ngữ pháp và từ vựng nằm TRONG ngữ cảnh chứ không hỏi rời.<br>'
+    + '② <b>Sắp xếp câu thành đoạn — 5 câu.</b> Mỗi đoạn 3 – 5 câu, có thể là đoạn văn, lá thư hoặc hội thoại.<br>'
+    + '③ <b>Hoàn thành đoạn văn — 5 câu.</b> Điền CẢ MỘT CÂU vào chỗ trống giữa đoạn.<br>'
+    + '④ <b>Đọc hiểu — 18 câu</b>, chia hai bài: một bài 8 câu và một bài 10 câu. Gần một nửa đề.<br>'
+    + '<b>Những dạng ĐÃ BỊ BỎ hẳn từ 2025:</b> ngữ âm · trọng âm · tìm lỗi sai · đồng nghĩa – trái nghĩa · '
+    + 'giao tiếp · và mọi câu ngữ pháp ĐƠN LẺ kiểu "chọn đáp án đúng: He ____ to school".<br>'
+    + '<b>Hệ quả cho cách ôn:</b> vẫn phải nắm ngữ pháp, nhưng luyện nó bằng cách đọc đoạn — '
+    + 'làm trăm câu chia động từ rời không dựng được phản xạ đọc mà đề cần.',
+  khi: 'Ngay khi lập kế hoạch ôn — để không đổ thời gian vào dạng bài không còn thi.',
+  vd: 'Phân bổ 50 phút: điền từ 10 phút · sắp xếp 6 phút · hoàn thành đoạn 7 phút · đọc hiểu 24 phút · soát 3 phút.',
+  bay: 'Đọc hiểu chiếm 18/40 câu nhưng nhiều bạn vẫn dành phần lớn thời gian ôn cho ngữ pháp rời. '
+     + 'Sai chỗ này là mất tới 4,5 điểm.' }
+]);
+
+them('van_ct', [
+{ nhom: 'Cấu trúc đề', cd: 'Cấu trúc đề', ten: 'Hai câu Viết có thể ĐẢO — phải luyện cả hai chiều', cap: 1,
+  ct: '<b>Đề Ngữ văn luôn có hai phần:</b> Đọc hiểu <b>4,0 điểm</b> (khoảng 5 câu hỏi nhỏ) và '
+    + 'Viết <b>6,0 điểm</b> (một đoạn văn và một bài văn). Ngữ liệu HOÀN TOÀN NGOÀI sách giáo khoa.<br>'
+    + '<b>Nhưng thứ tự hai câu Viết thì Bộ đã đảo:</b><br>'
+    + '&nbsp;&nbsp;<b>2025:</b> đoạn <b>NGHỊ LUẬN VĂN HỌC</b> khoảng 200 chữ (2,0đ) + '
+    + 'bài <b>NGHỊ LUẬN XÃ HỘI</b> khoảng 600 chữ (4,0đ).<br>'
+    + '&nbsp;&nbsp;<b>2026:</b> đảo lại — đoạn <b>NGHỊ LUẬN XÃ HỘI</b> 200 chữ (2,0đ) + '
+    + 'bài <b>NGHỊ LUẬN VĂN HỌC</b> 600 chữ (4,0đ).<br>'
+    + '<b>Nghĩa là không được đoán trước.</b> Phải thuộc bốn khung, không phải hai:<br>'
+    + '&nbsp;&nbsp;• đoạn NLVH 200 chữ&nbsp;&nbsp;• đoạn NLXH 200 chữ<br>'
+    + '&nbsp;&nbsp;• bài NLVH 600 chữ&nbsp;&nbsp;• bài NLXH 600 chữ<br>'
+    + '<b>Điểm không đổi dù đảo:</b> câu 200 chữ luôn 2,0đ, câu 600 chữ luôn 4,0đ; '
+    + 'câu 200 chữ luôn gắn với ngữ liệu ở phần Đọc hiểu.',
+  khi: 'Lúc lập kế hoạch ôn Văn và lúc mở đề ra — nhìn đề bài xác định ngay đang rơi vào chiều nào.',
+  vd: '2025 hỏi "viết đoạn 200 chữ phân tích tình cảm của Lê dành cho Sơn" (NLVH) rồi mới tới bài 600 chữ '
+    + 'về chủ đề "Vùng trời quê hương nào cũng là bầu trời Tổ quốc" (NLXH).',
+  bay: 'Chỉ luyện một chiều là mở đề ra hoảng. Dấu hiệu nhận biết trong 5 giây: câu nào có chữ '
+     + '"trong văn bản ở phần Đọc hiểu" thì đó là NGHỊ LUẬN VĂN HỌC, dù nó nằm ở câu 1 hay câu 2.' }
+]);
+
+them('toan_cam', [
+{ nhom: 'Phòng thi', cd: '*', ten: 'Từ 2027 có thể thi trên MÁY TÍNH — chuẩn bị thêm gì', cap: 1,
+  ct: '<b>Bộ đã công bố lộ trình:</b> từ năm 2027 kỳ thi tốt nghiệp THPT được tổ chức '
+    + '<b>song song trên giấy và trên máy tính</b> tại một số địa phương. Đây là thay đổi về CÁCH TỔ CHỨC, '
+    + 'không phải thay đổi cấu trúc đề: vẫn ba phần, vẫn tỉ lệ 40 – 30 – 30.<br>'
+    + '<b>Ba thứ khác đi nếu thi trên máy:</b><br>'
+    + '&nbsp;&nbsp;① <b>Không gạch được lên đề.</b> Thói quen khoanh dữ kiện, gạch chân từ khoá phải chuyển sang '
+    + 'giấy nháp — nên tập ghi dữ kiện ra nháp theo dòng ngay từ bây giờ.<br>'
+    + '&nbsp;&nbsp;② <b>Nhìn màn hình lâu mỏi hơn nhìn giấy</b>, nhất là bài đọc dài của Tiếng Anh và câu '
+    + 'đúng/sai 4 ý. Tập làm đề trên màn hình cho quen, đừng chỉ in ra làm.<br>'
+    + '&nbsp;&nbsp;③ <b>Không lật lại nhanh như giấy.</b> Trên giấy liếc một cái là thấy cả trang; trên máy phải '
+    + 'cuộn. Nên quyết dứt điểm từng câu, hạn chế để lại "quay lại sau".<br>'
+    + '<b>Không đổi:</b> vẫn được mang máy tính cầm tay, vẫn tô đáp án trả lời ngắn theo ô, '
+    + 'thời gian từng môn giữ nguyên.',
+  khi: 'Giai đoạn nước rút — kiểm tra xem tỉnh mình có nằm trong diện thi trên máy không rồi tập cho đúng kiểu.',
+  vd: 'Cách tập: mở chính ứng dụng này ở chế độ Độ Kiếp, bấm giờ, không in đề ra, chỉ dùng một tờ nháp.',
+  bay: 'Đừng nghe "thi trên máy" rồi tưởng đề dễ đi hoặc được tra cứu. Đề y hệt đề giấy, '
+     + 'chỉ khác chỗ bấm chuột thay vì tô chì.' }
+]);
+})();

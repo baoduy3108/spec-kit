@@ -1746,7 +1746,10 @@ TD.deThiThat = function (mon, seed, cap) {
   const R = TD.rng(seed === undefined ? (Math.random() * 4294967295) >>> 0 : (seed >>> 0));
   const kho = TD.KHO[mon] || [], lt = TD.KHO_LT[mon] || [];
   /* _tuLT là mẫu đề sinh ra TỪ kho mệnh đề — bỏ ra kẻo trùng với nguồn mệnh đề bên dưới */
-  const gen = (TD.GEN[mon] || []).filter(t => !t._tuLT);
+  /* _luyen: bộ sinh chỉ dùng để LUYỆN, không được vào đề thật. Cụ thể là các
+     bộ câu ngữ pháp tiếng Anh dạng câu rời — đề tốt nghiệp từ 2025 không còn
+     một câu nào như vậy, mọi kiến thức ngôn ngữ đều nằm trong văn bản. */
+  const gen = (TD.GEN[mon] || []).filter(t => !t._tuLT && !t._luyen);
 
   /* ---- gom bể câu theo dạng, mỗi mục kèm mức độ để chia cho đúng ---- */
   const be = { mc: [], ds: [], tln: [] };
@@ -1858,6 +1861,16 @@ TD.deThiThat = function (mon, seed, cap) {
      Thả mẫu có hình chung rổ với hơn tám trăm mẫu khác thì xác suất bốc
      trúng gần bằng không (đo được 0,01 câu mỗi đề môn Toán), nên phải giữ
      sẵn chỗ cho chúng trước khi rút phần còn lại. */
+  /* ---- BỐ CỤC CỐ ĐỊNH CỦA ĐỀ TIẾNG ANH ----
+     Bốn mươi câu tiếng Anh không phải bốc ngẫu nhiên: đề chia cứng
+     12 câu điền từ vào văn bản · 5 câu sắp xếp · 5 câu hoàn thành đoạn văn ·
+     18 câu đọc hiểu (hai bài 8 và 10 câu). Rút đúng theo hạn ngạch đó. */
+  /* Vì bố cục này do Bộ quy định nên môn Anh KHÔNG chạy theo cấp lôi kiếp:
+     không thể vừa giữ 12/5/5/18 vừa nhồi 55% câu vận dụng cao. Cấp lôi kiếp
+     ở môn Anh chỉ đổi bộ văn bản và bộ câu hỏi, không đổi bố cục. */
+  const BO_CUC_ANH = [['anh-that-dienvb', 12], ['anh-sapxep', 5],
+                      ['anh-that-hoanthanh', 5], ['anh-that-dochieu', 18]];
+
   const canHinh = (TD.SO_CAU_HINH || {})[mon] || 0;
   const maHinh = {};
   gen.forEach(t => { if (t._hinh) maHinh[mon + '@' + t.ma] = t.dang; });
@@ -1893,7 +1906,39 @@ TD.deThiThat = function (mon, seed, cap) {
   /* Rút theo đúng thứ tự: Phần III (khó nhất) → Phần II → Phần I nhận phần còn lại */
   const p3 = hinhTln.concat(chot(rut(be.tln, M.p3 - hinhTln.length, [4, 3, 2, 1])));
   const p2 = hinhDs.concat(chot(rut(be.ds, M.p2 - hinhDs.length, [2, 3, 4, 1])));
-  const p1 = hinhMc.concat(chot(rut(be.mc, M.p1 - hinhMc.length, [1, 2, 3, 4])));
+  let p1 = hinhMc.concat(chot(rut(be.mc, M.p1 - hinhMc.length, [1, 2, 3, 4])));
+  /* Tiếng Anh: thay Phần I bốc ngẫu nhiên bằng đúng bố cục bốn dạng của đề.
+     Mỗi dạng có thể lấy lại nhiều lần vì mỗi lần rút ra một văn bản khác. */
+  if (mon === 'anh') {
+    const theoMa = {};
+    (TD.GEN.anh || []).forEach(t => { theoMa[t.ma] = t; });
+    const raA = [];
+    for (const [ma, soCau] of BO_CUC_ANH) {
+      if (!theoMa[ma]) continue;
+      for (let i = 0; i < soCau; i++) {
+        /* Bố cục cứng thì mức độ cũng phải cân bằng tay: mỗi dạng chứa câu ở
+           nhiều mức khác nhau, nên ưu tiên hạt giống nào cho ra câu thuộc mức
+           còn hạn ngạch, hết mới lấy đại. Không làm thế thì cả đề tiếng Anh
+           dồn về một mức và lệch hẳn tỉ lệ 4:3:3. */
+        let them = null, du = null;
+        for (let l = 0; l < 60 && !them; l++) {
+          const it = { mon: 'anh', g: ma, s: R.nguyen(1, 2147483646) >>> 0 };
+          const q = TD.layCau(it);
+          if (!q) continue;
+          const vt = vanTay(q);
+          if (daRa.has(vt)) continue;
+          const m = q.muc || 2;
+          if (quota[m] > 0) { daRa.add(vt); quota[m]--; them = it; }
+          else if (!du) du = { it: it, vt: vt, m: m };
+        }
+        if (!them && du) { daRa.add(du.vt); quota[du.m] = Math.max(0, quota[du.m] - 1); them = du.it; }
+        if (them) raA.push(them);
+      }
+    }
+    /* thiếu bao nhiêu thì vét nốt từ bể chung để đề vẫn đủ 40 câu */
+    if (raA.length < M.p1) p1 = raA.concat(p1.slice(0, M.p1 - raA.length));
+    else p1 = raA.slice(0, M.p1);
+  }
   /* thứ tự làm bài khuyến nghị: Phần I → Phần III → Phần II */
   return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2), kiep: K };
 };
@@ -13705,7 +13750,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
    ========================================================== */
 TD.GEN.anh = (TD.GEN.anh || []).concat([
 
-{ ma: 'anh-sapxep', chuong: 'Cấu trúc – Chiến thuật', muc: 3, dang: 'mc',
+{ ma: 'anh-sapxep', chuong: 'Sắp xếp câu', muc: 2, dang: 'mc',
   tao(R) {
     const bo = R.chon([
       { t: 'một lá thư xin việc', c: [
@@ -26569,6 +26614,1318 @@ them('dia_ct', [
   bay: 'Gió Lào là gió TÂY NAM bị biến tính khi vượt núi, không phải một loại gió riêng. '
      + 'Và gió mùa Tây Nam khi vào Bắc Bộ thổi theo hướng đông nam — đây là chi tiết đề rất hay hỏi.' }
 
+]);
+})();
+
+/* ============================================================
+   BỔ SUNG SAU KHI ĐỐI CHIẾU VỚI KỲ THI 2025 VÀ 2026 THẬT
+   ============================================================ */
+(function () {
+const them = (khoa, ds) => { TD.KHO[khoa] = (TD.KHO[khoa] || []).concat(ds); };
+
+them('anh_ct', [
+{ nhom: 'Chiến thuật', cd: 'Cấu trúc – Chiến thuật', ten: 'Bốn dạng bài của đề thật — 12 · 5 · 5 · 18', cap: 1,
+  ct: '<b>Đề tiếng Anh có đúng 40 câu, 50 phút, và chỉ có BỐN dạng:</b><br>'
+    + '① <b>Điền từ vào văn bản — 12 câu.</b> Một mẩu quảng cáo, thông báo, email hoặc tờ rơi có 4 chỗ trống. '
+    + 'Ngữ pháp và từ vựng nằm TRONG ngữ cảnh chứ không hỏi rời.<br>'
+    + '② <b>Sắp xếp câu thành đoạn — 5 câu.</b> Mỗi đoạn 3 – 5 câu, có thể là đoạn văn, lá thư hoặc hội thoại.<br>'
+    + '③ <b>Hoàn thành đoạn văn — 5 câu.</b> Điền CẢ MỘT CÂU vào chỗ trống giữa đoạn.<br>'
+    + '④ <b>Đọc hiểu — 18 câu</b>, chia hai bài: một bài 8 câu và một bài 10 câu. Gần một nửa đề.<br>'
+    + '<b>Những dạng ĐÃ BỊ BỎ hẳn từ 2025:</b> ngữ âm · trọng âm · tìm lỗi sai · đồng nghĩa – trái nghĩa · '
+    + 'giao tiếp · và mọi câu ngữ pháp ĐƠN LẺ kiểu "chọn đáp án đúng: He ____ to school".<br>'
+    + '<b>Hệ quả cho cách ôn:</b> vẫn phải nắm ngữ pháp, nhưng luyện nó bằng cách đọc đoạn — '
+    + 'làm trăm câu chia động từ rời không dựng được phản xạ đọc mà đề cần.',
+  khi: 'Ngay khi lập kế hoạch ôn — để không đổ thời gian vào dạng bài không còn thi.',
+  vd: 'Phân bổ 50 phút: điền từ 10 phút · sắp xếp 6 phút · hoàn thành đoạn 7 phút · đọc hiểu 24 phút · soát 3 phút.',
+  bay: 'Đọc hiểu chiếm 18/40 câu nhưng nhiều bạn vẫn dành phần lớn thời gian ôn cho ngữ pháp rời. '
+     + 'Sai chỗ này là mất tới 4,5 điểm.' }
+]);
+
+them('van_ct', [
+{ nhom: 'Cấu trúc đề', cd: 'Cấu trúc đề', ten: 'Hai câu Viết có thể ĐẢO — phải luyện cả hai chiều', cap: 1,
+  ct: '<b>Đề Ngữ văn luôn có hai phần:</b> Đọc hiểu <b>4,0 điểm</b> (khoảng 5 câu hỏi nhỏ) và '
+    + 'Viết <b>6,0 điểm</b> (một đoạn văn và một bài văn). Ngữ liệu HOÀN TOÀN NGOÀI sách giáo khoa.<br>'
+    + '<b>Nhưng thứ tự hai câu Viết thì Bộ đã đảo:</b><br>'
+    + '&nbsp;&nbsp;<b>2025:</b> đoạn <b>NGHỊ LUẬN VĂN HỌC</b> khoảng 200 chữ (2,0đ) + '
+    + 'bài <b>NGHỊ LUẬN XÃ HỘI</b> khoảng 600 chữ (4,0đ).<br>'
+    + '&nbsp;&nbsp;<b>2026:</b> đảo lại — đoạn <b>NGHỊ LUẬN XÃ HỘI</b> 200 chữ (2,0đ) + '
+    + 'bài <b>NGHỊ LUẬN VĂN HỌC</b> 600 chữ (4,0đ).<br>'
+    + '<b>Nghĩa là không được đoán trước.</b> Phải thuộc bốn khung, không phải hai:<br>'
+    + '&nbsp;&nbsp;• đoạn NLVH 200 chữ&nbsp;&nbsp;• đoạn NLXH 200 chữ<br>'
+    + '&nbsp;&nbsp;• bài NLVH 600 chữ&nbsp;&nbsp;• bài NLXH 600 chữ<br>'
+    + '<b>Điểm không đổi dù đảo:</b> câu 200 chữ luôn 2,0đ, câu 600 chữ luôn 4,0đ; '
+    + 'câu 200 chữ luôn gắn với ngữ liệu ở phần Đọc hiểu.',
+  khi: 'Lúc lập kế hoạch ôn Văn và lúc mở đề ra — nhìn đề bài xác định ngay đang rơi vào chiều nào.',
+  vd: '2025 hỏi "viết đoạn 200 chữ phân tích tình cảm của Lê dành cho Sơn" (NLVH) rồi mới tới bài 600 chữ '
+    + 'về chủ đề "Vùng trời quê hương nào cũng là bầu trời Tổ quốc" (NLXH).',
+  bay: 'Chỉ luyện một chiều là mở đề ra hoảng. Dấu hiệu nhận biết trong 5 giây: câu nào có chữ '
+     + '"trong văn bản ở phần Đọc hiểu" thì đó là NGHỊ LUẬN VĂN HỌC, dù nó nằm ở câu 1 hay câu 2.' }
+]);
+
+them('toan_cam', [
+{ nhom: 'Phòng thi', cd: '*', ten: 'Từ 2027 có thể thi trên MÁY TÍNH — chuẩn bị thêm gì', cap: 1,
+  ct: '<b>Bộ đã công bố lộ trình:</b> từ năm 2027 kỳ thi tốt nghiệp THPT được tổ chức '
+    + '<b>song song trên giấy và trên máy tính</b> tại một số địa phương. Đây là thay đổi về CÁCH TỔ CHỨC, '
+    + 'không phải thay đổi cấu trúc đề: vẫn ba phần, vẫn tỉ lệ 40 – 30 – 30.<br>'
+    + '<b>Ba thứ khác đi nếu thi trên máy:</b><br>'
+    + '&nbsp;&nbsp;① <b>Không gạch được lên đề.</b> Thói quen khoanh dữ kiện, gạch chân từ khoá phải chuyển sang '
+    + 'giấy nháp — nên tập ghi dữ kiện ra nháp theo dòng ngay từ bây giờ.<br>'
+    + '&nbsp;&nbsp;② <b>Nhìn màn hình lâu mỏi hơn nhìn giấy</b>, nhất là bài đọc dài của Tiếng Anh và câu '
+    + 'đúng/sai 4 ý. Tập làm đề trên màn hình cho quen, đừng chỉ in ra làm.<br>'
+    + '&nbsp;&nbsp;③ <b>Không lật lại nhanh như giấy.</b> Trên giấy liếc một cái là thấy cả trang; trên máy phải '
+    + 'cuộn. Nên quyết dứt điểm từng câu, hạn chế để lại "quay lại sau".<br>'
+    + '<b>Không đổi:</b> vẫn được mang máy tính cầm tay, vẫn tô đáp án trả lời ngắn theo ô, '
+    + 'thời gian từng môn giữ nguyên.',
+  khi: 'Giai đoạn nước rút — kiểm tra xem tỉnh mình có nằm trong diện thi trên máy không rồi tập cho đúng kiểu.',
+  vd: 'Cách tập: mở chính ứng dụng này ở chế độ Độ Kiếp, bấm giờ, không in đề ra, chỉ dùng một tờ nháp.',
+  bay: 'Đừng nghe "thi trên máy" rồi tưởng đề dễ đi hoặc được tra cứu. Đề y hệt đề giấy, '
+     + 'chỉ khác chỗ bấm chuột thay vì tô chì.' }
+]);
+})();
+
+</script>
+<script>
+/* ============================================================
+   TIẾNG ANH — DỰNG LẠI THEO ĐÚNG BỐN DẠNG CỦA ĐỀ THẬT
+   Đề tốt nghiệp từ 2025 (và giữ nguyên ở 2026) KHÔNG còn một câu
+   ngữ pháp đơn lẻ nào. Bốn mươi câu chia đúng như sau:
+     ① Điền từ vào quảng cáo – thông báo – email … 12 câu
+     ② Sắp xếp câu thành đoạn                        5 câu
+     ③ Hoàn thành đoạn văn (điền CẢ CÂU vào chỗ trống) 5 câu
+     ④ Đọc hiểu, hai bài 8 và 10 câu                 18 câu
+   Kho cũ có 92 trên 96 bộ sinh là câu rời — luyện ngữ pháp thì tốt,
+   nhưng không giống một câu nào trong đề. File này bù đúng bốn dạng
+   trên; bộ sinh câu rời được đánh dấu _luyen để chỉ dùng trong Luyện
+   Công, không lọt vào đề Độ Kiếp nữa.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  const loai = opts.filter(o => o !== it.d)
+    .map(o => `• ${o} — ${(it.sv && it.sv[o]) || 'không hợp với ngữ cảnh của chỗ trống này.'}`).join('\n');
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n${loai}`, meo: meo };
+};
+const khungVB = (tieuDe, than) =>
+  `<div style="border:1px solid var(--vien);border-radius:10px;padding:12px 14px;margin:10px 0;`
+  + `background:var(--nen2);font-size:14.5px;line-height:1.75">`
+  + (tieuDe ? `<div style="font-weight:700;color:var(--kim);margin-bottom:8px">${tieuDe}</div>` : '')
+  + than + `</div>`;
+
+/* ============================================================
+   ① ĐIỀN TỪ VÀO VĂN BẢN THẬT — 12 câu trong đề
+   Mỗi văn bản là một mẩu quảng cáo, thông báo, email hoặc tờ rơi
+   đúng kiểu đề ra: ngữ pháp và từ vựng nằm TRONG ngữ cảnh.
+   ============================================================ */
+const VAN_BAN = [
+
+{ ten: 'GREEN CAMPUS VOLUNTEER PROGRAMME',
+  than: 'Are you looking for a way to make a difference? The Green Campus Programme (1)____ students '
+      + 'to join our tree-planting weekends. No experience (2)____ — we will train you on the first day. '
+      + 'Volunteers who take part in at least five sessions (3)____ a certificate from the university. '
+      + 'Places are limited, (4)____ apply before 30 September.',
+  cho: [
+  { so: 1, d: 'invites', m: 2, s: ['inviting', 'to invite', 'invited'],
+    v: 'Chủ ngữ "The Green Campus Programme" là số ít, câu ở hiện tại đơn nên động từ chia "invites".',
+    sv: { inviting: 'V-ing không thể làm động từ chính khi câu chưa có trợ động từ',
+          'to invite': 'to V không làm động từ chính của mệnh đề',
+          invited: 'quá khứ đơn lệch với các thì hiện tại còn lại của thông báo' } },
+  { so: 2, d: 'is required', m: 3, s: ['requires', 'is requiring', 'required'],
+    v: '"Experience" là vật, không tự yêu cầu ai — phải dùng BỊ ĐỘNG "is required" (không đòi hỏi kinh nghiệm).',
+    sv: { requires: 'chủ động — kinh nghiệm không thể "yêu cầu" điều gì',
+          'is requiring': 'tiếp diễn không dùng cho trạng thái này',
+          required: 'thiếu "is", không thành dạng bị động' } },
+  { so: 3, d: 'will receive', m: 2, s: ['receive', 'received', 'have received'],
+    v: 'Điều kiện loại 1: mệnh đề điều kiện ở hiện tại, mệnh đề chính dùng "will + V" nói việc sẽ xảy ra.',
+    sv: { receive: 'hiện tại đơn diễn tả thói quen, không hợp với lời hứa trong tương lai',
+          received: 'quá khứ đơn nói việc đã xảy ra rồi',
+          'have received': 'hoàn thành nói việc đã hoàn tất trước hiện tại' } },
+  { so: 4, d: 'so', m: 1, s: ['but', 'although', 'because'],
+    v: '"Chỗ có hạn" là NGUYÊN NHÂN, "hãy nộp đơn sớm" là KẾT QUẢ ⇒ dùng "so".',
+    sv: { but: 'nối hai ý trái chiều, ở đây hai vế cùng chiều',
+          although: 'là liên từ nhượng bộ, phải đứng đầu mệnh đề phụ',
+          because: 'đảo ngược quan hệ nhân quả — vế sau không phải nguyên nhân' } }] },
+
+{ ten: 'NOTICE — LIBRARY OPENING HOURS',
+  than: 'From 1 October, the Central Library (1)____ open until 10 p.m. on weekdays. '
+      + 'Readers are reminded (2)____ their student cards at the entrance. '
+      + 'Books borrowed during the exam period must (3)____ within two weeks. '
+      + 'For (4)____ information, please contact the front desk.',
+  cho: [
+  { so: 1, d: 'will be', m: 2, s: ['is being', 'has been', 'was'],
+    v: '"From 1 October" là mốc TƯƠNG LAI nên dùng "will be".',
+    sv: { 'is being': 'tiếp diễn không dùng với tính từ trạng thái "open" theo nghĩa này',
+          'has been': 'hoàn thành nói việc đã kéo dài tới hiện tại, trái với mốc tương lai',
+          was: 'quá khứ đơn trái hẳn với "from 1 October"' } },
+  { so: 2, d: 'to show', m: 3, s: ['showing', 'show', 'shown'],
+    v: 'Cấu trúc "be reminded TO DO something" — nhắc ai làm gì luôn đi với to V.',
+    sv: { showing: '"remind" không đi với V-ing ở cấu trúc này',
+          show: 'thiếu "to" sau be reminded',
+          shown: 'quá khứ phân từ không hợp sau "reminded" ở đây' } },
+  { so: 3, d: 'be returned', m: 3, s: ['return', 'be returning', 'have returned'],
+    v: 'Sách là vật bị trả nên sau "must" phải dùng BỊ ĐỘNG: must be returned.',
+    sv: { return: 'chủ động — sách không tự trả',
+          'be returning': 'không có dạng "must be V-ing" mang nghĩa bị động',
+          'have returned': 'chủ động hoàn thành, sai nghĩa' } },
+  { so: 4, d: 'further', m: 1, s: ['farther', 'far', 'furthest'],
+    v: '"Further information" là cụm cố định nghĩa "thông tin thêm". "Farther" chỉ dùng cho khoảng cách vật lí.',
+    sv: { farther: 'chỉ dùng cho khoảng cách địa lí, không dùng cho thông tin',
+          far: 'nguyên thể không đứng trước danh từ theo nghĩa "thêm"',
+          furthest: 'so sánh nhất, không hợp với một lời mời chung' } }] },
+
+{ ten: 'PART-TIME JOB ADVERTISEMENT — CAFÉ ASSISTANT',
+  than: 'Sunrise Café is looking for a part-time assistant (1)____ can work two evenings a week. '
+      + 'The successful applicant will be responsible (2)____ serving customers and keeping the '
+      + 'counter tidy. Training (3)____ provided, so students with no experience are welcome. '
+      + 'If you are interested, send your CV (4)____ Friday.',
+  cho: [
+  { so: 1, d: 'who', m: 2, s: ['which', 'whose', 'whom'],
+    v: 'Đại từ quan hệ thay cho NGƯỜI và làm CHỦ NGỮ của mệnh đề quan hệ ⇒ "who".',
+    sv: { which: 'chỉ dùng cho vật',
+          whose: 'chỉ sở hữu, phải có danh từ theo sau',
+          whom: 'chỉ dùng khi làm TÂN NGỮ, ở đây nó làm chủ ngữ của "can work"' } },
+  { so: 2, d: 'for', m: 1, s: ['of', 'to', 'with'],
+    v: '"Be responsible FOR + V-ing" là cụm cố định: chịu trách nhiệm làm gì.',
+    sv: { of: 'không có cụm "responsible of"',
+          to: '"responsible to" nghĩa là chịu trách nhiệm TRƯỚC ai, không hợp',
+          with: 'không có cụm "responsible with"' } },
+  { so: 3, d: 'is', m: 2, s: ['are', 'has', 'have'],
+    v: '"Training" ở đây là danh từ KHÔNG đếm được nên đi với động từ số ít "is".',
+    sv: { are: 'training không phải danh từ số nhiều',
+          has: 'sai nghĩa, câu cần dạng bị động "is provided"',
+          have: 'vừa sai số vừa sai nghĩa' } },
+  { so: 4, d: 'by', m: 1, s: ['until', 'in', 'since'],
+    v: '"By Friday" nghĩa là HẠN CHÓT — gửi chậm nhất vào thứ Sáu.',
+    sv: { until: 'nghĩa "cho tới khi", dùng cho hành động kéo dài chứ không phải hạn chót',
+          in: 'đi với tháng, năm hoặc khoảng thời gian, không đi với thứ',
+          since: 'chỉ mốc bắt đầu trong quá khứ' } }] },
+
+{ ten: 'EMAIL — SCHOOL TRIP CONFIRMATION',
+  than: 'Dear parents,<br>I am writing to confirm the details of the field trip (1)____ will take place '
+      + 'on 12 November. The coach (2)____ at 7 a.m. sharp, so please make sure your child arrives early. '
+      + 'Students should bring a packed lunch and (3)____ clothing, as part of the day will be spent outdoors. '
+      + 'We look forward (4)____ a rewarding day with the class.',
+  cho: [
+  { so: 1, d: 'which', m: 2, s: ['who', 'where', 'whose'],
+    v: 'Thay cho "the field trip" — một sự việc, không phải người ⇒ "which".',
+    sv: { who: 'chỉ dùng cho người',
+          where: 'chỉ nơi chốn, mà "trip" ở đây là sự kiện chứ không phải địa điểm',
+          whose: 'chỉ sở hữu, phải có danh từ theo sau' } },
+  { so: 2, d: 'leaves', m: 2, s: ['is leaving', 'left', 'has left'],
+    v: 'Lịch trình cố định (xe chạy đúng giờ) dùng HIỆN TẠI ĐƠN, dù nói về tương lai.',
+    sv: { 'is leaving': 'tiếp diễn dùng cho kế hoạch cá nhân, không dùng cho thời gian biểu cố định',
+          left: 'quá khứ đơn trái với mốc 12 tháng 11 sắp tới',
+          'has left': 'hoàn thành nói việc đã xảy ra' } },
+  { so: 3, d: 'suitable', m: 1, s: ['suit', 'suitably', 'suitability'],
+    v: 'Trước danh từ "clothing" phải là TÍNH TỪ ⇒ "suitable".',
+    sv: { suit: 'là danh từ hoặc động từ, không bổ nghĩa cho danh từ khác',
+          suitably: 'trạng từ, không đứng trước danh từ',
+          suitability: 'danh từ, hai danh từ ghép ở đây không thành nghĩa' } },
+  { so: 4, d: 'to having', m: 3, s: ['to have', 'having', 'have'],
+    v: '"Look forward TO" là giới từ nên theo sau phải là V-ing ⇒ "to having".',
+    sv: { 'to have': '"to" ở đây là giới từ chứ không phải to-infinitive',
+          having: 'thiếu giới từ "to" bắt buộc của cụm',
+          have: 'vừa thiếu "to" vừa sai dạng' } }] },
+
+{ ten: 'FLYER — CITY MARATHON 2026',
+  than: 'Join thousands of runners at the City Marathon! Registration (1)____ online until 15 March. '
+      + 'All participants (2)____ receive a T-shirt and a finisher medal. The route passes through the old '
+      + 'quarter, (3)____ makes it one of the most scenic races in the region. Proceeds will go to a charity '
+      + '(4)____ supports children with disabilities.',
+  cho: [
+  { so: 1, d: 'is open', m: 3, s: ['opens', 'has opened', 'is opening'],
+    v: '"Registration is open until…" là cách nói chuẩn của thông báo: việc đăng ký đang mở tới hạn đó.',
+    sv: { opens: '"open" làm động từ chỉ hành động mở ra một lần, không hợp với "until"',
+          'has opened': 'nhấn việc đã mở xong, không diễn tả trạng thái còn mở',
+          'is opening': 'tiếp diễn chỉ hành động đang diễn ra tại thời điểm nói' } },
+  { so: 2, d: 'will', m: 2, s: ['would', 'should have', 'used to'],
+    v: 'Nói việc chắc chắn xảy ra trong tương lai ⇒ "will receive".',
+    sv: { would: 'dùng cho giả định hoặc quá khứ trong tương lai',
+          'should have': 'nói điều đáng lẽ đã xảy ra mà không xảy ra',
+          'used to': 'nói thói quen trong quá khứ' } },
+  { so: 3, d: 'which', m: 2, s: ['that', 'what', 'it'],
+    v: 'Mệnh đề quan hệ KHÔNG XÁC ĐỊNH thay cho cả ý đứng trước, sau dấu phẩy chỉ dùng "which".',
+    sv: { that: 'không bao giờ dùng sau dấu phẩy trong mệnh đề không xác định',
+          what: 'không phải đại từ quan hệ',
+          it: 'sẽ tạo thành hai mệnh đề độc lập dính nhau bằng dấu phẩy — lỗi câu' } },
+  { so: 4, d: 'that', m: 2, s: ['who', 'what', 'where'],
+    v: 'Thay cho "a charity" — một tổ chức, dùng "that" hoặc "which" trong mệnh đề xác định.',
+    sv: { who: 'chỉ dùng cho người',
+          what: 'không phải đại từ quan hệ',
+          where: 'chỉ nơi chốn, tổ chức ở đây là chủ thể hành động chứ không phải địa điểm' } }] },
+
+{ ten: 'ANNOUNCEMENT — SCHOOL CLUB FAIR',
+  than: 'The annual Club Fair (1)____ in the main hall next Tuesday. Over twenty clubs will set up stalls '
+      + 'so that new students can find an activity (2)____ suits their interests. Members of the organising '
+      + 'team have been working hard (3)____ last month to prepare the event. '
+      + 'Refreshments will be (4)____ free of charge to all visitors.',
+  cho: [
+  { so: 1, d: 'will be held', m: 3, s: ['will hold', 'is holding', 'held'],
+    v: 'Hội chợ là vật bị tổ chức nên phải bị động: will be held.',
+    sv: { 'will hold': 'chủ động — hội chợ không tự tổ chức chính nó',
+          'is holding': 'chủ động tiếp diễn, sai nghĩa',
+          held: 'thiếu trợ động từ chỉ tương lai' } },
+  { so: 2, d: 'that', m: 2, s: ['what', 'whose', 'where'],
+    v: 'Mệnh đề quan hệ xác định cho "an activity" ⇒ "that" (hoặc which).',
+    sv: { what: 'không phải đại từ quan hệ',
+          whose: 'chỉ sở hữu, phải có danh từ theo sau',
+          where: 'chỉ nơi chốn' } },
+  { so: 3, d: 'since', m: 3, s: ['for', 'from', 'during'],
+    v: '"Since + MỐC thời gian" (last month). "For" mới đi với KHOẢNG thời gian.',
+    sv: { for: 'phải đi với khoảng: for a month',
+          from: 'chỉ dùng khi có "to" đi kèm nêu điểm cuối',
+          during: 'đi với danh từ chỉ giai đoạn, không dùng với hiện tại hoàn thành tiếp diễn kiểu này' } },
+  { so: 4, d: 'served', m: 3, s: ['serving', 'serve', 'to serve'],
+    v: 'Sau "will be" cần quá khứ phân từ để tạo bị động: will be served.',
+    sv: { serving: 'sẽ thành tiếp diễn chủ động, sai nghĩa',
+          serve: 'không có dạng "will be serve"',
+          'to serve': 'không có dạng "will be to serve" ở nghĩa này' } }] },
+
+{ ten: 'NOTICE — RECYCLING RULES IN THE DORMITORY',
+  than: 'Students are asked (1)____ separate their waste into three bins. Paper and cardboard go in the blue '
+      + 'bin, (2)____ plastic bottles belong in the yellow one. Anyone who leaves rubbish in the corridor '
+      + '(3)____ be fined. The new system aims to cut the amount of waste sent to landfill (4)____ half '
+      + 'by the end of the year.',
+  cho: [
+  { so: 1, d: 'to', m: 1, s: ['for', 'that', 'about'],
+    v: '"Be asked TO DO something" — được yêu cầu làm gì.',
+    sv: { for: '"ask for" nghĩa là xin cái gì, phải theo sau bởi danh từ',
+          that: 'sau "be asked" ở dạng bị động này không dùng mệnh đề that',
+          about: '"ask about" nghĩa là hỏi về, sai nghĩa' } },
+  { so: 2, d: 'while', m: 3, s: ['so', 'because', 'unless'],
+    v: '"While" ở đây nối hai vế ĐỐI CHIẾU: loại rác này thùng này, loại kia thùng kia.',
+    sv: { so: 'chỉ kết quả, hai vế ở đây song song chứ không nhân quả',
+          because: 'chỉ nguyên nhân, sai quan hệ',
+          unless: 'nghĩa "trừ khi", sai hẳn' } },
+  { so: 3, d: 'will', m: 2, s: ['would', 'might have', 'is'],
+    v: 'Cảnh báo về hậu quả chắc chắn trong tương lai ⇒ "will be fined".',
+    sv: { would: 'dùng cho giả định không có thật',
+          'might have': 'nói khả năng trong quá khứ',
+          is: 'thì hiện tại không diễn tả hậu quả sẽ áp dụng' } },
+  { so: 4, d: 'by', m: 1, s: ['in', 'at', 'to'],
+    v: '"Cut something BY half" — giảm ĐI một nửa. Giới từ "by" chỉ mức chênh lệch.',
+    sv: { in: 'không có cụm "cut in half" theo nghĩa giảm sản lượng (cut in half chỉ việc cắt đôi vật thể)',
+          at: 'không có cụm này',
+          to: '"cut to half" nói mức CÒN LẠI, khác nghĩa với mức giảm' } }] },
+
+{ ten: 'ADVERTISEMENT — ONLINE ENGLISH COURSE',
+  than: 'Want to improve your English (1)____ leaving home? Our ten-week online course is designed for '
+      + 'learners (2)____ want to build confidence in speaking. Each lesson lasts fifty minutes and '
+      + '(3)____ by an experienced teacher. Sign up today and you (4)____ a twenty per cent discount '
+      + 'on your first month.',
+  cho: [
+  { so: 1, d: 'without', m: 1, s: ['despite', 'although', 'instead'],
+    v: '"Without + V-ing" — mà không cần làm gì.',
+    sv: { despite: 'nghĩa "mặc dù", sai quan hệ ý',
+          although: 'là liên từ, phải nối một mệnh đề có chủ ngữ và động từ',
+          instead: 'phải có "of" mới đi được với V-ing, và nghĩa "thay vì" cũng sai' } },
+  { so: 2, d: 'who', m: 2, s: ['which', 'whom', 'whose'],
+    v: 'Thay cho "learners" (người) và làm chủ ngữ của "want" ⇒ "who".',
+    sv: { which: 'chỉ dùng cho vật',
+          whom: 'chỉ dùng khi làm tân ngữ',
+          whose: 'chỉ sở hữu, phải có danh từ theo sau' } },
+  { so: 3, d: 'is taught', m: 3, s: ['teaches', 'is teaching', 'teaching'],
+    v: 'Bài học là vật được dạy ⇒ bị động "is taught".',
+    sv: { teaches: 'chủ động — bài học không tự dạy',
+          'is teaching': 'chủ động tiếp diễn, sai nghĩa',
+          teaching: 'thiếu trợ động từ' } },
+  { so: 4, d: 'will get', m: 2, s: ['get', 'got', 'would get'],
+    v: 'Cấu trúc "mệnh lệnh + and + will": Sign up today AND you will get… (điều kiện loại 1 ẩn).',
+    sv: { get: 'hiện tại đơn không diễn tả hệ quả sẽ xảy ra',
+          got: 'quá khứ đơn, sai thì',
+          'would get': 'giả định không có thật, không hợp với lời mời chào' } }] }
+];
+
+TD.GEN.anh = (TD.GEN.anh || []).concat([
+
+{ ma: 'anh-that-dienvb', chuong: 'Điền từ vào văn bản', muc: 2, dang: 'mc', _dethat: 'dienvb',
+  tao(R) {
+    const vb = R.chon(VAN_BAN);
+    const c = R.chon(vb.cho);
+    /* làm nổi chỗ trống đang hỏi, các chỗ còn lại để nguyên số thứ tự */
+    const than = vb.than.replace(new RegExp('\\(' + c.so + '\\)____', 'g'),
+      '<b style="color:var(--kim)">(' + c.so + ') ______</b>');
+    const o = MC(R,
+      `Đọc văn bản sau và chọn phương án đúng cho chỗ trống <b>(${c.so})</b>:`
+      + khungVB(vb.ten, than), c,
+      'Dạng này chiếm 12 trên 40 câu của đề. Ngữ pháp nằm TRONG ngữ cảnh: đọc cả câu trước và câu sau '
+      + 'rồi mới chọn, vì cùng một chỗ trống có thể hợp ngữ pháp mà lệch nghĩa của văn bản.');
+    /* mỗi chỗ trống một mức khác nhau — mạo từ là nhận biết, bị động và cụm
+       cố định là vận dụng — nên mức phải trả theo TỪNG câu, không phải theo bộ */
+    o.muc = c.m || 2;
+    return o;
+  } },
+
+/* ============================================================
+   ③ HOÀN THÀNH ĐOẠN VĂN — điền CẢ CÂU vào chỗ trống, 5 câu trong đề
+   ============================================================ */
+{ ma: 'anh-that-hoanthanh', chuong: 'Hoàn thành đoạn văn', muc: 3, dang: 'mc', _dethat: 'hoanthanh',
+  tao(R) {
+    const ds = [
+
+{ ten: 'Working from home',
+  than: 'Working from home has become common in many countries. ______ For example, employees save the time '
+      + 'and money they used to spend on commuting, and they can arrange their day around family duties. '
+      + 'Employers benefit too, since they need less office space.',
+  m: 3, d: 'The arrangement brings clear advantages to both sides.',
+  s: ['Most companies have therefore banned it completely.',
+      'Commuting by train is cheaper than driving in most cities.',
+      'Office rents rose sharply during the last decade.'],
+  v: 'Chỗ trống đứng trước "For example" nêu lợi ích cho CẢ nhân viên lẫn chủ — nên câu điền phải là câu '
+   + 'khái quát nói về lợi ích của cả hai bên.',
+  sv: { 'Most companies have therefore banned it completely.': 'trái hẳn với các ví dụ về lợi ích ở sau',
+        'Commuting by train is cheaper than driving in most cities.': 'là một chi tiết lạc, không khái quát được đoạn',
+        'Office rents rose sharply during the last decade.': 'chỉ liên quan tới một ý nhỏ ở cuối, không mở đầu được đoạn' } },
+
+{ ten: 'Plastic waste',
+  than: 'Every year millions of tonnes of plastic end up in the ocean. Bags and bottles break down into tiny '
+      + 'pieces that fish mistake for food. ______ Scientists warn that these particles then travel up the food '
+      + 'chain and reach the meals on our own plates.',
+  m: 3, d: 'Once swallowed, the fragments stay in their bodies for years.',
+  s: ['Plastic was first produced on a large scale in the 1950s.',
+      'Many countries now export their waste to other regions.',
+      'Glass bottles are heavier and cost more to transport.'],
+  v: 'Câu sau bắt đầu bằng "these particles then travel up the food chain", nên câu điền phải nói về '
+   + 'chuyện các mảnh nhựa NẰM LẠI trong cơ thể cá — đó là bước nối giữa "cá nuốt nhầm" và "đi lên chuỗi thức ăn".',
+  sv: { 'Plastic was first produced on a large scale in the 1950s.': 'thông tin lịch sử, không nối được hai câu',
+        'Many countries now export their waste to other regions.': 'đổi chủ đề sang xuất khẩu rác',
+        'Glass bottles are heavier and cost more to transport.': 'so sánh với thuỷ tinh, lạc đề' } },
+
+{ ten: 'Learning a second language',
+  than: 'Learning a second language does more than open doors to travel. Studies suggest that bilingual people '
+      + 'switch between tasks more easily and remember instructions better. ______ In other words, the effort '
+      + 'you put into vocabulary lists may pay off in ways you never expected.',
+  m: 3, d: 'Some research even links it to a later onset of memory decline in old age.',
+  s: ['Grammar rules are the hardest part for most beginners.',
+      'English is spoken by more than a billion people worldwide.',
+      'Travelling abroad is the fastest way to become fluent.'],
+  v: 'Câu sau tổng kết "may pay off in ways you never expected" — nên câu điền phải nêu thêm một lợi ích BẤT NGỜ '
+   + 'nữa, tiếp mạch các lợi ích về trí nhớ ở câu trước.',
+  sv: { 'Grammar rules are the hardest part for most beginners.': 'nói về khó khăn, trái mạch lợi ích',
+        'English is spoken by more than a billion people worldwide.': 'là số liệu lạc, không phải lợi ích nhận thức',
+        'Travelling abroad is the fastest way to become fluent.': 'nói về cách học, không phải lợi ích' } },
+
+{ ten: 'Night-time light pollution',
+  than: 'City lights make streets safer, but they also hide the night sky. ______ Migrating birds, which navigate '
+      + 'by the stars, become disoriented above brightly lit cities and collide with buildings. '
+      + 'Some cities have begun dimming their lights during migration season.',
+  m: 3, d: 'The glow affects wildlife as much as it affects astronomers.',
+  s: ['Street lamps were once powered by gas rather than electricity.',
+      'Astronomers prefer to build observatories on high mountains.',
+      'Birds usually build their nests in early spring.'],
+  v: 'Câu sau nói về chim di cư bị ảnh hưởng, còn câu trước nói về bầu trời đêm bị che. Câu điền phải bắc cầu: '
+   + 'ánh sáng ảnh hưởng tới ĐỘNG VẬT chứ không chỉ tới người quan sát sao.',
+  sv: { 'Street lamps were once powered by gas rather than electricity.': 'chi tiết lịch sử, không bắc cầu được',
+        'Astronomers prefer to build observatories on high mountains.': 'chỉ nối được với vế thiên văn, bỏ rơi vế chim',
+        'Birds usually build their nests in early spring.': 'nói về làm tổ, không liên quan tới ánh sáng' } },
+
+{ ten: 'The four-day week',
+  than: 'Several companies have tested a four-day working week with no cut in pay. ______ Staff reported lower '
+      + 'stress levels, and in most trials output stayed the same or rose slightly. Critics argue, however, that '
+      + 'the model suits office work far better than hospitals or factories.',
+  m: 3, d: 'The results have surprised many managers who expected productivity to fall.',
+  s: ['Weekends were introduced in Britain in the nineteenth century.',
+      'Most employees would prefer a higher salary to extra time off.',
+      'Factories usually run three shifts a day to meet demand.'],
+  v: 'Câu sau nêu KẾT QUẢ thử nghiệm (bớt căng thẳng, năng suất không giảm), nên câu điền phải giới thiệu '
+   + 'chính kết quả đó và tương phản với dự đoán ban đầu.',
+  sv: { 'Weekends were introduced in Britain in the nineteenth century.': 'thông tin lịch sử, không dẫn vào kết quả',
+        'Most employees would prefer a higher salary to extra time off.': 'trái với mạch ủng hộ ở sau',
+        'Factories usually run three shifts a day to meet demand.': 'chỉ nối được với câu cuối, không nối câu trước' } },
+
+{ ten: 'Street food and tourism',
+  than: 'For many visitors, a bowl of noodles on a plastic stool is the highlight of the trip. ______ '
+      + 'Local authorities in several cities have responded by mapping food streets and offering hygiene '
+      + 'training to vendors, so that the tradition survives without putting anyone at risk.',
+  m: 3, d: 'Yet the same stalls raise questions about food safety and street order.',
+  s: ['Noodles are usually served with fresh herbs and lime.',
+      'Hotels in the old quarter are fully booked every summer.',
+      'Cooking at home is generally cheaper than eating out.'],
+  v: 'Câu sau nói chính quyền PHẢN ỨNG bằng cách tập huấn vệ sinh — nên câu điền phải nêu VẤN ĐỀ '
+   + '(an toàn thực phẩm, trật tự đường phố) để có cái mà phản ứng.',
+  sv: { 'Noodles are usually served with fresh herbs and lime.': 'là chi tiết ẩm thực, không nêu vấn đề',
+        'Hotels in the old quarter are fully booked every summer.': 'lạc sang chuyện lưu trú',
+        'Cooking at home is generally cheaper than eating out.': 'so sánh chi phí, không liên quan' } }
+
+    ];
+    const it = R.chon(ds);
+    const than = it.than.replace('______', '<b style="color:var(--kim)">______</b>');
+    const o = MC(R, 'Đọc đoạn văn sau và chọn câu thích hợp nhất điền vào chỗ trống:'
+      + khungVB(it.ten, than), it,
+      'Dạng này 5 câu trong đề. Luôn đọc CÂU NGAY SAU chỗ trống trước: từ nối (For example, In other words, '
+      + 'Yet, therefore) và đại từ (these, the same, it) sẽ chỉ thẳng ra câu cần điền.');
+    o.muc = it.m || 3;
+    return o;
+  } },
+
+/* ============================================================
+   ④ ĐỌC HIỂU — 18 câu trong đề, chia hai bài 8 và 10 câu
+   ============================================================ */
+{ ma: 'anh-that-dochieu', chuong: 'Đọc hiểu', muc: 3, dang: 'mc', _dethat: 'dochieu',
+  tao(R) {
+    const BAI = [
+
+{ ten: 'Reading Passage — Urban farming',
+  than: 'In cities around the world, rooftops and empty lots are being turned into farms. Urban farming began '
+      + 'as a hobby for a handful of enthusiasts, but it has grown into a small industry. Supporters point out '
+      + 'that food grown a few streets away needs no refrigerated lorry, so it arrives fresher and with a much '
+      + 'smaller carbon footprint. City farms also give neighbours a shared project, and several studies have '
+      + 'found that people who garden together report stronger ties to the place where they live.<br><br>'
+      + 'Not everyone is convinced. Land in the centre of a city is expensive, and a rooftop plot can rarely '
+      + 'produce enough to feed even the building below it. Critics argue that the same money spent on rural '
+      + 'farms would yield far more food. Defenders reply that the point is not to replace the countryside '
+      + 'but to change how city dwellers think about what they eat. A child who has pulled a carrot out of the '
+      + 'soil, they say, is unlikely to see vegetables the same way again.',
+  hoi: [
+  { q: 'What is the passage mainly about?',
+    m: 4, d: 'The benefits and the limits of growing food in cities',
+    s: ['A step-by-step guide to starting a rooftop garden',
+        'The reasons rural farms are becoming less productive',
+        'How refrigerated transport changed the food industry'],
+    v: 'Đoạn một nêu lợi ích, đoạn hai nêu phản đối và lời đáp lại — tức bài bàn cả MẶT LỢI lẫn GIỚI HẠN.',
+    sv: { 'A step-by-step guide to starting a rooftop garden': 'bài không hướng dẫn bước nào cả',
+          'The reasons rural farms are becoming less productive': 'bài không nói nông thôn kém năng suất đi',
+          'How refrigerated transport changed the food industry': 'xe lạnh chỉ được nhắc một lần làm ví dụ' } },
+  { q: 'According to paragraph 1, food grown in the city arrives fresher because it', 
+    m: 1, d: 'does not need to be transported over long distances',
+    s: ['is harvested by professional farmers',
+        'is stored in refrigerated lorries',
+        'is grown only during the summer'],
+    v: 'Bài viết: "needs no refrigerated lorry, so it arrives fresher" — vì không phải chở xa.',
+    sv: { 'is harvested by professional farmers': 'bài nói người trồng là dân nghiệp dư và hàng xóm',
+          'is stored in refrigerated lorries': 'ngược hẳn — bài nói KHÔNG cần xe lạnh',
+          'is grown only during the summer': 'bài không nhắc tới mùa vụ' } },
+  { q: 'According to paragraph 2, what do critics of urban farming say about the money spent on it?',
+    m: 1, d: 'The same money would produce more food on rural farms',
+    s: ['It should be spent on refrigerated transport instead',
+        'It is usually provided by the city council',
+        'It has already been repaid by ticket sales'],
+    v: 'Bài viết: "Critics argue that the same money spent on rural farms would yield far more food."',
+    sv: { 'It should be spent on refrigerated transport instead': 'xe lạnh chỉ được nhắc ở đoạn 1 làm ví dụ',
+          'It is usually provided by the city council': 'bài không nhắc tới nguồn tiền',
+          'It has already been repaid by ticket sales': 'bài không nhắc tới bán vé' } },
+  { q: 'According to paragraph 1, what did several studies find about people who garden together?',
+    m: 1, d: 'They feel more strongly connected to their neighbourhood',
+    s: ['They eat more vegetables than other city dwellers',
+        'They spend less money on food each month',
+        'They are more likely to move to the countryside'],
+    v: 'Bài viết: "people who garden together report stronger ties to the place where they live."',
+    sv: { 'They eat more vegetables than other city dwellers': 'bài không so sánh lượng rau ăn vào',
+          'They spend less money on food each month': 'bài không nói tới chi tiêu',
+          'They are more likely to move to the countryside': 'bài không nhắc tới việc chuyển đi' } },
+  { q: 'The word "yield" in paragraph 2 is closest in meaning to',
+    d: 'produce', m: 2, s: ['waste', 'cost', 'store'],
+    v: '"Would yield far more food" nghĩa là "sẽ cho ra nhiều lương thực hơn" ⇒ produce.',
+    sv: { waste: 'nghĩa lãng phí, trái với mạch so sánh hiệu quả',
+          cost: 'nghĩa tốn kém, không thay được vào chỗ đó',
+          store: 'nghĩa cất trữ, sai nghĩa' } },
+  { q: 'The word "they" in the last sentence of paragraph 2 refers to',
+    d: 'defenders of urban farming', m: 2, s: ['critics', 'children', 'city dwellers'],
+    v: 'Câu trước là "Defenders reply that…", nên "they say" ở câu cuối vẫn là những người BẢO VỆ nông nghiệp đô thị.',
+    sv: { critics: 'người phản đối đã hết lượt nói ở câu trước đó',
+          children: 'đứa trẻ là ví dụ được nói TỚI, không phải người nói',
+          'city dwellers': 'là đối tượng được bàn, không phải chủ thể của "say"' } },
+  { q: 'Which of the following can be inferred from the passage?',
+    m: 4, d: 'Urban farming is valued for its social and educational effects as much as for its output',
+    s: ['Urban farms now supply most of the vegetables eaten in large cities',
+        'City councils have banned farming on rooftops for safety reasons',
+        'Rural farmers have started moving their businesses into cities'],
+    v: 'Bài nhấn mạnh gắn kết hàng xóm và chuyện đứa trẻ nhổ củ cà rốt — tức giá trị XÃ HỘI và GIÁO DỤC '
+     + 'được coi trọng ngang sản lượng.',
+    sv: { 'Urban farms now supply most of the vegetables eaten in large cities': 'trái hẳn — bài nói sân thượng khó nuôi nổi chính toà nhà',
+          'City councils have banned farming on rooftops for safety reasons': 'bài không nhắc tới lệnh cấm nào',
+          'Rural farmers have started moving their businesses into cities': 'bài không nói tới việc này' } }] },
+
+{ ten: 'Reading Passage — The rise of the second-hand market',
+  than: 'A decade ago, buying used clothes was mostly a way to save money. Today it has become a statement. '
+      + 'Online platforms let sellers photograph a jacket in the morning and post it to a buyer in another city '
+      + 'by the evening, and the market for second-hand fashion is now growing several times faster than the '
+      + 'market for new clothes.<br><br>'
+      + 'Two forces explain the shift. The first is price: young shoppers facing high rents are quick to notice '
+      + 'that a used coat costs a fraction of a new one. The second is conscience. Textile production consumes '
+      + 'enormous quantities of water and dye, and a garment worn twice before being thrown away is hard to '
+      + 'defend. Buying second-hand lets shoppers keep up with fashion without adding to that pile.<br><br>'
+      + 'The trend is not without its critics. Some argue that cheap resale simply encourages people to buy '
+      + 'more overall, because a wardrobe that can be sold on feels less like a commitment. Others note that '
+      + 'the most worn-out items still end up in landfill, merely a little later than before.',
+  hoi: [
+  { q: 'What is the main purpose of the passage?',
+    m: 4, d: 'To explain why second-hand shopping has grown and what doubts remain about it',
+    s: ['To advise readers on how to sell clothes online',
+        'To compare the prices of new and used coats in detail',
+        'To describe the technology behind delivery services'],
+    v: 'Đoạn 2 giải thích hai lí do tăng trưởng, đoạn 3 nêu các ý kiến phản biện — đúng cấu trúc "vì sao tăng '
+     + 'và còn nghi ngại gì".',
+    sv: { 'To advise readers on how to sell clothes online': 'bài không đưa lời khuyên bán hàng nào',
+          'To compare the prices of new and used coats in detail': 'giá chỉ được nhắc một câu làm lí do',
+          'To describe the technology behind delivery services': 'chuyện giao hàng chỉ là chi tiết minh hoạ' } },
+  { q: 'According to paragraph 2, the second reason for the shift is',
+    m: 1, d: 'concern about the environmental cost of making clothes',
+    s: ['the rising rent that young people have to pay',
+        'the speed of modern delivery services',
+        'the poor quality of newly made garments'],
+    v: '"The second is conscience" rồi giải thích nước và thuốc nhuộm — tức mối lo về MÔI TRƯỜNG.',
+    sv: { 'the rising rent that young people have to pay': 'đó là lí do THỨ NHẤT (giá cả)',
+          'the speed of modern delivery services': 'nằm ở đoạn 1, không phải một trong hai lí do',
+          'the poor quality of newly made garments': 'bài không chê chất lượng đồ mới' } },
+  { q: 'According to paragraph 1, how fast is the second-hand fashion market growing?',
+    m: 1, d: 'Several times faster than the market for new clothes',
+    s: ['At about the same speed as the market for new clothes',
+        'Slightly more slowly than a decade ago',
+        'Twice as fast as the online delivery business'],
+    v: 'Bài viết: "growing several times faster than the market for new clothes."',
+    sv: { 'At about the same speed as the market for new clothes': 'bài nói nhanh hơn NHIỀU LẦN',
+          'Slightly more slowly than a decade ago': 'trái hẳn với mạch tăng trưởng',
+          'Twice as fast as the online delivery business': 'bài không so sánh với ngành giao hàng' } },
+  { q: 'According to paragraph 3, what do some critics say about cheap resale?',
+    m: 1, d: 'It may encourage people to buy more clothes overall',
+    s: ['It makes new clothes more expensive to produce',
+        'It has been banned on most online platforms',
+        'It only works for expensive designer items'],
+    v: 'Bài viết: "cheap resale simply encourages people to buy more overall."',
+    sv: { 'It makes new clothes more expensive to produce': 'bài không nói tới giá sản xuất đồ mới',
+          'It has been banned on most online platforms': 'bài không nhắc tới lệnh cấm',
+          'It only works for expensive designer items': 'bài không giới hạn ở hàng hiệu' } },
+  { q: 'The phrase "that pile" in paragraph 2 refers to',
+    d: 'discarded clothing', m: 2, s: ['unsold stock in shops', 'water used in factories', 'money saved by shoppers'],
+    v: '"A garment worn twice before being thrown away" — đống ở đây là đống quần áo BỊ VỨT ĐI.',
+    sv: { 'unsold stock in shops': 'bài không nhắc tới hàng tồn',
+          'water used in factories': 'nước là tài nguyên bị tiêu tốn, không tạo thành "đống"',
+          'money saved by shoppers': 'tiền tiết kiệm không phải thứ chất đống theo nghĩa này' } },
+  { q: 'Which of the following best describes the tone of the last paragraph?',
+    d: 'Cautious', m: 2, s: ['Enthusiastic', 'Angry', 'Humorous'],
+    v: 'Đoạn cuối nêu hai lời phản biện một cách điềm đạm ("Some argue…", "Others note…") ⇒ giọng THẬN TRỌNG.',
+    sv: { Enthusiastic: 'không có từ ngữ hào hứng nào ở đoạn cuối',
+          Angry: 'không có lời chỉ trích gay gắt',
+          Humorous: 'không có yếu tố hài hước' } },
+  { q: 'It can be inferred from the passage that the writer believes second-hand shopping',
+    m: 4, d: 'helps but does not solve the problem of textile waste',
+    s: ['will soon replace the market for new clothes entirely',
+        'is chosen mainly by people who cannot afford new items',
+        'has no measurable effect on the environment'],
+    v: 'Tác giả ghi nhận lợi ích ở đoạn 2 nhưng kết bằng ý "đồ rách vẫn ra bãi rác, chỉ muộn hơn một chút" — '
+     + 'tức giúp được nhưng không giải quyết triệt để.',
+    sv: { 'will soon replace the market for new clothes entirely': 'bài chỉ nói tăng nhanh hơn, không nói thay thế',
+          'is chosen mainly by people who cannot afford new items': 'trái với câu mở đầu "today it has become a statement"',
+          'has no measurable effect on the environment': 'trái với cả đoạn 2' } }] },
+
+{ ten: 'Reading Passage — Sleep and the teenage brain',
+  than: 'Parents often complain that teenagers cannot get out of bed. Sleep researchers say the problem is not '
+      + 'laziness but biology. During adolescence the body clock shifts by one to two hours, so a teenager who '
+      + 'feels wide awake at eleven at night is not being stubborn; the hormone that triggers sleepiness simply '
+      + 'arrives later than it did in childhood.<br><br>'
+      + 'The trouble is that school still starts early. A student who falls asleep at midnight and is woken at '
+      + 'six loses around two hours of the sleep the brain uses to store what was learned the day before. '
+      + 'Several districts in the United States moved their start times back by an hour and reported fewer late '
+      + 'arrivals, better attendance and, in some schools, higher grades.<br><br>'
+      + 'Changing the timetable, however, is not simple. Later starts push sports practice into the evening and '
+      + 'clash with the working hours of parents who drive their children to school. For now, most researchers '
+      + 'advise families to protect the hour before bed instead: no bright screens, no heavy homework, and a '
+      + 'consistent time to switch off the light.',
+  hoi: [
+  { q: 'According to paragraph 1, teenagers stay up late mainly because',
+    m: 1, d: 'their internal body clock shifts during adolescence',
+    s: ['they choose to ignore their parents',
+        'they have too much homework to finish',
+        'they drink caffeine in the evening'],
+    v: 'Bài nói rõ "the body clock shifts by one to two hours" và hormone gây buồn ngủ đến muộn hơn.',
+    sv: { 'they choose to ignore their parents': 'bài bác bỏ hẳn cách hiểu "lười hay bướng"',
+          'they have too much homework to finish': 'bài tập chỉ được nhắc ở đoạn 3 như lời khuyên',
+          'they drink caffeine in the evening': 'bài không nhắc tới caffeine' } },
+  { q: 'According to paragraph 2, how much sleep does a student lose in the example given?',
+    m: 1, d: 'About two hours', s: ['About four hours', 'About thirty minutes', 'A whole night'],
+    v: 'Bài viết: "falls asleep at midnight and is woken at six loses around two hours of the sleep".',
+    sv: { 'About four hours': 'bài ghi rõ khoảng hai tiếng',
+          'About thirty minutes': 'quá ít so với con số trong bài',
+          'A whole night': 'bài không nói mất trắng cả đêm' } },
+  { q: 'According to paragraph 1, how much does the body clock shift during adolescence?',
+    m: 1, d: 'By one to two hours', s: ['By three to four hours', 'By about ten minutes', 'It does not shift at all'],
+    v: 'Bài viết: "the body clock shifts by one to two hours".',
+    sv: { 'By three to four hours': 'lớn hơn con số trong bài',
+          'By about ten minutes': 'nhỏ hơn hẳn con số trong bài',
+          'It does not shift at all': 'trái hẳn với luận điểm chính của đoạn' } },
+  { q: 'The word "it" in paragraph 1 refers to',
+    d: 'the hormone that triggers sleepiness', m: 2, s: ['the body clock', 'adolescence', 'the teenager'],
+    v: 'Cụm đầy đủ là "the hormone … simply arrives later than IT did in childhood" — "it" thay cho chính hormone đó.',
+    sv: { 'the body clock': 'đồng hồ sinh học là thứ dịch chuyển, không phải thứ "arrives"',
+          adolescence: 'là giai đoạn, không "đến muộn hơn"',
+          'the teenager': 'người không phải chủ thể của động từ "arrive" ở đây' } },
+  { q: 'What did some American school districts find after starting classes later?',
+    m: 1, d: 'Attendance improved and some schools saw better grades',
+    s: ['Students went to bed even later than before',
+        'Parents refused to send their children to school',
+        'Sports practice had to be cancelled altogether'],
+    v: 'Bài viết: "reported fewer late arrivals, better attendance and, in some schools, higher grades".',
+    sv: { 'Students went to bed even later than before': 'bài không nêu kết quả này',
+          'Parents refused to send their children to school': 'bài chỉ nói giờ làm của phụ huynh bị lệch',
+          'Sports practice had to be cancelled altogether': 'bài nói tập thể thao bị đẩy sang buổi tối, không bị huỷ' } },
+  { q: 'Which of the following is NOT mentioned as a difficulty of starting school later?',
+    m: 3, d: 'Teachers would need to be paid more',
+    s: ['Sports practice moves into the evening',
+        'Parents\u2019 working hours no longer match',
+        'Families have to rearrange the school run'],
+    v: 'Bài nêu tập thể thao buổi tối và giờ làm của phụ huynh; chuyện TRẢ LƯƠNG giáo viên không hề được nhắc.',
+    sv: { 'Sports practice moves into the evening': 'có nêu ở đoạn 3',
+          'Parents\u2019 working hours no longer match': 'có nêu ở đoạn 3',
+          'Families have to rearrange the school run': 'chính là ý "parents who drive their children to school"' } },
+  { q: 'What do most researchers currently recommend?',
+    m: 1, d: 'Keeping the last hour before bed calm and screen-free',
+    s: ['Moving every school start time back by two hours',
+        'Allowing students to sleep during the first lesson',
+        'Giving teenagers coffee in the morning'],
+    v: 'Đoạn cuối: "protect the hour before bed instead: no bright screens, no heavy homework, and a consistent time".',
+    sv: { 'Moving every school start time back by two hours': 'bài nói việc đổi giờ KHÔNG đơn giản nên mới khuyên cách khác',
+          'Allowing students to sleep during the first lesson': 'bài không đề xuất điều này',
+          'Giving teenagers coffee in the morning': 'bài không nhắc tới cà phê' } }] }
+
+    ];
+    const bai = R.chon(BAI);
+    const h = R.chon(bai.hoi);
+    const o = MC(R, 'Đọc bài sau và chọn phương án đúng:' + khungVB(bai.ten, bai.than)
+      + `<div style="margin-top:8px"><b>${h.q}</b></div>`, h,
+      'Đọc hiểu chiếm 18 trên 40 câu — gần một nửa đề. Thứ tự câu hỏi thường bám theo thứ tự đoạn văn, '
+      + 'trừ câu hỏi ý chính và câu hỏi suy luận. Câu hỏi từ vựng thì thay từng phương án vào đúng chỗ đó '
+      + 'rồi đọc lại cả câu, đừng dịch từ rời.');
+    /* câu chi tiết là thông hiểu, câu từ vựng và tham chiếu là vận dụng,
+       câu ý chính và suy luận là vận dụng cao — mức phải theo LOẠI câu hỏi */
+    o.muc = h.m || 3;
+    return o;
+  } }
+
+]);
+
+/* ============================================================
+   BỘ SINH CÂU RỜI CHỈ DÙNG ĐỂ LUYỆN, KHÔNG VÀO ĐỀ
+   Ngữ pháp vẫn phải học — đề vẫn kiểm tra nó, chỉ là kiểm tra bên
+   trong văn bản. Nên giữ nguyên các bộ sinh câu rời cho Luyện Công
+   và Tà Đạo, nhưng chặn không cho vào đề Độ Kiếp.
+   ============================================================ */
+(function () {
+  const VAO_DE = ['anh-that-dienvb', 'anh-that-hoanthanh', 'anh-that-dochieu',
+                  'anh-sapxep', 'anh-chencau', 'anh-tomtat', 'anh-vdc-cloze', 'anh-vdc-doanvan'];
+  (TD.GEN.anh || []).forEach(t => { if (VAO_DE.indexOf(t.ma) < 0) t._luyen = true; });
+})();
+})();
+
+</script>
+<script>
+/* ============================================================
+   ĐỊA LÍ 10 – 11 — MẢNG KHO CŨ THIẾU HẲN
+   Đề tốt nghiệp 2026 có câu nằm ngoài chương trình lớp 12: kiến thức
+   Địa lí 10 (tự nhiên đại cương, dân cư, các ngành kinh tế) và Địa lí 11
+   (nhóm nước, toàn cầu hoá, các tổ chức khu vực, địa lí khu vực – quốc gia).
+   Các câu đó ở mức nhận biết nhưng đủ làm học sinh chỉ ôn lớp 12 lúng túng.
+   File này bù đúng mảng đó: thẻ Tàng Kinh Các, mệnh đề cho Tà Đạo và
+   Phần II, cùng bộ sinh câu hỏi.
+   ============================================================ */
+window.TD = window.TD || {}; TD.KHO = TD.KHO || {}; TD.KHO_LT = TD.KHO_LT || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const CD = 'Địa 10 – 11';
+
+/* ---------------------------------------------------------- THẺ */
+TD.KHO.dia_ct = (TD.KHO.dia_ct || []).concat([
+
+{ nhom: 'Địa lí 10 – 11', cd: CD, ten: 'Địa lí tự nhiên đại cương — bốn quyển phải nhớ', cap: 1,
+  ct: '<b>THẠCH QUYỂN</b><br>'
+    + '&nbsp;&nbsp;Nội lực sinh ra từ bên trong Trái Đất, làm địa hình GỒ GHỀ thêm: uốn nếp, đứt gãy, động đất, núi lửa.<br>'
+    + '&nbsp;&nbsp;Ngoại lực sinh ra từ bên ngoài (nước, gió, sinh vật), làm địa hình SAN BẰNG: phong hoá, bóc mòn, vận chuyển, bồi tụ.<br>'
+    + '&nbsp;&nbsp;Hai lực này tác động ĐỒNG THỜI và ngược chiều nhau.<br>'
+    + '<b>KHÍ QUYỂN</b><br>'
+    + '&nbsp;&nbsp;Ba đai khí áp cao: cực, cận chí tuyến. Hai đai áp thấp: xích đạo, ôn đới.<br>'
+    + '&nbsp;&nbsp;Gió Mậu dịch (Tín phong) thổi từ áp cao cận chí tuyến về xích đạo; gió Tây ôn đới thổi từ áp cao cận chí tuyến về áp thấp ôn đới.<br>'
+    + '&nbsp;&nbsp;Nhiệt độ giảm dần từ xích đạo về cực và giảm theo độ cao (trung bình 0,6 °C mỗi 100 m).<br>'
+    + '<b>THUỶ QUYỂN</b><br>'
+    + '&nbsp;&nbsp;Chế độ nước sông phụ thuộc chế độ mưa (vùng nhiệt đới), băng tuyết tan (ôn đới lạnh), nước ngầm và hồ đầm.<br>'
+    + '&nbsp;&nbsp;Dòng biển nóng chảy từ vĩ độ thấp lên cao, gây mưa ở nơi nó đi qua; dòng lạnh ngược lại, gây khô hạn — đó là lí do có hoang mạc ven biển.<br>'
+    + '<b>SINH QUYỂN</b><br>'
+    + '&nbsp;&nbsp;Sự phân bố sinh vật theo vĩ độ và độ cao tạo ra quy luật ĐỊA ĐỚI và ĐAI CAO.',
+  khi: 'Câu nhận biết lấy từ Địa lí 10 — thường rơi vào Phần I của đề.',
+  vd: 'Hoang mạc Atacama nằm ngay ven biển vì có dòng biển LẠNH Pêru chảy qua, hơi nước không bốc lên được.',
+  bay: 'Nội lực làm địa hình gồ ghề, ngoại lực làm bằng phẳng — hai vế này rất hay bị tráo cho nhau trong phương án nhiễu.' },
+
+{ nhom: 'Địa lí 10 – 11', cd: CD, ten: 'Nhóm nước, toàn cầu hoá và các tổ chức khu vực', cap: 2,
+  ct: '<b>HAI NHÓM NƯỚC</b><br>'
+    + '&nbsp;&nbsp;Nước PHÁT TRIỂN: GNI/người cao, HDI cao, tỉ trọng dịch vụ lớn, cơ cấu dân số GIÀ, đô thị hoá cao.<br>'
+    + '&nbsp;&nbsp;Nước ĐANG PHÁT TRIỂN: GNI/người thấp hoặc trung bình, tỉ trọng nông nghiệp còn lớn, cơ cấu dân số TRẺ.<br>'
+    + '&nbsp;&nbsp;Ba chỉ tiêu đánh giá: GNI bình quân đầu người · cơ cấu kinh tế · chỉ số phát triển con người HDI.<br>'
+    + '<b>TOÀN CẦU HOÁ</b> — biểu hiện: thương mại phát triển, đầu tư nước ngoài tăng, thị trường tài chính mở rộng, '
+    + 'các công ty xuyên quốc gia có vai trò lớn. Hệ quả: thúc đẩy tăng trưởng nhưng làm gia tăng khoảng cách giàu nghèo.<br>'
+    + '<b>KHU VỰC HOÁ</b> — các tổ chức phải phân biệt:<br>'
+    + '&nbsp;&nbsp;<b>EU</b> — Liên minh châu Âu, mức liên kết SÂU nhất (có đồng tiền chung euro, thị trường chung).<br>'
+    + '&nbsp;&nbsp;<b>ASEAN</b> — Hiệp hội các quốc gia Đông Nam Á, 10 thành viên, ba trụ cột Cộng đồng.<br>'
+    + '&nbsp;&nbsp;<b>APEC</b> — Diễn đàn Hợp tác Kinh tế châu Á – Thái Bình Dương, là DIỄN ĐÀN chứ không phải liên minh.<br>'
+    + '&nbsp;&nbsp;<b>WTO</b> — Tổ chức Thương mại Thế giới, phạm vi TOÀN CẦU chứ không phải khu vực.<br>'
+    + '&nbsp;&nbsp;<b>USMCA</b> — hiệp định Bắc Mỹ (Hoa Kỳ – Mexico – Canada), thay cho NAFTA cũ.<br>'
+    + '<b>AN NINH TOÀN CẦU</b> — an ninh lương thực, an ninh nguồn nước, an ninh năng lượng, an ninh mạng.',
+  khi: 'Câu Địa lí 11 trong đề, và câu so sánh hai nhóm nước.',
+  vd: 'EU có đồng tiền chung nên mức liên kết sâu hơn ASEAN; APEC chỉ là diễn đàn nên không có ràng buộc pháp lí như EU.',
+  bay: 'WTO là tổ chức TOÀN CẦU, đừng xếp chung nhóm với EU hay ASEAN khi đề hỏi về tổ chức KHU VỰC.' },
+
+{ nhom: 'Địa lí 10 – 11', cd: CD, ten: 'Địa lí các ngành kinh tế và các khu vực trên thế giới', cap: 2,
+  ct: '<b>NÔNG NGHIỆP</b> — nhân tố quyết định phân bố: đất, khí hậu, nguồn nước (tự nhiên); thị trường, khoa học công nghệ, chính sách (kinh tế – xã hội). '
+    + 'Cây lương thực chính: lúa gạo ở vùng nhiệt đới ẩm châu Á; lúa mì ở ôn đới; ngô ở cận nhiệt và ôn đới nóng.<br>'
+    + '<b>CÔNG NGHIỆP</b> — công nghiệp khai thác đứng gần nguồn nguyên liệu; công nghiệp chế biến đứng gần thị trường và lao động. '
+    + 'Xu hướng hiện nay: phát triển công nghiệp xanh, kinh tế tuần hoàn.<br>'
+    + '<b>DỊCH VỤ</b> — chia ba nhóm: dịch vụ kinh doanh (giao thông, tài chính), dịch vụ tiêu dùng (bán lẻ, du lịch), dịch vụ công (hành chính, y tế, giáo dục). '
+    + 'Tỉ trọng dịch vụ càng cao thì trình độ phát triển càng cao.<br>'
+    + '<b>MỘT SỐ KHU VỰC – QUỐC GIA hay ra đề</b><br>'
+    + '&nbsp;&nbsp;<b>Hoa Kỳ:</b> nền kinh tế quy mô lớn nhất thế giới, dịch vụ chiếm tỉ trọng rất cao.<br>'
+    + '&nbsp;&nbsp;<b>Trung Quốc:</b> dân số đông, công nghiệp chế biến chế tạo mạnh, chênh lệch lớn giữa miền Đông và miền Tây.<br>'
+    + '&nbsp;&nbsp;<b>Nhật Bản:</b> nghèo khoáng sản, dân số GIÀ, kinh tế dựa vào công nghệ cao và nhập nguyên liệu.<br>'
+    + '&nbsp;&nbsp;<b>Đông Nam Á:</b> vị trí cầu nối, khí hậu nhiệt đới gió mùa, thế mạnh nông nghiệp nhiệt đới và biển.<br>'
+    + '&nbsp;&nbsp;<b>Tây Nam Á:</b> trữ lượng dầu mỏ lớn nhất thế giới, khí hậu khô hạn, bất ổn chính trị kéo dài.<br>'
+    + '&nbsp;&nbsp;<b>Mỹ Latinh:</b> giàu tài nguyên nhưng chênh lệch giàu nghèo và đô thị hoá tự phát lớn.<br>'
+    + '&nbsp;&nbsp;<b>Cộng hoà Nam Phi:</b> nền kinh tế phát triển nhất châu Phi, giàu khoáng sản quý.',
+  khi: 'Câu nhận biết về các ngành và các khu vực trong đề — phần lớn học sinh chỉ ôn lớp 12 nên bỏ trống.',
+  vd: 'Đề hỏi "khu vực có trữ lượng dầu mỏ lớn nhất thế giới" — đáp án là Tây Nam Á, kiến thức Địa lí 11.',
+  bay: 'Nhật Bản dân số GIÀ còn Đông Nam Á dân số TRẺ; đừng nhớ ngược. Và Nam Phi phát triển nhất CHÂU PHI, '
+     + 'không phải nước phát triển theo phân loại thế giới.' }
+
+]);
+
+/* ---------------------------------------------------------- MỆNH ĐỀ */
+TD.KHO_LT.dia = (TD.KHO_LT.dia || []).concat([
+{ cd: CD, m: 1, a: true,  t: 'Nội lực có xu hướng làm cho bề mặt Trái Đất gồ ghề hơn.', v: 'Nội lực sinh ra uốn nếp, đứt gãy, núi lửa — đều làm địa hình nhô cao và chia cắt.' },
+{ cd: CD, m: 1, a: false, t: 'Ngoại lực làm cho bề mặt Trái Đất gồ ghề hơn.', v: 'Ngoại lực SAN BẰNG địa hình: phong hoá, bóc mòn, vận chuyển, bồi tụ.' },
+{ cd: CD, m: 1, a: true,  t: 'Nhiệt độ không khí giảm trung bình 0,6 °C khi lên cao 100 m.', v: 'Đây là gradient nhiệt theo độ cao ở tầng đối lưu.' },
+{ cd: CD, m: 2, a: true,  t: 'Dòng biển lạnh chảy ven bờ là một nguyên nhân hình thành hoang mạc ven biển.', v: 'Nước lạnh làm hơi nước khó bốc lên, không tạo mưa — ví dụ hoang mạc Atacama và Namib.' },
+{ cd: CD, m: 2, a: false, t: 'Dòng biển nóng đi qua thường gây khô hạn cho vùng ven bờ.', v: 'Ngược lại — dòng NÓNG làm tăng bốc hơi nên gây MƯA; dòng LẠNH mới gây khô hạn.' },
+{ cd: CD, m: 1, a: true,  t: 'Gió Mậu dịch (Tín phong) thổi từ áp cao cận chí tuyến về áp thấp xích đạo.', v: 'Gió thổi từ nơi áp cao về nơi áp thấp.' },
+{ cd: CD, m: 2, a: true,  t: 'HDI là một trong các chỉ tiêu dùng để phân chia hai nhóm nước.', v: 'Ba chỉ tiêu: GNI bình quân đầu người, cơ cấu kinh tế và HDI.' },
+{ cd: CD, m: 2, a: true,  t: 'Các nước phát triển thường có cơ cấu dân số già.', v: 'Tỉ suất sinh thấp, tuổi thọ cao nên tỉ lệ người trên 65 tuổi lớn.' },
+{ cd: CD, m: 2, a: false, t: 'Các nước đang phát triển thường có tỉ trọng ngành dịch vụ cao nhất thế giới.', v: 'Tỉ trọng dịch vụ cao là đặc trưng của nhóm nước PHÁT TRIỂN.' },
+{ cd: CD, m: 2, a: true,  t: 'EU là tổ chức khu vực có mức độ liên kết sâu nhất thế giới hiện nay.', v: 'EU có thị trường chung, đồng tiền chung euro và nhiều thiết chế siêu quốc gia.' },
+{ cd: CD, m: 2, a: false, t: 'WTO là một tổ chức liên kết kinh tế khu vực.', v: 'WTO là tổ chức thương mại TOÀN CẦU, không giới hạn theo khu vực địa lí.' },
+{ cd: CD, m: 2, a: true,  t: 'APEC là một diễn đàn hợp tác kinh tế, không có tính ràng buộc pháp lí như EU.', v: 'APEC hoạt động theo nguyên tắc tự nguyện và đồng thuận.' },
+{ cd: CD, m: 2, a: true,  t: 'Tây Nam Á là khu vực có trữ lượng dầu mỏ lớn nhất thế giới.', v: 'Tập trung quanh vịnh Péc-xích.' },
+{ cd: CD, m: 2, a: false, t: 'Nhật Bản có nguồn khoáng sản phong phú nên ít phải nhập nguyên liệu.', v: 'Nhật Bản NGHÈO khoáng sản, phải nhập phần lớn nguyên – nhiên liệu.' },
+{ cd: CD, m: 2, a: true,  t: 'Nhật Bản đang đối mặt với vấn đề dân số già và thiếu lao động.', v: 'Tỉ suất sinh rất thấp, tuổi thọ cao nhất thế giới.' },
+{ cd: CD, m: 2, a: true,  t: 'Kinh tế Trung Quốc có sự chênh lệch lớn giữa miền Đông và miền Tây.', v: 'Miền Đông giáp biển, tập trung công nghiệp và đô thị; miền Tây núi cao, hoang mạc, thưa dân.' },
+{ cd: CD, m: 2, a: true,  t: 'Cộng hoà Nam Phi là nước có nền kinh tế phát triển nhất châu Phi.', v: 'Giàu khoáng sản quý, công nghiệp khai khoáng và dịch vụ tài chính phát triển.' },
+{ cd: CD, m: 3, a: true,  t: 'Toàn cầu hoá vừa thúc đẩy tăng trưởng vừa làm gia tăng khoảng cách giàu nghèo.', v: 'Lợi ích phân bố không đều giữa các nước và giữa các nhóm dân cư trong một nước.' },
+{ cd: CD, m: 2, a: true,  t: 'An ninh lương thực, an ninh nguồn nước và an ninh năng lượng đều thuộc nhóm vấn đề an ninh toàn cầu.', v: 'Đây là ba trong các vấn đề an ninh phi truyền thống được nêu trong chương trình Địa lí 11.' },
+{ cd: CD, m: 2, a: true,  t: 'Trong ngành công nghiệp, các cơ sở khai thác thường phân bố gần nguồn nguyên liệu.', v: 'Nguyên liệu thô cồng kềnh, vận chuyển xa thì chi phí lớn.' }
+]);
+
+/* ---------------------------------------------------------- BỘ SINH */
+TD.GEN.dia = (TD.GEN.dia || []).concat([
+{ ma: 'dia-1011-tunhien', chuong: 'Địa 10 – 11', muc: 1, dang: 'mc',
+  tao(R) {
+    const ds = [
+    { q: 'Quá trình nào sau đây thuộc tác động của NGOẠI lực?', d: 'Phong hoá đá',
+      s: ['Uốn nếp địa tầng', 'Động đất', 'Núi lửa phun trào'],
+      v: 'Phong hoá do nước, nhiệt độ, sinh vật gây ra — đều là tác nhân bên ngoài.' },
+    { q: 'Loại gió nào thổi từ áp cao cận chí tuyến về áp thấp xích đạo?', d: 'Gió Mậu dịch',
+      s: ['Gió Tây ôn đới', 'Gió Đông cực', 'Gió mùa'],
+      v: 'Gió Mậu dịch (Tín phong) thổi quanh năm về phía xích đạo.' },
+    { q: 'Nhiệt độ không khí ở tầng đối lưu giảm trung bình bao nhiêu khi lên cao 100 m?', d: '0,6 °C',
+      s: ['1,0 °C', '0,1 °C', '6,0 °C'],
+      v: 'Gradient nhiệt theo độ cao trong tầng đối lưu là khoảng 0,6 °C trên 100 m.' },
+    { q: 'Hoang mạc ven biển như Atacama hình thành chủ yếu do', d: 'dòng biển lạnh chảy ven bờ',
+      s: ['dòng biển nóng chảy ven bờ', 'địa hình núi cao chắn gió biển', 'vĩ độ quá cao nên ít bức xạ'],
+      v: 'Nước biển lạnh làm hơi nước khó bốc lên, không tạo được mưa dù ngay sát biển.' },
+    { q: 'Quy luật nào giải thích sự thay đổi của thảm thực vật theo độ cao của núi?', d: 'Quy luật đai cao',
+      s: ['Quy luật địa đới', 'Quy luật địa ô', 'Quy luật thống nhất'],
+      v: 'Lên cao nhiệt độ giảm nên thảm thực vật đổi theo tầng — đó là quy luật đai cao.' }];
+    const it = R.chon(ds);
+    const opts = TD.xaoR(R, [it.d].concat(it.s));
+    return { q: it.q, opts: opts, ans: opts.indexOf(it.d),
+      giai: `Đáp án: ${it.d}\n${it.v}`,
+      meo: 'Kiến thức Địa lí 10. Đề 2026 có câu ngoài chương trình lớp 12 — chỉ ở mức nhận biết nhưng ai bỏ qua là mất điểm dễ.' };
+  } },
+
+{ ma: 'dia-1011-thegioi', chuong: 'Địa 10 – 11', muc: 2, dang: 'mc',
+  tao(R) {
+    const ds = [
+    { q: 'Tổ chức nào sau đây có mức độ liên kết SÂU nhất?', d: 'EU',
+      s: ['ASEAN', 'APEC', 'WTO'],
+      v: 'EU có thị trường chung, đồng tiền chung euro và các thiết chế siêu quốc gia.' },
+    { q: 'Tổ chức nào sau đây KHÔNG phải tổ chức liên kết kinh tế khu vực?', d: 'WTO',
+      s: ['EU', 'ASEAN', 'USMCA'],
+      v: 'WTO là tổ chức thương mại TOÀN CẦU, không giới hạn theo khu vực.' },
+    { q: 'Khu vực nào có trữ lượng dầu mỏ lớn nhất thế giới?', d: 'Tây Nam Á',
+      s: ['Đông Nam Á', 'Mỹ Latinh', 'Tây Âu'],
+      v: 'Trữ lượng tập trung quanh vịnh Péc-xích.' },
+    { q: 'Đặc điểm nổi bật về dân số của Nhật Bản hiện nay là', d: 'dân số già, thiếu lao động',
+      s: ['dân số trẻ, tăng nhanh', 'dân số đông nhất thế giới', 'tỉ suất sinh cao nhất châu Á'],
+      v: 'Tỉ suất sinh rất thấp trong khi tuổi thọ cao nhất thế giới.' },
+    { q: 'Chỉ tiêu nào sau đây KHÔNG dùng để phân chia hai nhóm nước phát triển và đang phát triển?', d: 'Diện tích lãnh thổ',
+      s: ['GNI bình quân đầu người', 'Cơ cấu kinh tế', 'Chỉ số HDI'],
+      v: 'Diện tích không phản ánh trình độ phát triển — nước nhỏ vẫn có thể rất phát triển.' },
+    { q: 'Nước có nền kinh tế phát triển nhất châu Phi là', d: 'Cộng hoà Nam Phi',
+      s: ['Ai Cập', 'Nigeria', 'Kenya'],
+      v: 'Giàu khoáng sản quý, công nghiệp khai khoáng và dịch vụ tài chính phát triển.' }];
+    const it = R.chon(ds);
+    const opts = TD.xaoR(R, [it.d].concat(it.s));
+    return { q: it.q, opts: opts, ans: opts.indexOf(it.d),
+      giai: `Đáp án: ${it.d}\n${it.v}`,
+      meo: 'Kiến thức Địa lí 11. Nhớ ba mức: WTO toàn cầu · EU liên minh sâu · APEC chỉ là diễn đàn.' };
+  } }
+]);
+
+/* luật ghép chuyên đề cho các thẻ và câu mới */
+if (TD.BAN_DO_CD && TD.BAN_DO_CD.dia)
+  TD.BAN_DO_CD.dia.unshift([/dia 10|dia 11|noi luc|ngoai luc|thach quyen|khi quyen|thuy quyen|sinh quyen|nhom nuoc|toan cau hoa|khu vuc hoa|hoa ky|trung quoc|nhat ban|tay nam a|my latinh|nam phi|apec|\bwto\b|\beu\b/, CD]);
+})();
+
+</script>
+<script>
+/* ============================================================
+   SINH HỌC — BÙ BỐN MẢNG CÒN THIẾU HẲN SO VỚI SGK 12 (CT 2018)
+   Dò lại mục lục Sinh học 12 chương trình mới thì kho đang trống bốn chỗ:
+     ① Bằng chứng tiến hoá (giải phẫu so sánh, tế bào học, sinh học phân tử)
+     ② Chu trình sinh địa hoá và sinh quyển
+     ③ Sinh thái phục hồi và bảo tồn
+     ④ Chọn – tạo giống, ưu thế lai
+   Cả bốn đều nằm trong yêu cầu cần đạt của chương trình nên đề ra được.
+   ============================================================ */
+window.TD = window.TD || {}; TD.KHO = TD.KHO || {}; TD.KHO_LT = TD.KHO_LT || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+
+TD.KHO.sinh_ct = (TD.KHO.sinh_ct || []).concat([
+
+{ nhom: 'Tiến hoá', cd: 'Tiến hoá', ten: 'Bằng chứng tiến hoá — bốn loại và cách phân biệt', cap: 2,
+  ct: '<b>① BẰNG CHỨNG GIẢI PHẪU SO SÁNH</b> — mạnh nhất trong đề.<br>'
+    + '&nbsp;&nbsp;<b>Cơ quan TƯƠNG ĐỒNG:</b> cùng NGUỒN GỐC, có thể khác chức năng. '
+    + 'Ví dụ: chi trước của mèo, cánh dơi, vây cá voi, tay người. Chứng minh tiến hoá PHÂN LI.<br>'
+    + '&nbsp;&nbsp;<b>Cơ quan TƯƠNG TỰ:</b> khác nguồn gốc, cùng CHỨC NĂNG. '
+    + 'Ví dụ: cánh sâu bọ với cánh dơi; mang cá với mang tôm. Chứng minh tiến hoá ĐỒNG QUY.<br>'
+    + '&nbsp;&nbsp;<b>Cơ quan THOÁI HOÁ:</b> là cơ quan tương đồng đã tiêu giảm. '
+    + 'Ví dụ: ruột thừa và xương cụt ở người, di tích chi sau ở trăn.<br>'
+    + '<b>② BẰNG CHỨNG TẾ BÀO HỌC</b> — mọi sinh vật đều cấu tạo từ tế bào, tế bào chỉ sinh ra từ tế bào có trước.<br>'
+    + '<b>③ BẰNG CHỨNG SINH HỌC PHÂN TỬ</b> — <b>bằng chứng THUYẾT PHỤC nhất</b>: mọi loài đều dùng chung '
+    + 'DNA, chung bộ mã di truyền, chung 20 loại amino acid. Loài càng gần nhau thì trình tự nucleotide và '
+    + 'trình tự amino acid càng giống nhau — đây là cơ sở để dựng cây phát sinh chủng loại.<br>'
+    + '<b>④ BẰNG CHỨNG HOÁ THẠCH</b> — cho biết TUỔI và trình tự xuất hiện của các nhóm loài; xác định bằng '
+    + 'đồng vị phóng xạ (carbon-14 cho mẫu vài chục nghìn năm, uranium-238 cho mẫu hàng trăm triệu năm).',
+  khi: 'Câu nhận biết và thông hiểu ở đầu phần Tiến hoá; cũng hay thành một ý trong câu Đúng/Sai.',
+  vd: 'Cánh dơi và tay người là cơ quan TƯƠNG ĐỒNG (cùng nguồn gốc chi trước); cánh dơi và cánh bướm là '
+    + 'cơ quan TƯƠNG TỰ (khác nguồn gốc, cùng chức năng bay).',
+  bay: 'Tương ĐỒNG là cùng NGUỒN GỐC, tương TỰ là cùng CHỨC NĂNG — hai chữ gần giống nhau nên rất hay bị tráo. '
+     + 'Mẹo nhớ: "đồng nguồn, tự việc".' },
+
+{ nhom: 'Sinh thái học', cd: 'Sinh thái học', ten: 'Chu trình sinh địa hoá và sinh quyển', cap: 3,
+  ct: '<b>Chu trình sinh địa hoá</b> là vòng tuần hoàn vật chất từ môi trường vào cơ thể sinh vật rồi trở lại '
+    + 'môi trường. Khác với dòng NĂNG LƯỢNG chỉ đi một chiều và mất dần, vật chất được TÁI SỬ DỤNG.<br>'
+    + '<b>CHU TRÌNH CARBON</b><br>'
+    + '&nbsp;&nbsp;Vào: thực vật lấy CO₂ qua QUANG HỢP. Ra: hô hấp của sinh vật, phân giải xác, cháy rừng, '
+    + 'đốt nhiên liệu hoá thạch.<br>'
+    + '&nbsp;&nbsp;Một phần carbon lắng đọng thành than đá, dầu mỏ, đá vôi — bị rút khỏi vòng tuần hoàn lâu dài.<br>'
+    + '<b>CHU TRÌNH NITƠ</b><br>'
+    + '&nbsp;&nbsp;N₂ trong khí quyển chiếm 78% nhưng thực vật KHÔNG dùng trực tiếp được.<br>'
+    + '&nbsp;&nbsp;Cố định đạm: vi khuẩn Rhizobium cộng sinh ở nốt sần cây họ Đậu, vi khuẩn lam, và sấm sét.<br>'
+    + '&nbsp;&nbsp;Amôn hoá → nitrat hoá → thực vật hấp thụ NH₄⁺ và NO₃⁻ → phản nitrat hoá trả N₂ về khí quyển.<br>'
+    + '<b>CHU TRÌNH NƯỚC</b> — bốc hơi, ngưng tụ, mưa, dòng chảy; điều hoà khí hậu và là dung môi của mọi phản ứng sống.<br>'
+    + '<b>SINH QUYỂN</b> là toàn bộ sinh vật cùng môi trường sống của chúng, gồm phần dưới khí quyển, '
+    + 'toàn bộ thuỷ quyển và phần trên thạch quyển. Chia thành các khu sinh học (biome) trên cạn và dưới nước.',
+  khi: 'Câu vận dụng về hệ sinh thái, và câu hỏi vì sao trồng cây họ Đậu lại cải tạo được đất.',
+  vd: 'Trồng xen cây họ Đậu làm giàu đạm cho đất nhờ vi khuẩn Rhizobium ở nốt sần cố định N₂ thành dạng cây dùng được.',
+  bay: 'Vật chất TUẦN HOÀN còn năng lượng thì KHÔNG — năng lượng đi một chiều từ ánh sáng qua các bậc dinh dưỡng '
+     + 'rồi thoát ra dạng nhiệt. Câu Đúng/Sai rất hay hỏi ngược chỗ này.' },
+
+{ nhom: 'Sinh thái học', cd: 'Sinh thái học', ten: 'Sinh thái phục hồi và bảo tồn', cap: 2,
+  ct: '<b>SINH THÁI PHỤC HỒI</b> là dùng hiểu biết sinh thái để đưa một hệ sinh thái đã suy thoái trở lại '
+    + 'gần với trạng thái ban đầu.<br>'
+    + '&nbsp;&nbsp;Ba cách làm: <b>phục hồi tự nhiên</b> (khoanh nuôi, để hệ tự diễn thế) · '
+    + '<b>phục hồi có hỗ trợ</b> (trồng bổ sung loài bản địa, cải tạo đất) · '
+    + '<b>tái tạo hoàn toàn</b> khi hệ đã mất hẳn.<br>'
+    + '&nbsp;&nbsp;Nguyên tắc: ưu tiên LOÀI BẢN ĐỊA, khôi phục cả cấu trúc lẫn chức năng, có giám sát lâu dài.<br>'
+    + '<b>BẢO TỒN ĐA DẠNG SINH HỌC</b><br>'
+    + '&nbsp;&nbsp;<b>Bảo tồn NGUYÊN VỊ (in situ):</b> giữ loài ngay trong môi trường sống tự nhiên — '
+    + 'vườn quốc gia, khu bảo tồn thiên nhiên, khu dự trữ sinh quyển. Đây là cách hiệu quả nhất.<br>'
+    + '&nbsp;&nbsp;<b>Bảo tồn CHUYỂN VỊ (ex situ):</b> đưa ra khỏi nơi sống tự nhiên — vườn thú, vườn thực vật, '
+    + 'ngân hàng hạt giống, ngân hàng gene. Dùng khi loài đã quá nguy cấp.<br>'
+    + '<b>Nguyên nhân suy giảm đa dạng sinh học:</b> mất và chia cắt nơi sống · khai thác quá mức · '
+    + 'ô nhiễm · loài ngoại lai xâm hại · biến đổi khí hậu.',
+  khi: 'Câu vận dụng cuối phần Sinh thái, và câu tình huống về môi trường.',
+  vd: 'Trồng lại rừng ngập mặn bằng chính loài đước bản địa là phục hồi CÓ HỖ TRỢ và là bảo tồn NGUYÊN VỊ.',
+  bay: 'Vườn quốc gia là bảo tồn NGUYÊN VỊ; vườn thú và ngân hàng hạt giống là CHUYỂN VỊ. '
+     + 'Đừng nhớ ngược, và nhớ rằng nguyên vị luôn được ưu tiên hơn.' },
+
+{ nhom: 'Di truyền', cd: 'Công nghệ di truyền', ten: 'Chọn – tạo giống và ưu thế lai', cap: 3,
+  ct: '<b>TẠO GIỐNG BẰNG LAI HỮU TÍNH</b><br>'
+    + '&nbsp;&nbsp;Tạo dòng thuần bằng tự thụ phấn hoặc giao phối gần qua nhiều thế hệ, rồi lai các dòng thuần '
+    + 'khác nhau để chọn tổ hợp gene mong muốn.<br>'
+    + '<b>ƯU THẾ LAI</b> — con lai F₁ vượt trội cha mẹ về sức sống, năng suất, khả năng chống chịu.<br>'
+    + '&nbsp;&nbsp;<b>Giả thuyết siêu trội</b> giải thích: kiểu gene DỊ HỢP Aa cho ưu thế hơn cả AA lẫn aa.<br>'
+    + '&nbsp;&nbsp;Ưu thế lai <b>cao nhất ở F₁ rồi GIẢM DẦN</b> ở các thế hệ sau, vì tỉ lệ dị hợp giảm một nửa mỗi '
+    + 'thế hệ khi tự thụ. Nên chỉ dùng F₁ làm giống thương phẩm, không giữ lại làm giống cho vụ sau.<br>'
+    + '&nbsp;&nbsp;Phép lai tạo ưu thế lai: lai khác dòng đơn, lai khác dòng kép, lai thuận nghịch.<br>'
+    + '<b>TẠO GIỐNG BẰNG GÂY ĐỘT BIẾN</b> — dùng tia phóng xạ, tia tử ngoại, consixin (gây đa bội). '
+    + 'Chủ yếu áp dụng cho VI SINH VẬT và THỰC VẬT, rất ít dùng cho động vật vì dễ gây chết.<br>'
+    + '<b>CÔNG NGHỆ TẾ BÀO</b> — nuôi cấy mô tế bào cho hàng loạt cây con đồng nhất về kiểu gene; '
+    + 'dung hợp tế bào trần tạo cây lai khác loài; nhân bản vô tính và cấy truyền phôi ở động vật.',
+  khi: 'Câu vận dụng phần Ứng dụng di truyền học.',
+  vd: 'Ngô lai F₁ cho năng suất cao nhưng nông dân phải mua giống mới mỗi vụ, vì đời F₂ ưu thế lai đã giảm rõ.',
+  bay: 'Ưu thế lai KHÔNG di truyền ổn định. Và consixin gây ĐA BỘI chứ không gây đột biến gene — '
+     + 'hai chuyện khác nhau, đề hay gài.' }
+
+]);
+
+TD.KHO_LT.sinh = (TD.KHO_LT.sinh || []).concat([
+{ cd: 'Tiến hoá', m: 2, a: true,  t: 'Cơ quan tương đồng là những cơ quan có cùng nguồn gốc, dù chức năng có thể khác nhau.', v: 'Ví dụ chi trước của mèo, cánh dơi và tay người.' },
+{ cd: 'Tiến hoá', m: 2, a: false, t: 'Cơ quan tương tự là những cơ quan có cùng nguồn gốc.', v: 'Cơ quan tương TỰ khác nguồn gốc nhưng cùng CHỨC NĂNG, ví dụ cánh sâu bọ và cánh dơi.' },
+{ cd: 'Tiến hoá', m: 2, a: true,  t: 'Cánh dơi và cánh bướm là cơ quan tương tự.', v: 'Khác hẳn nguồn gốc nhưng cùng chức năng bay — bằng chứng của tiến hoá đồng quy.' },
+{ cd: 'Tiến hoá', m: 2, a: true,  t: 'Ruột thừa ở người là một cơ quan thoái hoá.', v: 'Là di tích của manh tràng phát triển ở tổ tiên ăn thực vật.' },
+{ cd: 'Tiến hoá', m: 3, a: true,  t: 'Bằng chứng sinh học phân tử là bằng chứng thuyết phục nhất về nguồn gốc chung của sinh giới.', v: 'Mọi loài đều dùng chung DNA, chung bộ mã di truyền và chung 20 loại amino acid.' },
+{ cd: 'Tiến hoá', m: 3, a: true,  t: 'Hai loài càng có quan hệ họ hàng gần thì trình tự nucleotide của cùng một gene càng giống nhau.', v: 'Đây là cơ sở để dựng cây phát sinh chủng loại bằng dữ liệu phân tử.' },
+{ cd: 'Tiến hoá', m: 2, a: false, t: 'Hoá thạch chỉ cho biết hình dạng chứ không cho biết tuổi của sinh vật.', v: 'Tuổi hoá thạch xác định được bằng đồng vị phóng xạ như carbon-14 hay uranium-238.' },
+{ cd: 'Sinh thái học', m: 3, a: true,  t: 'Trong hệ sinh thái, vật chất được tuần hoàn còn năng lượng thì không.', v: 'Năng lượng đi một chiều từ ánh sáng qua các bậc dinh dưỡng rồi thoát ra dưới dạng nhiệt.' },
+{ cd: 'Sinh thái học', m: 3, a: false, t: 'Năng lượng trong hệ sinh thái được tuần hoàn giống như vật chất.', v: 'Năng lượng đi MỘT CHIỀU và hao hụt dần, không quay lại.' },
+{ cd: 'Sinh thái học', m: 2, a: true,  t: 'Thực vật không sử dụng trực tiếp được khí nitơ tự do trong khí quyển.', v: 'Phải qua cố định đạm thành NH₄⁺ hoặc NO₃⁻ mới hấp thụ được.' },
+{ cd: 'Sinh thái học', m: 2, a: true,  t: 'Vi khuẩn Rhizobium cộng sinh ở nốt sần cây họ Đậu có khả năng cố định nitơ.', v: 'Vì thế trồng xen cây họ Đậu làm giàu đạm cho đất.' },
+{ cd: 'Sinh thái học', m: 2, a: true,  t: 'Quang hợp là con đường chính đưa carbon từ khí quyển vào chuỗi thức ăn.', v: 'Thực vật lấy CO₂ tổng hợp chất hữu cơ, mở đầu chu trình carbon trong hệ sinh thái.' },
+{ cd: 'Sinh thái học', m: 2, a: true,  t: 'Vườn quốc gia là hình thức bảo tồn nguyên vị.', v: 'Loài được giữ ngay trong môi trường sống tự nhiên của nó.' },
+{ cd: 'Sinh thái học', m: 2, a: false, t: 'Ngân hàng hạt giống là hình thức bảo tồn nguyên vị.', v: 'Đó là bảo tồn CHUYỂN VỊ, vì hạt được đưa ra khỏi nơi sống tự nhiên.' },
+{ cd: 'Sinh thái học', m: 3, a: true,  t: 'Bảo tồn nguyên vị được ưu tiên hơn bảo tồn chuyển vị.', v: 'Giữ được cả loài lẫn mối quan hệ sinh thái và khả năng tiến hoá của nó trong tự nhiên.' },
+{ cd: 'Sinh thái học', m: 2, a: true,  t: 'Loài ngoại lai xâm hại là một trong các nguyên nhân làm suy giảm đa dạng sinh học.', v: 'Chúng cạnh tranh, ăn thịt hoặc mang mầm bệnh cho loài bản địa.' },
+{ cd: 'Công nghệ di truyền', m: 3, a: true,  t: 'Ưu thế lai biểu hiện cao nhất ở đời F₁ rồi giảm dần ở các thế hệ sau.', v: 'Tỉ lệ kiểu gene dị hợp giảm một nửa mỗi thế hệ khi tự thụ phấn.' },
+{ cd: 'Công nghệ di truyền', m: 3, a: false, t: 'Ưu thế lai được duy trì ổn định qua nhiều thế hệ nên có thể giữ F₂ làm giống.', v: 'Ưu thế lai GIẢM DẦN, nên chỉ dùng F₁ làm giống thương phẩm.' },
+{ cd: 'Công nghệ di truyền', m: 3, a: true,  t: 'Giả thuyết siêu trội giải thích ưu thế lai bằng ưu thế của kiểu gene dị hợp.', v: 'Aa cho sức sống vượt cả AA lẫn aa.' },
+{ cd: 'Công nghệ di truyền', m: 2, a: true,  t: 'Consixin gây đột biến đa bội chứ không gây đột biến gene.', v: 'Nó cản trở hình thành thoi phân bào nên nhiễm sắc thể nhân đôi mà không phân li.' },
+{ cd: 'Công nghệ di truyền', m: 2, a: true,  t: 'Nuôi cấy mô tế bào tạo ra hàng loạt cây con đồng nhất về kiểu gene.', v: 'Vì đều xuất phát từ cùng một mô của một cây mẹ.' },
+{ cd: 'Công nghệ di truyền', m: 2, a: false, t: 'Phương pháp gây đột biến được áp dụng phổ biến cho động vật bậc cao.', v: 'Chủ yếu dùng cho VI SINH VẬT và THỰC VẬT; động vật bậc cao rất dễ chết hoặc bất thụ.' }
+]);
+
+TD.GEN.sinh = (TD.GEN.sinh || []).concat([
+{ ma: 'sinh-bangchung', chuong: 'Tiến hoá', muc: 2, dang: 'mc',
+  tao(R) {
+    const ds = [
+    { q: 'Cặp cơ quan nào sau đây là cơ quan TƯƠNG ĐỒNG?', d: 'Cánh dơi và tay người',
+      s: ['Cánh dơi và cánh bướm', 'Mang cá và mang tôm', 'Gai xương rồng và gai hoa hồng'],
+      v: 'Cánh dơi và tay người đều biến đổi từ chi trước của động vật có xương sống ⇒ cùng NGUỒN GỐC.' },
+    { q: 'Cặp cơ quan nào sau đây là cơ quan TƯƠNG TỰ?', d: 'Cánh chim và cánh côn trùng',
+      s: ['Cánh chim và chi trước của mèo', 'Tay người và vây cá voi', 'Ruột thừa ở người và manh tràng ở thỏ'],
+      v: 'Cùng chức năng bay nhưng khác hẳn nguồn gốc phát sinh ⇒ cơ quan TƯƠNG TỰ.' },
+    { q: 'Bằng chứng nào sau đây được xem là thuyết phục nhất về nguồn gốc chung của sinh giới?',
+      d: 'Bằng chứng sinh học phân tử',
+      s: ['Bằng chứng giải phẫu so sánh', 'Bằng chứng hoá thạch', 'Bằng chứng tế bào học'],
+      v: 'Mọi loài đều dùng chung DNA, chung bộ mã di truyền và chung 20 loại amino acid.' },
+    { q: 'Cơ quan nào sau đây ở người là cơ quan thoái hoá?', d: 'Ruột thừa',
+      s: ['Lá lách', 'Tuyến giáp', 'Tuyến tuỵ'],
+      v: 'Ruột thừa là di tích của manh tràng phát triển ở tổ tiên ăn thực vật.' },
+    { q: 'Sự giống nhau về trình tự amino acid của cùng một loại protein ở hai loài cho phép kết luận',
+      d: 'hai loài có quan hệ họ hàng càng gần nếu trình tự càng giống nhau',
+      s: ['hai loài có cùng số lượng nhiễm sắc thể', 'hai loài sống trong cùng một môi trường',
+          'hai loài có cùng kích thước cơ thể'],
+      v: 'Đây chính là nguyên tắc dựng cây phát sinh chủng loại bằng dữ liệu phân tử.' }];
+    const it = R.chon(ds);
+    const opts = TD.xaoR(R, [it.d].concat(it.s));
+    return { q: it.q, opts: opts, ans: opts.indexOf(it.d), giai: `Đáp án: ${it.d}\n${it.v}`,
+      meo: 'Tương ĐỒNG là cùng NGUỒN GỐC (phân li) · tương TỰ là cùng CHỨC NĂNG (đồng quy). Nhớ: "đồng nguồn, tự việc".' };
+  } },
+
+{ ma: 'sinh-chutrinh', chuong: 'Sinh thái học', muc: 3, dang: 'mc',
+  tao(R) {
+    const ds = [
+    { q: 'Phát biểu nào sau đây đúng về hệ sinh thái?', d: 'Vật chất được tuần hoàn còn năng lượng thì không',
+      s: ['Cả vật chất lẫn năng lượng đều được tuần hoàn', 'Năng lượng tuần hoàn còn vật chất thì không',
+          'Cả vật chất lẫn năng lượng đều đi một chiều'],
+      v: 'Năng lượng đi một chiều và hao hụt dần thành nhiệt; vật chất quay vòng qua chu trình sinh địa hoá.' },
+    { q: 'Vì sao trồng xen cây họ Đậu lại làm giàu đạm cho đất?',
+      d: 'Vi khuẩn cộng sinh ở nốt sần cố định được nitơ tự do',
+      s: ['Rễ cây họ Đậu tiết ra đạm trực tiếp', 'Lá cây họ Đậu hấp thụ nitơ qua khí khổng',
+          'Cây họ Đậu hút ít đạm nên đất còn dư'],
+      v: 'Vi khuẩn Rhizobium ở nốt sần biến N₂ thành dạng cây hấp thụ được.' },
+    { q: 'Con đường chính đưa carbon từ khí quyển vào chuỗi thức ăn là', d: 'quang hợp của sinh vật sản xuất',
+      s: ['hô hấp của động vật', 'phân giải xác sinh vật', 'đốt nhiên liệu hoá thạch'],
+      v: 'Thực vật lấy CO₂ tổng hợp chất hữu cơ, mở đầu chu trình carbon trong hệ sinh thái.' },
+    { q: 'Hình thức nào sau đây thuộc bảo tồn CHUYỂN VỊ?', d: 'Ngân hàng hạt giống',
+      s: ['Vườn quốc gia', 'Khu bảo tồn thiên nhiên', 'Khu dự trữ sinh quyển'],
+      v: 'Chuyển vị là đưa loài RA KHỎI môi trường sống tự nhiên để bảo quản.' },
+    { q: 'Nguyên nhân nào sau đây KHÔNG làm suy giảm đa dạng sinh học?', d: 'Thành lập thêm khu bảo tồn thiên nhiên',
+      s: ['Loài ngoại lai xâm hại', 'Mất và chia cắt nơi sống', 'Khai thác quá mức'],
+      v: 'Lập khu bảo tồn là biện pháp BẢO VỆ đa dạng sinh học, không phải nguyên nhân suy giảm.' }];
+    const it = R.chon(ds);
+    const opts = TD.xaoR(R, [it.d].concat(it.s));
+    return { q: it.q, opts: opts, ans: opts.indexOf(it.d), giai: `Đáp án: ${it.d}\n${it.v}`,
+      meo: 'Câu hỏi hệ sinh thái hay xoay quanh một đối lập duy nhất: VẬT CHẤT tuần hoàn, NĂNG LƯỢNG một chiều.' };
+  } },
+
+{ ma: 'sinh-uuthelai', chuong: 'Ứng dụng di truyền', muc: 3, dang: 'mc',
+  tao(R) {
+    const ds = [
+    { q: 'Vì sao nông dân trồng ngô lai F₁ phải mua giống mới mỗi vụ?',
+      d: 'Vì ưu thế lai giảm dần từ đời F₂ trở đi',
+      s: ['Vì hạt F₁ không nảy mầm được', 'Vì cây F₁ bị bất thụ hoàn toàn',
+          'Vì F₂ bị đột biến gene hàng loạt'],
+      v: 'Tỉ lệ kiểu gene dị hợp giảm một nửa mỗi thế hệ nên ưu thế lai tụt nhanh.' },
+    { q: 'Giả thuyết siêu trội giải thích ưu thế lai dựa trên', d: 'ưu thế của kiểu gene dị hợp',
+      s: ['ưu thế của kiểu gene đồng hợp trội', 'sự tích luỹ đột biến có lợi',
+          'sự tăng số lượng nhiễm sắc thể'],
+      v: 'Theo giả thuyết siêu trội, Aa cho sức sống vượt cả AA lẫn aa.' },
+    { q: 'Consixin được dùng để', d: 'gây đột biến đa bội',
+      s: ['gây đột biến gene', 'gây đột biến mất đoạn', 'chuyển gene giữa hai loài'],
+      v: 'Consixin cản trở hình thành thoi phân bào nên nhiễm sắc thể nhân đôi mà không phân li.' },
+    { q: 'Phương pháp nào tạo ra hàng loạt cây con đồng nhất về kiểu gene?', d: 'Nuôi cấy mô tế bào',
+      s: ['Lai khác dòng', 'Gây đột biến bằng tia phóng xạ', 'Dung hợp tế bào trần'],
+      v: 'Mọi cây con đều xuất phát từ cùng một mô của một cây mẹ nên kiểu gene giống hệt nhau.' },
+    { q: 'Phương pháp gây đột biến ít được áp dụng cho động vật bậc cao vì',
+      d: 'động vật bậc cao rất dễ chết hoặc bất thụ khi bị xử lí tác nhân đột biến',
+      s: ['động vật không có vật chất di truyền là DNA', 'đột biến ở động vật không di truyền được',
+          'động vật không sinh sản hữu tính'],
+      v: 'Hệ cơ quan phức tạp nên chịu tác nhân đột biến rất kém.' }];
+    const it = R.chon(ds);
+    const opts = TD.xaoR(R, [it.d].concat(it.s));
+    return { q: it.q, opts: opts, ans: opts.indexOf(it.d), giai: `Đáp án: ${it.d}\n${it.v}`,
+      meo: 'Ưu thế lai KHÔNG di truyền ổn định · consixin gây ĐA BỘI chứ không gây đột biến gene.' };
+  } }
+]);
+})();
+
+</script>
+<script>
+/* ============================================================
+   NGỮ VĂN — BÙ CÁC THỂ LOẠI MỚI CỦA SGK 12 (CT 2018)
+   Ngữ liệu đọc hiểu lấy hoàn toàn NGOÀI sách giáo khoa, nhưng THỂ LOẠI
+   thì vẫn nằm trong danh mục chương trình. Kho cũ thiếu hẳn bốn thể loại
+   mà cả ba bộ sách lớp 12 đều dạy: truyện truyền kì · hài kịch · văn tế ·
+   tuỳ bút. Không nhận ra thể loại là hỏng ngay câu đầu phần Đọc hiểu.
+   ============================================================ */
+window.TD = window.TD || {}; TD.KHO = TD.KHO || {}; TD.KHO_LT = TD.KHO_LT || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const CD = 'Thể loại';
+
+TD.KHO.van_ct = (TD.KHO.van_ct || []).concat([
+
+{ nhom: 'Đọc hiểu', cd: CD, ten: 'Bốn thể loại của SGK 12 mà đề hay lấy ngữ liệu', cap: 2,
+  ct: '<b>① TRUYỆN TRUYỀN KÌ</b><br>'
+    + '&nbsp;&nbsp;Dấu hiệu: có yếu tố <b>KÌ ẢO</b> (thần tiên, ma quỷ, hoá thân, báo mộng) đan xen với chuyện đời thực.<br>'
+    + '&nbsp;&nbsp;Cốt truyện thường theo trục: gặp nạn → yếu tố kì ảo can thiệp → kết thúc có tính răn dạy.<br>'
+    + '&nbsp;&nbsp;Chức năng của cái kì ảo: KHÔNG phải để doạ, mà để nói điều hiện thực không nói thẳng được — '
+    + 'phê phán bất công, bênh vực người yếu thế.<br>'
+    + '&nbsp;&nbsp;Khi phân tích phải chỉ ra: yếu tố kì ảo là gì · nó xuất hiện lúc nào · nó phục vụ ý nghĩa nào.<br>'
+    + '<b>② HÀI KỊCH</b><br>'
+    + '&nbsp;&nbsp;Dấu hiệu: viết bằng LỜI THOẠI, có chỉ dẫn sân khấu đặt trong ngoặc đơn.<br>'
+    + '&nbsp;&nbsp;Cốt lõi là <b>XUNG ĐỘT giữa cái đáng cười với chuẩn mực</b>: nhân vật tự cho mình là gì đó '
+    + 'mà thực chất không phải.<br>'
+    + '&nbsp;&nbsp;Thủ pháp gây cười: phóng đại · tương phản giữa lời nói và hành động · hiểu lầm · lặp lại.<br>'
+    + '&nbsp;&nbsp;Mục đích: cười để SỬA, nên bao giờ cũng có ý phê phán một thói tật xã hội.<br>'
+    + '<b>③ VĂN TẾ</b><br>'
+    + '&nbsp;&nbsp;Là bài văn đọc khi tế người đã mất, viết theo lối biền ngẫu, có vần và đối.<br>'
+    + '&nbsp;&nbsp;Bố cục bốn phần: <b>Lung khởi</b> (mở đầu khái quát lẽ sống chết) → <b>Thích thực</b> '
+    + '(kể lại cuộc đời, công đức người mất) → <b>Ai vãn</b> (bày tỏ niềm thương tiếc) → '
+    + '<b>Kết</b> (lời cầu nguyện, khẳng định).<br>'
+    + '&nbsp;&nbsp;Giọng điệu: bi tráng — vừa xót thương vừa ngợi ca.<br>'
+    + '<b>④ TUỲ BÚT và TẢN VĂN</b><br>'
+    + '&nbsp;&nbsp;Đều thuộc loại KÍ, ghi chép người thật việc thật nhưng đậm chất trữ tình.<br>'
+    + '&nbsp;&nbsp;Tuỳ bút: mạch theo <b>CẢM XÚC</b> của cái tôi tác giả, tự do liên tưởng, ngôn ngữ giàu hình ảnh.<br>'
+    + '&nbsp;&nbsp;Tản văn: ngắn hơn, bám vào một sự việc hoặc một đối tượng cụ thể rồi bàn rộng ra.<br>'
+    + '&nbsp;&nbsp;Cả hai đều KHÔNG có cốt truyện hoàn chỉnh — đó là dấu hiệu phân biệt với truyện ngắn.',
+  khi: 'Câu đầu phần Đọc hiểu gần như luôn hỏi thể loại hoặc đặc điểm thể loại.',
+  vd: 'Ngữ liệu có lời thoại kèm chỉ dẫn "(cười khẩy, quay sang khán giả)" ⇒ hài kịch, không phải truyện ngắn.',
+  bay: 'Có yếu tố kì ảo CHƯA CHẮC là truyện truyền kì — truyện ngắn hiện đại cũng dùng. Phải xem cái kì ảo có '
+     + 'đóng vai trò chuyển hướng số phận nhân vật và mang ý răn dạy hay không.' },
+
+{ nhom: 'Đọc hiểu', cd: CD, ten: 'Ba loại văn bản của đề và cách soi mỗi loại', cap: 1,
+  ct: 'Đề chỉ lấy ngữ liệu thuộc <b>ba loại</b>, nhận ra loại nào là biết ngay phải soi cái gì.<br>'
+    + '<b>① VĂN BẢN VĂN HỌC</b> (thơ, truyện, kí, kịch)<br>'
+    + '&nbsp;&nbsp;Soi: nhân vật · tình huống · hình ảnh · biện pháp tu từ · giọng điệu · thông điệp.<br>'
+    + '&nbsp;&nbsp;Với thơ soi thêm: thể thơ, vần, nhịp, chủ thể trữ tình.<br>'
+    + '<b>② VĂN BẢN NGHỊ LUẬN</b><br>'
+    + '&nbsp;&nbsp;Soi: <b>luận đề</b> (vấn đề bàn) → <b>luận điểm</b> (các ý lớn) → <b>lí lẽ</b> → <b>bằng chứng</b>.<br>'
+    + '&nbsp;&nbsp;Hay hỏi: mục đích của tác giả · cách lập luận (diễn dịch, quy nạp, tổng – phân – hợp) · '
+    + 'yếu tố biểu cảm dùng để làm gì.<br>'
+    + '<b>③ VĂN BẢN THÔNG TIN</b><br>'
+    + '&nbsp;&nbsp;Soi: cách trình bày (theo trình tự thời gian, theo quan hệ nhân quả, theo mức độ quan trọng) · '
+    + 'phương tiện phi ngôn ngữ (sơ đồ, bảng, số liệu, ảnh) · tính chính xác và khách quan của dữ liệu.<br>'
+    + '&nbsp;&nbsp;Hay hỏi: số liệu trong bài có tác dụng gì · nhan đề và sa-pô cho biết điều gì.<br>'
+    + '<b>Ba câu hỏi luôn xuất hiện dù là loại nào:</b> ① xác định thể loại hoặc phương thức biểu đạt · '
+    + '② tìm chi tiết có sẵn trong văn bản · ③ nêu tác dụng của một yếu tố ngôn ngữ.',
+  khi: 'Ngay khi đọc dòng đầu ngữ liệu — nhận loại rồi mới đọc kỹ.',
+  vd: 'Ngữ liệu 2026 là văn bản THÔNG TIN về quyền lực công nghệ, nên câu hỏi xoay quanh số liệu và cách trình bày '
+    + 'chứ không hỏi hình ảnh thơ.',
+  bay: 'Văn bản thông tin vẫn có thể dùng biện pháp tu từ, nhưng đừng phân tích nó như văn bản văn học — '
+     + 'phải trả lời theo hướng "giúp thông tin dễ hiểu, tăng sức thuyết phục".' }
+
+]);
+
+TD.KHO_LT.van = (TD.KHO_LT.van || []).concat([
+{ cd: CD, m: 2, a: true,  t: 'Yếu tố kì ảo trong truyện truyền kì thường dùng để phản ánh hiện thực và gửi gắm thái độ của tác giả.', v: 'Cái kì ảo là phương tiện nói điều hiện thực không nói thẳng được.' },
+{ cd: CD, m: 2, a: false, t: 'Truyện truyền kì chỉ nhằm mục đích gây sợ hãi cho người đọc.', v: 'Mục đích chính là phê phán bất công và bênh vực người yếu thế thông qua yếu tố kì ảo.' },
+{ cd: CD, m: 1, a: true,  t: 'Hài kịch được viết chủ yếu bằng lời thoại kèm chỉ dẫn sân khấu.', v: 'Đây là dấu hiệu hình thức để nhận ra kịch ngay từ cái nhìn đầu tiên.' },
+{ cd: CD, m: 2, a: true,  t: 'Xung đột trong hài kịch nảy sinh giữa cái đáng cười và chuẩn mực xã hội.', v: 'Nhân vật tự cho mình là gì đó mà thực chất không phải — mâu thuẫn đó tạo tiếng cười.' },
+{ cd: CD, m: 2, a: true,  t: 'Bố cục bài văn tế gồm bốn phần: lung khởi, thích thực, ai vãn và kết.', v: 'Đây là bố cục cố định của thể văn tế.' },
+{ cd: CD, m: 2, a: false, t: 'Văn tế là thể loại viết để ca ngợi người đang sống.', v: 'Văn tế đọc trong lễ tế NGƯỜI ĐÃ MẤT, giọng bi tráng.' },
+{ cd: CD, m: 2, a: true,  t: 'Tuỳ bút triển khai theo mạch cảm xúc của cái tôi tác giả chứ không theo cốt truyện.', v: 'Đó là điểm phân biệt tuỳ bút với truyện ngắn.' },
+{ cd: CD, m: 2, a: false, t: 'Tuỳ bút bắt buộc phải có cốt truyện hoàn chỉnh với mở đầu, cao trào và kết thúc.', v: 'Tuỳ bút KHÔNG có cốt truyện hoàn chỉnh; nó đi theo mạch cảm xúc và liên tưởng.' },
+{ cd: CD, m: 1, a: true,  t: 'Ngữ liệu đọc hiểu của đề tốt nghiệp được lấy hoàn toàn ngoài sách giáo khoa.', v: 'Nhằm triệt tiêu học tủ và văn mẫu; nhưng THỂ LOẠI vẫn nằm trong chương trình.' },
+{ cd: CD, m: 2, a: true,  t: 'Văn bản thông tin thường dùng phương tiện phi ngôn ngữ như sơ đồ, bảng, số liệu.', v: 'Chúng làm thông tin trực quan và tăng độ tin cậy.' },
+{ cd: CD, m: 2, a: true,  t: 'Khi đọc văn bản nghị luận cần xác định luận đề, luận điểm, lí lẽ và bằng chứng.', v: 'Đó là bốn thành tố của một văn bản nghị luận.' }
+]);
+
+TD.GEN.van = (TD.GEN.van || []).concat([
+{ ma: 'van-theloai-moi', chuong: 'Thể loại', muc: 2, dang: 'mc',
+  tao(R) {
+    const ds = [
+    { q: 'Một ngữ liệu có lời thoại nhân vật kèm chỉ dẫn đặt trong ngoặc đơn như "(cười khẩy, quay sang khán giả)". Ngữ liệu đó nhiều khả năng thuộc thể loại nào?',
+      d: 'Hài kịch', s: ['Truyện ngắn', 'Tuỳ bút', 'Văn tế'],
+      v: 'Lời thoại kèm CHỈ DẪN SÂN KHẤU là dấu hiệu hình thức của kịch; chi tiết "quay sang khán giả" và giọng giễu cho biết là hài kịch.' },
+    { q: 'Phần "ai vãn" trong bài văn tế có nội dung gì?',
+      d: 'Bày tỏ niềm thương tiếc đối với người đã mất',
+      s: ['Khái quát lẽ sống chết ở đời', 'Kể lại cuộc đời và công đức người mất', 'Lời cầu nguyện kết thúc'],
+      v: 'Bố cục văn tế: lung khởi (khái quát) – thích thực (kể công đức) – ai vãn (thương tiếc) – kết (cầu nguyện).' },
+    { q: 'Đặc điểm nào KHÔNG phải của tuỳ bút?',
+      d: 'Có cốt truyện hoàn chỉnh với cao trào và kết thúc',
+      s: ['Triển khai theo mạch cảm xúc của tác giả', 'Ghi chép người thật việc thật', 'Ngôn ngữ giàu hình ảnh, đậm chất trữ tình'],
+      v: 'Tuỳ bút không có cốt truyện hoàn chỉnh — đó chính là điểm phân biệt với truyện ngắn.' },
+    { q: 'Yếu tố kì ảo trong truyện truyền kì chủ yếu có tác dụng gì?',
+      d: 'Phản ánh hiện thực và gửi gắm thái độ của tác giả',
+      s: ['Chỉ để gây sợ hãi cho người đọc', 'Làm cho câu chuyện dài thêm', 'Thay thế cho việc xây dựng nhân vật'],
+      v: 'Cái kì ảo là phương tiện nói điều mà hiện thực không cho phép nói thẳng: phê phán bất công, bênh vực người yếu.' },
+    { q: 'Với một văn bản THÔNG TIN, câu hỏi đọc hiểu thường xoay quanh điều gì?',
+      d: 'Cách trình bày thông tin và tác dụng của số liệu, sơ đồ',
+      s: ['Hình ảnh thơ và nhịp điệu', 'Diễn biến tâm lí nhân vật', 'Xung đột kịch giữa các tuyến nhân vật'],
+      v: 'Văn bản thông tin được soi ở cách tổ chức thông tin và các phương tiện phi ngôn ngữ.' },
+    { q: 'Bốn thành tố cần xác định khi đọc một văn bản nghị luận là',
+      d: 'luận đề, luận điểm, lí lẽ, bằng chứng',
+      s: ['nhân vật, tình huống, cốt truyện, chủ đề', 'vần, nhịp, hình ảnh, giọng điệu',
+          'sa-pô, tiêu đề, sơ đồ, chú thích'],
+      v: 'Luận đề là vấn đề bàn; luận điểm là các ý lớn; lí lẽ và bằng chứng làm sáng tỏ luận điểm.' }];
+    const it = R.chon(ds);
+    const opts = TD.xaoR(R, [it.d].concat(it.s));
+    return { q: it.q, opts: opts, ans: opts.indexOf(it.d), giai: `Đáp án: ${it.d}\n${it.v}`,
+      meo: 'Câu số 1 phần Đọc hiểu gần như luôn hỏi thể loại hoặc phương thức biểu đạt — đó là điểm cho không, '
+        + 'miễn là thuộc dấu hiệu hình thức của từng thể loại.' };
+  } }
+]);
+})();
+
+</script>
+<script>
+/* ============================================================
+   GDKT & PHÁP LUẬT — BÙ CÁC BÀI PHÁP LUẬT CÒN THIẾU
+   Dò mục lục SGK GDKT&PL 12 (CT 2018) phần Giáo dục pháp luật thì kho
+   đang trống bốn bài: quyền sở hữu tài sản · quyền và nghĩa vụ trong bảo
+   vệ, chăm sóc sức khoẻ và bảo đảm an sinh xã hội · quyền và nghĩa vụ
+   trong bảo vệ di sản văn hoá và môi trường · nghĩa vụ tuân thủ Hiến pháp.
+   Đề 2026 điểm trung bình môn này tụt từ 7,69 xuống 5,02 vì tăng phân hoá,
+   nên bỏ trống bài nào là mất điểm bài đó.
+   ============================================================ */
+window.TD = window.TD || {}; TD.KHO = TD.KHO || {}; TD.KHO_LT = TD.KHO_LT || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const CD = 'Quyền & nghĩa vụ';
+
+TD.KHO.gdkt_ct = (TD.KHO.gdkt_ct || []).concat([
+
+{ nhom: 'Pháp luật', cd: CD, ten: 'Quyền sở hữu tài sản và nghĩa vụ tôn trọng tài sản người khác', cap: 2,
+  ct: '<b>Quyền sở hữu gồm ba quyền năng</b> (Bộ luật Dân sự 2015):<br>'
+    + '&nbsp;&nbsp;<b>Quyền CHIẾM HỮU</b> — nắm giữ, quản lí tài sản.<br>'
+    + '&nbsp;&nbsp;<b>Quyền SỬ DỤNG</b> — khai thác công dụng, hưởng hoa lợi, lợi tức từ tài sản.<br>'
+    + '&nbsp;&nbsp;<b>Quyền ĐỊNH ĐOẠT</b> — bán, tặng cho, để thừa kế, tiêu dùng hoặc tiêu huỷ. '
+    + 'Đây là quyền năng CAO NHẤT, chỉ chủ sở hữu mới có đầy đủ.<br>'
+    + '<b>Người thuê, người mượn</b> có quyền chiếm hữu và sử dụng nhưng KHÔNG có quyền định đoạt.<br>'
+    + '<b>Nghĩa vụ của công dân:</b> tôn trọng tài sản của người khác; nhặt được của rơi phải trả lại hoặc '
+    + 'giao nộp; gây thiệt hại phải bồi thường; không được chiếm giữ trái phép.<br>'
+    + '<b>Bốn hình thức trách nhiệm pháp lí</b> có thể áp dụng: dân sự (bồi thường) · hành chính (phạt tiền) · '
+    + 'hình sự (với hành vi nguy hiểm như trộm cắp, cướp) · kỉ luật (với người trong cơ quan, tổ chức).',
+  khi: 'Câu tình huống về mượn – thuê – nhặt được của rơi – làm hỏng đồ người khác.',
+  vd: 'A thuê xe của B rồi tự ý bán: A có quyền chiếm hữu và sử dụng nhưng KHÔNG có quyền định đoạt, '
+    + 'nên hành vi bán xe là trái pháp luật.',
+  bay: 'Người thuê vẫn có quyền SỬ DỤNG hợp pháp — đừng nhầm là mọi hành vi của người thuê đều trái luật. '
+     + 'Chỉ khi ĐỊNH ĐOẠT (bán, cho, phá) mới là vi phạm.' },
+
+{ nhom: 'Pháp luật', cd: CD, ten: 'Bảo vệ, chăm sóc sức khoẻ và bảo đảm an sinh xã hội', cap: 2,
+  ct: '<b>QUYỀN</b> của công dân:<br>'
+    + '&nbsp;&nbsp;Được bảo vệ, chăm sóc sức khoẻ; được bình đẳng trong khám chữa bệnh, không phân biệt '
+    + 'giàu nghèo, dân tộc, giới tính.<br>'
+    + '&nbsp;&nbsp;Được tôn trọng bí mật thông tin về tình trạng sức khoẻ và đời tư trong hồ sơ bệnh án.<br>'
+    + '&nbsp;&nbsp;Được hưởng các chính sách an sinh xã hội: bảo hiểm xã hội, bảo hiểm y tế, trợ giúp xã hội, '
+    + 'ưu đãi người có công.<br>'
+    + '&nbsp;&nbsp;Được khiếu nại, tố cáo, khởi kiện khi quyền bị xâm phạm.<br>'
+    + '<b>NGHĨA VỤ</b> của công dân:<br>'
+    + '&nbsp;&nbsp;Tuân thủ quy định phòng bệnh, khám chữa bệnh; giữ vệ sinh nơi công cộng.<br>'
+    + '&nbsp;&nbsp;Tôn trọng quyền được chăm sóc sức khoẻ của người khác.<br>'
+    + '&nbsp;&nbsp;Đóng bảo hiểm y tế, bảo hiểm xã hội theo quy định của pháp luật.<br>'
+    + '<b>Bốn trụ cột an sinh xã hội</b> phải nhớ: việc làm và thu nhập tối thiểu · bảo hiểm xã hội · '
+    + 'trợ giúp xã hội cho nhóm yếu thế · dịch vụ xã hội cơ bản (y tế, giáo dục, nhà ở, nước sạch, thông tin).',
+  khi: 'Câu tình huống về bệnh viện, bảo hiểm y tế và chính sách xã hội.',
+  vd: 'Bệnh viện từ chối khám vì bệnh nhân là người dân tộc thiểu số — vi phạm quyền BÌNH ĐẲNG trong '
+    + 'khám chữa bệnh của công dân.',
+  bay: 'Bảo hiểm Y TẾ khác bảo hiểm XÃ HỘI: BHYT chi trả chi phí khám chữa bệnh; BHXH chi trả khi ốm đau, '
+     + 'thai sản, tai nạn lao động, hưu trí, tử tuất. Đề rất hay tráo hai cái này.' },
+
+{ nhom: 'Pháp luật', cd: CD, ten: 'Bảo vệ di sản văn hoá, môi trường và nghĩa vụ tuân thủ Hiến pháp', cap: 2,
+  ct: '<b>DI SẢN VĂN HOÁ</b><br>'
+    + '&nbsp;&nbsp;Chia hai loại: <b>vật thể</b> (di tích, danh lam thắng cảnh, cổ vật, bảo vật quốc gia) và '
+    + '<b>phi vật thể</b> (tiếng nói, chữ viết, lễ hội, nghề thủ công, nghệ thuật trình diễn).<br>'
+    + '&nbsp;&nbsp;Quyền: được hưởng thụ, tiếp cận và sử dụng di sản; được tham gia quản lí và giám sát.<br>'
+    + '&nbsp;&nbsp;Nghĩa vụ: bảo vệ, giữ gìn; thông báo khi phát hiện di sản; giao nộp cổ vật do mình tìm được. '
+    + '<b>Cổ vật tìm được trong lòng đất thuộc SỞ HỮU TOÀN DÂN</b>, không thuộc người tìm thấy.<br>'
+    + '&nbsp;&nbsp;Cấm: chiếm đoạt, làm sai lệch, huỷ hoại di sản; đào bới trái phép; mua bán trái phép cổ vật.<br>'
+    + '<b>MÔI TRƯỜNG</b> — quyền được sống trong môi trường trong lành; nghĩa vụ bảo vệ môi trường, '
+    + 'phân loại rác tại nguồn, không xả thải trái phép. Người gây ô nhiễm phải khắc phục và bồi thường.<br>'
+    + '<b>TUÂN THỦ HIẾN PHÁP</b><br>'
+    + '&nbsp;&nbsp;Hiến pháp là luật CƠ BẢN, có hiệu lực pháp lí CAO NHẤT. Mọi văn bản pháp luật khác đều '
+    + 'không được trái Hiến pháp; văn bản nào trái thì bị bãi bỏ.<br>'
+    + '&nbsp;&nbsp;Nghĩa vụ của công dân: chấp hành Hiến pháp và pháp luật; tham gia bảo vệ Hiến pháp; '
+    + 'phê phán và tố giác hành vi vi phạm.',
+  khi: 'Câu tình huống về di tích, xả thải, và câu lí thuyết về vị trí của Hiến pháp.',
+  vd: 'Người dân đào móng nhà thấy trống đồng cổ: phải giao nộp cho cơ quan nhà nước, vì cổ vật trong lòng đất '
+    + 'thuộc sở hữu toàn dân.',
+  bay: 'Hiến pháp là luật cơ bản nhưng KHÔNG phải văn bản duy nhất do Quốc hội ban hành — Quốc hội còn ban hành '
+     + 'luật và nghị quyết. Điều đúng là Hiến pháp có hiệu lực pháp lí CAO NHẤT.' }
+
+]);
+
+TD.KHO_LT.gdkt = (TD.KHO_LT.gdkt || []).concat([
+{ cd: CD, m: 2, a: true,  t: 'Quyền sở hữu bao gồm quyền chiếm hữu, quyền sử dụng và quyền định đoạt.', v: 'Ba quyền năng theo Bộ luật Dân sự 2015.' },
+{ cd: CD, m: 2, a: true,  t: 'Người thuê tài sản có quyền sử dụng nhưng không có quyền định đoạt tài sản đó.', v: 'Chỉ chủ sở hữu mới có đầy đủ cả ba quyền năng.' },
+{ cd: CD, m: 2, a: false, t: 'Người mượn tài sản có quyền bán tài sản đó nếu đã giữ trong thời gian dài.', v: 'Người mượn không có quyền ĐỊNH ĐOẠT, dù giữ bao lâu.' },
+{ cd: CD, m: 2, a: true,  t: 'Nhặt được của rơi, công dân có nghĩa vụ trả lại hoặc giao nộp cho cơ quan có thẩm quyền.', v: 'Chiếm giữ trái phép tài sản của người khác là vi phạm pháp luật.' },
+{ cd: CD, m: 2, a: true,  t: 'Cổ vật được tìm thấy trong lòng đất thuộc sở hữu toàn dân.', v: 'Người tìm thấy có nghĩa vụ giao nộp, không được giữ hay bán.' },
+{ cd: CD, m: 1, a: true,  t: 'Di sản văn hoá được chia thành di sản vật thể và di sản phi vật thể.', v: 'Vật thể như di tích, cổ vật; phi vật thể như lễ hội, nghề thủ công, nghệ thuật trình diễn.' },
+{ cd: CD, m: 2, a: false, t: 'Lễ hội truyền thống thuộc loại di sản văn hoá vật thể.', v: 'Lễ hội là di sản PHI vật thể.' },
+{ cd: CD, m: 1, a: true,  t: 'Hiến pháp là luật cơ bản, có hiệu lực pháp lí cao nhất trong hệ thống pháp luật.', v: 'Mọi văn bản pháp luật khác không được trái Hiến pháp.' },
+{ cd: CD, m: 2, a: false, t: 'Một văn bản luật trái với Hiến pháp vẫn có hiệu lực nếu do Quốc hội ban hành.', v: 'Văn bản trái Hiến pháp phải bị bãi bỏ, bất kể do cơ quan nào ban hành.' },
+{ cd: CD, m: 2, a: true,  t: 'Công dân được bình đẳng trong khám chữa bệnh, không phân biệt giàu nghèo hay dân tộc.', v: 'Đây là nội dung quyền được bảo vệ, chăm sóc sức khoẻ.' },
+{ cd: CD, m: 2, a: true,  t: 'Bảo hiểm y tế chi trả chi phí khám chữa bệnh, còn bảo hiểm xã hội chi trả khi ốm đau, thai sản, hưu trí.', v: 'Hai loại bảo hiểm có phạm vi chi trả khác nhau.' },
+{ cd: CD, m: 3, a: true,  t: 'Thông tin về tình trạng sức khoẻ trong hồ sơ bệnh án của người bệnh phải được giữ bí mật.', v: 'Đây là quyền được tôn trọng bí mật đời tư của người bệnh.' },
+{ cd: CD, m: 2, a: true,  t: 'Người gây ô nhiễm môi trường phải khắc phục hậu quả và bồi thường thiệt hại.', v: 'Nguyên tắc "người gây ô nhiễm phải trả tiền".' }
+]);
+
+TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
+{ ma: 'gdkt-quyen-bu', chuong: 'Quyền & nghĩa vụ', muc: 2, dang: 'mc',
+  tao(R) {
+    const ds = [
+    { q: 'Anh A thuê xe máy của chị B trong một tháng, sau đó tự ý bán chiếc xe cho người khác. Anh A đã vi phạm quyền nào của chị B?',
+      d: 'Quyền định đoạt tài sản', s: ['Quyền chiếm hữu tài sản', 'Quyền sử dụng tài sản', 'Quyền khiếu nại'],
+      v: 'Người thuê có quyền chiếm hữu và sử dụng, nhưng quyền ĐỊNH ĐOẠT (bán, cho, huỷ) chỉ thuộc chủ sở hữu.' },
+    { q: 'Trong ba quyền năng của quyền sở hữu, quyền nào là cao nhất và chỉ chủ sở hữu mới có đầy đủ?',
+      d: 'Quyền định đoạt', s: ['Quyền chiếm hữu', 'Quyền sử dụng', 'Quyền thừa kế'],
+      v: 'Định đoạt là bán, tặng cho, để thừa kế, tiêu huỷ — quyết định số phận pháp lí của tài sản.' },
+    { q: 'Ông C đào móng nhà và tìm thấy một chiếc trống đồng cổ. Theo pháp luật, ông C phải làm gì?',
+      d: 'Giao nộp cho cơ quan nhà nước có thẩm quyền',
+      s: ['Được giữ làm của riêng vì tìm thấy trên đất của mình', 'Được bán cho nhà sưu tầm',
+          'Được giữ nếu đã báo cho hàng xóm biết'],
+      v: 'Cổ vật tìm thấy trong lòng đất thuộc SỞ HỮU TOÀN DÂN, người tìm được có nghĩa vụ giao nộp.' },
+    { q: 'Nội dung nào sau đây thuộc di sản văn hoá PHI vật thể?',
+      d: 'Nghệ thuật đờn ca tài tử', s: ['Cố đô Huế', 'Trống đồng Đông Sơn', 'Vịnh Hạ Long'],
+      v: 'Phi vật thể gồm tiếng nói, chữ viết, lễ hội, nghề thủ công, nghệ thuật trình diễn.' },
+    { q: 'Phát biểu nào sau đây đúng về Hiến pháp?',
+      d: 'Hiến pháp có hiệu lực pháp lí cao nhất, mọi văn bản khác không được trái Hiến pháp',
+      s: ['Hiến pháp là văn bản duy nhất do Quốc hội ban hành',
+          'Hiến pháp chỉ điều chỉnh quan hệ giữa các cơ quan nhà nước',
+          'Văn bản luật trái Hiến pháp vẫn có hiệu lực nếu do Quốc hội ban hành'],
+      v: 'Hiến pháp là luật CƠ BẢN; văn bản nào trái Hiến pháp thì bị bãi bỏ.' },
+    { q: 'Bệnh viện X từ chối tiếp nhận bệnh nhân vì người này là người dân tộc thiểu số. Hành vi đó xâm phạm quyền nào?',
+      d: 'Quyền được bình đẳng trong khám chữa bệnh',
+      s: ['Quyền tự do đi lại', 'Quyền được học tập', 'Quyền tự do kinh doanh'],
+      v: 'Công dân bình đẳng trong bảo vệ, chăm sóc sức khoẻ, không phân biệt dân tộc, giới tính, giàu nghèo.' },
+    { q: 'Loại bảo hiểm nào chi trả cho người lao động khi ốm đau, thai sản, tai nạn lao động và hưu trí?',
+      d: 'Bảo hiểm xã hội', s: ['Bảo hiểm y tế', 'Bảo hiểm thất nghiệp', 'Bảo hiểm thương mại'],
+      v: 'Bảo hiểm Y TẾ chi trả chi phí khám chữa bệnh; bảo hiểm XÃ HỘI chi trả các chế độ nêu trên.' }];
+    const it = R.chon(ds);
+    const opts = TD.xaoR(R, [it.d].concat(it.s));
+    return { q: it.q, opts: opts, ans: opts.indexOf(it.d), giai: `Đáp án: ${it.d}\n${it.v}`,
+      meo: 'Câu tình huống thì xác định CHỦ THỂ trước, HÀNH VI sau, rồi mới đối chiếu với quyền nào bị xâm phạm.' };
+  } }
 ]);
 })();
 

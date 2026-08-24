@@ -514,7 +514,7 @@ TD.GEN.anh = (TD.GEN.anh || []).concat([
    ========================================================== */
 TD.GEN.anh = (TD.GEN.anh || []).concat([
 
-{ ma: 'anh-sapxep', chuong: 'Cấu trúc – Chiến thuật', muc: 3, dang: 'mc',
+{ ma: 'anh-sapxep', chuong: 'Sắp xếp câu', muc: 2, dang: 'mc',
   tao(R) {
     const bo = R.chon([
       { t: 'một lá thư xin việc', c: [

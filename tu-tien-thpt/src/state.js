@@ -1295,7 +1295,10 @@ TD.deThiThat = function (mon, seed, cap) {
   const R = TD.rng(seed === undefined ? (Math.random() * 4294967295) >>> 0 : (seed >>> 0));
   const kho = TD.KHO[mon] || [], lt = TD.KHO_LT[mon] || [];
   /* _tuLT là mẫu đề sinh ra TỪ kho mệnh đề — bỏ ra kẻo trùng với nguồn mệnh đề bên dưới */
-  const gen = (TD.GEN[mon] || []).filter(t => !t._tuLT);
+  /* _luyen: bộ sinh chỉ dùng để LUYỆN, không được vào đề thật. Cụ thể là các
+     bộ câu ngữ pháp tiếng Anh dạng câu rời — đề tốt nghiệp từ 2025 không còn
+     một câu nào như vậy, mọi kiến thức ngôn ngữ đều nằm trong văn bản. */
+  const gen = (TD.GEN[mon] || []).filter(t => !t._tuLT && !t._luyen);
 
   /* ---- gom bể câu theo dạng, mỗi mục kèm mức độ để chia cho đúng ---- */
   const be = { mc: [], ds: [], tln: [] };
@@ -1407,6 +1410,16 @@ TD.deThiThat = function (mon, seed, cap) {
      Thả mẫu có hình chung rổ với hơn tám trăm mẫu khác thì xác suất bốc
      trúng gần bằng không (đo được 0,01 câu mỗi đề môn Toán), nên phải giữ
      sẵn chỗ cho chúng trước khi rút phần còn lại. */
+  /* ---- BỐ CỤC CỐ ĐỊNH CỦA ĐỀ TIẾNG ANH ----
+     Bốn mươi câu tiếng Anh không phải bốc ngẫu nhiên: đề chia cứng
+     12 câu điền từ vào văn bản · 5 câu sắp xếp · 5 câu hoàn thành đoạn văn ·
+     18 câu đọc hiểu (hai bài 8 và 10 câu). Rút đúng theo hạn ngạch đó. */
+  /* Vì bố cục này do Bộ quy định nên môn Anh KHÔNG chạy theo cấp lôi kiếp:
+     không thể vừa giữ 12/5/5/18 vừa nhồi 55% câu vận dụng cao. Cấp lôi kiếp
+     ở môn Anh chỉ đổi bộ văn bản và bộ câu hỏi, không đổi bố cục. */
+  const BO_CUC_ANH = [['anh-that-dienvb', 12], ['anh-sapxep', 5],
+                      ['anh-that-hoanthanh', 5], ['anh-that-dochieu', 18]];
+
   const canHinh = (TD.SO_CAU_HINH || {})[mon] || 0;
   const maHinh = {};
   gen.forEach(t => { if (t._hinh) maHinh[mon + '@' + t.ma] = t.dang; });
@@ -1442,7 +1455,39 @@ TD.deThiThat = function (mon, seed, cap) {
   /* Rút theo đúng thứ tự: Phần III (khó nhất) → Phần II → Phần I nhận phần còn lại */
   const p3 = hinhTln.concat(chot(rut(be.tln, M.p3 - hinhTln.length, [4, 3, 2, 1])));
   const p2 = hinhDs.concat(chot(rut(be.ds, M.p2 - hinhDs.length, [2, 3, 4, 1])));
-  const p1 = hinhMc.concat(chot(rut(be.mc, M.p1 - hinhMc.length, [1, 2, 3, 4])));
+  let p1 = hinhMc.concat(chot(rut(be.mc, M.p1 - hinhMc.length, [1, 2, 3, 4])));
+  /* Tiếng Anh: thay Phần I bốc ngẫu nhiên bằng đúng bố cục bốn dạng của đề.
+     Mỗi dạng có thể lấy lại nhiều lần vì mỗi lần rút ra một văn bản khác. */
+  if (mon === 'anh') {
+    const theoMa = {};
+    (TD.GEN.anh || []).forEach(t => { theoMa[t.ma] = t; });
+    const raA = [];
+    for (const [ma, soCau] of BO_CUC_ANH) {
+      if (!theoMa[ma]) continue;
+      for (let i = 0; i < soCau; i++) {
+        /* Bố cục cứng thì mức độ cũng phải cân bằng tay: mỗi dạng chứa câu ở
+           nhiều mức khác nhau, nên ưu tiên hạt giống nào cho ra câu thuộc mức
+           còn hạn ngạch, hết mới lấy đại. Không làm thế thì cả đề tiếng Anh
+           dồn về một mức và lệch hẳn tỉ lệ 4:3:3. */
+        let them = null, du = null;
+        for (let l = 0; l < 60 && !them; l++) {
+          const it = { mon: 'anh', g: ma, s: R.nguyen(1, 2147483646) >>> 0 };
+          const q = TD.layCau(it);
+          if (!q) continue;
+          const vt = vanTay(q);
+          if (daRa.has(vt)) continue;
+          const m = q.muc || 2;
+          if (quota[m] > 0) { daRa.add(vt); quota[m]--; them = it; }
+          else if (!du) du = { it: it, vt: vt, m: m };
+        }
+        if (!them && du) { daRa.add(du.vt); quota[du.m] = Math.max(0, quota[du.m] - 1); them = du.it; }
+        if (them) raA.push(them);
+      }
+    }
+    /* thiếu bao nhiêu thì vét nốt từ bể chung để đề vẫn đủ 40 câu */
+    if (raA.length < M.p1) p1 = raA.concat(p1.slice(0, M.p1 - raA.length));
+    else p1 = raA.slice(0, M.p1);
+  }
   /* thứ tự làm bài khuyến nghị: Phần I → Phần III → Phần II */
   return { p1: p1, p2: p2, p3: p3, ds: p1.concat(p3, p2), kiep: K };
 };
