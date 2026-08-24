@@ -30238,6 +30238,13 @@ TD.chamVan = function (i) {
   const K = (TD.phien && TD.phien.kiep) || TD.kiepTheoCanhGioi(TD.S.exp);
   clearInterval(TD.dhTimer);
   const phut = TD.phien ? Math.round((Date.now() - TD.phien.batDau) / 60000) : 0;
+  /* PHẢI gom bài làm TRƯỚC khi xoá màn hình. Đọc sau thì mấy ô nhập đã bị
+     innerHTML = '' thổi bay, getElementById trả null và bài viết mất trắng. */
+  const baiLam = {
+    doc: d.doc.map((x, k) => ((document.getElementById('van-doc-' + k) || {}).value || '').trim()),
+    nlvh: ((document.getElementById('van-nlvh') || {}).value || '').trim(),
+    nlxh: ((document.getElementById('van-nlxh') || {}).value || '').trim()
+  };
   const c = $('#noidung'); c.innerHTML = '';
 
   c.appendChild(el('div', 'the vien-kim', `<h3>📕 Đáp án & biểu điểm — Đề số ${i + 1}</h3>
@@ -30257,7 +30264,7 @@ TD.chamVan = function (i) {
   /* --- đáp án đọc hiểu --- */
   const b1 = el('div', 'the', '<h3>I. ĐỌC HIỂU (4,0 điểm)</h3>');
   d.doc.forEach((x, k) => {
-    const lam = (document.getElementById('van-doc-' + k) || {}).value;
+    const lam = baiLam.doc[k];
     b1.appendChild(el('div', '', `<div style="margin-top:14px;font-size:14.4px">
       <b>Câu ${k + 1}</b> <span class="nhan">${TD.soVN(x.d, 1)} điểm</span> — ${x.q}</div>
       <div class="giai" style="white-space:pre-wrap">${x.a}</div>`));
@@ -30281,8 +30288,108 @@ TD.chamVan = function (i) {
   });
   c.appendChild(b2);
 
+  /* ---------- SOI SƠ BỘ: những tiêu chí ĐẾM ĐƯỢC ----------
+     Máy không hiểu nghĩa nên không chấm được nội dung, nhưng phần điểm hình
+     thức và bố cục thì đo được: dung lượng, số đoạn, mở – thân – kết, có dẫn
+     chứng hay chỉ nói suông, từ nối, câu dài lê thê, lặp từ. Đúng những chỗ
+     mất điểm oan mà không ai soi hộ. */
+  const soiBai = (van, chuan, laDoan) => {
+    const t = String(van || '').trim();
+    if (!t) return ['<b>Chưa viết gì.</b>'];
+    const chu = (t.match(/\S+/g) || []).length;
+    const cau = t.split(/[.!?…]+\s/).filter(x => x.trim().length > 3);
+    const doan = t.split(/\n\s*\n|\n/).map(x => x.trim()).filter(Boolean);
+    const ra = [];
+    const lech = Math.round((chu - chuan) / chuan * 100);
+    ra.push(Math.abs(lech) <= 20
+      ? `✓ Dung lượng ${chu} chữ — nằm trong khoảng chấp nhận (chuẩn ~${chuan}).`
+      : `✗ Dung lượng ${chu} chữ, lệch ${lech > 0 ? '+' : ''}${lech}% so với chuẩn ~${chuan}. `
+        + (lech > 0 ? 'Viết dài quá dễ lan man và hết giờ.' : 'Viết ngắn quá thì không đủ ý để cho điểm.'));
+    if (laDoan) ra.push(doan.length === 1
+      ? '✓ Viết liền một đoạn, đúng yêu cầu đoạn văn.'
+      : `✗ Đề yêu cầu MỘT đoạn văn nhưng bài đang tách ${doan.length} đoạn — mất 0,25 điểm hình thức.`);
+    else ra.push(doan.length >= 3
+      ? `✓ Bài chia ${doan.length} đoạn, có bố cục mở – thân – kết.`
+      : `✗ Bài chỉ có ${doan.length} đoạn. Bài văn phải tách rõ mở bài, thân bài, kết bài.`);
+    const dai = cau.filter(x => (x.match(/\S+/g) || []).length > 45).length;
+    ra.push(dai === 0 ? '✓ Không có câu nào dài quá 45 chữ.'
+      : `✗ Có ${dai} câu dài trên 45 chữ — câu dài dễ sai ngữ pháp và khó chấm.`);
+    const NOI = /\b(tuy nhiên|mặt khác|hơn nữa|bên cạnh đó|vì vậy|do đó|trước hết|không chỉ|ngược lại|thật vậy|nói cách khác|chẳng những)\b/gi;
+    const soNoi = (t.match(NOI) || []).length;
+    ra.push(soNoi >= (laDoan ? 2 : 4)
+      ? `✓ Dùng ${soNoi} từ ngữ liên kết — lập luận có mạch.`
+      : `✗ Mới ${soNoi} từ ngữ liên kết. Thiếu từ nối thì các ý rời rạc, mất điểm lập luận.`);
+    const DAN = /\b(ví dụ|chẳng hạn|theo|nhà văn|tác giả|câu thơ|chi tiết|hình ảnh|dẫn chứng|thực tế|số liệu)\b/gi;
+    ra.push((t.match(DAN) || []).length >= 2
+      ? '✓ Có dấu hiệu đưa dẫn chứng, không nói suông.'
+      : '✗ Chưa thấy dẫn chứng cụ thể. Phần triển khai chiếm 1,0 – 2,5 điểm, nói chay là mất phần lớn số đó.');
+    const tu = {};
+    (t.toLowerCase().match(/[a-zàáâãèéêìíòóôõùúýăđĩũơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]{4,}/g) || [])
+      .forEach(w => { tu[w] = (tu[w] || 0) + 1; });
+    const lap = Object.entries(tu).filter(([w, n]) => n >= Math.max(5, Math.round(chu / 40)))
+      .sort((a, b) => b[1] - a[1]).slice(0, 3);
+    ra.push(lap.length === 0 ? '✓ Không có từ nào bị lặp quá dày.'
+      : `✗ Lặp từ: ${lap.map(([w, n]) => `"${w}" ${n} lần`).join(' · ')} — nên thay bằng từ đồng nghĩa.`);
+    return ra;
+  };
+
+  const bSoi = el('div', 'the', '<h3>🔍 Soi sơ bộ bài viết</h3>'
+    + '<p class="mo-nhat">Máy chỉ đo được những thứ ĐẾM ĐƯỢC: dung lượng, bố cục, từ nối, dẫn chứng, lặp từ. '
+    + 'Phần nội dung và cảm thụ thì máy chịu — chỗ đó vẫn phải tự đối chiếu đáp án, hoặc chép bài gửi cho Claude chấm.</p>');
+  [['Câu 1 — đoạn nghị luận văn học (~200 chữ)', baiLam.nlvh, 200, true],
+   ['Câu 2 — bài nghị luận xã hội (~600 chữ)', baiLam.nlxh, 600, false]]
+    .forEach(([ten, van, chuan, laDoan]) => {
+      bSoi.appendChild(el('div', '', `<div style="margin-top:12px;font-size:14.2px"><b>${ten}</b></div>`
+        + `<div class="giai" style="white-space:pre-wrap">${soiBai(van, chuan, laDoan).join('\n')}</div>`));
+    });
+  c.appendChild(bSoi);
+
+  /* ---------- CHÉP BÀI ĐI NHỜ CHẤM ----------
+     Máy trong file HTML này không có mô hình ngôn ngữ nên không chấm được nội
+     dung. Nhưng chép nguyên đề, biểu điểm và bài làm ra thì dán sang chỗ nào
+     có Claude là chấm được ngay — đỡ phải tự cho điểm mình. */
+  const goiChep = () => {
+    const l = [];
+    l.push('Chấm giúp bài Ngữ văn này theo đúng biểu điểm bên dưới, cho điểm từng câu, chỉ rõ chỗ mất điểm và cách sửa.');
+    l.push('');
+    l.push('=== NGỮ LIỆU: ' + d.ten + ' ===');
+    l.push(String(d.nguLieu || '').trim());
+    l.push('');
+    l.push('=== PHẦN I. ĐỌC HIỂU (4,0 điểm) ===');
+    d.doc.forEach((x, k) => {
+      l.push(`Câu ${k + 1} (${TD.soVN(x.d, 1)}đ): ${x.q}`);
+      l.push('BÀI LÀM: ' + (baiLam.doc[k] || '(bỏ trống)'));
+      l.push('');
+    });
+    l.push('=== PHẦN II. VIẾT (6,0 điểm) ===');
+    [[d.nlvh, baiLam.nlvh, '2,0'], [d.nlxh, baiLam.nlxh, '4,0']].forEach(([x, viet, dm]) => {
+      l.push(`Đề (${dm}đ): ${x.q}`);
+      l.push('Biểu điểm: ' + x.diem);
+      l.push('BÀI LÀM: ' + (viet || '(bỏ trống)'));
+      l.push('');
+    });
+    return l.join('\n');
+  };
+
   const kq = el('div', 'the vien-lua', '<h3>Tổng kết</h3><div id="van-tong">Nhập điểm từng câu rồi bấm chốt.</div>');
   const nut = el('div', 'hang-nut', '');
+  /* Chép cả đề, biểu điểm và bài làm ra bảng nhớ tạm — dán sang chỗ nào có
+     Claude là chấm được nội dung ngay, khỏi phải tự cho điểm mình. */
+  const chep = el('button', 'nut phu', '📋 Chép bài đi nhờ chấm');
+  chep.onclick = async () => {
+    const van = goiChep();
+    try {
+      await navigator.clipboard.writeText(van);
+      TD.bao('Đã chép cả đề, biểu điểm và bài làm. Dán vào chỗ chat với Claude để được chấm.', 'ngoc');
+    } catch (e) {
+      /* trình duyệt chặn clipboard (mở bằng file://) thì đổ ra ô cho tự bôi đen */
+      const o = el('textarea', 'o-nhap'); o.rows = 12; o.value = van;
+      o.style.width = '100%'; o.style.marginTop = '9px';
+      kq.appendChild(el('div', 'mo-nhat', 'Trình duyệt không cho chép tự động — bôi đen ô dưới rồi copy tay:'));
+      kq.appendChild(o); o.select();
+    }
+  };
+  nut.appendChild(chep);
   const chot = el('button', 'nut kim', 'Chốt điểm & ghi vào sổ');
   chot.onclick = () => {
     let tong = 0, thieu = false;
