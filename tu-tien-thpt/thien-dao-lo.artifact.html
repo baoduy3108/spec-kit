@@ -1112,9 +1112,36 @@ TD.bangCuaThe = function (the) {
       const tran = noi.replace(/<[^>]+>/g, '').trim();
       if (!nhan || nhan.length > 44 || tran.length < 3 || tran.length > 150) return;
       if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
-      ra.push({ nhan: nhan, noi: noi, tran: tran, chat: TD.chatTrongO(tran) });
+      ra.push({ nhan: nhan, noi: noi, tran: tran, chat: TD.chatTrongO(tran), _nhom: 'bang' });
+    });
+    /* Bảng NHIỀU CỘT có hàng tiêu đề: mỗi ô dữ liệu là một dữ kiện hỏi được.
+       Thẻ "Polymer – trùng hợp" là bảng bốn cột Monomer · Polymer · Loại phản
+       ứng · Ứng dụng — trước đây bị bỏ qua sạch vì code chỉ nhận bảng hai cột. */
+    const hang = b.match(/<tr[\s\S]*?<\/tr>/g) || [];
+    const dau = hang[0] && (hang[0].match(/<th[^>]*>[\s\S]*?<\/th>/g) || []);
+    if (!dau || dau.length < 3) return;
+    const sach = t => t.replace(/<t[dh][^>]*>|<\/t[dh]>/g, '').replace(/<\/?(b|i|em|strong|u)>/g, '').trim();
+    const tenCot = dau.map(t => sach(t).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+    hang.slice(1).forEach(tr => {
+      const o = tr.match(/<td[^>]*>[\s\S]*?<\/td>/g) || [];
+      if (o.length !== tenCot.length) return;
+      const v = o.map(sach);
+      const khoa = v[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!khoa || khoa.length > 40) return;
+      for (let j = 1; j < v.length; j++) {
+        const tran2 = v[j].replace(/<[^>]+>/g, '').trim();
+        if (tran2.length < 2 || tran2.length > 90) continue;
+        ra.push({ nhan: `${tenCot[j]} của ${tenCot[0].toLowerCase()} ${khoa}`,
+          noi: v[j], tran: tran2, chat: TD.chatTrongO(tran2),
+          /* nhiễu phải lấy trong CÙNG CỘT, không thì hỏi "loại phản ứng" mà
+             bày ra tên polymer — lộ đáp án ngay */
+          _nhom: 'cot' + j, _cot: true, _khoa: khoa, _tenKhoa: tenCot[0], _tenCot: tenCot[j] });
+      }
     });
   });
+  /* Thẻ không có bảng vẫn hỏi được: rất nhiều thẻ viết theo lối
+     "Nhãn: nội dung" trên từng dòng, đó cũng là một bảng hai cột trá hình. */
+  TD.dongVanCuaThe(than).forEach(d => ra.push(d));
   const da = {};
   const loc = ra.filter(d => {
     const k = TD.khongDau(d.tran);
@@ -1122,6 +1149,30 @@ TD.bangCuaThe = function (the) {
   });
   if (TD._boNhoBang && the && typeof the === 'object') TD._boNhoBang.set(the, loc);
   return loc;
+};
+
+/* Bóc các dòng "Nhãn: nội dung" trong thân thẻ thành cặp hỏi được.
+   Lọc chặt để không bẻ nhầm giữa một câu văn: vế trái phải NGẮN, không kết
+   thúc bằng dấu chấm, vế phải phải đủ dài để thành một phương án tử tế. */
+TD.dongVanCuaThe = function (than) {
+  const ra = [];
+  String(than).split(/<br\s*\/?>|<\/p>|\n/).forEach(d => {
+    const van = d.replace(/<table[\s\S]*?<\/table>/g, '')
+      .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    if (van.length < 12 || van.length > 170) return;
+    const i = van.indexOf(':');
+    if (i < 1) return;                       /* nhãn một ký tự như "γ:" vẫn hợp lệ */
+    const nhan = van.slice(0, i).trim();
+    const tran = van.slice(i + 1).trim().replace(/[.;]$/, '');
+    if (nhan.length > 45 || /[.!?]$/.test(nhan) || nhan.indexOf(':') >= 0) return;
+    if (tran.length < 10 || tran.length > 120 || tran.indexOf(':') >= 0) return;
+    /* nhãn mà đã chứa luôn câu trả lời thì hỏi cũng bằng thừa */
+    if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
+    ra.push({ nhan: nhan, noi: tran, tran: tran, chat: TD.chatTrongO(tran), _nhom: 'van', _van: true });
+  });
+  /* một dòng lẻ thì không dựng nổi phương án nhiễu cùng kiểu */
+  return ra.length >= 2 ? ra : [];
 };
 
 /* Tách một ô thành danh sách CÔNG THỨC/CHẤT riêng lẻ.
@@ -1183,7 +1234,11 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     const A = new Set(tach(a)), B = new Set(tach(b));
     if (!A.size || !B.size) return true;
     let c = 0; A.forEach(w => { if (B.has(w)) c++; });
-    return c === Math.min(A.size, B.size) || c / (A.size + B.size - c) >= 0.5;
+    /* Chỉ chặn khi phương án này CHỨA TRỌN phương án kia ("Cu, Ag" nằm gọn
+       trong "Cu, Ag (mọi KL sau H)" là hai đáp án cùng đúng). Trước đây còn
+       chặn theo tỉ lệ trùng quá nửa, nhưng thế thì loại luôn cặp nhiễu tốt
+       nhất: "Z tăng 1" và "Z giảm 1" chỉ khác nhau đúng một từ. */
+    return c === Math.min(A.size, B.size);
   };
   /* nhiễu lấy từ CHÍNH bảng này trước, cạn mới mượn thẻ cùng chuyên đề rồi cả môn */
   const nhieu = (nhom, dung, can) => {
@@ -1270,17 +1325,33 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
 
   /* ④ + ⑤ — hỏi cả dòng, dùng được cho cả những ô không tách được thành chất */
   dong.forEach(d => {
+    const cungNhom = dong.filter(z => z !== d && z._nhom === d._nhom);
     const khac = dong.filter(z => z !== d);
-    /* xếp trước những dòng CÙNG kiểu (cũng là danh sách chất) để bốn phương án
-       trông đồng nhất, không lộ đáp án vì ba phương án kia toàn chữ */
+    /* Dòng bóc từ cột phụ hoặc từ câu văn thì phương án nhiễu CHỈ được lấy
+       trong chính thẻ, cùng cột hoặc cùng kiểu. Mượn thẻ khác là ra câu hỏi
+       phóng xạ mà phương án là công thức cường độ âm — nhìn phát loại luôn. */
+    const trongThe = d._nhom !== 'bang';
     const cungKieu = z => (z.chat.length > 0) === (d.chat.length > 0);
-    themMC(`Theo bảng trong thẻ <b>«${ten}»</b>, mục <b>${d.nhan}</b> ứng với nội dung nào sau đây?`,
-      d.noi, nhieu([khac.filter(cungKieu).map(z => z.noi), ngoai.filter(cungKieu).map(z => z.noi),
-                    khac.map(z => z.noi), ngoai.map(z => z.noi), xa.filter(cungKieu).map(z => z.noi)], d.noi, 3),
-      `Bảng trong thẻ «${ten}» ghi rõ:\n${d.nhan} → ${d.tran}`, 1);
+    const hoiNoi = d._cot
+      ? `Theo bảng trong thẻ <b>«${ten}»</b>, ${d._tenKhoa.toLowerCase()} <b>${d._khoa}</b> `
+        + `có <b>${d._tenCot.toLowerCase()}</b> là gì?`
+      : `Theo thẻ <b>«${ten}»</b>, <b>${d.nhan}</b> ứng với nội dung nào sau đây?`;
+    /* Dòng văn thì vẫn cho mượn thẻ CÙNG CHUYÊN ĐỀ (cùng kiểu dòng văn) — nhiễu
+       vẫn nằm trong phạm vi kiến thức đang học. Cột phụ thì tuyệt đối không:
+       ngữ nghĩa của cột không chuyển sang thẻ khác được. */
+    const muonNgoai = d._van ? ngoai.filter(z => z._nhom === 'van').map(z => z.noi) : [];
+    themMC(hoiNoi, d.noi,
+      trongThe ? nhieu([cungNhom.map(z => z.noi), muonNgoai], d.noi, 3)
+               : nhieu([khac.filter(cungKieu).map(z => z.noi), ngoai.filter(cungKieu).map(z => z.noi),
+                        khac.map(z => z.noi), ngoai.map(z => z.noi), xa.filter(cungKieu).map(z => z.noi)], d.noi, 3),
+      `Thẻ «${ten}» ghi rõ:\n${d.nhan} → ${d.tran}`, 1);
+    if (d._cot) return;                       /* nhãn cột ghép sẵn, hỏi ngược nghe rất gượng */
     themMC(`Nội dung sau thuộc mục nào trong thẻ <b>«${ten}»</b>?<br><b>${d.noi}</b>`,
-      d.nhan, nhieu([khac.map(z => z.nhan), ngoai.map(z => z.nhan)], d.nhan, 3),
-      `Bảng trong thẻ «${ten}» xếp ${d.tran} vào mục <b>${d.nhan}</b>.`, 2);
+      d.nhan,
+      trongThe ? nhieu([cungNhom.map(z => z.nhan),
+                        d._van ? ngoai.filter(z => z._nhom === 'van').map(z => z.nhan) : []], d.nhan, 3)
+               : nhieu([khac.map(z => z.nhan), ngoai.map(z => z.nhan)], d.nhan, 3),
+      `Thẻ «${ten}» xếp ${d.tran} vào mục <b>${d.nhan}</b>.`, 2);
   });
 
   /* ⑥ câu đúng/sai bốn ý ghép từ chính bảng: "X thuộc nhóm Y" đúng hay sai */
