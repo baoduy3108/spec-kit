@@ -35,7 +35,7 @@ TD.KHO.hoa_kq = [
 <tr><td>Hiđroxit lưỡng tính</td><td>Al(OH)₃, Zn(OH)₂, <b>Cr(OH)₃</b>, Be(OH)₂, Sn(OH)₂, Pb(OH)₂</td></tr>
 <tr><td>Muối lưỡng tính</td><td>NaHCO₃, Ca(HCO₃)₂, NaHS, (NH₄)₂CO₃, CH₃COONH₄ … <b>trừ NaHSO₄</b></td></tr></table>
 Trong Al và H₂O thì <b>H₂O</b> mới là chất lưỡng tính (Al là kim loại, chỉ đóng vai chất khử).`,
-  dc: 'Bảng photo ghi hiđroxit lưỡng tính là Cu(OH)₂ — SAI. Theo SGK, Cu(OH)₂ KHÔNG lưỡng tính (nó chỉ tan trong NH₃ dư tạo phức). Chất đúng phải là <b>Cr(OH)₃</b>.' },
+  dc: 'Rất nhiều bạn xếp nhầm Cu(OH)₂ vào nhóm lưỡng tính. Cu(OH)₂ <b>KHÔNG</b> lưỡng tính — nó tan trong NH₃ dư là do tạo <b>phức</b> [Cu(NH₃)₄](OH)₂, không phải do phản ứng với base. Chất lưỡng tính trong dãy này là <b>Cr(OH)₃</b>.' },
 
 { so: 4, chu_de: 'Tính chất vật lí kim loại', cap: 1,
   hoi: '4 tính chất vật lí chung của kim loại do đâu mà có? Các kỉ lục cần nhớ?',
@@ -154,7 +154,7 @@ Hỗn hợp <b>+ HCl có khí ⇒ có Fe hoặc Al</b>.`,
 <tr><td>0,5 mol CO₂ + 0,4 mol Ca(OH)₂ (T = 0,8/0,5 = 1,6)</td><td>Ca(HCO₃)₂ và CaCO₃; <b>n↓ = 2·0,4 − 0,5 = 0,3</b></td></tr>
 <tr><td>0,7 mol NaOH + 0,2 mol AlCl₃ (T = 3,5)</td><td>còn NaAlO₂; <b>n↓ = 4·0,2 − 0,7 = 0,1</b></td></tr>
 <tr><td>0,1 mol P₂O₅ (= 0,2 mol H₃PO₄) + 0,3 mol NaOH (T = 1,5)</td><td>NaH₂PO₄ và Na₂HPO₄; <b>không có kết tủa</b></td></tr></table>`,
-  dc: 'Bảng photo ghi "0,1 mol P₂O₅ + 3 mol NaOH" — với 3 mol NaOH thì T = 15, chỉ tạo Na₃PO₄. Số liệu đúng để ra 2 muối NaH₂PO₄ + Na₂HPO₄ phải là <b>0,3 mol NaOH</b>.',
+  dc: 'Chỗ hay tính hụt: cho 0,1 mol P₂O₅ tác dụng NaOH thì phải quy về 0,2 mol H₃PO₄ trước rồi mới lập tỉ lệ T = n(NaOH)/n(H₃PO₄). Với 3 mol NaOH thì T = 15, dư base nên chỉ ra <b>Na₃PO₄</b>. Muốn ra hai muối NaH₂PO₄ và Na₂HPO₄ thì cần <b>0,3 mol NaOH</b> (T = 1,5).',
   meo: 'Nhớ 2 công thức "vàng": n↓ = 2n<sub>Ca(OH)₂</sub> − n<sub>CO₂</sub> (khi có 2 muối) và n↓ = 4n<sub>Al³⁺</sub> − n<sub>OH⁻</sub> (khi ↓ đã tan 1 phần).' },
 
 { so: 17, cd: '*', chu_de: 'Hiện tượng đặc trưng', cap: 2,
@@ -167,7 +167,7 @@ Hỗn hợp <b>+ HCl có khí ⇒ có Fe hoặc Al</b>.`,
 <tr><td>Fe + dd CuSO₄</td><td>Cu đỏ bám vào Fe, màu xanh nhạt dần</td></tr>
 <tr><td>Na + dd Fe₂(SO₄)₃</td><td><b>2 phản ứng</b>: có khí H₂↑ và ↓ nâu đỏ Fe(OH)₃</td></tr>
 <tr><td>AlCl₃, FeCl₃ + dd Na₂CO₃</td><td>khí CO₂↑ và ↓ Al(OH)₃, Fe(OH)₃ (thuỷ phân hoàn toàn)</td></tr></table>`,
-  dc: 'Bảng photo hỏi "2 bazơ nào KHÔNG tan trong NH₃" rồi trả lời Cu(OH)₂, Zn(OH)₂ — ngược. Đúng phải là 2 bazơ <b>TAN</b> trong NH₃ dư nhờ tạo phức.' },
+  dc: 'Cu(OH)₂ và Zn(OH)₂ là hai hydroxide <b>TAN</b> trong NH₃ dư nhờ tạo phức — chứ không phải hai chất không tan. Nhớ ngược chiều là mất câu.' },
 
 /* ---------- SẮT – CROM ---------- */
 { so: 18, chu_de: 'Sắt – tác dụng axit', cap: 2,
@@ -275,7 +275,7 @@ TD.KHO.hoa_kq.push(
 <tr><td>Br₂</td><td><b>lỏng</b>, nâu đỏ</td></tr><tr><td>I₂</td><td><b>rắn</b>, đen tím (thăng hoa)</td></tr></table>
 Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của X⁻: <b>I⁻ &gt; Br⁻ &gt; Cl⁻ &gt; F⁻</b> · Tính axit: <b>HI &gt; HBr &gt; HCl &gt; HF</b><br>
 + Fe: F₂, Cl₂, Br₂ → <b>Fe³⁺</b>; I₂ → <b>Fe²⁺</b> (I₂ oxi hoá yếu).`,
-  dc: 'Bảng photo ghi "F: khí, màu xanh" — chính xác phải là <b>lục nhạt (vàng lục rất nhạt)</b>.' },
+  dc: 'Màu của F₂ là <b>lục nhạt</b> (vàng lục rất nhạt), không phải xanh. Cả nhóm halogen đậm dần: F₂ lục nhạt → Cl₂ vàng lục → Br₂ nâu đỏ → I₂ tím đen.' },
 
 { so: 29, cd: '*', chu_de: 'Tốc độ phản ứng & cân bằng hoá học', cap: 2,
   hoi: 'Yếu tố nào ảnh hưởng tốc độ? Yếu tố nào làm chuyển dịch cân bằng?',
@@ -317,7 +317,7 @@ Tính oxi hoá: <b>F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂</b> · Tính khử của
 <tr><td>Supephotphat kép</td><td>chỉ Ca(H₂PO₄)₂ — hàm lượng cao hơn</td></tr>
 <tr><td>Amophot</td><td>NH₄H₂PO₄ và (NH₄)₂HPO₄ — phân phức hợp</td></tr>
 <tr><td>Nitrophotka</td><td>(NH₄)₂HPO₄ và KNO₃ — phân hỗn hợp NPK</td></tr></table>`,
-  dc: 'Bảng photo ghi supephotphat đơn là "Ca(HPO₄)₂" — sai chính tả công thức. Đúng là <b>Ca(H₂PO₄)₂</b>.' },
+  dc: 'Công thức superphosphate hay bị viết thiếu chỉ số: đúng là <b>Ca(H₂PO₄)₂</b> chứ không phải Ca(HPO₄)₂. Đếm hoá trị mà kiểm: H₂PO₄⁻ hoá trị I nên cần hai gốc cho một Ca.' },
 
 { so: 33, cd: '*', chu_de: 'Số oxi hoá', cap: 1,
   hoi: 'Chất nào vừa có tính khử vừa có tính oxi hoá? Các số oxi hoá thường gặp?',
@@ -407,7 +407,7 @@ Na₂S₂O₃ + 2HCl → 2NaCl + H₂O + SO₂ + <b>S↓</b><br>
 <tr><td>Manhetit</td><td>Fe₃O₄</td><td>giàu Fe nhất (<b>72,4%</b>) nhưng hiếm</td></tr>
 <tr><td>Xiđerit</td><td>FeCO₃</td><td>—</td></tr>
 <tr><td>Pirit sắt</td><td>FeS₂</td><td><b>%Fe thấp nhất</b>; dùng SX H₂SO₄</td></tr></table>`,
-  dc: 'Bảng photo ghi Boxit là "Al₂O₃". Chính xác quặng boxit là <b>Al₂O₃·2H₂O</b> (nhôm oxit ngậm nước, lẫn SiO₂, Fe₂O₃).' }
+  dc: 'Đừng đồng nhất quặng boxite với Al₂O₃ tinh khiết: boxite là <b>Al₂O₃·2H₂O</b> — nhôm oxide ngậm nước, còn lẫn SiO₂ và Fe₂O₃, nên mới phải tinh chế trước khi điện phân.' }
 );
 
 /* ---------- HỮU CƠ (40–72) — kèm tên IUPAC mới của CT 2018 ---------- */
@@ -584,7 +584,7 @@ Các acid béo khác: palmitic C₁₅H₃₁COOH (M = 256), linoleic C₁₇H�
 <tr><td><b>Nhựa phenol-formaldehyde</b> (bakelit)</td><td>phenol C₆H₅OH + formaldehyde HCHO</td><td>đồng trùng ngưng</td></tr>
 <tr><td><b>Cao su Buna-S</b></td><td>buta-1,3-diene + <b>styrene</b> C₆H₅CH=CH₂</td><td>đồng trùng hợp</td></tr>
 <tr><td><b>Cao su Buna-N</b></td><td>buta-1,3-diene + <b>acrylonitrile</b> CH₂=CH–CN</td><td>đồng trùng hợp</td></tr></table>`,
-  dc: 'Bảng photo ghi acrylonitrile là "CH₂=CH–N" — thiếu C. Đúng là <b>CH₂=CH–CN</b>.' },
+  dc: 'Acrylonitrile hay bị viết thiếu một carbon: đúng là <b>CH₂=CH–CN</b> (nhóm cyano –C≡N), không phải CH₂=CH–N.' },
 
 { so: 55, cd: 'Polymer', chu_de: 'Phân loại tơ', cap: 1,
   hoi: 'Tơ khác chất dẻo ở điểm nào? Phân loại tơ và cho ví dụ.',
@@ -678,7 +678,7 @@ CO₂ vào nước vôi trong <b>dư</b> ⇒ chỉ tạo CaCO₃, <b>n<sub>CO₂
 <tr><td>Propane + Cl₂ (1:1, as)</td><td><b>2</b></td><td><b>2-chloropropane</b> (thế H ở C bậc cao hơn)</td></tr>
 <tr><td>But-2-ene + HCl</td><td>1</td><td>2-chlorobutane (alkene đối xứng)</td></tr>
 <tr><td>But-2-ene + H₂O</td><td><b>1</b></td><td>butan-2-ol</td></tr></table>`,
-  dc: 'Bảng photo ghi "Propan + Cl₂ → 1 sp" và "But-2-ene + H₂O → 2 sp" — cả hai đều ngược. Propane có 2 loại H (bậc I và bậc II) ⇒ <b>2 sản phẩm</b>. But-2-ene <b>đối xứng</b> ⇒ chỉ <b>1 sản phẩm</b>.' },
+  dc: 'Hai trường hợp rất hay bị đảo kết quả cho nhau. Propane có <b>hai loại H</b> (bậc I ở hai đầu và bậc II ở giữa) nên thế Cl₂ cho <b>2 sản phẩm</b>. Còn but-2-ene <b>đối xứng</b> nên cộng H₂O chỉ ra <b>1 sản phẩm</b>.' },
 
 { so: 63, chu_de: 'Phản ứng điều chế quan trọng', cap: 2,
   hoi: 'Điền sản phẩm: 2CH₄ (1500°C), C₂H₂ + H₂O, CaC₂ + H₂O, Al₄C₃ + H₂O, CH₃COONa + NaOH (CaO).',

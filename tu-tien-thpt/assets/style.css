@@ -114,7 +114,12 @@ input.o-nhap:focus{outline:0;border-color:var(--ngoc)}
 .meo::before{content:'💡 MẸO: ';color:var(--kim);font-weight:700}
 .dc{background:rgba(231,76,60,.09);border-left:3px solid var(--lua);border-radius:0 10px 10px 0;
   padding:10px 15px;margin-top:9px;font-size:13.6px}
-.dc::before{content:'⚠ ĐÍNH CHÍNH: ';color:var(--lua);font-weight:700}
+/* Trước đây khối này gắn cứng nhãn "⚠ ĐÍNH CHÍNH" — chữ ấy chỉ có nghĩa hồi
+   nội dung còn là bản in đính chính lại một tờ photo. Trong app thì không có
+   bản nào để mà đính chính, mà nhãn lại đè lên cả khối BẪY dùng chung class,
+   thành ra "ĐÍNH CHÍNH: BẪY:". Nay bỏ nhãn mặc định, chỗ nào cần nhãn thì
+   tự ghi lấy. */
+.dc::before{content:''}
 
 /* ---------- nhãn ---------- */
 .nhan{display:inline-block;padding:2.5px 9px;border-radius:99px;font-size:11.5px;font-weight:700;

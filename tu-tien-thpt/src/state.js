@@ -756,6 +756,16 @@ TD.chuanChu = function (t) {
     if (manh.length < 2) return dong;
     return manh.every(x => /[=⇔]/.test(x)) ? manh.join('<br>') : dong;
   }).join('<br>');
+  /* ①b Dấu nhân phải chỉ có MỘT kiểu. Trước đây lời giải trộn cả hai:
+     "2·n(E) = 2×1,06 + 1,06 − 2×1,4" — cùng một dòng hai ký hiệu nhân, nhìn
+     rất rát. Nay tách bạch: dấu NHÂN luôn là ×, còn · chỉ còn một nghĩa là
+     dấu NGĂN giữa các ý. Nhận ra dấu nhân ở chỗ nó dính liền hai toán hạng,
+     không có dấu cách — dấu ngăn thì luôn có cách ở hai bên.
+     Nhưng KHÔNG được đụng tới dấu chấm giữa trong ĐƠN VỊ đo (N·m, J/(kg·K)) —
+     đó là ký hiệu chuẩn quốc tế. Phân biệt: dấu nhân luôn có ít nhất một bên
+     là CHỮ SỐ, còn đơn vị thì hai bên đều là chữ. */
+  r = r.replace(/([\d)\]])·(?=[\dA-Za-zÀ-ỹΔΣπ√(])/g, '$1×')     /* 2·n(E) · 62·n(CO₂) */
+       .replace(/(\S)·(?=\d)/g, '$1×');                          /* 4π·5² */
   /* ② mũi tên vectơ */
   r = r.replace(/([A-Za-zÀ-ỹ]{1,3})⃗/g, '<span class="vt">$1</span>');
   r = r.replace(/⃗/g, '');

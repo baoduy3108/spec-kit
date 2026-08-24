@@ -149,15 +149,22 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
         + '② tìm một người NỮ bị bệnh — nếu bố cô ấy bình thường thì loại ngay giả thiết "nằm trên X".');
     if (hoi === 'kieuGen')
       return MC(R, `Cho sơ đồ phả hệ về một bệnh do gen lặn trên nhiễm sắc thể thường quy định:${hinh}Có thể xác định chắc chắn kiểu gen của bao nhiêu người trong phả hệ trên?`,
-        { d: '5', s: ['3', '4', '7'],
-          sv: { '3': 'đếm sót: cả hai người bị bệnh lẫn ba người mang gen bắt buộc đều xác định được',
-                '4': 'đếm sót một người: cặp (6) và (7) sinh con (9) bị bệnh nên CẢ HAI đều là Aa',
-                '7': 'đếm thừa: những người bình thường còn lại có thể là AA hoặc Aa, không xác định chắc chắn được' },
-          v: `Xác định chắc chắn được 5 người:\n`
-            + `· (5) và (9) BỊ BỆNH ⇒ chắc chắn aa — 2 người.\n`
-            + `· (1) và (2) bình thường mà sinh con (5) là aa ⇒ mỗi người đều cho một allele a ⇒ cả hai đều Aa — 2 người.\n`
-            + `· (6) và (7) bình thường mà sinh con (9) là aa ⇒ cả hai đều Aa — nhưng (6) đã nằm trong nhóm con của (1)×(2) và vẫn cần xác định riêng; tính thêm (6) và (7) thì tổng là 5 người xác định chắc chắn: (5), (9), (1), (2), (7).\n`
-            + `Riêng (6) suy ra được là Aa nên thực chất còn nhiều hơn, nhưng câu hỏi tính theo nhóm tối thiểu bắt buộc.` },
+        { d: '6', s: ['4', '5', '8'],
+          sv: { '4': 'đếm sót cặp (6) × (7): họ sinh con (9) bị bệnh nên CẢ HAI bắt buộc là Aa',
+                '5': 'đếm sót một người — cả (6) lẫn (7) đều xác định được, không phải chỉ một trong hai',
+                '8': 'đếm thừa: (3), (4), (8), (10) đều bình thường nhưng có thể AA hoặc Aa, không chắc chắn' },
+          v: `Quy ước: A bình thường trội hoàn toàn so với a gây bệnh.\n`
+            + `KIỂU GEN TỪNG NGƯỜI — làm nháp thì vẽ lại phả hệ rồi ghi thẳng cạnh mỗi ký hiệu:\n`
+            + `  (1) Aa · (2) Aa — bình thường mà sinh con (5) bị bệnh, nên mỗi người phải cho một allele a\n`
+            + `  (3) A− · (4) A− — bình thường, chưa xác định được (lí do ở cuối)\n`
+            + `  (5) aa — bị bệnh\n`
+            + `  (6) Aa · (7) Aa — bình thường mà sinh con (9) bị bệnh\n`
+            + `  (8) A− — bình thường, chưa xác định\n`
+            + `  (9) aa — bị bệnh\n`
+            + `  (10) A− — con của Aa × Aa nhưng bình thường ⇒ 1AA : 2Aa, không chắc\n`
+            + `⇒ Xác định CHẮC CHẮN được 6 người: (1), (2), (5), (6), (7), (9).\n`
+            + `Vì sao (3) và (4) không xác định được: con gái (7) của họ là Aa nên đã nhận allele a từ một trong `
+            + `hai người — nhưng không biết từ ai, nên chỉ chắc rằng ÍT NHẤT một người là Aa, còn từng người thì không.` },
         'Ba nguồn cho kiểu gen chắc chắn: ① người BỊ BỆNH luôn là aa ② bố mẹ bình thường sinh con aa thì cả hai là Aa '
         + '③ con của người aa luôn mang ít nhất một allele a.');
     return MC(R, `Cho sơ đồ phả hệ về một bệnh do gen lặn trên nhiễm sắc thể thường quy định:${hinh}Cặp vợ chồng (6) × (7) dự định sinh thêm một người con. Xác suất người con đó không bị bệnh là bao nhiêu?`,

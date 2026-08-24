@@ -1211,7 +1211,7 @@ TD.moThe = function (khoa, i) {
     <hr class="mo">${than}
     ${x.meo ? `<div class="meo">${x.meo}</div>` : ''}
     ${x.bay ? `<div class="dc" style="border-left-color:var(--tim)"><b style="color:var(--tim)">BẪY:</b> ${x.bay}</div>` : ''}
-    ${x.dc ? `<div class="dc">${x.dc}</div>` : ''}
+    ${x.dc ? `<div class="dc"><b style="color:var(--lua)">DỄ NHẦM:</b> ${x.dc}</div>` : ''}
     <div class="hang-nut">
       <button class="nut" id="tk-khac">✅ Đã thuộc — khắc cốt ghi tâm</button>
       <span id="tk-thu"></span>
