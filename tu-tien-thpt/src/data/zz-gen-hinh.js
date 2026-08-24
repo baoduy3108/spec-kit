@@ -371,10 +371,14 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
   tao(R) {
     const loai = R.chon(['nhiet', 'tich', 'ap']);
     const p1 = R.nguyen(2, 4), V1 = R.nguyen(1, 2), he = p1 * V1;
+    /* Đẳng tích = đường thẳng ĐỨNG tại V = V₁. Trước đây cố nặn nó ra từ
+       hàm f(v) nên chỉ vẽ được một gạch ngang cụt vài pixel — nhìn không ra
+       cái gì, mà đáp án lại bắt nhận diện đúng đường thẳng đứng. */
     const f = loai === 'nhiet' ? (v => he / v)
-            : loai === 'tich' ? (v => (Math.abs(v - V1) < 0.06 ? p1 : NaN))
-            : (v => p1);
-    const hinh = TD.hinhDoThi(f, { xMin: 0.2, xMax: 5, yMin: 0, yMax: 6 });
+            : loai === 'tich' ? (() => NaN)
+            : (() => p1);
+    const hinh = TD.hinhDoThi(f, { xMin: 0.2, xMax: 5, yMin: 0, yMax: 6, tenX: 'V', tenY: 'p',
+      duongDung: loai === 'tich' ? [V1] : [] });
     const ten = { nhiet: 'đẳng nhiệt', tich: 'đẳng tích', ap: 'đẳng áp' };
     const dung = { nhiet: 'Quá trình đẳng nhiệt (T không đổi)', tich: 'Quá trình đẳng tích (V không đổi)', ap: 'Quá trình đẳng áp (p không đổi)' };
     const moTa = { nhiet: 'đường cong hypebol, p giảm khi V tăng sao cho tích p·V không đổi',

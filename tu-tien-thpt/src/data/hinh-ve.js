@@ -17,6 +17,11 @@ const M = {
   nhan: 'var(--kim)', phu: 'var(--vien)', do: 'var(--lua)', tim: 'var(--tim)'
 };
 const so = n => (Math.round(n * 100) / 100);
+/* Nhãn số trên hình phải in đúng lối chữ của đề thi: dấu âm là dấu trừ thật
+   (U+2212) chứ không phải gạch nối bàn phím, và phần thập phân dùng dấu phẩy.
+   Trước đây trục ghi "-2" trong khi bảng biến thiên ghi "−∞", nhìn lệch nhau. */
+const nso = n => String(so(n)).replace('-', '\u2212').replace('.', ',');
+const ntxt = t => String(t == null ? '' : t).replace(/-(?=\d|\u221e|\u2192)/g, '\u2212');
 /* Trục tung chia làm 4 vạch, nên đỉnh trục phải chọn sao cho mỗi vạch là một
    con số TRÒN. Trước đây lấy thẳng max×1,15 nên vạch ra 27,03 – 54,05 – 81,07,
    nhìn như lỗi in. */
@@ -45,7 +50,9 @@ TD.hinhDoThi = function (f, cf) {
      đúng như sách: nhãn hoành độ chạy dọc mép dưới, nhãn tung độ dọc mép trái. */
   const kep = (v, min, max) => Math.min(Math.max(v, min), max);
   const yNhan = kep(Y(0) + 13, le + 11, H - 5);
-  const xNhan = kep(X(0) - 6, 15, W - 5);
+  /* Nhãn âm dùng dấu trừ thật (−) rộng hơn gạch nối, "−20" canh phải ở mốc
+     15 là lòi hẳn ra ngoài khung. Chừa đủ chỗ cho nhãn bốn ký tự. */
+  const xNhan = kep(X(0) - 6, 26, W - 5);
   /* Không ghi mọi số nguyên: đồ thị có biên độ lớn (nhiệt độ từ −30 đến 30
      chẳng hạn) sẽ xếp sáu chục nhãn chồng lên nhau thành một vệt đen. Chọn
      bước chia sao cho mỗi trục nhiều nhất mười vạch. */
@@ -62,13 +69,13 @@ TD.hinhDoThi = function (f, cf) {
     if (x === 0) continue;
     luoi += `<line x1="${so(X(x))}" y1="${le}" x2="${so(X(x))}" y2="${H - le}" stroke="${M.phu}" stroke-width="1"/>`;
     if (X(x) > le + 7 && X(x) < W - le - 7)
-      luoi += `<text x="${so(X(x))}" y="${so(yNhan)}" fill="${M.chu}" font-size="10" text-anchor="middle">${so(x)}</text>`;
+      luoi += `<text x="${so(X(x))}" y="${so(yNhan)}" fill="${M.chu}" font-size="10" text-anchor="middle">${nso(x)}</text>`;
   }
   for (let y = Math.ceil(c.yMin / by) * by; y <= c.yMax; y += by) {
     if (y === 0) continue;
     luoi += `<line x1="${le}" y1="${so(Y(y))}" x2="${W - le}" y2="${so(Y(y))}" stroke="${M.phu}" stroke-width="1"/>`;
     if (Y(y) > le + 7 && Y(y) < H - le - 7)
-      luoi += `<text x="${so(xNhan)}" y="${so(Y(y) + 3.5)}" fill="${M.chu}" font-size="10" text-anchor="end">${so(y)}</text>`;
+      luoi += `<text x="${so(xNhan)}" y="${so(Y(y) + 3.5)}" fill="${M.chu}" font-size="10" text-anchor="end">${nso(y)}</text>`;
   }
   /* Trục chỉ vẽ khi nó thật sự nằm trong vùng hiển thị; nếu không thì thay
      bằng khung viền, và không ghi chữ O ở nơi không có gốc toạ độ. */
@@ -76,8 +83,11 @@ TD.hinhDoThi = function (f, cf) {
   const truc = `<rect x="${le}" y="${le}" width="${W - 2 * le}" height="${H - 2 * le}" fill="none" stroke="${M.phu}" stroke-width="1.2"/>`
     + (coX ? `<line x1="${le}" y1="${so(Y(0))}" x2="${W - le + 6}" y2="${so(Y(0))}" stroke="${M.truc}" stroke-width="1.6"/>` : '')
     + (coY ? `<line x1="${so(X(0))}" y1="${le - 6}" x2="${so(X(0))}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>` : '')
-    + `<text x="${W - le + 9}" y="${so(kep(Y(0) - 5, le + 4, H - 4))}" fill="${M.chu}" font-size="11">x</text>`
-    + `<text x="${so(kep(X(0) + 6, 4, W - 12))}" y="${le - 8}" fill="${M.chu}" font-size="11">y</text>`
+    /* Đề thật luôn ghi TÊN ĐẠI LƯỢNG ở đầu trục (V, p, t, T, N…) chứ không
+       ghi trơ "x" với "y". Ghi x/y trong khi đề bảo "trục hoành là thể tích"
+       là bắt học sinh tự dịch, không giống giấy thi. */
+    + `<text x="${W - 3}" y="${so(kep(Y(0) - 5, le + 4, H - 4))}" fill="${M.chu}" font-size="11" text-anchor="end">${c.tenX || 'x'}</text>`
+    + `<text x="${so(kep(X(0) + 6, 4, W - 12))}" y="${le - 8}" fill="${M.chu}" font-size="11">${c.tenY || 'y'}</text>`
     + (coX && coY ? `<text x="${so(xNhan)}" y="${so(yNhan)}" fill="${M.chu}" font-size="10" text-anchor="end">O</text>` : '');
 
   /* Vẽ theo từng đoạn liên tục: gặp tiệm cận đứng thì ngắt nét, không nối bừa */
@@ -107,7 +117,12 @@ TD.hinhDoThi = function (f, cf) {
     + (d.ten ? `<text x="${so(X(d.x) + 7)}" y="${so(Y(d.y) - 6)}" fill="${M.nhan}" font-size="10.5">${d.ten}</text>` : '')).join('');
   const ngang = (c.duongNgang || []).map(y =>
     `<line x1="${le}" y1="${so(Y(y))}" x2="${W - le}" y2="${so(Y(y))}" stroke="${M.tim}" stroke-width="1.4" stroke-dasharray="7 4"/>`).join('');
-  return boc(W, H, luoi + truc + them + ngang + net + diem);
+  /* Đồ thị hàm số y = f(x) không bao giờ vẽ nổi một ĐƯỜNG THẲNG ĐỨNG (mỗi x
+     một giá trị y). Mà đề Lý lại cần đúng thứ đó: quá trình đẳng tích trong
+     hệ (V; p) là đường thẳng đứng. Vẽ riêng bằng danh sách này. */
+  const dung = (c.duongDung || []).map(x =>
+    `<line x1="${so(X(x))}" y1="${le}" x2="${so(X(x))}" y2="${H - le}" stroke="${M.net}" stroke-width="2.2"/>`).join('');
+  return boc(W, H, luoi + truc + them + ngang + dung + net + diem);
 };
 
 /* ============================================================
@@ -127,7 +142,7 @@ TD.hinhBangBienThien = function (moc, nhanHam) {
      + `<text x="8" y="112" fill="${M.chu}" font-size="12.5">${nhanHam || 'y'}</text>`;
 
   moc.forEach((m, i) => {
-    ra += `<text x="${X(i)}" y="25" fill="${M.chu}" font-size="12.5" text-anchor="middle">${m.x}</text>`;
+    ra += `<text x="${X(i)}" y="25" fill="${M.chu}" font-size="12.5" text-anchor="middle">${ntxt(m.x)}</text>`;
     if (i < n - 1) {
       const giua = (X(i) + X(i + 1)) / 2;
       ra += `<text x="${giua}" y="61" fill="${m.dau === '+' ? M.net : M.do}" font-size="14" font-weight="700" text-anchor="middle">${m.dau === '+' ? '+' : '−'}</text>`;
@@ -137,7 +152,7 @@ TD.hinhBangBienThien = function (moc, nhanHam) {
     }
     if (m.mocDung) ra += `<line x1="${X(i)}" y1="42" x2="${X(i)}" y2="${H}" stroke="${M.phu}" stroke-dasharray="3 3"/>`;
     if (m.y !== undefined)
-      ra += `<text x="${X(i)}" y="${m.tren ? 90 : 137}" fill="${M.nhan}" font-size="12.5" text-anchor="middle">${m.y}</text>`;
+      ra += `<text x="${X(i)}" y="${m.tren ? 90 : 137}" fill="${M.nhan}" font-size="12.5" text-anchor="middle">${ntxt(m.y)}</text>`;
     if (m.khong) ra += `<text x="${X(i)}" y="61" fill="${M.chu}" font-size="12.5" text-anchor="middle">0</text>`;
   });
   const dinhNghia = `<defs><marker id="mt" markerWidth="7" markerHeight="7" refX="6" refY="3.2" orient="auto">`
@@ -210,7 +225,10 @@ TD.hinhKetTua = function (aMol, dinh, tenX, tenY) {
   const Y = y => H - le - y / yMax * (H - le - 24);
   let ra = `<line x1="${le}" y1="${H - le}" x2="${W - 12}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
     + `<line x1="${le}" y1="16" x2="${le}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
-    + `<text x="${W - 10}" y="${H - le + 15}" fill="${M.chu}" font-size="10.5" text-anchor="end">${tenX || 'n(OH⁻)'}</text>`
+    /* Tên trục hoành để cùng hàng với nhãn mốc thì nó đè lên "4a" (mốc cuối
+       nằm sát mép phải). Nhấc lên NGAY TRÊN trục, chỗ đó luôn trống vì đồ
+       thị đã về 0 trước đó. */
+    + `<text x="${W - 10}" y="${H - le - 7}" fill="${M.chu}" font-size="10.5" text-anchor="end">${tenX || 'n(OH⁻)'}</text>`
     + `<text x="3" y="12" fill="${M.chu}" font-size="10.5">${tenY || 'n↓'}</text>`;
   /* nhánh lên tới đỉnh (3a) rồi nhánh xuống về 0 (4a) */
   ra += `<polyline points="${so(X(0))},${so(Y(0))} ${so(X(3 * aMol))},${so(Y(aMol))} ${so(X(4 * aMol))},${so(Y(0))}" `
@@ -237,7 +255,7 @@ TD.hinhTamGiac = function (xDinh, xHet, yDinh, ten, dinh) {
   const Y = y => H - le - y / yMax * (H - le - 24);
   let ra = `<line x1="${le}" y1="${H - le}" x2="${W - 12}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
     + `<line x1="${le}" y1="16" x2="${le}" y2="${H - le}" stroke="${M.truc}" stroke-width="1.6"/>`
-    + `<text x="${W - 10}" y="${H - le + 15}" fill="${M.chu}" font-size="10.5" text-anchor="end">${(ten && ten.x) || 'n'}</text>`
+    + `<text x="${W - 10}" y="${H - le - 7}" fill="${M.chu}" font-size="10.5" text-anchor="end">${(ten && ten.x) || 'n'}</text>`
     + `<text x="3" y="12" fill="${M.chu}" font-size="10.5">${(ten && ten.y) || 'n↓'}</text>`
     + `<polyline points="${so(X(0))},${so(Y(0))} ${so(X(xDinh))},${so(Y(yDinh))} ${so(X(xHet))},${so(Y(0))}" fill="none" stroke="${M.net}" stroke-width="2.4"/>`
     + `<line x1="${so(X(xDinh))}" y1="${so(Y(yDinh))}" x2="${so(X(xDinh))}" y2="${so(Y(0))}" stroke="${M.phu}" stroke-dasharray="4 3"/>`
@@ -267,12 +285,12 @@ TD.hinhCot = function (ds, donVi) {
   for (let k = 0; k <= 4; k++) {
     const y = day - k / 4 * (day - dinh), gt = so(max * k / 4);
     ra += `<line x1="${le}" y1="${so(y)}" x2="${W - 8}" y2="${so(y)}" stroke="${M.phu}" stroke-width="1"/>`
-       + `<text x="${le - 5}" y="${so(y + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${String(gt).replace('.', ',')}</text>`;
+       + `<text x="${le - 5}" y="${so(y + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${nso(gt)}</text>`;
   }
   ds.forEach((d, i) => {
     const h = d.v / max * (day - dinh), x = le + i * rong + rong * 0.2;
     ra += `<rect x="${so(x)}" y="${so(day - h)}" width="${so(rong * 0.6)}" height="${so(h)}" fill="${i % 2 ? M.net : M.nhan}" opacity="0.85"/>`
-       + `<text x="${so(x + rong * 0.3)}" y="${so(day - h - 5)}" fill="${M.chu}" font-size="9.5" text-anchor="middle">${String(d.v).replace('.', ',')}</text>`
+       + `<text x="${so(x + rong * 0.3)}" y="${so(day - h - 5)}" fill="${M.chu}" font-size="9.5" text-anchor="middle">${nso(d.v)}</text>`
        + `<text x="${so(x + rong * 0.3)}" y="${day + 14}" fill="${M.chu}" font-size="10" text-anchor="middle">${d.ten}</text>`;
   });
   return boc(W, H, ra);
@@ -294,7 +312,7 @@ TD.hinhTron = function (ds) {
        + `fill="${mau[i % mau.length]}" opacity="0.85" stroke="var(--nen)" stroke-width="1.5"/>`;
     chu += `<rect x="172" y="${22 + i * 32}" width="12" height="12" fill="${mau[i % mau.length]}" opacity="0.85"/>`
         + `<text x="190" y="${32 + i * 32}" fill="${M.chu}" font-size="10.5">${d.ten}</text>`
-        + `<text x="190" y="${45 + i * 32}" fill="${M.nhan}" font-size="10.5" font-weight="700">${String(so(d.v / tong * 100)).replace('.', ',')}%</text>`;
+        + `<text x="190" y="${45 + i * 32}" fill="${M.nhan}" font-size="10.5" font-weight="700">${nso(d.v / tong * 100)}%</text>`;
     goc = het;
   });
   return boc(W, H, ra + chu);
@@ -346,24 +364,42 @@ TD.hinhKhoi = function (kieu, nhan) {
    ============================================================ */
 const MAU_DAY = [M.net, M.nhan, M.tim, 'var(--lam)', M.do];
 
-TD.hinhDuong = function (ds, nhan, donVi) {
+TD.hinhDuong = function (ds, nhan, donVi, cf) {
+  cf = cf || {};
   const W = 340, H = 248, le = 46, day = H - 64, dinh = 30;
-  const max = mocDep(Math.max(...ds.flatMap(d => d.v)));
+  const tatCa = ds.reduce((t, d) => t.concat(d.v), []);
+  const vMax = Math.max(...tatCa), vMin = Math.min(...tatCa);
+  /* Chuỗi bám quanh một mốc cao (CPI quanh 100 điểm chẳng hạn) mà vẽ trục
+     tung từ 0 thì cả đồ thị dẹp thành một vạch ngang, không đọc ra nổi năm
+     nào hơn năm nào. Với những chuỗi đó cắt trục cho bám sát dữ liệu. */
+  let goc = 0, max = mocDep(vMax);
+  if (cf.khongTuGoc) {
+    const bien = (vMax - vMin) || Math.max(1, Math.abs(vMax) * 0.05);
+    const buoc = mocDep(bien * 2.4) / 4;
+    goc = Math.floor((vMin - bien * 0.35) / buoc) * buoc;
+    max = Math.ceil((vMax + bien * 0.35) / buoc) * buoc;
+    if (max <= goc) max = goc + buoc * 4;
+  }
   const X = i => le + i * (W - le - 14) / Math.max(1, nhan.length - 1);
-  const Y = v => day - v / max * (day - dinh);
+  const Y = v => day - (v - goc) / (max - goc) * (day - dinh);
   let ra = `<line x1="${le}" y1="${day}" x2="${W - 8}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
     + `<line x1="${le}" y1="${dinh - 6}" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
     + `<text x="3" y="12" fill="${M.chu}" font-size="10">${donVi || ''}</text>`;
   for (let k = 0; k <= 4; k++) {
     const y = day - k / 4 * (day - dinh);
     ra += `<line x1="${le}" y1="${so(y)}" x2="${W - 8}" y2="${so(y)}" stroke="${M.phu}" stroke-width="1"/>`
-       + `<text x="${le - 5}" y="${so(y + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${String(so(max * k / 4)).replace('.', ',')}</text>`;
+       + `<text x="${le - 5}" y="${so(y + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${nso(goc + (max - goc) * k / 4)}</text>`;
   }
   nhan.forEach((n, i) => { ra += `<text x="${so(X(i))}" y="${day + 15}" fill="${M.chu}" font-size="10" text-anchor="middle">${n}</text>`; });
   ds.forEach((d, k) => {
     const mau = MAU_DAY[k % MAU_DAY.length];
     ra += `<polyline points="${d.v.map((v, i) => so(X(i)) + ',' + so(Y(v))).join(' ')}" fill="none" stroke="${mau}" stroke-width="2.2"/>`;
-    d.v.forEach((v, i) => { ra += `<circle cx="${so(X(i))}" cy="${so(Y(v))}" r="3" fill="${mau}"/>`; });
+    d.v.forEach((v, i) => {
+      ra += `<circle cx="${so(X(i))}" cy="${so(Y(v))}" r="3" fill="${mau}"/>`;
+      /* Câu hỏi bắt tính từ số liệu trên hình thì hình PHẢI ghi số, chứ đọc
+         ước lượng theo vạch chia không ra nổi hai chữ số thập phân. */
+      if (cf.ghiSo) ra += `<text x="${so(X(i))}" y="${so(Y(v) - 8)}" fill="${mau}" font-size="9.5" text-anchor="middle">${nso(v)}</text>`;
+    });
     /* chú giải chuyển xuống chân hình cho khỏi tranh chỗ với tên đơn vị */
     ra += `<rect x="${6 + k * 150}" y="${H - 17}" width="10" height="10" fill="${mau}"/>`
        + `<text x="${20 + k * 150}" y="${H - 8}" fill="${M.chu}" font-size="10">${d.ten}</text>`;
@@ -397,27 +433,52 @@ TD.hinhMien = function (ds, nhan) {
   return boc(W, H, ra);
 };
 
-TD.hinhKetHop = function (cot, duong, nhan, dvCot, dvDuong) {
+TD.hinhKetHop = function (cot, duong, nhan, dvCot, dvDuong, cf) {
+  cf = cf || {};
   const W = 340, H = 236, le = 46, phai = W - 42, day = H - 46, dinh = 34;
-  const maxC = mocDep(Math.max(...cot)), maxD = mocDep(Math.max(...duong));
-  const rong = (phai - le) / nhan.length;
+  /* Biểu đồ kết hợp hai trục: nếu để hai thang tự do thì đường số liệu chui
+     xuống giữa vùng cột, nhãn của nó nằm đè lên thân cột và không đọc nổi.
+     Ép thang của CỘT giãn ra cho tới khi cả đường lẫn nhãn của nó chạy phía
+     trên đỉnh cột — đúng cách trình bày của đề thi. */
+  /* Hai đại lượng CÙNG ĐƠN VỊ (thu và chi cùng tính bằng triệu đồng) thì bắt
+     buộc chung một thang, không thì đường chi tiêu 14 triệu lại vẽ cao hơn
+     cột thu nhập 20 triệu — nhìn ra đúng cái kết luận ngược. */
+  const chung = cf.chungThang ? mocDep(Math.max(Math.max(...cot), Math.max(...duong))) : 0;
+  let maxC = chung || mocDep(Math.max(...cot));
+  const maxD = chung || mocDep(Math.max(...duong));
   const Yc = v => day - v / maxC * (day - dinh);
   const Yd = v => day - v / maxD * (day - dinh);
+  if (!chung) for (let lan = 0; lan < 5; lan++) {
+    const thapNhat = Math.max(...duong.map(Yd)), cayCaoNhat = Math.min(...cot.map(Yc));
+    if (thapNhat + 18 <= cayCaoNhat) break;
+    maxC *= 2;
+  }
+  const rong = (phai - le) / nhan.length;
   let ra = `<line x1="${le}" y1="${day}" x2="${phai}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
     + `<line x1="${le}" y1="${dinh - 8}" x2="${le}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
     + `<line x1="${phai}" y1="${dinh - 8}" x2="${phai}" y2="${day}" stroke="${M.truc}" stroke-width="1.5"/>`
     + `<text x="3" y="12" fill="${M.nhan}" font-size="9.5">${dvCot || ''}</text>`
+    + (chung ? [0, 1, 2, 3, 4].map(k => {
+        const y = day - k / 4 * (day - dinh);
+        return `<line x1="${le}" y1="${so(y)}" x2="${phai}" y2="${so(y)}" stroke="${M.phu}" stroke-width="1"/>`
+          + `<text x="${le - 5}" y="${so(y + 3.5)}" fill="${M.chu}" font-size="9.5" text-anchor="end">${nso(chung * k / 4)}</text>`;
+      }).join('') : '')
     + `<text x="${W - 3}" y="12" fill="${M.net}" font-size="9.5" text-anchor="end">${dvDuong || ''}</text>`;
   cot.forEach((v, i) => {
     const x = le + i * rong + rong * 0.24;
     ra += `<rect x="${so(x)}" y="${so(Yc(v))}" width="${so(rong * 0.52)}" height="${so(day - Yc(v))}" fill="${M.nhan}" opacity="0.8"/>`
+       + `<text x="${so(x + rong * 0.26)}" y="${so(Yc(v) - 6)}" fill="${M.nhan}" font-size="9.5" text-anchor="middle">${nso(v)}</text>`
        + `<text x="${so(x + rong * 0.26)}" y="${day + 15}" fill="${M.chu}" font-size="10" text-anchor="middle">${nhan[i]}</text>`;
   });
   const X = i => le + i * rong + rong * 0.5;
   ra += `<polyline points="${duong.map((v, i) => so(X(i)) + ',' + so(Yd(v))).join(' ')}" fill="none" stroke="${M.net}" stroke-width="2.3"/>`;
   duong.forEach((v, i) => {
+    /* Chung thang thì đường chạy ngay dưới đỉnh cột, nhãn của nó đặt phía
+       trên điểm là đâm thẳng vào nhãn cột. Đẩy sang cạnh, ra ngoài thân cột. */
     ra += `<circle cx="${so(X(i))}" cy="${so(Yd(v))}" r="3.2" fill="${M.net}"/>`
-       + `<text x="${so(X(i))}" y="${so(Yd(v) - 7)}" fill="${M.net}" font-size="9.5" text-anchor="middle">${String(v).replace('.', ',')}</text>`;
+       + (chung
+          ? `<text x="${so(Math.max(X(i) - rong * 0.32, le + 2))}" y="${so(Yd(v) + 3.5)}" fill="${M.net}" font-size="9.5" text-anchor="end">${nso(v)}</text>`
+          : `<text x="${so(X(i))}" y="${so(Yd(v) - 7)}" fill="${M.net}" font-size="9.5" text-anchor="middle">${nso(v)}</text>`);
   });
   return boc(W, H, ra);
 };
@@ -465,7 +526,7 @@ TD.hinhThap = function (bac, donVi) {
     const y = 22 + (bac.length - 1 - i) * 40;
     const r = 14 + b.v / max * (toiDa - 14);
     ra += `<rect x="${so(giua - r)}" y="${y}" width="${so(r * 2)}" height="30" fill="${MAU_DAY[i % MAU_DAY.length]}" opacity="0.82" stroke="var(--nen)" stroke-width="1.5"/>`
-       + `<text x="${so(giua)}" y="${y + 20}" fill="var(--nen)" font-size="10.5" font-weight="700" text-anchor="middle">${String(b.v).replace('.', ',')}</text>`
+       + `<text x="${so(giua)}" y="${y + 20}" fill="var(--nen)" font-size="10.5" font-weight="700" text-anchor="middle">${nso(b.v)}</text>`
        + `<text x="${le - 8}" y="${y + 20}" fill="${M.chu}" font-size="10" text-anchor="end">${b.ten}</text>`;
   });
   ra += `<text x="${W - 6}" y="${H - 6}" fill="${M.chu}" font-size="9.5" text-anchor="end">${donVi || ''}</text>`;
@@ -506,13 +567,15 @@ TD.hinhGianDo = function (hDau, hCuoi, tenDau, tenCuoi) {
    ⑥ MẠCH ĐIỆN NỐI TIẾP / SONG SONG — cho Vật lí
    ============================================================ */
 TD.hinhMach = function (kieu, ds, nguon) {
-  const W = 320, H = kieu === 'nt' ? 130 : 160;
-  const t = 40, d = W - 40, tren = 40, duoi = H - 30;
+  const W = 320, H = kieu === 'nt' ? 132 : 34 + 34 * (ds.length + 1) + 34;
+  const t = 40, d = W - 40, tren = 34, duoi = H - 32;
   const day = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${M.truc}" stroke-width="1.8"/>`;
   const dienTro = (x, y, ten) =>
     `<rect x="${x - 17}" y="${y - 9}" width="34" height="18" fill="var(--nen2)" stroke="${M.net}" stroke-width="1.8"/>`
     + `<text x="${x}" y="${y - 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${ten}</text>`;
-  let ra = `<text x="${(t + d) / 2}" y="20" fill="${M.chu}" font-size="10.5" text-anchor="middle">`
+  /* Nhãn nguồn để ở giữa mép trên thì đè lên tên của điện trở đứng giữa
+     mạch (U = 24 V chồng lên R₂ = 2 Ω). Hạ xuống dưới đáy mạch, chỗ trống. */
+  let ra = `<text x="${(t + d) / 2}" y="${H - 8}" fill="${M.chu}" font-size="10.5" text-anchor="middle">`
     + `${nguon || ''}</text>`;
   /* nguồn điện ở cạnh trái */
   ra += day(t, tren, t, duoi)
@@ -523,11 +586,23 @@ TD.hinhMach = function (kieu, ds, nguon) {
     ra += day(t, tren, d, tren) + day(t, duoi, d, duoi) + day(d, tren, d, duoi);
     ds.forEach((r, i) => { ra += dienTro(t + b * (i + 1), tren, r); });
   } else {
-    ra += day(t, tren, d, tren) + day(t, duoi, d, duoi) + day(d, tren, d, duoi);
+    /* Mạch song song: mỗi nhánh phải nối THẲNG vào hai nút, trước đây nhánh
+       chỉ dài 120 px giữa khung nên hai đầu hở, vẽ ra không thành mạch kín.
+       Tên điện trở cũng phải ghi BÊN PHẢI: các nhánh chỉ cách nhau hơn hai
+       chục pixel, ghi phía trên thì chữ nhánh dưới đè lên hộp nhánh trên. */
+    /* Hai thanh góp là HAI NÚT khác nhau. Nếu nối luôn dây trên chạy suốt từ
+       cực này sang cực kia thì hai đầu mỗi nhánh chung một nút — vẽ ra là
+       mạch chập, mọi điện trở bị nối tắt. */
     const b = (duoi - tren) / (ds.length + 1);
+    const gx = t + 34;
+    const yDau = tren + b, yCuoi = tren + b * ds.length;
+    ra += day(t, tren, gx, tren) + day(gx, tren, gx, yCuoi)
+       + day(t, duoi, d, duoi) + day(d, yDau, d, duoi);
     ds.forEach((r, i) => {
       const y = tren + b * (i + 1);
-      ra += day((t + d) / 2 - 60, y, (t + d) / 2 + 60, y) + dienTro((t + d) / 2, y, r);
+      ra += day(gx, y, d, y)
+         + `<rect x="${gx + 26}" y="${y - 9}" width="34" height="18" fill="var(--nen2)" stroke="${M.net}" stroke-width="1.8"/>`
+         + `<text x="${gx + 43}" y="${y - 14}" fill="${M.nhan}" font-size="10.5" text-anchor="middle">${r}</text>`;
     });
   }
   return boc(W, H, ra);

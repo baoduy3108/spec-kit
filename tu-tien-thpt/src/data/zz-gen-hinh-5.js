@@ -82,10 +82,14 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
   tao(R) {
     const loai = R.chon(['nhiet', 'tich', 'ap']);
     const p1 = R.nguyen(2, 4), V1 = R.nguyen(1, 2), he = p1 * V1;
+    /* Đẳng tích = đường thẳng ĐỨNG tại V = V₁. Trước đây cố nặn nó ra từ
+       hàm f(v) nên chỉ vẽ được một gạch ngang cụt vài pixel — nhìn không ra
+       cái gì, mà đáp án lại bắt nhận diện đúng đường thẳng đứng. */
     const f = loai === 'nhiet' ? (v => he / v)
-            : loai === 'tich' ? (v => (Math.abs(v - V1) < 0.06 ? p1 : NaN))
-            : (v => p1);
-    const hinh = TD.hinhDoThi(f, { xMin: 0.2, xMax: 5, yMin: 0, yMax: 6 });
+            : loai === 'tich' ? (() => NaN)
+            : (() => p1);
+    const hinh = TD.hinhDoThi(f, { xMin: 0.2, xMax: 5, yMin: 0, yMax: 6, tenX: 'V', tenY: 'p',
+      duongDung: loai === 'tich' ? [V1] : [] });
     const ten = { nhiet: 'đẳng nhiệt', tich: 'đẳng tích', ap: 'đẳng áp' };
     const dangHoi = R.chon(['nhiet', 'tich', 'ap']);
     const y = chon4(R, [
@@ -219,14 +223,17 @@ TD.GEN.dia = (TD.GEN.dia || []).concat([
 { ma: 'dia-hinh-cot-ds', chuong: 'Kỹ năng', muc: 2, dang: 'ds',
   tao(R) {
     const nam = [2015, 2018, 2020, 2022];
+    /* Mỗi chỉ tiêu có một khoảng giá trị THẬT của nước ta. Dùng chung một
+       thang 20 – 100 cho tất cả thì ra "62 triệu lượt khách quốc tế", gấp
+       ba lần con số thật, học sinh học Địa nhìn là biết bịa. */
     const doiTuong = R.chon([
-      { ten: 'sản lượng thuỷ sản nuôi trồng', dv: 'nghìn tấn' },
-      { ten: 'sản lượng điện', dv: 'tỉ kWh' },
-      { ten: 'số lượt khách du lịch quốc tế', dv: 'triệu lượt' },
-      { ten: 'giá trị xuất khẩu hàng dệt may', dv: 'tỉ USD' }
+      { ten: 'sản lượng thuỷ sản nuôi trồng', dv: 'nghìn tấn', tu: 3300, den: 4200, buoc: 480 },
+      { ten: 'sản lượng điện', dv: 'tỉ kWh', tu: 160, den: 200, buoc: 26 },
+      { ten: 'số lượt khách du lịch quốc tế', dv: 'triệu lượt', tu: 6, den: 9, buoc: 4 },
+      { ten: 'giá trị xuất khẩu hàng dệt may', dv: 'tỉ USD', tu: 22, den: 28, buoc: 6 }
     ]);
-    const v = [R.nguyen(20, 40)];
-    for (let i = 1; i < 4; i++) v.push(v[i - 1] + R.nguyen(-6, 22));
+    const v = [R.nguyen(doiTuong.tu, doiTuong.den)];
+    for (let i = 1; i < 4; i++) v.push(v[i - 1] + R.nguyen(-Math.round(doiTuong.buoc / 4), doiTuong.buoc));
     /* mọi năm phải khác nhau, nếu không thì ý "năm nào lớn nhất" mất nghĩa */
     if (v.some(x => x <= 0) || new Set(v).size < v.length) return null;
     const ds = nam.map((n, i) => ({ ten: String(n), v: v[i] }));

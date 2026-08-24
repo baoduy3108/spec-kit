@@ -2,6 +2,9 @@
    LỊCH SỬ – ĐỊA LÍ – GDKT&PL – TIẾNG ANH : NGÂN HÀNG CÂU HỎI
    (Ngữ văn thi tự luận nên dùng thẻ kỹ năng, không có trắc nghiệm)
    ============================================================ */
+/* Từ 2025 đề Tiếng Anh đã BỎ dạng ngữ âm và trọng âm, nên hai câu viết tay
+   thuộc hai dạng đó đã được gỡ khỏi kho — giữ lại là bắt học sinh ôn thứ
+   không thi, trái với chính thẻ Cấm Thư trong app. */
 window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
 
 /* ==================== LỊCH SỬ ==================== */
@@ -188,12 +191,6 @@ TD.KHO.anh = [
   giai: 'Dấu hiệu "since + mốc thời gian" báo hiệu thì hiện tại hoàn thành (present perfect): have/has + V3. Chủ ngữ "She" ⇒ has lived.',
   meo: 'since + mốc thời gian (2018, Monday); for + khoảng thời gian (3 years). Cả hai đều dùng hiện tại hoàn thành.' },
 
-{ chuong: 'Pronunciation', dang: 'mc', muc: 1,
-  q: 'Mark the letter to indicate the word whose underlined part is pronounced differently: work<u>ed</u>, want<u>ed</u>, wash<u>ed</u>, watch<u>ed</u>.',
-  opts: ['worked', 'wanted', 'washed', 'watched'], ans: 1,
-  giai: 'Đuôi -ed đọc là /ɪd/ khi động từ gốc kết thúc bằng /t/ hoặc /d/. "want" kết thúc bằng /t/ ⇒ wanted /ˈwɒntɪd/. Ba từ còn lại kết thúc bằng âm vô thanh /k/, /ʃ/, /tʃ/ ⇒ đều đọc /t/.',
-  meo: 'Chỉ /t/ và /d/ ở cuối mới cho đuôi /ɪd/. Nhớ câu thần chú: "want – need – decide" đều /ɪd/.' },
-
 { chuong: 'Word form', dang: 'mc', muc: 2,
   q: 'Mark the letter to indicate the correct answer: "He always drives ______, so he has never had an accident."',
   opts: ['care', 'careful', 'carefully', 'careless'], ans: 2,
@@ -227,12 +224,6 @@ TD.KHO.anh = [
   opts: ['which', 'whom', 'who', 'whose'], ans: 2,
   giai: 'Từ được thay thế là "the woman" (người) và đóng vai trò CHỦ NGỮ của mệnh đề quan hệ (helped me) ⇒ dùng "who". "whom" chỉ dùng khi làm tân ngữ; "which" dùng cho vật; "whose" chỉ sở hữu.',
   meo: 'Sau đại từ quan hệ mà là ĐỘNG TỪ ngay ⇒ nó làm chủ ngữ ⇒ who/which/that. Nếu sau đó là chủ ngữ mới ⇒ nó làm tân ngữ ⇒ whom/which.' },
-
-{ chuong: 'Stress', dang: 'mc', muc: 2,
-  q: 'Mark the letter to indicate the word that differs in the position of primary stress: economic, scientific, comfortable, academic.',
-  opts: ['economic', 'scientific', 'comfortable', 'academic'], ans: 2,
-  giai: 'Các từ có đuôi -ic đều nhấn vào âm tiết NGAY TRƯỚC đuôi: eco-NO-mic, scien-TI-fic, aca-DE-mic (âm tiết thứ 3). Riêng "comfortable" nhấn âm tiết ĐẦU: COM-fortable (đuôi -able không ảnh hưởng trọng âm).',
-  meo: 'Đuôi kéo trọng âm về phía trước: -ic, -tion, -sion, -ial, -ian. Đuôi trung tính: -ment, -ness, -ful, -less, -able, -ly.' },
 
 { chuong: 'Reading strategy', dang: 'ds', muc: 3,
   q: 'Về chiến thuật làm phần Đọc hiểu và Sắp xếp trong đề Tiếng Anh, xét các nhận định sau:',

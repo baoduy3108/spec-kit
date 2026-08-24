@@ -128,7 +128,7 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
     const f = x => x <= t1 ? -20 + (nc + 20) * x / t1
                  : x <= t2 ? nc
                  : nc + (cuoi - nc) * (x - t2) / (t3 - t2);
-    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: t3 + 1, yMin: -25, yMax: cuoi + 10, rong: 330, cao: 240 });
+    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: t3 + 1, yMin: -25, yMax: cuoi + 10, rong: 330, cao: 240, tenX: 't', tenY: 'T (°C)' });
     return MC(R, `Đồ thị sau biểu diễn nhiệt độ của một khối nước đá theo thời gian khi được đun nóng liên tục (trục hoành là thời gian, trục tung là nhiệt độ tính bằng °C).${hinh}Đoạn nằm ngang trên đồ thị ứng với quá trình nào?`,
       { d: 'Nước đá đang nóng chảy, nhiệt độ không đổi dù vẫn nhận nhiệt',
         s: ['Nước đang sôi và hoá hơi hoàn toàn', 'Khối nước đá ngừng nhận nhiệt từ bên ngoài',
@@ -150,7 +150,7 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
     const V1 = R.nguyen(1, 4), V2 = V1 + R.nguyen(1, 5);   /* lít */
     const A = T(p * (V2 - V1) / 1000, 2);            /* J */
     const f = () => p / 20000;
-    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: V2 + 2, yMin: 0, yMax: 7, rong: 320, cao: 220,
+    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: V2 + 2, yMin: 0, yMax: 7, rong: 320, cao: 220, tenX: 'V', tenY: 'p',
       diem: [{ x: V1, y: p / 20000, ten: '1' }, { x: V2, y: p / 20000, ten: '2' }] });
     return {
       q: `Một lượng khí lí tưởng giãn nở đẳng áp từ trạng thái 1 sang trạng thái 2 theo đồ thị sau `
@@ -179,7 +179,7 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
     const t = T2 * soT;
     const conLai = N0 / Math.pow(2, soT);
     const f = x => N0 * Math.pow(0.5, x / T2) / (N0 / 4);   /* thu nhỏ cho vừa khung */
-    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: T2 * 4.4, yMin: 0, yMax: 4.6, rong: 330, cao: 235,
+    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: T2 * 4.4, yMin: 0, yMax: 4.6, rong: 330, cao: 235, tenX: 't', tenY: 'N',
       diem: [{ x: T2, y: 2, ten: '' }, { x: 2 * T2, y: 1, ten: '' }] });
     return {
       q: `Đồ thị sau biểu diễn số hạt nhân còn lại N của một mẫu chất phóng xạ theo thời gian t (ngày). `
@@ -280,7 +280,7 @@ TD.GEN.sinh = (TD.GEN.sinh || []).concat([
     const chuS = R() < 0.5;
     const K = R.nguyen(3, 5);
     const f = chuS ? (x => K / (1 + 12 * Math.exp(-1.1 * x))) : (x => 0.12 * Math.exp(0.62 * x));
-    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: 6, yMin: 0, yMax: K + 1.4, rong: 330, cao: 235,
+    const hinh = TD.hinhDoThi(f, { xMin: 0, xMax: 6, yMin: 0, yMax: K + 1.4, rong: 330, cao: 235, tenX: 't', tenY: 'N',
       duongNgang: chuS ? [K] : [] });
     return MC(R, `Đồ thị sau biểu diễn sự tăng trưởng số lượng cá thể của một quần thể theo thời gian.${hinh}Đồ thị trên mô tả kiểu tăng trưởng nào?`,
       { d: chuS ? 'Tăng trưởng theo đường cong chữ S, trong điều kiện môi trường bị giới hạn'
@@ -503,7 +503,7 @@ TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
     const nam = ['2021', '2022', '2023', '2024'];
     const cpi = [100];
     for (let i = 1; i < 4; i++) cpi.push(T(cpi[i - 1] * (1 + R.nguyen(15, 55) / 1000), 1));
-    const hinh = TD.hinhDuong([{ ten: 'Chỉ số giá tiêu dùng (CPI)', v: cpi }], nam, 'điểm');
+    const hinh = TD.hinhDuong([{ ten: 'Chỉ số giá tiêu dùng (CPI)', v: cpi }], nam, 'điểm', { khongTuGoc: true, ghiSo: true });
     const k = R.nguyen(1, 3);
     const lp = T((cpi[k] - cpi[k - 1]) / cpi[k - 1] * 100, 2);
     return {
@@ -537,9 +537,9 @@ TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
     const hinh = TD.hinhTron(ds);
     const max = ds.slice().sort((a, b) => b.v - a.v)[0];
     if (ds.filter(x => x.v === max.v).length > 1) return null;
-    return MC(R, `Biểu đồ sau thể hiện cơ cấu chi tiêu hằng tháng của một gia đình.${hinh}Khoản nào chiếm tỉ trọng lớn nhất trong tổng chi tiêu?`,
+    return MC(R, `Biểu đồ sau thể hiện cơ cấu sử dụng thu nhập hằng tháng của một gia đình.${hinh}Khoản nào chiếm tỉ trọng lớn nhất?`,
       { d: max.ten, s: baNhieu(max.ten, ds.map(x => x.ten).concat(['Vay nợ'])) || [],
-        v: `Đọc số phần trăm trong phần chú giải bên phải: ${ds.map(x => x.ten + ' ' + x.v + '%').join(', ')}.
+        v: `Tiết kiệm KHÔNG phải một khoản chi tiêu, nên biểu đồ này là cơ cấu SỬ DỤNG THU NHẬP chứ không phải cơ cấu chi tiêu.\nĐọc số phần trăm trong phần chú giải bên phải: ${ds.map(x => x.ten + ' ' + x.v + '%').join(', ')}.
 `
           + `Lớn nhất là ${max.ten} với ${max.v}%.` },
       'Nguyên tắc lập kế hoạch thu chi: khoản TIẾT KIỆM phải được trích ra NGAY khi có thu nhập, '
@@ -551,7 +551,7 @@ TD.GEN.gdkt = (TD.GEN.gdkt || []).concat([
     const thang = ['T1', 'T2', 'T3', 'T4'];
     const thu = thang.map(() => R.nguyen(14, 26));
     const chi = thu.map(x => T(x * R.nguyen(62, 88) / 100, 1));
-    const hinh = TD.hinhKetHop(thu, chi, thang, 'triệu · thu', 'triệu · chi');
+    const hinh = TD.hinhKetHop(thu, chi, thang, 'triệu đồng', '', { chungThang: true });
     const tongThu = T(thu.reduce((a, b) => a + b, 0), 1);
     const tongChi = T(chi.reduce((a, b) => a + b, 0), 1);
     const ty = T((tongThu - tongChi) / tongThu * 100, 2);
