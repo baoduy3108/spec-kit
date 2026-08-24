@@ -228,37 +228,60 @@ TD.hinhTuTruong = function (kieu) {
    ⑭ BỘ DỤNG CỤ THÍ NGHIỆM — điều chế và thu khí
    ============================================================ */
 TD.hinhThiNghiem = function (cach, tenKhi) {
-  const W = 330, H = 220;
+  /* Cao thêm một quãng để hai dòng chú thích (nhãn bình cầu và nhãn cách thu
+     khí) nằm ở HAI dòng riêng — để chung một dòng thì chúng đè lên nhau. */
+  const W = 330, H = 244;
   let ra = `<defs>${mui('mttn', M.net)}</defs>`;
   /* bình cầu có nhánh + đèn cồn */
   ra += `<path d="M 46 96 L 46 62 L 78 62 L 78 96 A 30 30 0 1 1 46 96 Z" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
      + `<path d="M 34 116 A 28 28 0 0 0 90 116 L 90 112 L 34 112 Z" fill="${M.lam}" opacity="0.5"/>`
-     + `<text x="92" y="208" fill="${M.chu}" font-size="10" text-anchor="middle">đun nóng hỗn hợp phản ứng</text>`
+     + `<text x="92" y="${H - 26}" fill="${M.chu}" font-size="10" text-anchor="middle">đun nóng hỗn hợp phản ứng</text>`
      + `<path d="M 52 176 q 10 -16 20 0 z" fill="${M.nhan}" opacity="0.9"/>`
      + `<rect x="50" y="176" width="24" height="14" fill="none" stroke="${M.truc}" stroke-width="1.5"/>`;
   /* ống dẫn khí */
   ra += `<path d="M 78 72 L 150 72" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`;
   if (cach === 'daynuoc') {
-    ra += `<rect x="160" y="96" width="130" height="76" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
-       + `<rect x="161" y="106" width="128" height="65" fill="${M.lam}" opacity="0.45"/>`
-       + `<path d="M 150 72 L 150 150 L 196 150" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
-       + `<path d="M 196 150 L 196 108" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
-       + `<rect x="184" y="60" width="34" height="60" rx="4" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
-       + `<rect x="185" y="61" width="32" height="28" fill="${M.net}" opacity="0.35"/>`
-       + `<text x="201" y="52" fill="${M.net}" font-size="10.5" text-anchor="middle">${tenKhi || 'khí'}</text>`
-       + `<text x="225" y="208" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy nước</text>`;
+    /* Cách thu này chỉ đúng khi ống nghiệm ÚP NGƯỢC, miệng chìm hẳn dưới mặt
+       nước, và đầu ống dẫn luồn từ dưới lên vào miệng ống. Bản cũ vẽ ống
+       nghiệm bo tròn cả bốn góc, nằm chồng lên mép chậu và hở miệng ra ngoài
+       nước — khí thoát hết ra ngoài chứ không đẩy được nước xuống. */
+    const cx = 236, mn = 116, dayChau = 194;  /* trục ống nghiệm · mặt nước · đáy chậu */
+    const dayOng = 44, mieng = 180;           /* đáy ống ở trên, miệng ngập sâu dưới nước */
+    const rOng = 19, mucKhi = 112;            /* khí chiếm phần trên tới đây */
+    ra += `<rect x="172" y="${mn}" width="132" height="${dayChau - mn}" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+       + `<rect x="173" y="${mn + 1}" width="130" height="${dayChau - mn - 2}" fill="${M.lam}" opacity="0.42"/>`
+       /* ống nghiệm úp ngược: đáy tròn ở TRÊN, miệng hở ở DƯỚI */
+       + `<path d="M ${cx - rOng} ${mieng} L ${cx - rOng} ${dayOng + rOng} `
+       + `A ${rOng} ${rOng} 0 0 1 ${cx + rOng} ${dayOng + rOng} L ${cx + rOng} ${mieng}" `
+       + `fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+       /* nước còn lại trong ống, phía dưới cột khí */
+       + `<rect x="${cx - rOng + 1}" y="${mucKhi}" width="${rOng * 2 - 2}" height="${mieng - mucKhi}" fill="${M.lam}" opacity="0.42"/>`
+       /* cột khí đã thu được, phía trên */
+       + `<path d="M ${cx - rOng + 1} ${mucKhi} L ${cx - rOng + 1} ${dayOng + rOng} `
+       + `A ${rOng - 1} ${rOng - 1} 0 0 1 ${cx + rOng - 1} ${dayOng + rOng} L ${cx + rOng - 1} ${mucKhi} Z" `
+       + `fill="${M.net}" opacity="0.32"/>`
+       /* ống dẫn khí: từ bình cầu chạy ngang, vòng xuống đáy chậu rồi ngoi lên
+          đúng miệng ống nghiệm */
+       + `<path d="M 150 72 L 150 ${dayChau - 8} L ${cx} ${dayChau - 8} L ${cx} ${mieng - 10}" `
+       + `fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+       /* vài bọt khí đang sủi lên trong ống — dấu hiệu khí đang được thu */
+       + `<circle cx="${cx}" cy="${mieng - 16}" r="2.6" fill="${M.net}" opacity="0.75"/>`
+       + `<circle cx="${cx - 5}" cy="${mieng - 27}" r="2" fill="${M.net}" opacity="0.6"/>`
+       + `<circle cx="${cx + 4}" cy="${mieng - 38}" r="2.3" fill="${M.net}" opacity="0.6"/>`
+       + `<text x="${cx}" y="${dayOng - 6}" fill="${M.net}" font-size="10.5" text-anchor="middle">${tenKhi || 'khí'}</text>`
+       + `<text x="${W / 2}" y="${H - 6}" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy nước</text>`;
   } else {
     const nguoc = cach === 'nguoc';
     ra += `<path d="M 150 72 L 218 72 L 218 ${nguoc ? 96 : 130}" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`;
     if (nguoc)
       ra += `<path d="M 194 84 L 194 148 A 24 24 0 0 0 242 148 L 242 84 Z" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
          + `<path d="M 195 100 L 195 148 A 23 23 0 0 0 241 148 L 241 100 Z" fill="${M.net}" opacity="0.3"/>`
-         + `<text x="218" y="208" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy không khí</text>`
+         + `<text x="218" y="${H - 6}" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy không khí</text>`
          + `<text x="250" y="112" fill="${M.chu}" font-size="10">(úp ngược bình)</text>`;
     else
       ra += `<path d="M 194 96 L 194 160 A 24 24 0 0 0 242 160 L 242 96 Z" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
          + `<path d="M 195 128 L 195 160 A 23 23 0 0 0 241 160 L 241 128 Z" fill="${M.net}" opacity="0.3"/>`
-         + `<text x="218" y="208" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy không khí</text>`
+         + `<text x="218" y="${H - 6}" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy không khí</text>`
          + `<text x="250" y="112" fill="${M.chu}" font-size="10">(đặt đứng bình)</text>`;
   }
   return boc(W, H, ra);

@@ -620,6 +620,132 @@ TD.diemSatThe = function (tk, van) {
   return d;
 };
 
+/* ------------------------------------------------------------
+   CÂU HỎI LẤY THẲNG TỪ BẢNG TRONG THẺ
+   Người học kêu đúng: bấm "Kiểm tra ngay" ở thẻ "Chất lưỡng tính" mà bị hỏi cả
+   chương Nhôm. Lý do là thẻ chỉ có 2–3 mệnh đề sát nó nên không dựng nổi lượt
+   riêng. Nhưng gần như thẻ nào cũng có một bảng hai cột "nhãn — nội dung"; đó
+   chính là phần kiến thức trọng điểm của thẻ. Bóc bảng đó ra là có ngay câu hỏi
+   KHÔNG BỊA một chữ nào, vì đáp án lấy nguyên văn từ thẻ vừa đọc.
+   ------------------------------------------------------------ */
+TD._boNhoBang = (typeof WeakMap === 'function') ? new WeakMap() : null;
+TD.bangCuaThe = function (the) {
+  /* mỗi lần mở thẻ là quét bảng của cả trăm thẻ cùng môn để lấy phương án nhiễu,
+     nhớ lại kết quả cho khỏi bóc đi bóc lại một nội dung không đổi */
+  if (TD._boNhoBang && the && typeof the === 'object' && TD._boNhoBang.has(the))
+    return TD._boNhoBang.get(the);
+  const than = String((the && (the.dap || the.ct)) || '');
+  const ra = [];
+  (than.match(/<table[\s\S]*?<\/table>/g) || []).forEach(b => {
+    (b.match(/<tr[\s\S]*?<\/tr>/g) || []).forEach(tr => {
+      /* chỉ nhận dòng ĐÚNG HAI ô <td>; dòng tiêu đề <th> và bảng ba cột bỏ qua
+         cho chắc, thà ít câu còn hơn ghép nhãn với nội dung sai cột */
+      if (/<th[\s>]/.test(tr)) return;
+      const o = tr.match(/<td[^>]*>[\s\S]*?<\/td>/g) || [];
+      if (o.length !== 2) return;
+      const boThe = t => t.replace(/<td[^>]*>|<\/td>/g, '').replace(/<\/?(b|i|em|strong|u)>/g, '').trim();
+      const nhan = boThe(o[0]).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const noi = boThe(o[1]);
+      const tran = noi.replace(/<[^>]+>/g, '').trim();
+      if (!nhan || nhan.length > 44 || tran.length < 3 || tran.length > 150) return;
+      /* nhãn nằm sẵn trong nội dung thì hỏi cũng bằng thừa */
+      if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
+      ra.push({ nhan: nhan, noi: noi, tran: tran });
+    });
+  });
+  /* trùng nội dung thì giữ dòng đầu, tránh hai phương án y hệt nhau */
+  const da = {};
+  const loc = ra.filter(d => {
+    const k = TD.khongDau(d.tran);
+    if (da[k]) return false; da[k] = 1; return true;
+  });
+  if (TD._boNhoBang && the && typeof the === 'object') TD._boNhoBang.set(the, loc);
+  return loc;
+};
+
+/* Gom bảng của các thẻ CÙNG chuyên đề để có đủ phương án nhiễu khi bảng của
+   chính thẻ chưa đủ bốn dòng. */
+TD.bangCungChuDe = function (mon, the, cd) {
+  /* thẻ Tàng Kinh Các nằm ở các kho riêng (hoa_kq, hoa_ct, hoa_cam …) chứ không
+     nằm trong kho câu hỏi TD.KHO[mon] */
+  const ten = String((the && (the.chu_de || the.ten)) || '');
+  const ra = [];
+  ((TD.NGUON_LT || {})[mon] || []).forEach(([khoa]) => {
+    (TD.KHO[khoa] || []).forEach(z => {
+      if (String(z.chu_de || z.ten || '') === ten) return;
+      if (cd && (z.cd || '') !== cd) return;
+      TD.bangCuaThe(z).forEach(d => ra.push(d));
+    });
+  });
+  return ra;
+};
+
+/* Dựng sẵn các câu hỏi của riêng thẻ. Hai chiều hỏi:
+   ① cho NHÃN, chọn nội dung   ② cho NỘI DUNG, chọn nhãn  */
+TD.cauBangThe = function (mon, the, cd, seed) {
+  const dong = TD.bangCuaThe(the);
+  if (dong.length < 2) return [];
+  const ten = String((the && (the.chu_de || the.ten)) || '').replace(/^\d+[.\s-]*/, '').trim();
+  const ngoai = TD.bangCungChuDe(mon, the, cd);
+  /* chuyên đề hẹp quá thì cả môn chỉ có vài dòng cùng loại — mượn thêm cả môn,
+     phương án nhiễu lệch chuyên đề vẫn là phương án sai, còn hơn không dựng nổi câu */
+  const xa = TD.bangCungChuDe(mon, the, null);
+  const R = TD.rng(seed || ((Math.random() * 4294967295) >>> 0));
+  const ra = [];
+  /* Hai phương án chỉ được phép là hai câu trả lời KHÁC HẲN nhau. "Cu, Ag" và
+     "Cu, Ag (mọi KL sau H)" mà đứng chung một câu là đánh đố vô lý — người học
+     chọn cái nào cũng đúng. Vì vậy so bộ từ: bao nhau hoặc giống quá nửa thì bỏ. */
+  const tach = t => TD.khongDau(String(t).replace(/<[^>]+>/g, ' '))
+    .replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
+  const dungDo = (a, b) => {
+    const x = tach(a), y = tach(b);
+    if (!x.length || !y.length) return true;
+    const A = new Set(x), B = new Set(y);
+    let chung = 0; A.forEach(w => { if (B.has(w)) chung++; });
+    const nho = Math.min(A.size, B.size);
+    if (chung === nho) return true;                        /* bộ này nằm gọn trong bộ kia */
+    return chung / (A.size + B.size - chung) >= 0.5;       /* giống quá nửa */
+  };
+  const nhieu = (kho, dung, lay, can) => {
+    const ds = [];
+    kho.forEach(nhom => TD.xaoR(R, nhom.slice()).forEach(d => {
+      if (ds.length >= can) return;
+      const v = lay(d);
+      if (dungDo(v, lay(dung))) return;
+      if (ds.some(z => dungDo(v, z))) return;
+      ds.push(v);
+    }));
+    return ds;
+  };
+  dong.forEach(d => {
+    /* nhiễu lấy từ CHÍNH bảng này trước — cùng một bảng nên bốn phương án mới
+       cùng hệ quy chiếu, đủ khó; cạn rồi mới mượn thẻ khác cùng chuyên đề */
+    const kho = [dong.filter(z => z !== d), ngoai, xa];
+
+    /* ① nhãn → nội dung */
+    const s1 = nhieu(kho, d, z => z.noi, 3);
+    if (s1.length === 3) {
+      const opts = TD.xaoR(R, [d.noi].concat(s1));
+      ra.push({ q: `Theo bảng trong thẻ <b>«${ten}»</b>, mục <b>${d.nhan}</b> ứng với nội dung nào sau đây?`,
+        opts: opts, ans: opts.indexOf(d.noi), muc: 1, dang: 'mc',
+        giai: `Bảng trong thẻ «${ten}» ghi rõ:\n${d.nhan} → ${d.tran}\n`
+          + `Đây là phần kiến thức trọng điểm của chính thẻ bạn vừa đọc, thuộc đúng nguyên văn là ăn điểm.`,
+        meo: the.meo || the.dc || '' });
+    }
+
+    /* ② nội dung → nhãn */
+    const s2 = nhieu(kho, d, z => z.nhan, 3);
+    if (s2.length === 3) {
+      const opts = TD.xaoR(R, [d.nhan].concat(s2));
+      ra.push({ q: `Nội dung sau thuộc mục nào trong thẻ <b>«${ten}»</b>?<br><b>${d.noi}</b>`,
+        opts: opts, ans: opts.indexOf(d.nhan), muc: 2, dang: 'mc',
+        giai: `Bảng trong thẻ «${ten}» xếp ${d.tran} vào mục <b>${d.nhan}</b>.`,
+        meo: the.dc || the.meo || '' });
+    }
+  });
+  return TD.xaoR(R, ra);
+};
+
 /* Trả về phạm vi kiểm tra của một thẻ, KHÔNG dựng câu — dùng để đặt tên nút. */
 TD.phamViThe = function (mon, the) {
   const cd = TD.chuDeCuaThe(mon, the);
@@ -627,7 +753,13 @@ TD.phamViThe = function (mon, the) {
   const ten = String((the && (the.chu_de || the.ten)) || '').replace(/^\d+[.\s-]*/, '').trim();
   const chiSo = [];
   kho.forEach((z, i) => { if (cd && (z.cd || '') === cd) chiSo.push(i); });
-  if (!cd || chiSo.length < 4) return { cd: cd, ten: ten, nong: [], rieng: false };
+  /* Bảng trong thân thẻ là nguồn câu sát thẻ nhất và KHÔNG phụ thuộc kho mệnh
+     đề — phải bóc trước, vì rất nhiều thẻ (công thức, Cấm Thư) không ghép được
+     chuyên đề nào nhưng vẫn có bảng để hỏi. */
+  const bangT = TD.bangCuaThe(the);
+  if (!cd || chiSo.length < 4)
+    return { cd: cd, ten: ten, nong: [], mau: [], bang: bangT,
+             rieng: !!ten && ten !== cd && bangT.length >= 2 };
   const tk = TD.tuKhoaThe(the);
   const nong = chiSo.filter(i => TD.diemSatThe(tk, (kho[i].t || '') + ' ' + (kho[i].v || '')) >= TD.NGUONG_SAT_THE);
   /* Bộ sinh đề khai thẳng tên thẻ ở trường chuong thì chắc chắn là của thẻ đó */
@@ -639,66 +771,45 @@ TD.phamViThe = function (mon, the) {
   /* Ngưỡng 6 mệnh đề (hoặc 2 bộ sinh riêng) mới đủ dựng trọn phần đầu lượt kiểm
      tra bằng câu của chính thẻ. Ít hơn thế mà vẫn ghi tên thẻ lên nút thì chỉ
      vài câu đầu là đúng, phần sau lạc sang chuyên đề — đúng cái người học kêu. */
-  return { cd: cd, ten: ten, nong: nong, mau: mau,
-           rieng: !!ten && ten !== cd && (nong.length >= 6 || mau.length >= 2) };
+  return { cd: cd, ten: ten, nong: nong, mau: mau, bang: bangT,
+           rieng: !!ten && ten !== cd && (nong.length >= 3 || mau.length >= 1 || bangT.length >= 2) };
 };
 
-/* Bộ câu hỏi cho ĐÚNG thẻ vừa đọc: phần sát thẻ xếp trước, hết mới nới ra. */
-TD.deTheNay = function (mon, the, soCau) {
-  const n = soCau || TD.SO_CAU_KIEM_TRA;
+/* Lượt kiểm tra CHỈ gồm kiến thức của chính thẻ này, tuyệt đối không nới ra cả
+   chuyên đề. Số câu vì thế do thẻ quyết định chứ không phải con số 50 cố định —
+   thà hỏi 12 câu đúng cái vừa đọc còn hơn 50 câu lạc sang chương khác. */
+TD.deRiengThe = function (mon, the) {
   const pv = TD.phamViThe(mon, the);
   const kho = TD.KHO_LT[mon] || [];
   const ds = [];
-  if (pv.rieng) {
-    const nong = pv.nong;
-    /* ① bài tập của CHÍNH thẻ này trước — đây mới là thứ người học vừa đọc */
-    if (pv.mau.length) {
-      const can = Math.min(Math.round(n * 0.4), pv.mau.length * 6);
-      let vt = 0, quay = TD.xao(pv.mau.slice());
-      for (let k = 0, thu = 0; k < can && thu < can * 8; thu++) {
-        if (vt >= quay.length) { quay = TD.xao(pv.mau.slice()); vt = 0; }
-        const t = quay[vt++], seed = (Math.random() * 4294967295) >>> 0;
-        if (TD.sinhCau(t, seed)) { ds.push({ mon: mon, g: t.ma, s: seed }); k++; }
-      }
+  /* ① câu bóc thẳng từ bảng trong thẻ */
+  TD.cauBangThe(mon, the, pv.cd, (Math.random() * 4294967295) >>> 0).forEach((c, k) =>
+    ds.push({ mon: mon, cau: c, khoaTu: pv.ten + '/' + k }));
+  /* ② bộ sinh bài tập mang đúng tên thẻ — mỗi bộ góp ĐÚNG 3 câu, bốc lại nếu
+     một hạt giống nào đó dựng hỏng, để số câu trên nút không bao giờ lệch với
+     số câu thật của lượt kiểm tra */
+  (pv.mau || []).forEach(t => {
+    for (let k = 0, thu = 0; k < 3 && thu < 24; thu++) {
+      const seed = (Math.random() * 4294967295) >>> 0;
+      if (TD.sinhCau(t, seed)) { ds.push({ mon: mon, g: t.ma, s: seed }); k++; }
     }
-    /* ② mệnh đề sát thẻ, hỏi thẳng tên thẻ */
-    TD.xao(nong.slice()).slice(0, Math.max(0, n - ds.length)).forEach(i => ds.push({
-      mon: mon, lt: i, c: kho[i].a ? 'd' : 's',
-      s: (Math.random() * 4294967295) >>> 0, nhan: pv.ten, loc: nong
-    }));
-    /* thêm vài câu đúng/sai 4 ý gom từ chính nhóm mệnh đề sát thẻ */
-    /* ③ vài câu đúng/sai 4 ý gom từ chính nhóm mệnh đề sát thẻ */
-    const da = {}; let thu = 0;
-    const tran = Math.min(n, Math.max(ds.length + 6, 14));
-    while (ds.length < tran && thu++ < 240) {
-      const bo = TD.xao(nong.slice()).slice(0, 4).sort((a, b) => a - b), k = bo.join('-');
+  });
+  /* ③ mệnh đề đúng/sai sát thẻ */
+  (pv.nong || []).forEach(i => ds.push({
+    mon: mon, lt: i, c: kho[i].a ? 'd' : 's',
+    s: (Math.random() * 4294967295) >>> 0, nhan: pv.ten, loc: pv.nong
+  }));
+  /* ④ vài câu đúng/sai bốn ý gom từ chính nhóm mệnh đề sát thẻ */
+  if ((pv.nong || []).length >= 4) {
+    const da = {};
+    for (let thu = 0; thu < 60 && Object.keys(da).length < 3; thu++) {
+      const bo = TD.xao(pv.nong.slice()).slice(0, 4).sort((a, b) => a - b), k = bo.join('-');
       if (da[k]) continue;
       da[k] = 1;
       ds.push({ mon: mon, dsy: bo, cd: pv.cd, nhan: pv.ten, s: (Math.random() * 4294967295) >>> 0 });
     }
   }
-  /* ③b Thẻ chưa đủ 6 mệnh đề riêng thì nút vẫn ghi tên chuyên đề cho thật thà,
-     nhưng mấy mệnh đề sát thẻ vẫn được xếp LÊN ĐẦU — hỏi cái vừa đọc trước
-     bao giờ cũng hơn bốc ngẫu nhiên cả rổ. */
-  if (!pv.rieng && pv.nong.length >= 2) {
-    TD.xao(pv.nong.slice()).slice(0, Math.min(pv.nong.length, n)).forEach(i => ds.push({
-      mon: mon, lt: i, c: kho[i].a ? 'd' : 's', s: (Math.random() * 4294967295) >>> 0
-    }));
-  }
-
-  /* ④ hết phần sát thẻ thì nới ra cả chuyên đề. Phải bốc DƯ rồi mới lọc trùng,
-     nếu không thì mỗi câu bị loại là hụt một câu của lượt kiểm tra. */
-  for (let vong = 0; vong < 3 && ds.length < n; vong++) {
-    const daCo = {};
-    ds.forEach(x => { if (x.lt !== undefined) daCo[x.lt] = 1; });
-    TD.deChuyenDe(mon, pv.cd, n).forEach(x => {
-      if (ds.length >= n) return;
-      if (x.lt !== undefined && daCo[x.lt]) return;
-      if (x.lt !== undefined) daCo[x.lt] = 1;
-      ds.push(x);
-    });
-  }
-  return { ds: ds.slice(0, n), nhan: pv.rieng ? pv.ten : pv.cd, sat: pv.rieng ? pv.nong.length : 0, cd: pv.cd };
+  return { ds: TD.xao(ds), ten: pv.ten, cd: pv.cd };
 };
 
 TD.timMau = function (mon, ma) {

@@ -1229,11 +1229,31 @@ TD.moThe = function (khoa, i) {
     /* Nút ghi đúng cái sẽ được hỏi: tên THẺ khi đủ mệnh đề sát thẻ, tên
        CHUYÊN ĐỀ khi phải hỏi rộng ra, và nói thẳng là tổng hợp khi không ghép
        được chuyên đề nào. */
-    const nut2 = el('button', 'nut kim', du
-      ? `📝 Kiểm tra ngay — ${pv.rieng ? pv.ten : pv.cd}`
-      : `📝 Kiểm tra tổng hợp ${TD.MON[monTK].ten}`);
-    nut2.onclick = () => TD.kiemTraNhanh(monTK, du ? pv.cd : null, du && pv.rieng ? x : null);
-    $('#tk-thu').replaceWith(nut2);
+    /* Hai nút tách bạch, không hứa hão:
+       · nút vàng hỏi ĐÚNG những gì viết trong thẻ này, số câu do thẻ quyết định
+       · nút phụ mới là lượt 50 câu mở rộng ra cả chuyên đề                    */
+    const boc = el('span', 'hang-nut');
+    boc.style.display = 'inline-flex';
+    /* dựng SẴN bộ câu rồi mới ghi số lên nút — nút và lượt kiểm tra phải là
+       cùng một bộ, không được đếm một đằng hỏi một nẻo */
+    const boRieng = pv.rieng ? TD.deRiengThe(monTK, x) : null;
+    const soRieng = boRieng ? boRieng.ds.length : 0;
+    if (soRieng >= 6) {
+      const n1 = el('button', 'nut kim', `📝 Kiểm tra thẻ này — ${soRieng} câu`);
+      n1.onclick = () => TD.kiemTraThe(monTK, x, boRieng);
+      boc.appendChild(n1);
+    }
+    if (du) {
+      const n2 = el('button', soRieng >= 6 ? 'nut phu' : 'nut kim',
+        `📚 Kiểm tra cả chuyên đề «${pv.cd}» — ${TD.SO_CAU_KIEM_TRA} câu`);
+      n2.onclick = () => TD.kiemTraNhanh(monTK, pv.cd);
+      boc.appendChild(n2);
+    } else if (soRieng < 6) {
+      const n3 = el('button', 'nut kim', `📝 Kiểm tra tổng hợp ${TD.MON[monTK].ten}`);
+      n3.onclick = () => TD.kiemTraNhanh(monTK, null);
+      boc.appendChild(n3);
+    }
+    $('#tk-thu').replaceWith(boc);
   }
 
   $('#tk-khac').onclick = () => {
@@ -1838,12 +1858,18 @@ TD.moDeTaDao = function (mon, so, loai) {
 };
 
 /* Kiểm tra nhanh ngay trong Tàng Kinh Các: bốc câu hỏi đúng chủ đề vừa đọc */
-TD.kiemTraNhanh = function (mon, cd, the) {
-  /* Có thẻ thì hỏi đúng nội dung thẻ trước, cạn rồi mới nới ra cả chuyên đề */
-  const ds = the ? TD.deTheNay(mon, the, TD.SO_CAU_KIEM_TRA).ds
-                 : TD.deChuyenDe(mon, cd, TD.SO_CAU_KIEM_TRA);
+TD.kiemTraNhanh = function (mon, cd) {
+  /* Lượt mở rộng: hỏi cả chuyên đề. Muốn hỏi đúng một thẻ thì dùng TD.kiemTraThe. */
+  const ds = TD.deChuyenDe(mon, cd, TD.SO_CAU_KIEM_TRA);
   if (ds.length < 4) { TD.bao('Chuyên đề này chưa đủ câu để kiểm tra.', 'lua'); return; }
   TD.batDauPhien(mon, null, 'luyen', ds);
+};
+
+/* Kiểm tra ĐÚNG một thẻ: chỉ hỏi thứ được viết trong chính thẻ vừa đọc */
+TD.kiemTraThe = function (mon, the, sanCo) {
+  const d = sanCo || TD.deRiengThe(mon, the);
+  if (d.ds.length < 4) { TD.bao('Thẻ này chưa đủ câu để kiểm tra riêng.', 'lua'); return; }
+  TD.batDauPhien(mon, null, 'luyen', d.ds);
 };
 
 /* ============================================================

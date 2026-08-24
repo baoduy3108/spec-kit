@@ -1076,6 +1076,132 @@ TD.diemSatThe = function (tk, van) {
   return d;
 };
 
+/* ------------------------------------------------------------
+   CÂU HỎI LẤY THẲNG TỪ BẢNG TRONG THẺ
+   Người học kêu đúng: bấm "Kiểm tra ngay" ở thẻ "Chất lưỡng tính" mà bị hỏi cả
+   chương Nhôm. Lý do là thẻ chỉ có 2–3 mệnh đề sát nó nên không dựng nổi lượt
+   riêng. Nhưng gần như thẻ nào cũng có một bảng hai cột "nhãn — nội dung"; đó
+   chính là phần kiến thức trọng điểm của thẻ. Bóc bảng đó ra là có ngay câu hỏi
+   KHÔNG BỊA một chữ nào, vì đáp án lấy nguyên văn từ thẻ vừa đọc.
+   ------------------------------------------------------------ */
+TD._boNhoBang = (typeof WeakMap === 'function') ? new WeakMap() : null;
+TD.bangCuaThe = function (the) {
+  /* mỗi lần mở thẻ là quét bảng của cả trăm thẻ cùng môn để lấy phương án nhiễu,
+     nhớ lại kết quả cho khỏi bóc đi bóc lại một nội dung không đổi */
+  if (TD._boNhoBang && the && typeof the === 'object' && TD._boNhoBang.has(the))
+    return TD._boNhoBang.get(the);
+  const than = String((the && (the.dap || the.ct)) || '');
+  const ra = [];
+  (than.match(/<table[\s\S]*?<\/table>/g) || []).forEach(b => {
+    (b.match(/<tr[\s\S]*?<\/tr>/g) || []).forEach(tr => {
+      /* chỉ nhận dòng ĐÚNG HAI ô <td>; dòng tiêu đề <th> và bảng ba cột bỏ qua
+         cho chắc, thà ít câu còn hơn ghép nhãn với nội dung sai cột */
+      if (/<th[\s>]/.test(tr)) return;
+      const o = tr.match(/<td[^>]*>[\s\S]*?<\/td>/g) || [];
+      if (o.length !== 2) return;
+      const boThe = t => t.replace(/<td[^>]*>|<\/td>/g, '').replace(/<\/?(b|i|em|strong|u)>/g, '').trim();
+      const nhan = boThe(o[0]).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const noi = boThe(o[1]);
+      const tran = noi.replace(/<[^>]+>/g, '').trim();
+      if (!nhan || nhan.length > 44 || tran.length < 3 || tran.length > 150) return;
+      /* nhãn nằm sẵn trong nội dung thì hỏi cũng bằng thừa */
+      if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
+      ra.push({ nhan: nhan, noi: noi, tran: tran });
+    });
+  });
+  /* trùng nội dung thì giữ dòng đầu, tránh hai phương án y hệt nhau */
+  const da = {};
+  const loc = ra.filter(d => {
+    const k = TD.khongDau(d.tran);
+    if (da[k]) return false; da[k] = 1; return true;
+  });
+  if (TD._boNhoBang && the && typeof the === 'object') TD._boNhoBang.set(the, loc);
+  return loc;
+};
+
+/* Gom bảng của các thẻ CÙNG chuyên đề để có đủ phương án nhiễu khi bảng của
+   chính thẻ chưa đủ bốn dòng. */
+TD.bangCungChuDe = function (mon, the, cd) {
+  /* thẻ Tàng Kinh Các nằm ở các kho riêng (hoa_kq, hoa_ct, hoa_cam …) chứ không
+     nằm trong kho câu hỏi TD.KHO[mon] */
+  const ten = String((the && (the.chu_de || the.ten)) || '');
+  const ra = [];
+  ((TD.NGUON_LT || {})[mon] || []).forEach(([khoa]) => {
+    (TD.KHO[khoa] || []).forEach(z => {
+      if (String(z.chu_de || z.ten || '') === ten) return;
+      if (cd && (z.cd || '') !== cd) return;
+      TD.bangCuaThe(z).forEach(d => ra.push(d));
+    });
+  });
+  return ra;
+};
+
+/* Dựng sẵn các câu hỏi của riêng thẻ. Hai chiều hỏi:
+   ① cho NHÃN, chọn nội dung   ② cho NỘI DUNG, chọn nhãn  */
+TD.cauBangThe = function (mon, the, cd, seed) {
+  const dong = TD.bangCuaThe(the);
+  if (dong.length < 2) return [];
+  const ten = String((the && (the.chu_de || the.ten)) || '').replace(/^\d+[.\s-]*/, '').trim();
+  const ngoai = TD.bangCungChuDe(mon, the, cd);
+  /* chuyên đề hẹp quá thì cả môn chỉ có vài dòng cùng loại — mượn thêm cả môn,
+     phương án nhiễu lệch chuyên đề vẫn là phương án sai, còn hơn không dựng nổi câu */
+  const xa = TD.bangCungChuDe(mon, the, null);
+  const R = TD.rng(seed || ((Math.random() * 4294967295) >>> 0));
+  const ra = [];
+  /* Hai phương án chỉ được phép là hai câu trả lời KHÁC HẲN nhau. "Cu, Ag" và
+     "Cu, Ag (mọi KL sau H)" mà đứng chung một câu là đánh đố vô lý — người học
+     chọn cái nào cũng đúng. Vì vậy so bộ từ: bao nhau hoặc giống quá nửa thì bỏ. */
+  const tach = t => TD.khongDau(String(t).replace(/<[^>]+>/g, ' '))
+    .replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
+  const dungDo = (a, b) => {
+    const x = tach(a), y = tach(b);
+    if (!x.length || !y.length) return true;
+    const A = new Set(x), B = new Set(y);
+    let chung = 0; A.forEach(w => { if (B.has(w)) chung++; });
+    const nho = Math.min(A.size, B.size);
+    if (chung === nho) return true;                        /* bộ này nằm gọn trong bộ kia */
+    return chung / (A.size + B.size - chung) >= 0.5;       /* giống quá nửa */
+  };
+  const nhieu = (kho, dung, lay, can) => {
+    const ds = [];
+    kho.forEach(nhom => TD.xaoR(R, nhom.slice()).forEach(d => {
+      if (ds.length >= can) return;
+      const v = lay(d);
+      if (dungDo(v, lay(dung))) return;
+      if (ds.some(z => dungDo(v, z))) return;
+      ds.push(v);
+    }));
+    return ds;
+  };
+  dong.forEach(d => {
+    /* nhiễu lấy từ CHÍNH bảng này trước — cùng một bảng nên bốn phương án mới
+       cùng hệ quy chiếu, đủ khó; cạn rồi mới mượn thẻ khác cùng chuyên đề */
+    const kho = [dong.filter(z => z !== d), ngoai, xa];
+
+    /* ① nhãn → nội dung */
+    const s1 = nhieu(kho, d, z => z.noi, 3);
+    if (s1.length === 3) {
+      const opts = TD.xaoR(R, [d.noi].concat(s1));
+      ra.push({ q: `Theo bảng trong thẻ <b>«${ten}»</b>, mục <b>${d.nhan}</b> ứng với nội dung nào sau đây?`,
+        opts: opts, ans: opts.indexOf(d.noi), muc: 1, dang: 'mc',
+        giai: `Bảng trong thẻ «${ten}» ghi rõ:\n${d.nhan} → ${d.tran}\n`
+          + `Đây là phần kiến thức trọng điểm của chính thẻ bạn vừa đọc, thuộc đúng nguyên văn là ăn điểm.`,
+        meo: the.meo || the.dc || '' });
+    }
+
+    /* ② nội dung → nhãn */
+    const s2 = nhieu(kho, d, z => z.nhan, 3);
+    if (s2.length === 3) {
+      const opts = TD.xaoR(R, [d.nhan].concat(s2));
+      ra.push({ q: `Nội dung sau thuộc mục nào trong thẻ <b>«${ten}»</b>?<br><b>${d.noi}</b>`,
+        opts: opts, ans: opts.indexOf(d.nhan), muc: 2, dang: 'mc',
+        giai: `Bảng trong thẻ «${ten}» xếp ${d.tran} vào mục <b>${d.nhan}</b>.`,
+        meo: the.dc || the.meo || '' });
+    }
+  });
+  return TD.xaoR(R, ra);
+};
+
 /* Trả về phạm vi kiểm tra của một thẻ, KHÔNG dựng câu — dùng để đặt tên nút. */
 TD.phamViThe = function (mon, the) {
   const cd = TD.chuDeCuaThe(mon, the);
@@ -1083,7 +1209,13 @@ TD.phamViThe = function (mon, the) {
   const ten = String((the && (the.chu_de || the.ten)) || '').replace(/^\d+[.\s-]*/, '').trim();
   const chiSo = [];
   kho.forEach((z, i) => { if (cd && (z.cd || '') === cd) chiSo.push(i); });
-  if (!cd || chiSo.length < 4) return { cd: cd, ten: ten, nong: [], rieng: false };
+  /* Bảng trong thân thẻ là nguồn câu sát thẻ nhất và KHÔNG phụ thuộc kho mệnh
+     đề — phải bóc trước, vì rất nhiều thẻ (công thức, Cấm Thư) không ghép được
+     chuyên đề nào nhưng vẫn có bảng để hỏi. */
+  const bangT = TD.bangCuaThe(the);
+  if (!cd || chiSo.length < 4)
+    return { cd: cd, ten: ten, nong: [], mau: [], bang: bangT,
+             rieng: !!ten && ten !== cd && bangT.length >= 2 };
   const tk = TD.tuKhoaThe(the);
   const nong = chiSo.filter(i => TD.diemSatThe(tk, (kho[i].t || '') + ' ' + (kho[i].v || '')) >= TD.NGUONG_SAT_THE);
   /* Bộ sinh đề khai thẳng tên thẻ ở trường chuong thì chắc chắn là của thẻ đó */
@@ -1095,66 +1227,45 @@ TD.phamViThe = function (mon, the) {
   /* Ngưỡng 6 mệnh đề (hoặc 2 bộ sinh riêng) mới đủ dựng trọn phần đầu lượt kiểm
      tra bằng câu của chính thẻ. Ít hơn thế mà vẫn ghi tên thẻ lên nút thì chỉ
      vài câu đầu là đúng, phần sau lạc sang chuyên đề — đúng cái người học kêu. */
-  return { cd: cd, ten: ten, nong: nong, mau: mau,
-           rieng: !!ten && ten !== cd && (nong.length >= 6 || mau.length >= 2) };
+  return { cd: cd, ten: ten, nong: nong, mau: mau, bang: bangT,
+           rieng: !!ten && ten !== cd && (nong.length >= 3 || mau.length >= 1 || bangT.length >= 2) };
 };
 
-/* Bộ câu hỏi cho ĐÚNG thẻ vừa đọc: phần sát thẻ xếp trước, hết mới nới ra. */
-TD.deTheNay = function (mon, the, soCau) {
-  const n = soCau || TD.SO_CAU_KIEM_TRA;
+/* Lượt kiểm tra CHỈ gồm kiến thức của chính thẻ này, tuyệt đối không nới ra cả
+   chuyên đề. Số câu vì thế do thẻ quyết định chứ không phải con số 50 cố định —
+   thà hỏi 12 câu đúng cái vừa đọc còn hơn 50 câu lạc sang chương khác. */
+TD.deRiengThe = function (mon, the) {
   const pv = TD.phamViThe(mon, the);
   const kho = TD.KHO_LT[mon] || [];
   const ds = [];
-  if (pv.rieng) {
-    const nong = pv.nong;
-    /* ① bài tập của CHÍNH thẻ này trước — đây mới là thứ người học vừa đọc */
-    if (pv.mau.length) {
-      const can = Math.min(Math.round(n * 0.4), pv.mau.length * 6);
-      let vt = 0, quay = TD.xao(pv.mau.slice());
-      for (let k = 0, thu = 0; k < can && thu < can * 8; thu++) {
-        if (vt >= quay.length) { quay = TD.xao(pv.mau.slice()); vt = 0; }
-        const t = quay[vt++], seed = (Math.random() * 4294967295) >>> 0;
-        if (TD.sinhCau(t, seed)) { ds.push({ mon: mon, g: t.ma, s: seed }); k++; }
-      }
+  /* ① câu bóc thẳng từ bảng trong thẻ */
+  TD.cauBangThe(mon, the, pv.cd, (Math.random() * 4294967295) >>> 0).forEach((c, k) =>
+    ds.push({ mon: mon, cau: c, khoaTu: pv.ten + '/' + k }));
+  /* ② bộ sinh bài tập mang đúng tên thẻ — mỗi bộ góp ĐÚNG 3 câu, bốc lại nếu
+     một hạt giống nào đó dựng hỏng, để số câu trên nút không bao giờ lệch với
+     số câu thật của lượt kiểm tra */
+  (pv.mau || []).forEach(t => {
+    for (let k = 0, thu = 0; k < 3 && thu < 24; thu++) {
+      const seed = (Math.random() * 4294967295) >>> 0;
+      if (TD.sinhCau(t, seed)) { ds.push({ mon: mon, g: t.ma, s: seed }); k++; }
     }
-    /* ② mệnh đề sát thẻ, hỏi thẳng tên thẻ */
-    TD.xao(nong.slice()).slice(0, Math.max(0, n - ds.length)).forEach(i => ds.push({
-      mon: mon, lt: i, c: kho[i].a ? 'd' : 's',
-      s: (Math.random() * 4294967295) >>> 0, nhan: pv.ten, loc: nong
-    }));
-    /* thêm vài câu đúng/sai 4 ý gom từ chính nhóm mệnh đề sát thẻ */
-    /* ③ vài câu đúng/sai 4 ý gom từ chính nhóm mệnh đề sát thẻ */
-    const da = {}; let thu = 0;
-    const tran = Math.min(n, Math.max(ds.length + 6, 14));
-    while (ds.length < tran && thu++ < 240) {
-      const bo = TD.xao(nong.slice()).slice(0, 4).sort((a, b) => a - b), k = bo.join('-');
+  });
+  /* ③ mệnh đề đúng/sai sát thẻ */
+  (pv.nong || []).forEach(i => ds.push({
+    mon: mon, lt: i, c: kho[i].a ? 'd' : 's',
+    s: (Math.random() * 4294967295) >>> 0, nhan: pv.ten, loc: pv.nong
+  }));
+  /* ④ vài câu đúng/sai bốn ý gom từ chính nhóm mệnh đề sát thẻ */
+  if ((pv.nong || []).length >= 4) {
+    const da = {};
+    for (let thu = 0; thu < 60 && Object.keys(da).length < 3; thu++) {
+      const bo = TD.xao(pv.nong.slice()).slice(0, 4).sort((a, b) => a - b), k = bo.join('-');
       if (da[k]) continue;
       da[k] = 1;
       ds.push({ mon: mon, dsy: bo, cd: pv.cd, nhan: pv.ten, s: (Math.random() * 4294967295) >>> 0 });
     }
   }
-  /* ③b Thẻ chưa đủ 6 mệnh đề riêng thì nút vẫn ghi tên chuyên đề cho thật thà,
-     nhưng mấy mệnh đề sát thẻ vẫn được xếp LÊN ĐẦU — hỏi cái vừa đọc trước
-     bao giờ cũng hơn bốc ngẫu nhiên cả rổ. */
-  if (!pv.rieng && pv.nong.length >= 2) {
-    TD.xao(pv.nong.slice()).slice(0, Math.min(pv.nong.length, n)).forEach(i => ds.push({
-      mon: mon, lt: i, c: kho[i].a ? 'd' : 's', s: (Math.random() * 4294967295) >>> 0
-    }));
-  }
-
-  /* ④ hết phần sát thẻ thì nới ra cả chuyên đề. Phải bốc DƯ rồi mới lọc trùng,
-     nếu không thì mỗi câu bị loại là hụt một câu của lượt kiểm tra. */
-  for (let vong = 0; vong < 3 && ds.length < n; vong++) {
-    const daCo = {};
-    ds.forEach(x => { if (x.lt !== undefined) daCo[x.lt] = 1; });
-    TD.deChuyenDe(mon, pv.cd, n).forEach(x => {
-      if (ds.length >= n) return;
-      if (x.lt !== undefined && daCo[x.lt]) return;
-      if (x.lt !== undefined) daCo[x.lt] = 1;
-      ds.push(x);
-    });
-  }
-  return { ds: ds.slice(0, n), nhan: pv.rieng ? pv.ten : pv.cd, sat: pv.rieng ? pv.nong.length : 0, cd: pv.cd };
+  return { ds: TD.xao(ds), ten: pv.ten, cd: pv.cd };
 };
 
 TD.timMau = function (mon, ma) {
@@ -8122,37 +8233,60 @@ TD.hinhTuTruong = function (kieu) {
    ⑭ BỘ DỤNG CỤ THÍ NGHIỆM — điều chế và thu khí
    ============================================================ */
 TD.hinhThiNghiem = function (cach, tenKhi) {
-  const W = 330, H = 220;
+  /* Cao thêm một quãng để hai dòng chú thích (nhãn bình cầu và nhãn cách thu
+     khí) nằm ở HAI dòng riêng — để chung một dòng thì chúng đè lên nhau. */
+  const W = 330, H = 244;
   let ra = `<defs>${mui('mttn', M.net)}</defs>`;
   /* bình cầu có nhánh + đèn cồn */
   ra += `<path d="M 46 96 L 46 62 L 78 62 L 78 96 A 30 30 0 1 1 46 96 Z" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
      + `<path d="M 34 116 A 28 28 0 0 0 90 116 L 90 112 L 34 112 Z" fill="${M.lam}" opacity="0.5"/>`
-     + `<text x="92" y="208" fill="${M.chu}" font-size="10" text-anchor="middle">đun nóng hỗn hợp phản ứng</text>`
+     + `<text x="92" y="${H - 26}" fill="${M.chu}" font-size="10" text-anchor="middle">đun nóng hỗn hợp phản ứng</text>`
      + `<path d="M 52 176 q 10 -16 20 0 z" fill="${M.nhan}" opacity="0.9"/>`
      + `<rect x="50" y="176" width="24" height="14" fill="none" stroke="${M.truc}" stroke-width="1.5"/>`;
   /* ống dẫn khí */
   ra += `<path d="M 78 72 L 150 72" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`;
   if (cach === 'daynuoc') {
-    ra += `<rect x="160" y="96" width="130" height="76" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
-       + `<rect x="161" y="106" width="128" height="65" fill="${M.lam}" opacity="0.45"/>`
-       + `<path d="M 150 72 L 150 150 L 196 150" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
-       + `<path d="M 196 150 L 196 108" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
-       + `<rect x="184" y="60" width="34" height="60" rx="4" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
-       + `<rect x="185" y="61" width="32" height="28" fill="${M.net}" opacity="0.35"/>`
-       + `<text x="201" y="52" fill="${M.net}" font-size="10.5" text-anchor="middle">${tenKhi || 'khí'}</text>`
-       + `<text x="225" y="208" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy nước</text>`;
+    /* Cách thu này chỉ đúng khi ống nghiệm ÚP NGƯỢC, miệng chìm hẳn dưới mặt
+       nước, và đầu ống dẫn luồn từ dưới lên vào miệng ống. Bản cũ vẽ ống
+       nghiệm bo tròn cả bốn góc, nằm chồng lên mép chậu và hở miệng ra ngoài
+       nước — khí thoát hết ra ngoài chứ không đẩy được nước xuống. */
+    const cx = 236, mn = 116, dayChau = 194;  /* trục ống nghiệm · mặt nước · đáy chậu */
+    const dayOng = 44, mieng = 180;           /* đáy ống ở trên, miệng ngập sâu dưới nước */
+    const rOng = 19, mucKhi = 112;            /* khí chiếm phần trên tới đây */
+    ra += `<rect x="172" y="${mn}" width="132" height="${dayChau - mn}" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+       + `<rect x="173" y="${mn + 1}" width="130" height="${dayChau - mn - 2}" fill="${M.lam}" opacity="0.42"/>`
+       /* ống nghiệm úp ngược: đáy tròn ở TRÊN, miệng hở ở DƯỚI */
+       + `<path d="M ${cx - rOng} ${mieng} L ${cx - rOng} ${dayOng + rOng} `
+       + `A ${rOng} ${rOng} 0 0 1 ${cx + rOng} ${dayOng + rOng} L ${cx + rOng} ${mieng}" `
+       + `fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+       /* nước còn lại trong ống, phía dưới cột khí */
+       + `<rect x="${cx - rOng + 1}" y="${mucKhi}" width="${rOng * 2 - 2}" height="${mieng - mucKhi}" fill="${M.lam}" opacity="0.42"/>`
+       /* cột khí đã thu được, phía trên */
+       + `<path d="M ${cx - rOng + 1} ${mucKhi} L ${cx - rOng + 1} ${dayOng + rOng} `
+       + `A ${rOng - 1} ${rOng - 1} 0 0 1 ${cx + rOng - 1} ${dayOng + rOng} L ${cx + rOng - 1} ${mucKhi} Z" `
+       + `fill="${M.net}" opacity="0.32"/>`
+       /* ống dẫn khí: từ bình cầu chạy ngang, vòng xuống đáy chậu rồi ngoi lên
+          đúng miệng ống nghiệm */
+       + `<path d="M 150 72 L 150 ${dayChau - 8} L ${cx} ${dayChau - 8} L ${cx} ${mieng - 10}" `
+       + `fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
+       /* vài bọt khí đang sủi lên trong ống — dấu hiệu khí đang được thu */
+       + `<circle cx="${cx}" cy="${mieng - 16}" r="2.6" fill="${M.net}" opacity="0.75"/>`
+       + `<circle cx="${cx - 5}" cy="${mieng - 27}" r="2" fill="${M.net}" opacity="0.6"/>`
+       + `<circle cx="${cx + 4}" cy="${mieng - 38}" r="2.3" fill="${M.net}" opacity="0.6"/>`
+       + `<text x="${cx}" y="${dayOng - 6}" fill="${M.net}" font-size="10.5" text-anchor="middle">${tenKhi || 'khí'}</text>`
+       + `<text x="${W / 2}" y="${H - 6}" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy nước</text>`;
   } else {
     const nguoc = cach === 'nguoc';
     ra += `<path d="M 150 72 L 218 72 L 218 ${nguoc ? 96 : 130}" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`;
     if (nguoc)
       ra += `<path d="M 194 84 L 194 148 A 24 24 0 0 0 242 148 L 242 84 Z" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
          + `<path d="M 195 100 L 195 148 A 23 23 0 0 0 241 148 L 241 100 Z" fill="${M.net}" opacity="0.3"/>`
-         + `<text x="218" y="208" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy không khí</text>`
+         + `<text x="218" y="${H - 6}" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy không khí</text>`
          + `<text x="250" y="112" fill="${M.chu}" font-size="10">(úp ngược bình)</text>`;
     else
       ra += `<path d="M 194 96 L 194 160 A 24 24 0 0 0 242 160 L 242 96 Z" fill="none" stroke="${M.truc}" stroke-width="1.8"/>`
          + `<path d="M 195 128 L 195 160 A 23 23 0 0 0 241 160 L 241 128 Z" fill="${M.net}" opacity="0.3"/>`
-         + `<text x="218" y="208" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy không khí</text>`
+         + `<text x="218" y="${H - 6}" fill="${M.chu}" font-size="10.5" text-anchor="middle">Thu khí bằng cách đẩy không khí</text>`
          + `<text x="250" y="112" fill="${M.chu}" font-size="10">(đặt đứng bình)</text>`;
   }
   return boc(W, H, ra);
@@ -25688,6 +25822,267 @@ TD.GEN.sinh = TD.GEN.sinh.concat([
 </script>
 <script>
 /* ============================================================
+   SINH — PHẢ HỆ: BA KIỂU DI TRUYỀN CÒN THIẾU
+   Kho cũ chỉ có gen LẶN trên NST thường và gen LẶN trên X. Đề lại rất
+   hay hỏi "xác định quy luật di truyền", mà muốn loại được phương án
+   thì phải từng nhìn thấy cả bốn kiểu còn lại. Bổ sung:
+     · gen TRỘI trên NST thường
+     · gen TRỘI trên vùng không tương đồng của X
+     · gen nằm trên vùng không tương đồng của Y (di truyền thẳng)
+   Mỗi phả hệ dựng sao cho DẤU HIỆU LOẠI TRỪ hiện rõ trên hình, không
+   phải đoán: có đủ dữ kiện để bác ba giả thiết còn lại.
+   ============================================================ */
+window.TD = window.TD || {}; TD.GEN = TD.GEN || {};
+
+(function () {
+const MC = (R, de, it, meo) => {
+  const opts = TD.xaoR(R, [it.d].concat(it.s));
+  return { q: de, opts: opts, ans: opts.indexOf(it.d),
+    giai: `Đáp án đúng: ${it.d}\n${it.v}\n\nVì sao các phương án còn lại bị loại:\n`
+      + TD.khoiLoai(opts, it.d, it.sv, 'không khớp với sơ đồ phả hệ.'),
+    meo: meo };
+};
+const t = id => `(${id})`;
+/* liệt kê danh sách người cho xuôi tai: (3), (5) và (6) */
+const ke = ds => ds.length < 2 ? ds.map(t).join('')
+  : ds.slice(0, -1).map(t).join(', ') + ' và ' + t(ds[ds.length - 1]);
+
+/* Bộ khung ba đời dùng chung.
+   cf.b1    = [ông có bệnh?, bà có bệnh?]
+   cf.gioi  = giới tính bốn người con đời II (true = nam), NGƯỜI CUỐI luôn là
+              người lập gia đình riêng — chọn sẵn sao cho đời III hợp quy luật.
+   cf.benh2 = (i, nam) → người con đời II thứ i có bệnh không
+   cf.gioi3 / cf.benh3 = tương tự cho đời III.
+   Ràng buộc bắt buộc: người con đời II ĐỨNG CUỐI phải là người mang được gen
+   gây bệnh xuống đời III, nếu không thì hình vẽ tự mâu thuẫn với đáp án. */
+const dung = (R, cf) => {
+  const nguoi = [], cap = [], con = [];
+  let dem = 0;
+  const them = (doi, x, nam, benh) => {
+    const id = String(++dem);
+    nguoi.push({ id: id, doi: doi, x: x, nam: nam, benh: benh });
+    return id;
+  };
+  const gioi = cf.gioi, k2 = gioi.length;
+  const gioi3 = cf.gioi3, k3 = gioi3.length;
+
+  /* ĐỜI I — một cặp ông bà, đặt giữa hàng con cho cân */
+  const a1 = them(1, 1.3, true, cf.b1[0]), a2 = them(1, 2.85, false, cf.b1[1]);
+  cap.push([a1, a2]);
+
+  /* ĐỜI II — có cả trai lẫn gái để lộ dấu hiệu liên kết giới tính */
+  const conA = [];
+  for (let i = 0; i < k2; i++)
+    conA.push(them(2, 0.5 + i * 1.05, gioi[i], cf.benh2(i, gioi[i])));
+  con.push({ cha: a1, me: a2, ds: conA });
+
+  /* người con đứng cuối lấy vợ hoặc chồng từ ngoài phả hệ, người này BÌNH THƯỜNG */
+  const trongCuoc = conA[k2 - 1], namTC = gioi[k2 - 1];
+  const xTC = 0.5 + (k2 - 1) * 1.05, xBD = xTC + 1.05;
+  const banDoi = them(2, xBD, !namTC, false);
+  cap.push(namTC ? [trongCuoc, banDoi] : [banDoi, trongCuoc]);
+
+  /* ĐỜI III — canh giữa ngay dưới cặp vợ chồng vừa lập */
+  const giua = (xTC + xBD) / 2, conC = [];
+  for (let j = 0; j < k3; j++)
+    conC.push(them(3, giua + (j - (k3 - 1) / 2) * 1.15, gioi3[j], cf.benh3(j, gioi3[j])));
+  con.push({ cha: namTC ? trongCuoc : banDoi, me: namTC ? banDoi : trongCuoc, ds: conC });
+
+  const loc = (ds, gi, muon) => ds.filter((x, i) => gi[i] === muon);
+  return {
+    hinh: TD.hinhPhaHe(nguoi, cap, con),
+    ong: a1, ba: a2, conA: conA, gioi: gioi,
+    trongCuoc: trongCuoc, namTC: namTC, banDoi: banDoi, conC: conC, gioi3: gioi3,
+    gaiDoi2: loc(conA, gioi, false), traiDoi2: loc(conA, gioi, true),
+    traiDoi3: loc(conC, gioi3, true), gaiDoi3: loc(conC, gioi3, false),
+    benhDoi2: conA.filter((x, i) => cf.benh2(i, gioi[i])),
+    lanhGai2: conA.filter((x, i) => !gioi[i] && !cf.benh2(i, gioi[i]))
+  };
+};
+
+const BON = [
+  'Gen lặn nằm trên nhiễm sắc thể thường',
+  'Gen trội nằm trên nhiễm sắc thể thường',
+  'Gen lặn nằm trên vùng không tương đồng của nhiễm sắc thể X',
+  'Gen trội nằm trên vùng không tương đồng của nhiễm sắc thể X',
+  'Gen nằm trên vùng không tương đồng của nhiễm sắc thể Y'
+];
+const khac = d => BON.filter(x => x !== d);
+
+TD.GEN.sinh = (TD.GEN.sinh || []).concat([
+
+
+/* ---------- ① GEN TRỘI TRÊN NST THƯỜNG ---------- */
+{ ma: 'sinh-phahe-troi-thuong', chuong: 'Di truyền người', muc: 3, dang: 'mc',
+  tao(R) {
+    /* Dựng để LOẠI được cả ba giả thiết còn lại, không phải đoán:
+       · ông BỆNH × bà BỆNH mà sinh con LÀNH ⇒ chắc chắn gen TRỘI
+         (nếu lặn thì aa × aa, mọi con đều aa và đều bệnh)
+       · trong đám con lành có một người con GÁI ⇒ loại trội trên X
+         (bố XᴬY thì mọi con gái đều nhận Xᴬ và đều phải bệnh)
+       · có người NỮ bị bệnh ⇒ loại gen trên Y                         */
+    const k3 = R.nguyen(2, 3);
+    /* thứ tự trai – gái đổi mỗi lần cho hình không lặp lại y hệt, nhưng luôn
+       còn ít nhất một con GÁI đứng trước người con út */
+    const gioi = R.chon([[false, true, false, true], [true, false, false, true],
+                         [false, false, true, true], [true, false, true, false]]);
+    const iGaiLanh = gioi.findIndex((nam, i) => !nam && i < gioi.length - 1);
+    const tuDo = gioi.map(() => R.chon([true, false]));
+    const p = dung(R, {
+      b1: [true, true],
+      benh2: (i) => i === gioi.length - 1 ? true : (i === iGaiLanh ? false : tuDo[i]),
+      gioi: gioi,
+      gioi3: k3 === 2 ? [true, false] : [true, false, true],
+      benh3: j => j === 0
+    });
+    const gaiLanh = p.conA[iGaiLanh];
+    const nuBenh = p.gaiDoi2.filter(id => p.benhDoi2.indexOf(id) >= 0);
+    const keNuBenh = nuBenh.length
+      ? `${t(p.ba)}, ${ke(nuBenh)}` : t(p.ba);
+    const d = BON[1];
+    return MC(R, `Cho sơ đồ phả hệ về một bệnh ở người, hình tô đậm là người bị bệnh:${p.hinh}`
+      + `Bệnh trên do loại gen nào quy định?`,
+      { d: d, s: R.chonNhieu(khac(d), 3),
+        sv: {
+          [BON[0]]: `nếu gen gây bệnh là gen LẶN trên NST thường thì cặp bố mẹ ${t(p.ong)} × ${t(p.ba)} đều bị `
+            + `bệnh nên đều có kiểu gen aa, mọi người con đều phải nhận aa và đều bị bệnh; nhưng ${t(gaiLanh)} `
+            + `là con của họ và hoàn toàn bình thường`,
+          [BON[2]]: `gen lặn trên X cũng vướng đúng chỗ đó: ${t(p.ong)} bệnh là XᵃY, ${t(p.ba)} bệnh là XᵃXᵃ, `
+            + `con gái nhận Xᵃ từ cả bố lẫn mẹ nên con gái nào cũng phải bị bệnh — mà ${t(gaiLanh)} thì không`,
+          [BON[3]]: `nếu gen TRỘI nằm trên X thì bố bệnh ${t(p.ong)} có kiểu gen XᴬY, con gái luôn nhận X của `
+            + `bố nên MỌI con gái đều mang Xᴬ và đều bị bệnh; trên hình ${t(gaiLanh)} là con gái ông và bình thường`,
+          [BON[4]]: `gen nằm trên Y thì chỉ nam giới mới mắc bệnh, trong khi phả hệ có người NỮ bị bệnh là `
+            + keNuBenh
+        },
+        v: `Đọc hình theo hai bước:\n`
+          + `① Bố ${t(p.ong)} và mẹ ${t(p.ba)} ĐỀU bị bệnh nhưng sinh ra ${t(gaiLanh)} bình thường. Nếu bệnh do `
+          + `gen lặn thì bố mẹ bệnh đều là đồng hợp lặn, con bắt buộc nhận đồng hợp lặn và bắt buộc bị bệnh. `
+          + `Có con lành ⇒ gen gây bệnh là gen TRỘI, và bố mẹ đều dị hợp.\n`
+          + `② Người con lành ${t(gaiLanh)} là con GÁI. Con gái luôn nhận một X từ bố. Nếu gen trội nằm trên X `
+          + `thì bố XᴬY sẽ truyền Xᴬ cho tất cả con gái ⇒ không thể có con gái lành. Vậy gen không nằm trên X. `
+          + `Phả hệ lại có nữ bị bệnh nên cũng không nằm trên Y.\n`
+          + `Kết luận: gen gây bệnh là gen TRỘI nằm trên NST THƯỜNG.\n`
+          + `Kiểu gen (A: bệnh, a: bình thường): ${t(p.ong)} Aa · ${t(p.ba)} Aa · ${t(gaiLanh)} aa · những người `
+          + `bị bệnh ở đời II và III đều là Aa hoặc AA, riêng người bệnh có bố hoặc mẹ mang kiểu gen aa thì `
+          + `chắc chắn là Aa.`,
+        },
+      'Quy trình bốn bước dùng cho mọi phả hệ: ① bố mẹ BỆNH sinh con LÀNH ⇒ gen TRỘI; bố mẹ LÀNH sinh con '
+      + 'BỆNH ⇒ gen LẶN ② nếu TRỘI, tìm một người bố bị bệnh — có con gái lành thì loại ngay trội trên X '
+      + '③ nếu LẶN, tìm một người nữ bị bệnh — bố cô ấy bình thường thì loại lặn trên X ④ chỉ khi không có '
+      + 'nữ nào bệnh và bố bệnh truyền cho toàn bộ con trai mới nghĩ tới Y.');
+  } },
+
+/* ---------- ② GEN TRỘI TRÊN X ---------- */
+{ ma: 'sinh-phahe-troi-x', chuong: 'Di truyền người', muc: 4, dang: 'mc',
+  tao(R) {
+    /* Ông XᴬY bệnh × bà XᴬXᵃ bệnh:
+       · con GÁI luôn nhận Xᴬ của bố ⇒ 100% con gái bị bệnh — dấu hiệu đặc trưng
+       · con TRAI nhận X của mẹ ⇒ có người bệnh, có người lành; đứa con trai LÀNH
+         này loại sạch cả hai giả thiết gen lặn (bố mẹ bệnh mà sinh con lành)
+       · đời III: mẹ bệnh × bố ngoài phả hệ LÀNH vẫn sinh con gái bệnh ⇒ loại
+         lặn trên X lần nữa (lặn trên X thì con gái bệnh phải có bố bệnh)      */
+    const k3 = R.nguyen(2, 3);
+    /* người con út BẮT BUỘC là con gái bị bệnh — chính cô ấy mang gen xuống đời III */
+    const gioi = R.chon([[true, false, true, false], [true, true, false, false],
+                         [false, true, true, false], [true, false, false, false]]);
+    const iTraiLanh = gioi.indexOf(true);
+    const tuDo = gioi.map(() => R.chon([true, false]));
+    const p = dung(R, {
+      b1: [true, true],
+      benh2: (i, nam) => !nam || (i === iTraiLanh ? false : tuDo[i]),
+      gioi: gioi,
+      gioi3: k3 === 2 ? [false, true] : [false, true, false],
+      benh3: j => j === 0
+    });
+    const traiLanh = p.conA[iTraiLanh], meBenh = p.trongCuoc, boNgoai = p.banDoi;
+    const gaiBenh3 = p.conC[0];
+    const dsGai = ke(p.gaiDoi2);
+    const d = BON[3];
+    return MC(R, `Cho sơ đồ phả hệ về một bệnh ở người, hình tô đậm là người bị bệnh:${p.hinh}`
+      + `Bệnh trên do loại gen nào quy định?`,
+      { d: d, s: R.chonNhieu(khac(d), 3),
+        sv: {
+          [BON[0]]: `gen lặn trên NST thường thì bố mẹ bệnh ${t(p.ong)} × ${t(p.ba)} đều là aa, mọi con đều `
+            + `phải bị bệnh; nhưng ${t(traiLanh)} là con của họ và bình thường`,
+          [BON[1]]: `gen trội trên NST thường thì con trai và con gái có xác suất mắc như nhau và không có lí `
+            + `do gì để TOÀN BỘ con gái ${dsGai} đều bệnh trong khi có con trai lành — sự lệch hẳn theo giới `
+            + `tính này chỉ giải thích được khi gen nằm trên X`,
+          [BON[2]]: `gen lặn trên X thì con gái bị bệnh phải là XᵃXᵃ, tức là BỐ của cô ấy cũng phải bị bệnh; `
+            + `ở đời III, ${t(gaiBenh3)} bị bệnh mà bố ${t(boNgoai)} hoàn toàn bình thường`,
+          [BON[4]]: `gen trên Y chỉ truyền cho nam và chỉ nam mới mắc bệnh; ở đây phần lớn người bệnh lại là NỮ`
+        },
+        v: `Ba dữ kiện trên hình khoá chặt đáp án:\n`
+          + `① Bố ${t(p.ong)} và mẹ ${t(p.ba)} đều bệnh mà sinh được ${t(traiLanh)} bình thường ⇒ gen gây bệnh `
+          + `là gen TRỘI (nếu lặn thì bố mẹ bệnh là đồng hợp lặn, con không thể lành).\n`
+          + `② TẤT CẢ con gái của ông ${t(p.ong)} là ${dsGai} đều bị bệnh, trong khi con trai có người lành. `
+          + `Con gái luôn nhận X từ bố: bố XᴬY truyền Xᴬ cho mọi con gái ⇒ mọi con gái đều bệnh. Con trai chỉ `
+          + `nhận Y của bố và X của mẹ XᴬXᵃ nên có người bệnh có người lành. Đúng khớp với hình.\n`
+          + `③ Đời III: mẹ ${t(meBenh)} bệnh, bố ${t(boNgoai)} bình thường mà vẫn sinh con gái ${t(gaiBenh3)} `
+          + `bị bệnh — điều này không thể xảy ra với gen lặn trên X.\n`
+          + `Vậy gen gây bệnh là gen TRỘI nằm trên vùng không tương đồng của NST X.\n`
+          + `Kiểu gen: ${t(p.ong)} XᴬY · ${t(p.ba)} XᴬXᵃ · ${t(traiLanh)} XᵃY · con gái bệnh XᴬXᵃ · `
+          + `${t(boNgoai)} XᵃY · ${t(gaiBenh3)} XᴬXᵃ.`,
+        },
+      'Bốn dấu hiệu nhận ra gen TRỘI TRÊN X: ① bố bệnh thì 100% con gái bệnh ② mẹ bệnh dị hợp thì 50% con mỗi '
+      + 'giới bệnh ③ bệnh gặp ở nữ nhiều hơn nam ④ bệnh không bao giờ truyền thẳng bố → con trai. Thấy "bố '
+      + 'bệnh mà có con gái lành" là loại ngay giả thiết này. Bệnh thật hay gặp: còi xương kháng vitamin D.');
+  } },
+
+/* ---------- ③ GEN TRÊN NST Y — DI TRUYỀN THẲNG ---------- */
+{ ma: 'sinh-phahe-y', chuong: 'Di truyền người', muc: 3, dang: 'mc',
+  tao(R) {
+    /* Suốt ba đời KHÔNG một người nữ nào bị bệnh, còn bố bệnh thì truyền cho
+       TOÀN BỘ con trai và cháu trai. Đó là di truyền thẳng, chỉ gen trên vùng
+       không tương đồng của Y mới cho ra bức tranh này. */
+    const k3 = R.nguyen(2, 3);
+    /* người con út BẮT BUỘC là con trai bị bệnh — bệnh phải đi tiếp xuống đời III */
+    const p = dung(R, {
+      b1: [true, false],
+      gioi: R.chon([[false, true, false, true], [true, false, false, true],
+                    [false, false, true, true], [false, true, true, true]]),
+      benh2: (i, nam) => nam,                    /* mọi con trai bệnh, mọi con gái lành */
+      gioi3: k3 === 2 ? [true, false] : [true, false, true],
+      benh3: (j, nam) => nam
+    });
+    const dsTrai = ke(p.traiDoi2);
+    const dsGai = ke(p.gaiDoi2);
+    const chauTrai = ke(p.traiDoi3);
+    const d = BON[4];
+    return MC(R, `Cho sơ đồ phả hệ về một bệnh ở người, hình tô đậm là người bị bệnh:${p.hinh}`
+      + `Bệnh trên do loại gen nào quy định?`,
+      { d: d, s: R.chonNhieu(khac(d), 3),
+        sv: {
+          [BON[0]]: `gen lặn trên NST thường thì nam và nữ mắc bệnh với tỉ lệ ngang nhau; ở đây suốt ba đời `
+            + `không một người NỮ nào bị bệnh, còn con trai thì bệnh 100%`,
+          [BON[1]]: `gen trội trên NST thường thì con gái của người bệnh cũng có 50% khả năng mắc; thực tế `
+            + `mọi con gái ${dsGai} đều bình thường`,
+          [BON[2]]: `gen lặn trên X đúng là gặp ở nam nhiều hơn, nhưng khi đó nam bệnh XᵃY nhận Xᵃ từ MẸ chứ `
+            + `không phải từ bố, nên bố bệnh KHÔNG truyền bệnh cho con trai; ở đây bố bệnh truyền cho toàn bộ `
+            + `con trai qua hai đời liên tiếp`,
+          [BON[3]]: `gen trội trên X thì bố bệnh truyền Xᴬ cho toàn bộ con GÁI nên con gái phải bệnh hết — `
+            + `ngược hẳn với hình, ở đây con gái lành hết còn con trai bệnh hết`
+        },
+        v: `Ba dấu hiệu cùng chỉ về một hướng:\n`
+          + `① Toàn bộ người bệnh trong phả hệ đều là NAM, không một người nữ nào mắc bệnh.\n`
+          + `② Ông ${t(p.ong)} bị bệnh truyền bệnh cho TẤT CẢ con trai (${dsTrai}); đến lượt ${t(p.trongCuoc)} `
+          + `lại truyền cho tất cả cháu trai (${chauTrai}). Bệnh đi thẳng một mạch bố → con trai → cháu trai.\n`
+          + `③ Con gái ${dsGai} không ai bị bệnh và cũng không mang gen để truyền tiếp.\n`
+          + `Đó chính là DI TRUYỀN THẲNG: gen nằm trên vùng không tương đồng của NST Y, đi theo đúng dòng nam `
+          + `và không bao giờ rẽ sang nữ.\n`
+          + `Kiểu gen: người bệnh là XYᴬ (allele gây bệnh nằm trên Y, kí hiệu Yᴬ) · người nam bình thường là `
+          + `XY · người nữ trong phả hệ không mang gen này nên kiểu gen là XX.`,
+        },
+      'Gen trên Y là kiểu dễ nhận nhất: chỉ cần thấy ① 100% người bệnh là nam ② bố bệnh thì mọi con trai đều '
+      + 'bệnh ③ không người nữ nào bệnh. Thiếu một trong ba thì phải nghĩ sang lặn trên X. Ví dụ thực tế: '
+      + 'tật dính ngón tay số 2 và 3, tật có túm lông ở vành tai.');
+  } }
+
+]);
+})();
+
+</script>
+<script>
+/* ============================================================
    SINH — LƯỚI THỨC ĂN
    Bản trước cho máy tự bốc CÁCH NỐI các loài theo vai trò rồi lắp tên
    vào. Hậu quả: sinh ra mũi tên "Sâu ăn lá → Rắn" — rắn không ăn sâu.
@@ -30910,11 +31305,31 @@ TD.moThe = function (khoa, i) {
     /* Nút ghi đúng cái sẽ được hỏi: tên THẺ khi đủ mệnh đề sát thẻ, tên
        CHUYÊN ĐỀ khi phải hỏi rộng ra, và nói thẳng là tổng hợp khi không ghép
        được chuyên đề nào. */
-    const nut2 = el('button', 'nut kim', du
-      ? `📝 Kiểm tra ngay — ${pv.rieng ? pv.ten : pv.cd}`
-      : `📝 Kiểm tra tổng hợp ${TD.MON[monTK].ten}`);
-    nut2.onclick = () => TD.kiemTraNhanh(monTK, du ? pv.cd : null, du && pv.rieng ? x : null);
-    $('#tk-thu').replaceWith(nut2);
+    /* Hai nút tách bạch, không hứa hão:
+       · nút vàng hỏi ĐÚNG những gì viết trong thẻ này, số câu do thẻ quyết định
+       · nút phụ mới là lượt 50 câu mở rộng ra cả chuyên đề                    */
+    const boc = el('span', 'hang-nut');
+    boc.style.display = 'inline-flex';
+    /* dựng SẴN bộ câu rồi mới ghi số lên nút — nút và lượt kiểm tra phải là
+       cùng một bộ, không được đếm một đằng hỏi một nẻo */
+    const boRieng = pv.rieng ? TD.deRiengThe(monTK, x) : null;
+    const soRieng = boRieng ? boRieng.ds.length : 0;
+    if (soRieng >= 6) {
+      const n1 = el('button', 'nut kim', `📝 Kiểm tra thẻ này — ${soRieng} câu`);
+      n1.onclick = () => TD.kiemTraThe(monTK, x, boRieng);
+      boc.appendChild(n1);
+    }
+    if (du) {
+      const n2 = el('button', soRieng >= 6 ? 'nut phu' : 'nut kim',
+        `📚 Kiểm tra cả chuyên đề «${pv.cd}» — ${TD.SO_CAU_KIEM_TRA} câu`);
+      n2.onclick = () => TD.kiemTraNhanh(monTK, pv.cd);
+      boc.appendChild(n2);
+    } else if (soRieng < 6) {
+      const n3 = el('button', 'nut kim', `📝 Kiểm tra tổng hợp ${TD.MON[monTK].ten}`);
+      n3.onclick = () => TD.kiemTraNhanh(monTK, null);
+      boc.appendChild(n3);
+    }
+    $('#tk-thu').replaceWith(boc);
   }
 
   $('#tk-khac').onclick = () => {
@@ -31519,12 +31934,18 @@ TD.moDeTaDao = function (mon, so, loai) {
 };
 
 /* Kiểm tra nhanh ngay trong Tàng Kinh Các: bốc câu hỏi đúng chủ đề vừa đọc */
-TD.kiemTraNhanh = function (mon, cd, the) {
-  /* Có thẻ thì hỏi đúng nội dung thẻ trước, cạn rồi mới nới ra cả chuyên đề */
-  const ds = the ? TD.deTheNay(mon, the, TD.SO_CAU_KIEM_TRA).ds
-                 : TD.deChuyenDe(mon, cd, TD.SO_CAU_KIEM_TRA);
+TD.kiemTraNhanh = function (mon, cd) {
+  /* Lượt mở rộng: hỏi cả chuyên đề. Muốn hỏi đúng một thẻ thì dùng TD.kiemTraThe. */
+  const ds = TD.deChuyenDe(mon, cd, TD.SO_CAU_KIEM_TRA);
   if (ds.length < 4) { TD.bao('Chuyên đề này chưa đủ câu để kiểm tra.', 'lua'); return; }
   TD.batDauPhien(mon, null, 'luyen', ds);
+};
+
+/* Kiểm tra ĐÚNG một thẻ: chỉ hỏi thứ được viết trong chính thẻ vừa đọc */
+TD.kiemTraThe = function (mon, the, sanCo) {
+  const d = sanCo || TD.deRiengThe(mon, the);
+  if (d.ds.length < 4) { TD.bao('Thẻ này chưa đủ câu để kiểm tra riêng.', 'lua'); return; }
+  TD.batDauPhien(mon, null, 'luyen', d.ds);
 };
 
 /* ============================================================
