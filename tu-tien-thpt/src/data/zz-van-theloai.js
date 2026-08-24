@@ -117,7 +117,66 @@ them('van_ct', [
   vd: 'Bài thơ lục bát nhưng dùng từ "xe máy", "điện thoại", xưng "tôi" và kể chuyện riêng ⇒ thơ hiện đại viết theo '
     + 'thể lục bát, không phải thơ trung đại.',
   bay: 'Không suy ra thời kỳ chỉ từ THỂ THƠ. Người hiện đại vẫn làm Đường luật, và ngược lại thơ trung đại cũng có '
-     + 'bài rất đời thường. Phải xét cả ngôn ngữ lẫn cách bộc lộ cái tôi.' }
+     + 'bài rất đời thường. Phải xét cả ngôn ngữ lẫn cách bộc lộ cái tôi.' },
+
+{ nhom: 'B. Cấu trúc đề', cd: 'Cấu trúc đề', ten: 'Phần Viết đã ĐẢO giữa hai năm — phải luyện cả hai chiều', cap: 1,
+  ct: '<b>Đề 2025:</b><br>'
+    + '&nbsp;&nbsp;Câu 1 — viết <b>ĐOẠN</b> nghị luận <b>VĂN HỌC</b>, khoảng 200 chữ, <b>2,0 điểm</b><br>'
+    + '&nbsp;&nbsp;Câu 2 — viết <b>BÀI</b> nghị luận <b>XÃ HỘI</b>, khoảng 600 chữ, <b>4,0 điểm</b><br>'
+    + '<b>Đề 2026 thì ngược lại:</b><br>'
+    + '&nbsp;&nbsp;Câu 1 — viết <b>ĐOẠN</b> nghị luận <b>XÃ HỘI</b>, khoảng 200 chữ, <b>2,0 điểm</b><br>'
+    + '&nbsp;&nbsp;Câu 2 — viết <b>BÀI</b> nghị luận <b>VĂN HỌC</b>, khoảng 600 chữ, <b>4,0 điểm</b><br>'
+    + '<b>Phần Đọc hiểu không đổi:</b> 4,0 điểm, 5 câu, ngữ liệu hoàn toàn ngoài sách giáo khoa.<br>'
+    + '<b>Hệ quả phải nhớ:</b> vào phòng thi ĐỌC KỸ lệnh đề trước khi viết. Nhìn thấy "Câu 1" mà tưởng chắc chắn là '
+    + 'văn học rồi lao vào phân tích tác phẩm, trong khi đề hỏi xã hội, là mất trọn 2,0 điểm.<br>'
+    + '<b>Ba thứ phải nhận ra ngay ở lệnh đề:</b><br>'
+    + '&nbsp;&nbsp;① <b>ĐOẠN</b> hay <b>BÀI</b> — đoạn thì viết liền một khối, không xuống dòng; bài thì phải tách rõ mở, thân, kết.<br>'
+    + '&nbsp;&nbsp;② <b>200</b> hay <b>600</b> chữ — lệch quá hai mươi phần trăm là mất điểm hình thức.<br>'
+    + '&nbsp;&nbsp;③ hỏi về <b>tác phẩm</b> (văn học) hay về <b>đời sống</b> (xã hội).',
+  khi: 'Đọc trước khi bước vào phòng thi, và mỗi lần bắt đầu một đề luyện.',
+  vd: 'Đề 2026 lấy bài thơ làm ngữ liệu cho câu 4 điểm, còn câu 2 điểm hỏi làm thế nào để có những Steve Jobs Việt Nam — '
+    + 'đúng kiểu đảo so với năm trước.',
+  bay: 'Đừng học tủ một bố cục. Không có gì bảo đảm năm sau giữ nguyên kiểu của năm nay — hai năm đầu tiên đã đảo một '
+     + 'lần rồi. Trong app này đề luân phiên cả hai bố cục để không quen tay một kiểu.' },
+
+{ nhom: 'B. Cấu trúc đề', cd: 'Cấu trúc đề', ten: 'Năm dạng lệnh đề nghị luận xã hội — mỗi dạng một khung khác', cap: 2,
+  ct: 'Nhầm dạng là lạc khung, mất phần lớn điểm triển khai. Nhận dạng bằng chính chữ trong lệnh đề:<br>'
+    + '<b>① "trình bày suy nghĩ về ý kiến…"</b> → <b>tư tưởng, đạo lí</b>.<br>'
+    + '&nbsp;&nbsp;Khung: giải thích → vì sao đúng (lí lẽ + dẫn chứng) → phản đề → bài học.<br>'
+    + '<b>② "trình bày suy nghĩ về hiện tượng…"</b> → <b>hiện tượng đời sống</b>.<br>'
+    + '&nbsp;&nbsp;Khung: thực trạng → nguyên nhân (chủ quan và khách quan) → hậu quả hoặc ý nghĩa → giải pháp theo từng chủ thể.<br>'
+    + '<b>③ "làm thế nào để…?"</b> → <b>câu hỏi giải pháp</b>.<br>'
+    + '&nbsp;&nbsp;Khung: chỉ ra GỐC RỄ trước đã (vì sao chưa làm được), rồi mới nhóm giải pháp. Bỏ bước gốc rễ là kê đơn suông.<br>'
+    + '<b>④ "anh/chị có đồng tình… không?"</b> → <b>bày tỏ quan điểm</b>.<br>'
+    + '&nbsp;&nbsp;Khung: nói lập trường NGAY ở mở bài → lí giải → đối thoại với ý kiến trái chiều → giới hạn của chính mình.<br>'
+    + '<b>⑤ "từ nội dung văn bản ở phần Đọc hiểu…"</b> → <b>tích hợp</b>.<br>'
+    + '&nbsp;&nbsp;Khung: bắt buộc nhắc một chi tiết của ngữ liệu làm điểm tựa, nhưng DẪN CHỨNG phải lấy ngoài văn bản.<br>'
+    + '<b>Chung cho mọi dạng:</b> phần triển khai chiếm 1,0 điểm ở đoạn và 2,5 điểm ở bài — đó là chỗ nặng nhất, phải có '
+    + 'dẫn chứng cụ thể chứ không nói chay.',
+  khi: 'Ngay khi đọc lệnh đề câu nghị luận xã hội, trước khi đặt bút.',
+  vd: 'Lệnh đề có chữ "làm thế nào" mà viết theo khung tư tưởng đạo lí thì cả bài đi giải thích khái niệm, '
+    + 'không đưa ra giải pháp nào — mất gần hết điểm triển khai.',
+  bay: 'Dạng ④ hay bị viết một chiều: chỉ khen ý kiến mà không hề nhắc tới phía đối lập. Thiếu phần đối thoại là '
+     + 'gần như không có điểm sáng tạo (0,25 ở đoạn, 0,5 ở bài).' },
+
+{ nhom: 'B. Cấu trúc đề', cd: 'Cấu trúc đề', ten: 'Năm dạng lệnh đề nghị luận văn học', cap: 2,
+  ct: '<b>① Phân tích, đánh giá chủ đề và nét đặc sắc nghệ thuật</b> — dạng phổ biến nhất, hỏi cả bài.<br>'
+    + '&nbsp;&nbsp;Khung: gọi tên chủ đề bằng một câu → phân tích theo mạch văn bản → nghệ thuật theo đặc trưng thể loại → đánh giá.<br>'
+    + '<b>② Phân tích nhân vật</b> — chỉ ra với ngữ liệu truyện.<br>'
+    + '&nbsp;&nbsp;Khung: hoàn cảnh → tính cách qua hành động, lời nói, quan hệ → chi tiết đắt nhất → nghệ thuật xây dựng → ý nghĩa.<br>'
+    + '<b>③ Phân tích một hình ảnh, hình tượng</b>.<br>'
+    + '&nbsp;&nbsp;Khung: nghĩa thực → nghĩa biểu tượng → SỰ VẬN ĐỘNG của hình ảnh từ đầu tới cuối → đóng góp vào chủ đề.<br>'
+    + '<b>④ Phân tích đặc sắc nghệ thuật</b>.<br>'
+    + '&nbsp;&nbsp;Khung: đi từng phương diện, mỗi phương diện một dẫn chứng và một câu chỉ ra TÁC DỤNG.<br>'
+    + '<b>⑤ Phân tích thông điệp</b>.<br>'
+    + '&nbsp;&nbsp;Khung: gọi tên thông điệp → CĂN CỨ rút ra từ chi tiết nào → cách tác giả gửi gắm → giá trị hôm nay.<br>'
+    + '<b>Điều bắt buộc ở mọi dạng:</b> phải trích dẫn chứng từ chính ngữ liệu. Viết chung chung về "tình yêu quê hương" '
+    + 'mà không dẫn được một câu nào trong bài là bài lạc, chấm rất thấp.',
+  khi: 'Ngay khi đọc lệnh đề câu nghị luận văn học.',
+  vd: 'Đề bảo "phân tích một hình ảnh giàu ý nghĩa" mà viết cả bài phân tích toàn tác phẩm thì lạc yêu cầu, '
+    + 'mất điểm xác định vấn đề.',
+  bay: 'Dạng ④ rất hay bị viết thành bản LIỆT KÊ biện pháp tu từ. Kể tên mười biện pháp mà không câu nào nói "để làm gì" '
+     + 'thì vẫn không có điểm — người chấm tính điểm ở chỗ phân tích tác dụng.' }
 
 ]);
 })();

@@ -549,10 +549,41 @@ TD.deVan = function (so) {
      với số đề xã hội ⇒ mọi biến thể của cùng một ngữ liệu chắc chắn ra câu 2 KHÁC nhau. */
   const buoc = 7;
   const k = (TD.bam('van-nlxh|' + nl.ten) + bienThe * buoc) % xhBo.length;
+  const hat = (TD.bam('van|' + nl.ten) + bienThe * 2654435761) >>> 0;
+
+  /* BỐ CỤC PHẦN VIẾT ĐÃ ĐẢO GIỮA HAI NĂM:
+       2025 — câu 1 ĐOẠN nghị luận VĂN HỌC 200 chữ (2,0đ), câu 2 BÀI nghị luận XÃ HỘI 600 chữ (4,0đ)
+       2026 — câu 1 ĐOẠN nghị luận XÃ HỘI 200 chữ (2,0đ), câu 2 BÀI nghị luận VĂN HỌC 600 chữ (4,0đ)
+     Không ai biết năm sau ra chiều nào, nên đề luân phiên cả hai để không
+     quen tay một kiểu rồi vào phòng thi gặp kiểu kia. */
+  const boCuc = (bienThe % 2 === 0) ? '2025' : '2026';
+
+  /* Câu văn học: biến thể đầu dùng đề gốc có dàn ý chi tiết bám sát ngữ liệu,
+     các biến thể sau sinh đề mới theo dạng lệnh khác — học tủ một đề là vô ích. */
+  const vhSo = boCuc === '2025' ? 200 : 600;
+  const cauVH = (bienThe === 0 && nl.nlvh && vhSo === 200)
+    ? nl.nlvh
+    : (TD.sinhDeNLVH ? TD.sinhDeNLVH(nl, hat, vhSo) : nl.nlvh);
+
+  /* Câu xã hội: bài 600 chữ lấy từ kho đề soạn sẵn (có dàn ý riêng cho từng
+     đề); đoạn 200 chữ thì sinh mới vì kho chỉ soạn theo cỡ bài. */
+  const cauXH = boCuc === '2025'
+    ? xhBo[k]
+    : (TD.sinhDeNLXH ? TD.sinhDeNLXH(hat ^ 0x9e3779b9, 200) : xhBo[k]);
+
+  const cau1 = boCuc === '2025' ? cauVH : cauXH;
+  const cau2 = boCuc === '2025' ? cauXH : cauVH;
   return {
     so: so, bienThe: bienThe + 1,
     ten: nl.ten, loai: nl.loai, nguLieu: nl.nguLieu, xuatXu: nl.xuatXu,
-    doc: nl.doc, nlvh: nl.nlvh, nlxh: xhBo[k]
+    doc: nl.doc,
+    boCuc: boCuc,
+    cau1: Object.assign({ nhan: boCuc === '2025' ? 'nghị luận văn học' : 'nghị luận xã hội',
+      kieu: 'đoạn văn', soChu: 200, dm: 2 }, cau1),
+    cau2: Object.assign({ nhan: boCuc === '2025' ? 'nghị luận xã hội' : 'nghị luận văn học',
+      kieu: 'bài văn', soChu: 600, dm: 4 }, cau2),
+    /* giữ hai tên cũ cho phần nào còn tra theo kiểu văn học / xã hội */
+    nlvh: cauVH, nlxh: cauXH
   };
 };
 

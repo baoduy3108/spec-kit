@@ -1406,17 +1406,26 @@ TD.thiVan = function (i) {
   });
   c.appendChild(p1);
 
-  /* --- Phần II: Viết --- */
+  /* --- Phần II: Viết ---
+     Bố cục đảo giữa hai năm nên không đóng cứng câu 1 là văn học nữa: lấy
+     thẳng từ đề, và ghi rõ đang theo bố cục năm nào để người học biết mình
+     vừa luyện kiểu gì. */
   const p2 = el('div', 'the', `<h3>II. VIẾT (6,0 điểm)</h3>
+    <p class="mo-nhat" style="margin-top:4px">Bố cục theo đề <b>${d.boCuc}</b>:
+      câu 1 ${d.cau1.kieu} ${d.cau1.nhan} · câu 2 ${d.cau2.kieu} ${d.cau2.nhan}.</p>
     <div style="margin-top:6px;font-size:14.6px;line-height:1.6">
-      <b>Câu 1</b> <span class="nhan">2,0 điểm</span><br>${d.nlvh.q}</div>`);
-  const o1 = el('textarea', 'o-nhap'); o1.rows = 7; o1.placeholder = 'Đoạn văn khoảng 200 chữ…';
-  o1.style.width = '100%'; o1.style.marginTop = '7px'; o1.id = 'van-nlvh';
+      <b>Câu 1</b> <span class="nhan">${TD.soVN(d.cau1.dm, 1)} điểm</span>
+      <span class="nhan">${d.cau1.nhan}</span><br>${d.cau1.q}</div>`);
+  const o1 = el('textarea', 'o-nhap'); o1.rows = 7;
+  o1.placeholder = `${d.cau1.kieu} khoảng ${d.cau1.soChu} chữ…`;
+  o1.style.width = '100%'; o1.style.marginTop = '7px'; o1.id = 'van-c1';
   p2.appendChild(o1);
   p2.appendChild(el('div', '', `<div style="margin-top:16px;font-size:14.6px;line-height:1.6">
-    <b>Câu 2</b> <span class="nhan">4,0 điểm</span><br>${d.nlxh.q}</div>`));
-  const o2 = el('textarea', 'o-nhap'); o2.rows = 14; o2.placeholder = 'Bài văn khoảng 600 chữ…';
-  o2.style.width = '100%'; o2.style.marginTop = '7px'; o2.id = 'van-nlxh';
+    <b>Câu 2</b> <span class="nhan">${TD.soVN(d.cau2.dm, 1)} điểm</span>
+    <span class="nhan">${d.cau2.nhan}</span><br>${d.cau2.q}</div>`));
+  const o2 = el('textarea', 'o-nhap'); o2.rows = 14;
+  o2.placeholder = `${d.cau2.kieu} khoảng ${d.cau2.soChu} chữ…`;
+  o2.style.width = '100%'; o2.style.marginTop = '7px'; o2.id = 'van-c2';
   p2.appendChild(o2);
 
   /* đếm chữ để canh dung lượng — sai dung lượng là mất điểm hình thức */
@@ -1424,7 +1433,7 @@ TD.thiVan = function (i) {
   const capNhat = () => {
     const c1 = (o1.value.trim().match(/\S+/g) || []).length;
     const c2 = (o2.value.trim().match(/\S+/g) || []).length;
-    dem.innerHTML = `Câu 1: <b>${c1}</b> chữ (chuẩn ~200) · Câu 2: <b>${c2}</b> chữ (chuẩn ~600)`;
+    dem.innerHTML = `Câu 1: <b>${c1}</b> chữ (chuẩn ~${d.cau1.soChu}) · Câu 2: <b>${c2}</b> chữ (chuẩn ~${d.cau2.soChu})`;
   };
   o1.oninput = capNhat; o2.oninput = capNhat; capNhat();
   p2.appendChild(dem);
@@ -1451,8 +1460,8 @@ TD.chamVan = function (i) {
      innerHTML = '' thổi bay, getElementById trả null và bài viết mất trắng. */
   const baiLam = {
     doc: d.doc.map((x, k) => ((document.getElementById('van-doc-' + k) || {}).value || '').trim()),
-    nlvh: ((document.getElementById('van-nlvh') || {}).value || '').trim(),
-    nlxh: ((document.getElementById('van-nlxh') || {}).value || '').trim()
+    c1: ((document.getElementById('van-c1') || {}).value || '').trim(),
+    c2: ((document.getElementById('van-c2') || {}).value || '').trim()
   };
   const c = $('#noidung'); c.innerHTML = '';
 
@@ -1486,7 +1495,8 @@ TD.chamVan = function (i) {
 
   /* --- đáp án phần viết --- */
   const b2 = el('div', 'the', '<h3>II. VIẾT (6,0 điểm)</h3>');
-  [['Câu 1 — nghị luận văn học (2,0đ)', d.nlvh, 2], ['Câu 2 — nghị luận xã hội (4,0đ)', d.nlxh, 4]].forEach(([ten, x, toiDa]) => {
+  [[`Câu 1 — ${d.cau1.nhan} (${TD.soVN(d.cau1.dm, 1)}đ)`, d.cau1, d.cau1.dm],
+   [`Câu 2 — ${d.cau2.nhan} (${TD.soVN(d.cau2.dm, 1)}đ)`, d.cau2, d.cau2.dm]].forEach(([ten, x, toiDa]) => {
     b2.appendChild(el('div', '', `<div style="margin-top:14px;font-size:14.4px"><b>${ten}</b><br>${x.q}</div>
       <div class="giai" style="white-space:pre-wrap"><b>Dàn ý cần có:</b>\n${x.dan}</div>
       <div class="meo"><b>Biểu điểm:</b> ${x.diem}</div>`));
@@ -1545,8 +1555,8 @@ TD.chamVan = function (i) {
   const bSoi = el('div', 'the', '<h3>🔍 Soi sơ bộ bài viết</h3>'
     + '<p class="mo-nhat">Máy chỉ đo được những thứ ĐẾM ĐƯỢC: dung lượng, bố cục, từ nối, dẫn chứng, lặp từ. '
     + 'Phần nội dung và cảm thụ thì máy chịu — chỗ đó vẫn phải tự đối chiếu đáp án, hoặc chép bài gửi cho Claude chấm.</p>');
-  [['Câu 1 — đoạn nghị luận văn học (~200 chữ)', baiLam.nlvh, 200, true],
-   ['Câu 2 — bài nghị luận xã hội (~600 chữ)', baiLam.nlxh, 600, false]]
+  [[`Câu 1 — ${d.cau1.kieu} ${d.cau1.nhan} (~${d.cau1.soChu} chữ)`, baiLam.c1, d.cau1.soChu, d.cau1.kieu === 'đoạn văn'],
+   [`Câu 2 — ${d.cau2.kieu} ${d.cau2.nhan} (~${d.cau2.soChu} chữ)`, baiLam.c2, d.cau2.soChu, d.cau2.kieu === 'đoạn văn']]
     .forEach(([ten, van, chuan, laDoan]) => {
       bSoi.appendChild(el('div', '', `<div style="margin-top:12px;font-size:14.2px"><b>${ten}</b></div>`
         + `<div class="giai" style="white-space:pre-wrap">${soiBai(van, chuan, laDoan).join('\n')}</div>`));
@@ -1571,8 +1581,8 @@ TD.chamVan = function (i) {
       l.push('');
     });
     l.push('=== PHẦN II. VIẾT (6,0 điểm) ===');
-    [[d.nlvh, baiLam.nlvh, '2,0'], [d.nlxh, baiLam.nlxh, '4,0']].forEach(([x, viet, dm]) => {
-      l.push(`Đề (${dm}đ): ${x.q}`);
+    [[d.cau1, baiLam.c1], [d.cau2, baiLam.c2]].forEach(([x, viet]) => {
+      l.push(`Đề (${TD.soVN(x.dm, 1)}đ · ${x.kieu} ${x.nhan}, khoảng ${x.soChu} chữ): ${x.q}`);
       l.push('Biểu điểm: ' + x.diem);
       l.push('BÀI LÀM: ' + (viet || '(bỏ trống)'));
       l.push('');
