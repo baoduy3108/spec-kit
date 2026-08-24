@@ -1226,38 +1226,14 @@ TD.moThe = function (khoa, i) {
   const pv = TD.phamViThe(monTK, x);
   if (khoLT.length >= 8) {
     const du = pv.cd && khoLT.filter(z => z.cd === pv.cd).length >= 4;
-    /* Nút ghi đúng cái sẽ được hỏi: tên THẺ khi đủ mệnh đề sát thẻ, tên
-       CHUYÊN ĐỀ khi phải hỏi rộng ra, và nói thẳng là tổng hợp khi không ghép
-       được chuyên đề nào. */
-    /* Hai nút tách bạch, không hứa hão:
-       · nút vàng hỏi ĐÚNG những gì viết trong thẻ này, số câu do thẻ quyết định
-       · nút phụ mới là lượt 50 câu mở rộng ra cả chuyên đề                    */
-    const boc = el('span', 'hang-nut');
-    boc.style.display = 'inline-flex';
-    /* dựng SẴN bộ câu rồi mới ghi số lên nút — nút và lượt kiểm tra phải là
-       cùng một bộ, không được đếm một đằng hỏi một nẻo */
-    const boRieng = pv.rieng ? TD.deRiengThe(monTK, x, TD.SO_CAU_KIEM_TRA) : null;
-    const coRieng = !!boRieng && boRieng.sat >= 5 && boRieng.ds.length >= TD.SO_CAU_KIEM_TRA;
-    if (coRieng) {
-      /* vẫn đủ 50 câu như mọi lượt kiểm tra khác, chỉ khác ở chỗ bao nhiêu câu
-         ĐẦU là của chính thẻ này — ghi rõ ra để không ai phải đoán */
-      const n1 = el('button', 'nut kim', `📝 Kiểm tra thẻ này — ${boRieng.ds.length} câu`
-        + (boRieng.sat >= boRieng.ds.length ? ' · toàn bộ bám sát thẻ'
-                                            : ` · ${boRieng.sat} câu đầu bám sát thẻ`));
-      n1.onclick = () => TD.kiemTraThe(monTK, x, boRieng);
-      boc.appendChild(n1);
-    }
-    if (du) {
-      const n2 = el('button', coRieng ? 'nut phu' : 'nut kim',
-        `📚 Kiểm tra cả chuyên đề «${pv.cd}» — ${TD.SO_CAU_KIEM_TRA} câu`);
-      n2.onclick = () => TD.kiemTraNhanh(monTK, pv.cd);
-      boc.appendChild(n2);
-    } else if (!coRieng) {
-      const n3 = el('button', 'nut kim', `📝 Kiểm tra tổng hợp ${TD.MON[monTK].ten}`);
-      n3.onclick = () => TD.kiemTraNhanh(monTK, null);
-      boc.appendChild(n3);
-    }
-    $('#tk-thu').replaceWith(boc);
+    /* Một nút, 50 câu trích từ ĐÚNG chuyên đề của thẻ vừa đọc. Ghép được chuyên
+       đề thì nút ghi tên chuyên đề, không ghép được thì nói thẳng là tổng hợp
+       cả môn — không gán bừa rồi hỏi lạc đề. */
+    const nut2 = el('button', 'nut kim', du
+      ? `📝 Kiểm tra ngay — ${pv.cd}`
+      : `📝 Kiểm tra tổng hợp ${TD.MON[monTK].ten}`);
+    nut2.onclick = () => TD.kiemTraNhanh(monTK, du ? pv.cd : null);
+    $('#tk-thu').replaceWith(nut2);
   }
 
   $('#tk-khac').onclick = () => {
@@ -1863,18 +1839,12 @@ TD.moDeTaDao = function (mon, so, loai) {
 
 /* Kiểm tra nhanh ngay trong Tàng Kinh Các: bốc câu hỏi đúng chủ đề vừa đọc */
 TD.kiemTraNhanh = function (mon, cd) {
-  /* Lượt mở rộng: hỏi cả chuyên đề. Muốn hỏi đúng một thẻ thì dùng TD.kiemTraThe. */
+  /* Bốc 50 câu thuộc ĐÚNG chuyên đề của thẻ vừa đọc */
   const ds = TD.deChuyenDe(mon, cd, TD.SO_CAU_KIEM_TRA);
   if (ds.length < 4) { TD.bao('Chuyên đề này chưa đủ câu để kiểm tra.', 'lua'); return; }
   TD.batDauPhien(mon, null, 'luyen', ds);
 };
 
-/* Kiểm tra ĐÚNG một thẻ: chỉ hỏi thứ được viết trong chính thẻ vừa đọc */
-TD.kiemTraThe = function (mon, the, sanCo) {
-  const d = sanCo || TD.deRiengThe(mon, the, TD.SO_CAU_KIEM_TRA);
-  if (d.ds.length < 4) { TD.bao('Thẻ này chưa đủ câu để kiểm tra riêng.', 'lua'); return; }
-  TD.batDauPhien(mon, null, 'luyen', d.ds);
-};
 
 /* ============================================================
    MÀN 6 — THIÊN MỆNH BẢNG (lộ trình 20 tuần)
