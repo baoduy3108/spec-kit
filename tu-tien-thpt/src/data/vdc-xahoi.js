@@ -106,8 +106,11 @@ const TU_LIEU = [
 TD.GEN.su = (TD.GEN.su || []).concat([
 
 { ma: 'su-vdc-tulieu', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'mc',
-  tao(R) {
-    const x = R.chon(TU_LIEU);
+  _cdHoTro: TU_LIEU.map(x => x.cd).filter((x, i, a) => x && a.indexOf(x) === i),
+  tao(R, cd) {
+    /* Luyện Công truyền chuyên đề vào thì chỉ lấy tư liệu của chuyên đề đó */
+    const bo = TU_LIEU.filter(y => !cd || y.cd === cd);
+    const x = R.chon(bo.length ? bo : TU_LIEU);
     const q = MC(R, `Đọc đoạn tư liệu sau:<br><div class="giai" style="font-style:italic">${x.tl}<br>`
       + `<span style="font-style:normal;font-size:12.6px;color:var(--chu3)">${x.ng}</span></div>`
       + `Nội dung nào sau đây <b>phản ánh đúng nhất</b> ý nghĩa của đoạn tư liệu trên?`,
@@ -118,8 +121,10 @@ TD.GEN.su = (TD.GEN.su || []).concat([
   } },
 
 { ma: 'su-vdc-tulieu-ds', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'ds',
-  tao(R) {
-    const x = R.chon(TU_LIEU);
+  _cdHoTro: TU_LIEU.map(x => x.cd).filter((x, i, a) => x && a.indexOf(x) === i),
+  tao(R, cd) {
+    const bo = TU_LIEU.filter(y => !cd || y.cd === cd);
+    const x = R.chon(bo.length ? bo : TU_LIEU);
     const khac = TU_LIEU.filter(y => y.cd !== x.cd);
     if (khac.length < 2) return null;
     const y1 = R.chon(khac);

@@ -346,28 +346,41 @@ const TRUC = [
 /* Ba mốc trở lên mới đủ chỗ ra bốn phương án đọc mốc */
 const veTruc = t => TD.hinhTrucThoiGian(t.moc, t.ten);
 
+/* Năm bộ dưới đây dùng chung kho trục thời gian, mỗi trục gắn với một chuyên
+   đề. Khai danh sách đó ra để Luyện Công biết bộ này phục vụ chuyên đề nào. */
+const CD_TRUC = TRUC.map(x => x.cd).filter((x, i, a) => x && a.indexOf(x) === i);
+
 TD.GEN.su = (TD.GEN.su || []).concat([
 
 /* ---------- MỨC 1: đọc thẳng một mốc trên trục ---------- */
-{ ma: 'su-hinh-docmoc', chuong: 'Tư liệu lịch sử', muc: 1, dang: 'mc',
-  tao(R) {
-    const t = R.chon(TRUC);
+{ ma: 'su-hinh-docmoc', chuong: 'Tư liệu lịch sử', muc: 1, dang: 'mc', _cdHoTro: CD_TRUC,
+  tao(R, cd) {
+    /* Bộ này phục vụ nhiều chuyên đề. Khi Luyện Công truyền chuyên đề vào thì
+       chỉ được lấy trục thuộc đúng chuyên đề đó, không thì câu ra lạc đề. */
+    const bo = TRUC.filter(x => !cd || x.cd === cd);
+    const t = R.chon(bo.length ? bo : TRUC);
     const i = R.nguyen(0, t.moc.length - 1);
     const dung = t.moc[i].ten;
     const nhieu = baNhieu(dung, TD.xaoR(R, t.moc.map(m => m.ten)));
     if (!nhieu) return null;
     const sv = {};
     t.moc.forEach(m => { if (m.ten !== dung) sv[m.ten] = `sự kiện này nằm ở mốc năm ${m.nam} trên trục, không phải năm ${t.moc[i].nam}`; });
-    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện nào diễn ra vào năm ${t.moc[i].nam}?`,
+    const oo = MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện nào diễn ra vào năm ${t.moc[i].nam}?`,
       { d: dung, s: nhieu, sv: sv,
         v: `Dò theo trục tới vạch ghi năm ${t.moc[i].nam}, nhãn tương ứng là "${dung}".` },
       'Câu đọc mốc chỉ cần dóng đúng vạch năm với nhãn sự kiện — đừng vội nhớ theo trí nhớ mà bỏ qua hình.');
+    /* Nhãn chương phải là tên chuyên đề của chính trục vừa chọn, không thì
+       người học đang ôn Liên hợp quốc lại thấy chương ghi "Tư liệu lịch sử". */
+    return oo ? Object.assign(oo, { chuong: t.cd }) : null;
   } },
 
 /* ---------- MỨC 2: khoảng cách năm và thứ tự trước sau ---------- */
-{ ma: 'su-hinh-khoangcach', chuong: 'Tư liệu lịch sử', muc: 2, dang: 'mc',
-  tao(R) {
-    const t = R.chon(TRUC);
+{ ma: 'su-hinh-khoangcach', chuong: 'Tư liệu lịch sử', muc: 2, dang: 'mc', _cdHoTro: CD_TRUC,
+  tao(R, cd) {
+    /* Bộ này phục vụ nhiều chuyên đề. Khi Luyện Công truyền chuyên đề vào thì
+       chỉ được lấy trục thuộc đúng chuyên đề đó, không thì câu ra lạc đề. */
+    const bo = TRUC.filter(x => !cd || x.cd === cd);
+    const t = R.chon(bo.length ? bo : TRUC);
     const kieu = R.chon(['cach', 'sau']);
     if (kieu === 'cach') {
       let i = R.nguyen(0, t.moc.length - 2);
@@ -379,7 +392,7 @@ TD.GEN.su = (TD.GEN.su || []).concat([
         for (let b = a + 1; b < t.moc.length; b++) ung.push(String(t.moc[b].nam - t.moc[a].nam) + ' năm');
       const nhieu = baNhieu(dung, TD.xaoR(R, ung));
       if (!nhieu) return null;
-      return MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện "${t.moc[i].ten}" và sự kiện "${t.moc[j].ten}" cách nhau bao nhiêu năm?`,
+      const oo = MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện "${t.moc[i].ten}" và sự kiện "${t.moc[j].ten}" cách nhau bao nhiêu năm?`,
         { d: dung, s: nhieu,
           sv: (() => { const s = {}; nhieu.forEach(x => { s[x] = 'đây là khoảng cách của một cặp mốc khác trên trục, không phải cặp mà đề hỏi'; }); return s; })(),
           v: `Lấy năm của mốc sau trừ năm của mốc trước: ${t.moc[j].nam} − ${t.moc[i].nam} = ${t.moc[j].nam - t.moc[i].nam}.` },
@@ -394,35 +407,53 @@ TD.GEN.su = (TD.GEN.su || []).concat([
       if (m.ten === dung) return;
       sv[m.ten] = k <= i ? `mốc năm ${m.nam} nằm TRƯỚC mốc mà đề hỏi` : `mốc năm ${m.nam} có đứng sau, nhưng còn một mốc khác xen vào giữa nên không phải sự kiện kế tiếp`;
     });
-    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện nào diễn ra ngay sau sự kiện "${t.moc[i].ten}"?`,
+    const oo = MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện nào diễn ra ngay sau sự kiện "${t.moc[i].ten}"?`,
       { d: dung, s: nhieu, sv: sv,
         v: `Trên trục, mốc đứng liền sau năm ${t.moc[i].nam} là năm ${t.moc[i + 1].nam} — ứng với "${dung}".` },
       'Hỏi "ngay sau" là hỏi mốc LIỀN KỀ, không phải mốc cuối cùng của trục.');
+    /* Nhãn chương phải là tên chuyên đề của chính trục vừa chọn, không thì
+       người học đang ôn Liên hợp quốc lại thấy chương ghi "Tư liệu lịch sử". */
+    return oo ? Object.assign(oo, { chuong: t.cd }) : null;
   } },
 
 /* ---------- MỨC 3: nhận định về mối liên hệ giữa các mốc ---------- */
-{ ma: 'su-hinh-nhandinh', chuong: 'Tư liệu lịch sử', muc: 3, dang: 'mc',
-  tao(R) {
-    const t = R.chon(TRUC);
-    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Nhận định nào sau đây đúng khi khai thác trục thời gian trên?`,
+{ ma: 'su-hinh-nhandinh', chuong: 'Tư liệu lịch sử', muc: 3, dang: 'mc', _cdHoTro: CD_TRUC,
+  tao(R, cd) {
+    /* Bộ này phục vụ nhiều chuyên đề. Khi Luyện Công truyền chuyên đề vào thì
+       chỉ được lấy trục thuộc đúng chuyên đề đó, không thì câu ra lạc đề. */
+    const bo = TRUC.filter(x => !cd || x.cd === cd);
+    const t = R.chon(bo.length ? bo : TRUC);
+    const oo = MC(R, `Cho trục thời gian sau:${veTruc(t)}Nhận định nào sau đây đúng khi khai thác trục thời gian trên?`,
       { d: t.nx.d, s: t.nx.s, sv: t.nx.sv, v: t.nx.v },
       'Câu nhận định luôn giấu bẫy ở THỨ TỰ và ở việc gộp hai sự kiện khác nhau làm một — cứ dóng lại từng mốc trên hình là loại được.');
+    /* Nhãn chương phải là tên chuyên đề của chính trục vừa chọn, không thì
+       người học đang ôn Liên hợp quốc lại thấy chương ghi "Tư liệu lịch sử". */
+    return oo ? Object.assign(oo, { chuong: t.cd }) : null;
   } },
 
 /* ---------- MỨC 4: rút ra quy luật của cả giai đoạn ---------- */
-{ ma: 'su-hinh-quyluat', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'mc',
-  tao(R) {
-    const t = R.chon(TRUC);
-    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Từ toàn bộ các mốc trên trục thời gian, có thể rút ra nhận xét khái quát nào sau đây?`,
+{ ma: 'su-hinh-quyluat', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'mc', _cdHoTro: CD_TRUC,
+  tao(R, cd) {
+    /* Bộ này phục vụ nhiều chuyên đề. Khi Luyện Công truyền chuyên đề vào thì
+       chỉ được lấy trục thuộc đúng chuyên đề đó, không thì câu ra lạc đề. */
+    const bo = TRUC.filter(x => !cd || x.cd === cd);
+    const t = R.chon(bo.length ? bo : TRUC);
+    const oo = MC(R, `Cho trục thời gian sau:${veTruc(t)}Từ toàn bộ các mốc trên trục thời gian, có thể rút ra nhận xét khái quát nào sau đây?`,
       { d: t.yn.d, s: t.yn.s, sv: t.yn.sv, v: t.yn.v },
       'Câu khái quát không hỏi từng mốc mà hỏi SỢI DÂY nối các mốc: điều kiện nào dẫn tới điều kiện nào. '
       + 'Phương án nào chỉ đúng với một mốc lẻ, hoặc đảo ngược quan hệ nhân quả, thì loại.');
+    /* Nhãn chương phải là tên chuyên đề của chính trục vừa chọn, không thì
+       người học đang ôn Liên hợp quốc lại thấy chương ghi "Tư liệu lịch sử". */
+    return oo ? Object.assign(oo, { chuong: t.cd }) : null;
   } },
 
 /* ---------- MỨC 3: đúng/sai bốn ý trên cùng một trục ---------- */
-{ ma: 'su-hinh-dungsai', chuong: 'Tư liệu lịch sử', muc: 3, dang: 'ds',
-  tao(R) {
-    const t = R.chon(TRUC);
+{ ma: 'su-hinh-dungsai', chuong: 'Tư liệu lịch sử', muc: 3, dang: 'ds', _cdHoTro: CD_TRUC,
+  tao(R, cd) {
+    /* Bộ này phục vụ nhiều chuyên đề. Khi Luyện Công truyền chuyên đề vào thì
+       chỉ được lấy trục thuộc đúng chuyên đề đó, không thì câu ra lạc đề. */
+    const bo = TRUC.filter(x => !cd || x.cd === cd);
+    const t = R.chon(bo.length ? bo : TRUC);
     const sai = TD.xaoR(R, t.nx.s.concat(t.yn.s)).slice(0, 2);
     const y = TD.xaoR(R, [
       { t: t.nx.d, a: true }, { t: t.yn.d, a: true },
@@ -433,6 +464,8 @@ TD.GEN.su = (TD.GEN.su || []).concat([
              : ((t.nx.sv && t.nx.sv[x.t]) || (t.yn.sv && t.yn.sv[x.t]) || 'không khớp với các mốc trên trục.'))).join('\n');
     return { q: `Cho trục thời gian sau:${veTruc(t)}Xét các phát biểu sau:`,
       items: y, giai: giai,
+      /* nhãn chương lấy theo trục vừa chọn, không để trơ "Tư liệu lịch sử" */
+      chuong: t.cd,
       meo: 'Dạng đúng/sai bốn ý thường có hai ý đọc mốc và hai ý khái quát. '
         + 'Làm chắc hai ý đọc mốc trước để ăn điểm, rồi mới cân nhắc hai ý còn lại.' };
   } }

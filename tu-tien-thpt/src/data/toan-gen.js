@@ -283,13 +283,33 @@ TD.GEN.toan = [
 
 { ma: 'toan-tron-non-cau', chuong: 'Khối tròn xoay', muc: 2, dang: 'tln',
   tao(R) {
-    const loai = R.chon(['tru-V', 'non-l', 'non-Sxq', 'cau-S']);
+    /* Bốn dạng cũ chỉ đẻ ra hơn bốn chục đề khác nhau vì hai dạng nón dùng
+       chung năm bộ Pythagore. Thêm thể tích nón, thể tích cầu, diện tích toàn
+       phần trụ và mở rộng bộ ba số cho đủ biến thể. */
+    const loai = R.chon(['tru-V', 'tru-Stp', 'non-l', 'non-Sxq', 'non-V', 'cau-S', 'cau-V']);
     if (loai === 'cau-S') {
-      const Rb = R.nguyen(1, 10);
+      const Rb = R.nguyen(1, 14);
       return { q: `Tính diện tích mặt cầu bán kính R = ${Rb}. Kết quả có dạng kπ, hãy tìm k.`,
         ans: String(4 * Rb * Rb),
         giai: `S = 4πR² = 4π·${Rb}² = ${4 * Rb * Rb}π ⇒ k = ${4 * Rb * Rb}.`,
         meo: 'Mặt cầu: S = 4πR², V = (4/3)πR³. Đừng nhầm với diện tích hình tròn πR².' };
+    }
+    if (loai === 'cau-V') {
+      const Rb = R.chon([3, 6, 9, 12, 15]);          /* chia hết cho 3 để k nguyên */
+      const k = 4 * Rb * Rb * Rb / 3;
+      return { q: `Tính thể tích khối cầu bán kính R = ${Rb}. Kết quả có dạng kπ, hãy tìm k.`,
+        ans: String(k),
+        giai: `V = (4/3)πR³ = (4/3)π·${Rb}³ = (4·${Rb * Rb * Rb}/3)π = ${k}π ⇒ k = ${k}.`,
+        meo: 'Thể tích cầu có hệ số 4/3 và mũ BA; diện tích mặt cầu hệ số 4 và mũ HAI.' };
+    }
+    if (loai === 'tru-Stp') {
+      const r = R.nguyen(1, 9), h = R.nguyen(2, 14);
+      const k = 2 * r * (h + r);
+      return { q: `Tính diện tích toàn phần của hình trụ có bán kính đáy r = ${r} và chiều cao h = ${h}. Kết quả có dạng kπ, hãy tìm k.`,
+        ans: String(k),
+        giai: `S_tp = S_xq + 2·S_đáy = 2πrh + 2πr² = 2πr(h + r)\n`
+            + `  = 2π·${r}·(${h} + ${r}) = ${k}π ⇒ k = ${k}.`,
+        meo: 'Trụ có HAI mặt đáy nên phải cộng 2πr², nón chỉ có một đáy.' };
     }
     if (loai === 'tru-V') {
       const r = R.nguyen(1, 8), h = R.nguyen(2, 12);
@@ -298,8 +318,19 @@ TD.GEN.toan = [
         giai: `V = πr²h = π·${r}²·${h} = ${r * r * h}π ⇒ k = ${r * r * h}.`,
         meo: 'Khối trụ V = πr²h; khối nón có thêm hệ số 1/3.' };
     }
-    const bo = R.chon([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15]]);
+    const bo = R.chon([[3, 4, 5], [6, 8, 10], [9, 12, 15], [12, 16, 20], [15, 20, 25],
+                       [5, 12, 13], [10, 24, 26], [8, 15, 17], [16, 30, 34],
+                       [7, 24, 25], [20, 21, 29], [9, 40, 41], [12, 35, 37]]);
     const [r, h, l] = bo;
+    if (loai === 'non-V') {
+      /* r²h phải chia hết cho 3 mới ra k nguyên */
+      if ((r * r * h) % 3) return null;
+      const k = r * r * h / 3;
+      return { q: `Tính thể tích khối nón có bán kính đáy r = ${r} và chiều cao h = ${h}. Kết quả có dạng kπ, hãy tìm k.`,
+        ans: String(k),
+        giai: `V = (1/3)πr²h = (1/3)π·${r}²·${h} = ${k}π ⇒ k = ${k}.`,
+        meo: 'Nón dùng CHIỀU CAO h cho thể tích, dùng ĐƯỜNG SINH l cho diện tích xung quanh.' };
+    }
     if (loai === 'non-l') {
       return { q: `Một hình nón có bán kính đáy r = ${r} và chiều cao h = ${h}. Tính độ dài đường sinh l.`,
         ans: String(l),

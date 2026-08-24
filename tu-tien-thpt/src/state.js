@@ -393,6 +393,9 @@ TD.tuKhoa = function (t) {
    Thứ tự quan trọng: luật hẹp đặt trước luật rộng. */
 TD.BAN_DO_CD = {
   hoa: [
+    /* "Năng lượng hoá học" là tên chương của bộ sinh nhiệt phản ứng — nó thuộc
+       chuyên đề nhiệt động, không thì bộ này không vào Luyện Công chỗ nào. */
+    [/nang luong hoa hoc|nhiet phan ung|enthalpy|nang luong lien ket/, 'Nhiệt động – Tốc độ – Cân bằng'],
     [/ester|este |xa phong|chat beo|lipid|triolein|tristearin|glycerol/, 'Ester – Lipid'],
     [/glucose|fructose|saccharose|tinh bot|cellulose|carbohydrate|trang bac|maltose/, 'Carbohydrate'],
     [/amine|amino acid|peptide|protein|glycine|alanine|anilin|lysine|glutamic|muoi amoni/, 'Amine – Amino acid – Peptide'],
@@ -485,7 +488,9 @@ TD.BAN_DO_CD = {
   ],
   anh: [
     [/word form|tu loai|hau to|tien to|duoi tu/, 'Từ loại'],
-    [/dang bai|chien thuat 2025|sap xep cau|chen cau|tom tat|doc hieu/, 'Dạng bài & chiến thuật 2025'],
+    /* "Hoàn thành đoạn văn" là một trong bốn dạng bài của đề 2025, phải nằm
+       trong chuyên đề dạng bài chứ không rơi ra ngoài mọi chuyên đề. */
+    [/dang bai|chien thuat 2025|sap xep cau|chen cau|tom tat|doc hieu|hoan thanh doan van|dien tu vao van ban/, 'Dạng bài & chiến thuật 2025'],
     [/dieu kien|conditional|wish/, 'Câu điều kiện'],
     [/bi dong|tuong thuat|passive|reported/, 'Bị động – Tường thuật'],
     [/menh de quan he|relative/, 'Mệnh đề quan hệ'],
@@ -547,7 +552,11 @@ TD.deChuyenDe = function (mon, cd, soCau) {
 
   /* ② bài tập tính toán thuộc đúng chương đó (nếu môn có bộ sinh đề) */
   const mau = (TD.GEN[mon] || []).filter(t =>
-    !t._tuLT && (!cd || TD.chuDeCuaThe(mon, { nhom: t.chuong }) === cd));
+    !t._tuLT && (!cd
+      || TD.chuDeCuaThe(mon, { nhom: t.chuong }) === cd
+      /* bộ sinh khai _cdHoTro là bộ dùng chung cho nhiều chuyên đề — nó sẽ tự
+         lọc nội dung theo chuyên đề được truyền vào, nên vẫn đúng phạm vi */
+      || (t._cdHoTro && t._cdHoTro.indexOf(cd) >= 0)));
   if (mau.length) {
     const soBT = Math.min(Math.round(n * 0.3), n - ds.length);
     /* Chuyên đề chỉ có một hai bộ sinh mà phải rút mười lăm câu thì rất dễ bốc
@@ -558,12 +567,12 @@ TD.deChuyenDe = function (mon, cd, soCau) {
     for (let k = 0, thu = 0; k < soBT && thu < soBT * 12; thu++) {
       if (vt >= quay.length) { quay = TD.xao(mau); vt = 0; }
       const t = quay[vt++], seed = (Math.random() * 4294967295) >>> 0;
-      const q = TD.sinhCau(t, seed);
+      const q = TD.sinhCau(t, seed, cd);
       if (!q) continue;
       const vtay = TD.vanTayCau(q);
       if (daRa.has(vtay)) continue;
       daRa.add(vtay);
-      ds.push({ mon: mon, g: t.ma, s: seed }); k++;
+      ds.push({ mon: mon, g: t.ma, s: seed, cd: cd }); k++;
     }
   }
 
@@ -772,10 +781,10 @@ TD.chuanDau = function (t) {
     .replace(/(^|[=(:;,[\s])-(\d)/g, '$1−$2');                                /* = -3 → = −3 */
 };
 
-TD.sinhCau = function (mau, seed) {
+TD.sinhCau = function (mau, seed, cd) {
   const R = TD.rng(seed);
   let o;
-  try { o = mau.tao(R); } catch (e) { console.warn('Mẫu đề lỗi:', mau.ma, e); return null; }
+  try { o = mau.tao(R, cd); } catch (e) { console.warn('Mẫu đề lỗi:', mau.ma, e); return null; }
   if (!o) return null;
   ['q', 'giai', 'meo', 'ans'].forEach(k => { if (o[k]) o[k] = TD.chuanDau(o[k]); });
   if (o.opts) o.opts = o.opts.map(TD.chuanDau);
@@ -794,7 +803,10 @@ TD.layCau = function (it) {
   if (it.lt !== undefined) return TD.cauTuMenhDe(it.mon, it.lt, it.c, it.s, it.nhan, it.loc);
   if (it.g) {
     const mau = TD.timMau(it.mon, it.g);
-    return mau ? TD.sinhCau(mau, it.s) : null;
+    /* Có bộ sinh phục vụ NHIỀU chuyên đề (trục thời gian Sử, đoạn tư liệu):
+       phải nói cho nó biết đang luyện chuyên đề nào, không thì nó bốc ngẫu
+       nhiên và ra câu lạc hẳn khỏi chuyên đề người học đang mở. */
+    return mau ? TD.sinhCau(mau, it.s, it.cd) : null;
   }
   return (TD.KHO[it.mon] || [])[it.i];
 };

@@ -12,6 +12,10 @@ const T = TD.lamTron;
 TD.GEN.hoa = [
 
 /* ---------- NỀN TẢNG ---------- */
+/* Tính số mol là kỹ năng nền của mọi chuyên đề, nhưng ĐÃ THỬ cho nó vào Luyện
+   Công của mọi chuyên đề thì hỏng: đang đọc thẻ Dãy điện hoá lại nhận câu
+   "tính số mol của 22,4 gam CuSO₄" — đúng kiểu lạc chuyên đề mà người học kêu.
+   Thà thiếu ở Luyện Công còn hơn hỏi lạc; nó vẫn vào Tà Đạo và đề Độ Kiếp. */
 { ma: 'hoa-mol', chuong: 'Tính toán hoá học', muc: 1, dang: 'tln',
   tao(R) {
     const c = R.chon([
@@ -570,7 +574,11 @@ TD.GEN.hoa = [
     };
   } },
 
-{ ma: 'hoa-hieusuat-nguoc', chuong: 'Bài toán hiệu suất', muc: 3, dang: 'tln',
+/* Bài này luôn là lên men tinh bột ra ethanol nên nó thuộc hẳn chuyên đề
+   Carbohydrate; ghi nhãn chương là "Bài toán hiệu suất" thì vừa khó tra vừa
+   bị coi là lạc chuyên đề khi ôn. */
+{ ma: 'hoa-hieusuat-nguoc', chuong: 'Carbohydrate', muc: 3, dang: 'tln',
+
   tao(R) {
     const H = R.chon([40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90]);
     const mSP = T(R.nguyen(2, 40) * 4.6, 2);

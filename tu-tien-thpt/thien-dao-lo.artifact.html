@@ -844,6 +844,9 @@ TD.tuKhoa = function (t) {
    Thứ tự quan trọng: luật hẹp đặt trước luật rộng. */
 TD.BAN_DO_CD = {
   hoa: [
+    /* "Năng lượng hoá học" là tên chương của bộ sinh nhiệt phản ứng — nó thuộc
+       chuyên đề nhiệt động, không thì bộ này không vào Luyện Công chỗ nào. */
+    [/nang luong hoa hoc|nhiet phan ung|enthalpy|nang luong lien ket/, 'Nhiệt động – Tốc độ – Cân bằng'],
     [/ester|este |xa phong|chat beo|lipid|triolein|tristearin|glycerol/, 'Ester – Lipid'],
     [/glucose|fructose|saccharose|tinh bot|cellulose|carbohydrate|trang bac|maltose/, 'Carbohydrate'],
     [/amine|amino acid|peptide|protein|glycine|alanine|anilin|lysine|glutamic|muoi amoni/, 'Amine – Amino acid – Peptide'],
@@ -936,7 +939,9 @@ TD.BAN_DO_CD = {
   ],
   anh: [
     [/word form|tu loai|hau to|tien to|duoi tu/, 'Từ loại'],
-    [/dang bai|chien thuat 2025|sap xep cau|chen cau|tom tat|doc hieu/, 'Dạng bài & chiến thuật 2025'],
+    /* "Hoàn thành đoạn văn" là một trong bốn dạng bài của đề 2025, phải nằm
+       trong chuyên đề dạng bài chứ không rơi ra ngoài mọi chuyên đề. */
+    [/dang bai|chien thuat 2025|sap xep cau|chen cau|tom tat|doc hieu|hoan thanh doan van|dien tu vao van ban/, 'Dạng bài & chiến thuật 2025'],
     [/dieu kien|conditional|wish/, 'Câu điều kiện'],
     [/bi dong|tuong thuat|passive|reported/, 'Bị động – Tường thuật'],
     [/menh de quan he|relative/, 'Mệnh đề quan hệ'],
@@ -998,7 +1003,11 @@ TD.deChuyenDe = function (mon, cd, soCau) {
 
   /* ② bài tập tính toán thuộc đúng chương đó (nếu môn có bộ sinh đề) */
   const mau = (TD.GEN[mon] || []).filter(t =>
-    !t._tuLT && (!cd || TD.chuDeCuaThe(mon, { nhom: t.chuong }) === cd));
+    !t._tuLT && (!cd
+      || TD.chuDeCuaThe(mon, { nhom: t.chuong }) === cd
+      /* bộ sinh khai _cdHoTro là bộ dùng chung cho nhiều chuyên đề — nó sẽ tự
+         lọc nội dung theo chuyên đề được truyền vào, nên vẫn đúng phạm vi */
+      || (t._cdHoTro && t._cdHoTro.indexOf(cd) >= 0)));
   if (mau.length) {
     const soBT = Math.min(Math.round(n * 0.3), n - ds.length);
     /* Chuyên đề chỉ có một hai bộ sinh mà phải rút mười lăm câu thì rất dễ bốc
@@ -1009,12 +1018,12 @@ TD.deChuyenDe = function (mon, cd, soCau) {
     for (let k = 0, thu = 0; k < soBT && thu < soBT * 12; thu++) {
       if (vt >= quay.length) { quay = TD.xao(mau); vt = 0; }
       const t = quay[vt++], seed = (Math.random() * 4294967295) >>> 0;
-      const q = TD.sinhCau(t, seed);
+      const q = TD.sinhCau(t, seed, cd);
       if (!q) continue;
       const vtay = TD.vanTayCau(q);
       if (daRa.has(vtay)) continue;
       daRa.add(vtay);
-      ds.push({ mon: mon, g: t.ma, s: seed }); k++;
+      ds.push({ mon: mon, g: t.ma, s: seed, cd: cd }); k++;
     }
   }
 
@@ -1223,10 +1232,10 @@ TD.chuanDau = function (t) {
     .replace(/(^|[=(:;,[\s])-(\d)/g, '$1−$2');                                /* = -3 → = −3 */
 };
 
-TD.sinhCau = function (mau, seed) {
+TD.sinhCau = function (mau, seed, cd) {
   const R = TD.rng(seed);
   let o;
-  try { o = mau.tao(R); } catch (e) { console.warn('Mẫu đề lỗi:', mau.ma, e); return null; }
+  try { o = mau.tao(R, cd); } catch (e) { console.warn('Mẫu đề lỗi:', mau.ma, e); return null; }
   if (!o) return null;
   ['q', 'giai', 'meo', 'ans'].forEach(k => { if (o[k]) o[k] = TD.chuanDau(o[k]); });
   if (o.opts) o.opts = o.opts.map(TD.chuanDau);
@@ -1245,7 +1254,10 @@ TD.layCau = function (it) {
   if (it.lt !== undefined) return TD.cauTuMenhDe(it.mon, it.lt, it.c, it.s, it.nhan, it.loc);
   if (it.g) {
     const mau = TD.timMau(it.mon, it.g);
-    return mau ? TD.sinhCau(mau, it.s) : null;
+    /* Có bộ sinh phục vụ NHIỀU chuyên đề (trục thời gian Sử, đoạn tư liệu):
+       phải nói cho nó biết đang luyện chuyên đề nào, không thì nó bốc ngẫu
+       nhiên và ra câu lạc hẳn khỏi chuyên đề người học đang mở. */
+    return mau ? TD.sinhCau(mau, it.s, it.cd) : null;
   }
   return (TD.KHO[it.mon] || [])[it.i];
 };
@@ -8310,6 +8322,10 @@ const T = TD.lamTron;
 TD.GEN.hoa = [
 
 /* ---------- NỀN TẢNG ---------- */
+/* Tính số mol là kỹ năng nền của mọi chuyên đề, nhưng ĐÃ THỬ cho nó vào Luyện
+   Công của mọi chuyên đề thì hỏng: đang đọc thẻ Dãy điện hoá lại nhận câu
+   "tính số mol của 22,4 gam CuSO₄" — đúng kiểu lạc chuyên đề mà người học kêu.
+   Thà thiếu ở Luyện Công còn hơn hỏi lạc; nó vẫn vào Tà Đạo và đề Độ Kiếp. */
 { ma: 'hoa-mol', chuong: 'Tính toán hoá học', muc: 1, dang: 'tln',
   tao(R) {
     const c = R.chon([
@@ -8868,7 +8884,11 @@ TD.GEN.hoa = [
     };
   } },
 
-{ ma: 'hoa-hieusuat-nguoc', chuong: 'Bài toán hiệu suất', muc: 3, dang: 'tln',
+/* Bài này luôn là lên men tinh bột ra ethanol nên nó thuộc hẳn chuyên đề
+   Carbohydrate; ghi nhãn chương là "Bài toán hiệu suất" thì vừa khó tra vừa
+   bị coi là lạc chuyên đề khi ôn. */
+{ ma: 'hoa-hieusuat-nguoc', chuong: 'Carbohydrate', muc: 3, dang: 'tln',
+
   tao(R) {
     const H = R.chon([40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90]);
     const mSP = T(R.nguyen(2, 40) * 4.6, 2);
@@ -9174,13 +9194,33 @@ TD.GEN.toan = [
 
 { ma: 'toan-tron-non-cau', chuong: 'Khối tròn xoay', muc: 2, dang: 'tln',
   tao(R) {
-    const loai = R.chon(['tru-V', 'non-l', 'non-Sxq', 'cau-S']);
+    /* Bốn dạng cũ chỉ đẻ ra hơn bốn chục đề khác nhau vì hai dạng nón dùng
+       chung năm bộ Pythagore. Thêm thể tích nón, thể tích cầu, diện tích toàn
+       phần trụ và mở rộng bộ ba số cho đủ biến thể. */
+    const loai = R.chon(['tru-V', 'tru-Stp', 'non-l', 'non-Sxq', 'non-V', 'cau-S', 'cau-V']);
     if (loai === 'cau-S') {
-      const Rb = R.nguyen(1, 10);
+      const Rb = R.nguyen(1, 14);
       return { q: `Tính diện tích mặt cầu bán kính R = ${Rb}. Kết quả có dạng kπ, hãy tìm k.`,
         ans: String(4 * Rb * Rb),
         giai: `S = 4πR² = 4π·${Rb}² = ${4 * Rb * Rb}π ⇒ k = ${4 * Rb * Rb}.`,
         meo: 'Mặt cầu: S = 4πR², V = (4/3)πR³. Đừng nhầm với diện tích hình tròn πR².' };
+    }
+    if (loai === 'cau-V') {
+      const Rb = R.chon([3, 6, 9, 12, 15]);          /* chia hết cho 3 để k nguyên */
+      const k = 4 * Rb * Rb * Rb / 3;
+      return { q: `Tính thể tích khối cầu bán kính R = ${Rb}. Kết quả có dạng kπ, hãy tìm k.`,
+        ans: String(k),
+        giai: `V = (4/3)πR³ = (4/3)π·${Rb}³ = (4·${Rb * Rb * Rb}/3)π = ${k}π ⇒ k = ${k}.`,
+        meo: 'Thể tích cầu có hệ số 4/3 và mũ BA; diện tích mặt cầu hệ số 4 và mũ HAI.' };
+    }
+    if (loai === 'tru-Stp') {
+      const r = R.nguyen(1, 9), h = R.nguyen(2, 14);
+      const k = 2 * r * (h + r);
+      return { q: `Tính diện tích toàn phần của hình trụ có bán kính đáy r = ${r} và chiều cao h = ${h}. Kết quả có dạng kπ, hãy tìm k.`,
+        ans: String(k),
+        giai: `S_tp = S_xq + 2·S_đáy = 2πrh + 2πr² = 2πr(h + r)\n`
+            + `  = 2π·${r}·(${h} + ${r}) = ${k}π ⇒ k = ${k}.`,
+        meo: 'Trụ có HAI mặt đáy nên phải cộng 2πr², nón chỉ có một đáy.' };
     }
     if (loai === 'tru-V') {
       const r = R.nguyen(1, 8), h = R.nguyen(2, 12);
@@ -9189,8 +9229,19 @@ TD.GEN.toan = [
         giai: `V = πr²h = π·${r}²·${h} = ${r * r * h}π ⇒ k = ${r * r * h}.`,
         meo: 'Khối trụ V = πr²h; khối nón có thêm hệ số 1/3.' };
     }
-    const bo = R.chon([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15]]);
+    const bo = R.chon([[3, 4, 5], [6, 8, 10], [9, 12, 15], [12, 16, 20], [15, 20, 25],
+                       [5, 12, 13], [10, 24, 26], [8, 15, 17], [16, 30, 34],
+                       [7, 24, 25], [20, 21, 29], [9, 40, 41], [12, 35, 37]]);
     const [r, h, l] = bo;
+    if (loai === 'non-V') {
+      /* r²h phải chia hết cho 3 mới ra k nguyên */
+      if ((r * r * h) % 3) return null;
+      const k = r * r * h / 3;
+      return { q: `Tính thể tích khối nón có bán kính đáy r = ${r} và chiều cao h = ${h}. Kết quả có dạng kπ, hãy tìm k.`,
+        ans: String(k),
+        giai: `V = (1/3)πr²h = (1/3)π·${r}²·${h} = ${k}π ⇒ k = ${k}.`,
+        meo: 'Nón dùng CHIỀU CAO h cho thể tích, dùng ĐƯỜNG SINH l cho diện tích xung quanh.' };
+    }
     if (loai === 'non-l') {
       return { q: `Một hình nón có bán kính đáy r = ${r} và chiều cao h = ${h}. Tính độ dài đường sinh l.`,
         ans: String(l),
@@ -16548,8 +16599,11 @@ const TU_LIEU = [
 TD.GEN.su = (TD.GEN.su || []).concat([
 
 { ma: 'su-vdc-tulieu', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'mc',
-  tao(R) {
-    const x = R.chon(TU_LIEU);
+  _cdHoTro: TU_LIEU.map(x => x.cd).filter((x, i, a) => x && a.indexOf(x) === i),
+  tao(R, cd) {
+    /* Luyện Công truyền chuyên đề vào thì chỉ lấy tư liệu của chuyên đề đó */
+    const bo = TU_LIEU.filter(y => !cd || y.cd === cd);
+    const x = R.chon(bo.length ? bo : TU_LIEU);
     const q = MC(R, `Đọc đoạn tư liệu sau:<br><div class="giai" style="font-style:italic">${x.tl}<br>`
       + `<span style="font-style:normal;font-size:12.6px;color:var(--chu3)">${x.ng}</span></div>`
       + `Nội dung nào sau đây <b>phản ánh đúng nhất</b> ý nghĩa của đoạn tư liệu trên?`,
@@ -16560,8 +16614,10 @@ TD.GEN.su = (TD.GEN.su || []).concat([
   } },
 
 { ma: 'su-vdc-tulieu-ds', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'ds',
-  tao(R) {
-    const x = R.chon(TU_LIEU);
+  _cdHoTro: TU_LIEU.map(x => x.cd).filter((x, i, a) => x && a.indexOf(x) === i),
+  tao(R, cd) {
+    const bo = TU_LIEU.filter(y => !cd || y.cd === cd);
+    const x = R.chon(bo.length ? bo : TU_LIEU);
     const khac = TU_LIEU.filter(y => y.cd !== x.cd);
     if (khac.length < 2) return null;
     const y1 = R.chon(khac);
@@ -24007,28 +24063,41 @@ const TRUC = [
 /* Ba mốc trở lên mới đủ chỗ ra bốn phương án đọc mốc */
 const veTruc = t => TD.hinhTrucThoiGian(t.moc, t.ten);
 
+/* Năm bộ dưới đây dùng chung kho trục thời gian, mỗi trục gắn với một chuyên
+   đề. Khai danh sách đó ra để Luyện Công biết bộ này phục vụ chuyên đề nào. */
+const CD_TRUC = TRUC.map(x => x.cd).filter((x, i, a) => x && a.indexOf(x) === i);
+
 TD.GEN.su = (TD.GEN.su || []).concat([
 
 /* ---------- MỨC 1: đọc thẳng một mốc trên trục ---------- */
-{ ma: 'su-hinh-docmoc', chuong: 'Tư liệu lịch sử', muc: 1, dang: 'mc',
-  tao(R) {
-    const t = R.chon(TRUC);
+{ ma: 'su-hinh-docmoc', chuong: 'Tư liệu lịch sử', muc: 1, dang: 'mc', _cdHoTro: CD_TRUC,
+  tao(R, cd) {
+    /* Bộ này phục vụ nhiều chuyên đề. Khi Luyện Công truyền chuyên đề vào thì
+       chỉ được lấy trục thuộc đúng chuyên đề đó, không thì câu ra lạc đề. */
+    const bo = TRUC.filter(x => !cd || x.cd === cd);
+    const t = R.chon(bo.length ? bo : TRUC);
     const i = R.nguyen(0, t.moc.length - 1);
     const dung = t.moc[i].ten;
     const nhieu = baNhieu(dung, TD.xaoR(R, t.moc.map(m => m.ten)));
     if (!nhieu) return null;
     const sv = {};
     t.moc.forEach(m => { if (m.ten !== dung) sv[m.ten] = `sự kiện này nằm ở mốc năm ${m.nam} trên trục, không phải năm ${t.moc[i].nam}`; });
-    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện nào diễn ra vào năm ${t.moc[i].nam}?`,
+    const oo = MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện nào diễn ra vào năm ${t.moc[i].nam}?`,
       { d: dung, s: nhieu, sv: sv,
         v: `Dò theo trục tới vạch ghi năm ${t.moc[i].nam}, nhãn tương ứng là "${dung}".` },
       'Câu đọc mốc chỉ cần dóng đúng vạch năm với nhãn sự kiện — đừng vội nhớ theo trí nhớ mà bỏ qua hình.');
+    /* Nhãn chương phải là tên chuyên đề của chính trục vừa chọn, không thì
+       người học đang ôn Liên hợp quốc lại thấy chương ghi "Tư liệu lịch sử". */
+    return oo ? Object.assign(oo, { chuong: t.cd }) : null;
   } },
 
 /* ---------- MỨC 2: khoảng cách năm và thứ tự trước sau ---------- */
-{ ma: 'su-hinh-khoangcach', chuong: 'Tư liệu lịch sử', muc: 2, dang: 'mc',
-  tao(R) {
-    const t = R.chon(TRUC);
+{ ma: 'su-hinh-khoangcach', chuong: 'Tư liệu lịch sử', muc: 2, dang: 'mc', _cdHoTro: CD_TRUC,
+  tao(R, cd) {
+    /* Bộ này phục vụ nhiều chuyên đề. Khi Luyện Công truyền chuyên đề vào thì
+       chỉ được lấy trục thuộc đúng chuyên đề đó, không thì câu ra lạc đề. */
+    const bo = TRUC.filter(x => !cd || x.cd === cd);
+    const t = R.chon(bo.length ? bo : TRUC);
     const kieu = R.chon(['cach', 'sau']);
     if (kieu === 'cach') {
       let i = R.nguyen(0, t.moc.length - 2);
@@ -24040,7 +24109,7 @@ TD.GEN.su = (TD.GEN.su || []).concat([
         for (let b = a + 1; b < t.moc.length; b++) ung.push(String(t.moc[b].nam - t.moc[a].nam) + ' năm');
       const nhieu = baNhieu(dung, TD.xaoR(R, ung));
       if (!nhieu) return null;
-      return MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện "${t.moc[i].ten}" và sự kiện "${t.moc[j].ten}" cách nhau bao nhiêu năm?`,
+      const oo = MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện "${t.moc[i].ten}" và sự kiện "${t.moc[j].ten}" cách nhau bao nhiêu năm?`,
         { d: dung, s: nhieu,
           sv: (() => { const s = {}; nhieu.forEach(x => { s[x] = 'đây là khoảng cách của một cặp mốc khác trên trục, không phải cặp mà đề hỏi'; }); return s; })(),
           v: `Lấy năm của mốc sau trừ năm của mốc trước: ${t.moc[j].nam} − ${t.moc[i].nam} = ${t.moc[j].nam - t.moc[i].nam}.` },
@@ -24055,35 +24124,53 @@ TD.GEN.su = (TD.GEN.su || []).concat([
       if (m.ten === dung) return;
       sv[m.ten] = k <= i ? `mốc năm ${m.nam} nằm TRƯỚC mốc mà đề hỏi` : `mốc năm ${m.nam} có đứng sau, nhưng còn một mốc khác xen vào giữa nên không phải sự kiện kế tiếp`;
     });
-    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện nào diễn ra ngay sau sự kiện "${t.moc[i].ten}"?`,
+    const oo = MC(R, `Cho trục thời gian sau:${veTruc(t)}Theo trục thời gian trên, sự kiện nào diễn ra ngay sau sự kiện "${t.moc[i].ten}"?`,
       { d: dung, s: nhieu, sv: sv,
         v: `Trên trục, mốc đứng liền sau năm ${t.moc[i].nam} là năm ${t.moc[i + 1].nam} — ứng với "${dung}".` },
       'Hỏi "ngay sau" là hỏi mốc LIỀN KỀ, không phải mốc cuối cùng của trục.');
+    /* Nhãn chương phải là tên chuyên đề của chính trục vừa chọn, không thì
+       người học đang ôn Liên hợp quốc lại thấy chương ghi "Tư liệu lịch sử". */
+    return oo ? Object.assign(oo, { chuong: t.cd }) : null;
   } },
 
 /* ---------- MỨC 3: nhận định về mối liên hệ giữa các mốc ---------- */
-{ ma: 'su-hinh-nhandinh', chuong: 'Tư liệu lịch sử', muc: 3, dang: 'mc',
-  tao(R) {
-    const t = R.chon(TRUC);
-    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Nhận định nào sau đây đúng khi khai thác trục thời gian trên?`,
+{ ma: 'su-hinh-nhandinh', chuong: 'Tư liệu lịch sử', muc: 3, dang: 'mc', _cdHoTro: CD_TRUC,
+  tao(R, cd) {
+    /* Bộ này phục vụ nhiều chuyên đề. Khi Luyện Công truyền chuyên đề vào thì
+       chỉ được lấy trục thuộc đúng chuyên đề đó, không thì câu ra lạc đề. */
+    const bo = TRUC.filter(x => !cd || x.cd === cd);
+    const t = R.chon(bo.length ? bo : TRUC);
+    const oo = MC(R, `Cho trục thời gian sau:${veTruc(t)}Nhận định nào sau đây đúng khi khai thác trục thời gian trên?`,
       { d: t.nx.d, s: t.nx.s, sv: t.nx.sv, v: t.nx.v },
       'Câu nhận định luôn giấu bẫy ở THỨ TỰ và ở việc gộp hai sự kiện khác nhau làm một — cứ dóng lại từng mốc trên hình là loại được.');
+    /* Nhãn chương phải là tên chuyên đề của chính trục vừa chọn, không thì
+       người học đang ôn Liên hợp quốc lại thấy chương ghi "Tư liệu lịch sử". */
+    return oo ? Object.assign(oo, { chuong: t.cd }) : null;
   } },
 
 /* ---------- MỨC 4: rút ra quy luật của cả giai đoạn ---------- */
-{ ma: 'su-hinh-quyluat', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'mc',
-  tao(R) {
-    const t = R.chon(TRUC);
-    return MC(R, `Cho trục thời gian sau:${veTruc(t)}Từ toàn bộ các mốc trên trục thời gian, có thể rút ra nhận xét khái quát nào sau đây?`,
+{ ma: 'su-hinh-quyluat', chuong: 'Tư liệu lịch sử', muc: 4, dang: 'mc', _cdHoTro: CD_TRUC,
+  tao(R, cd) {
+    /* Bộ này phục vụ nhiều chuyên đề. Khi Luyện Công truyền chuyên đề vào thì
+       chỉ được lấy trục thuộc đúng chuyên đề đó, không thì câu ra lạc đề. */
+    const bo = TRUC.filter(x => !cd || x.cd === cd);
+    const t = R.chon(bo.length ? bo : TRUC);
+    const oo = MC(R, `Cho trục thời gian sau:${veTruc(t)}Từ toàn bộ các mốc trên trục thời gian, có thể rút ra nhận xét khái quát nào sau đây?`,
       { d: t.yn.d, s: t.yn.s, sv: t.yn.sv, v: t.yn.v },
       'Câu khái quát không hỏi từng mốc mà hỏi SỢI DÂY nối các mốc: điều kiện nào dẫn tới điều kiện nào. '
       + 'Phương án nào chỉ đúng với một mốc lẻ, hoặc đảo ngược quan hệ nhân quả, thì loại.');
+    /* Nhãn chương phải là tên chuyên đề của chính trục vừa chọn, không thì
+       người học đang ôn Liên hợp quốc lại thấy chương ghi "Tư liệu lịch sử". */
+    return oo ? Object.assign(oo, { chuong: t.cd }) : null;
   } },
 
 /* ---------- MỨC 3: đúng/sai bốn ý trên cùng một trục ---------- */
-{ ma: 'su-hinh-dungsai', chuong: 'Tư liệu lịch sử', muc: 3, dang: 'ds',
-  tao(R) {
-    const t = R.chon(TRUC);
+{ ma: 'su-hinh-dungsai', chuong: 'Tư liệu lịch sử', muc: 3, dang: 'ds', _cdHoTro: CD_TRUC,
+  tao(R, cd) {
+    /* Bộ này phục vụ nhiều chuyên đề. Khi Luyện Công truyền chuyên đề vào thì
+       chỉ được lấy trục thuộc đúng chuyên đề đó, không thì câu ra lạc đề. */
+    const bo = TRUC.filter(x => !cd || x.cd === cd);
+    const t = R.chon(bo.length ? bo : TRUC);
     const sai = TD.xaoR(R, t.nx.s.concat(t.yn.s)).slice(0, 2);
     const y = TD.xaoR(R, [
       { t: t.nx.d, a: true }, { t: t.yn.d, a: true },
@@ -24094,6 +24181,8 @@ TD.GEN.su = (TD.GEN.su || []).concat([
              : ((t.nx.sv && t.nx.sv[x.t]) || (t.yn.sv && t.yn.sv[x.t]) || 'không khớp với các mốc trên trục.'))).join('\n');
     return { q: `Cho trục thời gian sau:${veTruc(t)}Xét các phát biểu sau:`,
       items: y, giai: giai,
+      /* nhãn chương lấy theo trục vừa chọn, không để trơ "Tư liệu lịch sử" */
+      chuong: t.cd,
       meo: 'Dạng đúng/sai bốn ý thường có hai ý đọc mốc và hai ý khái quát. '
         + 'Làm chắc hai ý đọc mốc trước để ăn điểm, rồi mới cân nhắc hai ý còn lại.' };
   } }
@@ -26732,7 +26821,7 @@ const VAN_BAN = [
     sv: { inviting: 'V-ing không thể làm động từ chính khi câu chưa có trợ động từ',
           'to invite': 'to V không làm động từ chính của mệnh đề',
           invited: 'quá khứ đơn lệch với các thì hiện tại còn lại của thông báo' } },
-  { so: 2, d: 'is required', m: 3, s: ['requires', 'is requiring', 'required'],
+  { so: 2, d: 'is required', m: 2, s: ['requires', 'is requiring', 'required'],
     v: '"Experience" là vật, không tự yêu cầu ai — phải dùng BỊ ĐỘNG "is required" (không đòi hỏi kinh nghiệm).',
     sv: { requires: 'chủ động — kinh nghiệm không thể "yêu cầu" điều gì',
           'is requiring': 'tiếp diễn không dùng cho trạng thái này',
@@ -26764,7 +26853,7 @@ const VAN_BAN = [
     sv: { showing: '"remind" không đi với V-ing ở cấu trúc này',
           show: 'thiếu "to" sau be reminded',
           shown: 'quá khứ phân từ không hợp sau "reminded" ở đây' } },
-  { so: 3, d: 'be returned', m: 3, s: ['return', 'be returning', 'have returned'],
+  { so: 3, d: 'be returned', m: 2, s: ['return', 'be returning', 'have returned'],
     v: 'Sách là vật bị trả nên sau "must" phải dùng BỊ ĐỘNG: must be returned.',
     sv: { return: 'chủ động — sách không tự trả',
           'be returning': 'không có dạng "must be V-ing" mang nghĩa bị động',
@@ -26791,7 +26880,7 @@ const VAN_BAN = [
     sv: { of: 'không có cụm "responsible of"',
           to: '"responsible to" nghĩa là chịu trách nhiệm TRƯỚC ai, không hợp',
           with: 'không có cụm "responsible with"' } },
-  { so: 3, d: 'is', m: 2, s: ['are', 'has', 'have'],
+  { so: 3, d: 'is', m: 1, s: ['are', 'has', 'have'],
     v: '"Training" ở đây là danh từ KHÔNG đếm được nên đi với động từ số ít "is".',
     sv: { are: 'training không phải danh từ số nhiều',
           has: 'sai nghĩa, câu cần dạng bị động "is provided"',
@@ -26808,7 +26897,7 @@ const VAN_BAN = [
       + 'Students should bring a packed lunch and (3)____ clothing, as part of the day will be spent outdoors. '
       + 'We look forward (4)____ a rewarding day with the class.',
   cho: [
-  { so: 1, d: 'which', m: 2, s: ['who', 'where', 'whose'],
+  { so: 1, d: 'which', m: 1, s: ['who', 'where', 'whose'],
     v: 'Thay cho "the field trip" — một sự việc, không phải người ⇒ "which".',
     sv: { who: 'chỉ dùng cho người',
           where: 'chỉ nơi chốn, mà "trip" ở đây là sự kiện chứ không phải địa điểm',
@@ -26835,7 +26924,7 @@ const VAN_BAN = [
       + 'quarter, (3)____ makes it one of the most scenic races in the region. Proceeds will go to a charity '
       + '(4)____ supports children with disabilities.',
   cho: [
-  { so: 1, d: 'is open', m: 3, s: ['opens', 'has opened', 'is opening'],
+  { so: 1, d: 'is open', m: 2, s: ['opens', 'has opened', 'is opening'],
     v: '"Registration is open until…" là cách nói chuẩn của thông báo: việc đăng ký đang mở tới hạn đó.',
     sv: { opens: '"open" làm động từ chỉ hành động mở ra một lần, không hợp với "until"',
           'has opened': 'nhấn việc đã mở xong, không diễn tả trạng thái còn mở',
@@ -26850,7 +26939,7 @@ const VAN_BAN = [
     sv: { that: 'không bao giờ dùng sau dấu phẩy trong mệnh đề không xác định',
           what: 'không phải đại từ quan hệ',
           it: 'sẽ tạo thành hai mệnh đề độc lập dính nhau bằng dấu phẩy — lỗi câu' } },
-  { so: 4, d: 'that', m: 2, s: ['who', 'what', 'where'],
+  { so: 4, d: 'that', m: 1, s: ['who', 'what', 'where'],
     v: 'Thay cho "a charity" — một tổ chức, dùng "that" hoặc "which" trong mệnh đề xác định.',
     sv: { who: 'chỉ dùng cho người',
           what: 'không phải đại từ quan hệ',
@@ -26862,17 +26951,17 @@ const VAN_BAN = [
       + 'team have been working hard (3)____ last month to prepare the event. '
       + 'Refreshments will be (4)____ free of charge to all visitors.',
   cho: [
-  { so: 1, d: 'will be held', m: 3, s: ['will hold', 'is holding', 'held'],
+  { so: 1, d: 'will be held', m: 2, s: ['will hold', 'is holding', 'held'],
     v: 'Hội chợ là vật bị tổ chức nên phải bị động: will be held.',
     sv: { 'will hold': 'chủ động — hội chợ không tự tổ chức chính nó',
           'is holding': 'chủ động tiếp diễn, sai nghĩa',
           held: 'thiếu trợ động từ chỉ tương lai' } },
-  { so: 2, d: 'that', m: 2, s: ['what', 'whose', 'where'],
+  { so: 2, d: 'that', m: 1, s: ['what', 'whose', 'where'],
     v: 'Mệnh đề quan hệ xác định cho "an activity" ⇒ "that" (hoặc which).',
     sv: { what: 'không phải đại từ quan hệ',
           whose: 'chỉ sở hữu, phải có danh từ theo sau',
           where: 'chỉ nơi chốn' } },
-  { so: 3, d: 'since', m: 3, s: ['for', 'from', 'during'],
+  { so: 3, d: 'since', m: 1, s: ['for', 'from', 'during'],
     v: '"Since + MỐC thời gian" (last month). "For" mới đi với KHOẢNG thời gian.',
     sv: { for: 'phải đi với khoảng: for a month',
           from: 'chỉ dùng khi có "to" đi kèm nêu điểm cuối',
@@ -26894,7 +26983,7 @@ const VAN_BAN = [
     sv: { for: '"ask for" nghĩa là xin cái gì, phải theo sau bởi danh từ',
           that: 'sau "be asked" ở dạng bị động này không dùng mệnh đề that',
           about: '"ask about" nghĩa là hỏi về, sai nghĩa' } },
-  { so: 2, d: 'while', m: 3, s: ['so', 'because', 'unless'],
+  { so: 2, d: 'while', m: 2, s: ['so', 'because', 'unless'],
     v: '"While" ở đây nối hai vế ĐỐI CHIẾU: loại rác này thùng này, loại kia thùng kia.',
     sv: { so: 'chỉ kết quả, hai vế ở đây song song chứ không nhân quả',
           because: 'chỉ nguyên nhân, sai quan hệ',
@@ -26926,7 +27015,7 @@ const VAN_BAN = [
     sv: { which: 'chỉ dùng cho vật',
           whom: 'chỉ dùng khi làm tân ngữ',
           whose: 'chỉ sở hữu, phải có danh từ theo sau' } },
-  { so: 3, d: 'is taught', m: 3, s: ['teaches', 'is teaching', 'teaching'],
+  { so: 3, d: 'is taught', m: 2, s: ['teaches', 'is teaching', 'teaching'],
     v: 'Bài học là vật được dạy ⇒ bị động "is taught".',
     sv: { teaches: 'chủ động — bài học không tự dạy',
           'is teaching': 'chủ động tiếp diễn, sai nghĩa',
