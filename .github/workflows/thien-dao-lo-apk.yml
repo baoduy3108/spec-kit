@@ -122,8 +122,13 @@ jobs:
           unzip -l "$f" | grep -q 'classes.dex'       || { echo "::error::APK thiếu classes.dex"; exit 1; }
           unzip -l "$f" | grep -q 'resources.arsc'    || { echo "::error::APK thiếu resources.arsc"; exit 1; }
           unzip -l "$f" | grep -q 'res/mipmap'        || echo "::warning::Không thấy icon trong APK"
-          "$ANDROID_HOME"/build-tools/*/apksigner verify --print-certs "$f" \
-            && echo "Chữ ký hợp lệ" || echo "::warning::apksigner không xác minh được chữ ký"
+          # Máy chủ có nhiều bản build-tools nên phải CHỌN một, không thì
+          # glob nở ra nhiều đường dẫn và apksigner tưởng đường thứ hai là
+          # lệnh con. APK chưa ký thì điện thoại từ chối cài, nên chỗ này
+          # sai là hỏng hẳn — cho fail luôn chứ không chỉ cảnh báo.
+          AS=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)
+          echo "Dùng $AS"
+          "$AS/apksigner" verify --verbose --print-certs "$f"
           {
             echo "### APK đã dựng xong ✅"
             echo '```'
