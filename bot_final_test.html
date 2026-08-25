@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: monospace; background: #000; color: #0f0; padding: 20px; }
+#display {
+  background: rgba(0,0,0,0.8); border: 3px solid #0f0; padding: 30px;
+  border-radius: 10px; max-width: 500px; margin: 40px auto;
+}
+h1 { color: #ff0; font-size: 28px; margin-bottom: 30px; text-align: center; }
+.stat {
+  display: flex; justify-content: space-between; margin: 20px 0;
+  padding: 15px; background: rgba(0,0,0,0.5); border-left: 3px solid #0f0;
+  font-size: 18px;
+}
+.stat-label { color: #0f0; }
+.stat-value { color: #ff0; font-weight: bold; font-size: 22px; }
+.button-group { margin-top: 40px; display: flex; gap: 10px; }
+button {
+  flex: 1; padding: 15px; font-size: 16px; border: 2px solid #0f0;
+  background: rgba(0,0,0,0.5); color: #0f0; cursor: pointer; border-radius: 5px;
+  font-weight: bold; transition: 0.2s;
+}
+button:hover { background: rgba(15,255,0,0.1); }
+button:active { transform: scale(0.95); }
+#game { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+</style>
+</head>
+<body>
+<div id="game"></div>
+
+<div id="display">
+  <h1>🤖 BOT TEST</h1>
+  
+  <div class="stat">
+    <span class="stat-label">Status:</span>
+    <span class="stat-value" id="status">READY</span>
+  </div>
+  
+  <div class="stat">
+    <span class="stat-label">Time:</span>
+    <span class="stat-value" id="time">0s</span>
+  </div>
+  
+  <div class="stat">
+    <span class="stat-label">Score:</span>
+    <span class="stat-value" id="score">0</span>
+  </div>
+  
+  <div class="stat">
+    <span class="stat-label">Board:</span>
+    <span class="stat-value" id="board">0%</span>
+  </div>
+  
+  <div class="button-group">
+    <button onclick="startBot()">▶️ START BOT</button>
+    <button onclick="resetGame()">🔄 NEW GAME</button>
+  </div>
+</div>
+
+<script>
+let gameLoaded = false;
+let startTime = 0;
+
+// Load game
+fetch('hacdong_working.html')
+  .then(r => r.text())
+  .then(html => {
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/);
+    if(bodyMatch) {
+      const temp = document.createElement('div');
+      temp.style.display = 'none';
+      temp.innerHTML = bodyMatch[1];
+      document.getElementById('game').appendChild(temp.firstElementChild);
+    }
+    
+    const scriptMatches = html.match(/<script>([\s\S]*?)<\/script>/g);
+    if(scriptMatches) {
+      scriptMatches.forEach(tag => {
+        const code = tag.replace(/<\/?script>/g, '');
+        try { eval(code); } catch(e) {}
+      });
+    }
+    
+    gameLoaded = true;
+    if(typeof newGame === 'function') {
+      newGame();
+    }
+  });
+
+function startBot() {
+  if(!gameLoaded) {
+    document.getElementById('status').textContent = 'LOADING...';
+    return;
+  }
+  
+  if(typeof botPlayFunction !== 'function') {
+    document.getElementById('status').textContent = 'ERROR';
+    return;
+  }
+  
+  document.getElementById('status').textContent = 'RUNNING';
+  startTime = Date.now();
+  
+  botPlayFunction();
+  
+  const update = setInterval(() => {
+    if(typeof score !== 'undefined' && typeof boardFill === 'function') {
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      const fill = Math.round(boardFill() * 100);
+      
+      document.getElementById('time').textContent = elapsed + 's';
+      document.getElementById('score').textContent = score.toLocaleString();
+      document.getElementById('board').textContent = fill + '%';
+      
+      if(typeof state !== 'undefined' && state !== 'play') {
+        clearInterval(update);
+        document.getElementById('status').textContent = '✅ DONE';
+      }
+    }
+  }, 100);
+  
+  setTimeout(() => clearInterval(update), 120000);
+}
+
+function resetGame() {
+  if(typeof newGame === 'function') {
+    newGame();
+    document.getElementById('status').textContent = 'READY';
+    document.getElementById('score').textContent = '0';
+    document.getElementById('time').textContent = '0s';
+    document.getElementById('board').textContent = '0%';
+  }
+}
+</script>
+</body>
+</html>

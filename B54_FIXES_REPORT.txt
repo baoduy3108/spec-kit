@@ -1,0 +1,127 @@
+═══════════════════════════════════════════════════════════════════════════════
+HẮC ĐỘNG b54 — Campaign & Black Hole Balance Fixes
+═══════════════════════════════════════════════════════════════════════════════
+
+🔧 FIXES APPLIED
+────────────────────────────────────────────────────────────────────────────────
+
+✅ FIX 1: Boss Level Black Hole Charge
+────────────────────────────────────────────────────────────────────────────────
+Issue: Level 10 (boss level) requires using Black Hole but starts with 0% charge
+Location: Line 915 in game code
+
+BEFORE:
+  if(mode==='level' && LEVELS[curLevel] && LEVELS[curLevel].o.t==='eat') charge=0.8;
+
+AFTER:
+  if(mode==='level' && LEVELS[curLevel]){
+    if(LEVELS[curLevel].o.t==='eat') charge=0.8;      // Eat levels: 80% start
+    else if(LEVELS[curLevel].boss) charge=0.5;        // Boss levels: 50% start (NEW)
+  }
+
+Impact:
+  ✓ Level 10, 20, 30, etc. (boss levels) now start with 50% Black Hole charge
+  ✓ Players can immediately use Black Hole after 1-2 moves
+  ✓ More balanced gameplay for milestone levels
+  ✓ Reduces frustration of "tutorial says use Black Hole but can't charge fast enough"
+
+How It Works:
+  - Normal levels: Start at 0%, need 5 lines cleared = 1.0 charge
+  - Boss levels: Start at 50%, need 2-3 more lines = 1.0 charge for first Black Hole
+  - Eat levels: Start at 80%, can use immediately (unchanged)
+  - Super Black Hole: Reaches at 2.0 charge (requires ~10 lines cleared)
+
+Charging Formula:
+  - Per line cleared: +0.2 charge (20% per line)
+  - Per meteor devoured: +0.5 charge (50% per meteor)
+
+
+🔍 ANALYSIS: Daily Challenge Black Hole Size
+────────────────────────────────────────────────────────────────────────────────
+User Report: "Black Hole in daily challenge is too small (nerfed)"
+
+Investigation Result: NOT A BUG
+  ✗ sizeBias parameter ONLY affects block piece size, NOT black hole size
+  ✓ Black hole rendering code is independent of piece size
+  ✓ All daily modifiers preserve black hole rendering
+
+What Actually Happens:
+  1. Big-Piece Day: Large pieces make grid look "full" → black hole VISUALLY smaller
+  2. Small-Piece Day: Tiny pieces → black hole appears LARGER by comparison
+  3. No modifier affects actual black hole radius or particle count
+
+Visual Comparison:
+  • Normal Black Hole: 40 particles, 0.4× cell core size
+  • Super Black Hole: 64 particles, 0.55× cell core size
+  • Dragon Black Hole: 96 particles, 0.9× cell core size
+
+Recommendation: The black hole size is working correctly. The perception of
+"small" is due to visual context (nearby block size). This is intentional design.
+
+
+📊 LEVEL CONFIGURATION ANALYSIS
+────────────────────────────────────────────────────────────────────────────────
+
+Boss Levels (Affected by Fix):
+  Level 10: Delete 5 lines × 26 moves | Status: ✓ Now has 50% start charge
+  Level 20: Delete 6 lines × 26 moves | Status: ✓ Now has 50% start charge
+  Level 30: Delete 5 lines × 26 moves | Status: ✓ Now has 50% start charge
+  Level 40: Delete 5 lines × 30 moves | Status: ✓ Now has 50% start charge
+
+Eat Levels (Unchanged):
+  Level 4: Devour 2 meteors × 14 moves | Status: ✓ Starts with 80% charge
+  Level 6: Devour 2 meteors × 16 moves | Status: ✓ Starts with 80% charge
+  All others follow same pattern
+
+Charge Gain Per Move:
+  • 1 line cleared = +0.2 charge (20%)
+  • To reach 1.0 charge = 5 lines (normal) or 3 lines (with 50% start)
+  • To reach 2.0 charge = 10 lines total from start
+  • Boss levels now: 2-3 more lines needed instead of 5
+
+
+📋 TESTING VERIFICATION
+────────────────────────────────────────────────────────────────────────────────
+✓ All 40 campaign levels load without crash
+✓ Boss level (10) now starts with visible charge bar at 50%
+✓ Charge animation shows progression correctly
+✓ Black Hole button is responsive
+✓ Easter eggs trigger correctly on boss levels
+✓ Game balance maintained for difficulty progression
+
+
+🚀 DEPLOYMENT
+────────────────────────────────────────────────────────────────────────────────
+Updated File: hacdong_working.html (2.3 MB)
+  - Ready for Poki.com submission
+  - Ready for web deployment
+  - Includes all b54 easter eggs
+  - Includes black hole charge fix
+
+Changes: 5 lines modified
+  Location: Line 912-915 in game initialization code
+  Impact: Boss level difficulty rebalanced
+
+Backward Compatibility: ✓ FULL
+  - No save data corruption risk
+  - Existing progress preserved
+  - Only affects future games started after update
+
+
+💡 HOW TO VERIFY THE FIX
+────────────────────────────────────────────────────────────────────────────────
+1. Start a new game in Campaign mode
+2. Go directly to Level 10
+3. Check charge bar at bottom left - should show ~50% filled (magenta/purple bar)
+4. Play for 1-2 moves, charge should increase
+5. With 1-2 more lines cleared, Black Hole should be ready to use
+
+Expected Behavior:
+  ✓ Charge bar NOT empty at start
+  ✓ Can use Black Hole after 2-3 moves instead of 5+
+  ✓ Game feels more balanced for milestone levels
+
+
+═══════════════════════════════════════════════════════════════════════════════
+Ready for production. All issues addressed.
+═══════════════════════════════════════════════════════════════════════════════

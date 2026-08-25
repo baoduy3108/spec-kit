@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Anti-Deadlock Test - HẮC ĐỘNG</title>
+<style>
+  body {
+    background: #0a0820;
+    color: #eef0ff;
+    font-family: monospace;
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  h1 { color: #3dd6ff; }
+  .log {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(61,214,255,0.3);
+    padding: 15px;
+    border-radius: 8px;
+    height: 500px;
+    overflow-y: auto;
+    font-size: 0.85em;
+    margin: 20px 0;
+    line-height: 1.4;
+  }
+  .log div {
+    margin: 2px 0;
+    padding: 1px 0;
+  }
+  .info { color: #9aa0d0; }
+  .deadlock { color: #ff4d6d; font-weight: bold; }
+  .reroll { color: #ffd54d; }
+  .success { color: #61ff99; }
+  .stat {
+    background: rgba(124,107,255,0.15);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+  }
+  button {
+    background: linear-gradient(180deg, #c9b6ff, #7c6bff);
+    color: #1a0a2e;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 10px 5px 10px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>🛡️ Anti-Deadlock System Test</h1>
+<p>Testing 70% Smart Piece + 30% Random + Anti-Deadlock detection</p>
+
+<button onclick="runTest()">Run Comprehensive Test (10 games)</button>
+<button onclick="clearLog()">Clear Log</button>
+
+<div class="log" id="log"></div>
+
+<div class="stat" id="results" style="display:none;">
+  <h2>Test Results</h2>
+  <div id="resultsContent"></div>
+</div>
+
+<script>
+const logEl = document.getElementById('log');
+
+function log(msg, type = 'info') {
+  const div = document.createElement('div');
+  div.className = type;
+  div.textContent = msg;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function clearLog() {
+  logEl.innerHTML = '';
+  document.getElementById('results').style.display = 'none';
+}
+
+async function runTest() {
+  clearLog();
+  log('Starting anti-deadlock test...');
+  log('Loading game file...');
+  log('---');
+
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+
+  const stats = {
+    games: 0,
+    deadlocksDetected: 0,
+    rerolls: 0,
+    averageRerolls: 0,
+    noDeadlock: 0,
+    gameOvers: [],
+  };
+
+  try {
+    const response = await fetch('./hacdong_working.html');
+    const html = await response.text();
+
+    iframe.srcdoc = html;
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const iframeWindow = iframe.contentWindow;
+    const console_log = window.console.log;
+
+    // Intercept console logs to catch anti-deadlock messages
+    let gameLog = [];
+    const originalLog = iframeWindow.console?.log || function(){};
+    if(iframeWindow.console){
+      iframeWindow.console.log = function(...args){
+        const msg = args.join(' ');
+        gameLog.push(msg);
+        originalLog.apply(iframeWindow.console, args);
+      };
+    }
+
+    log('Game initialized. Running 10 test games...');
+    log('---');
+
+    for (let i = 1; i <= 10; i++) {
+      log(`\n[GAME ${i}] Starting...`, 'info');
+      gameLog = [];
+
+      // Reset and start game
+      if (iframeWindow.newGame) iframeWindow.newGame();
+      else if (iframeWindow.init) iframeWindow.init();
+
+      // Play for a set number of moves (30 moves per game)
+      for (let move = 0; move < 30; move++) {
+        if (iframeWindow.checkOver && iframeWindow.checkOver()) break; // Game over
+
+        // Simulate random placement
+        if (iframeWindow.tray && iframeWindow.tray.length > 0) {
+          const pieceIdx = Math.floor(Math.random() * 3);
+          if (iframeWindow.placePiece) {
+            iframeWindow.placePiece(pieceIdx, Math.floor(Math.random() * 6), Math.floor(Math.random() * 6));
+          }
+        }
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+
+      stats.games++;
+
+      // Check game log for anti-deadlock messages
+      const deadlockDetected = gameLog.some(msg => msg.includes('Deadlock detected'));
+      const rerollCount = gameLog.filter(msg => msg.includes('Deadlock detected')).length;
+
+      if (deadlockDetected) {
+        stats.deadlocksDetected++;
+        stats.rerolls += rerollCount;
+        log(`[GAME ${i}] Deadlock detected: ${rerollCount} reroll(s)`, 'deadlock');
+      } else {
+        stats.noDeadlock++;
+        log(`[GAME ${i}] No deadlock ✓`, 'success');
+      }
+
+      const finalScore = iframeWindow.score || 0;
+      stats.gameOvers.push(finalScore);
+      log(`[GAME ${i}] Final score: ${finalScore.toLocaleString()}`, 'info');
+    }
+
+  } catch (error) {
+    log(`Error: ${error.message}`);
+  }
+
+  document.body.removeChild(iframe);
+  showResults(stats);
+}
+
+function showResults(stats) {
+  document.getElementById('results').style.display = 'block';
+  const resultsEl = document.getElementById('resultsContent');
+
+  const rerollRate = stats.deadlocksDetected > 0
+    ? (stats.rerolls / stats.deadlocksDetected).toFixed(2)
+    : 0;
+
+  const avgScore = stats.gameOvers.length > 0
+    ? (stats.gameOvers.reduce((a,b) => a+b, 0) / stats.gameOvers.length).toFixed(0)
+    : 0;
+
+  resultsEl.innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+      <div>
+        <span style="color: #9aa0d0;">Games Run:</span><br>
+        <span class="value" style="font-size: 1.3em; color: #ffd54d;">${stats.games}</span>
+      </div>
+      <div>
+        <span style="color: #9aa0d0;">Deadlocks Detected:</span><br>
+        <span class="value" style="font-size: 1.3em; color: ${stats.deadlocksDetected > 0 ? '#ff4d6d' : '#61ff99'};">${stats.deadlocksDetected}</span>
+      </div>
+      <div>
+        <span style="color: #9aa0d0;">Total Rerolls:</span><br>
+        <span class="value" style="font-size: 1.3em; color: #ffd54d;">${stats.rerolls}</span>
+      </div>
+      <div>
+        <span style="color: #9aa0d0;">Avg Rerolls/Deadlock:</span><br>
+        <span class="value" style="font-size: 1.3em; color: #ffd54d;">${rerollRate}</span>
+      </div>
+      <div>
+        <span style="color: #9aa0d0;">No-Deadlock Games:</span><br>
+        <span class="value" style="font-size: 1.3em; color: #61ff99;">${stats.noDeadlock}/10</span>
+      </div>
+      <div>
+        <span style="color: #9aa0d0;">Average Score:</span><br>
+        <span class="value" style="font-size: 1.3em; color: #ffd54d;">${Number(avgScore).toLocaleString()}</span>
+      </div>
+    </div>
+    <hr style="border: 1px solid rgba(227,107,255,0.2); margin: 20px 0;">
+    <p style="color: #9aa0d0; line-height: 1.8;">
+      <strong>Analysis:</strong><br>
+      ${stats.deadlocksDetected === 0
+        ? '✓ Anti-deadlock is working perfectly! No deadlock situations detected.'
+        : `⚠ Detected ${stats.deadlocksDetected} potential deadlock(s) during testing. System rerolled ${stats.rerolls} times.`
+      }
+    </p>
+  `;
+}
+</script>
+
+</body>
+</html>

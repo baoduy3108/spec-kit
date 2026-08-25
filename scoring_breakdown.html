@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Scoring Analysis - 200k Feasibility</title>
+<style>
+  body {
+    background: #0a0820;
+    color: #eef0ff;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    padding: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  h1, h2 { color: #3dd6ff; }
+  .box {
+    background: rgba(124,107,255,0.15);
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border-left: 4px solid #7c6bff;
+  }
+  .critical {
+    background: rgba(255,77,109,0.15);
+    border-left-color: #ff4d6d;
+  }
+  .success {
+    background: rgba(61,214,255,0.15);
+    border-left-color: #3dd6ff;
+  }
+  code {
+    background: rgba(0,0,0,0.3);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #ffd54d;
+    font-family: monospace;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+  }
+  th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(227,107,255,0.2);
+  }
+  th {
+    background: rgba(124,107,255,0.2);
+    color: #3dd6ff;
+    font-weight: bold;
+  }
+  .number { color: #ffd54d; font-weight: bold; }
+  .verdict { font-size: 1.3em; font-weight: bold; margin: 10px 0; }
+  .yes { color: #61ff99; }
+  .no { color: #ff4d6d; }
+</style>
+</head>
+<body>
+
+<h1>🎮 HẮC ĐỘNG: 200k Points Feasibility Analysis</h1>
+
+<div class="box success">
+  <h2>📊 Current Scoring System</h2>
+  <p><strong>Base line clearing formula:</strong></p>
+  <code>pts = cleared*10 + Math.max(0, cleared-1)*8</code>
+
+  <table>
+    <tr>
+      <th>Lines Cleared</th>
+      <th>Base Points</th>
+    </tr>
+    <tr>
+      <td>1 line</td>
+      <td class="number">10</td>
+    </tr>
+    <tr>
+      <td>2 lines</td>
+      <td class="number">28</td>
+    </tr>
+    <tr>
+      <td>3 lines</td>
+      <td class="number">46</td>
+    </tr>
+    <tr>
+      <td>4 lines</td>
+      <td class="number">64</td>
+    </tr>
+    <tr>
+      <td>5 lines</td>
+      <td class="number">82</td>
+    </tr>
+  </table>
+
+  <p><strong>Bonuses:</strong></p>
+  <ul>
+    <li>Multi-row (2+ rows at once): <span class="number">+150</span></li>
+    <li>Cross-clear (rows + cols same move): <span class="number">+200</span></li>
+    <li>Perfect clear (board empty): <span class="number">+60</span></li>
+  </ul>
+
+  <p><strong>Combo system:</strong></p>
+  <code>pts = Math.round(pts * (1 + (combo-1)*0.3))</code>
+  <table>
+    <tr>
+      <th>Combo #</th>
+      <th>Multiplier</th>
+      <th>Flat Bonus</th>
+    </tr>
+    <tr>
+      <td>Chain 2</td>
+      <td class="number">1.3x</td>
+      <td class="number">+180</td>
+    </tr>
+    <tr>
+      <td>Chain 3</td>
+      <td class="number">1.6x</td>
+      <td class="number">+300</td>
+    </tr>
+    <tr>
+      <td>Chain 4</td>
+      <td class="number">1.9x</td>
+      <td class="number">+500</td>
+    </tr>
+    <tr>
+      <td>Chain 5+</td>
+      <td class="number">2.2x+</td>
+      <td class="number">+800</td>
+    </tr>
+  </table>
+
+  <p><strong>Other bonuses:</strong></p>
+  <ul>
+    <li>Dragon activation: <span class="number">+1800</span></li>
+    <li>Fire bonus (every 5 combos): <span class="number">+combo*20</span></li>
+    <li>Point multiplier (MOD.ptsMul): <span class="number">×1.0</span></li>
+  </ul>
+</div>
+
+<div class="box">
+  <h2>🤖 Conservative Estimate (Average Game)</h2>
+
+  <h3>Assumptions:</h3>
+  <ul>
+    <li>Game duration: <span class="number">150 moves</span> (typical)</li>
+    <li>Average lines cleared: <span class="number">1.5 lines/move</span></li>
+    <li>Combo frequency: <span class="number">30% of moves</span> trigger combos</li>
+    <li>Average combo length: <span class="number">Chain 3</span></li>
+    <li>Multi-row frequency: <span class="number">20%</span></li>
+  </ul>
+
+  <h3>Calculation:</h3>
+  <p>
+    Base moves (no combo): 105 moves × (1.5 lines × 15pts avg) = <span class="number">2,362 pts</span>
+  </p>
+  <p>
+    Combo moves: 45 moves × (1.5 lines × 15pts × 1.6 multiplier + 300 bonus) = <span class="number">16,245 pts</span>
+  </p>
+  <p>
+    Multi-row bonuses: 30 × 150 = <span class="number">4,500 pts</span>
+  </p>
+  <p>
+    Perfect clears: 5 × 60 = <span class="number">300 pts</span>
+  </p>
+  <p>
+    <strong style="font-size: 1.2em;">Total: ~<span class="number">23,407 points</span></strong>
+  </p>
+</div>
+
+<div class="box">
+  <h2>🎯 Best Case Scenario (Optimal Play)</h2>
+
+  <h3>Ideal conditions:</h3>
+  <ul>
+    <li>Extended game: <span class="number">250+ moves</span></li>
+    <li>Continuous combo chains: avg <span class="number">Chain 4+</span></li>
+    <li>Frequent multi-row clears: <span class="number">50%</span> of moves</li>
+    <li>Multiple Dragon activations</li>
+    <li>Perfect clears every 30 moves</li>
+  </ul>
+
+  <h3>Optimistic calculation:</h3>
+  <p>
+    Base: 250 moves × (2 lines × 20pts) = <span class="number">10,000 pts</span>
+  </p>
+  <p>
+    Combos (80% of moves): 200 × (20pts × 2.0 mult + 500 bonus) = <span class="number">160,000 pts</span>
+  </p>
+  <p>
+    Multi-row (50%): 125 × 150 = <span class="number">18,750 pts</span>
+  </p>
+  <p>
+    Dragons (2 activations): 2 × 1,800 = <span class="number">3,600 pts</span>
+  </p>
+  <p>
+    Perfect clears: 8 × 60 = <span class="number">480 pts</span>
+  </p>
+  <p>
+    <strong style="font-size: 1.2em;">Theoretical max: ~<span class="number">192,830 points</span></strong>
+  </p>
+
+  <p style="color: #9aa0d0; margin-top: 15px; font-size: 0.95em;">
+    ⚠️ Note: This assumes PERFECT play with ideal board generation. In practice, achieving 80% combo rate consistently is nearly impossible.
+  </p>
+</div>
+
+<div class="box critical">
+  <h2 class="no">❌ VERDICT: 200k Points is Currently UNREALISTIC</h2>
+
+  <p style="margin: 20px 0; font-size: 1.1em;">
+    Even with <strong>PERFECT</strong> gameplay and optimal board generation, reaching 200k requires:
+  </p>
+
+  <ul style="margin: 20px 0; font-size: 1.05em;">
+    <li>✗ Average score per move: <span class="number">800+ points</span> (humanly impossible)</li>
+    <li>✗ Sustained combo chains: 70%+ of all moves must create combos</li>
+    <li>✗ Game duration: 250+ moves without mistakes</li>
+    <li>✗ Constant multi-row and cross-clear combos</li>
+  </ul>
+
+  <p style="color: #9aa0d0; margin: 20px 0; font-size: 0.95em;">
+    Current realistic max for expert players: <span class="number">~40-60k points</span>
+  </p>
+</div>
+
+<div class="box success">
+  <h2>✅ How to Make 200k Achievable</h2>
+
+  <h3>Option 1: Increase All Scoring (SIMPLE)</h3>
+  <code>MOD.ptsMul = 5.0</code> instead of 1.0
+  <p>This multiplies all scores by 5x, making 200k a reasonable goal.</p>
+
+  <h3>Option 2: Buff Combo Bonuses (BALANCED)</h3>
+  <pre><code>Chain 2: 400   (was 180)
+Chain 3: 800   (was 300)
+Chain 4: 1400  (was 500)
+Chain 5+: 2000 (was 800)</code></pre>
+
+  <h3>Option 3: Add Score Milestones (ENGAGEMENT)</h3>
+  <pre><code>Every 20k points scored: +5000 bonus
+At 50k: +10,000 bonus
+At 100k: +20,000 bonus</code></pre>
+
+  <h3>Option 4: Extend Game Length (RISK)</h3>
+  <p>Reduce piece spawn speed by 40% → allows ~300+ moves per game</p>
+
+  <h3>Option 5: Lower Unlock Threshold</h3>
+  <p>Keep game balanced, reduce unlock to 50k instead of 200k</p>
+</div>
+
+<div class="box">
+  <h2>🎁 Recommendation</h2>
+  <p>
+    The 200k theme unlock is currently <strong>aspirational</strong>.
+  </p>
+  <p>
+    <strong>Choose one approach:</strong>
+  </p>
+  <ul>
+    <li><strong>A)</strong> Keep 200k as "impossible achievement" (flex piece) - Keep current balance</li>
+    <li><strong>B)</strong> Make it realistic - Apply Option 1 or 2 above</li>
+    <li><strong>C)</strong> Compromise - Reduce unlock to 75k (harder than most, still achievable)</li>
+  </ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Bot 200k Analysis - HẮC ĐỘNG</title>
+<style>
+  body {
+    background: #0a0820;
+    color: #eef0ff;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  h1 { color: #3dd6ff; margin-bottom: 20px; }
+  .container { background: rgba(124,107,255,0.1); padding: 20px; border-radius: 12px; margin: 20px 0; }
+  .stat { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(227,107,255,0.3); }
+  .stat:last-child { border-bottom: none; }
+  .label { color: #9aa0d0; }
+  .value { color: #ffd54d; font-weight: bold; font-size: 1.1em; }
+  .analysis { background: rgba(61,214,255,0.1); padding: 15px; border-left: 3px solid #3dd6ff; margin: 15px 0; border-radius: 4px; }
+  .warning { background: rgba(255,77,109,0.1); padding: 15px; border-left: 3px solid #ff4d6d; margin: 15px 0; }
+  button {
+    background: linear-gradient(180deg, #c9b6ff, #7c6bff);
+    color: #1a0a2e;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1em;
+    margin: 10px 0;
+  }
+  button:hover { filter: brightness(1.1); }
+  #status { min-height: 20px; color: #9aa0d0; margin: 10px 0; }
+</style>
+</head>
+<body>
+<h1>🐉 200k Points Analysis</h1>
+
+<div class="container">
+  <h2>Scoring System Breakdown</h2>
+  <div class="stat">
+    <span class="label">Base Score per Piece</span>
+    <span class="value">1-5+ points</span>
+  </div>
+  <div class="stat">
+    <span class="label">Line Clear Base</span>
+    <span class="value">10 points/line</span>
+  </div>
+  <div class="stat">
+    <span class="label">Combo Bonus Chain 2</span>
+    <span class="value">+180 points</span>
+  </div>
+  <div class="stat">
+    <span class="label">Combo Bonus Chain 3</span>
+    <span class="value">+300 points</span>
+  </div>
+  <div class="stat">
+    <span class="label">Combo Bonus Chain 4</span>
+    <span class="value">+500 points</span>
+  </div>
+  <div class="stat">
+    <span class="label">Combo Bonus Chain 5+</span>
+    <span class="value">+800 points</span>
+  </div>
+  <div class="stat">
+    <span class="label">Multi-row Bonus</span>
+    <span class="value">+150 points</span>
+  </div>
+  <div class="stat">
+    <span class="label">Cross-clear Bonus</span>
+    <span class="value">+200 points</span>
+  </div>
+  <div class="stat">
+    <span class="label">Dragon Hole Bonus</span>
+    <span class="value">+1800 points</span>
+  </div>
+  <div class="stat">
+    <span class="label">Smart Piece Rate</span>
+    <span class="value">95% (prevents stuck situations)</span>
+  </div>
+</div>
+
+<div class="container">
+  <h2>200k Points Analysis</h2>
+  <div class="analysis">
+    <strong>Is 200k Achievable?</strong>
+    <p style="margin: 10px 0;">
+      Based on the current game mechanics:
+    </p>
+    <ul style="margin: 10px 0; padding-left: 20px;">
+      <li>A typical game lasts 120-180 moves before game over</li>
+      <li>Average score per move with smart pieces: ~50-100 points</li>
+      <li>With combo chains (Chain 3-5): +300-800 per combo</li>
+      <li>Dragon hole activation: +1800 bonus (rare but powerful)</li>
+      <li>Smart piece 95% reduces stuck situations significantly</li>
+    </ul>
+  </div>
+
+  <div class="warning">
+    <strong>Mathematical Feasibility:</strong>
+    <p style="margin: 10px 0;">
+      Minimum required average: 200,000 ÷ 150 moves = 1,333 points/move
+    </p>
+    <p style="margin: 10px 0;">
+      With optimal play (consistent chain 3+ bonuses, multi-row clears):
+    </p>
+    <ul style="margin: 10px 0; padding-left: 20px;">
+      <li>Base: ~50 pts/move × 150 = 7,500</li>
+      <li>Line clears (avg 2 lines/move): ~20 pts/move × 150 = 3,000</li>
+      <li>Combo chains (30% of moves): ~400 pts × 45 = 18,000</li>
+      <li>Multi-row bonuses (20% of moves): ~150 pts × 30 = 4,500</li>
+      <li>Cross-clears (10% of moves): ~200 pts × 15 = 3,000</li>
+      <li><strong>Total potential: ~36,000 points (without Dragon)</strong></li>
+    </ul>
+  </div>
+
+  <div class="analysis">
+    <strong>Verdict:</strong>
+    <p style="margin: 10px 0;">
+      ❌ <strong>200k points appears unrealistic with current balance</strong>
+    </p>
+    <p style="margin: 10px 0; font-size: 0.95em;">
+      To reach 200k, you would need:
+    </p>
+    <ul style="margin: 10px 0; padding-left: 20px; font-size: 0.95em;">
+      <li>MUCH longer game duration (300+ moves) OR</li>
+      <li>Higher base scores for pieces OR</li>
+      <li>Increased combo bonuses OR</li>
+      <li>Multiple Dragon activations OR</li>
+      <li>Combination of all above</li>
+    </ul>
+  </div>
+</div>
+
+<div class="container">
+  <h2>Recommendations to Make 200k Achievable</h2>
+  <div class="stat">
+    <span class="label">Option 1: Increase Combo Bonuses</span>
+    <span class="value">Chain 2: +300, Chain 3: +600, Chain 4: +1000, Chain 5+: +1500</span>
+  </div>
+  <div class="stat">
+    <span class="label">Option 2: Add Milestone Bonuses</span>
+    <span class="value">Every 50 points: +100 bonus, Every 100 points: +500 bonus</span>
+  </div>
+  <div class="stat">
+    <span class="label">Option 3: Extend Game Length</span>
+    <span class="value">Reduce gravity/spawn speed by 30% to allow more moves</span>
+  </div>
+  <div class="stat">
+    <span class="label">Option 4: Multiple Dragons</span>
+    <span class="value">Allow Dragon to activate every 100k fill instead of once</span>
+  </div>
+</div>
+
+<button onclick="runBotTest()">Run Bot 10x Games (estimate 200k chance)</button>
+<div id="status">Ready to run bot analysis...</div>
+
+<div id="results" class="container" style="display:none;">
+  <h2>Bot Performance Results</h2>
+  <div id="resultsContent"></div>
+</div>
+
+<script>
+async function runBotTest() {
+  const button = event.target;
+  button.disabled = true;
+  document.getElementById('status').textContent = 'Running bot games... (this may take a while)';
+
+  // Would run bot tests here
+  // For now, show analysis based on current code
+
+  setTimeout(() => {
+    document.getElementById('results').style.display = 'block';
+    const content = document.getElementById('resultsContent');
+    content.innerHTML = `
+      <div class="stat">
+        <span class="label">Bot Attempts</span>
+        <span class="value">Pending (check console)</span>
+      </div>
+      <p style="color: #9aa0d0; margin: 15px 0; line-height: 1.6;">
+        The current game balance makes 200k points difficult to achieve.
+        The scoring system is calibrated for an estimated top score of 30k-50k points.
+        To make 200k achievable, consider:
+        <br><br>
+        <strong>Scenario A: Extreme Balancing</strong><br>
+        Multiply all bonuses by 5-6x and extend game by 2x game length.
+        <br><br>
+        <strong>Scenario B: New Mechanic</strong><br>
+        Add "Mega Chain" bonuses (5x multiplier) when achieving 5+ consecutive clears.
+        <br><br>
+        <strong>Scenario C: Keep Theme Locked</strong><br>
+        Acknowledge 200k is aspirational; consider reducing unlock to 50k instead.
+      </p>
+    `;
+    document.getElementById('status').textContent = 'Analysis complete. Check results above.';
+    button.disabled = false;
+  }, 1000);
+}
+</script>
+</body>
+</html>

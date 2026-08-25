@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+body { margin: 0; padding: 0; font-family: monospace; background: #000; }
+#overlay { position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.95);
+  color: #0f0; padding: 20px; font-size: 18px; border-bottom: 3px solid #0f0; z-index: 99999; }
+.game { position: fixed; top: 120px; left: 0; width: 100%; height: calc(100% - 120px); }
+</style>
+</head>
+<body>
+<div id="overlay">BOT TEST LOADING...</div>
+<div class="game" id="gameContainer"></div>
+
+<script>
+// Fetch and run the game
+fetch('hacdong_working.html')
+  .then(r => r.text())
+  .then(html => {
+    // Extract just the body content and scripts
+    const match = html.match(/<body[^>]*>([\s\S]*)<\/body>/);
+    if(match) {
+      document.getElementById('gameContainer').innerHTML = match[1];
+      
+      // Now run the test
+      setTimeout(startTest, 2000);
+    }
+  });
+
+function startTest() {
+  const info = document.getElementById('overlay');
+  let finalScore = 0;
+  let startTime = Date.now();
+  
+  function updateInfo(msg) {
+    info.innerHTML = msg;
+    console.log(msg);
+  }
+  
+  updateInfo('🤖 Starting bot test...');
+  
+  if(typeof botPlayFunction !== 'function') {
+    updateInfo('❌ Bot function not found');
+    return;
+  }
+  
+  // Start bot
+  botPlayFunction();
+  
+  // Monitor game
+  const monitor = setInterval(() => {
+    if(typeof score === 'undefined') return;
+    
+    finalScore = score;
+    const elapsed = Math.round((Date.now() - startTime) / 1000);
+    
+    let msg = '🤖 BOT TEST RUNNING<br>';
+    msg += '⏱️ Time: ' + elapsed + 's<br>';
+    msg += '📊 Score: ' + finalScore + '<br>';
+    msg += '🎮 State: ' + (typeof state !== 'undefined' ? state : 'unknown');
+    
+    updateInfo(msg);
+    
+    // End condition
+    if(typeof state !== 'undefined' && state !== 'play') {
+      clearInterval(monitor);
+      updateInfo('✅ GAME OVER<br>📊 Final Score: <strong>' + finalScore + '</strong><br>⏱️ Time: ' + elapsed + 's');
+      console.log('*** FINAL_SCORE: ' + finalScore + ' ***');
+    }
+  }, 100);
+  
+  // Timeout
+  setTimeout(() => {
+    clearInterval(monitor);
+    updateInfo('⏹️ TIMEOUT<br>Final Score: ' + finalScore);
+  }, 120000);
+}
+</script>
+</body>
+</html>
