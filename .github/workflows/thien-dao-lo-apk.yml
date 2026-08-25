@@ -1,27 +1,49 @@
 # Dựng file APK cài thẳng lên điện thoại Android.
 #
-# CỐ Ý để chạy tay: Actions → "Thiên Đạo Lộ · dựng APK" → Run workflow.
-# Chạy xong tải APK ở mục Artifacts của lần chạy đó (chỉ người có quyền
-# vào repo mới tải được, không công khai như GitHub Pages).
+# Chạy theo hai đường:
+#  · Tự chạy khi nhánh phát triển có thay đổi phần app hoặc nội dung game.
+#    Cần thế vì nút "Run workflow" chỉ hiện khi file này đã nằm trên nhánh
+#    chính — mà nó thì chưa.
+#  · Chạy tay từ tab Actions sau khi nhánh đã gộp vào nhánh chính.
 #
-# Máy chủ của GitHub có sẵn Android SDK nên không phải cài gì thêm.
+# Tải APK ở mục Artifacts của lần chạy. Artifact chỉ người có quyền vào
+# repo mới tải được, KHÔNG công khai như GitHub Pages.
+#
+# Máy chủ của GitHub có sẵn Android SDK nên không phải cài gì thêm — đây
+# chính là lý do phải dựng ở đây: mạng trong môi trường soạn thảo chặn
+# dl.google.com, nơi chứa cả SDK lẫn Android Gradle Plugin.
 name: Thiên Đạo Lộ · dựng APK
 
 on:
   workflow_dispatch:
     inputs:
       loai:
-        description: 'debug = cài được ngay, không cần cấu hình gì. release = cần đủ 4 secret ký tên ở dưới.'
+        description: 'debug = cài được ngay, không cần cấu hình. release = cần đủ 4 secret ký tên.'
         type: choice
         default: debug
         options: [debug, release]
+  push:
+    branches: [claude/game-hoc-tap-on-thi-thpt-kwsnz9]
+    paths:
+      - 'tu-tien-thpt/android/**'
+      - 'tu-tien-thpt/src/**'
+      - 'tu-tien-thpt/assets/**'
+      - 'tu-tien-thpt/build.mjs'
+      - '.github/workflows/thien-dao-lo-apk.yml'
 
 permissions:
   contents: read
 
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   apk:
     runs-on: ubuntu-latest
+    env:
+      # push không có inputs ⇒ mặc định debug
+      LOAI: ${{ inputs.loai || 'debug' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -50,12 +72,14 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Nhận giấy phép Android SDK
-        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+          echo "ANDROID_HOME=$ANDROID_HOME"
 
-      # Ký tên bằng khoá riêng: chỉ chạy khi đã nạp đủ 4 secret.
-      # Có khoá cố định thì cài đè bản mới được, KHÔNG mất tiến độ.
+      # Ký bằng khoá riêng: chỉ khi chọn release và đã nạp đủ secret.
+      # Khoá cố định thì cài đè bản mới được mà KHÔNG mất tiến độ.
       - name: Chuẩn bị khoá ký
-        if: inputs.loai == 'release'
+        if: env.LOAI == 'release'
         env:
           KHO: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
@@ -69,26 +93,26 @@ jobs:
       - name: Dựng APK
         working-directory: tu-tien-thpt/android
         env:
-          TDL_KEYSTORE:     ${{ env.DUONG_KHO }}
+          TDL_KEYSTORE:      ${{ env.DUONG_KHO }}
           TDL_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           TDL_KEY_ALIAS:     ${{ secrets.ANDROID_KEY_ALIAS }}
           TDL_KEY_PASS:      ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          if [ "${{ inputs.loai }}" = "release" ]; then
-            ./gradlew --no-daemon assembleRelease
+          if [ "$LOAI" = "release" ]; then
+            ./gradlew --no-daemon --stacktrace assembleRelease
           else
-            ./gradlew --no-daemon assembleDebug
+            ./gradlew --no-daemon --stacktrace assembleDebug
           fi
 
       - name: Gom APK lại và đặt tên tử tế
         working-directory: tu-tien-thpt/android
         run: |
-          mkdir -p ../../apk-ra
+          mkdir -p "$GITHUB_WORKSPACE/apk-ra"
           f=$(find app/build/outputs/apk -name '*.apk' | head -1)
           [ -n "$f" ] || { echo "::error::Không tìm thấy APK nào"; exit 1; }
-          cp "$f" "../../apk-ra/thien-dao-lo-${{ inputs.loai }}.apk"
-          ls -lh ../../apk-ra/
+          cp "$f" "$GITHUB_WORKSPACE/apk-ra/thien-dao-lo-$LOAI.apk"
+          ls -lh "$GITHUB_WORKSPACE/apk-ra/"
 
       - name: Kiểm tra APK có đủ thứ cần
         working-directory: apk-ra
@@ -96,17 +120,21 @@ jobs:
           f=$(ls *.apk)
           unzip -l "$f" | grep -q 'assets/index.html' || { echo "::error::APK thiếu assets/index.html"; exit 1; }
           unzip -l "$f" | grep -q 'classes.dex'       || { echo "::error::APK thiếu classes.dex"; exit 1; }
-          unzip -l "$f" | grep -qi 'META-INF/.*\.RSA\|META-INF/.*\.EC\|META-INF/.*\.DSA' \
-            || echo "::warning::Không thấy chữ ký v1, có thể chỉ ký v2/v3 — vẫn cài được trên Android 7 trở lên."
-          echo "### APK đã dựng xong :white_check_mark:" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          ls -lh "$f" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "Tải ở mục **Artifacts** ngay dưới đây, bung zip ra là được file .apk." >> $GITHUB_STEP_SUMMARY
+          unzip -l "$f" | grep -q 'resources.arsc'    || { echo "::error::APK thiếu resources.arsc"; exit 1; }
+          unzip -l "$f" | grep -q 'res/mipmap'        || echo "::warning::Không thấy icon trong APK"
+          "$ANDROID_HOME"/build-tools/*/apksigner verify --print-certs "$f" \
+            && echo "Chữ ký hợp lệ" || echo "::warning::apksigner không xác minh được chữ ký"
+          {
+            echo "### APK đã dựng xong ✅"
+            echo '```'
+            ls -lh "$f"
+            echo '```'
+            echo "Tải ở mục **Artifacts** ngay dưới đây, bung zip ra là được file \`.apk\`."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: thien-dao-lo-apk-${{ inputs.loai }}
+          name: thien-dao-lo-apk-${{ env.LOAI }}
           path: apk-ra/*.apk
           if-no-files-found: error
           retention-days: 30
