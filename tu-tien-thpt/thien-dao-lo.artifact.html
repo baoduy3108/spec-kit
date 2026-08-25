@@ -1158,20 +1158,40 @@ TD.bangCuaThe = function (the) {
    thúc bằng dấu chấm, vế phải phải đủ dài để thành một phương án tử tế. */
 TD.dongVanCuaThe = function (than) {
   const ra = [];
+  /* Thứ tự ưu tiên dấu tách. ":" trước vì nó tách nhãn – nội dung rõ nhất;
+     "=" để cuối vì một dòng có thể là chuỗi đẳng thức (v = λf = λ/T) và ta chỉ
+     muốn cắt ở dấu đầu tiên. */
+  const DAU = [':', '⇔', '⇒', '→', '='];
+  const NHAN_RONG = /^(lưu ý|chú ý|ví dụ|mẹo|nhớ|ghi nhớ|kết luận|tóm lại|trong đó|với|nếu)$/i;
   String(than).split(/<br\s*\/?>|<\/p>|\n/).forEach(d => {
     const van = d.replace(/<table[\s\S]*?<\/table>/g, '')
-      .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
       .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
-    if (van.length < 12 || van.length > 170) return;
-    const i = van.indexOf(':');
-    if (i < 1) return;                       /* nhãn một ký tự như "γ:" vẫn hợp lệ */
-    const nhan = van.slice(0, i).trim();
-    const tran = van.slice(i + 1).trim().replace(/[.;]$/, '');
-    if (nhan.length > 45 || /[.!?]$/.test(nhan) || nhan.indexOf(':') >= 0) return;
-    if (tran.length < 10 || tran.length > 120 || tran.indexOf(':') >= 0) return;
-    /* nhãn mà đã chứa luôn câu trả lời thì hỏi cũng bằng thừa */
-    if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
-    ra.push({ nhan: nhan, noi: tran, tran: tran, chat: TD.chatTrongO(tran), _nhom: 'van', _van: true });
+    if (!van) return;
+    /* Một dòng thường xâu nhiều công thức bằng " · ": bảng đạo hàm viết
+       "(xⁿ)′ = n·xⁿ⁻¹ · (√x)′ = 1/(2√x) · (1/x)′ = −1/x²" trên đúng một dòng.
+       Chỉ tách ở dấu chấm giữa CÓ khoảng trắng hai bên — "n·xⁿ⁻¹" là phép nhân. */
+    van.split(/\s+[·•]\s+/).forEach(manh => {
+      const t = manh.trim();
+      if (t.length < 4 || t.length > 170) return;
+      let i = -1, dau = '';
+      for (let k = 0; k < DAU.length; k++) {
+        const j = t.indexOf(DAU[k]);
+        if (j > 0) { i = j; dau = DAU[k]; break; }
+      }
+      if (i < 1) return;
+      const nhan = t.slice(0, i).trim();
+      let tran = t.slice(i + dau.length).trim().replace(/[.;,]$/, '');
+      /* vế phải lỡ ôm sang câu sau thì cắt ở dấu chấm */
+      const cham = tran.indexOf('. ');
+      if (cham > 3) tran = tran.slice(0, cham).trim();
+      if (nhan.length > 45 || /[.!?]$/.test(nhan) || NHAN_RONG.test(nhan)) return;
+      if (tran.length < 2 || tran.length > 120) return;
+      /* nhãn mà đã chứa luôn câu trả lời thì hỏi cũng bằng thừa */
+      if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
+      ra.push({ nhan: nhan, noi: tran, tran: tran, chat: TD.chatTrongO(tran),
+        _nhom: 'van', _van: true, _dau: dau });
+    });
   });
   /* một dòng lẻ thì không dựng nổi phương án nhiễu cùng kiểu */
   return ra.length >= 2 ? ra : [];
@@ -1249,9 +1269,21 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     }));
     return ds;
   };
+  /* Bốn phương án phải là bốn chuỗi KHÁC NHAU. Thẻ có hai dòng cùng nhãn
+     ("∫ab" xuất hiện ở nhiều tính chất tích phân) thì ghép chéo dễ ra hai
+     phương án y hệt nhau trong một câu. */
+  const bonKhac = opts => {
+    const da = {};
+    return opts.length === 4 && opts.every(o => {
+      const k = String(o).replace(/<[^>]+>/g, '').trim();
+      if (!k || da[k]) return false;
+      da[k] = 1; return true;
+    });
+  };
   const themMC = (q, dung, s, giai, muc) => {
     if (s.length !== 3) return;
     const opts = TD.xaoR(R, [dung].concat(s));
+    if (!bonKhac(opts)) return;
     ra.push({ q: q, opts: opts, ans: opts.indexOf(dung), muc: muc || 1, dang: 'mc',
       giai: giai, meo: meoThe });
   };
@@ -1315,6 +1347,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     const s = TD.xaoR(R, d.chat.filter(riengMot)).slice(0, 3);
     if (s.length !== 3) return;
     const opts = TD.xaoR(R, [dung].concat(s));
+    if (!bonKhac(opts)) return;
     const cua = (dong.find(z => (z.chat || []).indexOf(dung) >= 0) || {}).nhan || '';
     ra.push({ q: `Theo thẻ <b>«${ten}»</b>, chất nào sau đây <b>KHÔNG</b> thuộc nhóm <b>${d.nhan}</b>?`,
       opts: opts, ans: opts.indexOf(dung), muc: 2, dang: 'mc',
@@ -1335,6 +1368,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     const hoiNoi = d._cot
       ? `Theo bảng trong thẻ <b>«${ten}»</b>, ${d._tenKhoa ? d._tenKhoa + ' ' : ''}<b>${d._khoa}</b> `
         + `có <b>${d._tenCot}</b> là gì?`
+      : d._dau === '=' ? `Theo thẻ <b>«${ten}»</b>, <b>${d.nhan}</b> bằng biểu thức nào sau đây?`
       : `Theo thẻ <b>«${ten}»</b>, <b>${d.nhan}</b> ứng với nội dung nào sau đây?`;
     /* Dòng văn thì vẫn cho mượn thẻ CÙNG CHUYÊN ĐỀ (cùng kiểu dòng văn) — nhiễu
        vẫn nằm trong phạm vi kiến thức đang học. Cột phụ thì tuyệt đối không:
@@ -1346,7 +1380,8 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
                         khac.map(z => z.noi), ngoai.map(z => z.noi), xa.filter(cungKieu).map(z => z.noi)], d.noi, 3),
       `Thẻ «${ten}» ghi rõ:\n${d.nhan} → ${d.tran}`, 1);
     if (d._cot) return;                       /* nhãn cột ghép sẵn, hỏi ngược nghe rất gượng */
-    themMC(`Nội dung sau thuộc mục nào trong thẻ <b>«${ten}»</b>?<br><b>${d.noi}</b>`,
+    themMC(d._dau === '=' ? `Trong thẻ <b>«${ten}»</b>, biểu thức <b>${d.noi}</b> là kết quả của mục nào?`
+             : `Nội dung sau thuộc mục nào trong thẻ <b>«${ten}»</b>?<br><b>${d.noi}</b>`,
       d.nhan,
       trongThe ? nhieu([cungNhom.map(z => z.nhan),
                         d._van ? ngoai.filter(z => z._nhom === 'van').map(z => z.nhan) : []], d.nhan, 3)
@@ -1405,6 +1440,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       if (s.length < 3) return;
       const dung = ghep(d, d.noi);
       const opts = TD.xaoR(R, [dung].concat(s.map(z => z.t)));
+      if (!bonKhac(opts)) return;
       ra.push({ q: `Theo thẻ <b>«${ten}»</b>, cách ghép nào sau đây <b>ĐÚNG</b>?`,
         opts: opts, ans: opts.indexOf(dung), muc: 2, dang: 'mc',
         giai: `Thẻ «${ten}» ghi: ${d.nhan} → ${d.tran}.\n`
@@ -1419,6 +1455,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       const s = TD.xaoR(R, nh.filter(d => d !== z.a && d !== z.b)).slice(0, 3);
       if (s.length < 3) return;
       const opts = TD.xaoR(R, [z.t].concat(s.map(d => ghep(d, d.noi))));
+      if (!bonKhac(opts)) return;
       ra.push({ q: `Theo thẻ <b>«${ten}»</b>, cách ghép nào sau đây <b>SAI</b>?`,
         opts: opts, ans: opts.indexOf(z.t), muc: 2, dang: 'mc',
         giai: `Thẻ «${ten}» ghi ${z.a.nhan} → ${z.a.tran}, còn ${z.b.tran} là nội dung của `
