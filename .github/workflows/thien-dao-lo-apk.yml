@@ -25,7 +25,11 @@ on:
   push:
     branches: [claude/game-hoc-tap-on-thi-thpt-kwsnz9]
     paths:
-      - 'tu-tien-thpt/android/**'
+      # cố ý KHÔNG lấy cả android/** — sửa README thì dựng lại làm gì
+      - 'tu-tien-thpt/android/app/**'
+      - 'tu-tien-thpt/android/*.gradle'
+      - 'tu-tien-thpt/android/gradle.properties'
+      - 'tu-tien-thpt/android/gradle/**'
       - 'tu-tien-thpt/src/**'
       - 'tu-tien-thpt/assets/**'
       - 'tu-tien-thpt/build.mjs'

@@ -18,10 +18,20 @@ vẫn không có một gói tin nào rời khỏi máy.
 `dl.google.com`, mà cả Android SDK lẫn Android Gradle Plugin đều nằm ở đó.
 Nên việc dựng đẩy sang GitHub Actions, nơi máy chủ có sẵn SDK:
 
-> Actions → **Thiên Đạo Lộ · dựng APK** → Run workflow → chọn `debug` →
-> chạy xong tải ở mục **Artifacts**.
+Workflow **tự chạy** mỗi khi nhánh phát triển đụng vào phần app hoặc nội
+dung game. Vào tab **Actions** → **Thiên Đạo Lộ · dựng APK** → mở lần chạy
+mới nhất → kéo xuống mục **Artifacts** → tải `thien-dao-lo-apk-debug`.
 
-Artifact chỉ người có quyền vào repo mới tải được, không công khai.
+Tải về là một file `.zip`, **bung ra mới thấy file `.apk`** — GitHub luôn
+gói artifact vào zip. Cần đăng nhập GitHub mới tải được; artifact không
+công khai như GitHub Pages.
+
+Sau khi nhánh gộp vào nhánh chính thì nút **Run workflow** mới hiện, lúc đó
+chạy tay được và chọn được `debug` hay `release`.
+
+Đã dựng thật, không phải lý thuyết: APK **1,4 MB**, có đủ `assets/index.html`,
+`classes.dex`, `resources.arsc`, icon, và `apksigner verify` xác nhận **ký
+đúng chuẩn v2**.
 
 **Dựng ở máy mình** (nếu có Android Studio hoặc SDK):
 
