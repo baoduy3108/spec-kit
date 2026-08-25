@@ -1092,13 +1092,19 @@ TD.phamViThe = function (mon, the) {
      đề — bóc trước, vì nhiều thẻ không ghép được chuyên đề nào nhưng vẫn có
      bảng để hỏi. */
   const bangT = TD.bangCuaThe(the);
+  /* Bộ sinh bài tập mang đúng tên thẻ phải tìm được KỂ CẢ khi thẻ không ghép
+     được chuyên đề nào. Ba thẻ kỹ thuật của Hoá đánh dấu cd '*' (dùng chung
+     mọi chuyên đề) nên rơi vào nhánh này, và trước đây bị trả về mau rỗng —
+     thành ra thẻ "Quy đổi hỗn hợp" trống trơn dù đã có sẵn bộ sinh cho nó. */
+  const goc0 = TD.khongDau(ten);
+  const mau0 = (TD.GEN[mon] || []).filter(t => !t._tuLT && goc0 && TD.khongDau(t.chuong || '') === goc0);
   if (!cd || chiSo.length < 4)
-    return { cd: cd, ten: ten, nong: [], mau: [], bang: bangT,
+    return { cd: cd, ten: ten, nong: [], mau: mau0, bang: bangT,
              /* Không loại thẻ trùng tên chuyên đề nữa. Thẻ "Phức chất" nằm trong
                 chuyên đề cũng tên "Phức chất" nên trước đây bị chặn, dù bảng của
                 nó bẻ ra tới 26 câu. Hai nút vẫn phân biệt được: một cái ghi
                 "Kiểm tra thẻ này", cái kia ghi "cả chuyên đề". */
-             rieng: !!ten && bangT.length >= 2 };
+             rieng: !!ten && (bangT.length >= 2 || mau0.length >= 1) };
   const tk = TD.tuKhoaThe(the);
   const nong = chiSo.filter(i => TD.diemSatThe(tk, (kho[i].t || '') + ' ' + (kho[i].v || '')) >= TD.NGUONG_SAT_THE);
   /* Bộ sinh đề khai thẳng tên thẻ ở trường chuong thì chắc chắn là của thẻ đó */
@@ -1111,7 +1117,7 @@ TD.phamViThe = function (mon, the) {
      tra bằng câu của chính thẻ. Ít hơn thế mà vẫn ghi tên thẻ lên nút thì chỉ
      vài câu đầu là đúng, phần sau lạc sang chuyên đề — đúng cái người học kêu. */
   return { cd: cd, ten: ten, nong: nong, mau: mau, bang: bangT,
-           rieng: !!ten && (nong.length >= 6 || bangT.length >= 2) };
+           rieng: !!ten && (nong.length >= 6 || bangT.length >= 2 || mau.length >= 1) };
 };
 
 /* Lượt kiểm tra của MỘT thẻ: 50 câu như mọi lượt khác, nhưng bẻ nhỏ từ chính
@@ -1166,11 +1172,13 @@ TD.deRiengThe = function (mon, the, soCau) {
 
   /* ⑤ chưa đủ thì nới ra chuyên đề, xếp SAU phần sát thẻ */
   const them = [];
-  if (rieng.length < n && pv.cd) {
+  if (rieng.length < n) {
     const daCo = {};
     rieng.forEach(x => { if (x.lt !== undefined) daCo[x.lt] = 1; });
+    /* Thẻ đánh dấu cd '*' (ba thẻ kỹ thuật của Hoá) không thuộc chuyên đề nào,
+       nên nới ra cả môn — đúng bản chất của nó: kỹ thuật dùng chung. */
     for (let vong = 0; vong < 3 && rieng.length + them.length < n; vong++)
-      TD.deChuyenDe(mon, pv.cd, n).forEach(x => {
+      TD.deChuyenDe(mon, pv.cd || null, n).forEach(x => {
         if (rieng.length + them.length >= n) return;
         if (x.lt !== undefined) { if (daCo[x.lt]) return; daCo[x.lt] = 1; }
         them.push(x);
