@@ -721,13 +721,24 @@ TD.dongVanCuaThe = function (than) {
     .replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
   const nhanCuoi = (nhan, tran, dau) => {
     let n = String(nhan).replace(/[:：]\s*$/, '').trim();
-    /* nhãn in đậm thường đi kèm gạch nối dẫn vào phần giải thích:
-       "<b>Phép lặp</b> — lặp lại từ ngữ…" — phải bỏ gạch đó khỏi đáp án */
-    let t = String(tran).trim().replace(/^[—–\-:·]\s*/, '').replace(/[.;,]$/, '');
+    /* nhãn in đậm thường đi kèm dấu dẫn vào phần giải thích:
+       "<b>Phép lặp</b> — lặp lại từ ngữ…", "<b>Nội năng U</b> = tổng động năng…"
+       — phải bỏ dấu đó khỏi đáp án, và nếu là dấu toán thì dùng luôn làm dấu nối. */
+    let t = String(tran).trim();
+    const daoDau = t.match(/^([—–:·=⇔⇒→])\s*/);
+    if (daoDau) {
+      t = t.slice(daoDau[0].length);
+      if ('=⇔⇒→'.indexOf(daoDau[1]) >= 0) dau = daoDau[1];
+    }
+    t = t.replace(/[.;,]$/, '');
     /* vế phải lỡ ôm sang câu sau thì cắt ở dấu chấm */
     const cham = t.indexOf('. ');
     if (cham > 8) t = t.slice(0, cham).trim();
-    if (!n || n.length > 45 || /[.!?]$/.test(n) || NHAN_RONG.test(n)) return null;
+    /* nhãn bị cắt giữa câu thì bỏ: "dãn chung 0,4). Nhịp tim" là mảnh vụn của
+       câu trước chứ không phải một mục hỏi được */
+    const leNgoac = (n.split(')').length - n.split('(').length) > 0;
+    if (!n || n.length > 45 || /[.!?]$/.test(n) || /[.!?]\s/.test(n) || leNgoac
+        || NHAN_RONG.test(n)) return null;
     if (t.length < 2 || t.length > 150) return null;
     if (TD.khongDau(t).indexOf(TD.khongDau(n)) >= 0) return null;
     /* n và t là VĂN BẢN THUẦN, đã giải mã &lt; thành <. Nhúng thẳng vào HTML
@@ -951,7 +962,10 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     /* Dòng văn thì vẫn cho mượn thẻ CÙNG CHUYÊN ĐỀ (cùng kiểu dòng văn) — nhiễu
        vẫn nằm trong phạm vi kiến thức đang học. Cột phụ thì tuyệt đối không:
        ngữ nghĩa của cột không chuyển sang thẻ khác được. */
-    const muonNgoai = d._van ? ngoai.filter(z => z._nhom === 'van').map(z => z.noi) : [];
+    const muonNgoai = d._van
+      ? ngoai.filter(z => z._nhom === 'van').map(z => z.noi)
+        .concat(ngoai.filter(z => z._nhom !== 'van').map(z => z.noi))
+      : [];
     themMC(hoiNoi, d.noi,
       trongThe ? nhieu([cungNhom.map(z => z.noi), muonNgoai], d.noi, 3)
                : nhieu([khac.filter(cungKieu).map(z => z.noi), ngoai.filter(cungKieu).map(z => z.noi),
@@ -1080,7 +1094,11 @@ TD.phamViThe = function (mon, the) {
   const bangT = TD.bangCuaThe(the);
   if (!cd || chiSo.length < 4)
     return { cd: cd, ten: ten, nong: [], mau: [], bang: bangT,
-             rieng: !!ten && ten !== cd && bangT.length >= 2 };
+             /* Không loại thẻ trùng tên chuyên đề nữa. Thẻ "Phức chất" nằm trong
+                chuyên đề cũng tên "Phức chất" nên trước đây bị chặn, dù bảng của
+                nó bẻ ra tới 26 câu. Hai nút vẫn phân biệt được: một cái ghi
+                "Kiểm tra thẻ này", cái kia ghi "cả chuyên đề". */
+             rieng: !!ten && bangT.length >= 2 };
   const tk = TD.tuKhoaThe(the);
   const nong = chiSo.filter(i => TD.diemSatThe(tk, (kho[i].t || '') + ' ' + (kho[i].v || '')) >= TD.NGUONG_SAT_THE);
   /* Bộ sinh đề khai thẳng tên thẻ ở trường chuong thì chắc chắn là của thẻ đó */
@@ -1093,7 +1111,7 @@ TD.phamViThe = function (mon, the) {
      tra bằng câu của chính thẻ. Ít hơn thế mà vẫn ghi tên thẻ lên nút thì chỉ
      vài câu đầu là đúng, phần sau lạc sang chuyên đề — đúng cái người học kêu. */
   return { cd: cd, ten: ten, nong: nong, mau: mau, bang: bangT,
-           rieng: !!ten && ten !== cd && (nong.length >= 6 || bangT.length >= 2) };
+           rieng: !!ten && (nong.length >= 6 || bangT.length >= 2) };
 };
 
 /* Lượt kiểm tra của MỘT thẻ: 50 câu như mọi lượt khác, nhưng bẻ nhỏ từ chính

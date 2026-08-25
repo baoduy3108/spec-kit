@@ -49,10 +49,13 @@ TD.hinhDoThi = function (f, cf) {
      thì Y(0) rơi ra ngoài khung, kéo theo cả hàng nhãn trục biến mất. Kẹp lại
      đúng như sách: nhãn hoành độ chạy dọc mép dưới, nhãn tung độ dọc mép trái. */
   const kep = (v, min, max) => Math.min(Math.max(v, min), max);
-  const yNhan = kep(Y(0) + 13, le + 11, H - 5);
+  /* Nhãn phải nằm TRONG khung. Đồ thị có miền y không chứa số 0 (ví dụ y chạy
+     từ 4 đến 8) thì trục hoành nằm ngoài khung, kẹp tới H − 5 là nhãn rơi hẳn
+     xuống dưới đáy khung, trông như dãy số lơ lửng không gắn vào đâu. */
+  const yNhan = kep(Y(0) + 13, le + 11, H - le + 12);
   /* Nhãn âm dùng dấu trừ thật (−) rộng hơn gạch nối, "−20" canh phải ở mốc
      15 là lòi hẳn ra ngoài khung. Chừa đủ chỗ cho nhãn bốn ký tự. */
-  const xNhan = kep(X(0) - 6, 26, W - 5);
+  const xNhan = kep(X(0) - 6, 26, W - le - 6);
   /* Không ghi mọi số nguyên: đồ thị có biên độ lớn (nhiệt độ từ −30 đến 30
      chẳng hạn) sẽ xếp sáu chục nhãn chồng lên nhau thành một vệt đen. Chọn
      bước chia sao cho mỗi trục nhiều nhất mười vạch. */
@@ -65,16 +68,23 @@ TD.hinhDoThi = function (f, cf) {
   let luoi = '';
   /* Vạch sát mép khung thì bỏ nhãn: chữ nằm chồng lên chính đường viền, in ra
      giấy trông như số bị cắt mất một nửa. */
+  /* Đường tiệm cận đứng vẽ nét đứt suốt chiều cao khung, đi qua đúng chỗ nhãn
+     hoành độ. Nhãn nào nằm ngay dưới nó thì bỏ, không thì chữ bị nét đứt xẻ
+     làm đôi — đọc "−2" thành "-|2". */
+  const xDung = (c.tiemCan || []).filter(t => t.doc !== undefined).map(t => X(t.doc))
+    .concat((c.duongDung || []).map(x => X(x)));
   for (let x = Math.ceil(c.xMin / bx) * bx; x <= c.xMax; x += bx) {
     if (x === 0) continue;
     luoi += `<line x1="${so(X(x))}" y1="${le}" x2="${so(X(x))}" y2="${H - le}" stroke="${M.phu}" stroke-width="1"/>`;
-    if (X(x) > le + 7 && X(x) < W - le - 7)
+    if (X(x) > le + 7 && X(x) < W - le - 7 && !xDung.some(v => Math.abs(v - X(x)) < 11))
       luoi += `<text x="${so(X(x))}" y="${so(yNhan)}" fill="${M.chu}" font-size="10" text-anchor="middle">${nso(x)}</text>`;
   }
+  const yNgang = (c.tiemCan || []).filter(t => t.ngang !== undefined).map(t => Y(t.ngang))
+    .concat((c.duongNgang || []).map(y => Y(y)));
   for (let y = Math.ceil(c.yMin / by) * by; y <= c.yMax; y += by) {
     if (y === 0) continue;
     luoi += `<line x1="${le}" y1="${so(Y(y))}" x2="${W - le}" y2="${so(Y(y))}" stroke="${M.phu}" stroke-width="1"/>`;
-    if (Y(y) > le + 7 && Y(y) < H - le - 7)
+    if (Y(y) > le + 7 && Y(y) < H - le - 7 && !yNgang.some(v => Math.abs(v - Y(y)) < 7))
       luoi += `<text x="${so(xNhan)}" y="${so(Y(y) + 3.5)}" fill="${M.chu}" font-size="10" text-anchor="end">${nso(y)}</text>`;
   }
   /* Trục chỉ vẽ khi nó thật sự nằm trong vùng hiển thị; nếu không thì thay
@@ -86,7 +96,7 @@ TD.hinhDoThi = function (f, cf) {
     /* Đề thật luôn ghi TÊN ĐẠI LƯỢNG ở đầu trục (V, p, t, T, N…) chứ không
        ghi trơ "x" với "y". Ghi x/y trong khi đề bảo "trục hoành là thể tích"
        là bắt học sinh tự dịch, không giống giấy thi. */
-    + `<text x="${W - 3}" y="${so(kep(Y(0) - 5, le + 4, H - 4))}" fill="${M.chu}" font-size="11" text-anchor="end">${c.tenX || 'x'}</text>`
+    + `<text x="${W - 3}" y="${so(kep(Y(0) - 5, le + 4, H - le + 12))}" fill="${M.chu}" font-size="11" text-anchor="end">${c.tenX || 'x'}</text>`
     + `<text x="${so(kep(X(0) + 6, 4, W - 12))}" y="${le - 8}" fill="${M.chu}" font-size="11">${c.tenY || 'y'}</text>`
     + (coX && coY ? `<text x="${so(xNhan)}" y="${so(yNhan)}" fill="${M.chu}" font-size="10" text-anchor="end">O</text>` : '');
 
