@@ -1051,13 +1051,7 @@ function placePiece(idx,row,col){
       console.log(`[TRAY] Force random tray (all attempts failed)`);
     }
     lastAction='refill khay';
-    // VÙNG AN TOÀN <1000 điểm (không áp daily seed-công-bằng & campaign độ-khó-thiết-kế): đảm bảo MỌI khối trong khay
-    // đều còn chỗ đặt — khối nào bít đường thì đổi thành khối NHỎ NHẤT còn đặt vừa. Người gà gần như không thể chết oan.
-    if(score<1000 && mode!=='daily' && mode!=='level'){
-      const smallest=()=>SHAPES.slice().sort((a,b)=>a.length-b.length)
-        .map(s2=>{ const d2=shapeDim(s2); return {cells:s2,w:d2.w,h:d2.h}; }).find(p2=>anyPlacement(p2));
-      for(let ti=0;ti<3;ti++){ if(!anyPlacement(tray[ti])){ const fit=smallest();
-        if(fit && Math.random()<0.85) tray[ti]={cells:fit.cells,w:fit.w,h:fit.h,color:TH.blocks[(Math.random()*TH.blocks.length)|0]}; } } } }
+  }
   checkOver(); updateDanger();
 }
 
