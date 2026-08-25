@@ -1,0 +1,50 @@
+plugins { id 'com.android.application' }
+
+android {
+  namespace 'vn.thiendaolo'
+  compileSdk 34
+
+  defaultConfig {
+    applicationId 'vn.thiendaolo'
+    minSdk 24                 // Android 7.0 trở lên
+    targetSdk 34
+    versionCode 1
+    versionName '1.0'
+  }
+
+  /* Ký tên bản release bằng khoá nạp qua biến môi trường.
+     Không có khoá thì bỏ qua hẳn khối này — bản debug vẫn dựng bình
+     thường, còn release sẽ ra APK chưa ký (điện thoại từ chối cài),
+     đó là chủ ý: thà lỗi rõ ràng còn hơn ra file cài không được. */
+  def khoTep = System.getenv('TDL_KEYSTORE')
+  if (khoTep) {
+    signingConfigs {
+      chinh {
+        storeFile file(khoTep)
+        storePassword System.getenv('TDL_KEYSTORE_PASS')
+        keyAlias     System.getenv('TDL_KEY_ALIAS')
+        keyPassword  System.getenv('TDL_KEY_PASS')
+        enableV1Signing true      // cho máy Android 7–8 đời cũ
+        enableV2Signing true
+        enableV3Signing true
+      }
+    }
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+      if (khoTep) signingConfig signingConfigs.chinh
+    }
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+}
+
+/* KHÔNG phụ thuộc thư viện nào — kể cả androidx.
+   App chỉ có một Activity và một WebView; càng ít thứ phải tải về thì
+   càng ít chỗ hỏng khi dựng, và APK cũng nhẹ đi vài trăm KB. */
+dependencies { }

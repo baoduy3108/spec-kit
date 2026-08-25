@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Theme của hệ điều hành, không cần AppCompat -->
+  <style name="Theme.ThienDaoLo" parent="@android:style/Theme.Material.NoActionBar">
+    <item name="android:windowBackground">@color/nen</item>
+    <item name="android:statusBarColor">@color/nen</item>
+    <item name="android:navigationBarColor">@color/nen</item>
+  </style>
+</resources>

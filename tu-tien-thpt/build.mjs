@@ -185,3 +185,14 @@ fs.writeFileSync(path.join(PWA, '.nojekyll'), '', 'utf8');
 const thieu = TAI_SAN.filter(u => u !== './' && !fs.existsSync(path.join(PWA, u.replace('./', ''))));
 if (thieu.length) { console.error('✗ Thiếu tài sản PWA: ' + thieu.join(', ')); process.exit(1); }
 console.log(`✓ Đã dựng: pwa/ (index.html ${(fs.statSync(path.join(PWA, 'index.html')).size / 1024).toFixed(0)} KB, bản ${ma})`);
+
+/* ---- Bản Android: chép thẳng vào assets nếu có dự án android/ ----
+   Tệp này bị .gitignore chặn (nó là bản dựng, không phải nguồn) nhưng
+   để sẵn thì mở Android Studio ra là dựng được ngay, khỏi chép tay và
+   khỏi lo lệch phiên bản với thien-dao-lo.html. */
+const TAI_APK = path.join(ROOT, 'android', 'app', 'src', 'main', 'assets');
+if (fs.existsSync(path.dirname(TAI_APK))) {
+  fs.mkdirSync(TAI_APK, { recursive: true });
+  fs.writeFileSync(path.join(TAI_APK, 'index.html'), html, 'utf8');
+  console.log(`✓ Đã chép: android/app/src/main/assets/index.html`);
+}
