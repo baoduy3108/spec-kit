@@ -29,8 +29,8 @@ Tự động tiêm qua Android wrapper — không cần code ở đây.
 window.admobConfig = {
   testRewardedId: 'ca-app-pub-3940256099942544/5224354917',
   testBannerId: 'ca-app-pub-3940256099942544/6300978111',
-  prodRewardedId: 'ca-app-pub-XXXXXXXXXXXXXXXX/yyyyyyyyyy',
-  prodBannerId: 'ca-app-pub-XXXXXXXXXXXXXXXX/zzzzzzzzzz',
+  prodRewardedId: 'ca-app-pub-2424151177279863/4089184121',
+  prodBannerId: 'ca-app-pub-2424151177279863/1541700380',
   isDev: location.hostname === 'localhost' || location.hostname === '127.0.0.1',
   get rewardedId() { return this.isDev ? this.testRewardedId : this.prodRewardedId; },
   get bannerId() { return this.isDev ? this.testBannerId : this.prodBannerId; }
