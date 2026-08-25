@@ -299,7 +299,7 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
   ['Hiệu suất sinh thái giữa hai bậc liền kề', 'khoảng 10 phần trăm'],
   ['Tháp sinh thái luôn có đáy rộng nhất', 'tháp năng lượng'],
   ['Vai trò của sinh vật phân giải', 'trả chất vô cơ về lại môi trường'],
-  ['Lí do chuỗi thức ăn ít khi quá sáu mắt xích', 'năng lượng hao hụt rất lớn qua mỗi bậc'] ] },
+  ['Độ dài thường gặp của chuỗi thức ăn', 'không quá 4 – 5 mắt xích vì mỗi bậc hao hụt khoảng 90 phần trăm năng lượng'] ] },
 
 { kho: 'sinh_ct', ten: 'Tuần hoàn & cân bằng nội môi', hang: [
   ['Chiều biến đổi huyết áp trong hệ mạch', 'giảm dần từ động mạch chủ tới tĩnh mạch chủ'],
@@ -327,7 +327,7 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
   ['Động lực chủ yếu của dòng mạch gỗ', 'lực hút do thoát hơi nước ở lá'],
   ['Con đường thoát hơi nước chủ yếu', 'qua khí khổng ở lá'],
   ['Vai trò của thoát hơi nước', 'tạo lực hút, hạ nhiệt cho lá và mở đường cho CO₂ đi vào'],
-  ['Các nguyên tố đa lượng', 'N, P, K, S, Ca và Mg'],
+  ['Các nguyên tố khoáng đa lượng', 'N, P, K, S, Ca và Mg'],
   ['Biểu hiện khi cây thiếu nitrogen', 'lá vàng nhạt và cây sinh trưởng kém'],
   ['Biểu hiện khi cây thiếu magnesium', 'vàng phần thịt lá ở giữa các gân lá'],
   ['Dạng nitrogen mà rễ hấp thụ được', 'ion NH₄⁺ và ion NO₃⁻'],
