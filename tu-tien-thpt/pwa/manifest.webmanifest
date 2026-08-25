@@ -1,0 +1,47 @@
+{
+  "name": "Thiên Đạo Lộ — Ôn thi THPT",
+  "short_name": "Thiên Đạo Lộ",
+  "description": "Game tu tiên hoá thành lộ trình ôn thi tốt nghiệp THPT 9 môn, chạy hoàn toàn offline.",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "id": "/thien-dao-lo/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "fullscreen",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "categories": [
+    "education"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

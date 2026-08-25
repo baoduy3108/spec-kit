@@ -1,0 +1,50 @@
+# Đưa bản PWA của Thiên Đạo Lộ lên GitHub Pages.
+#
+# CỐ Ý để chạy tay (workflow_dispatch), không tự chạy theo push:
+# bật Pages là trang thành CÔNG KHAI, ai có link đều xem được, nên
+# việc đó phải do người chủ repo bấm chứ không tự động.
+#
+# Cách dùng:
+#   1. Settings → Pages → Source: GitHub Actions
+#   2. Tab Actions → "Thiên Đạo Lộ · PWA lên Pages" → Run workflow
+name: Thiên Đạo Lộ · PWA lên Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  dung-va-day:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.day.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Dựng lại từ nguồn rồi soi dữ liệu
+        working-directory: tu-tien-thpt
+        run: |
+          node build.mjs
+          node check.mjs
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: tu-tien-thpt/pwa
+
+      - id: day
+        uses: actions/deploy-pages@v4

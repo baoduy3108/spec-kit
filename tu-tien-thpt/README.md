@@ -23,6 +23,13 @@ node check.mjs src/config.js src/data/*.js    # kiểm tra tính hợp lệ dữ
 
 Tiến độ lưu bằng `localStorage` ngay trên máy, không gửi đi đâu.
 
+**Cách cài lên màn hình chính điện thoại** — `build.mjs` còn dựng ra thư mục
+`tu-tien-thpt/pwa/`: cùng một game nhưng thêm manifest, icon và service worker,
+cài được như một app thật, mở toàn màn hình, rút mạng vẫn chơi. Cần đưa lên
+https trước vì service worker không chạy trên `file://`. Xem
+[`tu-tien-thpt/pwa/README.md`](tu-tien-thpt/pwa/README.md) để biết cách đưa lên
+GitHub Pages và cách cài trên Android/iPhone.
+
 ## Cơ chế game
 
 | Trong game | Thật ra là |
