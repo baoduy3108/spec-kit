@@ -4165,7 +4165,7 @@ TD.KHO.ly_ct = [
   bay: 'Dây dẫn <b>song song</b> với B⃗ (α = 0) ⇒ F = 0. Quy tắc bàn tay trái xác định chiều lực.' },
 
 { nhom: 'III. Từ trường', ten: 'Từ thông & cảm ứng điện từ', cap: 3,
-  ct: '<b>Φ = N·B·S·cosα</b> &nbsp;(α: góc giữa B⃗ và <b>pháp tuyến</b> n⃗) [Φ: weber (Wb)]<br><b>Định luật Faraday: e<sub>c</sub> = −N·ΔΦ/Δt</b> &nbsp;(dấu − là định luật Lenz)<br>Độ lớn: |e<sub>c</sub>| = N·|ΔΦ|/Δt<br>Cường độ dòng cảm ứng: i = e<sub>c</sub>/R',
+  ct: '<b>Φ = B·S·cosα</b> qua MỘT vòng &nbsp;(α: góc giữa B⃗ và <b>pháp tuyến</b> n⃗) [Φ: weber (Wb)]<br><b>Định luật Faraday: e<sub>c</sub> = −N·ΔΦ/Δt</b> &nbsp;(dấu − là định luật Lenz)<br>Độ lớn: |e<sub>c</sub>| = N·|ΔΦ|/Δt<br>Cường độ dòng cảm ứng: i = e<sub>c</sub>/R',
   khi: 'Khung dây quay/biến dạng trong từ trường, nam châm chuyển động qua ống dây.',
   vd: 'N = 100 vòng, ΔΦ = 0,02 Wb trong 0,1 s ⇒ |e| = 100·0,02/0,1 = <b>20 V</b>.',
   bay: 'α là góc với <b>pháp tuyến</b>, không phải với mặt phẳng khung dây. Khung song song B⃗ ⇒ α = 90° ⇒ Φ = 0.' },
@@ -4423,7 +4423,7 @@ TD.KHO.ly_ct.push(
   bay: 'Dây song song B thì F = 0. Lực Lorentz luôn ⊥ v→ nên không sinh công, chỉ đổi hướng chuyển động.' },
 
 { nhom: 'III. Từ trường', ten: 'Từ thông & cảm ứng điện từ', cap: 2,
-  ct: '<b>Từ thông:</b> Φ = NBS·cosα (α là góc giữa B→ và pháp tuyến), đơn vị Weber.<br><b>Định luật Faraday:</b> e<sub>c</sub> = −N·ΔΦ/Δt ⇒ độ lớn |e| = N|ΔΦ|/Δt<br><b>Định luật Lenz:</b> dòng cảm ứng có chiều chống lại nguyên nhân sinh ra nó.<br>Thanh dẫn chuyển động: e = Bℓv·sinθ.',
+  ct: '<b>Từ thông:</b> Φ = B·S·cosα qua một vòng (α là góc giữa B→ và pháp tuyến), đơn vị Weber.<br><b>Định luật Faraday:</b> e<sub>c</sub> = −N·ΔΦ/Δt ⇒ độ lớn |e| = N|ΔΦ|/Δt<br><b>Định luật Lenz:</b> dòng cảm ứng có chiều chống lại nguyên nhân sinh ra nó.<br>Thanh dẫn chuyển động: e = Bℓv·sinθ.',
   khi: 'Bài tính suất điện động cảm ứng, xác định chiều dòng cảm ứng.',
   vd: 'N = 100, ΔΦ = 0,02 Wb mỗi vòng, Δt = 0,1 s ⇒ |e| = 100·0,02/0,1 = <b>20 V</b>.',
   bay: 'ΔΦ là biến thiên qua MỘT vòng; nhân N mới ra suất điện động của cả cuộn.' },
@@ -6399,8 +6399,8 @@ TD.KHO_LT.ly = [
 { cd: 'Từ trường', m: 1, a: false, t: 'Đơn vị của cảm ứng từ trong hệ SI là weber (Wb).', v: 'Weber là đơn vị TỪ THÔNG. Cảm ứng từ có đơn vị tesla.' },
 { cd: 'Từ trường', m: 2, a: true,  t: 'Lực từ tác dụng lên đoạn dây dẫn mang dòng điện đặt song song với đường sức từ bằng không.', v: 'F = BIL·sinα, với α = 0 thì sinα = 0.' },
 { cd: 'Từ trường', m: 2, a: false, t: 'Lực từ tác dụng lên đoạn dây dẫn mang dòng điện đạt cực đại khi dây song song với các đường sức từ.', v: 'Cực đại khi dây VUÔNG GÓC với đường sức (α = 90°). Song song thì lực bằng 0.' },
-{ cd: 'Từ trường', m: 2, a: true,  t: 'Từ thông qua một khung dây được tính bằng Φ = NBS·cosα, trong đó α là góc giữa vectơ cảm ứng từ và vectơ pháp tuyến của mặt phẳng khung.', v: 'Nếu mặt phẳng khung song song với B thì α = 90° và Φ = 0.' },
-{ cd: 'Từ trường', m: 3, a: false, t: 'Trong công thức từ thông Φ = NBS·cosα, góc α là góc giữa vectơ cảm ứng từ và mặt phẳng khung dây.', v: 'α là góc với vectơ PHÁP TUYẾN của mặt phẳng khung, không phải với chính mặt phẳng đó.' },
+{ cd: 'Từ trường', m: 2, a: true,  t: 'Từ thông qua một vòng dây được tính bằng Φ = B·S·cosα, trong đó α là góc giữa vectơ cảm ứng từ và vectơ pháp tuyến của mặt phẳng vòng dây.', v: 'Nếu mặt phẳng khung song song với B thì α = 90° và Φ = 0.' },
+{ cd: 'Từ trường', m: 3, a: false, t: 'Trong công thức từ thông Φ = B·S·cosα, góc α là góc giữa vectơ cảm ứng từ và mặt phẳng khung dây.', v: 'α là góc với vectơ PHÁP TUYẾN của mặt phẳng khung, không phải với chính mặt phẳng đó.' },
 { cd: 'Từ trường', m: 2, a: true,  t: 'Suất điện động cảm ứng xuất hiện trong mạch kín khi từ thông qua mạch biến thiên.', v: 'Định luật Faraday: e = −ΔΦ/Δt.' },
 { cd: 'Từ trường', m: 2, a: false, t: 'Chỉ cần có từ thông qua mạch kín là trong mạch xuất hiện dòng điện cảm ứng.', v: 'Phải có từ thông BIẾN THIÊN. Từ thông lớn nhưng không đổi thì không sinh dòng cảm ứng.' },
 { cd: 'Từ trường', m: 3, a: true,  t: 'Theo định luật Lenz, dòng điện cảm ứng có chiều sao cho từ trường do nó sinh ra chống lại sự biến thiên từ thông đã sinh ra nó.', v: 'Đây là hệ quả trực tiếp của định luật bảo toàn năng lượng.' },
@@ -10148,7 +10148,7 @@ TD.GEN.ly = [
        + `Vectơ cảm ứng từ hợp với vectơ pháp tuyến của mặt phẳng khung góc ${goc}°. `
        + `Tính từ thông qua khung dây (đơn vị Wb, làm tròn đến 4 chữ số thập phân).`,
       ans: S(phi, 4),
-      giai: `Φ = N·B·S·cosα\n`
+      giai: `Φ = N·B·S·cosα (từ thông qua cả khung N vòng)\n`
           + `Đổi diện tích: S = ${Scm} cm² = ${S(T(Scm / 10000, 4))} m²\n`
           + `cos${goc}° = ${S(T(cos, 4))}\n`
           + `Φ = ${N} · ${S(B)} · ${S(T(Scm / 10000, 4))} · ${S(T(cos, 4))} = ${S(phi, 4)} Wb.`,
@@ -19186,7 +19186,7 @@ M1('Khí lí tưởng', true,  'Ở thể tích không đổi, áp suất của 
 M1('Khí lí tưởng', false, 'Trong các định luật chất khí, nhiệt độ được tính theo thang Celsius.', 'Phải dùng nhiệt độ TUYỆT ĐỐI theo Kelvin, nếu không mọi tỉ lệ đều sai.'),
 M1('Khí lí tưởng', true,  'Phương trình trạng thái khí lí tưởng có dạng pV = nRT.', 'n là số mol, R là hằng số khí lí tưởng.'),
 M1('Từ trường', true,  'Đơn vị của từ thông trong hệ SI là vêbe, kí hiệu Wb.', 'Một vêbe bằng một tesla nhân một mét vuông.'),
-M1('Từ trường', true,  'Từ thông qua một khung dây được tính bằng công thức Φ = N·B·S·cosα.', 'α là góc giữa vectơ pháp tuyến của mặt phẳng khung và vectơ cảm ứng từ.'),
+M1('Từ trường', true,  'Từ thông qua một vòng dây được tính bằng công thức Φ = B·S·cosα.', 'α là góc giữa vectơ pháp tuyến của mặt phẳng khung và vectơ cảm ứng từ.'),
 M1('Từ trường', true,  'Lực từ tác dụng lên đoạn dây dẫn mang dòng điện đặt trong từ trường có độ lớn F = B·I·l·sinα.', 'α là góc giữa dây dẫn và đường sức từ; α = 90° cho lực lớn nhất.'),
 M1('Từ trường', false, 'Đường sức từ là những đường cong có điểm đầu và điểm cuối.', 'Đường sức từ luôn KHÉP KÍN, không có điểm bắt đầu hay kết thúc.'),
 M1('Vật lí hạt nhân', true,  'Hạt nhân nguyên tử được cấu tạo từ proton và neutron, gọi chung là nucleon.', 'Số proton là Z, tổng số nucleon là A.'),
@@ -21599,7 +21599,7 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
     const phi = N * B * S1;
     return MC(R, `Một khung dây phẳng gồm ${N} vòng, mỗi vòng có diện tích ${S(S1, 3)} m², đặt trong từ trường đều B = ${S(B, 3)} T sao cho vectơ pháp tuyến của khung song song cùng chiều với B. Từ thông qua khung bằng bao nhiêu?`,
       phi, [B * S1, N * B / S1, phi * 2, B / S1],
-      `Φ = N·B·S·cosα, ở đây α = 0 nên cosα = 1.\n`
+      `Φ = N·B·S·cosα cho cả khung N vòng, ở đây α = 0 nên cosα = 1.\n`
       + `Φ = ${N}·${S(B, 3)}·${S(S1, 3)} = ${S(phi, 4)} Wb.`,
       'α là góc giữa PHÁP TUYẾN của mặt phẳng khung và vectơ B, không phải góc giữa B với mặt phẳng khung. Nhầm hai góc này là lệch nhau đúng 90°.',
       x => S(x, 4) + ' Wb');
@@ -30539,7 +30539,7 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
     + ' Cùng nhiệt độ thì mọi khí có W̄<sub>đ</sub> như nhau, nhưng TỐC ĐỘ thì khác vì khối lượng phân tử khác.' },
 
 { kho: 'ly_ct', ten: 'Từ thông & cảm ứng điện từ', cap: 3,
-  ct: '<b>Φ = N·B·S·cosα</b> &nbsp;(α: góc giữa B⃗ và <b>pháp tuyến</b> n⃗) [Φ: weber (Wb)]'
+  ct: '<b>Φ = B·S·cosα</b> qua MỘT vòng &nbsp;(α: góc giữa B⃗ và <b>pháp tuyến</b> n⃗) [Φ: weber (Wb)]'
     + '<br><b>Định luật Faraday: e<sub>c</sub> = −N·ΔΦ/Δt</b> &nbsp;(dấu − là định luật Lenz)'
     + '<br>Độ lớn: |e<sub>c</sub>| = N·|ΔΦ|/Δt'
     + '<br><b>Định luật Lenz:</b> dòng cảm ứng có chiều chống lại nguyên nhân sinh ra nó.'
@@ -30666,9 +30666,9 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
   ['Nội dung định luật Lenz', 'dòng cảm ứng có chiều sao cho từ trường nó sinh ra chống lại sự biến thiên từ thông sinh ra nó'],
   ['Khi từ thông qua mạch tăng', 'từ trường cảm ứng ngược chiều từ trường ngoài'],
   ['Khi từ thông qua mạch giảm', 'từ trường cảm ứng cùng chiều từ trường ngoài'],
-  ['Công thức suất điện động cảm ứng', 'e = −ΔΦ/Δt'],
+  ['Công thức suất điện động cảm ứng', 'e = −N·ΔΦ/Δt, trong đó ΔΦ là biến thiên từ thông qua MỘT vòng'],
   ['Ý nghĩa dấu trừ trong công thức Faraday', 'thể hiện chính định luật Lenz'],
-  ['Công thức từ thông qua khung N vòng', 'Φ = N·B·S·cosα'],
+  ['Công thức từ thông qua một vòng dây', 'Φ = B·S·cosα'],
   ['Đơn vị của từ thông', 'weber, kí hiệu Wb'],
   ['Đưa nam châm lại gần vòng dây', 'vòng dây đẩy nam châm ra xa'],
   ['Đưa nam châm ra xa vòng dây', 'vòng dây hút nam châm lại gần'],
@@ -30739,9 +30739,9 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
 /* ---------------- HOÁ ---------------- */
 { kho: 'hoa_kq', ten: 'Na + Al vào nước', hang: [
   ['Phản ứng thứ nhất khi cho Na vào nước', '2Na + 2H₂O → 2NaOH + H₂'],
-  ['Phản ứng thứ hai của Al với kiềm', '2Al + 2NaOH + 2H₂O → 2NaAlO₂ + 3H₂'],
+  ['Phản ứng thứ hai của Al với kiềm', '2Al + 2NaOH + 6H₂O → 2Na[Al(OH)₄] + 3H₂, viết gọn là 2Al + 2NaOH + 2H₂O → 2NaAlO₂ + 3H₂'],
   ['Khí thu được ở cả hai phản ứng', 'khí hydrogen'],
-  ['Muối có trong dung dịch sau phản ứng', 'NaAlO₂'],
+  ['Muối có trong dung dịch sau phản ứng', 'Na[Al(OH)₄], sách cũ viết gọn là NaAlO₂'],
   ['Chất rắn còn lại nếu có', 'nhôm còn dư'],
   ['Điều kiện để Al tan hết', 'số mol Al nhỏ hơn hoặc bằng số mol Na'],
   ['Vai trò của Al trong phản ứng thứ hai', 'chất khử, bị kiềm hoà tan'],
@@ -30768,7 +30768,7 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
   ['Sản phẩm của cellulose với HNO₃ đặc', 'cellulose trinitrate, thuốc súng không khói'],
   ['Phương trình quang hợp ở cây xanh', '6nCO₂ + 5nH₂O → (C₆H₁₀O₅)n + 6nO₂'],
   ['Thuốc thử nhận biết hồ tinh bột', 'dung dịch iodine cho màu xanh tím'],
-  ['Chất hoà tan Cu(OH)₂ cho dung dịch xanh lam', 'glucose, fructose, saccharose'],
+  ['Chất hoà tan Cu(OH)₂ cho dung dịch xanh lam', 'glucose, fructose, saccharose và maltose, cả bốn đều được'],
   ['Chất tham gia phản ứng tráng bạc', 'glucose, fructose, maltose'],
   ['Carbohydrate không tráng bạc', 'saccharose, tinh bột, cellulose'],
   ['Công thức tính khối lượng ethanol từ tinh bột', 'm ethanol = m tinh bột × 92/162 × hiệu suất'],
@@ -30831,7 +30831,7 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
   ['Số mol H⁺ khi sản phẩm khử là NO', 'gấp 4 lần số mol NO'],
   ['Số mol H⁺ khi sản phẩm khử là NO₂', 'gấp 2 lần số mol NO₂'],
   ['Tính oxi hoá của hỗn hợp HCl và NaNO₃', 'giống hệt dung dịch HNO₃ loãng'],
-  ['Số mol NO₃⁻ còn lại trong muối', 'bằng số mol electron mà kim loại nhường'],
+  ['Số mol NO₃⁻ còn lại trong muối', 'bằng số mol electron kim loại nhường, chỉ đúng khi dung dịch KHÔNG tạo muối NH₄NO₃'],
   ['Dấu hiệu khí NO hoá nâu ngoài không khí', '2NO + O₂ → 2NO₂ màu nâu đỏ'] ] },
 
 { kho: 'hoa_ct', ten: 'Đốt cháy hợp chất hữu cơ', hang: [
@@ -30967,7 +30967,7 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
 /* ---------------- VĂN ---------------- */
 { kho: 'van_ct', ten: 'Bộ câu trả lời mẫu cho 5 dạng câu đọc hiểu', hang: [
   ['Cách trả lời dạng câu nhận biết', 'trả lời thẳng một câu và không giải thích thêm'],
-  ['Nội dung thường hỏi ở dạng nhận biết', 'thể thơ, phương thức biểu đạt, phong cách và ngôi kể'],
+  ['Nội dung thường hỏi ở dạng nhận biết', 'thể thơ, phương thức biểu đạt, phong cách sáng tác và ngôi kể'],
   ['Cách trả lời dạng chỉ ra chi tiết', 'trích đúng ý đã có sẵn trong văn bản'],
   ['Dấu hiệu nhận ra dạng chỉ ra chi tiết', 'câu hỏi mở đầu bằng cụm Theo tác giả'],
   ['Ba bước trả lời câu hỏi biện pháp tu từ', 'gọi tên biện pháp, chỉ ra biểu hiện rồi nêu tác dụng'],

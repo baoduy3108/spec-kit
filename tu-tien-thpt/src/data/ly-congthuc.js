@@ -57,7 +57,7 @@ TD.KHO.ly_ct = [
   bay: 'Dây dẫn <b>song song</b> với B⃗ (α = 0) ⇒ F = 0. Quy tắc bàn tay trái xác định chiều lực.' },
 
 { nhom: 'III. Từ trường', ten: 'Từ thông & cảm ứng điện từ', cap: 3,
-  ct: '<b>Φ = N·B·S·cosα</b> &nbsp;(α: góc giữa B⃗ và <b>pháp tuyến</b> n⃗) [Φ: weber (Wb)]<br><b>Định luật Faraday: e<sub>c</sub> = −N·ΔΦ/Δt</b> &nbsp;(dấu − là định luật Lenz)<br>Độ lớn: |e<sub>c</sub>| = N·|ΔΦ|/Δt<br>Cường độ dòng cảm ứng: i = e<sub>c</sub>/R',
+  ct: '<b>Φ = B·S·cosα</b> qua MỘT vòng &nbsp;(α: góc giữa B⃗ và <b>pháp tuyến</b> n⃗) [Φ: weber (Wb)]<br><b>Định luật Faraday: e<sub>c</sub> = −N·ΔΦ/Δt</b> &nbsp;(dấu − là định luật Lenz)<br>Độ lớn: |e<sub>c</sub>| = N·|ΔΦ|/Δt<br>Cường độ dòng cảm ứng: i = e<sub>c</sub>/R',
   khi: 'Khung dây quay/biến dạng trong từ trường, nam châm chuyển động qua ống dây.',
   vd: 'N = 100 vòng, ΔΦ = 0,02 Wb trong 0,1 s ⇒ |e| = 100·0,02/0,1 = <b>20 V</b>.',
   bay: 'α là góc với <b>pháp tuyến</b>, không phải với mặt phẳng khung dây. Khung song song B⃗ ⇒ α = 90° ⇒ Φ = 0.' },
@@ -315,7 +315,7 @@ TD.KHO.ly_ct.push(
   bay: 'Dây song song B thì F = 0. Lực Lorentz luôn ⊥ v→ nên không sinh công, chỉ đổi hướng chuyển động.' },
 
 { nhom: 'III. Từ trường', ten: 'Từ thông & cảm ứng điện từ', cap: 2,
-  ct: '<b>Từ thông:</b> Φ = NBS·cosα (α là góc giữa B→ và pháp tuyến), đơn vị Weber.<br><b>Định luật Faraday:</b> e<sub>c</sub> = −N·ΔΦ/Δt ⇒ độ lớn |e| = N|ΔΦ|/Δt<br><b>Định luật Lenz:</b> dòng cảm ứng có chiều chống lại nguyên nhân sinh ra nó.<br>Thanh dẫn chuyển động: e = Bℓv·sinθ.',
+  ct: '<b>Từ thông:</b> Φ = B·S·cosα qua một vòng (α là góc giữa B→ và pháp tuyến), đơn vị Weber.<br><b>Định luật Faraday:</b> e<sub>c</sub> = −N·ΔΦ/Δt ⇒ độ lớn |e| = N|ΔΦ|/Δt<br><b>Định luật Lenz:</b> dòng cảm ứng có chiều chống lại nguyên nhân sinh ra nó.<br>Thanh dẫn chuyển động: e = Bℓv·sinθ.',
   khi: 'Bài tính suất điện động cảm ứng, xác định chiều dòng cảm ứng.',
   vd: 'N = 100, ΔΦ = 0,02 Wb mỗi vòng, Δt = 0,1 s ⇒ |e| = 100·0,02/0,1 = <b>20 V</b>.',
   bay: 'ΔΦ là biến thiên qua MỘT vòng; nhân N mới ra suất điện động của cả cuộn.' },

@@ -51,7 +51,7 @@ M1('Khí lí tưởng', true,  'Ở thể tích không đổi, áp suất của 
 M1('Khí lí tưởng', false, 'Trong các định luật chất khí, nhiệt độ được tính theo thang Celsius.', 'Phải dùng nhiệt độ TUYỆT ĐỐI theo Kelvin, nếu không mọi tỉ lệ đều sai.'),
 M1('Khí lí tưởng', true,  'Phương trình trạng thái khí lí tưởng có dạng pV = nRT.', 'n là số mol, R là hằng số khí lí tưởng.'),
 M1('Từ trường', true,  'Đơn vị của từ thông trong hệ SI là vêbe, kí hiệu Wb.', 'Một vêbe bằng một tesla nhân một mét vuông.'),
-M1('Từ trường', true,  'Từ thông qua một khung dây được tính bằng công thức Φ = N·B·S·cosα.', 'α là góc giữa vectơ pháp tuyến của mặt phẳng khung và vectơ cảm ứng từ.'),
+M1('Từ trường', true,  'Từ thông qua một vòng dây được tính bằng công thức Φ = B·S·cosα.', 'α là góc giữa vectơ pháp tuyến của mặt phẳng khung và vectơ cảm ứng từ.'),
 M1('Từ trường', true,  'Lực từ tác dụng lên đoạn dây dẫn mang dòng điện đặt trong từ trường có độ lớn F = B·I·l·sinα.', 'α là góc giữa dây dẫn và đường sức từ; α = 90° cho lực lớn nhất.'),
 M1('Từ trường', false, 'Đường sức từ là những đường cong có điểm đầu và điểm cuối.', 'Đường sức từ luôn KHÉP KÍN, không có điểm bắt đầu hay kết thúc.'),
 M1('Vật lí hạt nhân', true,  'Hạt nhân nguyên tử được cấu tạo từ proton và neutron, gọi chung là nucleon.', 'Số proton là Z, tổng số nucleon là A.'),

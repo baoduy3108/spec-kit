@@ -213,7 +213,7 @@ TD.GEN.ly = (TD.GEN.ly || []).concat([
     const phi = N * B * S1;
     return MC(R, `Một khung dây phẳng gồm ${N} vòng, mỗi vòng có diện tích ${S(S1, 3)} m², đặt trong từ trường đều B = ${S(B, 3)} T sao cho vectơ pháp tuyến của khung song song cùng chiều với B. Từ thông qua khung bằng bao nhiêu?`,
       phi, [B * S1, N * B / S1, phi * 2, B / S1],
-      `Φ = N·B·S·cosα, ở đây α = 0 nên cosα = 1.\n`
+      `Φ = N·B·S·cosα cho cả khung N vòng, ở đây α = 0 nên cosα = 1.\n`
       + `Φ = ${N}·${S(B, 3)}·${S(S1, 3)} = ${S(phi, 4)} Wb.`,
       'α là góc giữa PHÁP TUYẾN của mặt phẳng khung và vectơ B, không phải góc giữa B với mặt phẳng khung. Nhầm hai góc này là lệch nhau đúng 90°.',
       x => S(x, 4) + ' Wb');

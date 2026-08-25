@@ -80,7 +80,7 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
     + ' Cùng nhiệt độ thì mọi khí có W̄<sub>đ</sub> như nhau, nhưng TỐC ĐỘ thì khác vì khối lượng phân tử khác.' },
 
 { kho: 'ly_ct', ten: 'Từ thông & cảm ứng điện từ', cap: 3,
-  ct: '<b>Φ = N·B·S·cosα</b> &nbsp;(α: góc giữa B⃗ và <b>pháp tuyến</b> n⃗) [Φ: weber (Wb)]'
+  ct: '<b>Φ = B·S·cosα</b> qua MỘT vòng &nbsp;(α: góc giữa B⃗ và <b>pháp tuyến</b> n⃗) [Φ: weber (Wb)]'
     + '<br><b>Định luật Faraday: e<sub>c</sub> = −N·ΔΦ/Δt</b> &nbsp;(dấu − là định luật Lenz)'
     + '<br>Độ lớn: |e<sub>c</sub>| = N·|ΔΦ|/Δt'
     + '<br><b>Định luật Lenz:</b> dòng cảm ứng có chiều chống lại nguyên nhân sinh ra nó.'

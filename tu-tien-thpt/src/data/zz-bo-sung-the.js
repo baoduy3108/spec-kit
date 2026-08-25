@@ -71,9 +71,9 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
   ['Nội dung định luật Lenz', 'dòng cảm ứng có chiều sao cho từ trường nó sinh ra chống lại sự biến thiên từ thông sinh ra nó'],
   ['Khi từ thông qua mạch tăng', 'từ trường cảm ứng ngược chiều từ trường ngoài'],
   ['Khi từ thông qua mạch giảm', 'từ trường cảm ứng cùng chiều từ trường ngoài'],
-  ['Công thức suất điện động cảm ứng', 'e = −ΔΦ/Δt'],
+  ['Công thức suất điện động cảm ứng', 'e = −N·ΔΦ/Δt, trong đó ΔΦ là biến thiên từ thông qua MỘT vòng'],
   ['Ý nghĩa dấu trừ trong công thức Faraday', 'thể hiện chính định luật Lenz'],
-  ['Công thức từ thông qua khung N vòng', 'Φ = N·B·S·cosα'],
+  ['Công thức từ thông qua một vòng dây', 'Φ = B·S·cosα'],
   ['Đơn vị của từ thông', 'weber, kí hiệu Wb'],
   ['Đưa nam châm lại gần vòng dây', 'vòng dây đẩy nam châm ra xa'],
   ['Đưa nam châm ra xa vòng dây', 'vòng dây hút nam châm lại gần'],
@@ -144,9 +144,9 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
 /* ---------------- HOÁ ---------------- */
 { kho: 'hoa_kq', ten: 'Na + Al vào nước', hang: [
   ['Phản ứng thứ nhất khi cho Na vào nước', '2Na + 2H₂O → 2NaOH + H₂'],
-  ['Phản ứng thứ hai của Al với kiềm', '2Al + 2NaOH + 2H₂O → 2NaAlO₂ + 3H₂'],
+  ['Phản ứng thứ hai của Al với kiềm', '2Al + 2NaOH + 6H₂O → 2Na[Al(OH)₄] + 3H₂, viết gọn là 2Al + 2NaOH + 2H₂O → 2NaAlO₂ + 3H₂'],
   ['Khí thu được ở cả hai phản ứng', 'khí hydrogen'],
-  ['Muối có trong dung dịch sau phản ứng', 'NaAlO₂'],
+  ['Muối có trong dung dịch sau phản ứng', 'Na[Al(OH)₄], sách cũ viết gọn là NaAlO₂'],
   ['Chất rắn còn lại nếu có', 'nhôm còn dư'],
   ['Điều kiện để Al tan hết', 'số mol Al nhỏ hơn hoặc bằng số mol Na'],
   ['Vai trò của Al trong phản ứng thứ hai', 'chất khử, bị kiềm hoà tan'],
@@ -173,7 +173,7 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
   ['Sản phẩm của cellulose với HNO₃ đặc', 'cellulose trinitrate, thuốc súng không khói'],
   ['Phương trình quang hợp ở cây xanh', '6nCO₂ + 5nH₂O → (C₆H₁₀O₅)n + 6nO₂'],
   ['Thuốc thử nhận biết hồ tinh bột', 'dung dịch iodine cho màu xanh tím'],
-  ['Chất hoà tan Cu(OH)₂ cho dung dịch xanh lam', 'glucose, fructose, saccharose'],
+  ['Chất hoà tan Cu(OH)₂ cho dung dịch xanh lam', 'glucose, fructose, saccharose và maltose, cả bốn đều được'],
   ['Chất tham gia phản ứng tráng bạc', 'glucose, fructose, maltose'],
   ['Carbohydrate không tráng bạc', 'saccharose, tinh bột, cellulose'],
   ['Công thức tính khối lượng ethanol từ tinh bột', 'm ethanol = m tinh bột × 92/162 × hiệu suất'],
@@ -236,7 +236,7 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
   ['Số mol H⁺ khi sản phẩm khử là NO', 'gấp 4 lần số mol NO'],
   ['Số mol H⁺ khi sản phẩm khử là NO₂', 'gấp 2 lần số mol NO₂'],
   ['Tính oxi hoá của hỗn hợp HCl và NaNO₃', 'giống hệt dung dịch HNO₃ loãng'],
-  ['Số mol NO₃⁻ còn lại trong muối', 'bằng số mol electron mà kim loại nhường'],
+  ['Số mol NO₃⁻ còn lại trong muối', 'bằng số mol electron kim loại nhường, chỉ đúng khi dung dịch KHÔNG tạo muối NH₄NO₃'],
   ['Dấu hiệu khí NO hoá nâu ngoài không khí', '2NO + O₂ → 2NO₂ màu nâu đỏ'] ] },
 
 { kho: 'hoa_ct', ten: 'Đốt cháy hợp chất hữu cơ', hang: [
@@ -372,7 +372,7 @@ window.TD = window.TD || {}; TD.KHO = TD.KHO || {};
 /* ---------------- VĂN ---------------- */
 { kho: 'van_ct', ten: 'Bộ câu trả lời mẫu cho 5 dạng câu đọc hiểu', hang: [
   ['Cách trả lời dạng câu nhận biết', 'trả lời thẳng một câu và không giải thích thêm'],
-  ['Nội dung thường hỏi ở dạng nhận biết', 'thể thơ, phương thức biểu đạt, phong cách và ngôi kể'],
+  ['Nội dung thường hỏi ở dạng nhận biết', 'thể thơ, phương thức biểu đạt, phong cách sáng tác và ngôi kể'],
   ['Cách trả lời dạng chỉ ra chi tiết', 'trích đúng ý đã có sẵn trong văn bản'],
   ['Dấu hiệu nhận ra dạng chỉ ra chi tiết', 'câu hỏi mở đầu bằng cụm Theo tác giả'],
   ['Ba bước trả lời câu hỏi biện pháp tu từ', 'gọi tên biện pháp, chỉ ra biểu hiện rồi nêu tác dụng'],

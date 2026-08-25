@@ -189,7 +189,7 @@ TD.GEN.ly = [
        + `Vectơ cảm ứng từ hợp với vectơ pháp tuyến của mặt phẳng khung góc ${goc}°. `
        + `Tính từ thông qua khung dây (đơn vị Wb, làm tròn đến 4 chữ số thập phân).`,
       ans: S(phi, 4),
-      giai: `Φ = N·B·S·cosα\n`
+      giai: `Φ = N·B·S·cosα (từ thông qua cả khung N vòng)\n`
           + `Đổi diện tích: S = ${Scm} cm² = ${S(T(Scm / 10000, 4))} m²\n`
           + `cos${goc}° = ${S(T(cos, 4))}\n`
           + `Φ = ${N} · ${S(B)} · ${S(T(Scm / 10000, 4))} · ${S(T(cos, 4))} = ${S(phi, 4)} Wb.`,
