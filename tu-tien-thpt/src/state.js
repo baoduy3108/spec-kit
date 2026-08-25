@@ -687,7 +687,11 @@ TD.bangCuaThe = function (the) {
   });
   /* Thẻ không có bảng vẫn hỏi được: rất nhiều thẻ viết theo lối
      "Nhãn: nội dung" trên từng dòng, đó cũng là một bảng hai cột trá hình. */
-  TD.dongVanCuaThe(than).forEach(d => ra.push(d));
+  /* Phải bỏ HẲN phần <table> ra trước khi tách dòng. Trước đây mới xoá bảng
+     trên từng dòng SAU khi split, mà HTML bảng có xuống dòng thật nên mỗi <tr>
+     thành một dòng riêng — thế là mỗi mục bị bóc hai lần, một bản từ bảng và
+     một bản từ dòng văn, rồi hai bản đó cùng vào một câu. */
+  TD.dongVanCuaThe(String(than).replace(/<table[\s\S]*?<\/table>/g, ' ')).forEach(d => ra.push(d));
   const da = {};
   const loc = ra.filter(d => {
     const k = TD.khongDau(d.tran);
@@ -783,6 +787,10 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
   const R = TD.rng(seed || ((Math.random() * 4294967295) >>> 0));
   const ra = [];
   const meoThe = the.dc || the.meo || '';
+  /* Dấu nối phải đúng dấu của chính dòng đó: "(eˣ)′ = eˣ" là đẳng thức, viết
+     thành "(eˣ)′ ⇒ eˣ" là sai ký hiệu — ⇒ trong toán nghĩa là "suy ra". */
+  const NOI = { '=': ' = ', '⇔': ' ⇔ ', '→': ' → ', '⇒': ' ⇒ ' };
+  const noiCua = d => NOI[d._dau] || ' ⇒ ';
 
   const tach = t => TD.khongDau(String(t).replace(/<[^>]+>/g, ' '))
     .replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
@@ -922,7 +930,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       trongThe ? nhieu([cungNhom.map(z => z.noi), muonNgoai], d.noi, 3)
                : nhieu([khac.filter(cungKieu).map(z => z.noi), ngoai.filter(cungKieu).map(z => z.noi),
                         khac.map(z => z.noi), ngoai.map(z => z.noi), xa.filter(cungKieu).map(z => z.noi)], d.noi, 3),
-      `Thẻ «${ten}» ghi rõ:\n${d.nhan} → ${d.tran}`, 1);
+      `Thẻ «${ten}» ghi rõ:\n${d.nhan}${noiCua(d)}${d.tran}`, 1);
     if (d._cot) return;                       /* nhãn cột ghép sẵn, hỏi ngược nghe rất gượng */
     themMC(d._dau === '=' ? `Trong thẻ <b>«${ten}»</b>, biểu thức <b>${d.noi}</b> là kết quả của mục nào?`
              : `Nội dung sau thuộc mục nào trong thẻ <b>«${ten}»</b>?<br><b>${d.noi}</b>`,
@@ -944,7 +952,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
      đọc không ra đâu là vế nào. */
   const ghep = (d, noi) => d._cot
     ? `${d._khoa} · ${d._tenCot} ⇒ ${noi}`
-    : `${d.nhan} ⇒ ${noi}`;
+    : `${d.nhan}${noiCua(d)}${noi}`;
   /* Chỉ ghép chéo được khi nội dung là GIÁ TRỊ rời rạc (công thức, tên chất,
      con số). Nội dung có "hoặc / hay / trừ / chỉ" là nội dung có ngoại lệ và
      phần chồng lấn: gán "③ Na₂CO₃/Na₃PO₄ (hoặc trao đổi ion)" sang dòng nước
@@ -987,7 +995,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       if (!bonKhac(opts)) return;
       ra.push({ q: `Theo thẻ <b>«${ten}»</b>, cách ghép nào sau đây <b>ĐÚNG</b>?`,
         opts: opts, ans: opts.indexOf(dung), muc: 2, dang: 'mc',
-        giai: `Thẻ «${ten}» ghi: ${d.nhan} → ${d.tran}.\n`
+        giai: `Thẻ «${ten}» ghi: ${d.nhan}${noiCua(d)}${d.tran}.\n`
           + `Ba phương án còn lại đều lấy nội dung của mục khác gán sang, nên sai:\n`
           + s.map(z => `· ${z.a.nhan} thật ra ứng với ${z.a.tran}, còn ${z.b.tran} là của ${z.b.nhan}.`).join('\n'),
         meo: meoThe });
