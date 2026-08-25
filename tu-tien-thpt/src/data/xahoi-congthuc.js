@@ -64,7 +64,17 @@ TD.KHO.su_ct = [
 /* ==================== ĐỊA LÍ ==================== */
 TD.KHO.dia_ct = [
 { nhom: 'A. Tự nhiên', ten: 'Vị trí địa lí & phạm vi lãnh thổ', cap: 1,
-  ct: '<b>Hệ toạ độ đất liền:</b> Bắc 23°23′B (Lũng Cú, Hà Giang) – Nam 8°34′B (Đất Mũi, Cà Mau); Tây 102°09′Đ (Sín Thầu, Điện Biên) – Đông 109°24′Đ (Vạn Thạnh, Khánh Hoà).<br><b>Múi giờ thứ 7</b>. Diện tích đất liền ~331 000 km².<br><b>Ý nghĩa:</b> nằm hoàn toàn trong vùng <b>nội chí tuyến bán cầu Bắc</b> ⇒ thiên nhiên <b>nhiệt đới ẩm gió mùa</b>; nằm ở rìa đông bán đảo Đông Dương, gần trung tâm Đông Nam Á ⇒ thuận lợi giao lưu; tiếp giáp Biển Đông ⇒ biển ảnh hưởng sâu sắc, thiên nhiên <b>xanh tốt quanh năm</b>, khác hẳn các nước cùng vĩ độ ở Tây Á, Bắc Phi.<br><b>Khó khăn:</b> nhiều thiên tai (bão, lũ lụt, hạn hán), phải chú trọng bảo vệ chủ quyền.',
+  ct: `<table class="kq">
+<tr><td>Điểm cực Bắc</td><td>23°23′B — xã Lũng Cú, tỉnh Hà Giang</td></tr>
+<tr><td>Điểm cực Nam</td><td>8°34′B — xã Đất Mũi, tỉnh Cà Mau</td></tr>
+<tr><td>Điểm cực Tây</td><td>102°09′Đ — xã Sín Thầu, tỉnh Điện Biên</td></tr>
+<tr><td>Điểm cực Đông</td><td>109°24′Đ — xã Vạn Thạnh, tỉnh Khánh Hoà</td></tr>
+<tr><td>Múi giờ</td><td>múi giờ số 7</td></tr>
+<tr><td>Diện tích đất liền</td><td>khoảng 331 000 km²</td></tr>
+<tr><td>Ý nghĩa của vĩ độ</td><td>nằm trọn trong vùng nội chí tuyến bán cầu Bắc nên thiên nhiên mang tính nhiệt đới ẩm gió mùa</td></tr>
+<tr><td>Ý nghĩa của kinh độ</td><td>rìa đông bán đảo Đông Dương, gần trung tâm Đông Nam Á nên thuận lợi giao lưu</td></tr>
+<tr><td>Vai trò của Biển Đông</td><td>làm thiên nhiên xanh tốt quanh năm, khác hẳn các nước cùng vĩ độ ở Tây Á và Bắc Phi</td></tr>
+<tr><td>Khó khăn</td><td>nhiều thiên tai như bão, lũ lụt, hạn hán và yêu cầu cao về bảo vệ chủ quyền</td></tr></table>`,
   khi: 'Câu mở đầu, mức nhận biết – thông hiểu.',
   vd: 'Việt Nam cùng vĩ độ với Bắc Phi nhưng không hoang mạc là nhờ <b>Biển Đông và gió mùa</b>.',
   bay: 'Nêu ý nghĩa vị trí phải tách rõ: ý nghĩa tự nhiên / kinh tế – xã hội / an ninh quốc phòng.' },
@@ -162,7 +172,23 @@ TD.KHO.su_ct.push(
 
 /* ============ BỔ SUNG: KHUNG NHỚ NHANH ============ */
 { nhom: 'B. Việt Nam', ten: 'Trục mốc thời gian phải thuộc', cd: '*', cap: 1,
-  ct: '<b>1858</b> Pháp nổ súng Đà Nẵng · <b>1930</b> Đảng ra đời · <b>1941</b> Mặt trận Việt Minh<br><b>19/8/1945</b> Tổng khởi nghĩa · <b>2/9/1945</b> Tuyên ngôn Độc lập<br><b>19/12/1946</b> Toàn quốc kháng chiến · <b>7/5/1954</b> Điện Biên Phủ · <b>21/7/1954</b> Hiệp định Genève<br><b>1959</b> Đường Trường Sơn · <b>1968</b> Mậu Thân · <b>1972</b> "Điện Biên Phủ trên không"<br><b>27/1/1973</b> Hiệp định Paris · <b>30/4/1975</b> Giải phóng miền Nam<br><b>1986</b> Đổi mới · <b>1995</b> Gia nhập ASEAN & bình thường hoá với Mỹ · <b>2007</b> Gia nhập WTO',
+  ct: `<table class="kq">
+<tr><td>1858</td><td>Pháp nổ súng xâm lược Đà Nẵng</td></tr>
+<tr><td>3/2/1930</td><td>Đảng Cộng sản Việt Nam ra đời</td></tr>
+<tr><td>1941</td><td>Mặt trận Việt Minh thành lập</td></tr>
+<tr><td>19/8/1945</td><td>Tổng khởi nghĩa giành chính quyền ở Hà Nội</td></tr>
+<tr><td>2/9/1945</td><td>Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hoà</td></tr>
+<tr><td>19/12/1946</td><td>Toàn quốc kháng chiến chống Pháp</td></tr>
+<tr><td>7/5/1954</td><td>Chiến thắng Điện Biên Phủ</td></tr>
+<tr><td>21/7/1954</td><td>Hiệp định Genève về Đông Dương được kí kết</td></tr>
+<tr><td>1959</td><td>Mở đường Trường Sơn — đường Hồ Chí Minh</td></tr>
+<tr><td>1968</td><td>Tổng tiến công và nổi dậy Xuân Mậu Thân</td></tr>
+<tr><td>12/1972</td><td>Trận "Điện Biên Phủ trên không" trên bầu trời Hà Nội</td></tr>
+<tr><td>27/1/1973</td><td>Hiệp định Paris về chấm dứt chiến tranh, lập lại hoà bình ở Việt Nam</td></tr>
+<tr><td>30/4/1975</td><td>Giải phóng miền Nam, thống nhất đất nước</td></tr>
+<tr><td>12/1986</td><td>Đại hội VI khởi xướng công cuộc Đổi mới</td></tr>
+<tr><td>7/1995</td><td>Gia nhập ASEAN và bình thường hoá quan hệ với Hoa Kỳ</td></tr>
+<tr><td>1/2007</td><td>Gia nhập Tổ chức Thương mại Thế giới WTO</td></tr></table>`,
   khi: 'Câu nhận biết mốc thời gian — điểm dễ nhất của đề Sử.',
   vd: 'Hỏi "sự kiện mở đầu kỉ nguyên độc lập" ⇒ Cách mạng tháng Tám và Tuyên ngôn Độc lập 2/9/1945.',
   bay: 'Phân biệt ngày KÍ hiệp định với ngày có HIỆU LỰC, và ngày mở màn với ngày kết thúc chiến dịch.' },
@@ -174,7 +200,19 @@ TD.KHO.su_ct.push(
   bay: 'Phân biệt "nguyên nhân quyết định" (chủ quan) với "điều kiện thuận lợi" (khách quan, ví dụ sự giúp đỡ quốc tế).' },
 
 { nhom: 'A. Thế giới', ten: 'Trục mốc lịch sử thế giới hiện đại', cd: '*', cap: 1,
-  ct: '<b>1945</b> Liên hợp quốc thành lập, Hội nghị Ianta · <b>1947</b> Học thuyết Truman mở đầu Chiến tranh lạnh<br><b>1949</b> NATO, CHND Trung Hoa · <b>1955</b> Tổ chức Vacsava · <b>1967</b> ASEAN ra đời<br><b>1989</b> Chiến tranh lạnh chấm dứt (Manta) · <b>1991</b> Liên Xô tan rã, trật tự hai cực sụp đổ<br><b>1993</b> Liên minh châu Âu (EU) · <b>1995</b> WTO · <b>2015</b> Cộng đồng ASEAN',
+  ct: `<table class="kq">
+<tr><td>2/1945</td><td>Hội nghị Ianta phân chia phạm vi ảnh hưởng sau chiến tranh</td></tr>
+<tr><td>24/10/1945</td><td>Liên hợp quốc chính thức thành lập</td></tr>
+<tr><td>3/1947</td><td>Học thuyết Truman mở đầu Chiến tranh lạnh</td></tr>
+<tr><td>4/1949</td><td>Khối quân sự NATO ra đời</td></tr>
+<tr><td>1/10/1949</td><td>Nước Cộng hoà Nhân dân Trung Hoa thành lập</td></tr>
+<tr><td>5/1955</td><td>Tổ chức Hiệp ước Vacsava thành lập</td></tr>
+<tr><td>8/8/1967</td><td>Hiệp hội các quốc gia Đông Nam Á ASEAN ra đời</td></tr>
+<tr><td>12/1989</td><td>Chiến tranh lạnh chấm dứt sau cuộc gặp Manta</td></tr>
+<tr><td>12/1991</td><td>Liên Xô tan rã, trật tự hai cực Ianta sụp đổ</td></tr>
+<tr><td>1/1993</td><td>Liên minh châu Âu EU chính thức hoạt động</td></tr>
+<tr><td>1/1/1995</td><td>Tổ chức Thương mại Thế giới WTO thành lập</td></tr>
+<tr><td>31/12/2015</td><td>Cộng đồng ASEAN chính thức hình thành</td></tr></table>`,
   khi: 'Phần lịch sử thế giới — thường 8–10 câu đầu của đề.',
   vd: 'Trật tự hai cực Ianta sụp đổ hoàn toàn khi Liên Xô tan rã năm <b>1991</b>.',
   bay: 'Chiến tranh lạnh CHẤM DỨT năm 1989 nhưng trật tự hai cực chỉ SỤP ĐỔ năm 1991 — hai mốc khác nhau.' }

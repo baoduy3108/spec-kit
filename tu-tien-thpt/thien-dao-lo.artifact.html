@@ -1109,7 +1109,8 @@ TD.bangCuaThe = function (the) {
       const boThe = t => t.replace(/<td[^>]*>|<\/td>/g, '').replace(/<\/?(b|i|em|strong|u)>/g, '').trim();
       const nhan = boThe(o[0]).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
       const noi = boThe(o[1]);
-      const tran = noi.replace(/<[^>]+>/g, '').trim();
+      const tran = noi.replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
       if (!nhan || nhan.length > 44 || tran.length < 3 || tran.length > 150) return;
       if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
       ra.push({ nhan: nhan, noi: noi, tran: tran, chat: TD.chatTrongO(tran), _nhom: 'bang' });
@@ -1129,7 +1130,8 @@ TD.bangCuaThe = function (the) {
       const khoa = v[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
       if (!khoa || khoa.length > 40) return;
       for (let j = 1; j < v.length; j++) {
-        const tran2 = v[j].replace(/<[^>]+>/g, '').trim();
+        const tran2 = v[j].replace(/<[^>]+>/g, '')
+          .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
         if (tran2.length < 2 || tran2.length > 90) continue;
         /* KHÔNG hạ chữ thường: tên cột có thể là công thức hoá học, "FeCO₃"
            mà thành "feco₃" là sai hẳn. Cột đầu không có tiêu đề thì bỏ luôn. */
@@ -1163,38 +1165,62 @@ TD.bangCuaThe = function (the) {
 TD.dongVanCuaThe = function (than) {
   const ra = [];
   /* Thứ tự ưu tiên dấu tách. ":" trước vì nó tách nhãn – nội dung rõ nhất;
-     "=" để cuối vì một dòng có thể là chuỗi đẳng thức (v = λf = λ/T) và ta chỉ
-     muốn cắt ở dấu đầu tiên. */
-  const DAU = [':', '⇔', '⇒', '→', '='];
-  const NHAN_RONG = /^(lưu ý|chú ý|ví dụ|mẹo|nhớ|ghi nhớ|kết luận|tóm lại|trong đó|với|nếu)$/i;
-  String(than).split(/<br\s*\/?>|<\/p>|\n/).forEach(d => {
-    const van = d.replace(/<table[\s\S]*?<\/table>/g, '')
-      .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
-      .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+     "=" rồi "—" để cuối vì một dòng có thể là chuỗi đẳng thức (v = λf = λ/T)
+     hoặc dùng gạch dài để chú thích giữa câu. */
+  const DAU = [':', '⇔', '⇒', '→', '=', '—', '–'];
+  const NHAN_RONG = /^(lưu ý|chú ý|ví dụ|vd|mẹo|nhớ|ghi nhớ|kết luận|tóm lại|trong đó|với|nếu|và|hoặc)$/i;
+  /* PHẢI xoá thẻ HTML trước rồi mới giải mã &lt; &gt;. Làm ngược lại thì
+     "a > 0 và Δ < 0" biến thành "a > 0 và Δ  0": regex nuốt trọn đoạn từ dấu
+     "<" vừa giải mã tới dấu ">" gần nhất, tưởng đó là một thẻ. */
+  const sach = t => t.replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+  const nhanCuoi = (nhan, tran, dau) => {
+    let n = String(nhan).replace(/[:：]\s*$/, '').trim();
+    /* nhãn in đậm thường đi kèm gạch nối dẫn vào phần giải thích:
+       "<b>Phép lặp</b> — lặp lại từ ngữ…" — phải bỏ gạch đó khỏi đáp án */
+    let t = String(tran).trim().replace(/^[—–\-:·]\s*/, '').replace(/[.;,]$/, '');
+    /* vế phải lỡ ôm sang câu sau thì cắt ở dấu chấm */
+    const cham = t.indexOf('. ');
+    if (cham > 8) t = t.slice(0, cham).trim();
+    if (!n || n.length > 45 || /[.!?]$/.test(n) || NHAN_RONG.test(n)) return null;
+    if (t.length < 2 || t.length > 150) return null;
+    if (TD.khongDau(t).indexOf(TD.khongDau(n)) >= 0) return null;
+    /* n và t là VĂN BẢN THUẦN, đã giải mã &lt; thành <. Nhúng thẳng vào HTML
+       thì trình duyệt tưởng "< 0 và Δ <" là một thẻ rồi nuốt mất cả đoạn — nên
+       phải mã hoá lại trước khi hiển thị, còn bản thuần giữ ở tran để so sánh. */
+    const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return { nhan: esc(n), noi: esc(t), tran: t, chat: TD.chatTrongO(t),
+      _nhom: 'van', _van: true, _dau: dau };
+  };
+
+  String(than).split(/<br\s*\/?>|<\/p>|\n/).forEach(dHtml => {
+    /* ① Nhãn in đậm ở ĐẦU dòng: rất nhiều thẻ viết "<b>Liên kết ion</b> hình
+       thành giữa kim loại…" — đó là một cặp nhãn – nội dung hoàn chỉnh, chỉ là
+       không có dấu nào ngăn. */
+    const dam = String(dHtml).match(/^\s*<b>([\s\S]{1,60}?)<\/b>\s*([\s\S]+)$/);
+    if (dam) {
+      const x = nhanCuoi(sach(dam[1]), sach(dam[2]), '⇒');
+      if (x) { ra.push(x); return; }
+    }
+    const van = sach(String(dHtml).replace(/<table[\s\S]*?<\/table>/g, ''));
     if (!van) return;
-    /* Một dòng thường xâu nhiều công thức bằng " · ": bảng đạo hàm viết
-       "(xⁿ)′ = n·xⁿ⁻¹ · (√x)′ = 1/(2√x) · (1/x)′ = −1/x²" trên đúng một dòng.
-       Chỉ tách ở dấu chấm giữa CÓ khoảng trắng hai bên — "n·xⁿ⁻¹" là phép nhân. */
+    /* ② Một dòng thường xâu nhiều công thức bằng " · ": bảng đạo hàm viết ba
+       công thức trên một dòng. Chỉ tách ở dấu chấm giữa CÓ khoảng trắng hai
+       bên — "n·xⁿ⁻¹" là phép nhân. */
     van.split(/\s+[·•]\s+/).forEach(manh => {
       const t = manh.trim();
-      if (t.length < 4 || t.length > 170) return;
+      if (t.length < 4 || t.length > 200) return;
       let i = -1, dau = '';
       for (let k = 0; k < DAU.length; k++) {
         const j = t.indexOf(DAU[k]);
         if (j > 0) { i = j; dau = DAU[k]; break; }
       }
       if (i < 1) return;
-      const nhan = t.slice(0, i).trim();
-      let tran = t.slice(i + dau.length).trim().replace(/[.;,]$/, '');
-      /* vế phải lỡ ôm sang câu sau thì cắt ở dấu chấm */
-      const cham = tran.indexOf('. ');
-      if (cham > 3) tran = tran.slice(0, cham).trim();
-      if (nhan.length > 45 || /[.!?]$/.test(nhan) || NHAN_RONG.test(nhan)) return;
-      if (tran.length < 2 || tran.length > 120) return;
-      /* nhãn mà đã chứa luôn câu trả lời thì hỏi cũng bằng thừa */
-      if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
-      ra.push({ nhan: nhan, noi: tran, tran: tran, chat: TD.chatTrongO(tran),
-        _nhom: 'van', _van: true, _dau: dau });
+      /* gạch dài hay dùng để chú thích giữa câu, chỉ nhận khi vế trái thật ngắn */
+      if ((dau === '—' || dau === '–') && i > 30) return;
+      const x = nhanCuoi(t.slice(0, i), t.slice(i + dau.length), dau);
+      if (x) ra.push(x);
     });
   });
   /* một dòng lẻ thì không dựng nổi phương án nhiễu cùng kiểu */
@@ -1332,7 +1358,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     themMC(`Theo thẻ <b>«${ten}»</b>, chất nào sau đây thuộc nhóm <b>${d.nhan}</b>?`,
       c, nhieu([chatKhac, chatNgoai], c, 3),
       `Bảng trong thẻ «${ten}» xếp <b>${c}</b> vào nhóm <b>${d.nhan}</b>.\n`
-      + `Cả nhóm này gồm: ${d.tran}.`, 1);
+      + `Cả nhóm này gồm: ${d.noi}.`, 1);
     /* ② chất này thuộc mục nào */
     const nhanKhac = dong.filter(z => z !== d).map(z => z.nhan);
     /* Phương án nhiễu là NHÃN thì tuyệt đối không mượn thẻ khác chuyên đề:
@@ -1341,7 +1367,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     themMC(`Theo thẻ <b>«${ten}»</b>, <b>${c}</b> thuộc nhóm nào sau đây?`,
       d.nhan, nhieu([nhanKhac, ngoai.map(z => z.nhan)], d.nhan, 3),
       `Bảng trong thẻ «${ten}» xếp <b>${c}</b> vào nhóm <b>${d.nhan}</b>.\n`
-      + `Nhóm ${d.nhan} gồm: ${d.tran}.`, 2);
+      + `Nhóm ${d.nhan} gồm: ${d.noi}.`, 2);
   });
 
   /* ③ chất nào KHÔNG thuộc mục này — mỗi mục một câu */
@@ -1359,7 +1385,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     const cua = (dong.find(z => (z.chat || []).indexOf(dung) >= 0) || {}).nhan || '';
     ra.push({ q: `Theo thẻ <b>«${ten}»</b>, chất nào sau đây <b>KHÔNG</b> thuộc nhóm <b>${d.nhan}</b>?`,
       opts: opts, ans: opts.indexOf(dung), muc: 2, dang: 'mc',
-      giai: `Nhóm ${d.nhan} trong thẻ «${ten}» gồm: ${d.tran}.\n`
+      giai: `Nhóm ${d.nhan} trong thẻ «${ten}» gồm: ${d.noi}.\n`
         + `<b>${dung}</b> không nằm trong dãy đó${cua ? ` — nó thuộc nhóm <b>${cua}</b>` : ''}.`,
       meo: meoThe });
   });
@@ -1386,7 +1412,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       trongThe ? nhieu([cungNhom.map(z => z.noi), muonNgoai], d.noi, 3)
                : nhieu([khac.filter(cungKieu).map(z => z.noi), ngoai.filter(cungKieu).map(z => z.noi),
                         khac.map(z => z.noi), ngoai.map(z => z.noi), xa.filter(cungKieu).map(z => z.noi)], d.noi, 3),
-      `Thẻ «${ten}» ghi rõ:\n${d.nhan}${noiCua(d)}${d.tran}`, 1);
+      `Thẻ «${ten}» ghi rõ:\n${d.nhan}${noiCua(d)}${d.noi}`, 1);
     if (d._cot) return;                       /* nhãn cột ghép sẵn, hỏi ngược nghe rất gượng */
     themMC(d._dau === '=' ? `Trong thẻ <b>«${ten}»</b>, biểu thức <b>${d.noi}</b> là kết quả của mục nào?`
              : `Nội dung sau thuộc mục nào trong thẻ <b>«${ten}»</b>?<br><b>${d.noi}</b>`,
@@ -1394,7 +1420,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       trongThe ? nhieu([cungNhom.map(z => z.nhan),
                         d._van ? ngoai.filter(z => z._nhom === 'van').map(z => z.nhan) : []], d.nhan, 3)
                : nhieu([khac.map(z => z.nhan), ngoai.map(z => z.nhan)], d.nhan, 3),
-      `Thẻ «${ten}» xếp ${d.tran} vào mục <b>${d.nhan}</b>.`, 2);
+      `Thẻ «${ten}» xếp ${d.noi} vào mục <b>${d.nhan}</b>.`, 2);
   });
 
   /* ⑦ + ⑧ — "ghép nào ĐÚNG / ghép nào SAI".
@@ -1451,9 +1477,9 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       if (!bonKhac(opts)) return;
       ra.push({ q: `Theo thẻ <b>«${ten}»</b>, cách ghép nào sau đây <b>ĐÚNG</b>?`,
         opts: opts, ans: opts.indexOf(dung), muc: 2, dang: 'mc',
-        giai: `Thẻ «${ten}» ghi: ${d.nhan}${noiCua(d)}${d.tran}.\n`
+        giai: `Thẻ «${ten}» ghi: ${d.nhan}${noiCua(d)}${d.noi}.\n`
           + `Ba phương án còn lại đều lấy nội dung của mục khác gán sang, nên sai:\n`
-          + s.map(z => `· ${z.a.nhan} thật ra ứng với ${z.a.tran}, còn ${z.b.tran} là của ${z.b.nhan}.`).join('\n'),
+          + s.map(z => `· ${z.a.nhan} thật ra ứng với ${z.a.noi}, còn ${z.b.noi} là của ${z.b.nhan}.`).join('\n'),
         meo: meoThe });
     });
     /* và một câu ngược "ghép nào SAI" cho mỗi cặp sai bốc được */
@@ -1466,7 +1492,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       if (!bonKhac(opts)) return;
       ra.push({ q: `Theo thẻ <b>«${ten}»</b>, cách ghép nào sau đây <b>SAI</b>?`,
         opts: opts, ans: opts.indexOf(z.t), muc: 2, dang: 'mc',
-        giai: `Thẻ «${ten}» ghi ${z.a.nhan} → ${z.a.tran}, còn ${z.b.tran} là nội dung của `
+        giai: `Thẻ «${ten}» ghi ${z.a.nhan}${noiCua(z.a)}${z.a.noi}, còn ${z.b.noi} là nội dung của `
           + `${z.b.nhan}. Phương án đó ghép chéo hai mục nên sai; ba phương án còn lại đều đúng nguyên văn.`,
         meo: meoThe });
     });
@@ -4726,7 +4752,17 @@ TD.KHO.su_ct = [
 /* ==================== ĐỊA LÍ ==================== */
 TD.KHO.dia_ct = [
 { nhom: 'A. Tự nhiên', ten: 'Vị trí địa lí & phạm vi lãnh thổ', cap: 1,
-  ct: '<b>Hệ toạ độ đất liền:</b> Bắc 23°23′B (Lũng Cú, Hà Giang) – Nam 8°34′B (Đất Mũi, Cà Mau); Tây 102°09′Đ (Sín Thầu, Điện Biên) – Đông 109°24′Đ (Vạn Thạnh, Khánh Hoà).<br><b>Múi giờ thứ 7</b>. Diện tích đất liền ~331 000 km².<br><b>Ý nghĩa:</b> nằm hoàn toàn trong vùng <b>nội chí tuyến bán cầu Bắc</b> ⇒ thiên nhiên <b>nhiệt đới ẩm gió mùa</b>; nằm ở rìa đông bán đảo Đông Dương, gần trung tâm Đông Nam Á ⇒ thuận lợi giao lưu; tiếp giáp Biển Đông ⇒ biển ảnh hưởng sâu sắc, thiên nhiên <b>xanh tốt quanh năm</b>, khác hẳn các nước cùng vĩ độ ở Tây Á, Bắc Phi.<br><b>Khó khăn:</b> nhiều thiên tai (bão, lũ lụt, hạn hán), phải chú trọng bảo vệ chủ quyền.',
+  ct: `<table class="kq">
+<tr><td>Điểm cực Bắc</td><td>23°23′B — xã Lũng Cú, tỉnh Hà Giang</td></tr>
+<tr><td>Điểm cực Nam</td><td>8°34′B — xã Đất Mũi, tỉnh Cà Mau</td></tr>
+<tr><td>Điểm cực Tây</td><td>102°09′Đ — xã Sín Thầu, tỉnh Điện Biên</td></tr>
+<tr><td>Điểm cực Đông</td><td>109°24′Đ — xã Vạn Thạnh, tỉnh Khánh Hoà</td></tr>
+<tr><td>Múi giờ</td><td>múi giờ số 7</td></tr>
+<tr><td>Diện tích đất liền</td><td>khoảng 331 000 km²</td></tr>
+<tr><td>Ý nghĩa của vĩ độ</td><td>nằm trọn trong vùng nội chí tuyến bán cầu Bắc nên thiên nhiên mang tính nhiệt đới ẩm gió mùa</td></tr>
+<tr><td>Ý nghĩa của kinh độ</td><td>rìa đông bán đảo Đông Dương, gần trung tâm Đông Nam Á nên thuận lợi giao lưu</td></tr>
+<tr><td>Vai trò của Biển Đông</td><td>làm thiên nhiên xanh tốt quanh năm, khác hẳn các nước cùng vĩ độ ở Tây Á và Bắc Phi</td></tr>
+<tr><td>Khó khăn</td><td>nhiều thiên tai như bão, lũ lụt, hạn hán và yêu cầu cao về bảo vệ chủ quyền</td></tr></table>`,
   khi: 'Câu mở đầu, mức nhận biết – thông hiểu.',
   vd: 'Việt Nam cùng vĩ độ với Bắc Phi nhưng không hoang mạc là nhờ <b>Biển Đông và gió mùa</b>.',
   bay: 'Nêu ý nghĩa vị trí phải tách rõ: ý nghĩa tự nhiên / kinh tế – xã hội / an ninh quốc phòng.' },
@@ -4824,7 +4860,23 @@ TD.KHO.su_ct.push(
 
 /* ============ BỔ SUNG: KHUNG NHỚ NHANH ============ */
 { nhom: 'B. Việt Nam', ten: 'Trục mốc thời gian phải thuộc', cd: '*', cap: 1,
-  ct: '<b>1858</b> Pháp nổ súng Đà Nẵng · <b>1930</b> Đảng ra đời · <b>1941</b> Mặt trận Việt Minh<br><b>19/8/1945</b> Tổng khởi nghĩa · <b>2/9/1945</b> Tuyên ngôn Độc lập<br><b>19/12/1946</b> Toàn quốc kháng chiến · <b>7/5/1954</b> Điện Biên Phủ · <b>21/7/1954</b> Hiệp định Genève<br><b>1959</b> Đường Trường Sơn · <b>1968</b> Mậu Thân · <b>1972</b> "Điện Biên Phủ trên không"<br><b>27/1/1973</b> Hiệp định Paris · <b>30/4/1975</b> Giải phóng miền Nam<br><b>1986</b> Đổi mới · <b>1995</b> Gia nhập ASEAN & bình thường hoá với Mỹ · <b>2007</b> Gia nhập WTO',
+  ct: `<table class="kq">
+<tr><td>1858</td><td>Pháp nổ súng xâm lược Đà Nẵng</td></tr>
+<tr><td>3/2/1930</td><td>Đảng Cộng sản Việt Nam ra đời</td></tr>
+<tr><td>1941</td><td>Mặt trận Việt Minh thành lập</td></tr>
+<tr><td>19/8/1945</td><td>Tổng khởi nghĩa giành chính quyền ở Hà Nội</td></tr>
+<tr><td>2/9/1945</td><td>Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hoà</td></tr>
+<tr><td>19/12/1946</td><td>Toàn quốc kháng chiến chống Pháp</td></tr>
+<tr><td>7/5/1954</td><td>Chiến thắng Điện Biên Phủ</td></tr>
+<tr><td>21/7/1954</td><td>Hiệp định Genève về Đông Dương được kí kết</td></tr>
+<tr><td>1959</td><td>Mở đường Trường Sơn — đường Hồ Chí Minh</td></tr>
+<tr><td>1968</td><td>Tổng tiến công và nổi dậy Xuân Mậu Thân</td></tr>
+<tr><td>12/1972</td><td>Trận "Điện Biên Phủ trên không" trên bầu trời Hà Nội</td></tr>
+<tr><td>27/1/1973</td><td>Hiệp định Paris về chấm dứt chiến tranh, lập lại hoà bình ở Việt Nam</td></tr>
+<tr><td>30/4/1975</td><td>Giải phóng miền Nam, thống nhất đất nước</td></tr>
+<tr><td>12/1986</td><td>Đại hội VI khởi xướng công cuộc Đổi mới</td></tr>
+<tr><td>7/1995</td><td>Gia nhập ASEAN và bình thường hoá quan hệ với Hoa Kỳ</td></tr>
+<tr><td>1/2007</td><td>Gia nhập Tổ chức Thương mại Thế giới WTO</td></tr></table>`,
   khi: 'Câu nhận biết mốc thời gian — điểm dễ nhất của đề Sử.',
   vd: 'Hỏi "sự kiện mở đầu kỉ nguyên độc lập" ⇒ Cách mạng tháng Tám và Tuyên ngôn Độc lập 2/9/1945.',
   bay: 'Phân biệt ngày KÍ hiệp định với ngày có HIỆU LỰC, và ngày mở màn với ngày kết thúc chiến dịch.' },
@@ -4836,7 +4888,19 @@ TD.KHO.su_ct.push(
   bay: 'Phân biệt "nguyên nhân quyết định" (chủ quan) với "điều kiện thuận lợi" (khách quan, ví dụ sự giúp đỡ quốc tế).' },
 
 { nhom: 'A. Thế giới', ten: 'Trục mốc lịch sử thế giới hiện đại', cd: '*', cap: 1,
-  ct: '<b>1945</b> Liên hợp quốc thành lập, Hội nghị Ianta · <b>1947</b> Học thuyết Truman mở đầu Chiến tranh lạnh<br><b>1949</b> NATO, CHND Trung Hoa · <b>1955</b> Tổ chức Vacsava · <b>1967</b> ASEAN ra đời<br><b>1989</b> Chiến tranh lạnh chấm dứt (Manta) · <b>1991</b> Liên Xô tan rã, trật tự hai cực sụp đổ<br><b>1993</b> Liên minh châu Âu (EU) · <b>1995</b> WTO · <b>2015</b> Cộng đồng ASEAN',
+  ct: `<table class="kq">
+<tr><td>2/1945</td><td>Hội nghị Ianta phân chia phạm vi ảnh hưởng sau chiến tranh</td></tr>
+<tr><td>24/10/1945</td><td>Liên hợp quốc chính thức thành lập</td></tr>
+<tr><td>3/1947</td><td>Học thuyết Truman mở đầu Chiến tranh lạnh</td></tr>
+<tr><td>4/1949</td><td>Khối quân sự NATO ra đời</td></tr>
+<tr><td>1/10/1949</td><td>Nước Cộng hoà Nhân dân Trung Hoa thành lập</td></tr>
+<tr><td>5/1955</td><td>Tổ chức Hiệp ước Vacsava thành lập</td></tr>
+<tr><td>8/8/1967</td><td>Hiệp hội các quốc gia Đông Nam Á ASEAN ra đời</td></tr>
+<tr><td>12/1989</td><td>Chiến tranh lạnh chấm dứt sau cuộc gặp Manta</td></tr>
+<tr><td>12/1991</td><td>Liên Xô tan rã, trật tự hai cực Ianta sụp đổ</td></tr>
+<tr><td>1/1993</td><td>Liên minh châu Âu EU chính thức hoạt động</td></tr>
+<tr><td>1/1/1995</td><td>Tổ chức Thương mại Thế giới WTO thành lập</td></tr>
+<tr><td>31/12/2015</td><td>Cộng đồng ASEAN chính thức hình thành</td></tr></table>`,
   khi: 'Phần lịch sử thế giới — thường 8–10 câu đầu của đề.',
   vd: 'Trật tự hai cực Ianta sụp đổ hoàn toàn khi Liên Xô tan rã năm <b>1991</b>.',
   bay: 'Chiến tranh lạnh CHẤM DỨT năm 1989 nhưng trật tự hai cực chỉ SỤP ĐỔ năm 1991 — hai mốc khác nhau.' }
@@ -28490,6 +28554,165 @@ TD.SO_DANG_VH = DANG_VH.length;
 </script>
 <script>
 /* ============================================================
+   SOI BÀI VIẾT NGỮ VĂN BẰNG LUẬT
+   Máy không đọc hiểu được nội dung, nhưng những gì ĐẾM ĐƯỢC thì đếm cho đủ:
+   dung lượng, bố cục, liên kết, dẫn chứng, lặp từ, LỖI CHÍNH TẢ, lỗi dấu câu,
+   mức bám đề, sáo ngữ. Đó đúng là mấy ô điểm hình thức trong đáp án của Bộ —
+   gộp lại vẫn tới 0,75/2,0 điểm với đoạn và 1,0/4,0 điểm với bài.
+   ============================================================ */
+window.TD = window.TD || {};
+
+/* Cặp SAI → ĐÚNG chỉ gồm những lỗi chắc chắn, không phụ thuộc ngữ cảnh.
+   Những cặp mà cả hai đều là từ có thật (dành/giành, yếu điểm/điểm yếu,
+   bàng quan/bàng quang) để riêng ở nhóm NHAC vì phải xét nghĩa mới biết sai. */
+TD.LOI_CHINH_TA = [
+  ['xuất xắc', 'xuất sắc'], ['suất sắc', 'xuất sắc'], ['chia sẽ', 'chia sẻ'],
+  ['sử lý', 'xử lí'], ['sử lí', 'xử lí'], ['cọ sát', 'cọ xát'],
+  ['chín mùi', 'chín muồi'], ['vô hình chung', 'vô hình trung'],
+  ['sáng lạng', 'xán lạn'], ['sáng lạn', 'xán lạn'], ['tựu chung', 'tựu trung'],
+  ['chau chuốt', 'trau chuốt'], ['sát nhập', 'sáp nhập'], ['thăm quan', 'tham quan'],
+  ['khắc khe', 'khắt khe'], ['suông sẻ', 'suôn sẻ'], ['xúc tích', 'súc tích'],
+  ['chuẩn đoán', 'chẩn đoán'], ['đường xá', 'đường sá'], ['bổ xung', 'bổ sung'],
+  ['khoảng khắc', 'khoảnh khắc'], ['lỗ lực', 'nỗ lực'], ['chăn trở', 'trăn trở'],
+  ['trân thành', 'chân thành'], ['chân trọng', 'trân trọng'], ['sâu xắc', 'sâu sắc'],
+  ['dữ gìn', 'giữ gìn'], ['dàn dụa', 'giàn giụa'], ['nhân tiễn', 'nhân tiện'],
+  ['xán lạng', 'xán lạn'], ['bắt trước', 'bắt chước'], ['dấu diếm', 'giấu giếm']
+];
+/* Cặp phải xét nghĩa: chỉ NHẮC chứ không tính là lỗi */
+TD.NHAC_DUNG_TU = [
+  ['yếu điểm', '"yếu điểm" nghĩa là điểm quan trọng; muốn nói mặt hạn chế thì viết "điểm yếu"'],
+  ['bàng quang', '"bàng quang" là bộ phận cơ thể; thái độ thờ ơ là "bàng quan"'],
+  ['giả thuyết', '"giả thuyết" là điều nêu ra để chứng minh; điều kiện cho sẵn của bài toán là "giả thiết"'],
+  ['cứu cánh', '"cứu cánh" nghĩa gốc là mục đích cuối cùng, không phải phao cứu sinh']
+];
+
+/* van: bài làm · cf = {chuan, laDoan, tuKhoa, tong} */
+TD.soiVan = function (van, cf) {
+  const c = cf || {};
+  const t = String(van || '').trim();
+  const chuan = c.chuan || 200, laDoan = !!c.laDoan;
+  const tong = c.tong || (laDoan ? 2 : 4);
+  if (!t) return { muc: [{ dat: false, y: 'Chưa viết gì.' }], diem: 0, tranDiem: 0, tong: tong };
+
+  const chu = (t.match(/\S+/g) || []).length;
+  const cau = t.split(/[.!?…]+[\s"”)]|[.!?…]+$/).map(x => x.trim()).filter(x => x.length > 3);
+  const doan = t.split(/\n+/).map(x => x.trim()).filter(Boolean);
+  const thuong = t.toLowerCase();
+  const muc = [];
+  const them = (dat, y) => { muc.push({ dat: dat, y: y }); return dat; };
+
+  /* ---------- 1. Dung lượng ---------- */
+  const lech = Math.round((chu - chuan) / chuan * 100);
+  const duDai = Math.abs(lech) <= 20;
+  them(duDai, duDai
+    ? `Dung lượng ${chu} chữ — nằm trong khoảng chấp nhận (chuẩn khoảng ${chuan} chữ).`
+    : `Dung lượng ${chu} chữ, lệch ${lech > 0 ? '+' : ''}${lech}% so với chuẩn ${chuan} chữ. `
+      + (lech > 0 ? 'Viết dài quá dễ lan man và hết giờ cho câu sau.'
+                  : 'Viết ngắn quá thì không đủ ý để giám khảo cho điểm triển khai.'));
+
+  /* ---------- 2. Bố cục ---------- */
+  const dungBoCuc = laDoan ? doan.length === 1 : doan.length >= 3;
+  them(dungBoCuc, laDoan
+    ? (doan.length === 1 ? 'Viết liền một đoạn, đúng yêu cầu đoạn văn.'
+       : `Đề yêu cầu MỘT đoạn văn nhưng bài đang tách ${doan.length} đoạn — mất luôn 0,25 điểm hình thức.`)
+    : (doan.length >= 3 ? `Bài chia ${doan.length} đoạn, có bố cục mở – thân – kết.`
+       : `Bài chỉ có ${doan.length} đoạn. Bài văn phải tách rõ mở bài, thân bài, kết bài.`));
+
+  /* ---------- 3. Chính tả ---------- */
+  const saiCT = [];
+  TD.LOI_CHINH_TA.forEach(([sai, dung]) => {
+    if (thuong.indexOf(sai) >= 0) saiCT.push(`"${sai}" → <b>${dung}</b>`);
+  });
+  them(saiCT.length === 0, saiCT.length === 0
+    ? 'Không dính lỗi chính tả nào trong danh sách hay sai.'
+    : `Sai chính tả ${saiCT.length} chỗ: ${saiCT.join(' · ')}`);
+  const nhac = [];
+  TD.NHAC_DUNG_TU.forEach(([tu, y]) => { if (thuong.indexOf(tu) >= 0) nhac.push(y); });
+
+  /* ---------- 4. Dấu câu và viết hoa ---------- */
+  const loiDau = [];
+  if (/\s+[,.;:!?]/.test(t)) loiDau.push('có khoảng trắng đứng trước dấu câu');
+  if (/[,.;:](?=[A-Za-zÀ-ỹ])/.test(t)) loiDau.push('thiếu dấu cách sau dấu câu');
+  if (/ {2,}/.test(t)) loiDau.push('có chỗ gõ hai dấu cách liền nhau');
+  if (!/[.!?…]["”)]?$/.test(t)) loiDau.push('bài chưa kết thúc bằng dấu chấm');
+  const hoa = cau.filter(x => /^[a-zà-ỹ]/.test(x)).length;
+  if (hoa > 0) loiDau.push(`${hoa} câu không viết hoa chữ đầu`);
+  them(loiDau.length === 0, loiDau.length === 0
+    ? 'Dấu câu và viết hoa đúng quy tắc.'
+    : `Lỗi trình bày: ${loiDau.join(' · ')}.`);
+
+  /* ---------- 5. Bám đề ---------- */
+  const khoa = (c.tuKhoa || []).filter(w => String(w).length >= 4);
+  let bamDe = true;
+  if (khoa.length) {
+    const thieu = khoa.filter(w => TD.khongDau(thuong).indexOf(TD.khongDau(String(w).toLowerCase())) < 0);
+    bamDe = thieu.length <= Math.floor(khoa.length / 3);
+    them(bamDe, bamDe
+      ? `Bài có nhắc lại ${khoa.length - thieu.length}/${khoa.length} từ khoá của đề — không lạc đề.`
+      : `Bài KHÔNG nhắc tới ${thieu.length}/${khoa.length} từ khoá của đề (${thieu.slice(0, 4).join(', ')}). `
+        + 'Không nêu trúng vấn đề thì mất luôn ô điểm "xác định đúng vấn đề nghị luận".');
+  }
+
+  /* ---------- 6. Liên kết ---------- */
+  const NOI = /(tuy nhiên|mặt khác|hơn nữa|bên cạnh đó|vì vậy|do đó|trước hết|không chỉ|ngược lại|thật vậy|nói cách khác|chẳng những|thứ nhất|thứ hai|đầu tiên|cuối cùng|tóm lại)/gi;
+  const soNoi = (t.match(NOI) || []).length;
+  them(soNoi >= (laDoan ? 2 : 4), soNoi >= (laDoan ? 2 : 4)
+    ? `Dùng ${soNoi} từ ngữ liên kết — lập luận có mạch.`
+    : `Mới ${soNoi} từ ngữ liên kết (cần ít nhất ${laDoan ? 2 : 4}). Thiếu từ nối thì các ý rời rạc.`);
+
+  /* ---------- 7. Dẫn chứng ---------- */
+  const DAN = /(ví dụ|chẳng hạn|nhà văn|nhà thơ|tác giả|câu thơ|khổ thơ|chi tiết|hình ảnh|dẫn chứng|thực tế|số liệu|nhân vật)/gi;
+  const soDan = (t.match(DAN) || []).length;
+  them(soDan >= 2, soDan >= 2
+    ? 'Có dấu hiệu đưa dẫn chứng, không nói suông.'
+    : 'Chưa thấy dẫn chứng cụ thể. Phần triển khai là ô điểm lớn nhất, nói chay là mất phần lớn số đó.');
+
+  /* ---------- 8. Lặp từ ---------- */
+  const dem = {};
+  (thuong.match(/[a-zà-ỹ]{4,}/g) || []).forEach(w => { dem[w] = (dem[w] || 0) + 1; });
+  const nguong = Math.max(5, Math.round(chu / 40));
+  const lap = Object.keys(dem).filter(w => dem[w] >= nguong)
+    .sort((a, b) => dem[b] - dem[a]).slice(0, 3);
+  them(lap.length === 0, lap.length === 0
+    ? 'Không có từ nào bị lặp quá dày.'
+    : `Lặp từ: ${lap.map(w => `"${w}" ${dem[w]} lần`).join(' · ')} — nên thay bằng từ đồng nghĩa.`);
+
+  /* ---------- 9. Sáo ngữ ---------- */
+  const SAO = /(rất là|vô cùng|hết sức|cực kỳ|cực kì|thật sự rất|theo em nghĩ thì|nói chung là)/gi;
+  const soSao = (t.match(SAO) || []).length;
+  them(soSao <= Math.max(2, Math.round(chu / 120)), soSao <= Math.max(2, Math.round(chu / 120))
+    ? 'Không lạm dụng từ nhấn mạnh sáo rỗng.'
+    : `Dùng ${soSao} lần các cụm nhấn mạnh chung chung ("rất là", "vô cùng", "hết sức"). `
+      + 'Thay bằng từ ngữ cụ thể thì mới được điểm sáng tạo.');
+
+  /* ---------- 10. Câu quá dài ---------- */
+  const dai = cau.filter(x => (x.match(/\S+/g) || []).length > 45).length;
+  them(dai === 0, dai === 0 ? 'Không có câu nào dài quá 45 chữ.'
+    : `Có ${dai} câu dài trên 45 chữ — câu dài dễ sai ngữ pháp và khó chấm.`);
+
+  /* ---------- Quy ra điểm cho phần ĐẾM ĐƯỢC ----------
+     Thang của Bộ: đoạn NLXH 2,0 điểm gồm 0,25 hình thức + 0,25 xác định vấn đề
+     + 1,0 triển khai + 0,25 chính tả ngữ pháp + 0,25 sáng tạo. Bài NLVH 4,0
+     điểm gồm 0,25 hình thức + 0,5 xác định vấn đề + 2,5 triển khai + 0,25
+     chính tả + 0,5 sáng tạo. Máy chỉ dám chấm ba ô đầu tiên. */
+  const oHinhThuc = 0.25;
+  const oVanDe = laDoan ? 0.25 : 0.5;
+  const oChinhTa = 0.25;
+  let diem = 0;
+  if (duDai && dungBoCuc) diem += oHinhThuc;
+  if (bamDe) diem += oVanDe;
+  if (saiCT.length === 0 && loiDau.length === 0) diem += oChinhTa;
+  return {
+    muc: muc, nhac: nhac,
+    diem: Math.round(diem * 100) / 100,
+    tranDiem: Math.round((oHinhThuc + oVanDe + oChinhTa) * 100) / 100,
+    tong: tong, chu: chu, soCau: cau.length, soDoan: doan.length
+  };
+};
+
+</script>
+<script>
+/* ============================================================
    BẢN DỊCH CÁC VĂN BẢN TIẾNG ANH
    Làm xong một câu mà không hiểu đoạn văn nói gì thì chỉ là đoán mò theo
    dấu hiệu ngữ pháp. Mỗi văn bản trong đề tự sinh đều có bản dịch, hiện
@@ -29286,19 +29509,20 @@ const CD = 'Địa 10 – 11';
 TD.KHO.dia_ct = (TD.KHO.dia_ct || []).concat([
 
 { nhom: 'Địa lí 10 – 11', cd: CD, ten: 'Địa lí tự nhiên đại cương — bốn quyển phải nhớ', cap: 1,
-  ct: '<b>THẠCH QUYỂN</b><br>'
-    + '&nbsp;&nbsp;Nội lực sinh ra từ bên trong Trái Đất, làm địa hình GỒ GHỀ thêm: uốn nếp, đứt gãy, động đất, núi lửa.<br>'
-    + '&nbsp;&nbsp;Ngoại lực sinh ra từ bên ngoài (nước, gió, sinh vật), làm địa hình SAN BẰNG: phong hoá, bóc mòn, vận chuyển, bồi tụ.<br>'
-    + '&nbsp;&nbsp;Hai lực này tác động ĐỒNG THỜI và ngược chiều nhau.<br>'
-    + '<b>KHÍ QUYỂN</b><br>'
-    + '&nbsp;&nbsp;Ba đai khí áp cao: cực, cận chí tuyến. Hai đai áp thấp: xích đạo, ôn đới.<br>'
-    + '&nbsp;&nbsp;Gió Mậu dịch (Tín phong) thổi từ áp cao cận chí tuyến về xích đạo; gió Tây ôn đới thổi từ áp cao cận chí tuyến về áp thấp ôn đới.<br>'
-    + '&nbsp;&nbsp;Nhiệt độ giảm dần từ xích đạo về cực và giảm theo độ cao (trung bình 0,6 °C mỗi 100 m).<br>'
-    + '<b>THUỶ QUYỂN</b><br>'
-    + '&nbsp;&nbsp;Chế độ nước sông phụ thuộc chế độ mưa (vùng nhiệt đới), băng tuyết tan (ôn đới lạnh), nước ngầm và hồ đầm.<br>'
-    + '&nbsp;&nbsp;Dòng biển nóng chảy từ vĩ độ thấp lên cao, gây mưa ở nơi nó đi qua; dòng lạnh ngược lại, gây khô hạn — đó là lí do có hoang mạc ven biển.<br>'
-    + '<b>SINH QUYỂN</b><br>'
-    + '&nbsp;&nbsp;Sự phân bố sinh vật theo vĩ độ và độ cao tạo ra quy luật ĐỊA ĐỚI và ĐAI CAO.',
+  ct: `<table class="kq">
+<tr><td>Nội lực</td><td>sinh ra từ bên trong Trái Đất, làm địa hình gồ ghề thêm qua uốn nếp, đứt gãy, động đất, núi lửa</td></tr>
+<tr><td>Ngoại lực</td><td>sinh ra từ bên ngoài do nước, gió, sinh vật, làm địa hình san bằng qua phong hoá, bóc mòn, vận chuyển, bồi tụ</td></tr>
+<tr><td>Quan hệ hai lực</td><td>tác động đồng thời và ngược chiều nhau</td></tr>
+<tr><td>Đai khí áp cao</td><td>hai đai áp cao cực và hai đai áp cao cận chí tuyến</td></tr>
+<tr><td>Đai khí áp thấp</td><td>một đai áp thấp xích đạo và hai đai áp thấp ôn đới</td></tr>
+<tr><td>Gió Mậu dịch</td><td>thổi từ áp cao cận chí tuyến về áp thấp xích đạo</td></tr>
+<tr><td>Gió Tây ôn đới</td><td>thổi từ áp cao cận chí tuyến về áp thấp ôn đới</td></tr>
+<tr><td>Nhiệt độ theo độ cao</td><td>giảm trung bình 0,6 °C mỗi 100 m lên cao</td></tr>
+<tr><td>Chế độ nước sông nhiệt đới</td><td>phụ thuộc chủ yếu vào chế độ mưa</td></tr>
+<tr><td>Chế độ nước sông ôn đới lạnh</td><td>phụ thuộc chủ yếu vào băng tuyết tan</td></tr>
+<tr><td>Dòng biển nóng</td><td>chảy từ vĩ độ thấp lên vĩ độ cao, gây mưa ở nơi nó đi qua</td></tr>
+<tr><td>Dòng biển lạnh</td><td>chảy từ vĩ độ cao về vĩ độ thấp, gây khô hạn nên có hoang mạc ven biển</td></tr>
+<tr><td>Quy luật của sinh quyển</td><td>sinh vật phân bố theo vĩ độ và độ cao tạo ra quy luật địa đới và đai cao</td></tr></table>`,
   khi: 'Câu nhận biết lấy từ Địa lí 10 — thường rơi vào Phần I của đề.',
   vd: 'Hoang mạc Atacama nằm ngay ven biển vì có dòng biển LẠNH Pêru chảy qua, hơi nước không bốc lên được.',
   bay: 'Nội lực làm địa hình gồ ghề, ngoại lực làm bằng phẳng — hai vế này rất hay bị tráo cho nhau trong phương án nhiễu.' },
@@ -32056,54 +32280,39 @@ TD.chamVan = function (i) {
      thức và bố cục thì đo được: dung lượng, số đoạn, mở – thân – kết, có dẫn
      chứng hay chỉ nói suông, từ nối, câu dài lê thê, lặp từ. Đúng những chỗ
      mất điểm oan mà không ai soi hộ. */
-  const soiBai = (van, chuan, laDoan) => {
-    const t = String(van || '').trim();
-    if (!t) return ['<b>Chưa viết gì.</b>'];
-    const chu = (t.match(/\S+/g) || []).length;
-    const cau = t.split(/[.!?…]+\s/).filter(x => x.trim().length > 3);
-    const doan = t.split(/\n\s*\n|\n/).map(x => x.trim()).filter(Boolean);
-    const ra = [];
-    const lech = Math.round((chu - chuan) / chuan * 100);
-    ra.push(Math.abs(lech) <= 20
-      ? `✓ Dung lượng ${chu} chữ — nằm trong khoảng chấp nhận (chuẩn ~${chuan}).`
-      : `✗ Dung lượng ${chu} chữ, lệch ${lech > 0 ? '+' : ''}${lech}% so với chuẩn ~${chuan}. `
-        + (lech > 0 ? 'Viết dài quá dễ lan man và hết giờ.' : 'Viết ngắn quá thì không đủ ý để cho điểm.'));
-    if (laDoan) ra.push(doan.length === 1
-      ? '✓ Viết liền một đoạn, đúng yêu cầu đoạn văn.'
-      : `✗ Đề yêu cầu MỘT đoạn văn nhưng bài đang tách ${doan.length} đoạn — mất 0,25 điểm hình thức.`);
-    else ra.push(doan.length >= 3
-      ? `✓ Bài chia ${doan.length} đoạn, có bố cục mở – thân – kết.`
-      : `✗ Bài chỉ có ${doan.length} đoạn. Bài văn phải tách rõ mở bài, thân bài, kết bài.`);
-    const dai = cau.filter(x => (x.match(/\S+/g) || []).length > 45).length;
-    ra.push(dai === 0 ? '✓ Không có câu nào dài quá 45 chữ.'
-      : `✗ Có ${dai} câu dài trên 45 chữ — câu dài dễ sai ngữ pháp và khó chấm.`);
-    const NOI = /\b(tuy nhiên|mặt khác|hơn nữa|bên cạnh đó|vì vậy|do đó|trước hết|không chỉ|ngược lại|thật vậy|nói cách khác|chẳng những)\b/gi;
-    const soNoi = (t.match(NOI) || []).length;
-    ra.push(soNoi >= (laDoan ? 2 : 4)
-      ? `✓ Dùng ${soNoi} từ ngữ liên kết — lập luận có mạch.`
-      : `✗ Mới ${soNoi} từ ngữ liên kết. Thiếu từ nối thì các ý rời rạc, mất điểm lập luận.`);
-    const DAN = /\b(ví dụ|chẳng hạn|theo|nhà văn|tác giả|câu thơ|chi tiết|hình ảnh|dẫn chứng|thực tế|số liệu)\b/gi;
-    ra.push((t.match(DAN) || []).length >= 2
-      ? '✓ Có dấu hiệu đưa dẫn chứng, không nói suông.'
-      : '✗ Chưa thấy dẫn chứng cụ thể. Phần triển khai chiếm 1,0 – 2,5 điểm, nói chay là mất phần lớn số đó.');
-    const tu = {};
-    (t.toLowerCase().match(/[a-zàáâãèéêìíòóôõùúýăđĩũơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]{4,}/g) || [])
-      .forEach(w => { tu[w] = (tu[w] || 0) + 1; });
-    const lap = Object.entries(tu).filter(([w, n]) => n >= Math.max(5, Math.round(chu / 40)))
-      .sort((a, b) => b[1] - a[1]).slice(0, 3);
-    ra.push(lap.length === 0 ? '✓ Không có từ nào bị lặp quá dày.'
-      : `✗ Lặp từ: ${lap.map(([w, n]) => `"${w}" ${n} lần`).join(' · ')} — nên thay bằng từ đồng nghĩa.`);
+  /* Gọi bộ soi bằng luật ở zz-cham-van.js rồi trình bày thành từng dòng ✓/✗ */
+  const soiBai = (van, chuan, laDoan, tuKhoa) => {
+    const kq = TD.soiVan(van, { chuan: chuan, laDoan: laDoan, tuKhoa: tuKhoa,
+      tong: laDoan ? 2 : 4 });
+    const ra = kq.muc.map(m => `${m.dat ? '✓' : '✗'} ${m.y}`);
+    (kq.nhac || []).forEach(y => ra.push(`⚠ ${y}`));
+    if (kq.tranDiem)
+      ra.push(`\n<b>Phần máy chấm được: ${TD.soVN(kq.diem, 2)}/${TD.soVN(kq.tranDiem, 2)} điểm</b> `
+        + `(hình thức · xác định vấn đề · chính tả – ngữ pháp) trên tổng ${TD.soVN(kq.tong, 1)} điểm của câu này. `
+        + `Phần triển khai và sáng tạo — ${TD.soVN(kq.tong - kq.tranDiem, 2)} điểm còn lại — phải người đọc mới chấm được.`);
     return ra;
   };
 
-  const bSoi = el('div', 'the', '<h3>🔍 Soi sơ bộ bài viết</h3>'
-    + '<p class="mo-nhat">Máy chỉ đo được những thứ ĐẾM ĐƯỢC: dung lượng, bố cục, từ nối, dẫn chứng, lặp từ. '
-    + 'Phần nội dung và cảm thụ thì máy chịu — chỗ đó vẫn phải tự đối chiếu đáp án, hoặc chép bài gửi cho Claude chấm.</p>');
-  [[`Câu 1 — ${d.cau1.kieu} ${d.cau1.nhan} (~${d.cau1.soChu} chữ)`, baiLam.c1, d.cau1.soChu, d.cau1.kieu === 'đoạn văn'],
-   [`Câu 2 — ${d.cau2.kieu} ${d.cau2.nhan} (~${d.cau2.soChu} chữ)`, baiLam.c2, d.cau2.soChu, d.cau2.kieu === 'đoạn văn']]
-    .forEach(([ten, van, chuan, laDoan]) => {
+  /* Từ khoá của đề để đo mức bám đề: lấy các từ dài trong lệnh đề, bỏ từ công cụ */
+  const khoaDe = q => {
+    const BO = /^(hãy|viết|một|đoạn|văn|bài|khoảng|chữ|trình|bày|suy|nghĩ|của|anh|chị|em|về|trong|những|các|cho|với|người|vấn|đề|nghị|luận|phân|tích|cảm|nhận|nhận|xét|theo|được|này|đó|và|là|có|không|thì|như|từ|khi|nếu)$/i;
+    const t = String(q || '').replace(/<[^>]+>/g, ' ');
+    const ds = (t.match(/[A-Za-zÀ-ỹ]{4,}/g) || []).map(w => w.toLowerCase()).filter(w => !BO.test(w));
+    const da = {};
+    return ds.filter(w => { if (da[w]) return false; da[w] = 1; return true; }).slice(0, 8);
+  };
+
+  const bSoi = el('div', 'the', '<h3>🔍 Soi bài viết — mười tiêu chí đếm được</h3>'
+    + '<p class="mo-nhat">Máy chấm được đúng ba ô điểm hình thức trong đáp án của Bộ: <b>hình thức</b> (đúng đoạn hay '
+    + 'bài, đủ dung lượng), <b>xác định vấn đề</b> (đo bằng từ khoá của đề có xuất hiện trong bài không) và '
+    + '<b>chính tả – ngữ pháp</b>. Ngoài ra soi thêm liên kết, dẫn chứng, lặp từ, sáo ngữ, câu quá dài. '
+    + 'Còn <b>triển khai</b> và <b>sáng tạo</b> — phần chiếm nhiều điểm nhất — thì phải đọc hiểu nội dung mới chấm '
+    + 'được, mà file này chạy offline, trong máy không có mô hình ngôn ngữ nào. Chỗ đó dùng nút chép bài bên dưới.</p>');
+  [[`Câu 1 — ${d.cau1.kieu} ${d.cau1.nhan} (~${d.cau1.soChu} chữ)`, baiLam.c1, d.cau1.soChu, d.cau1.kieu === 'đoạn văn', khoaDe(d.cau1.dm || d.cau1.q)],
+   [`Câu 2 — ${d.cau2.kieu} ${d.cau2.nhan} (~${d.cau2.soChu} chữ)`, baiLam.c2, d.cau2.soChu, d.cau2.kieu === 'đoạn văn', khoaDe(d.cau2.dm || d.cau2.q)]]
+    .forEach(([ten, van, chuan, laDoan, khoa]) => {
       bSoi.appendChild(el('div', '', `<div style="margin-top:12px;font-size:14.2px"><b>${ten}</b></div>`
-        + `<div class="giai" style="white-space:pre-wrap">${soiBai(van, chuan, laDoan).join('\n')}</div>`));
+        + `<div class="giai" style="white-space:pre-wrap">${soiBai(van, chuan, laDoan, khoa).join('\n')}</div>`));
     });
   c.appendChild(bSoi);
 

@@ -1530,54 +1530,39 @@ TD.chamVan = function (i) {
      thức và bố cục thì đo được: dung lượng, số đoạn, mở – thân – kết, có dẫn
      chứng hay chỉ nói suông, từ nối, câu dài lê thê, lặp từ. Đúng những chỗ
      mất điểm oan mà không ai soi hộ. */
-  const soiBai = (van, chuan, laDoan) => {
-    const t = String(van || '').trim();
-    if (!t) return ['<b>Chưa viết gì.</b>'];
-    const chu = (t.match(/\S+/g) || []).length;
-    const cau = t.split(/[.!?…]+\s/).filter(x => x.trim().length > 3);
-    const doan = t.split(/\n\s*\n|\n/).map(x => x.trim()).filter(Boolean);
-    const ra = [];
-    const lech = Math.round((chu - chuan) / chuan * 100);
-    ra.push(Math.abs(lech) <= 20
-      ? `✓ Dung lượng ${chu} chữ — nằm trong khoảng chấp nhận (chuẩn ~${chuan}).`
-      : `✗ Dung lượng ${chu} chữ, lệch ${lech > 0 ? '+' : ''}${lech}% so với chuẩn ~${chuan}. `
-        + (lech > 0 ? 'Viết dài quá dễ lan man và hết giờ.' : 'Viết ngắn quá thì không đủ ý để cho điểm.'));
-    if (laDoan) ra.push(doan.length === 1
-      ? '✓ Viết liền một đoạn, đúng yêu cầu đoạn văn.'
-      : `✗ Đề yêu cầu MỘT đoạn văn nhưng bài đang tách ${doan.length} đoạn — mất 0,25 điểm hình thức.`);
-    else ra.push(doan.length >= 3
-      ? `✓ Bài chia ${doan.length} đoạn, có bố cục mở – thân – kết.`
-      : `✗ Bài chỉ có ${doan.length} đoạn. Bài văn phải tách rõ mở bài, thân bài, kết bài.`);
-    const dai = cau.filter(x => (x.match(/\S+/g) || []).length > 45).length;
-    ra.push(dai === 0 ? '✓ Không có câu nào dài quá 45 chữ.'
-      : `✗ Có ${dai} câu dài trên 45 chữ — câu dài dễ sai ngữ pháp và khó chấm.`);
-    const NOI = /\b(tuy nhiên|mặt khác|hơn nữa|bên cạnh đó|vì vậy|do đó|trước hết|không chỉ|ngược lại|thật vậy|nói cách khác|chẳng những)\b/gi;
-    const soNoi = (t.match(NOI) || []).length;
-    ra.push(soNoi >= (laDoan ? 2 : 4)
-      ? `✓ Dùng ${soNoi} từ ngữ liên kết — lập luận có mạch.`
-      : `✗ Mới ${soNoi} từ ngữ liên kết. Thiếu từ nối thì các ý rời rạc, mất điểm lập luận.`);
-    const DAN = /\b(ví dụ|chẳng hạn|theo|nhà văn|tác giả|câu thơ|chi tiết|hình ảnh|dẫn chứng|thực tế|số liệu)\b/gi;
-    ra.push((t.match(DAN) || []).length >= 2
-      ? '✓ Có dấu hiệu đưa dẫn chứng, không nói suông.'
-      : '✗ Chưa thấy dẫn chứng cụ thể. Phần triển khai chiếm 1,0 – 2,5 điểm, nói chay là mất phần lớn số đó.');
-    const tu = {};
-    (t.toLowerCase().match(/[a-zàáâãèéêìíòóôõùúýăđĩũơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]{4,}/g) || [])
-      .forEach(w => { tu[w] = (tu[w] || 0) + 1; });
-    const lap = Object.entries(tu).filter(([w, n]) => n >= Math.max(5, Math.round(chu / 40)))
-      .sort((a, b) => b[1] - a[1]).slice(0, 3);
-    ra.push(lap.length === 0 ? '✓ Không có từ nào bị lặp quá dày.'
-      : `✗ Lặp từ: ${lap.map(([w, n]) => `"${w}" ${n} lần`).join(' · ')} — nên thay bằng từ đồng nghĩa.`);
+  /* Gọi bộ soi bằng luật ở zz-cham-van.js rồi trình bày thành từng dòng ✓/✗ */
+  const soiBai = (van, chuan, laDoan, tuKhoa) => {
+    const kq = TD.soiVan(van, { chuan: chuan, laDoan: laDoan, tuKhoa: tuKhoa,
+      tong: laDoan ? 2 : 4 });
+    const ra = kq.muc.map(m => `${m.dat ? '✓' : '✗'} ${m.y}`);
+    (kq.nhac || []).forEach(y => ra.push(`⚠ ${y}`));
+    if (kq.tranDiem)
+      ra.push(`\n<b>Phần máy chấm được: ${TD.soVN(kq.diem, 2)}/${TD.soVN(kq.tranDiem, 2)} điểm</b> `
+        + `(hình thức · xác định vấn đề · chính tả – ngữ pháp) trên tổng ${TD.soVN(kq.tong, 1)} điểm của câu này. `
+        + `Phần triển khai và sáng tạo — ${TD.soVN(kq.tong - kq.tranDiem, 2)} điểm còn lại — phải người đọc mới chấm được.`);
     return ra;
   };
 
-  const bSoi = el('div', 'the', '<h3>🔍 Soi sơ bộ bài viết</h3>'
-    + '<p class="mo-nhat">Máy chỉ đo được những thứ ĐẾM ĐƯỢC: dung lượng, bố cục, từ nối, dẫn chứng, lặp từ. '
-    + 'Phần nội dung và cảm thụ thì máy chịu — chỗ đó vẫn phải tự đối chiếu đáp án, hoặc chép bài gửi cho Claude chấm.</p>');
-  [[`Câu 1 — ${d.cau1.kieu} ${d.cau1.nhan} (~${d.cau1.soChu} chữ)`, baiLam.c1, d.cau1.soChu, d.cau1.kieu === 'đoạn văn'],
-   [`Câu 2 — ${d.cau2.kieu} ${d.cau2.nhan} (~${d.cau2.soChu} chữ)`, baiLam.c2, d.cau2.soChu, d.cau2.kieu === 'đoạn văn']]
-    .forEach(([ten, van, chuan, laDoan]) => {
+  /* Từ khoá của đề để đo mức bám đề: lấy các từ dài trong lệnh đề, bỏ từ công cụ */
+  const khoaDe = q => {
+    const BO = /^(hãy|viết|một|đoạn|văn|bài|khoảng|chữ|trình|bày|suy|nghĩ|của|anh|chị|em|về|trong|những|các|cho|với|người|vấn|đề|nghị|luận|phân|tích|cảm|nhận|nhận|xét|theo|được|này|đó|và|là|có|không|thì|như|từ|khi|nếu)$/i;
+    const t = String(q || '').replace(/<[^>]+>/g, ' ');
+    const ds = (t.match(/[A-Za-zÀ-ỹ]{4,}/g) || []).map(w => w.toLowerCase()).filter(w => !BO.test(w));
+    const da = {};
+    return ds.filter(w => { if (da[w]) return false; da[w] = 1; return true; }).slice(0, 8);
+  };
+
+  const bSoi = el('div', 'the', '<h3>🔍 Soi bài viết — mười tiêu chí đếm được</h3>'
+    + '<p class="mo-nhat">Máy chấm được đúng ba ô điểm hình thức trong đáp án của Bộ: <b>hình thức</b> (đúng đoạn hay '
+    + 'bài, đủ dung lượng), <b>xác định vấn đề</b> (đo bằng từ khoá của đề có xuất hiện trong bài không) và '
+    + '<b>chính tả – ngữ pháp</b>. Ngoài ra soi thêm liên kết, dẫn chứng, lặp từ, sáo ngữ, câu quá dài. '
+    + 'Còn <b>triển khai</b> và <b>sáng tạo</b> — phần chiếm nhiều điểm nhất — thì phải đọc hiểu nội dung mới chấm '
+    + 'được, mà file này chạy offline, trong máy không có mô hình ngôn ngữ nào. Chỗ đó dùng nút chép bài bên dưới.</p>');
+  [[`Câu 1 — ${d.cau1.kieu} ${d.cau1.nhan} (~${d.cau1.soChu} chữ)`, baiLam.c1, d.cau1.soChu, d.cau1.kieu === 'đoạn văn', khoaDe(d.cau1.dm || d.cau1.q)],
+   [`Câu 2 — ${d.cau2.kieu} ${d.cau2.nhan} (~${d.cau2.soChu} chữ)`, baiLam.c2, d.cau2.soChu, d.cau2.kieu === 'đoạn văn', khoaDe(d.cau2.dm || d.cau2.q)]]
+    .forEach(([ten, van, chuan, laDoan, khoa]) => {
       bSoi.appendChild(el('div', '', `<div style="margin-top:12px;font-size:14.2px"><b>${ten}</b></div>`
-        + `<div class="giai" style="white-space:pre-wrap">${soiBai(van, chuan, laDoan).join('\n')}</div>`));
+        + `<div class="giai" style="white-space:pre-wrap">${soiBai(van, chuan, laDoan, khoa).join('\n')}</div>`));
     });
   c.appendChild(bSoi);
 

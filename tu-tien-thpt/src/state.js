@@ -653,7 +653,8 @@ TD.bangCuaThe = function (the) {
       const boThe = t => t.replace(/<td[^>]*>|<\/td>/g, '').replace(/<\/?(b|i|em|strong|u)>/g, '').trim();
       const nhan = boThe(o[0]).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
       const noi = boThe(o[1]);
-      const tran = noi.replace(/<[^>]+>/g, '').trim();
+      const tran = noi.replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
       if (!nhan || nhan.length > 44 || tran.length < 3 || tran.length > 150) return;
       if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
       ra.push({ nhan: nhan, noi: noi, tran: tran, chat: TD.chatTrongO(tran), _nhom: 'bang' });
@@ -673,7 +674,8 @@ TD.bangCuaThe = function (the) {
       const khoa = v[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
       if (!khoa || khoa.length > 40) return;
       for (let j = 1; j < v.length; j++) {
-        const tran2 = v[j].replace(/<[^>]+>/g, '').trim();
+        const tran2 = v[j].replace(/<[^>]+>/g, '')
+          .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
         if (tran2.length < 2 || tran2.length > 90) continue;
         /* KHÔNG hạ chữ thường: tên cột có thể là công thức hoá học, "FeCO₃"
            mà thành "feco₃" là sai hẳn. Cột đầu không có tiêu đề thì bỏ luôn. */
@@ -707,38 +709,62 @@ TD.bangCuaThe = function (the) {
 TD.dongVanCuaThe = function (than) {
   const ra = [];
   /* Thứ tự ưu tiên dấu tách. ":" trước vì nó tách nhãn – nội dung rõ nhất;
-     "=" để cuối vì một dòng có thể là chuỗi đẳng thức (v = λf = λ/T) và ta chỉ
-     muốn cắt ở dấu đầu tiên. */
-  const DAU = [':', '⇔', '⇒', '→', '='];
-  const NHAN_RONG = /^(lưu ý|chú ý|ví dụ|mẹo|nhớ|ghi nhớ|kết luận|tóm lại|trong đó|với|nếu)$/i;
-  String(than).split(/<br\s*\/?>|<\/p>|\n/).forEach(d => {
-    const van = d.replace(/<table[\s\S]*?<\/table>/g, '')
-      .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
-      .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+     "=" rồi "—" để cuối vì một dòng có thể là chuỗi đẳng thức (v = λf = λ/T)
+     hoặc dùng gạch dài để chú thích giữa câu. */
+  const DAU = [':', '⇔', '⇒', '→', '=', '—', '–'];
+  const NHAN_RONG = /^(lưu ý|chú ý|ví dụ|vd|mẹo|nhớ|ghi nhớ|kết luận|tóm lại|trong đó|với|nếu|và|hoặc)$/i;
+  /* PHẢI xoá thẻ HTML trước rồi mới giải mã &lt; &gt;. Làm ngược lại thì
+     "a > 0 và Δ < 0" biến thành "a > 0 và Δ  0": regex nuốt trọn đoạn từ dấu
+     "<" vừa giải mã tới dấu ">" gần nhất, tưởng đó là một thẻ. */
+  const sach = t => t.replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+  const nhanCuoi = (nhan, tran, dau) => {
+    let n = String(nhan).replace(/[:：]\s*$/, '').trim();
+    /* nhãn in đậm thường đi kèm gạch nối dẫn vào phần giải thích:
+       "<b>Phép lặp</b> — lặp lại từ ngữ…" — phải bỏ gạch đó khỏi đáp án */
+    let t = String(tran).trim().replace(/^[—–\-:·]\s*/, '').replace(/[.;,]$/, '');
+    /* vế phải lỡ ôm sang câu sau thì cắt ở dấu chấm */
+    const cham = t.indexOf('. ');
+    if (cham > 8) t = t.slice(0, cham).trim();
+    if (!n || n.length > 45 || /[.!?]$/.test(n) || NHAN_RONG.test(n)) return null;
+    if (t.length < 2 || t.length > 150) return null;
+    if (TD.khongDau(t).indexOf(TD.khongDau(n)) >= 0) return null;
+    /* n và t là VĂN BẢN THUẦN, đã giải mã &lt; thành <. Nhúng thẳng vào HTML
+       thì trình duyệt tưởng "< 0 và Δ <" là một thẻ rồi nuốt mất cả đoạn — nên
+       phải mã hoá lại trước khi hiển thị, còn bản thuần giữ ở tran để so sánh. */
+    const esc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return { nhan: esc(n), noi: esc(t), tran: t, chat: TD.chatTrongO(t),
+      _nhom: 'van', _van: true, _dau: dau };
+  };
+
+  String(than).split(/<br\s*\/?>|<\/p>|\n/).forEach(dHtml => {
+    /* ① Nhãn in đậm ở ĐẦU dòng: rất nhiều thẻ viết "<b>Liên kết ion</b> hình
+       thành giữa kim loại…" — đó là một cặp nhãn – nội dung hoàn chỉnh, chỉ là
+       không có dấu nào ngăn. */
+    const dam = String(dHtml).match(/^\s*<b>([\s\S]{1,60}?)<\/b>\s*([\s\S]+)$/);
+    if (dam) {
+      const x = nhanCuoi(sach(dam[1]), sach(dam[2]), '⇒');
+      if (x) { ra.push(x); return; }
+    }
+    const van = sach(String(dHtml).replace(/<table[\s\S]*?<\/table>/g, ''));
     if (!van) return;
-    /* Một dòng thường xâu nhiều công thức bằng " · ": bảng đạo hàm viết
-       "(xⁿ)′ = n·xⁿ⁻¹ · (√x)′ = 1/(2√x) · (1/x)′ = −1/x²" trên đúng một dòng.
-       Chỉ tách ở dấu chấm giữa CÓ khoảng trắng hai bên — "n·xⁿ⁻¹" là phép nhân. */
+    /* ② Một dòng thường xâu nhiều công thức bằng " · ": bảng đạo hàm viết ba
+       công thức trên một dòng. Chỉ tách ở dấu chấm giữa CÓ khoảng trắng hai
+       bên — "n·xⁿ⁻¹" là phép nhân. */
     van.split(/\s+[·•]\s+/).forEach(manh => {
       const t = manh.trim();
-      if (t.length < 4 || t.length > 170) return;
+      if (t.length < 4 || t.length > 200) return;
       let i = -1, dau = '';
       for (let k = 0; k < DAU.length; k++) {
         const j = t.indexOf(DAU[k]);
         if (j > 0) { i = j; dau = DAU[k]; break; }
       }
       if (i < 1) return;
-      const nhan = t.slice(0, i).trim();
-      let tran = t.slice(i + dau.length).trim().replace(/[.;,]$/, '');
-      /* vế phải lỡ ôm sang câu sau thì cắt ở dấu chấm */
-      const cham = tran.indexOf('. ');
-      if (cham > 3) tran = tran.slice(0, cham).trim();
-      if (nhan.length > 45 || /[.!?]$/.test(nhan) || NHAN_RONG.test(nhan)) return;
-      if (tran.length < 2 || tran.length > 120) return;
-      /* nhãn mà đã chứa luôn câu trả lời thì hỏi cũng bằng thừa */
-      if (TD.khongDau(tran).indexOf(TD.khongDau(nhan)) >= 0) return;
-      ra.push({ nhan: nhan, noi: tran, tran: tran, chat: TD.chatTrongO(tran),
-        _nhom: 'van', _van: true, _dau: dau });
+      /* gạch dài hay dùng để chú thích giữa câu, chỉ nhận khi vế trái thật ngắn */
+      if ((dau === '—' || dau === '–') && i > 30) return;
+      const x = nhanCuoi(t.slice(0, i), t.slice(i + dau.length), dau);
+      if (x) ra.push(x);
     });
   });
   /* một dòng lẻ thì không dựng nổi phương án nhiễu cùng kiểu */
@@ -876,7 +902,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     themMC(`Theo thẻ <b>«${ten}»</b>, chất nào sau đây thuộc nhóm <b>${d.nhan}</b>?`,
       c, nhieu([chatKhac, chatNgoai], c, 3),
       `Bảng trong thẻ «${ten}» xếp <b>${c}</b> vào nhóm <b>${d.nhan}</b>.\n`
-      + `Cả nhóm này gồm: ${d.tran}.`, 1);
+      + `Cả nhóm này gồm: ${d.noi}.`, 1);
     /* ② chất này thuộc mục nào */
     const nhanKhac = dong.filter(z => z !== d).map(z => z.nhan);
     /* Phương án nhiễu là NHÃN thì tuyệt đối không mượn thẻ khác chuyên đề:
@@ -885,7 +911,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     themMC(`Theo thẻ <b>«${ten}»</b>, <b>${c}</b> thuộc nhóm nào sau đây?`,
       d.nhan, nhieu([nhanKhac, ngoai.map(z => z.nhan)], d.nhan, 3),
       `Bảng trong thẻ «${ten}» xếp <b>${c}</b> vào nhóm <b>${d.nhan}</b>.\n`
-      + `Nhóm ${d.nhan} gồm: ${d.tran}.`, 2);
+      + `Nhóm ${d.nhan} gồm: ${d.noi}.`, 2);
   });
 
   /* ③ chất nào KHÔNG thuộc mục này — mỗi mục một câu */
@@ -903,7 +929,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     const cua = (dong.find(z => (z.chat || []).indexOf(dung) >= 0) || {}).nhan || '';
     ra.push({ q: `Theo thẻ <b>«${ten}»</b>, chất nào sau đây <b>KHÔNG</b> thuộc nhóm <b>${d.nhan}</b>?`,
       opts: opts, ans: opts.indexOf(dung), muc: 2, dang: 'mc',
-      giai: `Nhóm ${d.nhan} trong thẻ «${ten}» gồm: ${d.tran}.\n`
+      giai: `Nhóm ${d.nhan} trong thẻ «${ten}» gồm: ${d.noi}.\n`
         + `<b>${dung}</b> không nằm trong dãy đó${cua ? ` — nó thuộc nhóm <b>${cua}</b>` : ''}.`,
       meo: meoThe });
   });
@@ -930,7 +956,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       trongThe ? nhieu([cungNhom.map(z => z.noi), muonNgoai], d.noi, 3)
                : nhieu([khac.filter(cungKieu).map(z => z.noi), ngoai.filter(cungKieu).map(z => z.noi),
                         khac.map(z => z.noi), ngoai.map(z => z.noi), xa.filter(cungKieu).map(z => z.noi)], d.noi, 3),
-      `Thẻ «${ten}» ghi rõ:\n${d.nhan}${noiCua(d)}${d.tran}`, 1);
+      `Thẻ «${ten}» ghi rõ:\n${d.nhan}${noiCua(d)}${d.noi}`, 1);
     if (d._cot) return;                       /* nhãn cột ghép sẵn, hỏi ngược nghe rất gượng */
     themMC(d._dau === '=' ? `Trong thẻ <b>«${ten}»</b>, biểu thức <b>${d.noi}</b> là kết quả của mục nào?`
              : `Nội dung sau thuộc mục nào trong thẻ <b>«${ten}»</b>?<br><b>${d.noi}</b>`,
@@ -938,7 +964,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       trongThe ? nhieu([cungNhom.map(z => z.nhan),
                         d._van ? ngoai.filter(z => z._nhom === 'van').map(z => z.nhan) : []], d.nhan, 3)
                : nhieu([khac.map(z => z.nhan), ngoai.map(z => z.nhan)], d.nhan, 3),
-      `Thẻ «${ten}» xếp ${d.tran} vào mục <b>${d.nhan}</b>.`, 2);
+      `Thẻ «${ten}» xếp ${d.noi} vào mục <b>${d.nhan}</b>.`, 2);
   });
 
   /* ⑦ + ⑧ — "ghép nào ĐÚNG / ghép nào SAI".
@@ -995,9 +1021,9 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       if (!bonKhac(opts)) return;
       ra.push({ q: `Theo thẻ <b>«${ten}»</b>, cách ghép nào sau đây <b>ĐÚNG</b>?`,
         opts: opts, ans: opts.indexOf(dung), muc: 2, dang: 'mc',
-        giai: `Thẻ «${ten}» ghi: ${d.nhan}${noiCua(d)}${d.tran}.\n`
+        giai: `Thẻ «${ten}» ghi: ${d.nhan}${noiCua(d)}${d.noi}.\n`
           + `Ba phương án còn lại đều lấy nội dung của mục khác gán sang, nên sai:\n`
-          + s.map(z => `· ${z.a.nhan} thật ra ứng với ${z.a.tran}, còn ${z.b.tran} là của ${z.b.nhan}.`).join('\n'),
+          + s.map(z => `· ${z.a.nhan} thật ra ứng với ${z.a.noi}, còn ${z.b.noi} là của ${z.b.nhan}.`).join('\n'),
         meo: meoThe });
     });
     /* và một câu ngược "ghép nào SAI" cho mỗi cặp sai bốc được */
@@ -1010,7 +1036,7 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
       if (!bonKhac(opts)) return;
       ra.push({ q: `Theo thẻ <b>«${ten}»</b>, cách ghép nào sau đây <b>SAI</b>?`,
         opts: opts, ans: opts.indexOf(z.t), muc: 2, dang: 'mc',
-        giai: `Thẻ «${ten}» ghi ${z.a.nhan} → ${z.a.tran}, còn ${z.b.tran} là nội dung của `
+        giai: `Thẻ «${ten}» ghi ${z.a.nhan}${noiCua(z.a)}${z.a.noi}, còn ${z.b.noi} là nội dung của `
           + `${z.b.nhan}. Phương án đó ghép chéo hai mục nên sai; ba phương án còn lại đều đúng nguyên văn.`,
         meo: meoThe });
     });

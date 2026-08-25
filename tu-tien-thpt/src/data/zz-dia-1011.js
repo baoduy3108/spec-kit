@@ -16,19 +16,20 @@ const CD = 'Địa 10 – 11';
 TD.KHO.dia_ct = (TD.KHO.dia_ct || []).concat([
 
 { nhom: 'Địa lí 10 – 11', cd: CD, ten: 'Địa lí tự nhiên đại cương — bốn quyển phải nhớ', cap: 1,
-  ct: '<b>THẠCH QUYỂN</b><br>'
-    + '&nbsp;&nbsp;Nội lực sinh ra từ bên trong Trái Đất, làm địa hình GỒ GHỀ thêm: uốn nếp, đứt gãy, động đất, núi lửa.<br>'
-    + '&nbsp;&nbsp;Ngoại lực sinh ra từ bên ngoài (nước, gió, sinh vật), làm địa hình SAN BẰNG: phong hoá, bóc mòn, vận chuyển, bồi tụ.<br>'
-    + '&nbsp;&nbsp;Hai lực này tác động ĐỒNG THỜI và ngược chiều nhau.<br>'
-    + '<b>KHÍ QUYỂN</b><br>'
-    + '&nbsp;&nbsp;Ba đai khí áp cao: cực, cận chí tuyến. Hai đai áp thấp: xích đạo, ôn đới.<br>'
-    + '&nbsp;&nbsp;Gió Mậu dịch (Tín phong) thổi từ áp cao cận chí tuyến về xích đạo; gió Tây ôn đới thổi từ áp cao cận chí tuyến về áp thấp ôn đới.<br>'
-    + '&nbsp;&nbsp;Nhiệt độ giảm dần từ xích đạo về cực và giảm theo độ cao (trung bình 0,6 °C mỗi 100 m).<br>'
-    + '<b>THUỶ QUYỂN</b><br>'
-    + '&nbsp;&nbsp;Chế độ nước sông phụ thuộc chế độ mưa (vùng nhiệt đới), băng tuyết tan (ôn đới lạnh), nước ngầm và hồ đầm.<br>'
-    + '&nbsp;&nbsp;Dòng biển nóng chảy từ vĩ độ thấp lên cao, gây mưa ở nơi nó đi qua; dòng lạnh ngược lại, gây khô hạn — đó là lí do có hoang mạc ven biển.<br>'
-    + '<b>SINH QUYỂN</b><br>'
-    + '&nbsp;&nbsp;Sự phân bố sinh vật theo vĩ độ và độ cao tạo ra quy luật ĐỊA ĐỚI và ĐAI CAO.',
+  ct: `<table class="kq">
+<tr><td>Nội lực</td><td>sinh ra từ bên trong Trái Đất, làm địa hình gồ ghề thêm qua uốn nếp, đứt gãy, động đất, núi lửa</td></tr>
+<tr><td>Ngoại lực</td><td>sinh ra từ bên ngoài do nước, gió, sinh vật, làm địa hình san bằng qua phong hoá, bóc mòn, vận chuyển, bồi tụ</td></tr>
+<tr><td>Quan hệ hai lực</td><td>tác động đồng thời và ngược chiều nhau</td></tr>
+<tr><td>Đai khí áp cao</td><td>hai đai áp cao cực và hai đai áp cao cận chí tuyến</td></tr>
+<tr><td>Đai khí áp thấp</td><td>một đai áp thấp xích đạo và hai đai áp thấp ôn đới</td></tr>
+<tr><td>Gió Mậu dịch</td><td>thổi từ áp cao cận chí tuyến về áp thấp xích đạo</td></tr>
+<tr><td>Gió Tây ôn đới</td><td>thổi từ áp cao cận chí tuyến về áp thấp ôn đới</td></tr>
+<tr><td>Nhiệt độ theo độ cao</td><td>giảm trung bình 0,6 °C mỗi 100 m lên cao</td></tr>
+<tr><td>Chế độ nước sông nhiệt đới</td><td>phụ thuộc chủ yếu vào chế độ mưa</td></tr>
+<tr><td>Chế độ nước sông ôn đới lạnh</td><td>phụ thuộc chủ yếu vào băng tuyết tan</td></tr>
+<tr><td>Dòng biển nóng</td><td>chảy từ vĩ độ thấp lên vĩ độ cao, gây mưa ở nơi nó đi qua</td></tr>
+<tr><td>Dòng biển lạnh</td><td>chảy từ vĩ độ cao về vĩ độ thấp, gây khô hạn nên có hoang mạc ven biển</td></tr>
+<tr><td>Quy luật của sinh quyển</td><td>sinh vật phân bố theo vĩ độ và độ cao tạo ra quy luật địa đới và đai cao</td></tr></table>`,
   khi: 'Câu nhận biết lấy từ Địa lí 10 — thường rơi vào Phần I của đề.',
   vd: 'Hoang mạc Atacama nằm ngay ven biển vì có dòng biển LẠNH Pêru chảy qua, hơi nước không bốc lên được.',
   bay: 'Nội lực làm địa hình gồ ghề, ngoại lực làm bằng phẳng — hai vế này rất hay bị tráo cho nhau trong phương án nhiễu.' },
