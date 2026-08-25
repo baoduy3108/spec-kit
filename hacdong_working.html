@@ -988,6 +988,15 @@ function canPlace(p,row,col){
   return true;
 }
 function anyPlacement(p){ for(let r=0;r<=N-p.h;r++) for(let c=0;c<=N-p.w;c++) if(canPlace(p,r,c)) return true; return false; }
+
+// Anti-Deadlock: kiểm tra tray có ít nhất 1 piece có thể đặt được không
+function hasValidMove(tray){
+  for(let pi=0;pi<tray.length;pi++){
+    if(anyPlacement(tray[pi])) return true; // còn nước đi
+  }
+  return false; // không có nước đi nào → deadlock
+}
+
 function cellCenter(r,c){ return {x:gridX+(c+0.5)*cell, y:gridY+(r+0.5)*cell}; }
 
 function placePiece(idx,row,col){
@@ -1010,16 +1019,36 @@ function placePiece(idx,row,col){
   if(tray.every(x=>!x)){
     // 95% chance from start: generate smart piece (fits + can clear lines)
     const bf=boardFill();
-    const useSmartPiece=Math.random()<0.95;
-    if(useSmartPiece){
-      const smartPiece=findFittingPiece();
-      tray=[smartPiece||makePiece(), makePiece(), makePiece()];
-      const sizes=[tray[0]?.cells.length||0, tray[1]?.cells.length||0, tray[2]?.cells.length||0];
-      console.log(`[TRAY] Fill:${(bf*100).toFixed(0)}% Smart:${!!smartPiece} Sizes:${sizes.join(',')} Score:${score}`);
-    } else {
-      tray=[makePiece(),makePiece(),makePiece()];
-      const sizes=[tray[0]?.cells.length||0, tray[1]?.cells.length||0, tray[2]?.cells.length||0];
-      console.log(`[TRAY] Fill:${(bf*100).toFixed(0)}% Random Sizes:${sizes.join(',')} Score:${score}`);
+    let trayAttempts=0;
+    let validTray=false;
+
+    while(!validTray && trayAttempts<5){
+      trayAttempts++;
+
+      // 70% Smart Piece + 30% Random
+      const useSmartPiece=Math.random()<0.70;
+      if(useSmartPiece){
+        const smartPiece=findFittingPiece();
+        tray=[smartPiece||makePiece(), makePiece(), makePiece()];
+      } else {
+        tray=[makePiece(),makePiece(),makePiece()];
+      }
+
+      // Anti-Deadlock: kiểm tra tray có nước đi không
+      if(hasValidMove(tray)){
+        validTray=true;
+        const sizes=[tray[0]?.cells.length||0, tray[1]?.cells.length||0, tray[2]?.cells.length||0];
+        console.log(`[TRAY] Fill:${(bf*100).toFixed(0)}% Smart:${useSmartPiece} Sizes:${sizes.join(',')} Score:${score}`);
+      } else {
+        // Không có nước đi → reroll
+        if(trayAttempts<5) console.log(`[TRAY] Deadlock detected (attempt ${trayAttempts}), rerolling...`);
+      }
+    }
+
+    if(!validTray){
+      // Fallback cuối cùng: tạo tray tất cả random cho đến khi có nước đi
+      while(!hasValidMove(tray)) tray=[makePiece(),makePiece(),makePiece()];
+      console.log(`[TRAY] Force random tray (all attempts failed)`);
     }
     lastAction='refill khay';
     // VÙNG AN TOÀN <1000 điểm (không áp daily seed-công-bằng & campaign độ-khó-thiết-kế): đảm bảo MỌI khối trong khay
