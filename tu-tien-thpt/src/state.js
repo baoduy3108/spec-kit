@@ -999,8 +999,15 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
      cứng vĩnh cửu thì trên thực tế VẪN ĐÚNG, thành câu hai đáp án. */
   /* \b của JavaScript chỉ biết A–Z0–9 nên "chỉ" (kết thúc bằng "ỉ") không bao
      giờ khớp — phải tự viết ranh giới từ cho tiếng Việt có dấu. */
-  const NGOAI_LE = /(^|[\s(,;·])(hoặc|hay|trừ|chỉ|ngoài ra|có thể|tuỳ|tùy)([\s),;·]|$)/i;
-  const ghepDuoc = d => d.tran.length <= 70 && !NGOAI_LE.test(d.tran);
+  /* Chỉ những nội dung có NGOẠI LỆ ở đầu hoặc trong ngoặc cuối mới không ghép
+     chéo được — "chỉ ③ Na₂CO₃" và "③ Na₂CO₃ (hoặc trao đổi ion)" gán sang dòng
+     khác thì trên thực tế VẪN ĐÚNG. Còn chữ "hoặc" nằm giữa câu chỉ là liệt kê
+     ("tiếp xúc trực tiếp hoặc qua dây dẫn"), chặn cả nó thì thẻ Ăn mòn kim loại
+     ra đúng 0 câu dù có ba mục rõ ràng. */
+  const NGOAI_LE = /^(chỉ|hoặc|trừ|tuỳ|tùy)[\s(]|[(（](hoặc|trừ|hay)[^)）]*[)）]\s*$/i;
+  /* Trần 150 ký tự chứ không phải 70: thẻ lý thuyết viết một mục dài trăm chữ
+     là chuyện thường, cắt ở 70 thì gần như mọi thẻ lý thuyết đều rớt. */
+  const ghepDuoc = d => d.tran.length <= 150 && !NGOAI_LE.test(d.tran);
   /* Câu ghép dùng TOÀN BỘ bảng chứ không tách theo cột: nhãn hiển thị đã kèm
      tên cột ("Tạm thời — anion: …") nên lấy giá trị của cột khác gán sang vẫn
      là một mệnh đề sai rành mạch. Nhờ vậy thẻ chia ba cột mỗi cột hai dòng —

@@ -1252,6 +1252,14 @@ TD.moThe = function (khoa, i) {
       boc.appendChild(n3);
     }
     $('#tk-thu').replaceWith(boc);
+    /* Nói rõ phần còn lại của lượt kiểm tra là gì, đừng để người học tự đoán
+       "17 câu đầu bám sát thẻ" thì 33 câu sau ở đâu ra. */
+    if (coRieng && boRieng.sat < boRieng.ds.length)
+      boc.parentNode.insertBefore(el('div', 'mo-nhat', `<span style="font-size:12.6px">`
+        + `${boRieng.sat} câu đầu bẻ ra từ chính nội dung thẻ này; `
+        + `${boRieng.ds.length - boRieng.sat} câu sau lấy rộng ra cả chuyên đề `
+        + `${pv.cd ? `«${pv.cd}»` : TD.MON[monTK].ten} cho đủ ${boRieng.ds.length} câu như mọi lượt kiểm tra khác.`
+        + `</span>`), boc.nextSibling);
   }
 
   $('#tk-khac').onclick = () => {
