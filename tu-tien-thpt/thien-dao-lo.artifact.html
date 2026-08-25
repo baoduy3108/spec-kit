@@ -1131,7 +1131,9 @@ TD.bangCuaThe = function (the) {
       for (let j = 1; j < v.length; j++) {
         const tran2 = v[j].replace(/<[^>]+>/g, '').trim();
         if (tran2.length < 2 || tran2.length > 90) continue;
-        ra.push({ nhan: `${tenCot[j]} của ${tenCot[0].toLowerCase()} ${khoa}`,
+        /* KHÔNG hạ chữ thường: tên cột có thể là công thức hoá học, "FeCO₃"
+           mà thành "feco₃" là sai hẳn. Cột đầu không có tiêu đề thì bỏ luôn. */
+        ra.push({ nhan: `${tenCot[j]} của ${tenCot[0] ? tenCot[0] + ' ' : ''}${khoa}`,
           noi: v[j], tran: tran2, chat: TD.chatTrongO(tran2),
           /* nhiễu phải lấy trong CÙNG CỘT, không thì hỏi "loại phản ứng" mà
              bày ra tên polymer — lộ đáp án ngay */
@@ -1231,14 +1233,12 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
   const dungDo = (a, b) => {
     const va = String(a).replace(/<[^>]+>/g, '').trim(), vb = String(b).replace(/<[^>]+>/g, '').trim();
     if (ctDon(va) && ctDon(vb)) return va === vb;
-    const A = new Set(tach(a)), B = new Set(tach(b));
-    if (!A.size || !B.size) return true;
-    let c = 0; A.forEach(w => { if (B.has(w)) c++; });
-    /* Chỉ chặn khi phương án này CHỨA TRỌN phương án kia ("Cu, Ag" nằm gọn
-       trong "Cu, Ag (mọi KL sau H)" là hai đáp án cùng đúng). Trước đây còn
-       chặn theo tỉ lệ trùng quá nửa, nhưng thế thì loại luôn cặp nhiễu tốt
-       nhất: "Z tăng 1" và "Z giảm 1" chỉ khác nhau đúng một từ. */
-    return c === Math.min(A.size, B.size);
+    /* So theo CHUỖI có thứ tự, không phải tập từ. Tập từ coi "Chắc 3 ý, đoán 1"
+       và "Chắc 1 ý, đoán 3" là một vì cùng bộ chữ — mà đó lại đúng là cặp bẫy
+       đảo số cần giữ. */
+    const cA = ' ' + tach(a).join(' ') + ' ', cB = ' ' + tach(b).join(' ') + ' ';
+    if (cA.trim() === '' || cB.trim() === '') return true;
+    return cA.indexOf(cB) >= 0 || cB.indexOf(cA) >= 0;
   };
   /* nhiễu lấy từ CHÍNH bảng này trước, cạn mới mượn thẻ cùng chuyên đề rồi cả môn */
   const nhieu = (nhom, dung, can) => {
@@ -1333,8 +1333,8 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
     const trongThe = d._nhom !== 'bang';
     const cungKieu = z => (z.chat.length > 0) === (d.chat.length > 0);
     const hoiNoi = d._cot
-      ? `Theo bảng trong thẻ <b>«${ten}»</b>, ${d._tenKhoa.toLowerCase()} <b>${d._khoa}</b> `
-        + `có <b>${d._tenCot.toLowerCase()}</b> là gì?`
+      ? `Theo bảng trong thẻ <b>«${ten}»</b>, ${d._tenKhoa ? d._tenKhoa + ' ' : ''}<b>${d._khoa}</b> `
+        + `có <b>${d._tenCot}</b> là gì?`
       : `Theo thẻ <b>«${ten}»</b>, <b>${d.nhan}</b> ứng với nội dung nào sau đây?`;
     /* Dòng văn thì vẫn cho mượn thẻ CÙNG CHUYÊN ĐỀ (cùng kiểu dòng văn) — nhiễu
        vẫn nằm trong phạm vi kiến thức đang học. Cột phụ thì tuyệt đối không:
@@ -1352,6 +1352,79 @@ TD.cauBangThe = function (mon, the, cd, seed, canBaoNhieu) {
                         d._van ? ngoai.filter(z => z._nhom === 'van').map(z => z.nhan) : []], d.nhan, 3)
                : nhieu([khac.map(z => z.nhan), ngoai.map(z => z.nhan)], d.nhan, 3),
       `Thẻ «${ten}» xếp ${d.tran} vào mục <b>${d.nhan}</b>.`, 2);
+  });
+
+  /* ⑦ + ⑧ — "ghép nào ĐÚNG / ghép nào SAI".
+     Đây là dạng cứu cho những thẻ chỉ có ba dòng: hỏi "mục X ứng với nội dung
+     nào" thì cần ba phương án nhiễu mà chỉ có hai dòng còn lại, nên trước đây
+     bảng ba dòng ra ĐÚNG 0 CÂU. Ghép chéo nhãn của dòng này với nội dung của
+     dòng kia thì ba dòng đã cho sáu cặp sai — thừa sức dựng câu, mà vẫn đúng
+     dạng "phát biểu nào sau đây đúng" của đề thật. */
+  /* Dấu nối là ⇒ chứ không phải — : chính nội dung trong thẻ đã dùng "—" để
+     chú thích ("A giảm 4, Z giảm 2 — đâm xuyên yếu"), dùng chung một dấu thì
+     đọc không ra đâu là vế nào. */
+  const ghep = (d, noi) => d._cot
+    ? `${d._khoa} · ${d._tenCot} ⇒ ${noi}`
+    : `${d.nhan} ⇒ ${noi}`;
+  /* Chỉ ghép chéo được khi nội dung là GIÁ TRỊ rời rạc (công thức, tên chất,
+     con số). Nội dung có "hoặc / hay / trừ / chỉ" là nội dung có ngoại lệ và
+     phần chồng lấn: gán "③ Na₂CO₃/Na₃PO₄ (hoặc trao đổi ion)" sang dòng nước
+     cứng vĩnh cửu thì trên thực tế VẪN ĐÚNG, thành câu hai đáp án. */
+  /* \b của JavaScript chỉ biết A–Z0–9 nên "chỉ" (kết thúc bằng "ỉ") không bao
+     giờ khớp — phải tự viết ranh giới từ cho tiếng Việt có dấu. */
+  const NGOAI_LE = /(^|[\s(,;·])(hoặc|hay|trừ|chỉ|ngoài ra|có thể|tuỳ|tùy)([\s),;·]|$)/i;
+  const ghepDuoc = d => d.tran.length <= 70 && !NGOAI_LE.test(d.tran);
+  /* Câu ghép dùng TOÀN BỘ bảng chứ không tách theo cột: nhãn hiển thị đã kèm
+     tên cột ("Tạm thời — anion: …") nên lấy giá trị của cột khác gán sang vẫn
+     là một mệnh đề sai rành mạch. Nhờ vậy thẻ chia ba cột mỗi cột hai dòng —
+     như "Carboxylic acid" — mới dựng nổi câu. */
+  [dong.filter(ghepDuoc)].forEach(nh => {
+    if (nh.length < 3) return;
+    const capSai = [];
+    /* Thẻ có thể có HAI DÒNG CÙNG NHÃN (thẻ cấp số có "Ba số liên tiếp" cho cả
+       cấp số cộng lẫn cấp số nhân). Ghép chéo khi đó lại ra đúng chuỗi của
+       dòng kia, thành hai phương án y hệt nhau trong một câu. */
+    const dungTatCa = {};
+    nh.forEach(d => { dungTatCa[ghep(d, d.noi)] = 1; });
+    nh.forEach(a => nh.forEach(b => {
+      if (a === b) return;
+      if (dungTatCa[ghep(a, b.noi)]) return;
+      /* Hai nội dung quá giống nhau thì ghép chéo chưa chắc đã sai: "chỉ ③
+         Na₂CO₃/Na₃PO₄" gán cho dòng ghi "③ Na₂CO₃/Na₃PO₄ (hoặc trao đổi ion)"
+         vẫn đúng trên thực tế. Chỉ ghép chéo khi hai nội dung khác hẳn nhau. */
+      if (dungDo(a.tran, b.tran)) return;
+      capSai.push({ t: ghep(a, b.noi), a: a, b: b });
+    }));
+    if (capSai.length < 3) return;
+    /* mỗi dòng một câu "ghép nào ĐÚNG" */
+    nh.forEach(d => {
+      /* Chỉ cần loại cặp có NHÃN trùng đáp án — hai phương án cùng nhãn là lộ.
+         Cặp mượn NỘI DUNG của d gán sang nhãn khác vẫn là nhiễu tốt, và với
+         bảng ba dòng thì đó chính là chỗ kiếm đủ ba phương án. */
+      const s = TD.xaoR(R, capSai.filter(z => z.a !== d)).slice(0, 3);
+      if (s.length < 3) return;
+      const dung = ghep(d, d.noi);
+      const opts = TD.xaoR(R, [dung].concat(s.map(z => z.t)));
+      ra.push({ q: `Theo thẻ <b>«${ten}»</b>, cách ghép nào sau đây <b>ĐÚNG</b>?`,
+        opts: opts, ans: opts.indexOf(dung), muc: 2, dang: 'mc',
+        giai: `Thẻ «${ten}» ghi: ${d.nhan} → ${d.tran}.\n`
+          + `Ba phương án còn lại đều lấy nội dung của mục khác gán sang, nên sai:\n`
+          + s.map(z => `· ${z.a.nhan} thật ra ứng với ${z.a.tran}, còn ${z.b.tran} là của ${z.b.nhan}.`).join('\n'),
+        meo: meoThe });
+    });
+    /* và một câu ngược "ghép nào SAI" cho mỗi cặp sai bốc được */
+    /* câu "ghép nào SAI" cần ba phương án ĐÚNG nguyên văn, tức bốn dòng trở lên */
+    if (nh.length < 4) return;
+    TD.xaoR(R, capSai.slice()).slice(0, nh.length).forEach(z => {
+      const s = TD.xaoR(R, nh.filter(d => d !== z.a && d !== z.b)).slice(0, 3);
+      if (s.length < 3) return;
+      const opts = TD.xaoR(R, [z.t].concat(s.map(d => ghep(d, d.noi))));
+      ra.push({ q: `Theo thẻ <b>«${ten}»</b>, cách ghép nào sau đây <b>SAI</b>?`,
+        opts: opts, ans: opts.indexOf(z.t), muc: 2, dang: 'mc',
+        giai: `Thẻ «${ten}» ghi ${z.a.nhan} → ${z.a.tran}, còn ${z.b.tran} là nội dung của `
+          + `${z.b.nhan}. Phương án đó ghép chéo hai mục nên sai; ba phương án còn lại đều đúng nguyên văn.`,
+        meo: meoThe });
+    });
   });
 
   /* ⑥ câu đúng/sai bốn ý ghép từ chính bảng: "X thuộc nhóm Y" đúng hay sai */
