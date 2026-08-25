@@ -1536,10 +1536,19 @@ TD.chamVan = function (i) {
       tong: laDoan ? 2 : 4 });
     const ra = kq.muc.map(m => `${m.dat ? '✓' : '✗'} ${m.y}`);
     (kq.nhac || []).forEach(y => ra.push(`⚠ ${y}`));
-    if (kq.tranDiem)
-      ra.push(`\n<b>Phần máy chấm được: ${TD.soVN(kq.diem, 2)}/${TD.soVN(kq.tranDiem, 2)} điểm</b> `
-        + `(hình thức · xác định vấn đề · chính tả – ngữ pháp) trên tổng ${TD.soVN(kq.tong, 1)} điểm của câu này. `
-        + `Phần triển khai và sáng tạo — ${TD.soVN(kq.tong - kq.tranDiem, 2)} điểm còn lại — phải người đọc mới chấm được.`);
+    (kq.khung || []).filter(b => !b.co).forEach(b => ra.push(`   ↳ ${b.ten}: ${b.sua}`));
+    if (kq.tranDiem) {
+      const conLai = Math.round((kq.tong - kq.tranDiem - kq.oTrienKhai) * 100) / 100;
+      ra.push(`\n<b>① Ba ô hình thức: ${TD.soVN(kq.diem, 2)}/${TD.soVN(kq.tranDiem, 2)} điểm</b> `
+        + `— hình thức, xác định vấn đề, chính tả và ngữ pháp. Đây là điểm CHẮC CHẮN, máy đếm được.`);
+      ra.push(`<b>② Ô triển khai: trần ${TD.soVN(kq.tranTrienKhai, 2)}/${TD.soVN(kq.oTrienKhai, 2)} điểm</b> `
+        + `— bài đã chạm ${kq.duBuoc}/${kq.soBuoc} bước trong khung mà hướng dẫn chấm đòi hỏi. `
+        + `Đây là MỨC TỐI ĐA nếu các ý ấy viết đúng: máy đếm được bài có nhắc tới bước đó chưa, `
+        + `nhưng không đọc được ý viết ra có chuẩn hay không.`);
+      ra.push(`<b>③ Ô sáng tạo: ${TD.soVN(conLai, 2)} điểm</b> — chỗ này phải người đọc.`);
+      ra.push(`Cộng lại: chắc chắn ${TD.soVN(kq.diem, 2)} điểm, trần tối đa `
+        + `${TD.soVN(Math.round((kq.diem + kq.tranTrienKhai + conLai) * 100) / 100, 2)}/${TD.soVN(kq.tong, 1)} điểm.`);
+    }
     return ra;
   };
 
@@ -1556,8 +1565,11 @@ TD.chamVan = function (i) {
     + '<p class="mo-nhat">Máy chấm được đúng ba ô điểm hình thức trong đáp án của Bộ: <b>hình thức</b> (đúng đoạn hay '
     + 'bài, đủ dung lượng), <b>xác định vấn đề</b> (đo bằng từ khoá của đề có xuất hiện trong bài không) và '
     + '<b>chính tả – ngữ pháp</b>. Ngoài ra soi thêm liên kết, dẫn chứng, lặp từ, sáo ngữ, câu quá dài. '
-    + 'Còn <b>triển khai</b> và <b>sáng tạo</b> — phần chiếm nhiều điểm nhất — thì phải đọc hiểu nội dung mới chấm '
-    + 'được, mà file này chạy offline, trong máy không có mô hình ngôn ngữ nào. Chỗ đó dùng nút chép bài bên dưới.</p>');
+    + 'Với ô <b>triển khai</b> thì soi theo đúng khung ý mà hướng dẫn chấm đòi hỏi — đoạn nghị luận xã hội có năm '
+    + 'bước (giải thích · biểu hiện · ý nghĩa · phản đề · bài học), bài nghị luận văn học cũng năm phần — và báo '
+    + 'bài đã chạm được mấy bước. Nhưng máy chỉ biết bài có NHẮC TỚI bước đó chưa, không đọc được ý viết ra có '
+    + 'đúng không, nên con số đó là TRẦN điểm chứ không phải điểm thật. Muốn biết điểm thật thì dùng nút chép bài '
+    + 'bên dưới nhờ người hoặc nhờ Claude chấm.</p>');
   [[`Câu 1 — ${d.cau1.kieu} ${d.cau1.nhan} (~${d.cau1.soChu} chữ)`, baiLam.c1, d.cau1.soChu, d.cau1.kieu === 'đoạn văn', khoaDe(d.cau1.dm || d.cau1.q)],
    [`Câu 2 — ${d.cau2.kieu} ${d.cau2.nhan} (~${d.cau2.soChu} chữ)`, baiLam.c2, d.cau2.soChu, d.cau2.kieu === 'đoạn văn', khoaDe(d.cau2.dm || d.cau2.q)]]
     .forEach(([ten, van, chuan, laDoan, khoa]) => {
