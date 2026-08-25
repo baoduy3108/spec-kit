@@ -693,7 +693,11 @@ TD.bangCuaThe = function (the) {
      trên từng dòng SAU khi split, mà HTML bảng có xuống dòng thật nên mỗi <tr>
      thành một dòng riêng — thế là mỗi mục bị bóc hai lần, một bản từ bảng và
      một bản từ dòng văn, rồi hai bản đó cùng vào một câu. */
-  TD.dongVanCuaThe(String(than).replace(/<table[\s\S]*?<\/table>/g, ' ')).forEach(d => ra.push(d));
+  /* Thẻ đã được nối bảng "đề hay hỏi" bao trọn nội dung (cờ _chiBang) thì
+     KHÔNG bóc thêm dòng văn nữa: dòng văn gốc và dòng bảng nói cùng một ý,
+     đứng chung một câu là thành hai phương án cùng đúng. */
+  if (!(the && the._chiBang))
+    TD.dongVanCuaThe(String(than).replace(/<table[\s\S]*?<\/table>/g, ' ')).forEach(d => ra.push(d));
   const da = {};
   const loc = ra.filter(d => {
     const k = TD.khongDau(d.tran);
